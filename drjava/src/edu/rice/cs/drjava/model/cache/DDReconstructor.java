@@ -1,4 +1,4 @@
-  /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -51,14 +51,14 @@ public interface DDReconstructor {
   public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException;
   
   /** Saves information (like cursor location, highlight, etc.) from the DefinitionsDocument before the cache deletes it
-   *  so that those pieces of info can be restored when reconstructing the DefinitionsDocument again.
-   *  @param doc the DefinitionsDocument whose data needs saving
-   */
+    * so that those pieces of info can be restored when reconstructing the DefinitionsDocument again.
+    * @param doc the DefinitionsDocument whose data needs saving
+    */
   public void saveDocInfo(DefinitionsDocument doc);
   
   /** Sets a document listener to be added to the definitions document when it is created
-   *  @param dl the listener to add to the document
-   */
+    * @param dl the listener to add to the document
+    */
   public void addDocumentListener(DocumentListener dl);
   
   /** Returns the string text for document that has been kicked out; null otherwise. */

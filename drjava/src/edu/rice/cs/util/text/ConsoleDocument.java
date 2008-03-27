@@ -57,34 +57,34 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   
   /** Default text style. */
   public static final String DEFAULT_STYLE = "default";
-
+  
   /** Style for System.out */
   public static final String SYSTEM_OUT_STYLE = "System.out";
-
+  
   /** Style for System.err */
   public static final String SYSTEM_ERR_STYLE = "System.err";
-
+  
   /** Style for System.in */
   public static final String SYSTEM_IN_STYLE = "System.in";
-
+  
   /** The embedded document storing the text and _hasPrompt property for this console model. */
   protected final ConsoleDocumentInterface _document;
-
+  
   /** A runnable command to use for a notification beep. */
   protected volatile Runnable _beep;
-
+  
   /** Index in the document of the first place that is editable. */
   private volatile int _promptPos;
-
+  
   /** String to use for the prompt. */
   protected volatile String _prompt;
-
+  
   /** The book object used for printing that represents several pages */
   protected volatile DrJavaBook _book;
-
+  
   /** Creates a new ConsoleDocument with the given embedded ConsoleDocumentInterface (a SwingDocument in native DrJava).
-   *  @param doc the embedded ConsoleDocumentInterface object
-   */
+    * @param doc the embedded ConsoleDocumentInterface object
+    */
   public ConsoleDocument(ConsoleDocumentInterface doc) {
     _document = doc;
     
@@ -92,11 +92,11 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _prompt = DEFAULT_CONSOLE_PROMPT;
     _promptPos = DEFAULT_CONSOLE_PROMPT.length();
     _document.setHasPrompt(false);
-   
+    
     // Prevent any edits before the prompt!
     _document.setEditCondition(new ConsoleEditCondition());
   }
-
+  
   /** @return true iff this document has a prompt and is ready to accept input. */
   public boolean hasPrompt() { return _document.hasPrompt(); }
   
@@ -105,13 +105,13 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     try { _document.setHasPrompt(val); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Accessor for the string used for the prompt. */
   public String getPrompt() { return _prompt; }
-
+  
   /** Sets the string to use for the prompt.
-   *  @param prompt String to use for the prompt.
-   */
+    * @param prompt String to use for the prompt.
+    */
   public void setPrompt(String prompt) { 
     acquireWriteLock();  
     _prompt = prompt;
@@ -120,39 +120,38 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   
   /** Returns the length of the prompt string. */
   public int getPromptLength() { return _prompt.length(); }
-
+  
   /** Gets the object which determines whether an insert/remove edit should be applied based on the inputs.
-   *  @return the DocumentEditCondition to determine legality of inputs
-   */
+    * @return the DocumentEditCondition to determine legality of inputs
+    */
   public DocumentEditCondition getEditCondition() { return _document.getEditCondition(); }
-
-  /** Provides an object which can determine whether an insert or remove edit should be applied, based on 
-   *  the inputs.
-   *  @param condition Object to determine legality of inputs
-   */
+  
+  /** Provides an object which can determine whether an insert or remove edit should be applied, based on the inputs.
+    * @param condition Object to determine legality of inputs
+    */
   public void setEditCondition(DocumentEditCondition condition) { _document.setEditCondition(condition); }
-
+  
   /** Returns the first location in the document where editing is allowed. */
   public int getPromptPos() { return _promptPos; }
-
+  
   /** Sets the prompt position. Only used in tests.
-   *  @param newPos the new position.
-   */
+    * @param newPos the new position.
+    */
   public void setPromptPos(int newPos) { 
     acquireWriteLock();
     _promptPos = newPos; 
     releaseWriteLock();
   }
-
+  
   /** Sets a runnable action to use as a beep.
-   *  @param beep Runnable beep command
-   */
+    * @param beep Runnable beep command
+    */
   public void setBeep(Runnable beep) { 
     acquireWriteLock();
     _beep = beep; 
     releaseWriteLock();
   }
-
+  
   /** Resets the document to a clean state. */
   public void reset(String banner) {
     acquireWriteLock();
@@ -164,7 +163,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Prints a prompt for a new input. */
   public void insertPrompt() {
     acquireWriteLock();
@@ -178,13 +177,13 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Disables the prompt in this document. */
   public void disablePrompt() {
     acquireWriteLock();
     try {
-    _document.setHasPrompt(false);
-    _promptPos = _document.getLength();
+      _document.setHasPrompt(false);
+      _promptPos = _document.getLength();
     }
     finally { releaseWriteLock(); }
   }
@@ -206,7 +205,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Gets the position immediately before the prompt, or the doc length if there is no prompt. Assumes that ReadLock or
     * WriteLock is already held.*/
   private int _getPositionBeforePrompt() {
@@ -217,7 +216,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     }
     return len;
   }
-
+  
   /** Inserts the given string with the given attributes just before the most recent prompt.
     * @param text String to insert
     * @param style name of style to format the string
@@ -232,7 +231,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Inserts a string into the document at the given offset and named style, if the edit condition allows it.
     * @param offs Offset into the document
     * @param str String to be inserted
@@ -306,7 +305,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     try { _removeText(offs, len); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Removes a portion of the document, if the edit condition allows it, as above.  Assumes that WriteLock is held. */
   public void _removeText(int offs, int len) throws EditDocumentException {
     if (offs < _promptPos) _beep.run();
@@ -314,38 +313,36 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   }
   
   /** Removes a portion of the document, regardless of the edit condition.
-   *  @param offs Offset to start deleting from
-   *  @param len Number of characters to remove
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @param offs Offset to start deleting from
+    * @param len Number of characters to remove
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public void forceRemoveText(int offs, int len) throws EditDocumentException {
     _document.forceRemoveText(offs, len);
   }
-
+  
   /** Returns the length of the document. */
   public int getLength() { return _document.getLength(); }
-
+  
   /** Returns a portion of the document.
-   *  @param offs First offset of the desired text
-   *  @param len Number of characters to return
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @param offs First offset of the desired text
+    * @param len Number of characters to return
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public String getDocText(int offs, int len) throws EditDocumentException {
     return _document.getDocText(offs, len);
   }
-
+  
   /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public String getText() {
     acquireReadLock();
     try { return _document.getDocText(0, getLength()); }
     finally { releaseReadLock(); }
   }
   
-  /** Returns the string that the user has entered at the current prompt.
-   *  May contain newline characters.
-   */
+  /** Returns the string that the user has entered at the current prompt. May contain newline characters. */
   public String getCurrentInput() {
     acquireReadLock();
     try {
@@ -354,10 +351,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     }
     finally { releaseReadLock(); }
   }
-
+  
   /** Clears the current input text. */
   public void clearCurrentInput() {  _clearCurrentInputText(); }
-
+  
   /** Removes the text from the current prompt to the end of the document. */
   protected void _clearCurrentInputText() {
     acquireWriteLock();
@@ -371,10 +368,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   
   /* Returns the default style for a "console" document. */
   public String getDefaultStyle() { return ConsoleDocument.DEFAULT_STYLE; }
-
+  
   /** Returns the Pageable object for printing.
-   *  @return A Pageable representing this document.
-   */
+    * @return A Pageable representing this document.
+    */
   public Pageable getPageable() throws IllegalStateException { return _book; }
   
   /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */

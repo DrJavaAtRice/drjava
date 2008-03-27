@@ -137,16 +137,14 @@ public abstract class StringOps {
     }
   }
 
-  /**
-   * Gets the offset and length equivalent to the given pairs start and end row-col.
-   * @param fullString the string in which to compute the offset/length
-   * @param startRow the row on which the error starts, starting at one for the first row
-   * @param startCol the col on which the error starts, starting at one for the first column
-   * @param endRow the row on which the error ends.  Equals the startRow for one-line errors
-   * @param endCol the character position on which the error ends.
-   *               Equals the startCol for one-character errors
-   * @return a Pair of which the first is the offset, the second is the length
-   */
+  /** Gets the offset and length equivalent to the given pairs start and end row-col.
+    * @param fullString the string in which to compute the offset/length
+    * @param startRow the row on which the error starts, starting at one for the first row
+    * @param startCol the col on which the error starts, starting at one for the first column
+    * @param endRow the row on which the error ends.  Equals the startRow for one-line errors
+    * @param endCol the character position on which the error ends. Equals the startCol for one-character errors.
+    * @return a Pair of which the first is the offset, the second is the length
+    */
   public static Pair<Integer,Integer> getOffsetAndLength(String fullString, int startRow,
                                                          int startCol, int endRow, int endCol) {
     _ensureStartBeforeEnd(startRow, startCol, endRow, endCol);
@@ -187,11 +185,10 @@ public abstract class StringOps {
     return new Pair<Integer,Integer>(new Integer(offset), new Integer(length));
   }
 
-  /**
-   * Gets the stack trace of the given Throwable as a String.
-   * @param t the throwable object for which to get the stack trace
-   * @return the stack trace of the given Throwable
-   */
+  /** Gets the stack trace of the given Throwable as a String.
+    * @param t the throwable object for which to get the stack trace
+    * @return the stack trace of the given Throwable
+    */
   public static String getStackTrace(Throwable t) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
@@ -199,10 +196,9 @@ public abstract class StringOps {
     return sw.toString();
   }
   
-  /**
-   * Gets the stack trace of the current code. Does not include this method.
-   * @return the stack trace for the current code
-   */
+  /** Gets the stack trace of the current code. Does not include this method.
+    * @return the stack trace for the current code
+    */
   public static String getStackTrace() {
     try { throw new Exception(); } // Thread.getStackTrace() might be more efficient, but is new in Java 5.0
     catch (Exception e) {

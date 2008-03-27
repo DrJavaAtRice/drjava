@@ -35,7 +35,7 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.sexp;
- 
+
 import java.util.*;
 import java.io.*;
 
@@ -77,9 +77,9 @@ class Lexer extends StreamTokenizer {
     while (nextToken() != TT_EOL) ; // eat tokens until EOL
     eolIsSignificant(false);
   }
-    
-  /** Performs a nextToken() operation from StreamTokenizer except
-   *  for throwing an unchecked LexingException instead of a checked IOException */
+  
+  /** Performs a nextToken() operation from StreamTokenizer except for throwing an unchecked LexingException instead of
+    * a checked IOException */
   private int getToken() {
     try {
       int tokenType = nextToken();
@@ -95,8 +95,8 @@ class Lexer extends StreamTokenizer {
     return buffer;
   }
   
-  /** Reads the next Tokens.SExpToken from the input stream and consumes it;
-   *  Returns the Tokens.SExpToken object representing this Tokens.SExpToken */
+  /** Reads the next Tokens.SExpToken from the input stream and consumes it.
+    * @return the Tokens.SExpToken object representing this Tokens.SExpToken */
   public Tokens.SExpToken readToken() {
     
     if (buffer != null) {
@@ -141,7 +141,7 @@ class Lexer extends StreamTokenizer {
 //        }
 //        else {
 //          pushBack();
-          return Tokens.BackSlashToken.ONLY;
+        return Tokens.BackSlashToken.ONLY;
 //          throw new SExpParseException("Invalid escape sequence: \\" + (char)t);
         
       default:

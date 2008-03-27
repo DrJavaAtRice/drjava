@@ -72,10 +72,12 @@ public class ReducedModelControl implements BraceReduction {
   }
   
   /** @return the absolute offset of the cursor in the brace model, which is expensive.  Used for testing purposes only. 
-    *         This value should agree with commentCursorOffset(). */
+    * This value should agree with commentCursorOffset(). 
+    */
   public int braceCursorOffset() { return _rmb.absOffset(); }  
   /** @return the absolute offset of the cursor in the comment model, which is expensive.  Used for testing purposes 
-    *         only.  This value should agree with braceCursorOffset(). */
+    * only.  This value should agree with braceCursorOffset(). 
+    */
   public int commentCursorOffset() { return _rmc.absOffset(); } 
   
   /** @return the absolute offset of the walker in the comment model, which is expensive.  Used for testing purposes only. */
@@ -107,8 +109,8 @@ public class ReducedModelControl implements BraceReduction {
   }
   
   /** Updates the BraceReduction to reflect text deletion.  Assumes that count is within range!
-    * @param count indicates the size and direction of text deletion. Negative values delete text to the left of the
-    *  cursor, positive values delete text to the right.
+    * @param count  A number indicating the size and direction of text deletion. Negative values delete text to the left
+    *               of the cursor, positive values delete text to the right.
     */
   public void delete(int count) {
     _rmb.delete(count);
@@ -377,8 +379,8 @@ public class ReducedModelControl implements BraceReduction {
   
   /** Return all highlight status info for text between the current location and current location + length.  This should
     * collapse adjoining blocks with the same status into one.
-    * @param start The start location of the area for which we want the status.  The reduced model is already at this
-    *    position, but this value is needed to determine the absolute positions in HighlightStatus objects we return.
+    * @param start  The start location of the area being inspected.  The reduced model cursor is already set at this
+    *               position, but this value is needed to compute the absolute positions of HighlightStatus objects.
     * @param length The length of the text segment for which status information must be generated.
     */
   public Vector<HighlightStatus> getHighlightStatus(final int start, final int length) {

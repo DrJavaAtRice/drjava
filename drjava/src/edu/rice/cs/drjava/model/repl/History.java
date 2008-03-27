@@ -64,7 +64,7 @@ public class History implements OptionConstants, Serializable {
   private volatile int _maxSize;
 
   /** Version flag at the beginning of saved history file format
-   *  If this is not present in a saved history, it is assumed to be the original format.
+   * If this is not present in a saved history, it is assumed to be the original format.
    */
   public static final String HISTORY_FORMAT_VERSION_2 = "// DrJava saved history v2" + StringOps.EOL;
 

@@ -50,8 +50,8 @@ import edu.rice.cs.drjava.model.debug.LineNotExecutableException;
 import javax.swing.text.BadLocationException;
 
 /** Superclasses all DebugActions that are associated with specific OpenDefinitionsDocuments.
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public abstract class DocumentDebugAction<T extends EventRequest> extends DebugAction<T> {
   
   protected volatile String _className;
@@ -61,7 +61,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   protected int _offset;
   
   public final int SHORT_DOC_MAX_LENGTH = 20000;
- 
+  
   
   /** Creates a new DocumentDebugAction.  Automatically tries to create the EventRequest if a ReferenceType can be 
     * found, or else adds this object to the PendingRequestManager. Any subclass should automatically call
@@ -122,10 +122,10 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   public String getExactClassName() { return _exactClassName; }
   
   /** Creates EventRequests corresponding to this DebugAction, using the given ReferenceTypes.  This is called either 
-   *  from the DebugAction constructor or the PendingRequestManager, depending on when the ReferenceTypes become 
-   *  available.  (There may be multiple reference types for the same class if a custom class loader is used.)
-   *  @return true if the EventRequest is successfully created
-   */
+    * from the DebugAction constructor or the PendingRequestManager, depending on when the ReferenceTypes become 
+    * available.  (There may be multiple reference types for the same class if a custom class loader is used.)
+    * @return true if the EventRequest is successfully created
+    */
   public boolean createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     _createRequests(refTypes);
     if (_requests.size() > 0) {
@@ -136,9 +136,9 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   }
   
   /** This should always be called from the constructor of the subclass.  Attempts to create EventRequests on the 
-   *  given ReferenceTypes, and also adds this action to the pending request manager (so identical classes loaded
-   *  in the future will also have this action).
-   */
+    * given ReferenceTypes, and also adds this action to the pending request manager (so identical classes loaded
+    * in the future will also have this action).
+    */
   protected void _initializeRequests(Vector<ReferenceType> refTypes) throws DebugException {
     if (refTypes.size() > 0) createRequests(refTypes);
     else {
@@ -159,15 +159,15 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   }
   
   /** Creates appropriate EventRequests from the EventRequestManager and stores them in the _requests field.
-   *  @param refTypes All (identical) ReferenceTypes to which this action applies.  (There may be multiple if a custom
-   *         class loader is in use.)
-   *  @throws DebugException if the requests could not be created.
-   */
+    * @param refTypes All (identical) ReferenceTypes to which this action applies.  (There may be multiple if a custom
+    *        class loader is in use.)
+    * @throws DebugException if the requests could not be created.
+    */
   protected abstract void _createRequests(Vector<ReferenceType> refTypes) throws DebugException;
   
   /** Prepares this EventRequest with the current stored values.
-   *  @param request the EventRequest to prepare
-   */
+    * @param request the EventRequest to prepare
+    */
   protected void _prepareRequest(T request) {
     super._prepareRequest(request);
     request.putProperty("document", _doc);

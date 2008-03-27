@@ -181,19 +181,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   // ----- FIELDS -----
   
   /** Adds a document to the list of auxiliary files.  The LinkedList class is not thread safe, so
-    *  the add operation is synchronized.
+    * the add operation is synchronized.
     */
   public void addAuxiliaryFile(OpenDefinitionsDocument doc) { _state.addAuxFile(doc.getRawFile()); }
   
   /** Removes a document from the list of auxiliary files.  The LinkedList class is not thread safe, so
-    *  operations on _auxiliaryFiles are synchronized.
+    * operations on _auxiliaryFiles are synchronized.
     */
   public void removeAuxiliaryFile(OpenDefinitionsDocument doc) { _state.remAuxFile(doc.getRawFile()); }
   
   /** Keeps track of all listeners to the model, and has the ability to notify them of some event.  Originally used
-    *  a Command Pattern style, but this has been replaced by having EventNotifier directly implement all listener
-    *  interfaces it supports.  Set in constructor so that subclasses can install their own notifier with additional
-    *  methods.
+    * a Command Pattern style, but this has been replaced by having EventNotifier directly implement all listener
+    * interfaces it supports.  Set in constructor so that subclasses can install their own notifier with additional
+    * methods.
     */
   public final GlobalEventNotifier _notifier = new GlobalEventNotifier();
   
@@ -215,7 +215,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected final InteractionsDJDocument _consoleDocAdapter;
   
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls.
-    *  TODO: why is this here, and why is it public?
+    * TODO: why is this here, and why is it public?
     */
   public static final int WRITE_DELAY = 100;
   
@@ -223,13 +223,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected volatile PageFormat _pageFormat = new PageFormat();
   
   /** The active document pointer, which will never be null once the constructor is done.
-    *  Maintained by the _gainVisitor with a navigation listener.
+    * Maintained by the _gainVisitor with a navigation listener.
     */
   private volatile OpenDefinitionsDocument _activeDocument;
   
   /** A pointer to the active directory, which is not necessarily the parent of the active document
-    *  The user may click on a folder component in the navigation pane and that will set this field without
-    *  setting the active document.  It is used by the newFile method to place new files into the active directory.
+    * The user may click on a folder component in the navigation pane and that will set this field without
+    * setting the active document.  It is used by the newFile method to place new files into the active directory.
     */
   private volatile File _activeDirectory;
   
@@ -237,7 +237,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private volatile boolean classPathChanged = false;
   
   /** The abstract container which contains views of open documents and allows user to navigate document focus among
-    *  this collection of open documents
+    * this collection of open documents
     */
   protected volatile IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator =
     new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator();
@@ -454,7 +454,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public File getProjectFile() { return _state.getProjectFile(); }
   
   /** @return all files currently saved as source files in the project file.
-    *  If _state not in project mode, returns null
+    * If _state not in project mode, returns null
     */
   public File[] getProjectFiles() { return _state.getProjectFiles(); }
   
@@ -462,8 +462,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean inProject(File f) { return _state.inProject(f); }
   
   /** A file is in the project if the source root is the same as the
-    *  project root. this means that project files must be saved at the
-    *  source root. (we query the model through the model's state)
+    * project root. this means that project files must be saved at the
+    * source root. (we query the model through the model's state)
     */
   public boolean inProjectPath(OpenDefinitionsDocument doc) { return _state.inProjectPath(doc); }
   
@@ -601,7 +601,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isProjectActive() { return true; }
     
     /** Determines whether the specified doc in within the project file tree.
-      *  No synchronization is required because only immutable data is accessed.
+      * No synchronization is required because only immutable data is accessed.
       */
     public boolean inProjectPath(OpenDefinitionsDocument doc) {
       if (doc.isUntitled()) return false;
@@ -877,30 +877,30 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Gives the title of the source bin for the navigator.
-    *  @return The text used for the source bin in the tree navigator
+    * @return The text used for the source bin in the tree navigator
     */
   public String getSourceBinTitle() { return "[ Source Files ]"; }
   
   /** Gives the title of the external files bin for the navigator
-    *  @return The text used for the external files bin in the tree navigator.
+    * @return The text used for the external files bin in the tree navigator.
     */
   public String getExternalBinTitle() { return "[ External Files ]"; }
   
   /** Gives the title of the aux files bin for the navigator.
-    *  @return The text used for the aux files bin in the tree navigator.
+    * @return The text used for the aux files bin in the tree navigator.
     */
   public String getAuxiliaryBinTitle() { return "[ Included External Files ]"; }
   
   // ----- METHODS -----
   
   /** Add a listener to this global model.
-    *  @param listener a listener that reacts on events generated by the GlobalModel.
+    * @param listener a listener that reacts on events generated by the GlobalModel.
     */
   public void addListener(GlobalModelListener listener) { _notifier.addListener(listener); }
   
   /** Remove a listener from this global model.
-    *  @param listener a listener that reacts on events generated by the GlobalModel
-    *  This method is synchronized using the readers/writers event protocol incorporated in EventNotifier<T>.
+    * @param listener a listener that reacts on events generated by the GlobalModel
+    * This method is synchronized using the readers/writers event protocol incorporated in EventNotifier<T>.
     */
   public void removeListener(GlobalModelListener listener) { _notifier.removeListener(listener); }
   
@@ -983,10 +983,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Creates a new junit test case.
-    *  @param name the name of the new test case
-    *  @param makeSetUp true iff an empty setUp() method should be included
-    *  @param makeTearDown true iff an empty tearDown() method should be included
-    *  @return the new open test case
+    * @param name the name of the new test case
+    * @param makeSetUp true iff an empty setUp() method should be included
+    * @param makeTearDown true iff an empty tearDown() method should be included
+    * @return the new open test case
     */
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
     boolean elementary = (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == 1);
@@ -1046,13 +1046,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   //---------------------- Specified by ILoadDocuments ----------------------//
   
   /** Open a file and add it to the pool of definitions documents. The provided file selector chooses a file,
-    *  and on a successful open, the fileOpened() event is fired. This method also checks if there was previously
-    *  a single unchanged, untitled document open, and if so, closes it after a successful opening.
-    *  @param com a command pattern command that selects what file to open
-    *  @return The open document, or null if unsuccessful
-    *  @exception IOException
-    *  @exception OperationCanceledException if the open was canceled
-    *  @exception AlreadyOpenException if the file is already open
+    * and on a successful open, the fileOpened() event is fired. This method also checks if there was previously
+    * a single unchanged, untitled document open, and if so, closes it after a successful opening.
+    * @param com a command pattern command that selects what file to open
+    * @return The open document, or null if unsuccessful
+    * @exception IOException
+    * @exception OperationCanceledException if the open was canceled
+    * @exception AlreadyOpenException if the file is already open
     */
   public OpenDefinitionsDocument openFile(FileOpenSelector com) throws
     IOException, OperationCanceledException, AlreadyOpenException {
@@ -1183,7 +1183,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   //----------------------- End ILoadDocuments Methods -----------------------//
   
   /** Opens all files in the specified folder dir and places them in the appropriate places in the document navigator.
-    *  If "open folders recursively" is checked, this operation opens all files in the subtree rooted at dir.
+    * If "open folders recursively" is checked, this operation opens all files in the subtree rooted at dir.
     */
   public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
     if (dir == null) return; // just in case
@@ -1225,9 +1225,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   
   /** Saves all open files, prompting for names if necessary.
-    *  When prompting (i.e., untitled document), set that document as active.
-    *  @param com a FileSaveSelector
-    *  @exception IOException
+    * When prompting (i.e., untitled document), set that document as active.
+    * @param com a FileSaveSelector
+    * @exception IOException
     */
   public void saveAllFiles(FileSaveSelector com) throws IOException {
     OpenDefinitionsDocument curdoc = getActiveDocument();
@@ -1249,7 +1249,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Creates a new FileGroupingState for specificed project file and default values for other properties.
-    *  @param projFile the new project file (which does not yet exist in the file system)
+    * @param projFile the new project file (which does not yet exist in the file system)
     */
   public void createNewProject(File projFile) { setFileGroupingState(new ProjectFileGroupingState(projFile)); }
   
@@ -1303,8 +1303,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _loadProject(builder);
   }
   /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
-    *  @param file where to save the project
-    *  @param info
+    * @param file where to save the project
+    * @param info
     */
   public ProjectProfile _makeProjectProfile(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) 
     throws IOException {    
@@ -1378,7 +1378,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
-    *  @param file where to save the project
+    * @param file where to save the project
     */
   public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     ProjectProfile builder = _makeProjectProfile(file, info);
@@ -1406,17 +1406,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Parses the given project file and loads it int the document navigator and resets interactions pane. Assumes
-    *  preceding project if any has already been closed.
+    * preceding project if any has already been closed.
     *
-    *  @param projectFile The project file to parse
+    * @param projectFile The project file to parse
     */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
     _loadProject(ProjectFileParser.ONLY.parse(projectFile));
   }
   
   /** Loads the specified project into the document navigator and opens all of the files (if not already open).
-    *  Assumes that any prior project has been closed.  Only runs in event thread.
-    *  @param projectFile The project file to parse
+    * Assumes that any prior project has been closed.  Only runs in event thread.
+    * @param projectFile The project file to parse
     */
   private void _loadProject(final ProjectFileIR ir) throws IOException {
     
@@ -1606,16 +1606,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** If the document is untitled, brings it to the top so that the
-    *  user will know which is being saved.
+    * user will know which is being saved.
     */
   public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) {
     if ( doc.isUntitled()) setActiveDocument(doc);
   }
   
   /** Closes an open definitions document, prompting to save if the document has been changed.  Returns whether
-    *  the file was successfully closed.  Also ensures the invariant that there is always at least
-    *  one open document holds by creating a new file if necessary.
-    *  @return true if the document was closed
+    * the file was successfully closed.  Also ensures the invariant that there is always at least
+    * one open document holds by creating a new file if necessary.
+    * @return true if the document was closed
     */
   public boolean closeFile(OpenDefinitionsDocument doc) {
     List<OpenDefinitionsDocument> list = new LinkedList<OpenDefinitionsDocument>();
@@ -1638,18 +1638,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** This function closes a group of files assuming that the files are contiguous in the enumeration
-    *  provided by the document navigator. This assumption is used in selecting which remaining document
-    *  (if any) to activate.
-    *  <p>
-    *  The corner cases in which the file that is being closed had been externally
-    *  deleted have been addressed in a few places, namely DefaultGlobalModel.canAbandonFile()
-    *  and MainFrame.ModelListener.canAbandonFile().  If the DefinitionsDocument for the
-    *  OpenDefinitionsDocument being closed is not in the cache (see model.cache.DocumentCache)
-    *  then it is closed without prompting the user to save it.  If it is in the cache, then
-    *  we can successfully notify the user that the file is selected for closing and ask whether to
-    *  saveAs, close, or cancel.
-    *  @param docs the list od OpenDefinitionsDocuments to close
-    *  @return whether all files were closed
+    * provided by the document navigator. This assumption is used in selecting which remaining document
+    * (if any) to activate.
+    * <p>
+    * The corner cases in which the file that is being closed had been externally
+    * deleted have been addressed in a few places, namely DefaultGlobalModel.canAbandonFile()
+    * and MainFrame.ModelListener.canAbandonFile().  If the DefinitionsDocument for the
+    * OpenDefinitionsDocument being closed is not in the cache (see model.cache.DocumentCache)
+    * then it is closed without prompting the user to save it.  If it is in the cache, then
+    * we can successfully notify the user that the file is selected for closing and ask whether to
+    * saveAs, close, or cancel.
+    * @param docs the list od OpenDefinitionsDocuments to close
+    * @return whether all files were closed
     */
   public boolean closeFiles(List<OpenDefinitionsDocument> docs) {
     if (docs.size() == 0) return true;
@@ -1681,10 +1681,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Closes an open definitions document, without prompting to save if the document has been changed.  Returns
-    *  whether the file was successfully closed. NOTE: This method should not be called unless it can be
-    *  absolutely known that the document being closed is not the active document. The closeFile() method in
-    *  SingleDisplayModel ensures that a new active document is set, but closeFileWithoutPrompt is not.
-    *  @return true if the document was closed.
+    * whether the file was successfully closed. NOTE: This method should not be called unless it can be
+    * absolutely known that the document being closed is not the active document. The closeFile() method in
+    * SingleDisplayModel ensures that a new active document is set, but closeFileWithoutPrompt is not.
+    * @return true if the document was closed.
     */
   public boolean closeFileWithoutPrompt(final OpenDefinitionsDocument doc) {
     //    new Exception("Closed document " + doc).printStackTrace();
@@ -1717,8 +1717,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Closes all open documents.  This operation can be cancelled by the user since it
-    *  checks if all files can be abandoned BEFORE it actually modifies the project state.
-    *  @return  {@code false} if the user cancelled
+    * checks if all files can be abandoned BEFORE it actually modifies the project state.
+    * @return  {@code false} if the user cancelled
     */
   public boolean closeAllFilesOnQuit() {
     
@@ -1824,17 +1824,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Iterates over OpenDefinitionsDocuments, looking for this file.
-    *  TODO: This is not very efficient!
+    * TODO: This is not very efficient!
     */
   public boolean isAlreadyOpen(File file) { return (_getOpenDocument(file) != null); }
   
   /** Returns the OpenDefinitionsDocument corresponding to the INavigatorItem/DefinitionsDocument passed in.
-    *  @param doc the searched for Document
-    *  @return its corresponding OpenDefinitionsDocument
+    * @param doc the searched for Document
+    * @return its corresponding OpenDefinitionsDocument
     */
   public OpenDefinitionsDocument getODDForDocument(AbstractDocumentInterface doc) {
     /** This function needs to be phased out altogether; the goal is for the OpenDefinitionsDocument
-      *  to also function as its own Document, so this function will be useless
+      * to also function as its own Document, so this function will be useless
       */
     if (doc instanceof OpenDefinitionsDocument) return (OpenDefinitionsDocument) doc;
     if  (doc instanceof DefinitionsDocument) return ((DefinitionsDocument) doc).getOpenDefDoc();
@@ -1845,8 +1845,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public DocumentIterator getDocumentIterator() { return this; }
   
   /** Returns the ODD preceding the given document in the document list.
-    *  @param d the current Document
-    *  @return the next Document
+    * @param d the current Document
+    * @return the next Document
     */
   public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d) {
     OpenDefinitionsDocument nextdoc = null; // irrelevant initialization required by javac
@@ -1870,8 +1870,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Returns the ODD preceding the given document in the document list.
-    *  @param d the current Document
-    *  @return the previous Document
+    * @param d the current Document
+    * @return the previous Document
     */
   public OpenDefinitionsDocument getPrevDocument(OpenDefinitionsDocument d) {
     OpenDefinitionsDocument prevdoc = null;  // irrelevant initialization required by javac
@@ -1998,12 +1998,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Appends a string to the given document using a particular attribute set.
-    *  Also waits for a small amount of time (WRITE_DELAY) to prevent any one
-    *  writer from flooding the model with print calls to the point that the
-    *  user interface could become unresponsive.
-    *  @param doc Document to append to
-    *  @param s String to append to the end of the document
-    *  @param style the style to print with
+    * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
+    * writer from flooding the model with print calls to the point that the
+    * user interface could become unresponsive.
+    * @param doc Document to append to
+    * @param s String to append to the end of the document
+    * @param style the style to print with
     */
   protected void _docAppend(ConsoleDocument doc, String s, String style) {
     /** A lock object to prevent print calls from flooding the JVM, ensuring the UI remains responsive. */
@@ -2043,12 +2043,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Returns a project's extra classpaths; empty for FlatFileGroupingState
-    *  @return The classpath entries loaded along with the project
+    * @return The classpath entries loaded along with the project
     */
   public Iterable<File> getExtraClassPath() { return _state.getExtraClassPath(); }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
-    *  project preferences..
+    * project preferences..
     */
   public void setExtraClassPath(Iterable<File> cp) {
     _state.setExtraClassPath(cp);
@@ -2094,12 +2094,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Checks if any open definitions documents have been modified since last being saved.
-    *  @return whether any documents have been modified
+    * @return whether any documents have been modified
     */
   public boolean hasModifiedDocuments() { return hasModifiedDocuments(getOpenDefinitionsDocuments()); }
   
   /** Checks if any given documents have been modified since last being saved.
-    *  @return whether any documents have been modified
+    * @return whether any documents have been modified
     */
   public boolean hasModifiedDocuments(List<OpenDefinitionsDocument> lod) {
     for (OpenDefinitionsDocument doc: lod) {
@@ -2109,7 +2109,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Checks if any open definitions documents are untitled.
-    *  @return whether any documents are untitled
+    * @return whether any documents are untitled
     */
   public boolean hasUntitledDocuments() {
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
@@ -2119,8 +2119,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Searches for a file with the given name on the current source roots and the augmented classpath.
-    *  @param fileName name of the source file to look for
-    *  @return the file corresponding to the given name, or null if it cannot be found
+    * @param fileName name of the source file to look for
+    * @return the file corresponding to the given name, or null if it cannot be found
     */
   public File getSourceFile(String fileName) {
     Iterable<File> sourceRoots = getSourceRootSet();
@@ -2133,9 +2133,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Searches for a file with the given name on the provided paths. Returns NULL_FILE if the file is not found.
-    *  @param fileName Name of the source file to look for
-    *  @param paths An array of directories to search
-    *  @return the file if it is found, or null otherwise
+    * @param fileName Name of the source file to look for
+    * @param paths An array of directories to search
+    * @return the file if it is found, or null otherwise
     */
   public File findFileInPaths(String fileName, Iterable<File> paths) {
     for (File p: paths) {
@@ -2146,9 +2146,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Gets the file named filename from the given path, if it exists.  Returns NULL_FILE if it's not there.
-    *  @param filename the file to look for
-    *  @param path the path to look for it in
-    *  @return the file if it exists
+    * @param filename the file to look for
+    * @param path the path to look for it in
+    * @return the file if it exists
     */
   private File _getSourceFileFromPath(String fileName, File path) {
     String root = path.getAbsolutePath();
@@ -2351,7 +2351,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Make the region that is more recent the current region.
-      *  @return new current region */
+      * @return new current region */
     public R nextCurrentRegion() {
       if (_current != null) {
         int index = getIndexOf(_current);
@@ -2362,7 +2362,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Make the region that is less recent the current region.
-      *  @return new current region */
+      * @return new current region */
     public R prevCurrentRegion() {
       if (_current != null) {
         int index = getIndexOf(_current);
@@ -2393,8 +2393,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Apply the given command to the specified region to change it.
-      *  @param region the region to find and change
-      *  @param cmd command that mutates the region. */
+      * @param region the region to find and change
+      * @param cmd command that mutates the region. */
     public void changeRegion(R region, Lambda<Object,R> cmd) {
       final int index = getIndexOf(region);
       if (index<0) { return; }
@@ -2487,12 +2487,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       
       /** Add the supplied DocumentRegion to the manager.
-        *  @param region the DocumentRegion to be inserted into the manager
+        * @param region the DocumentRegion to be inserted into the manager
         */
       public void addRegion(R region) { _superSetManager.addRegion(region); }
       
       /** Remove the given DocumentRegion from the manager.
-        *  @param region the DocumentRegion to be removed.
+        * @param region the DocumentRegion to be removed.
         */
       public void removeRegion(R region) { _superSetManager.removeRegion(region); }
       
@@ -2537,13 +2537,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       protected final LinkedList<FilteredRegionManagerListener<R>> _filters = new LinkedList<FilteredRegionManagerListener<R>>();
       
       /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and
-        *  removing listeners are considered write operations, and all notifications are considered read operations. Multiple
-        *  reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
+        * removing listeners are considered write operations, and all notifications are considered read operations. Multiple
+        * reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
         */
       protected final ReaderWriterLock _lock = new ReaderWriterLock();
       
       /** Adds a listener to the notifier.
-        *  @param listener a listener that reacts on events
+        * @param listener a listener that reacts on events
         */
       public void addListener(RegionManagerListener<R> listener) {
         FilteredRegionManagerListener<R> filter = new FilteredRegionManagerListener<R>(listener);
@@ -2556,7 +2556,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       
       /** Removes a listener from the notifier.
-        *  @param listener a listener that reacts on events
+        * @param listener a listener that reacts on events
         */
       public void removeListener(RegionManagerListener<R> listener) {
         _lock.startWrite();
@@ -2596,21 +2596,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       
       /** Set the current region. 
-        *  @param region new current region */
+        * @param region new current region */
       public void setCurrentRegion(R region) {
         // TODO
         throw new UnsupportedOperationException("SubsetRegionManager.setCurrentRegion not supported");
       }
       
       /** Make the region that is more recent the current region.
-        *  @return new current region */
+        * @return new current region */
       public R nextCurrentRegion() {
         // TODO
         throw new UnsupportedOperationException("SubsetRegionManager.nextCurrentRegion not supported");        
       }
       
       /** Make the region that is less recent the current region.
-        *  @return new current region */
+        * @return new current region */
       public R prevCurrentRegion() {
         // TODO
         throw new UnsupportedOperationException("SubsetRegionManager.prevCurrentRegion not supported");        
@@ -2662,8 +2662,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile boolean _classFileInSync = false;
     
     /** The package name embedded in the document the last time is was loaded, reconstructed, or saved.  When loading a
-      *  project, this information is extracted from the project file eliminating the need to read every document file.  
-      *  For non-project files, it is extracted from the text of the file.  If there is an error, it is left as "".
+      * project, this information is extracted from the project file eliminating the need to read every document file.  
+      * For non-project files, it is extracted from the text of the file.  If there is an error, it is left as "".
       */
     protected volatile String _packageName = "";
     
@@ -2690,7 +2690,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile DrJavaBook _book;
     
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.  Assumes that f exists.
-      *  @param f file describing DefinitionsDocument to manage; should be in canonical form
+      * @param f file describing DefinitionsDocument to manage; should be in canonical form
       */
     ConcreteOpenDefDoc(File f) { this(f, f.getParentFile(), f.lastModified()); }
     
@@ -2728,9 +2728,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getRawFile() { return _file; }
     
     /** Returns the file for this document, null if the document is null (which should never happen).  If the document's
-      *  file does not exist, this throws a FileMovedException.  If a FileMovedException is thrown, you
-      *  can retrieve the non-existence source file from the FileMovedException by using the getFile() method.
-      *  @return the file for this document
+      * file does not exist, this throws a FileMovedException.  If a FileMovedException is thrown, you
+      * can retrieve the non-existence source file from the FileMovedException by using the getFile() method.
+      * @return the file for this document
       */
     public File getFile() throws FileMovedException {
       File f = _file;  // single read of f
@@ -2771,7 +2771,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getParentDirectory() { return _parentDir; }
     
     /** Sets the parent directory of the document only if it is "Untitled"
-      *  @param pd The parent directory
+      * @param pd The parent directory
       */
     public void setParentDirectory(File pd) {
       synchronized(this) {
@@ -2792,7 +2792,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     void setInitialSelEnd(int i)   { _initSelEnd = i; }
     
     /** Gets the definitions document being handled.
-      *  @return document being handled
+      * @return document being handled
       */
     protected DefinitionsDocument getDocument() {
       
@@ -2816,14 +2816,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    public void makePositions() { _cacheAdapter.makePositions(); }
     
     /** Returns the name of the top level class, if any.
-      *  @throws ClassNameNotFoundException if no top level class name found.
+      * @throws ClassNameNotFoundException if no top level class name found.
       */
     public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
       return getDocument().getFirstTopLevelClassName();
     }
     
     /** Returns the name of the main (public) class, if any.
-      *  @throws ClassNameNotFoundException if no top level class name found.
+      * @throws ClassNameNotFoundException if no top level class name found.
       */
     public String getMainClassName() throws ClassNameNotFoundException {
       return getDocument().getMainClassName();
@@ -2859,9 +2859,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Finds the root directory for the source file for this document; null if document is Untitled.
-      *  @return The root directory of the source files, based on the package statement.
-      *  @throws InvalidPackageException if the package statement is invalid,
-      *  or if it does not match up with the location of the source file.
+      * @return The root directory of the source files, based on the package statement.
+      * @throws InvalidPackageException if the package statement is invalid,
+      * or if it does not match up with the location of the source file.
       */
     public File getSourceRoot() throws InvalidPackageException { 
       if (isUntitled())
@@ -2906,7 +2906,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     
     /** Originally designed to allow undoManager to set the current document to be modified whenever an undo
-      *  or redo is performed.  Now it actually does this.
+      * or redo is performed.  Now it actually does this.
       */
     public void updateModifiedSinceSave() { getDocument().updateModifiedSinceSave(); }
     
@@ -2914,7 +2914,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public int id() { return _id; }
     
     /** Returns the Pageable object for printing.
-      *  @return A Pageable representing this document.
+      * @return A Pageable representing this document.
       */
     public Pageable getPageable() throws IllegalStateException { return _book; }
     
@@ -2924,8 +2924,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     //--------------- Simple Predicates ---------------//
     
     /** A file is in the project if the source root is the same as the
-      *  project root. this means that project files must be saved at the
-      *  source root. (we query the model through the model's state)
+      * project root. this means that project files must be saved at the
+      * source root. (we query the model through the model's state)
       */
     public boolean inProjectPath() { return _state.inProjectPath(this); }
     
@@ -2953,7 +2953,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
-      *  @return true if the document is untitled and has no file
+      * @return true if the document is untitled and has no file
       */
     public boolean isUntitled() { return AbstractGlobalModel.isUntitled(_file); }
     
@@ -3144,10 +3144,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Saves the document with a FileWriter.  If the file name is already set, the method will use
-      *  that name instead of whatever selector is passed in.
-      *  @param com a selector that picks the file name if the doc is untitled
-      *  @exception IOException
-      *  @return true if the file was saved, false if the operation was canceled
+      * that name instead of whatever selector is passed in.
+      * @param com a selector that picks the file name if the doc is untitled
+      * @exception IOException
+      * @return true if the file was saved, false if the operation was canceled
       */
     public boolean saveFile(FileSaveSelector com) throws IOException {
 //      System.err.println("saveFile called on " + this);
@@ -3315,7 +3315,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isReady() { return _cacheAdapter != null && _cacheAdapter.isReady(); }
     
     /** Determines if the document has been modified since the last save.
-      *  @return true if the document has been modified
+      * @return true if the document has been modified
       */
     public boolean isModifiedSinceSave() {
       /* If the document has not been registered or it is virtualized (only stored on disk), then we know that
@@ -3335,7 +3335,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void documentReset() { _cacheAdapter.documentReset(); }
     
     /** Determines if the file for this document has been modified since it was loaded.
-      *  @return true if the file has been modified
+      * @return true if the file has been modified
       */
     public boolean modifiedOnDisk() {
       boolean ret = false;
@@ -3471,8 +3471,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Determines if the definitions document has been changed by an outside agent. If the document has changed,
-      *  asks the listeners if the GlobalModel should revert the document to the most recent version saved.
-      *  @return true if document has been reverted
+      * asks the listeners if the GlobalModel should revert the document to the most recent version saved.
+      * @return true if document has been reverted
       */
     public boolean revertIfModifiedOnDisk() throws IOException {
       final OpenDefinitionsDocument doc = this;
@@ -3522,9 +3522,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Asks the listeners if the GlobalModel can abandon the current document.  Fires the canAbandonFile(File)
-      *  event if isModifiedSinceSave() is true.  Only executes in event thread except for tests.
-      *  @return true if the current document can be abandoned, false if the current action should be halted in
-      *               its tracks (e.g., file open when the document has been modified since the last save).
+      * event if isModifiedSinceSave() is true.  Only executes in event thread except for tests.
+      * @return true if the current document can be abandoned, false if the current action should be halted in
+      *              its tracks (e.g., file open when the document has been modified since the last save).
       */
     public boolean canAbandonFile() {
 //      assert EventQueue.isDispatchThread();
@@ -3536,8 +3536,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Fires the quit(File) event if isModifiedSinceSave() is true.  The quitFile() event asks the user if the
-      *  the file should be saved before quitting.  Only executes in event thread.
-      *  @return true if quitting should continue, false if the user cancelled
+      * the file should be saved before quitting.  Only executes in event thread.
+      * @return true if quitting should continue, false if the user cancelled
       */
     public boolean quitFile() {
       assert EventQueue.isDispatchThread();
@@ -3547,9 +3547,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Moves the definitions document to the given line, and returns the resulting character position.  
-      *  @param line Destination line number. If it exceeds the number of lines in the document, it is
-      *              interpreted as the last line.
-      *  @return Index into document of where it moved
+      * @param line Destination line number. If it exceeds the number of lines in the document, it is
+      *             interpreted as the last line.
+      * @return Index into document of where it moved
       */
     public int gotoLine(int line) {
       DefinitionsDocument dd = getDocument();
@@ -3571,12 +3571,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public int getCaretPosition() { return _caretPosition; }
     
     /** Forwarding method to find the match for the closing brace immediately to the left, assuming there is such a brace.
-      *  @return the relative distance backwards to the offset before the matching brace.
+      * @return the relative distance backwards to the offset before the matching brace.
       */
     public int balanceBackward() { return getDocument().balanceBackward(); }
     
     /** Forwarding method to find the match for the open brace immediately to the right, assuming there is such a brace.
-      *  @return the relative distance forwards to the offset after `the matching brace.
+      * @return the relative distance forwards to the offset after `the matching brace.
       */
     public int balanceForward() { return getDocument().balanceForward(); }
     
@@ -3594,13 +3594,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Add a region manager for find results to this document.
-      *  @param rm the global model's region manager */
+      * @param rm the global model's region manager */
     public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
       _findResultsManagers.add(new SubsetRegionManager<MovingDocumentRegion>(rm));
     }
     
     /** Remove a manager for find results from this document.
-      *  @param rm the global model's region manager. */
+      * @param rm the global model's region manager. */
     public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
       for (SubsetRegionManager<MovingDocumentRegion> ssrm: _findResultsManagers) {
         if (ssrm.getSuperSetManager().equals(rm)) {
@@ -3705,7 +3705,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** End implementation of javax.swing.text.Document interface. */
     
     /** If the undo manager is unavailable, no undos are available
-      *  @return whether the undo manager can perform any undo's
+      * @return whether the undo manager can perform any undo's
       */
     public boolean undoManagerCanUndo() { return _cacheAdapter.isReady() && getUndoManager().canUndo(); }
     /**
@@ -3945,13 +3945,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Creates a ConcreteOpenDefDoc for a NullFile object f (corresponding to a new empty document)
-    *  @return OpenDefinitionsDocument object for a new document
+    * @return OpenDefinitionsDocument object for a new document
     */
   protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(NullFile f) { return new ConcreteOpenDefDoc(f); }
   
   /** Creates a ConcreteOpenDefDoc for an existing file f.
-    *  @return OpenDefinitionsDocument object for f
-    *  @throws FileNotFoundException if file f does not exist
+    * @return OpenDefinitionsDocument object for f
+    * @throws FileNotFoundException if file f does not exist
     */
   protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(File f) throws IOException {
     if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");
@@ -3959,8 +3959,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Returns the OpenDefinitionsDocument corresponding to the given File, or null if that file is not open.
-    *  @param file File object to search for
-    *  @return Corresponding OpenDefinitionsDocument, or null
+    * @param file File object to search for
+    * @return Corresponding OpenDefinitionsDocument, or null
     */
   protected OpenDefinitionsDocument _getOpenDocument(File file) {
     synchronized(_documentsRepos) { return _documentsRepos.get(file); }
@@ -4008,8 +4008,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Creates an OpenDefinitionsDocument for a file. Does not add to the navigator or notify that the file's open.
-    *  This method should be called only from within another open method that will do all of this clean up.
-    *  @param file the file to open
+    * This method should be called only from within another open method that will do all of this clean up.
+    * @param file the file to open
     */
   private OpenDefinitionsDocument _rawOpenFile(File file) throws IOException, AlreadyOpenException{
     OpenDefinitionsDocument openDoc = _getOpenDocument(file);
@@ -4037,8 +4037,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected static <T> T pop(ArrayList<T> stack) { return stack.remove(stack.size() - 1); }
   
   /** Creates an iNavigatorItem for a document, and adds it to the navigator. A helper for opening a file or creating
-    *  a new file.
-    *  @param doc the document to add to the navigator
+    * a new file.
+    * @param doc the document to add to the navigator
     */
   protected void addDocToNavigator(final OpenDefinitionsDocument doc) {
     Utilities.invokeLater(new SRunnable() {
@@ -4060,8 +4060,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected void addDocToClassPath(OpenDefinitionsDocument doc) { }
   
   /** Creates a document from a file.
-    *  @param file File to read document from
-    *  @return openened document
+    * @param file File to read document from
+    * @return openened document
     */
   public OpenDefinitionsDocument _openFile(File file) throws IOException, AlreadyOpenException {
     
@@ -4099,7 +4099,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public OpenDefinitionsDocument getActiveDocument() { return  _activeDocument; }
   
   /** Sets the currently active document by updating the selection model.
-    *  @param doc Document to set as active
+    * @param doc Document to set as active
     */
   public void setActiveDocument(final OpenDefinitionsDocument doc) {
     /* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
@@ -4199,7 +4199,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process
-    *  sets up _activeDocument as the document in the definitions pane. */
+    * sets up _activeDocument as the document in the definitions pane. */
   public void installActiveDocument() { _notifier.activeDocumentChanged(_activeDocument); }
   
   /** Invokes the activedocumentRefreshed method in the global listener on the argument _activeDocument.  This process

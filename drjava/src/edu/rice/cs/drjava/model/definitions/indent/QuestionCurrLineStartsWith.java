@@ -41,8 +41,7 @@ import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/** Question rule in the indentation decision tree.  Determines if current line starts with the specified string,
-  * ignoring leading whitespace (in current line).
+/** Question rule in the indentation decision tree.  Determines if the current line starts with the specified string.
   * @version $Id$
   */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
@@ -57,21 +56,20 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
     super(yesRule, noRule);
     _prefix = prefix;
   }
-   
-  /** Determines if the current line in the document starts with specified prefix, ignoring whitespace. Assumes
-    * ReadLock is already held.
-    * @param doc  AbstractDJDocument containing the line to be indented.
-    * @param reason  The reason that the indentation is being done
+  
+  /** Determines if the current line in the document starts with the specified prefix, ignoring whitespace.
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that the indentation is being done
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-
-      try {
+    
+    try {
       // Find start of line
       int here = doc.getCurrentLocation();
       int firstCharPos = doc.getLineFirstCharPos(here);
       int lineEndPos = doc.getLineEndPos(here);
-
+      
       // If prefix would run off the end of the line, the answer is obvious.
       if (firstCharPos + _prefix.length() > lineEndPos) {
         return false;

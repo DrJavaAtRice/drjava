@@ -37,18 +37,18 @@
 package edu.rice.cs.util.text;
 
 /** Class to decide whether a given edit can be applied to the document. Subclasses can impose conditions on 
- *  which edits will be applied.
- *  @version $Id$
- */
+  *  which edits will be applied.
+  *  @version $Id$
+  */
 public class DocumentEditCondition {
-
+  
   /** Returns whether to actually insert, given these inputs.
-   *  @param offs Offset into the document
-   */
+    * @param offs Offset into the document
+    */
   public boolean canInsertText(int offs) { return true; }
   
   /** Returns whether to actually remove, given these inputs.
-   *  @param offs Offset to start deleting from
-   */
+    * @param offs Offset to start deleting from
+    */
   public boolean canRemoveText(int offs) { return true; }
 }

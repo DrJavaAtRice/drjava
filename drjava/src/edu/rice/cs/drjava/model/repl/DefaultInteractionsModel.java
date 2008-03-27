@@ -59,10 +59,10 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Message to signal that input is required from the console. */
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
-
+  
   /** Model that contains the interpreter to use. */
   protected final DefaultGlobalModel _model;
-
+  
   /** Creates a new InteractionsModel.
     * @param model DefaultGlobalModel to do the interpretation
     * @param jvm  the RMI interface used by the Main JVM to access the Interpreter JVM
@@ -86,23 +86,23 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
       }
     });
   }
-
+  
   /** Called when the repl prints to System.out.
-   *  @param s String to print
-   */
+    * @param s String to print
+    */
   public void replSystemOutPrint(String s) {
     super.replSystemOutPrint(s); // Print s to interactions pane
     _model.systemOutPrint(s);    // Print s to console
   }
-
+  
   /** Called when the repl prints to System.err.
-   *  @param s String to print
-   */
+    * @param s String to print
+    */
   public void replSystemErrPrint(String s) {
     super.replSystemErrPrint(s);
     _model.systemErrPrint(s);
   }
-
+  
   /** Returns a line of text entered by the user at the equivalent of System.in. */
   public String getConsoleInput() { 
     String s = super.getConsoleInput();
@@ -113,21 +113,21 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
     * FIX: this code needs to run in the event thread an update the caret.
-   *  @param t The Throwable thrown by System.exit
-   */
+    * @param t The Throwable thrown by System.exit
+    */
   protected void _interpreterResetFailed(Throwable t) {
     _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + _newLine,
                                      InteractionsDocument.ERROR_STYLE);
     // Print the exception to the console
     _model.systemErrPrint(StringOps.getStackTrace(t));
   }
-
+  
   /** Called when the Java interpreter is ready to use.  This method body adds actions that involve the global model. */
   public void interpreterReady(File wd) {
     _model.resetInteractionsClassPath();  // Done here rather than in the superclass because _model is available here.
     super.interpreterReady(wd);
   }
-
+  
   /** Notifies listeners that an interaction has started. */
   protected void _notifyInteractionStarted() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
@@ -142,44 +142,44 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionErrorOccurred(offset,length); } });
   }
-
+  
   /** Notifies listeners that the interpreter has changed.
     * @param inProgress Whether the new interpreter is currently in progress.
     */
   protected void _notifyInterpreterChanged(final boolean inProgress) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterChanged(inProgress); } });
   }
-
+  
   /** Notifies listeners that the interpreter is resetting. */
   protected void _notifyInterpreterResetting() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetting(); } });
   }
-
+  
   /** Notifies listeners that the interpreter is ready. */
   public void _notifyInterpreterReady(final File wd) { 
 //    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
-
+  
   /** Notifies listeners that slave JVM has been used. */
   protected void _notifySlaveJVMUsed(final File wd) { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.slaveJVMUsed(); } });
   }
   
   /** Notifies listeners that the interpreter has exited unexpectedly.
-   *  @param status Status code of the dead process
-   */
+    * @param status Status code of the dead process
+    */
   protected void _notifyInterpreterExited(final int status) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterExited(status); } });
   }
-
+  
   /** Notifies listeners that the interpreter reset failed.
-   *  @param t Throwable causing the failure
-   */
+    * @param t Throwable causing the failure
+    */
   protected void _notifyInterpreterResetFailed(final Throwable t) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetFailed(t); } });
   }
-
+  
   /** Notifies the view that the current interaction is incomplete. */
   protected void _notifyInteractionIncomplete() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });

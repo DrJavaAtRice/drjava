@@ -46,81 +46,81 @@ import java.awt.event.FocusListener;
 public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implements IDocumentNavigatorFactory<ItemT> {
   
   public AWTContainerNavigatorFactory() { }
-
-  /** Creates a new List Navigator
-   *  @return a list navigator
-   */
-    public IDocumentNavigator<ItemT> makeListNavigator() { return new JListSortNavigator<ItemT>(); }
-
-  /** Returns a new tree Navigator with the specified root
-   *  @param path the path name of the root node
-   *  @return a tree navigator
-   */
-    public IDocumentNavigator<ItemT> makeTreeNavigator(String path) { return new JTreeSortNavigator<ItemT>(path); }
-    
-    /** Creates a list navigator and migrates the navigator items from parent to the new navigator.  The migration
-      * is asynchronous but it completes before any subsequent computation in the event thread.
-      * @param parent the navigator to migrate from
-      * @return the new list navigator
-      */
-    public IDocumentNavigator<ItemT> makeListNavigator(final IDocumentNavigator<ItemT> parent) {
-      final IDocumentNavigator<ItemT> child = makeListNavigator();
-      Utilities.invokeLater(new Runnable() { 
-        public void run() {
-//          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
-            migrateNavigatorItems(child, parent);
-            migrateListeners(child, parent);
-          }
-//        }
-      });
-      return child;
-    }
   
-    /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator. The migration
-      * is asynchronous but it completes before any subsequent computation in the event thread.
-      * @param name the name of the root node
-      * @param parent the navigator to migrate from
-      * @return the new tree navigator
-      */
-    public IDocumentNavigator<ItemT> makeTreeNavigator(String name, final IDocumentNavigator<ItemT> parent, 
-                                                final List<Pair<String, INavigatorItemFilter<ItemT>>> l) {
-      
-      final IDocumentNavigator<ItemT> child = makeTreeNavigator(name);
-      Utilities.invokeLater(new Runnable() { 
-        public void run() { 
+  /** Creates a new List Navigator
+    * @return a list navigator
+    */
+  public IDocumentNavigator<ItemT> makeListNavigator() { return new JListSortNavigator<ItemT>(); }
+  
+  /** Returns a new tree Navigator with the specified root
+    * @param path the path name of the root node
+    * @return a tree navigator
+    */
+  public IDocumentNavigator<ItemT> makeTreeNavigator(String path) { return new JTreeSortNavigator<ItemT>(path); }
+  
+  /** Creates a list navigator and migrates the navigator items from parent to the new navigator.  The migration
+    * is asynchronous but it completes before any subsequent computation in the event thread.
+    * @param parent the navigator to migrate from
+    * @return the new list navigator
+    */
+  public IDocumentNavigator<ItemT> makeListNavigator(final IDocumentNavigator<ItemT> parent) {
+    final IDocumentNavigator<ItemT> child = makeListNavigator();
+    Utilities.invokeLater(new Runnable() { 
+      public void run() {
 //          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
-            for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { child.addTopLevelGroup(p.first(), p.second()); }
-            migrateNavigatorItems(child, parent);
-            migrateListeners(child, parent);
-          }
-//        }
-      });     
-      return child;
-    }
-    
-    /** Migrates all the navigator items from parent to child
-     *  @param child the navigator to migrate to
-     *  @param parent the navigator to migrate from
-     */
-    // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
-    // long as it extends ItemT.
-    private void migrateNavigatorItems(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
-      Enumeration<ItemT> enumerator =  parent.getDocuments();
-      while (enumerator.hasMoreElements()) {
-        ItemT navitem = enumerator.nextElement();
-        child.addDocument(navitem);
+        migrateNavigatorItems(child, parent);
+        migrateListeners(child, parent);
       }
-      parent.clear(); // Remove documents from old navigator (parent)
-    }
+//        }
+    });
+    return child;
+  }
+  
+  /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator. The migration
+    * is asynchronous but it completes before any subsequent computation in the event thread.
+    * @param name the name of the root node
+    * @param parent the navigator to migrate from
+    * @return the new tree navigator
+    */
+  public IDocumentNavigator<ItemT> makeTreeNavigator(String name, final IDocumentNavigator<ItemT> parent, 
+                                                     final List<Pair<String, INavigatorItemFilter<ItemT>>> l) {
     
-    /** Migrates all the listeners from parent to child
-     *  @param child the navigator to migrate to
-     *  @param parent the navigator to migrate from
-     */
-    // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
-    // long as it extends ItemT.
-    private void migrateListeners(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
-      for (INavigationListener<? super ItemT> nl: parent.getNavigatorListeners())  child.addNavigationListener(nl);
-      for (FocusListener fl: parent.getFocusListeners())  child.addFocusListener(fl);
+    final IDocumentNavigator<ItemT> child = makeTreeNavigator(name);
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { 
+//          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
+        for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { child.addTopLevelGroup(p.first(), p.second()); }
+        migrateNavigatorItems(child, parent);
+        migrateListeners(child, parent);
+      }
+//        }
+    });     
+    return child;
+  }
+  
+  /** Migrates all the navigator items from parent to child
+    * @param child the navigator to migrate to
+    * @param parent the navigator to migrate from
+    */
+  // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
+  // long as it extends ItemT.
+  private void migrateNavigatorItems(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
+    Enumeration<ItemT> enumerator =  parent.getDocuments();
+    while (enumerator.hasMoreElements()) {
+      ItemT navitem = enumerator.nextElement();
+      child.addDocument(navitem);
     }
+    parent.clear(); // Remove documents from old navigator (parent)
+  }
+  
+  /** Migrates all the listeners from parent to child
+    * @param child the navigator to migrate to
+    * @param parent the navigator to migrate from
+    */
+  // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
+  // long as it extends ItemT.
+  private void migrateListeners(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
+    for (INavigationListener<? super ItemT> nl: parent.getNavigatorListeners())  child.addNavigationListener(nl);
+    for (FocusListener fl: parent.getFocusListeners())  child.addFocusListener(fl);
+  }
 }

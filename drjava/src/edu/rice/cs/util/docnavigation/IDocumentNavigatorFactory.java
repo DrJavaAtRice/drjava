@@ -43,31 +43,30 @@ import java.util.List;
 public interface IDocumentNavigatorFactory<ItemT extends INavigatorItem> {
   
   /** Creates a new List Navigator
-   *  @return a list navigator
-   */
+    *  @return a list navigator
+    */
   public IDocumentNavigator<ItemT> makeListNavigator();
   
   /** Returns a new tree Navigator with the specified root
-   *  @param name the name of the root node
-   *  @return a tree navigator
-   */
+    * @param name the name of the root node
+    * @return a tree navigator
+    */
   public IDocumentNavigator<ItemT> makeTreeNavigator(String name);
   
   /** Creates a list navigator and migrates the navigator items from parent to the new navigator
-   *  @param parent the navigator to migrate from
-   *  @return the new list navigator
-   */
+    * @param parent the navigator to migrate from
+    * @return the new list navigator
+    */
   // Note: parent's type cannot be relaxed with a wildcard.  The type has an upper bound of ItemT,
   // because the new navigator must be able to contain all of its items; the type has a lower bound
   // of ItemT, because the parent's listeners must be able to handle all items in the new navigator.
   public IDocumentNavigator<ItemT> makeListNavigator(IDocumentNavigator<ItemT> parent);
   
-  /**
-   * creates a tree navigator and migrates the navigator items from the parent to the new navigator
-   * @param name the name of the root node
-   * @param parent the navigator to migrate from
-   * @return the new tree navigator
-   */
+  /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator
+    * @param name the name of the root node
+    * @param parent the navigator to migrate from
+    * @return the new tree navigator
+    */
   public IDocumentNavigator<ItemT> makeTreeNavigator(String name, IDocumentNavigator<ItemT> parent, 
                                                      List<Pair<String, INavigatorItemFilter<ItemT>>> l);
 }

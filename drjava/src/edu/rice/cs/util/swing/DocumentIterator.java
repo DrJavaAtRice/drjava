@@ -43,15 +43,15 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 /** Used to get the next or previous open document given the current one. */
 public interface DocumentIterator {
   /** Gets the next document.
-   *  @param doc the current document.
-   *  @return the next document.
-   */
+    * @param doc the current document.
+    * @return the next document.
+    */
   OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument doc);
   
   /** Gets the previous document.
-   *  @param doc the current document.
-   *  @return the previous document.
-   */
+    * @param doc the current document.
+    * @return the previous document.
+    */
   OpenDefinitionsDocument getPrevDocument(OpenDefinitionsDocument doc);
   
   /** @return the number of documents being iterated over */

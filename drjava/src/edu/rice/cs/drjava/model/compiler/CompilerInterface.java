@@ -41,28 +41,28 @@ import java.util.List;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** The minimum interface that a compiler must meet to be used by DrJava.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public interface CompilerInterface {
   
   /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method 
-   *  should load the compiler class, which should hopefully prove whether the class can load.  If this 
-   *  method returns true, the {@link #compile} method should not fail due to class not being found.
-   */
+    * should load the compiler class, which should hopefully prove whether the class can load.  If this 
+    * method returns true, the {@link #compile} method should not fail due to class not being found.
+    */
   boolean isAvailable();
-
+  
   /** Compile the given files.
-   *  @param files  Source files to compile.
-   *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
-   *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
-   *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
-   *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
-   *                        If @code{null}, the default is used.
-   *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
-   *                        the default is used.
-   *  @param showWarnings  Whether compiler warnings should be shown or ignored.
-   *  @return Errors that occurred. If no errors, should be zero length (not null).
-   */
+    * @param files  Source files to compile.
+    * @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+    * @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+    * @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+    * @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+    *                       If @code{null}, the default is used.
+    * @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+    *                       the default is used.
+    * @param showWarnings  Whether compiler warnings should be shown or ignored.
+    * @return Errors that occurred. If no errors, should be zero length (not null).
+    */
   List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
                                         List<? extends File> sourcePath, File destination, 
                                         List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings);
@@ -72,7 +72,7 @@ public interface CompilerInterface {
   
   /** Returns the name of this compiler, appropriate to show to the user. */
   String getName();
-
+  
   /** Returns a one-line description of the compiler (such as the name and file location) */
   String getDescription();
   

@@ -51,14 +51,14 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   */
 public class QuestionFollowedByStar extends IndentRuleQuestion {
   
-  /** Constructs a new rule which determines if the current position is immediately followed by a star '*'.
+  /** Constructs a new rule which determines if the current position is
+    * immediately followed by a star '*'.
     * @param yesRule Rule to use if this rule holds
     * @param noRule Rule to use if this rule does not hold
     */
   public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
-  /** Determines if the next non WS character is '*'. Does not search in quotes or comments.  Assumes ReadLock is 
-    * already held. <p>
+  /** Determines if the next non WS character is '*'. Does not search in quotes or comments. <p>
     * <b>Does not work if character being searched for is a '/' or a '*'</b>
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if this node's rule holds.
@@ -66,8 +66,7 @@ public class QuestionFollowedByStar extends IndentRuleQuestion {
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
-      
-      return !(charPos == -1) && doc.getText(charPos, 1).equals("*");
+      return (charPos != -1) && doc.getText(charPos, 1).equals("*");
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }

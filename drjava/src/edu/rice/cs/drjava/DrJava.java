@@ -67,11 +67,11 @@ import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.plt.debug.DebugUtil;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
-  *  one if none exists) to get the critical information required to start the main JVM for DrJava: 
-  *  (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
-  *      stored in tools.jar)
-  *  (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
-  *  @version $Id$
+  * one if none exists) to get the critical information required to start the main JVM for DrJava: 
+  * (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
+  *     stored in tools.jar)
+  * (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
+  * @version $Id$
   */
 public class DrJava {
   
@@ -114,7 +114,7 @@ public class DrJava {
   public static boolean getShowDebugConsole() { return _showDebugConsole; }
   
   /** Starts running DrJava.
-    *  @param args Command line argument array
+    * @param args Command line argument array
     */
   public static void main(final String[] args) {
     // Platform-specific UI setup.
@@ -223,7 +223,7 @@ public class DrJava {
   }
   
   /** Handles any command line arguments that have been specified.
-    *  @return true if DrJava should load, false if not
+    * @return true if DrJava should load, false if not
     */
   static boolean handleCommandLineArgs(String[] args) {
     boolean heapSizeGiven = false;  // indicates whether args includes an argument of the form -Xmx<number>
@@ -310,10 +310,10 @@ public class DrJava {
   }
   
 //  /** Prompts the user that the location of tools.jar needs to be specified to be able to use the compiler and/or the
-//   *  debugger.  
-//   *  @param needCompiler whether DrJava needs tools.jar for a compiler
-//   *  @param needDebugger whether DrJava needs tools.jar for the debugger
-//   */
+//    * debugger.  
+//    * @param needCompiler whether DrJava needs tools.jar for a compiler
+//    * @param needDebugger whether DrJava needs tools.jar for the debugger
+//    */
 //  public static void promptForToolsJar(boolean needCompiler, boolean needDebugger) {
 //    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
 //    String selectedVersion = _getToolsJarVersion(selectedFile);
@@ -377,14 +377,14 @@ public class DrJava {
   
   
   /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
-    *  accidentally used.
+    * accidentally used.
     */
   static void setPropertiesFile(String fileName) {
     if (!fileName.endsWith(".java"))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.
-    *  @throws IllegalStateException if config has already been assigned
+    * @throws IllegalStateException if config has already been assigned
     */
   static FileConfiguration _initConfig() throws IllegalStateException {
 //    // Make sure someone doesn't try to change the config object.
@@ -421,8 +421,8 @@ public class DrJava {
   }
   
 //  /** Displays a prompt to the user indicating that tools.jar could not be found in the specified location, and asks
-//   *  if he would like to specify a new location.
-//   */
+//    * if he would like to specify a new location.
+//    */
 //  private static boolean _userWantsToPickAgain() {
 //    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
 //    String selectedVersion = _getToolsJarVersion(selectedFile);

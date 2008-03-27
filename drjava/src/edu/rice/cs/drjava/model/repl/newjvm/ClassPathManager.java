@@ -86,7 +86,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     // _fullPath is traversed
     _fullPath = IterUtil.collapse(IterUtil.map(allPaths, _makeSafeSnapshot));
   }
-      
+  
   private final Lambda<Iterable<File>, Iterable<File>> _makeSafeSnapshot =
     new Lambda<Iterable<File>, Iterable<File>>() {
     public Iterable<File> value(Iterable<File> arg) {
@@ -95,8 +95,8 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   };
   
   /** Adds the entry to the front of the project classpath
-   *  (this is the classpath specified in project properties)
-   */
+    * (this is the classpath specified in project properties)
+    */
   public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); }
   
   public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
@@ -106,7 +106,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     _buildCP.remove(f); // eliminate duplicates
     _buildCP.addFirst(f);
   }
-
+  
   public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
   
   /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). */
@@ -133,14 +133,13 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public Iterable<File> getExtraCP() { return IterUtil.snapshot(_extraCP); }
   
-  /**
-   * Create a new class loader based on the given path.  The loader's path is dynamically updated
-   * as changes are made in the ClassPathManager.  Each loader returned by this method will
-   * have its own set of loaded classes, and will only share those classes that are loaded
-   * by a common parent.
-   * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap
-   *                class loader.
-   */
+  /** Create a new class loader based on the given path.  The loader's path is dynamically updated
+    * as changes are made in the ClassPathManager.  Each loader returned by this method will
+    * have its own set of loaded classes, and will only share those classes that are loaded
+    * by a common parent.
+    * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap
+    *                class loader.
+    */
   public synchronized ClassLoader makeClassLoader(ClassLoader parent) {
     return new PathClassLoader(parent, _fullPath);
   }

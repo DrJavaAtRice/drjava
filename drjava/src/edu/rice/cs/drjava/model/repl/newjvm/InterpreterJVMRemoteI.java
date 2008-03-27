@@ -59,11 +59,11 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * @param show Whether to show a message if a reset operation fails.
    */
   public void setShowMessageOnResetFailure(boolean show) throws RemoteException;
-
+  
   /** Sets whether to allow private access. */
   public void setPrivateAccessible(boolean allow) throws RemoteException;
-
-
+  
+  
   
   
   /**
@@ -72,43 +72,43 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * @throws IllegalArgumentException if the name is not unique
    */
   public void addInterpreter(String name) throws RemoteException;
-
+  
   /**
    * Removes the interpreter with the given name, if it exists.
    * @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) throws RemoteException;
-
+  
   /** Sets the current interpreter to be the one specified by the given name
     * @param name the unique name of the interpreter to set active
     * @return Whether the new interpreter is currently in progress
     * with an interaction
     */
   public boolean setActiveInterpreter(String name) throws RemoteException;
-
+  
   /** Sets the default interpreter to be active.
     * @return Whether the new interpreter is currently in progress
     * with an interaction
     */
   public boolean setToDefaultInterpreter() throws RemoteException;
-
-
+  
+  
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVMRemoteI via
-   *  the interpretResult method.
-   *  @param s Source code to interpret.
-   */
+    * the interpretResult method.
+    * @param s Source code to interpret.
+    */
   public InterpretResult interpret(String s) throws RemoteException;
   
   /** Gets the string representation of the value of a variable in the current interpreter.
-   *  @param var the name of the variable
-   *  @return null if the variable is not defined, "null" if the value is null; otherwise,
-   *          its string representation
-   */
+    * @param var the name of the variable
+    * @return null if the variable is not defined, "null" if the value is null; otherwise,
+    *         its string representation
+    */
   public String getVariableToString(String var) throws RemoteException;
   
   /** Gets the type of a variable in the current interpreter.
-   *  @param var the name of the variable
-   */
+    * @param var the name of the variable
+    */
   public String getVariableType(String var) throws RemoteException;
   
   /**
@@ -118,28 +118,28 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public List<File> getClassPath() throws RemoteException;  
   
   /** Adds the given path to the classpath shared by ALL Java interpreters.  Only unique paths are added.
-   *  @param f Entry to add to the accumulated classpath
-   */
+    * @param f Entry to add to the accumulated classpath
+    */
   public void addProjectClassPath(File f) throws RemoteException;
   
   /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
-   *  @param f Entry to add to the accumulated classpath
-   */
+    * @param f Entry to add to the accumulated classpath
+    */
   public void addBuildDirectoryClassPath(File f) throws RemoteException;
   
   /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
-   *  @param f Entry to add to the accumulated classpath
-   */
+    * @param f Entry to add to the accumulated classpath
+    */
   public void addProjectFilesClassPath(File f) throws RemoteException;
   
   /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
-   *  @param f Entry to add to the accumulated classpath
-   */
+    * @param f Entry to add to the accumulated classpath
+    */
   public void addExternalFilesClassPath(File f) throws RemoteException;
   
   /** Adds the given path to the classpath shared by ALL Java interpreters.  Only unique paths are added.
-   *  @param f Entry to add to the accumulated classpath
-   */
+    * @param f Entry to add to the accumulated classpath
+    */
   public void addExtraClassPath(File f) throws RemoteException;
   
 }

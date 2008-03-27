@@ -54,11 +54,10 @@ public interface INavigatorItem {
   public boolean fileExists();
   
   /** Returns a "simple" name representing this <code>INavigatorItem</code>.
-   *  Strings returned by this method may or may not be unique with respect to other <code>INavigatorItem</code>s within or without
-   *  a given <code>IDocumentNavigator</code>.
-   * 
-   *  @return the simple name for this document.
-   * */
+    * Strings returned by this method may or may not be unique with respect to other <code>INavigatorItem</code>s within or without
+    * a given <code>IDocumentNavigator</code>.
+    * @return the simple name for this document.
+    */
   public String getName();
   public boolean isAuxiliaryFile();
   public boolean inProject();

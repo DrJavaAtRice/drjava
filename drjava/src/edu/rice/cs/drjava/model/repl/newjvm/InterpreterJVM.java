@@ -78,14 +78,14 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** This is the main class for the interpreter JVM.  All public methods except those involving remote calls (callbacks) 
- *  synchronized (unless synchronization has no effect).  This class is loaded in the Interpreter JVM, not the Main JVM. 
- *  (Do not use DrJava's config framework here.)
- *  <p>
- *  Note that this class is specific to DynamicJava. It must be refactored to accommodate other interpreters.
- *  @version $Id$
- */
+  * synchronized (unless synchronization has no effect).  This class is loaded in the Interpreter JVM, not the Main JVM. 
+  * (Do not use DrJava's config framework here.)
+  * <p>
+  * Note that this class is specific to DynamicJava. It must be refactored to accommodate other interpreters.
+  * @version $Id$
+  */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
-
+  
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY;
   static {
@@ -114,7 +114,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
-
+  
   /** Whether to display an error message if a reset fails. */
   private volatile boolean _messageOnResetFailure;
   
@@ -125,13 +125,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // Inherited fields:
     _quitSlaveThreadName = "Reset Interactions Thread";
     _pollMasterThreadName = "Poll DrJava Thread";
-
+    
     Iterable<File> runtimeCP = IOUtil.parsePath(System.getProperty("java.class.path", ""));
     _classPathManager = new ClassPathManager(runtimeCP);
     _interpreterLoader = _classPathManager.makeClassLoader(null);
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
     _messageOnResetFailure = true;
-
+    
     _interpreterOptions = Options.DEFAULT;
     _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
     _interpreters = Collections.synchronizedMap(new HashMap<String,Interpreter>());
@@ -221,17 +221,17 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }  
   
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
-   *  the interpretResult method.
-   *  @param s Source code to interpret.
-   */
+    * the interpretResult method.
+    * @param s Source code to interpret.
+    */
   public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
   
   /** Interprets the given string of source code with the given interpreter. The result is returned to
-   *  MainJVM via the interpretResult method.
-   *  @param s Source code to interpret.
-   *  @param interpreterName Name of the interpreter to use
-   *  @throws IllegalArgumentException if the named interpreter does not exist
-   */
+    * MainJVM via the interpretResult method.
+    * @param s Source code to interpret.
+    * @param interpreterName Name of the interpreter to use
+    * @throws IllegalArgumentException if the named interpreter does not exist
+    */
   public InterpretResult interpret(String s, String interpreterName) {
     Interpreter i = _interpreters.get(interpreterName);
     if (i == null) {
@@ -239,7 +239,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     return interpret(s, i);
   }
-   
+  
   private InterpretResult interpret(String input, Interpreter interpreter) {
     debug.logStart("Interpret " + input);
     
@@ -275,7 +275,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     });
   }
   
-  /** Get the value of the variable with the given name in the current interpreter.
+  /** Gets the value of the variable with the given name in the current interpreter.
     * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
     * an array here is used as the return type rather than an {@code Option<Object>} --
     * an empty array corresponds to "none," and a singleton array corresponds to a "some."
@@ -290,10 +290,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   
   /** Gets the string representation of the value of a variable in the current interpreter.
-   *  @param var the name of the variable
-   *  @return null if the variable is not defined, "null" if the value is null; otherwise,
-   *          its string representation
-   */
+    * @param var the name of the variable
+    * @return null if the variable is not defined, "null" if the value is null; otherwise,
+    * its string representation
+    */
   public String getVariableToString(String var) {
     Object[] val = getVariable(var);
     if (val.length == 0) { return null; }
@@ -304,8 +304,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Gets the type of a variable in the current interpreter.
-   *  @param var the name of the variable
-   */
+    * @param var the name of the variable
+    */
   public String getVariableType(String var) {
     Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
     if (env == null) { return null; }
@@ -314,11 +314,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     else { return _interpreterOptions.typeSystem().userRepresentation(lv.type()); }
   }
   
-    
+  
   /** Adds a named Interpreter to the list.
-   *  @param name the unique name for the interpreter
-   *  @throws IllegalArgumentException if the name is not unique
-   */
+    * @param name the unique name for the interpreter
+    * @throws IllegalArgumentException if the name is not unique
+    */
   public void addInterpreter(String name) {
     if (_interpreters.containsKey(name)) {
       throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
@@ -327,23 +327,22 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _interpreters.put(name, i);
   }
   
-  /**
-   * Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
-   * the debugger.
-   *  @param name  The unique name for the interpreter
-   *  @param thisVal  The value of {@code this} (may be null, implying this is a static context)
-   *  @param thisClass  The class in whose context the interpreter is to be created
-   *  @param localVars  Values of local variables
-   *  @param localVarNames  Names of the local variables
-   *  @param localVarClasses  Classes of the local variables.  To simplify the work callers must
-   *                          do, a value with a primitive type may have a {@code null} entry here.
-   *  @throws IllegalArgumentException if the name is not unique, or if the local var arrays
-   *                                   are not all of the same length
-   */
+  /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
+    * the debugger.
+    * @param name  The unique name for the interpreter
+    * @param thisVal  The value of {@code this} (may be null, implying this is a static context)
+    * @param thisClass  The class in whose context the interpreter is to be created
+    * @param localVars  Values of local variables
+    * @param localVarNames  Names of the local variables
+    * @param localVarClasses  Classes of the local variables.  To simplify the work callers must
+    *                         do, a value with a primitive type may have a {@code null} entry here.
+    * @throws IllegalArgumentException if the name is not unique, or if the local var arrays
+    *                                  are not all of the same length
+    */
   public void addInterpreter(String name, Object thisVal, Class<?> thisClass, Object[] localVars,
                              String[] localVarNames, Class<?>[] localVarClasses) {
     debug.logValues(new String[]{ "name", "thisVal", "thisClass", "localVars", "localVarNames",
-                    "localVarClasses" }, name, thisVal, thisClass, localVars, localVarNames, localVarClasses);
+      "localVarClasses" }, name, thisVal, thisClass, localVars, localVarNames, localVarClasses);
     if (_interpreters.containsKey(name)) {
       throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
     }
@@ -372,7 +371,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     ctx = new ClassContext(ctx, c);
     ctx = new DebugMethodContext(ctx, thisVal == null);
     ctx = new LocalContext(ctx, vars);
-
+    
     RuntimeBindings bindings = RuntimeBindings.EMPTY;
     if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
     bindings = new RuntimeBindings(bindings, vars, IterUtil.make(localVars));
@@ -403,9 +402,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   
   /** Sets the current interpreter to be the one specified by the given name
-   *  @param name the unique name of the interpreter to set active
-   *  @return Whether the new interpreter is currently in progress with an interaction
-   */
+    * @param name the unique name of the interpreter to set active
+    * @return Whether the new interpreter is currently in progress with an interaction
+    */
   public synchronized boolean setActiveInterpreter(String name) {
     Interpreter i = _interpreters.get(name);
     if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
@@ -414,14 +413,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Sets the default interpreter to be active.
-   *  @return Whether the new interpreter is currently in progress with an interaction
-   */
+    * @return Whether the new interpreter is currently in progress with an interaction
+    */
   public synchronized boolean setToDefaultInterpreter() {
     _activeInterpreter = Pair.make("", _defaultInterpreter);
     return _busyInterpreters.contains(_defaultInterpreter);
   }
   
-
+  
   /** Sets the interpreter to allow access to private members. */
   public synchronized void setPrivateAccessible(boolean allow) {
     // TODO: implement with Options values
@@ -429,27 +428,27 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   // ---------- JUnit methods ----------
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases classes (by 
-   *  loading them).  Unsynchronized because it contains a remote call and does not involve mutable local state.
-   *  @param classNames the class names to run in a test
-   *  @param files the associated file
-   *  @return the class names that are actually test cases
-   */
+    * loading them).  Unsynchronized because it contains a remote call and does not involve mutable local state.
+    * @param classNames the class names to run in a test
+    * @param files the associated file
+    * @return the class names that are actually test cases
+    */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
     return _junitTestManager.findTestClasses(classNames, files);
   }
   
   /** Runs JUnit test suite already cached in the Interpreter JVM.  Unsynchronized because it contains a remote call
-   *  and does not involve mutable local state.
-   *  @return false if no test suite is cached; true otherwise
-   */
+    * and does not involve mutable local state.
+    * @return false if no test suite is cached; true otherwise
+    */
   public boolean runTestSuite() throws RemoteException {
     return _junitTestManager.runTestSuite();
   }
   
   /** Notifies Main JVM that JUnit has been invoked on a non TestCase class.  Unsynchronized because it contains a 
-   *  remote call and does not involve mutable local state.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * remote call and does not involve mutable local state.
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(boolean isTestAll) {
     try { _mainJVM.nonTestCase(isTestAll); }
     catch (RemoteException re) {
@@ -459,9 +458,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Notifies the main JVM that JUnitTestManager has encountered an illegal class file.  Unsynchronized because it 
-   *  contains a remote call and does not involve mutable local state.
-   *  @param e the ClassFileError object describing the error on loading the file
-   */
+    * contains a remote call and does not involve mutable local state.
+    * @param e the ClassFileError object describing the error on loading the file
+    */
   public void classFileError(ClassFileError e) {
     try { _mainJVM.classFileError(e); }
     catch (RemoteException re) {
@@ -471,9 +470,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Notifies that a suite of tests has started running.  Unsynchronized because it contains a remote call and does
-   *  not involve mutable local state.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * not involve mutable local state.
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void testSuiteStarted(int numTests) {
     try { _mainJVM.testSuiteStarted(numTests); }
     catch (RemoteException re) {
@@ -483,9 +482,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Notifies that a particular test has started.  Unsynchronized because it contains a remote call and does not
-   *  involve mutable local state.
-   *  @param testName The name of the test being started.
-   */
+    * involve mutable local state.
+    * @param testName The name of the test being started.
+    */
   public void testStarted(String testName) {
     try { _mainJVM.testStarted(testName); }
     catch (RemoteException re) {
@@ -495,10 +494,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Notifies that a particular test has ended.  Unsynchronized because it contains a remote call.
-   *  @param testName The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error or simply failed.
-   */
+    * @param testName The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error or simply failed.
+    */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {
     try { _mainJVM.testEnded(testName, wasSuccessful, causedError); }
     catch (RemoteException re) {
@@ -508,9 +507,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Notifies that a full suite of tests has finished running.  Unsynchronized because it contains a remote call
-   *  and does not involve mutable local state.
-   *  @param errors The array of errors from all failed tests in the suite.
-   */
+    * and does not involve mutable local state.
+    * @param errors The array of errors from all failed tests in the suite.
+    */
   public void testSuiteEnded(JUnitError[] errors) {
     try { _mainJVM.testSuiteEnded(errors); }
     catch (RemoteException re) {
@@ -520,10 +519,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Called when the JUnitTestManager wants to open a file that is not currently open.  Unsynchronized because it 
-   *  contains a remote call and does not involve mutable local state.
-   *  @param className the name of the class for which we want to find the file
-   *  @return the file associated with the given class
-   */
+    * contains a remote call and does not involve mutable local state.
+    * @param className the name of the class for which we want to find the file
+    * @return the file associated with the given class
+    */
   public File getFileForClassName(String className) {
     try { return _mainJVM.getFileForClassName(className); }
     catch (RemoteException re) {
@@ -542,5 +541,5 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void addProjectFilesClassPath(File f) { _classPathManager.addProjectFilesCP(f); }
   public void addExternalFilesClassPath(File f) { _classPathManager.addExternalFilesCP(f); }
   public List<File> getClassPath() { return IterUtil.asList(_classPathManager.getClassPath()); }
-
+  
 }

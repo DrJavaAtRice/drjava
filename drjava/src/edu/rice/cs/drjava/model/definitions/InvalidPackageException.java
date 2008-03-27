@@ -46,21 +46,18 @@ package edu.rice.cs.drjava.model.definitions;
  */
 public class InvalidPackageException extends Exception {
   private final int _location;
-
-   /**
-    * Constructs a exception
+  
+  /** Constructs a exception
     * @param location The location in the document where the invalid package
     *                 statement begins.
     * @param message  Textual explanation of the problem.
-   */
+    */
   public InvalidPackageException(int location, String message) {
     super(message);
     _location = location;
   }
-
-  /**
-   * Returns the location of the problem.
-   */
+  
+  /** Returns the location of the problem. */
   public int getLocation() {
     return _location;
   }

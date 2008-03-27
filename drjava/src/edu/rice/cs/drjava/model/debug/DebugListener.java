@@ -41,9 +41,9 @@ import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /** Any class which wants to listen to events fired by the Debugger should implement this interface and use Debugger's
- *  addDebugListener() method.
- *  @version $Id$
- */
+  *  addDebugListener() method.
+  *  @version $Id$
+  */
 public interface DebugListener extends RegionManagerListener<Breakpoint> {
   
   /** Called when debugger mode has been enabled. Must be executed in event thread. */
@@ -51,28 +51,28 @@ public interface DebugListener extends RegionManagerListener<Breakpoint> {
   
   /** Called when debugger mode has been disabled.  Must be executed in event thread. */
   public void debuggerShutdown();
-
+  
   /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
-   *  displayed.  Must be executed only in the event thread.
-   *  @param doc Document to display
-   *  @param lineNumber Line to display or highlight
-   *  @param shouldHighlight true iff the line should be highlighted.
-   */
+    * displayed.  Must be executed only in the event thread.
+    * @param doc Document to display
+    * @param lineNumber Line to display or highlight
+    * @param shouldHighlight true iff the line should be highlighted.
+    */
   public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight);  
   
   /** Called when a breakpoint is reached during execution.
-   *  @param bp the breakpoint
-   */
+    * @param bp the breakpoint
+    */
   public void breakpointReached(Breakpoint bp);
-
+  
   /** Called when a watch is set.  Must be executed in event thread.
-   *  @param w the watch
-   */
+    * @param w the watch
+    */
   public void watchSet(DebugWatchData w);
   
   /** Called when a watch is removed.  Must be executed in event thread.
-   *  @param w the watch
-   */
+    * @param w the watch
+    */
   public void watchRemoved(DebugWatchData w);
   
   /** Called when a step is requested on the current thread.  Must be executed in event thread. */
@@ -92,10 +92,10 @@ public interface DebugListener extends RegionManagerListener<Breakpoint> {
   
   /** Called when any thread other than the current thread dies. Must be executed in event thread. */
   public void nonCurrThreadDied();
-
+  
   /** Called when the current (selected) thread is set in the debugger.
-   *  @param thread the thread that was set as current
-   */
+    * @param thread the thread that was set as current
+    */
   public void currThreadSet(DebugThreadData thread);
   
   // from RegionManagerListener<Breakpoint>:

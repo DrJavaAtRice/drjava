@@ -41,70 +41,60 @@ package edu.rice.cs.util.swing;
  * 
  */
 public class AsyncCompletionArgs<R> {
-
- private R _result;
-
- private Exception _caughtException;
-
- private boolean _cancelRequested;
-
- public AsyncCompletionArgs(R result, boolean cancelRequested) {
-  this(result, null, cancelRequested);
- }
-
- public AsyncCompletionArgs(R result, Exception caughtException, boolean wasCanceled) {
-  _result = result;
-  _caughtException = caughtException;
-  _cancelRequested = wasCanceled;
- }
-
- /**
-  * Returns the result of the asynchronous computation performed by the
-  * <code>AsyncTask</code>. If the task threw an exception, this value will
-  * be null. The exception can be obtained by calling
-  * <code>getCaughtException</code>
-  * 
-  * @return The resulting data produced by <code>AsyncTask.runAsync</code>
-  */
- public R getResult() {
-  return _result;
- }
-
- /**
-  * Returns the exception thrown from within the asynchronous task if an
-  * exception was thrown. If no exception was thrown and the task completed
-  * successfully, this value will be null.
-  * 
-  * @return The exception that was caught when running
-  *         <code>AsyncTask.runAsync</code> or <code>null</code> if no
-  *         exception was thrown.
-  */
- public Exception getCaughtException() {
-  return _caughtException;
- }
-
- /**
-  * If an exception was thrown during the execution of the AsyncTask, calling
-  * this method will cause the exception to be thrown again in the thread that
-  * calls this method. If no exception was thrown, this method does nothing.
-  * 
-  * @throws Exception
-  *           If an exception was thrown from within the asynchronous task.
-  */
- public void throwCaughtException() throws Exception {
-  if (_caughtException != null) {
-   throw _caughtException;
+  
+  private R _result;
+  
+  private Exception _caughtException;
+  
+  private boolean _cancelRequested;
+  
+  public AsyncCompletionArgs(R result, boolean cancelRequested) {
+    this(result, null, cancelRequested);
   }
- }
-
- /**
-  * Returns whether the user requested that the operation be canceled before
-  * completing. The task itself is responsible for terminating its own
-  * execution and thus may have successfully completed.
-  * 
-  * @return Whether the user requested for the task to be canceled was 
-  */
- public boolean cancelRequested() {
-  return _cancelRequested;
- }
+  
+  public AsyncCompletionArgs(R result, Exception caughtException, boolean wasCanceled) {
+    _result = result;
+    _caughtException = caughtException;
+    _cancelRequested = wasCanceled;
+  }
+  
+  /**
+   * Returns the result of the asynchronous computation performed by the
+   * <code>AsyncTask</code>. If the task threw an exception, this value will
+   * be null. The exception can be obtained by calling
+   * <code>getCaughtException</code>
+   * 
+   * @return The resulting data produced by <code>AsyncTask.runAsync</code>
+   */
+  public R getResult() {
+    return _result;
+  }
+  
+  /** Returns the exception thrown from within the asynchronous task if an exception was thrown. If no exception was
+    * thrown and the task completed successfully, this value will be null. 
+    * @return The exception that was caught when running <code>AsyncTask.runAsync</code> or <code>null</code> if no
+    *         exception was thrown.
+    */
+  public Exception getCaughtException() {
+    return _caughtException;
+  }
+  
+  /** If an exception was thrown during the execution of the AsyncTask, calling
+    * this method will cause the exception to be thrown again in the thread that
+    * calls this method. If no exception was thrown, this method does nothing.
+    * @throws Exception if an exception was thrown from within the asynchronous task.
+    */
+  public void throwCaughtException() throws Exception {
+    if (_caughtException != null) {
+      throw _caughtException;
+    }
+  }
+  
+  /** Returns whether the user requested cancellation of the operation before completion. The task itself is responsible
+    * for terminating its own execution and thus may have successfully completed.
+    * @return Whether the user requested for the task to be canceled was 
+    */
+  public boolean cancelRequested() {
+    return _cancelRequested;
+  }
 }

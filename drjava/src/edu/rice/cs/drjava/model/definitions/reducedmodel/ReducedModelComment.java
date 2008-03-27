@@ -37,23 +37,23 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** Keeps track of newlines, comment blocks, and single and double-quoted strings. This reduced sub-model is used for 
- *  coloring purposes.  Given the information contained here, the DefinitionsEditorKit can paint strings, comments, and
- *  regular code in different colors.  DefinitionsEditorKit colors keywords by directly reading DefinitionsDocument, 
- *  the "full-scale" model.
- *  @version $Id$
- */
+  *  coloring purposes.  Given the information contained here, the DefinitionsEditorKit can paint strings, comments, and
+  *  regular code in different colors.  DefinitionsEditorKit colors keywords by directly reading DefinitionsDocument, 
+  *  the "full-scale" model.
+  *  @version $Id$
+  */
 
 public class ReducedModelComment extends AbstractReducedModel {
-
+  
   /** Can be used by other classes to walk through the list of comment chars*/
   TokenList.Iterator _walker;
-
+  
   /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
   public ReducedModelComment() {
     super();
     _walker = _cursor.copy();
   }
-
+  
   public void insertChar(char ch) {
     switch(ch) {
       case '*': insertSpecial("*"); break;
@@ -66,33 +66,32 @@ public class ReducedModelComment extends AbstractReducedModel {
         _insertGap(1); break;
     }
   }
-
-  /**
-  * Inserts one of three special chars, (*),(/), or (\).
-  * <OL>
-  *  <li> empty list: insert slash
-  *  <li> atEnd: check previous and insert slash
-  *  <li> inside multiple character brace:
-  *   <ol>
-  *    <li> break current brace
-  *    <li> move next to make second part current
-  *    <li> insert brace between broken parts of former brace
-  *    <li> move previous twice to get before the broken first part
-  *    <li> walk
-  *    <li> current = multiple char brace? move next once<BR>
-  *         current = single char brace?  move next twice<BR>
-  *         We moved two previous, but if the broken part combined with
-  *         the insert, there's only one brace where once were two.
-  *   </ol>
-  *  <li> inside a gap: use helper function
-  *  <li> before a multiple char brace:
-  *   <ol>
-  *    <li> break the current brace
-  *    <li> check previous and insert
-  *   </ol>
-  *  <li>otherwise, check previous and insert
-  * </OL>
-  */
+  
+  /** Inserts one of three special chars, (*),(/), or (\).
+    * <OL>
+    *  <li> empty list: insert slash
+    *  <li> atEnd: check previous and insert slash
+    *  <li> inside multiple character brace:
+    *   <ol>
+    *    <li> break current brace
+    *    <li> move next to make second part current
+    *    <li> insert brace between broken parts of former brace
+    *    <li> move previous twice to get before the broken first part
+    *    <li> walk
+    *    <li> current = multiple char brace? move next once<BR>
+    *         current = single char brace?  move next twice<BR>
+    *         We moved two previous, but if the broken part combined with
+    *         the insert, there's only one brace where once were two.
+    *   </ol>
+    *  <li> inside a gap: use helper function
+    *  <li> before a multiple char brace:
+    *   <ol>
+    *    <li> break the current brace
+    *    <li> check previous and insert
+    *   </ol>
+    *  <li>otherwise, check previous and insert
+    * </OL>
+    */
   private void insertSpecial(String special) {
     // Check if empty.
     if (_tokens.isEmpty()) {
@@ -134,12 +133,12 @@ public class ReducedModelComment extends AbstractReducedModel {
       // is one.
       _cursor._splitCurrentIfCommentBlock(false,special.equals("\\"));
       //leaving us at start
-
+      
       _checkPreviousInsertSpecial(special);
     }
     else _checkPreviousInsertSpecial(special);
   }
-
+  
   /** Checks before point of insertion to make sure we don't need to combine.
     * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
     * depending on what's being inserted into the document.
@@ -152,11 +151,11 @@ public class ReducedModelComment extends AbstractReducedModel {
       _checkPreviousInsertCommentChar(special);
     }
   }
-
-  /** Checks before point of insertion to make sure we don't need to combine
-   *  backslash with another backslash (yes, they too can be escaped).
-   */
-
+  
+  /** Checks before point of insertion to make sure we don't need to combine backslash with another backslash (yes, they
+    * too can be escaped).
+    */
+  
   private void _checkPreviousInsertBackSlash() {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
       if (_cursor.prevItem().getType().equals("\\")) {
@@ -172,27 +171,26 @@ public class ReducedModelComment extends AbstractReducedModel {
     if (_cursor.current().getSize() == 2) _cursor.setBlockOffset(1);
     else _cursor.next();
   }
-
-  /** Checks before the place of insert to make sure there are no preceding
-   *  slashes with which the inserted slash must combine.  It then performs
-   *  the insert of either (/), (/ /), (/ *) or (* /).
-   */
+  
+  /** Checks before the place of insert to make sure there are no preceding slashes with which the inserted slash must 
+    * combine.  It then performs the insert of either (/), (/ /), (/ *) or (* /).
+    */
   private void _checkPreviousInsertCommentChar(String special) {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
       if ((_cursor.prevItem().getType().equals("/")) && (_cursor.prevItem().getState() == FREE)) {
-            _cursor.prevItem().setType("/" + special);
-            _updateBasedOnCurrentState();
-            return;
-          }
+        _cursor.prevItem().setType("/" + special);
+        _updateBasedOnCurrentState();
+        return;
+      }
       // if we're after a star,
       else if (_cursor.prevItem().getType().equals("*") &&
                getStateAtCurrent() == INSIDE_BLOCK_COMMENT &&
                special.equals("/")) {
-          _cursor.prevItem().setType("*" + special);
-          _cursor.prevItem().setState(FREE);
-          _updateBasedOnCurrentState();
-          return;
-        }
+        _cursor.prevItem().setType("*" + special);
+        _cursor.prevItem().setState(FREE);
+        _updateBasedOnCurrentState();
+        return;
+      }
     }
     //Here we know the / unites with nothing behind it.
     _cursor.insertNewBrace(special); //leaving us after the brace.
@@ -201,25 +199,24 @@ public class ReducedModelComment extends AbstractReducedModel {
     if (_cursor.current().getSize() == 2) _cursor.setBlockOffset(1);
     else _cursor.next();
   }
-
-  /**
-  * Inserts an end-of-line character.
-  * <OL>
-  *  <li> atStart: insert
-  *  <li> atEnd: insert
-  *  <li> inside multiple character brace:
-  *   <ol>
-  *    <li> break current brace
-  *    <li> move next to make second part current
-  *    <li> insert brace between broken parts of former brace
-  *    <li> move previous twice to get before the broken first part
-  *    <li> walk
-  *    <li> move next twice to be after newline insertion
-  *   </ol>
-  *  <li> inside a gap: use helper function
-  *  <li>otherwise, just insert normally
-  * </OL>
-  */
+  
+  /** Inserts an end-of-line character.
+    * <OL>
+    *  <li> atStart: insert
+    *  <li> atEnd: insert
+    *  <li> inside multiple character brace:
+    *   <ol>
+    *    <li> break current brace
+    *    <li> move next to make second part current
+    *    <li> insert brace between broken parts of former brace
+    *    <li> move previous twice to get before the broken first part
+    *    <li> walk
+    *    <li> move next twice to be after newline insertion
+    *   </ol>
+    *  <li> inside a gap: use helper function
+    *  <li>otherwise, just insert normally
+    * </OL>
+    */
   public void insertNewline() {
     if (_cursor.atStart()) {
       _insertNewEndOfLine();
@@ -251,7 +248,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
-
+  
   private void _insertNewEndOfLine() {
     _cursor.insertNewBrace("\n");
     _cursor.prev();
@@ -259,34 +256,33 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.next();
     _cursor.setBlockOffset(0);
   }
-
-  /**
-   * Inserts the specified quote character.
-   * <OL>
-   *  <li> atStart: insert
-   *  <li> atEnd: insert
-   *  <li> inside multiple character brace:
-   *   <ol>
-   *    <li> break current brace
-   *    <li> move next to make second part current
-   *    <li> insert brace between broken parts of former brace
-   *    <li> walk
-   *    <li> current = multiple char brace? move next once<BR>
-   *         current = single char brace?  move next twice<BR>
-   *         We moved two previous, but if the broken part combined with
-   *         the insert, there's only one brace where once were two.
-   *    <li> move next twice to be after newline insertion
-   *   </ol>
-   *  <li> inside a gap: use helper function
-   *  <li> before a multiple char brace:
-   *   <ol>
-   *    <li> break the current brace
-   *    <li> check previous and insert
-   *   </ol>
-   *  <li>otherwise, just insert normally
-   * </OL>
-   * @param quote the type of quote to insert
-   */
+  
+  /** Inserts the specified quote character.
+    * <OL>
+    *  <li> atStart: insert
+    *  <li> atEnd: insert
+    *  <li> inside multiple character brace:
+    *   <ol>
+    *    <li> break current brace
+    *    <li> move next to make second part current
+    *    <li> insert brace between broken parts of former brace
+    *    <li> walk
+    *    <li> current = multiple char brace? move next once<BR>
+    *         current = single char brace?  move next twice<BR>
+    *         We moved two previous, but if the broken part combined with
+    *         the insert, there's only one brace where once were two.
+    *    <li> move next twice to be after newline insertion
+    *   </ol>
+    *  <li> inside a gap: use helper function
+    *  <li> before a multiple char brace:
+    *   <ol>
+    *    <li> break the current brace
+    *    <li> check previous and insert
+    *   </ol>
+    *  <li>otherwise, just insert normally
+    * </OL>
+    * @param quote the type of quote to insert
+    */
   public void insertQuote(String quote) {
     if (_cursor.atStart()) {
       _insertNewQuote(quote);
@@ -315,12 +311,12 @@ public class ReducedModelComment extends AbstractReducedModel {
       // restore cursor state
       _cursor.next();
       _cursor.next();
-
+      
     }
     else _insertNewQuote(quote);
     return;
   }
-
+  
   /**
    * Helper function for insertQuote.  Creates a new quote Brace and puts it in the
    * reduced model.
@@ -339,7 +335,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   public ReducedModelState getStateAtCurrent() { return _cursor.getStateAtCurrent(); }
   
   public int walkerOffset() { return absOffset(_walker); }
-
+  
   /**
    * Helper function for insertNewQuote.  In the case where a backslash
    * precedes the point of insertion, it removes the backslash and returns
@@ -357,13 +353,13 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     else return quote;
   }
-
-  /** Inserts a gap between the characters in a multiple character brace.  This function is called by
-   *  AbstractReducedModel's method insertGap when a Gap is inserted between the characters in a comment brace or an
-   *  escape sequence.  It splits up the multiple character brace into its component parts and inserts a Gap of size
-   *  length in                                                                                 between the resulting split parts.
-   * @param length the size of the Gap to be inserted in characters
-   */
+  
+  /** Inserts a gap between the characters in a multiple character brace.  This function is called by insertGap in
+    * AbstractReducedModel when a Gap is inserted between the characters in a comment brace or an escape sequence.
+    * It splits up the multiple character brace into its component parts and inserts a Gap of size length in between
+    * the resulting split parts.
+    * @param length the size of the Gap to be inserted in characters
+    */
   protected void insertGapBetweenMultiCharBrace(int length) {
     if (_cursor.getBlockOffset() > 1)
       throw new IllegalArgumentException("OFFSET TOO BIG:  " + _cursor.getBlockOffset());
@@ -385,41 +381,39 @@ public class ReducedModelComment extends AbstractReducedModel {
   }
   
   /** USE RULES:
-   *  Inserting between braces: This should be called from between the two
-   *                            characters of the broken double comment.
-   *  Deleting special chars: Start from previous char if it exists.
-   *  Begins updating at current character.  /./ would not become // because current is in the middle.
-   *  Double character comments inside of a quote or a comment are broken.
-   */
-
+    * Inserting between braces: This should be called from between the two characters of the broken double comment.
+    * Deleting special chars: Start from previous char if it exists.
+    * Begins updating at current character.  /./ would not become // because current is in the middle.
+    * Double character comments inside of a quote or a comment are broken.
+    */
+  
   private void _updateBasedOnCurrentState() {
     TokenList.Iterator copyCursor = _cursor.copy();
     copyCursor.updateBasedOnCurrentState();
     copyCursor.dispose();
   }
-
- /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive values
-  *  move right.
-  *  @param count indicates the direction and magnitude of cursor movement
-  */
+  
+  /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive values
+    * move right.
+    * @param count indicates the direction and magnitude of cursor movement
+    */
   public void move(int count) { _cursor.move(count); }
-
-  /** <P>Update the BraceReduction to reflect text deletion.</P>
-   *  @param count indicates the size and direction of text deletion.
-   *  Negative values delete text to the left of the cursor, positive values delete text to the right.
-   *  Always move count spaces to make sure we can delete.
-   */
+  
+  /** <P>Update the BraceReduction to reflect text deletion.</P> Negative values delete text to the left of the cursor,
+    * positive values delete text to the right.  Always move count spaces to make sure we can delete.
+    * @param count indicates the size and direction of text deletion. 
+    */
   public void delete(int count) {
     if (count == 0) return;
     
     _cursor.delete(count);
-
+    
     // Changes in ReducedModelComment can entail state changes in the
     // document.  For this reason, we have to call
     // _updateBasedOnCurrentState because there is no need to call it
     // in ReducedModelBrace, and factoring it out would be stupid and
     // wasteful.
-
+    
     // Move back 2 or as far back as the document will allow
     int absOff = this.absOffset();
     int movement;
@@ -432,51 +426,52 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.move(movement);
     return;
   }
-
-   /** @return true if the current token is shadowed by a comment or quotation.  Note: returns false for the "brace" 
-     * opening a line, block comment, or quotation. */
-   public boolean isShadowed() {
+  
+  /** @return true if the current token is shadowed by a comment or quotation.  Note: returns false for the "brace" 
+    * opening a line, block comment, or quotation. */
+  public boolean isShadowed() {
 //     ReducedToken curToken = _cursor.current();
-     return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
-   }
-
-   public boolean isWeaklyShadowed() { return isShadowed() || isOpenComment(); }
-   
-   public boolean isOpenComment() {
-     if (_cursor.atStart() || ! _cursor.atEnd()) return false;
-     ReducedToken curToken = _cursor.current();
-     return curToken.isCommentStart();
-   }
-   
- /* The walker design is an ugly kludge.  The reduced model consists of two separate TokenLists, a reduced "comment"
-  * and a reduced "brace" model.  There are glued together in the class ReducedModelControl.  In brace matching, the
-  * reduced brace model is dominant but walking through this TokenList is not sufficient because some braces can be
-  * shadowed by comments or quotation marks.  This information is stored in the reduced comment model.  ReducedModelControl
-  * should support an iterator over the reduced model that consists of two iterators, a reduced brace iterator and a reduced
-  * comment iterator that are always in sync.  Then it would be easy to get shadowing information given the position of
-  * a reduced model control iterator.  But no such iterator exits.  So the code in DrJava limps by using an iterator
-  * over the reduced brace model and a separate reduced comment "walker" (iterator) with a truly horrible interface. */
-   
-  /* In order to interface with the ReducedModelComment two functions are
-     provided. One resets the walker and the other will both move the walker
-     by x and return the state at that new location.
-     Once the new value has returned all new calculations will be relative to
-     that spot until the walker is reset to the _cursor.  */
-
-  /** Returns the state at the relLocation, where relLocation is the location relative to the walker
-   *  @param relLocation distance from walker to get state at.
+    return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
+  }
+  
+  public boolean isWeaklyShadowed() { return isShadowed() || isOpenComment(); }
+  
+  public boolean isOpenComment() {
+    if (_cursor.atStart() || ! _cursor.atEnd()) return false;
+    ReducedToken curToken = _cursor.current();
+    return curToken.isCommentStart();
+  }
+  
+  /* The walker design is an ugly kludge.  The reduced model consists of two separate TokenLists, a reduced "comment"
+   * and a reduced "brace" model.  There are glued together in the class ReducedModelControl.  In brace matching, the
+   * reduced brace model is dominant but walking through this TokenList is not sufficient because some braces can be
+   * shadowed by comments or quotation marks.  This information is stored in the reduced comment model.  ReducedModelControl
+   * should support an iterator over the reduced model that consists of two iterators, a reduced brace iterator and a reduced
+   * comment iterator that are always in sync.  Then it would be easy to get shadowing information given the position of
+   * a reduced model control iterator.  But no such iterator exits.  So the code in DrJava limps by using an iterator
+   * over the reduced brace model and a separate reduced comment "walker" (iterator) with a truly horrible interface.  
+   * -- Corky */
+  
+  // Comment by the code authors
+  /* In order to interface with the ReducedModelComment two functions are provided. One resets the walker and the other 
+   * will both move the walker by x and return the state at that new location. Once the new value has returned all new 
+   * calculations will be relative to that spot until the walker is reset to the _cursor.  
    */
+  
+  /** Returns the state at the relLocation, where relLocation is the location relative to the walker
+    * @param relLocation distance from walker to get state at.
+    */
   protected ReducedModelState moveWalkerGetState(int relLocation) {
     _walker.move(relLocation);
     return _walker.getStateAtCurrent();
   }
-
+  
   /** Resets the walker to the current position in document */
   protected void resetWalkerLocationToCursor() {
     _walker.dispose();
     _walker = _cursor.copy();
   }
-
+  
   /** Stores distance to previous newline character in braceInfo.  Stores -1 if no newline,
     * so it fails find start of line on first line. */
   void getDistToStart(IndentInfo info) {
@@ -494,36 +489,36 @@ public class ReducedModelComment extends AbstractReducedModel {
     int walkcount = copyCursor.getBlockOffset();
     if (! copyCursor.atStart()) copyCursor.prev();
     while (! copyCursor.atStart() && ! copyCursor.current().getType().equals("\n"))
-           {
-             //  copyCursor.current().getState() == FREE))) {
-             walkcount += copyCursor.current().getSize();
-             copyCursor.prev();
-           }
-
+    {
+      //  copyCursor.current().getState() == FREE))) {
+      walkcount += copyCursor.current().getSize();
+      copyCursor.prev();
+    }
+    
     if (copyCursor.atStart()) return -1;
     return walkcount;
   }
-
+  
   /** Gets distance to the start of the line containing the brace enclosing the start of this line and stores this 
     * info in the IndentInfo field _distToLineEnclosingBraceStart.  Assumes that 
     * getDistToLineEnclosingBrace has already been called. */
   void getDistToLineEnclosingBraceStart(IndentInfo info) {
     TokenList.Iterator copyCursor = _cursor.copy();
-
+    
     if (info.distToLineEnclosingBrace() == -1 || copyCursor.atStart()) {
       info.setDistToLineEnclosingBraceStart(-1);  // should not be necessary
       return; // no brace
     }
-
+    
     copyCursor.move(-info.distToLineEnclosingBrace());
     int walkcount = _getDistToStart(copyCursor);
-
+    
     if (walkcount == -1) info.setDistToLineEnclosingBraceStart(-1);  // should not be necessary
     else info.setDistToLineEnclosingBraceStart(walkcount + info.distToLineEnclosingBrace());
-
+    
     return;
   }
-
+  
 //  /** Computes the distance to the beginning of the line (except first) containing the brace enclosing
 //    * the current location given the distnace to this brace.
 //    */
@@ -545,19 +540,19 @@ public class ReducedModelComment extends AbstractReducedModel {
     */
   void getDistToEnclosingBraceStart(IndentInfo info) {
     TokenList.Iterator copyCursor = _cursor.copy();
-
+    
     if (info.distToEnclosingBrace() == -1 || copyCursor.atStart()) return; // no brace
-
+    
     copyCursor.move(-info.distToEnclosingBrace());
     int walkcount = _getDistToStart(copyCursor);
-
+    
     if (walkcount == -1) info.setDistToEnclosingBraceStart(-1);
     else {
       info.setDistToEnclosingBraceStart(walkcount + info.distToEnclosingBrace());
     }
     return;
   }
-
+  
   /** Computes the distance to the beginning of the line (except first) containing the brace enclosing
     * the current location given the distnace to this brace.
     */
@@ -583,7 +578,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     if (dist == -1) return -1;
     return dist + relLoc;
   }
-
+  
   /** Returns the distance to the gap before the next newline (end of document if no newline) */
   public int getDistToNextNewline() {
     TokenList.Iterator copyCursor = _cursor.copy();
@@ -595,7 +590,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     int walkcount = copyCursor.current().getSize() - _cursor.getBlockOffset();
     copyCursor.next();
-
+    
     while ((!copyCursor.atEnd()) &&
            (!(copyCursor.current().getType().equals("\n"))))
     {

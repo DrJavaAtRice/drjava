@@ -42,8 +42,7 @@ import java.util.*;
 
 /** Class representing all the variables that
   * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+  * @version $Id$
   */
 public class PropertyMaps {
   /**

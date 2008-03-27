@@ -89,8 +89,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    if (_closed) throw new RuntimeException("Definitions Document is closed, yet is being used");
 //  }
   
-  /** Called when this is kicked out of the document cache so that the references made to it may 
-    *  be released so that this can be GC'd. */
+  /** Closes this DefinitionsDocument (but not the enclosing OpenDefinitionsDocument).  Called when this is kicked out
+    * of the document cache so that this can be GC'd. */
   public void close() {
     _removeIndenter();
     synchronized(_closedListeners) {
@@ -137,8 +137,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
   
   /** Convenience constructor for using a custom indenter.
-    *  @param indenter custom indenter class
-    *  @param notifier used by CompoundUndoManager to announce undoable edits
+    * @param indenter custom indenter class
+    * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
     super(indenter);
@@ -148,8 +148,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
-    *  for a single usage in CompoundUndoManager.  TODO: find a better way.
-    *  @param notifier used by CompoundUndoManager to announce undoable edits
+    * for a single usage in CompoundUndoManager.  TODO: find a better way.
+    * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
@@ -159,8 +159,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
-    *  for a single usage in CompoundUndoManager.  TODO: find a better way.
-    *  @param notifier used by CompoundUndoManager to announce undoable edits
+    * for a single usage in CompoundUndoManager.  TODO: find a better way.
+    * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super();
@@ -190,7 +190,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from AbstractDJDocument. */
   
   /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
-    *  @param odd the OpenDefinitionsDocument to set as this DD's holder
+    * @param odd the OpenDefinitionsDocument to set as this DD's holder
     */
   public void setOpenDefDoc(OpenDefinitionsDocument odd) { if (_odd == null) _odd = odd; }
   
@@ -281,7 +281,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Gets the package and main class/interface name of this OpenDefinitionsDocument
-    *  @return the qualified main class/interface name
+    * @return the qualified main class/interface name
     */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
     return _getPackageQualifier() + getMainClassName();
@@ -293,7 +293,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Gets an appropriate prefix to fully qualify a class name. Returns this class's package followed by a dot, or the
-    *  empty string if no package name is found.
+    * empty string if no package name is found.
     */
   protected String _getPackageQualifier() {
     String packageName = getPackageName();
@@ -376,7 +376,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Determines if the document has been modified since the last save.
-    *  @return true if the document has been modified
+    * @return true if the document has been modified
     */
   public boolean isModifiedSinceSave() {
 //    acquireReadLock();  // unnecessary since _isModifiedSinceSave is volatile
@@ -404,10 +404,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseReadLock(); }
   }
   
-  /** Returns the offset corresponding to the first character of the given line number,
-    *  or -1 if the lineNum is not found.  Avoid locking the document by copying its text.
-    *  @param lineNum the line number for which to calculate the offset.
-    *  @return the offset of the first character in the given line number
+  /** Returns the offset corresponding to the first character of the given line number, or -1 if the lineNum is not
+    * found.  Avoids locking the document by copying its text.  
+    * @param lineNum the line number for which to calculate the offset.
+    * @return the offset of the first character in the given line number
     */
   public int getOffset(int lineNum) {
     if (lineNum < 0) return -1;
@@ -415,8 +415,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int curLine = 1;
     int offset = 0; // offset is number of chars from beginning of file
     
-    // offset is always pointing to the first character in a line
-    // at the top of the loop
+    // offset is always pointing to the first character in a line at the top of the loop
+    /* Isn't there a more efficient way to do this? */
     while (offset < defsText.length()) {
       
       if (curLine == lineNum) return offset;
@@ -433,10 +433,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Returns true iff tabs are to removed on text insertion. */
   public boolean tabsRemoved() { return _tabsRemoved; }
   
-  /** Comments out all lines between selStart and selEnd, inclusive. The current cursor position is maintained 
-    *  after the operation.
-    *  @param selStart the document offset for the start of the selection
-    *  @param selEnd the document offset for the end of the selection
+  /** Comments out all lines between selStart and selEnd, inclusive. The cursor position is unchanged by the operation.
+    * @param selStart the document offset for the start of the selection
+    * @param selEnd the document offset for the end of the selection
     */
   public int commentLines(int selStart, int selEnd) {
     
@@ -460,9 +459,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   
-  /** Comments out the lines between and including the lines containing points start and end, using wing 
-    *  comments -- "// ".
-    * 
+  /** Comments out the lines between start and end inclusive, using wing comments -- "// ".
     *  @param start Position in document to start commenting from
     *  @param end Position in document to end commenting at
     */
@@ -504,10 +501,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** Uncomments all lines between selStart and selEnd, inclusive.
-    *  The current cursor position is maintained after the operation.
-    *  @param selStart the document offset for the start of the selection
-    *  @param selEnd the document offset for the end of the selection
+  /** Uncomments all lines between selStart and selEnd, inclusive.  The cursor position is unchanged by the operation.
+    * @param selStart the document offset for the start of the selection
+    * @param selEnd the document offset for the end of the selection
     */
   public int uncommentLines(int selStart, int selEnd) {
     
@@ -531,8 +527,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return toReturn;
   }
   
-  /** Uncomments all lines between and including the lines containing
-    *  points start and end.  
+  /** Uncomments all lines between start and end inclusive. 
     * @param start Position in document to start commenting from
     * @param end Position in document to end commenting at
     */
@@ -570,7 +565,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    Utilities.show("Uncomment line at location " + _currentLocation);
 //    Utilities.show("Preceding char = '" + getText().charAt(_currentLocation - 1) + "'");
 //    Utilities.show("Line = \n" + getText(_currentLocation, getLineEndPos(_currentLocation) - _currentLocation + 1));
-    int pos1 = _getText().indexOf("//", _currentLocation);
+    int pos1 = _getText().indexOf("//", _currentLocation);  // TODO: get text of current line instead of whole document
     int pos2 = getFirstNonWSCharPos(_currentLocation, true);
 //    Utilities.show("Pos1 = " + pos1 + " Pos2 = " + pos2);
     if (pos1 != pos2) return NO_COMMENT_OFFSET;
@@ -908,13 +903,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Gets the package name embedded in the text of this document by minimally parsing the document to find the
     * package statement.  If package statement is not found or is ill-formed, returns "" as the package name.
-    * @return The name of package embedded in this document.  If there is no well-formed package statement, 
-    *         returns "" as the package name.
+    * @return the name of package embedded in this document.  If there is no well-formed package statement, 
+    * returns "" as the package name.
     */
   public String getPackageName() {
     Reader r;
     acquireReadLock();
-    try { r = new StringReader(_getText()); }
+    try { r = new StringReader(_getText()); }  // getText() is cheap if document is not resident
     finally { releaseReadLock(); }
     try { return new Parser(r).packageDeclaration().getName(); }
     catch (ParseException e) { return ""; }
@@ -1078,7 +1073,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       try {
         setCurrentLocation(0);
-        final String text = _getText();
+        final String text = _getText();  // getText() is cheap if document is not resident
         
         final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
         final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
@@ -1110,9 +1105,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-  /** Gets the name of the top level class in this source file. This attempts to find the first declaration
-    *  of a class or interface.
-    *   @return The name of first class in the file
+  /** Gets the name of the top level class in this source file by finding the first declaration of a class or interface.
+    * @return The name of first class in the file
     * @throws ClassNameNotFoundException if no top level class found
     */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
@@ -1265,8 +1259,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     public int getOffset() { return _wrapped.getOffset(); }
   }
   
-  /** Factory method for created WrappedPositions. Stores the created Position instance
-    *  so it can be linked to a different DefinitionsDocument later. */
+  /** Factory method for created WrappedPositions. Stores the created Position instance so it can be linked to a 
+    * different DefinitionsDocument later. 
+    */
   public Position createPosition(int offs) throws BadLocationException {
     WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offs));
     synchronized(_wrappedPosListLock) {

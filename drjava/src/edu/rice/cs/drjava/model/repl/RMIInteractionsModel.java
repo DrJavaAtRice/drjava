@@ -50,21 +50,21 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id$
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
-
+  
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _jvm;
-
+  
   /** Constructs an InteractionsModel which can communicate with another JVM.
-   *  @param jvm RMI interface to the slave JVM
-   *  @param adapter InteractionsDJDocument to use in the InteractionsDocument
-   *  @param historySize Number of lines to store in the history
-   *  @param writeDelay Number of milliseconds to wait after each println
-   */
+    * @param jvm RMI interface to the slave JVM
+    * @param adapter InteractionsDJDocument to use in the InteractionsDocument
+    * @param historySize Number of lines to store in the history
+    * @param writeDelay Number of milliseconds to wait after each println
+    */
   public RMIInteractionsModel(MainJVM jvm, ConsoleDocumentInterface adapter, File wd, int historySize, int writeDelay) {
     super(adapter, wd, historySize, writeDelay);
     _jvm = jvm;
   }
-
+  
   /** Interprets the given command.
     * @param toEval command to be evaluated
     */
@@ -73,12 +73,12 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _jvm.interpret(toEval);
     debug.logEnd();
   }
-
+  
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
     */
   public String getVariableToString(String var) { return _jvm.getVariableToString(var); }
-
+  
   /**
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
@@ -86,7 +86,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   public String getVariableType(String var) {
     return _jvm.getVariableType(var);
   }
-
+  
   /** Adds the given path to the interpreter's classpath.
     * @param file  the path to add
     */
@@ -95,7 +95,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //  }
 //  
   public void addProjectClassPath(File f) { _jvm.addProjectClassPath(f); }
-
+  
   public void addBuildDirectoryClassPath(File f) { _jvm.addBuildDirectoryClassPath(f); }
   
   public void addProjectFilesClassPath(File f) { 
@@ -109,43 +109,43 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) { _jvm.killInterpreter(wd); }
-
+  
   /** Adds a named interpreter to the list.
-   *  @param name the unique name for the interpreter
-   *  @throws IllegalArgumentException if the name is not unique
-   */
+    * @param name the unique name for the interpreter
+    * @throws IllegalArgumentException if the name is not unique
+    */
   public void addInterpreter(String name) { _jvm.addInterpreter(name); }
-
+  
   /** Removes the interpreter with the given name, if it exists.
-   *  @param name Name of the interpreter to remove
-   */
+    * @param name Name of the interpreter to remove
+    */
   public void removeInterpreter(String name) {
     _jvm.removeInterpreter(name);
   }
-
+  
   /** Sets the active interpreter.
-   *  @param name the (unique) name of the interpreter.
-   *  @param prompt the prompt the interpreter should have.
-   */
+    * @param name the (unique) name of the interpreter.
+    * @param prompt the prompt the interpreter should have.
+    */
   public void setActiveInterpreter(String name, String prompt) {
     String currName = _jvm.getCurrentInterpreterName();
     boolean inProgress = _jvm.setActiveInterpreter(name);
     _updateDocument(prompt, inProgress, !currName.equals(name));
     _notifyInterpreterChanged(inProgress);
   }
-
+  
   /** Sets the default interpreter to be the current one. */
   public void setToDefaultInterpreter() {
     // Only print prompt if we're not already the default
     String currName = _jvm.getCurrentInterpreterName();
     boolean printPrompt = !MainJVM.DEFAULT_INTERPRETER_NAME.equals(currName);
-
+    
     boolean inProgress = _jvm.setToDefaultInterpreter();
-
+    
     _updateDocument(InteractionsDocument.DEFAULT_PROMPT, inProgress, printPrompt);
     _notifyInterpreterChanged(inProgress);
   }
-
+  
   /** Updates the prompt and status of the document after an interpreter change.
     * Must run in event thread.
     * @param prompt New prompt to display
@@ -167,21 +167,21 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     }
     _document.setInProgress(inProgress);
   }
-
+  
   /** Notifies listeners that the interpreter has changed. (Subclasses must maintain listeners.)
-   *  @param inProgress Whether the new interpreter is currently in progress with an interaction, i.e., whether 
-   *         an interactionEnded event will be fired)
-   */
+    * @param inProgress Whether the new interpreter is currently in progress with an interaction, i.e., whether 
+    *        an interactionEnded event will be fired)
+    */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
-
+  
   /** Sets whether or not the interpreter should allow access to private members. */
   public void setPrivateAccessible(boolean allow) {
     _jvm.setPrivateAccessible(allow);
   }
-
+  
   /** Gets the interpreter classpath from the interpreter jvm.
-   * @return a vector of classpath elements
-   */
+    * @return a vector of classpath elements
+    */
   public Iterable<File> getClassPath() { return _jvm.getClassPath(); }
   
   /** Enables restarting of slave JVM. */

@@ -50,7 +50,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * @version $Id$
  */
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
-
+  
   private JUnitErrorModel _m;
   
   private static final String MONKEYTEST_FAIL_TEXT =
@@ -65,7 +65,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "    throw new IOException(\"Error\"); \n" +
     "  } \n" +
     "}";
-
+  
   private static final String TEST_ONE =
     "import junit.framework.TestCase;\n" +
     "public class TestOne extends TestCase {\n" +
@@ -92,7 +92,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "    fail(\"i just failed the test\");\n" +
     "  }\n" +
     "}";
-
+  
   private static final String TEST_TWO =
     "import junit.framework.TestCase;\n" +
     "public class TestTwo extends TestOne {\n" +
@@ -113,7 +113,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "    return getClass().hashCode();\n" +
     "  }\n" +
     "}";
-
+  
 //  private static final String NONPUBLIC_TEXT =
 //    "import junit.framework.*; " +
 //    "public class NonPublic extends TestCase { " +
@@ -122,27 +122,27 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    "    assertEquals(\"monkey\", \"baboon\"); " +
 //    "  } " +
 //    "}";
-
+  
   private static final String ABC_CLASS_ONE =
     "class ABC extends java.util.Vector {}\n";
-
+  
   private static final String ABC_CLASS_TWO =
     "class ABC extends java.util.ArrayList {}\n";
-
+  
   private static final String ABC_TEST =
     "public class ABCTest extends junit.framework.TestCase {\n" +
     "  public void testABC() {\n" +
     "    new ABC().get(0);\n" +
     "  }\n" +
     "}";
-
+  
   private static final String LANGUAGE_LEVEL_TEST =
     "class MyTest extends junit.framework.TestCase {\n"+
     "  void testMyMethod() {\n"+
     "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
     "  }\n"+
     "}\n";
-
+  
   /** Tests that the errors array contains all encountered failures and error in the right order. */
   public void testErrorsArrayInOrder() throws Exception {
     debug.logStart();
@@ -150,7 +150,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
-
+    
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     
@@ -165,23 +165,23 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
     //final TestResult testResults = doc.startJUnit();
-
+    
     //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
     _m = _model.getJUnitModel().getJUnitErrorModel();
-
+    
     //JUnitError[] errorsWithPositions = _m.getErrorsWithPositions();
     //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
     //assertTrue("testResults should not be null", testResults != null);
-
+    
     assertEquals("the test results should have one error and one failure "+_m.getNumErrors(), 2, _m.getNumErrors());
-
+    
     assertEquals("test case has one error reported" + _m.getError(0).message(), _m.getError(0).isWarning(), false);
-
+    
     assertEquals("test case has one failure reported" + _m.getError(1).message(), _m.getError(1).isWarning(), true);
     //_model.setResetAfterCompile(true);
     debug.logEnd();
   }
-
+  
   /**
    * Tests that a VerifyError is reported as an error, rather than
    * simply causing JUnit to blow up.  Note that this test will hang if
@@ -192,20 +192,20 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
     final File file = new File(_tempDir, "ABC1.java");
     doc.saveFile(new FileSelector(file));
-
+    
     OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.java");
     doc2.saveFile(new FileSelector(file2));
-
+    
     // Compile the correct ABC and the test
 //    JUnitTestListener listener = new JUnitTestListener(false);
 //      System.out.println("compiling all");
     _model.getCompilerModel().compileAll();
-
+    
     OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
     doc3.saveFile(new FileSelector(file3));
-
+    
     JUnitTestListener listener = new JUnitNonTestListener();
     // Compile the incorrect ABC
 //      System.out.println("compiling doc3");
@@ -217,7 +217,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     // Run the test: a VerifyError will be thrown in Java 1.4
 //    JUnitTestListener listener2 = new JUnitTestListener();
 //    _model.addListener(listener2);
-
+    
     listener.assertClassFileErrorCount(0);
     listener.runJUnit(doc2);
     listener.waitJUnitDone();
@@ -229,24 +229,24 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     _model.removeListener(listener);
   }
-
-
+  
+  
   /** Tests that an elementary level file has the previous line of the actual error reported as the line of its error.
-   *  Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the
-   *  language level compiler)
-   */
-
+    * Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the
+    * language level compiler)
+    */
+  
   public void testLanguageLevelJUnitErrorLine() throws Exception {
     debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
     final File file = new File(_tempDir, "MyTest.dj0");
     doc.saveFile(new FileSelector(file));
-
+    
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     
-
+    
     doc.startCompile();
     listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -257,19 +257,19 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     listener.runJUnit(doc);
     
     listener.assertJUnitStartCount(1);
-
+    
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
-
+    
     _m = _model.getJUnitModel().getJUnitErrorModel();
-
+    
     assertEquals("the test results should have one failure "+_m.getNumErrors(), 1, _m.getNumErrors());
-
+    
     assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
     debug.logEnd();
   }
-
-
+  
+  
   /** Test errors that occur in superclass. */
   public void testErrorInSuperClass() throws Exception {
     debug.logStart();
@@ -295,9 +295,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     assertEquals("test case has one error reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
-
+    
     assertTrue("it's a junit error", _m.getError(0) instanceof JUnitError);
-
+    
     assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
@@ -312,7 +312,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
-
+    
     _model.removeListener(listener);
     debug.logEnd();
   }

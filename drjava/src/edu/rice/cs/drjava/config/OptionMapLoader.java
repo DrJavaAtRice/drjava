@@ -42,11 +42,11 @@ import java.util.Iterator;
 import java.io.*;
 import java.lang.reflect.*;
 public class OptionMapLoader implements OptionConstants {
-
+  
   /** bag of default options (programmatically defined, instead of in an options file) */
   private static DefaultOptionMap DEFAULTS = new DefaultOptionMap();
   private static Properties DEFAULT_STRINGS = new Properties();
-
+  
   static {
     // initialize DEFAULTS objects, based on OptionConstants using reflection.
     Field[] fields = OptionConstants.class.getDeclaredFields();
@@ -62,39 +62,39 @@ public class OptionMapLoader implements OptionConstants {
           if (o == null || !(o instanceof Option)) {
             continue; // Development options can be null in the stable version of the code
           }
-
+          
           option = (Option<?>) o;
         }
         catch(IllegalAccessException e) {
           // this cannot happen, since we don't get in here unless the field is public.
           throw new UnexpectedException(e);
         }
-
+        
         String sval = option.getDefaultString();
         DEFAULT_STRINGS.setProperty(option.name,sval);
         DEFAULTS.setString(option,sval);
       }
     }
   }
-
+  
   /** Default OptionMapLoader. */
   public static final OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
-
+  
   /** Creates an OptionMapLoader from a given input stream.  Does not maintain a reference to this input stream.
-   *  @param is the input stream to read.
-   */
+    * @param is the input stream to read.
+    */
   public OptionMapLoader(InputStream is) throws IOException {
     this(new Properties(DEFAULT_STRINGS));
     try { prop.load(is); }
     finally { is.close(); }
   }
-
+  
   private final Properties prop;
-
+  
   private OptionMapLoader(Properties prop) {
     this.prop = prop;
   }
-
+  
   public void loadInto(OptionMap map) {
     Iterator<OptionParser<?>> options = DEFAULTS.keys();
     while(options.hasNext()) {

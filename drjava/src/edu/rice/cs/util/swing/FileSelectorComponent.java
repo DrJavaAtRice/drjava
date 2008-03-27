@@ -57,22 +57,22 @@ public class FileSelectorComponent extends JPanel {
   
   /** The default number of columns for the text box. */
   public static final int DEFAULT_NUM_COLS = 30;
-
+  
   /** The default font size for the text box. */
   public static final float DEFAULT_FONT_SIZE = 10f;
-
+  
   /** The parent frame of this component. */
   protected final Frame _parent;
-
+  
   /** Text field with the name of the selected file. */
   protected final JTextField _fileField;
-
+  
   /** "..." button to open the file chooser. */
   protected final JButton _chooserButton;
-
+  
   /** File chooser to open when clicking the "..." button. */
   protected final JFileChooser _chooser;
-
+  
   /** File filter to use in the chooser. */
   protected volatile FileFilter _fileFilter;
   
@@ -81,35 +81,32 @@ public class FileSelectorComponent extends JPanel {
   
   /** True if file must exist. */
   protected volatile boolean _mustExist;
-
+  
   /** Creates a new FileSelectorComponent with default dimensions.
-   *
-   *  @param parent  Parent of this component.
-   *  @param chooser File chooser to display from the "..." button.
-   */
+    * @param parent  Parent of this component.
+    * @param chooser File chooser to display from the "..." button.
+    */
   public FileSelectorComponent(Frame parent, JFileChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE, true);
   }
-
+  
   /** Creates a new FileSelectorComponent.
-   *
-   *  @param parent   Parent of this component.
-   *  @param chooser  File chooser to display from the "..." button.
-   *  @param numCols  Number of columns to display in the text field
-   *  @param fontSize Font size for the text field
-   */
+    * @param parent   Parent of this component.
+    * @param chooser  File chooser to display from the "..." button.
+    * @param numCols  Number of columns to display in the text field
+    * @param fontSize Font size for the text field
+    */
   public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize) {
     this(parent, chooser, numCols, fontSize, true);
   }
   
   /** Creates a new FileSelectorComponent.
-   *
-   *  @param parent    Parent of this component; may be null if the FileSelector is supposed to stand-alone.
-   *  @param chooser   File chooser to display from the "..." button.
-   *  @param numCols   Number of columns to display in the text field
-   *  @param fontSize  Font size for the text field
-   *  @param mustExist force selection of existing file
-   */
+    * @param parent    Parent of this component; may be null if the FileSelector is supposed to stand-alone.
+    * @param chooser   File chooser to display from the "..." button.
+    * @param numCols   Number of columns to display in the text field
+    * @param fontSize  Font size for the text field
+    * @param mustExist force selection of existing file
+    */
   public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize, boolean mustExist) {
     
     if (chooser == null) throw new UnexpectedException("Error: called new FileSelectorComponent(...) with a null chooser!");
@@ -149,19 +146,19 @@ public class FileSelectorComponent extends JPanel {
     this.add(_fileField);
     this.add(_chooserButton);
   }
-
+  
   public void setEnabled(boolean isEnabled) {
     _fileField.setEnabled(isEnabled);
     _chooserButton.setEnabled(isEnabled);
     super.setEnabled(isEnabled);
   }
-
+  
   /** Returns the file text field. */
   public JTextField getFileField() { return _fileField; }
-
+  
   /** Returns the file chooser. */
   public JFileChooser getFileChooser() { return _chooser; }
-
+  
   /** Returns the file currently typed into the file field. */
   public File getFileFromField() {
     String txt = _fileField.getText().trim();
@@ -170,10 +167,10 @@ public class FileSelectorComponent extends JPanel {
     
     return _file;
   }
-
+  
   /** Sets the text of the file field to be the given file.
-   *  @param file File to display in the file field.
-   */
+    * @param file File to display in the file field.
+    */
   public void setFileField(File file) {
     _file = file;
     if (file != null && !file.getPath().equals("")) {
@@ -182,7 +179,7 @@ public class FileSelectorComponent extends JPanel {
     }
     resetFileField();
   }
-
+  
   public void resetFileField() {
     if (_file == null) _fileField.setText("");
     else {
@@ -193,7 +190,7 @@ public class FileSelectorComponent extends JPanel {
   
   /** Sets the file filter to use. */
   public void setFileFilter(FileFilter filter) { _fileFilter = filter; }
-
+  
   public void setToolTipText(String text) {
     super.setToolTipText(text);
     _fileField.setToolTipText(text);
@@ -207,10 +204,10 @@ public class FileSelectorComponent extends JPanel {
       _chooser.setCurrentDirectory(_file);
       _chooser.setSelectedFile(_file);
     }
-
+    
     // Apply the filter
     if (_fileFilter != null) _chooser.setFileFilter(_fileFilter);
-
+    
     // Get the file from the chooser
     int returnValue = _chooser.showDialog(_parent, null);
     if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -218,15 +215,15 @@ public class FileSelectorComponent extends JPanel {
       if (chosen != null) setFileField(chosen);
     }
   }
-   
+  
   // used so that the focus listener and the action listener do not
   // both validate the incorrect text.  This ensures that only the first
   // one gets it.
 //  private boolean _validationInProgress = false;
   
   /** The chooser method for the validation of filenames that are manually entered into the text field.
-   *  @return False, if file does not exist. True, otherwise.
-   */
+    * @return False, if file does not exist. True, otherwise.
+    */
   public boolean validateTextField() {
 //    if (_validationInProgress) return true;
 //    _validationInProgress = true;

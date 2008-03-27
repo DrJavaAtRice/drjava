@@ -127,24 +127,24 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //------------------------ Simple Predicates ------------------------------//
   
   public boolean isTestInProgress() { return _testInProgress;  }
-
+  
   //------------------------Listener Management -----------------------------//
   
   /** Add a JUnitListener to the model.
-   *  @param listener a listener that reacts to JUnit events
-   */
+    * @param listener a listener that reacts to JUnit events
+    */
   public void addListener(JUnitListener listener) { _notifier.addListener(listener); }
   
   /** Remove a JUnitListener from the model.  If the listener is not currently listening to this model, this method 
-   *  has no effect.
-   *  @param listener a listener that reacts to JUnit events
-   */
+    * has no effect.
+    * @param listener a listener that reacts to JUnit events
+    */
   public void removeListener(JUnitListener listener) { _notifier.removeListener(listener); }
   
   /** Removes all JUnitListeners from this model. */
   public void removeAllListeners() { _notifier.removeAllListeners(); }
   
-
+  
   
   //-------------------------------- Triggers --------------------------------//
   
@@ -152,14 +152,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public SwingDocument getJUnitDocument() { return _junitDoc; }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
-   *  associated with a file is not a test case, it is ignored.  
-   */
+    * associated with a file is not a test case, it is ignored.  
+    */
   public void junitAll() { junitDocs(_model.getOpenDefinitionsDocuments()); }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If a class file associated with a 
-   *  source file is not a test case, it will be ignored.  Synchronized against the compiler model to prevent 
-   *  testing and compiling at the same time, which would create invalid results.
-   */
+    * source file is not a test case, it will be ignored.  Synchronized against the compiler model to prevent 
+    * testing and compiling at the same time, which would create invalid results.
+    */
   public void junitProject() {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
@@ -170,10 +170,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Forwards the classnames and files to the test manager to test all of them; does not notify 
-   *  since we don't have ODD's to send out with the notification of junit start.
-   *  @param qualifiedClassnames a list of all the qualified class names to test.
-   *  @param files a list of their source files in the same order as qualified class names.
-   */
+    * since we don't have ODD's to send out with the notification of junit start.
+    * @param qualifiedClassnames a list of all the qualified class names to test.
+    * @param files a list of their source files in the same order as qualified class names.
+    */
   public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
     Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
     synchronized(_compilerModel.getCompilerLock()) {
@@ -226,7 +226,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
-   *  to _rawJUnitOpenTestDocs. */
+    * to _rawJUnitOpenTestDocs. */
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
     
@@ -234,7 +234,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // Check_testInProgress flag
     if (_testInProgress) return; 
-
+    
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
     
@@ -243,37 +243,38 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
 //      System.err.println("Out of sync documents exist");
-        
-        CompilerListener testAfterCompile = new DummyCompilerListener() {
-          @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-            final CompilerListener listenerThis = this;
-            try {
-              if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompErrors() > 0) {
-                if (! Utilities.TEST_MODE) 
-                  JOptionPane.showMessageDialog(null, "All open files must be compiled before running a unit test", 
-                                              "Must Compile All Before Testing", JOptionPane.ERROR_MESSAGE); 
-                nonTestCase(allTests);
-                return;
-              }
-              _rawJUnitOpenDefDocs(lod, allTests);
-            }
-            finally {  // always remove this listener after its first execution
-              SwingUtilities.invokeLater(new Runnable() { 
-                public void run() { _compilerModel.removeListener(listenerThis); }
-              });
-            }
-          }
-        };
-        
-//        Utilities.show("Notifying JUnitModelListener");
-        _notifier.compileBeforeJUnit(testAfterCompile);
-      }
       
-      else _rawJUnitOpenDefDocs(lod, allTests);
+      CompilerListener testAfterCompile = new DummyCompilerListener() {
+        @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
+          final CompilerListener listenerThis = this;
+          try {
+            if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompErrors() > 0) {
+              if (! Utilities.TEST_MODE) 
+                JOptionPane.showMessageDialog(null, "All open files must be compiled before running a unit test", 
+                                              "Must Compile All Before Testing", JOptionPane.ERROR_MESSAGE); 
+              nonTestCase(allTests);
+              return;
+            }
+            _rawJUnitOpenDefDocs(lod, allTests);
+          }
+          finally {  // always remove this listener after its first execution
+            SwingUtilities.invokeLater(new Runnable() { 
+              public void run() { _compilerModel.removeListener(listenerThis); }
+            });
+          }
+        }
+      };
+      
+//        Utilities.show("Notifying JUnitModelListener");
+      _notifier.compileBeforeJUnit(testAfterCompile);
+    }
+    
+    else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
   /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-   *  classes by searching the build directories for the documents. */
+    * classes by searching the build directories for the documents. 
+    */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
     File buildDir = _model.getBuildDirectory();
 //    System.err.println("Build directory is " + buildDir);
@@ -282,8 +283,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     HashSet<String> openDocFiles = new HashSet<String>();
     
     /** A map whose keys are directories containing class files corresponding to open java source files.
-     *  Their values are the corresponding source roots. 
-     */
+      * Their values are the corresponding source roots. 
+      */
     HashMap<File, File> classDirsAndRoots = new HashMap<File, File>();
     
     // Initialize openDocFiles and classDirsAndRoots
@@ -296,7 +297,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           // doc has valid package name; add it to list of open java source doc files
           openDocFiles.add(doc.getCanonicalPath());
-        
+          
           String packagePath = doc.getPackageName().replace('.', File.separatorChar);
           
           // Add (canonical path name for) build directory for doc to classDirs
@@ -324,7 +325,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     Set<File> classDirs = classDirsAndRoots.keySet();
     
 //    System.err.println("openDocFiles = " + openDocFiles);
-        
+    
     /* Names of test classes. */
     ArrayList<String> classNames = new ArrayList<String>();
     
@@ -333,7 +334,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     /* Flag indicating if project is open */
     boolean isProject = _model.isProjectActive();
-
+    
     try {
       for (File dir: classDirs) { // foreach class file directory
 //        System.err.println("Examining directory " + dir);
@@ -386,7 +387,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public MethodVisitor visitMethod(int a, String n, String d, String s, String[] e) { return null; }
                 public void visitEnd() {}
               }, 0);
-
+              
               File rootDir = classDirsAndRoots.get(dir);
               
               /** The canonical pathname for the file (including the file name) */
@@ -431,7 +432,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
     // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
-   
+    
     synchronized(_compilerModel.getCompilerLock()) {
       /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
       List<String> tests;
@@ -462,7 +463,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //-------------------------------- Helpers --------------------------------//
   
-   private String getCanonicalPath(File f) throws IOException {
+  private String getCanonicalPath(File f) throws IOException {
     if (f == null) return "";
     return f.getCanonicalPath();
   }
@@ -480,44 +481,43 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //---------------------------- Model Callbacks ----------------------------//
   
   /** Called from the JUnitTestManager if its given className is not a test case.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(final boolean isTestAll) {
     // NOTE: junitStarted is called in a different thread from the testing thread.  The _testInProgress flag
     //       is used to prevent a new test from being started and overrunning the existing one.
 //      Utilities.show("DefaultJUnitModel.nonTestCase(" + isTestAll + ") called");
-      _notifier.nonTestCase(isTestAll);
-      _testInProgress = false;
+    _notifier.nonTestCase(isTestAll);
+    _testInProgress = false;
   }
   
   /** Called to indicate that an illegal class file was encountered
-   *  @param e the ClassFileObject describing the error.
-   */
+    * @param e the ClassFileObject describing the error.
+    */
   public void classFileError(ClassFileError e) { _notifier.classFileError(e); }
   
   /** Called to indicate that a suite of tests has started running.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void testSuiteStarted(final int numTests) { _notifier.junitSuiteStarted(numTests); }
   
   /** Called when a particular test is started.
-   *  @param testName The name of the test being started.
-   */
+    * @param testName The name of the test being started.
+    */
   public void testStarted(final String testName) { _notifier.junitTestStarted(testName); }
   
   /** Called when a particular test has ended.
-   *  @param testName The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
-   */
+    * @param testName The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error or simply failed.
+    */
   public void testEnded(final String testName, final boolean wasSuccessful, final boolean causedError) {
-     _notifier.junitTestEnded(testName, wasSuccessful, causedError);
+    _notifier.junitTestEnded(testName, wasSuccessful, causedError);
   }
   
   /** Called when a full suite of tests has finished running.
-   *  @param errors The array of errors from all failed tests in the suite.
-   */
+    * @param errors The array of errors from all failed tests in the suite.
+    */
   public void testSuiteEnded(JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
@@ -527,9 +527,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Called when the JUnitTestManager wants to open a file that is not currently open.
-   * @param className the name of the class for which we want to find the file
-   * @return the file associated with the given class
-   */
+    * @param className the name of the class for which we want to find the file
+    * @return the file associated with the given class
+    */
   public File getFileForClassName(String className) { return _model.getSourceFile(className + ".java"); }
   
   /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
@@ -537,7 +537,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady() {
-   
+    
     if (! _testInProgress) return; 
     JUnitError[] errors = new JUnitError[1];
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");

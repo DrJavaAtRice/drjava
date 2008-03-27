@@ -36,10 +36,8 @@
 
 package edu.rice.cs.drjava.config;
 
-/** Class representing values from the Java System properties that
-  * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+/** Class representing values from the Java System properties that can be inserted as variables in external processes.
+  * @version $Id$
   */
 public class JavaSystemProperty extends EagerProperty {
   /** Create a Java system property. */

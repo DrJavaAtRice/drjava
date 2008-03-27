@@ -36,15 +36,12 @@
 
 package edu.rice.cs.util.sexp;
 
-/**
- * Provides a common namespace for the token classes.
- */
+/** A common namespace for the token classes. */
 public interface Tokens {
   
-  /** These tokens are designed to be compared using the == operator for (, ), ", and \.  Otherwise,
-  *  the tokens may be compared using the .equals() method.  This class is concrete only for testing
-  *  purposes.
-  */
+  /** These tokens are designed to be compared using the == operator with (, ), ", and \.  Otherwise, the tokens may be
+    * compared using the .equals() method.  This class is concrete only for testing purposes.
+    */
   /* abstract */ class SExpToken {
     protected String _rep;
     
@@ -86,18 +83,15 @@ public interface Tokens {
   class WordToken extends SExpToken { public WordToken(String word) { super(word); } }
   
   /** This token is handled as a unit by the lexer. Any text between the pair of quotes is given
-  *  in this QuotedTextToken.
-  */
+    * in this QuotedTextToken.
+    */
   class QuotedTextToken extends SExpToken {
     //  private String _txt;
     public QuotedTextToken(String txt) { super(txt); }
     public String getFullText() { return "\"" + _rep + "\""; }
   }
   
-  /**
-  * Words include any text (including symbols) that
-   * is not a number, a backslash, or a quote character
-   */
+  /** Words include any text (including symbols) that is not a number, a backslash, or a quote character. */
   class BooleanToken extends SExpToken {
     public static final BooleanToken TRUE = new BooleanToken(true);
     public static final BooleanToken FALSE = new BooleanToken(false);
@@ -111,7 +105,7 @@ public interface Tokens {
   }
   
   /**
-  * Numbers are string s of only digits (0-9)
+   * Numbers are string s of only digits (0-9)
    */
   class NumberToken extends SExpToken {
     private double _num;

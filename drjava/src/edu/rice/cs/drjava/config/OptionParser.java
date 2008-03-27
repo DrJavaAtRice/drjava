@@ -37,60 +37,59 @@
 package edu.rice.cs.drjava.config;
 import java.util.Hashtable;
 /** The association of an OptionName with the ability to parse something to type T; the intended type 
- *  parameterization is covariant: if U extends T, then OptionParser<U> extends OptionParser<T>.
- */
+  * parameterization is covariant: if U extends T, then OptionParser<U> extends OptionParser<T>.
+  */
 public abstract class OptionParser<T> implements ParseStrategy<T> {
-    
-    /** The logical name of this configurable option (i.e. "indent.size") public because it's final, 
-     *  and a String is immutable.
-     */
-    public final String name;
-    private final T defaultValue;
-
-    /** An inner hashtable that maps DefaultOptionMaps to value T's. Part of the magic inner workings of this package.
-     */
-    final Hashtable<DefaultOptionMap,T> map = new Hashtable<DefaultOptionMap,T>();
-
-    /** Constructor that takes in a name
-     *  @param name the name of this option (i.e. "indent.level");
-     */
-    public OptionParser(String name, T def) { this.name = name; defaultValue = def; }
-    
-    /** Accessor for name option
-     *  @return name of this option (i.e. "indent.level")
-     */
-    public String getName() { return name; }
-
-    /** @return the default value */
-    public T getDefault() { return defaultValue; }
-
-    /** @return the default value as a string */
-    public abstract String getDefaultString();
   
-    /** The ability to parse a string to an object of type T.  All concrete versions of this class must override this
-     *  method to provide some sort of parser implementation.
-     *  @param value a String to parse
-     *  @return the statically-typed representation of the string value.
-     */
-    public abstract T parse(String value);
-     
-    /* PACKAGE PRIVATE MAGIC STUFF
-     * This package-private magic stuff makes all of the config "magic" types work. Basically, it's achieved via a 
-     * double-dispatch stunt, so that the type information is saved. */
-
-    abstract String getString(DefaultOptionMap om);
-    
-    /** Uses parse() and setOption() so that any changes in parsing will automatically be applied to setString(). */
-    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
-    
-    /** The accessor for the magic-typed hashtable stunt. */
-    T getOption(DefaultOptionMap om) { return map.get(om); }
-
-    /** The mutator for the magic-typed hashtable stunt. */
-    T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
-    
-    /** The destructor for a mapping in the magic-typed hashtable. */
-    T remove(DefaultOptionMap om) { return map.remove(om); }
+  /** The logical name of this configurable option (i.e. "indent.size") public because it's final, 
+    * and a String is immutable.
+    */
+  public final String name;
+  private final T defaultValue;
+  
+  /** An inner hashtable that maps DefaultOptionMaps to value T's. Part of the magic inner workings of this package. */
+  final Hashtable<DefaultOptionMap,T> map = new Hashtable<DefaultOptionMap,T>();
+  
+  /** Constructor that takes in a name
+    * @param name the name of this option (i.e. "indent.level");
+    */
+  public OptionParser(String name, T def) { this.name = name; defaultValue = def; }
+  
+  /** Accessor for name option
+    * @return name of this option (i.e. "indent.level")
+    */
+  public String getName() { return name; }
+  
+  /** @return the default value */
+  public T getDefault() { return defaultValue; }
+  
+  /** @return the default value as a string */
+  public abstract String getDefaultString();
+  
+  /** The ability to parse a string to an object of type T.  All concrete versions of this class must override this
+    * method to provide some sort of parser implementation.
+    * @param value a String to parse
+    * @return the statically-typed representation of the string value.
+    */
+  public abstract T parse(String value);
+  
+  /* PACKAGE PRIVATE MAGIC STUFF
+   * This package-private magic stuff makes all of the config "magic" types work. Basically, it's achieved via a 
+   * double-dispatch stunt, so that the type information is saved. */
+  
+  abstract String getString(DefaultOptionMap om);
+  
+  /** Uses parse() and setOption() so that any changes in parsing will automatically be applied to setString(). */
+  T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
+  
+  /** The accessor for the magic-typed hashtable stunt. */
+  T getOption(DefaultOptionMap om) { return map.get(om); }
+  
+  /** The mutator for the magic-typed hashtable stunt. */
+  T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
+  
+  /** The destructor for a mapping in the magic-typed hashtable. */
+  T remove(DefaultOptionMap om) { return map.remove(om); }
 }
 
 

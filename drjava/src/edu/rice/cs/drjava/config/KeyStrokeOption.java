@@ -47,16 +47,16 @@ import java.util.Hashtable;
 /** Class representing all configuration options with values of type KeyStroke.  Only runs in the event thread, so no
   * synchronization is necessary (or advisable).*/
 public class KeyStrokeOption extends Option<KeyStroke> {
-
+  
   /** Storage for keystrokes.*/
   static Hashtable<Integer, String> keys = new Hashtable<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
   /** Standard constructor
-   *  @param key The name of this option.
-   */
+    *  @param key The name of this option.
+    */
   public KeyStrokeOption(String key, KeyStroke def) {
     super(key,def); }
-
+  
   // This sets up the hashtable that has key-value pairs consisting of
   // ascii codes and Strings that describe the ascii character and are
   // in the form that KeyStroke.getKeyStroke(String s) requires.
@@ -75,17 +75,16 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       throw new UnexpectedException(iae);
     }
   }
-
-
-  /** @param s The String to be parsed, must be the string representation of
-    * the KeyStroke to be created. Uses the method KeyStroke.getKeyStroke(String s)
-    * which returns a KeyStroke if the string is correctly formatted or null
+  
+  
+  /** @param s  The String to be parsed; must be the string representation of the KeyStroke to be created. Uses the 
+    * method KeyStroke.getKeyStroke(String s) which returns a KeyStroke if the string is correctly formatted or null
     * otherwise.
     * @return The KeyStroke object corresponding to the input string "s".
     */
   public KeyStroke parse(String s) {
     if (s.equals("<none>")) { return NULL_KEYSTROKE; }
-
+    
     // Replace "command" with "meta" (OS X)
     int cIndex = s.indexOf("command");
     if (cIndex > -1) {
@@ -94,7 +93,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       sb.append(s.substring(cIndex + "command".length(), s.length()));
       s = sb.toString();
     }
-
+    
     // Replace "option" with "alt" (OS X)
     int oIndex = s.indexOf("option");
     if (oIndex > -1) {
@@ -103,15 +102,14 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       sb.append(s.substring(oIndex + "option".length(), s.length()));
       s = sb.toString();
     }
-
+    
     KeyStroke ks = KeyStroke.getKeyStroke(s);
     if (ks == null) {
-      throw new OptionParseException(name, s,
-                                     "Must be a valid string representation of a Keystroke.");
+      throw new OptionParseException(name, s, "Must be a valid string representation of a Keystroke.");
     }
     return ks;
   }
-
+  
   /** @param k The instance of class KeyStroke to be formatted.
     * @return A String representing the KeyStroke "k".
     */
@@ -119,18 +117,18 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     if (k == NULL_KEYSTROKE) {
       return "<none>";
     }
-
+    
     // This code prints out locale specific text, which is bad!
     //  (KeyStroke.getKeystroke(s) can't parse it.)
     /*
-    StringBuffer buf = new StringBuffer();
-    String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
-    s = s.replace('+', ' ');
-    if (!s.equals(""))
-      s += " ";
-    buf.append(s);
-    */
-
+     StringBuffer buf = new StringBuffer();
+     String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
+     s = s.replace('+', ' ');
+     if (!s.equals(""))
+     s += " ";
+     buf.append(s);
+     */
+    
     // Generate modifiers text on our own, since getKeyStroke can't parse locale-specific modifiers.
     int modifiers = k.getModifiers();
     boolean isMac = PlatformFactory.ONLY.isMacPlatform();
@@ -149,7 +147,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     if ((modifiers & Event.SHIFT_MASK) > 0) {
       buf.append("shift ");
     }
-
+    
     // If the key code is undefined, this is a "typed" unicode character
     if (k.getKeyCode() == KeyEvent.VK_UNDEFINED) {
       buf.append("typed ");

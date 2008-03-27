@@ -48,15 +48,15 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-  
+
 public class Utilities {
   
   /** True if the program is run in non-interactive test mode. */
   public static volatile boolean TEST_MODE = false;
   
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
-   *  event thread to be run asynchronously after all events already on the queue have been processed.
-   */
+    * event thread to be run asynchronously after all events already on the queue have been processed.
+    */
   public static void invokeLater(Runnable task) {
     if (EventQueue.isDispatchThread()) {
       task.run(); 
@@ -81,34 +81,34 @@ public class Utilities {
   }
   
   /** Show a modal debug message box with an OK button regardless of TEST_MODE.
-   *  @param msg string to display
-   */
+    * @param msg string to display
+    */
   public static void show(final String msg) { 
-     Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+    Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
   }
   
   /** Show a modal debug message box containing a backtrace for the Throwable t.
-   *  @param t the Throwable to be back traced.
-   */
+    * @param t the Throwable to be back traced.
+    */
   public static void showTrace(final Throwable t) { 
     Utilities.invokeAndWait(new Runnable() { public void run() { new DrJavaErrorHandler().handle(t); } } );
   } 
   
-  /** Show a modal debug message box with an OK button when not in TEST_MODE.
-   *  @param msg string to display
-   */
+  /** Shows a modal debug message box with an OK button when not in TEST_MODE.
+    * @param msg string to display
+    */
   public static void showDebug(String msg) { showMessageBox(msg, "Debug Message"); }
   
-  /** Show a modal message box with an OK button.
-   *  @param msg string to display
-   */
+  /** Shows a modal message box with an OK button.
+    * @param msg string to display
+    */
   public static void showMessageBox(final String msg, final String title) {
     //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
     Utilities.invokeAndWait(new Runnable() { public void run() {
       Utilities.TextAreaMessageDialog.showDialog(null, title, msg); 
     } } );
   }
-
+  
   public static void showStackTrace(final Throwable t) {
     Utilities.invokeAndWait(new Runnable() { public void run() { 
       JOptionPane.showMessageDialog(null, StringOps.getStackTrace(t));
@@ -118,12 +118,12 @@ public class Utilities {
   
   /** Message dialog with a word-wrapping text area that allows copy & paste. */
   public static class TextAreaMessageDialog extends JDialog {
-
-    /** Show the initialized dialog.
-     *  @param comp parent component, or null
-     *  @param title dialog title
-     *  @param message message for the text area
-     */
+    
+    /** Shows the initialized dialog.
+      * @param comp parent component, or null
+      * @param title dialog title
+      * @param message message for the text area
+      */
     public static void showDialog(Component comp, String title, String message) {
       if (TEST_MODE) System.out.println(title + ": " + message);
       else {
@@ -133,17 +133,17 @@ public class Utilities {
         dialog.setVisible(true);
       }
     }
-
+    
     /** Private constructor for this dialog. Only gets used in the static showDialog method.
-     *  @param frame owner frame
-     *  @param comp parent component
-     *  @param title dialog title
-     *  @param message message for the text area
-     */
+      * @param frame owner frame
+      * @param comp parent component
+      * @param title dialog title
+      * @param message message for the text area
+      */
     private TextAreaMessageDialog(Frame frame, Component comp, String title, String message) {
       super(frame, title, true);
       setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
+      
       //buttons
       JButton okButton = new JButton("OK");
       okButton.addActionListener(new ActionListener() {
@@ -152,20 +152,20 @@ public class Utilities {
         }
       });
       getRootPane().setDefaultButton(okButton);
-
+      
       JTextArea textArea = new JTextArea(message);
       textArea.setEditable(false);
       textArea.setLineWrap(true);
       textArea.setWrapStyleWord(false);
       textArea.setBackground(SystemColor.window);
-
+      
       Border emptyBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);
       textArea.setBorder(emptyBorder);
-
+      
       Container contentPane = getContentPane();
       contentPane.add(textArea, BorderLayout.CENTER);
       contentPane.add(okButton, BorderLayout.SOUTH);
-
+      
       Dimension parentDim = (comp != null)?(comp.getSize()):getToolkit().getScreenSize();
       int xs = (int)parentDim.getWidth()/4;
       int ys = (int)parentDim.getHeight()/5;
@@ -176,21 +176,21 @@ public class Utilities {
   
   /** @return a string with the current clipboard selection, or null if not available. */
   public static String getClipboardSelection(Component c) {
-      Clipboard cb = c.getToolkit().getSystemClipboard();
-      if (cb == null) return null;
-      Transferable t = cb.getContents(null);
-      if (t == null) return null;
-      String s = null;
-      try {
-        java.io.Reader r = DataFlavor.stringFlavor.getReaderForText(t);
-        int ch;
-        final StringBuilder sb = new StringBuilder();
-        while ((ch=r.read()) !=-1 ) { sb.append((char)ch); }
-        s = sb.toString();
-      }
-      catch(UnsupportedFlavorException ufe) { /* ignore, return null */ }
-      catch(java.io.IOException ioe) { /* ignore, return null */ }
-      return s;
+    Clipboard cb = c.getToolkit().getSystemClipboard();
+    if (cb == null) return null;
+    Transferable t = cb.getContents(null);
+    if (t == null) return null;
+    String s = null;
+    try {
+      java.io.Reader r = DataFlavor.stringFlavor.getReaderForText(t);
+      int ch;
+      final StringBuilder sb = new StringBuilder();
+      while ((ch=r.read()) !=-1 ) { sb.append((char)ch); }
+      s = sb.toString();
+    }
+    catch(UnsupportedFlavorException ufe) { /* ignore, return null */ }
+    catch(java.io.IOException ioe) { /* ignore, return null */ }
+    return s;
   }
   
   /** @return an action with a new name that delegates to another action. */

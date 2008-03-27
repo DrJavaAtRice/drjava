@@ -40,10 +40,8 @@ import edu.rice.cs.drjava.DrJava;
 import java.util.HashSet;
 import java.util.Iterator;
 
-/** Class representing values that are always up-to-date and that
-  * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+/** Class representing values that are always up-to-date and that can be inserted as variables in external processes.
+  * @version $Id$
   */
 public abstract class EagerProperty extends DrJavaProperty {
   /** Create an eager property. */

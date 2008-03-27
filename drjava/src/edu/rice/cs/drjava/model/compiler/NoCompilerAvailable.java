@@ -43,33 +43,31 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** A CompilerInterface implementation for signifying that no compiler is available.
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public class NoCompilerAvailable implements CompilerInterface {
   public static final CompilerInterface ONLY = new NoCompilerAvailable();
   private static final String MESSAGE = "No compiler is available.";
-
+  
   private NoCompilerAvailable() { }
-
+  
   public boolean isAvailable() { return false; }
-
+  
   public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
     return Arrays.asList(new CompilerError(MESSAGE, false));
   }
-
+  
   public JavaVersion version() { return JavaVersion.UNRECOGNIZED; }
-
+  
   public String getName() { return "(no compiler available)"; }
   
   public String getDescription() { return getName(); }
   
-  /** The toString() of this class is displayed in the "Compiler" drop
-   *  down on the compiler tab.
-   * 
-   *  @return "None"
-   */
+  /** The toString() of this class is displayed in the "Compiler" drop down on the compiler tab.
+    * @return "None"
+    */
   @Override
   public String toString() { return "None"; }
 }

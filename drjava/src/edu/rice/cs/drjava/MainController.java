@@ -44,8 +44,7 @@ package edu.rice.cs.drjava;
   * @version $Id$
   */
 public class MainController {
-  /*
-   * Things that MainController needs to manage:
+  /* Things that MainController needs to manage:
    *   DJWindow [aka: MainFrame] (register view components)
    *   Menu Bar Manager (register with DJWindow [+ ViewerWindows + AboutWindow on Mac])
    *     Menus (register with MBM, add Actions)

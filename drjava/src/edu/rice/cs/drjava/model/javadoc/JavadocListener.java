@@ -56,12 +56,10 @@ public interface JavadocListener {
   /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted();
   
-  /**
-   * Called after Javadoc is finished.
-   * @param success whether the Javadoc operation generated proper output
-   * @param destDir if (success == true) the location where the output was
-   *                generated, otherwise undefined (possibly null)
-   * @param allDocs Whether we are running over all open documents
-   */
+  /** Called after Javadoc is finished.
+    * @param success whether the Javadoc operation generated proper output
+    * @param destDir  if (success == true) the location where the output was generated, otherwise undefined (null?)
+    * @param allDocs Whether we are running over all open documents
+    */
   public void javadocEnded(boolean success, File destDir, boolean allDocs);
 }

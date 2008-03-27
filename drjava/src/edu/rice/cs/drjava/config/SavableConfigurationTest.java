@@ -46,9 +46,8 @@ import java.text.ParseException;
 import java.util.Date;
 
 /** JUnit test class for testing SavableConfiguration.
-  *
-  *  @author <a href="mailto:chrisw@rice.edu">Chris Warrington</a>
-  *  @version $Id: $
+  * @author <a href="mailto:chrisw@rice.edu">Chris Warrington</a>
+  * @version $Id: $
   */
 public class SavableConfigurationTest extends DrJavaTestCase {
   /**

@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.io.*;
 
 /** Class with getClassName method for finding the name of the first class or 
- *  interface defined in a file */
+  * interface defined in a file */
 
 public class ClassAndInterfaceFinder {
   
@@ -71,22 +71,22 @@ public class ClassAndInterfaceFinder {
   }
   
   /** Finds the the name of the first class or interface defined in this file.
-   *  @return the String containing this name or "" if no such class or interface
-   *          is found.
-   */
+    * @return the String containing this name or "" if no such class or interface
+    *         is found.
+    */
   public String getClassOrInterfaceName() { return getName(true); }
   
   /** Finds the the name of the first class (excluding interfaces) defined in this file.
-   *  @return the String containing this name or "" if no such class or interface
-   *          is found.
-   */
+    * @return the String containing this name or "" if no such class or interface
+    *         is found.
+    */
   public String getClassName() { return getName(false); }
   
   /** Finds the the name of the first class or interface in this file, respecting the
-   *  value of the interfaceOK flag.
-   *  I hate flags but did not see a simpler way to avoid duplicated code.
-   *  This method has package (rather than private) visibility for testing purposes.
-   */
+    * value of the interfaceOK flag.
+    * I hate flags but did not see a simpler way to avoid duplicated code.
+    * This method has package (rather than private) visibility for testing purposes.
+    */
   String getName(boolean interfaceOK) {
     try {
       String package_name = "";
@@ -96,7 +96,7 @@ public class ClassAndInterfaceFinder {
       do {
         tokenType = tokenizer.nextToken();
       } while(! isClassOrInterfaceWord(tokenType,interfaceOK) && ! isPackageWord(tokenType));
-
+      
       if (isEOF(tokenType)) return "";
       
       /* Save opening keyword */
@@ -106,13 +106,13 @@ public class ClassAndInterfaceFinder {
       do {
         tokenType = tokenizer.nextToken();
       } while (! isWord(tokenType));
-
+      
       if (isEOF(tokenType)) return "";
       
       if (keyword.equals("class")) return tokenizer.sval;  // a class defined without a package
-        
+      
       if (interfaceOK && keyword.equals("interface")) return tokenizer.sval; // an interface without a package
-  
+      
       if (keyword.equals("package")) package_name = tokenizer.sval;
       
       // find the "class" keyword
@@ -148,7 +148,7 @@ public class ClassAndInterfaceFinder {
       (tt == StreamTokenizer.TT_WORD && tokenizer.sval.equals("class")) ||
       (tt == StreamTokenizer.TT_WORD && interfaceOK && tokenizer.sval.equals("interface"));
   }
-
+  
   /**
    * returns true iff the token is "package" or we're at the end of the file
    */

@@ -79,22 +79,16 @@ public abstract class AsyncTask<ParamType, ResType> {
    * unless those calls are made explicitly thread safe by the developer. Any
    * code that modifies swing GUI components in any way should be located in the
    * <code>complete</code> method.
-   * 
-   * @param param
-   *          Any parameter that should be passed to the task when it is
-   *          executed
-   * @param monitor
-   *          An object that handles the flow of information about the progress
-   *          of the task both to and from the runAsync method. This also offers
-   *          a means of passing a result from the async step to the completion
-   *          step.
-   * @throws Exception
+   *
+   * @param param  Any parameter that should be passed to the task when it is executed
+   * @param monitor  An object that controls the flow of information about task progress both to and from the runAsync 
+   *                 method. This also offers a means of passing a result from the async step to the completion step.
+   * @throws  RuntimeException
    */
  public abstract ResType runAsync(ParamType param, IAsyncProgress monitor) throws Exception;
 
- /** This is the completion step where any modifications to swing components
-   * should be made. This method is called on the AWT event thread and so any
-   * changes made to swing components are safe.
+ /** Performs te completion step where modifications to swing components are made. This method runs in the event thread
+   * so changes made to swing components are safe.
    */
  public abstract void complete(AsyncCompletionArgs<ResType> args);
 

@@ -39,20 +39,20 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.File;
 
 /** Interface for any listener to an InteractionsModel.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public interface InteractionsListener {
-
+  
   /** Called when an interaction has started. */
   public void interactionStarted();
-
+  
   /** Called when an interaction has ended. */
   public void interactionEnded();
   
   /** Called when an interaction results in a syntax error.
-   *  @param offset the error's offset into the InteractionsDocument
-   *  @param length the length of the error
-   */
+    * @param offset the error's offset into the InteractionsDocument
+    * @param length the length of the error
+    */
   public void interactionErrorOccurred(int offset, int length);
   
   /** Called when the interpreter has begun resetting. */
@@ -62,21 +62,21 @@ public interface InteractionsListener {
   public void interpreterReady(File wd);
   
   /** Called if the interpreter could not be reset.
-   *  @param t Throwable explaining why the reset failed.
-   */
+    * @param t Throwable explaining why the reset failed.
+    */
   public void interpreterResetFailed(Throwable t);
   
   /** Called when the interpreter exits unexpectedly.
-   *  @param status the exit code
-   */
+    * @param status the exit code
+    */
   public void interpreterExited(int status);
   
   /** Called when the active interpreter is changed.
-   *  @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
-   *  interactionEnded event is pending.)
-   */
+    * @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
+    * interactionEnded event is pending.)
+    */
   public void interpreterChanged(boolean inProgress);
-
+  
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();
   

@@ -59,9 +59,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
- *  JUnitError that can be passed back to the MainJVM.
- *  @version $Id$
- */
+  * JUnitError that can be passed back to the MainJVM.
+  * @version $Id$
+  */
 public class JUnitTestManager {
   
   /** The interface to the master JVM via RMI. */
@@ -87,7 +87,7 @@ public class JUnitTestManager {
     _jmc = jmc;
     _loaderFactory = loaderFactory;
   }
-
+  
   /** Find the test classes among the given classNames and accumulate them in
     * TestSuite for junit.  Returns null if a test suite is already pending.
     * @param classNames the class names that are test class candidates
@@ -104,7 +104,7 @@ public class JUnitTestManager {
     _testClassNames = new ArrayList<String>();
     _testFiles = new ArrayList<File>();
     _suite = new TestSuite();
-
+    
     int i = 0;
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
@@ -122,23 +122,23 @@ public class JUnitTestManager {
         _jmc.classFileError(new ClassFileError(cName, path, e));
       }
     }
-     
+    
     debug.logEnd("result", _testClassNames);
     return _testClassNames;
   }
-    
+  
   /** Runs the pending test suite set up by the preceding call to findTestClasses
-   *  @return false if no test suite (even an empty one) has been set up
-   */
+    * @return false if no test suite (even an empty one) has been set up
+    */
   public /* synchronized */ boolean runTestSuite() {
     
     if (_testClassNames == null || _testClassNames.isEmpty()) return false;
     
 //    new ScrollableDialog(null, "runTestSuite() in SlaveJVM called", "", "").show();
-
+    
     try {
       TestResult result = _testRunner.runSuite(_suite);
-    
+      
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
       
       Enumeration failures = result.failures();
@@ -176,27 +176,27 @@ public class JUnitTestManager {
     }
     return true;
   }
-
+  
   /** Determines if the given class is a junit Test.
-   *  @param c the class to check
-   *  @return true iff the given class is an instance of junit.framework.Test
-   */
+    * @param c the class to check
+    * @return true iff the given class is an instance of junit.framework.Test
+    */
   private boolean _isJUnitTest(Class c) {
     boolean result = Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
-                     !Modifier.isInterface(c.getModifiers());
+      !Modifier.isInterface(c.getModifiers());
     //debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
     return result;
   }
-
+  
   /** Constructs a new JUnitError from a TestFailure
-   *  @param failure A given TestFailure
-   *  @param classNames The classes that were used for this test suite
-   *  @param isError The passed TestFailure may signify either an error or a failure
-   *  @param files The files that were used for this test suite
-   *  @return JUnitError
-   */
+    * @param failure A given TestFailure
+    * @param classNames The classes that were used for this test suite
+    * @param isError The passed TestFailure may signify either an error or a failure
+    * @param files The files that were used for this test suite
+    * @return JUnitError
+    */
   private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
-
+    
     Test failedTest = failure.failedTest();
     String testName;
     if (failedTest instanceof TestCase) testName = ((TestCase)failedTest).getName();
@@ -234,7 +234,7 @@ public class JUnitTestManager {
        */
       trace = trace.substring(trace.indexOf('\n')+1);
       while (trace.indexOf("junit.framework.Assert") != -1 &&
-            trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
+             trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
         /* the format of the trace will have "at junit.framework.Assert..."
          * on each line until the line of the actual source file.
          * if the exception was thrown from the test case (so the test failed
@@ -253,7 +253,7 @@ public class JUnitTestManager {
         className = trace.substring(0,trace.lastIndexOf('.'));
         classNameAndTest = className + "." + testName;
       }
-
+      
       try {
         lineNum = Integer.parseInt(trace.substring(trace.indexOf(':') + 1)) - 1;
       }
@@ -265,12 +265,12 @@ public class JUnitTestManager {
     }
     
 //    if (lineNum > -1) _errorsWithPos++;
-
+    
     String exception =  (isError) ? failure.thrownException().toString(): 
-                                    failure.thrownException().getMessage();
+      failure.thrownException().getMessage();
     boolean isFailure = (failure.thrownException() instanceof AssertionFailedError) &&
       !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
-
+    
 //    for dubugging    
 //    try{
 //      File temp = File.createTempFile("asdf", "java", new File("/home/awulf"));
@@ -289,7 +289,7 @@ public class JUnitTestManager {
 //    } catch(IOException e) {
 //      
 //    }
-
+    
     int indexOfClass = classNames.indexOf(className);
     File file;
     if (indexOfClass != -1) file = files.get(indexOfClass);
@@ -311,19 +311,19 @@ public class JUnitTestManager {
     
     return new JUnitError(file, adjLineNum, 0, exception, !isFailure, testName, className, stackTrace);
   }
-
+  
   /** Parses the line number out of the stack trace in the given class name. */
   private int _lineNumber(String sw, String classname) {
     int lineNum;
     int idxClassname = sw.indexOf(classname);
     if (idxClassname == -1) return -1;
-
+    
     String theLine = sw.substring(idxClassname, sw.length());
     
     theLine = theLine.substring(theLine.indexOf(classname), theLine.length());
     theLine = theLine.substring(theLine.indexOf("(") + 1, theLine.length());
     theLine = theLine.substring(0, theLine.indexOf(")"));
-
+    
     try {
       int i = theLine.indexOf(":") + 1;
       lineNum = Integer.parseInt(theLine.substring(i, theLine.length())) - 1;

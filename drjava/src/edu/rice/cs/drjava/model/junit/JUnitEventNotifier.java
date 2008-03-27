@@ -1,4 +1,4 @@
- /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -81,23 +81,23 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     super.addListener(jul);
 //    Utilities.show("Adding listener " + jul + " to listener list in " + this);
   }
-
+  
   /** Called when trying to test a non-TestCase class.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll); } }
     finally { _lock.endRead(); }
   }
-
+  
   public void classFileError(ClassFileError e) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.classFileError(e); } }
     finally { _lock.endRead(); }
   }
   
- /** Called before JUnit is started by the DefaultJUnitModel. */
+  /** Called before JUnit is started by the DefaultJUnitModel. */
   public void compileBeforeJUnit(final CompilerListener cl) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl); } }
@@ -110,43 +110,43 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     try { for (JUnitListener jul : _listeners) { jul.junitStarted(); } }
     finally { _lock.endRead(); }
   }
-
+  
   /** Called after junitClasses is started by the GlobalModel. */
   public void junitClassesStarted() {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.junitClassesStarted(); } }
     finally { _lock.endRead(); }
   }
-
+  
   /** Called to indicate that a suite of tests has started running.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void junitSuiteStarted(int numTests) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.junitSuiteStarted(numTests); } }
     finally { _lock.endRead(); }
   }
-
+  
   /** Called when a particular test is started.
-   *  @param name The name of the test being started.
-   */
+    * @param name The name of the test being started.
+    */
   public void junitTestStarted(String name) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.junitTestStarted(name); } }
     finally { _lock.endRead(); }
   }
-
+  
   /** Called when a particular test has ended.
-   *  @param name The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error or simply failed.
-   */
+    * @param name The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error or simply failed.
+    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.junitTestEnded(name, wasSuccessful, causedError); } }
     finally { _lock.endRead(); }
   }
-
+  
   /** Called after JUnit is finished running tests. */
   public void junitEnded() {
 //    new ScrollableDialog(null, "Ready to grab acquireReadLock for junitListener queue in junitEnded" + _listeners, "", "").show();

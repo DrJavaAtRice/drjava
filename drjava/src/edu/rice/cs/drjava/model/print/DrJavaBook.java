@@ -51,30 +51,30 @@ import java.text.*;
  * @version $Id$
  */
 public class DrJavaBook implements Pageable {
-
+  
   private ArrayList<PagePrinter> _pagePrinters;
   private PageFormat _format;
   private String _fileName;
-
+  
   public static final Font PRINT_FONT = new Font("Monospaced", Font.PLAIN, 9);
   public static final Font FOOTER_FONT = new Font("Monospaced", Font.PLAIN, 8);
   public static final Font LINE_FONT = new Font("Monospaced", Font.ITALIC, 8);
   public float LINE_NUM_WIDTH;
-
+  
   private static FontRenderContext DEFAULT_FRC = new FontRenderContext(null, false, true);
-
+  
   /** Constructs a DrJavaBook which a given content text, filename, and pageformat. */
   public DrJavaBook(String text, String fileName, PageFormat format) {
     _pagePrinters = new ArrayList<PagePrinter>();
     _format = format;
     _fileName = fileName;
-
+    
     TextLayout textl = new TextLayout("XXX ", LINE_FONT, DEFAULT_FRC);
     LINE_NUM_WIDTH = textl.getAdvance();
-
+    
     setUpPagePrinters(text);
   }
-
+  
   /**
    * Method which creates all of the individual Printable objects
    * given a String text.
@@ -85,18 +85,18 @@ public class DrJavaBook implements Pageable {
     int reallinenum = 1;
     String thisText;
     FontRenderContext frc = new FontRenderContext(null, false, true);
-
+    
     // determine the number of lines per page
     TextLayout textl = new TextLayout("X", PRINT_FONT, frc);
     float lineHeight = textl.getLeading() + textl.getAscent();
     int linesPerPage = (int) (_format.getImageableHeight() / lineHeight) - 1;
-
+    
     HashMap<TextAttribute,Object> map = new HashMap<TextAttribute,Object>(); // Added parameterization <TextAttribute, Object>.
     map.put(TextAttribute.FONT, PRINT_FONT);
-
+    
     char[] carriageReturn = {(char) 10};
     String lineSeparator = new String(carriageReturn);
-
+    
     try {
       thisText = text.substring(0, text.indexOf(lineSeparator));
       text = text.substring(text.indexOf(lineSeparator) + 1);
@@ -105,30 +105,30 @@ public class DrJavaBook implements Pageable {
       thisText = text;
       text = "";
     }
-
+    
     int page = 0;
     PagePrinter thisPagePrinter = new PagePrinter(page, _fileName, this);
     _pagePrinters.add(thisPagePrinter);
-
+    
     // loop over each of the *real* lines in the document
     while (! (thisText.equals("") && (text.equals("")))) {
       if (thisText.equals("")) thisText = " ";
-
+      
       AttributedCharacterIterator charIterator = (new AttributedString(thisText, map)).getIterator();
       LineBreakMeasurer measurer = new LineBreakMeasurer(charIterator, frc);
-
+      
       boolean isCarryLine = false;
-
+      
       // loop over each of the broken lines in the real line
       while (measurer.getPosition() < charIterator.getEndIndex()) {
         TextLayout pageNumber = new TextLayout(" ", LINE_FONT, DEFAULT_FRC);
-
+        
         if (! isCarryLine)
           pageNumber = new TextLayout("" + reallinenum, LINE_FONT, DEFAULT_FRC);
-
+        
         // add this TextLayout to the PagePrinter
         thisPagePrinter.add(measurer.nextLayout((float) _format.getImageableWidth() - LINE_NUM_WIDTH), pageNumber);
-
+        
         linenum++;
         // Create a new PagePrinter, if necessary
         if (linenum == (linesPerPage * (page+1)))
@@ -137,12 +137,12 @@ public class DrJavaBook implements Pageable {
           thisPagePrinter = new PagePrinter(page, _fileName, this);
           _pagePrinters.add(thisPagePrinter);
         }
-
+        
         isCarryLine = true;
       }
-
+      
       reallinenum++;
-
+      
       // Get next *real* line
       try {
         thisText = text.substring(0, text.indexOf(lineSeparator));
@@ -153,20 +153,20 @@ public class DrJavaBook implements Pageable {
       }
     }
   }
-
+  
   /** @return The number of pages in this print job. */
   public int getNumberOfPages() { return _pagePrinters.size(); }
-
+  
   /** Returns the PageFormat for this print job.
-   *  @param pageIndex The page number
-   *  @return the PageFormat of this print job.
-   */
+    * @param pageIndex The page number
+    * @return the PageFormat of this print job.
+    */
   public PageFormat getPageFormat(int pageIndex) { return _format; }
-
+  
   /** Returns the Printable object for a given page.
-   *  @param pageIndex The page number.
-   *  @return The Printable object for the given page.
-   */
+    * @param pageIndex The page number.
+    * @return The Printable object for the given page.
+    */
   public Printable getPrintable(int pageIndex) { return _pagePrinters.get(pageIndex); }
-
+  
 }

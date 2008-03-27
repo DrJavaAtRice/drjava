@@ -60,7 +60,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   private int _doc_saved;
   
   protected File _tempDir;
-
+  
   public void setUp() throws Exception {
     super.setUp();
     createModel();
@@ -84,7 +84,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     boolean ret = IOUtil.deleteRecursively(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     _model.dispose();
-
+    
     _tempDir = null;
     _model = null;
     super.tearDown();
@@ -94,20 +94,20 @@ public class DocumentCacheTest extends DrJavaTestCase {
   protected void createModel() {
     //_model = new DefaultGlobalModel(_originalModel);
     _model = new TestGlobalModel();
-
+    
     // Wait until it has connected
     _model.waitForInterpreter();
   }
-
+  
   /** Create a new temporary file in _tempDir. */
   protected File tempFile() throws IOException {
     return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
   
   /** Create a new temporary file in _tempDir.  Calls with the same
-   *  int will return the same filename, while calls with different
-   *  ints will return different filenames.
-   */
+    * int will return the same filename, while calls with different
+    * ints will return different filenames.
+    */
   protected File tempFile(int i) throws IOException {
     return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
   }
@@ -134,16 +134,16 @@ public class DocumentCacheTest extends DrJavaTestCase {
      * cacheSize <= 0 is provided
      */
     try {
-     _cache.setCacheSize(0);
-     fail("IllegalArgumentException expected.");
+      _cache.setCacheSize(0);
+      fail("IllegalArgumentException expected.");
     }
     catch (IllegalArgumentException iae) {
       //We're good
     }
     
     try {
-     _cache.setCacheSize(-34);
-     fail("IllegalArgumentException expected.");
+      _cache.setCacheSize(-34);
+      fail("IllegalArgumentException expected.");
     }
     catch (IllegalArgumentException iae) {
       //We're good
@@ -176,7 +176,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // This tests that isModifiedSinceSave does not cause the document to load into the cache,
     // so the two that should have been kicked out, 1 & 2 should not be loaded uppon calling isModified.
-
+    
     assertFalse("Document 1 shouldn't be modified", doc1.isModifiedSinceSave());
     assertFalse("Document 2 shouldn't be modified", doc2.isModifiedSinceSave());
     assertFalse("Document 3 shouldn't be modified", doc3.isModifiedSinceSave());
@@ -248,11 +248,11 @@ public class DocumentCacheTest extends DrJavaTestCase {
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     
     assertEquals("Wrong Cache Size", 4, _cache.getCacheSize());
-
+    
     // cache = [3 4 5 6]
     // This tests that isModifiedSinceSave does not cause the document to load into the cache,
     // so the two that should have been kicked out, 1 & 2 should not be loaded uppon calling isModified.
-
+    
     assertFalse("Document 1 shouldn't be modified", doc1.isModifiedSinceSave());
     assertFalse("Document 2 shouldn't be modified", doc2.isModifiedSinceSave());
     assertFalse("Document 3 shouldn't be modified", doc3.isModifiedSinceSave());
@@ -271,13 +271,13 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     
     // Rectivate all documents and make sure that the right ones get kicked out
- 
+    
     doc1.getCurrentLine();
     doc2.getCurrentLine();
     doc3.getCurrentLine();
     doc4.getCurrentLine();
     
-   // cache = [1 2 3 4]
+    // cache = [1 2 3 4]
     
     assertTrue("Document 1 should be ready", _adapterTable.get(doc1).isReady());
     assertTrue("Document 2 should be ready", _adapterTable.get(doc2).isReady());
@@ -440,38 +440,38 @@ public class DocumentCacheTest extends DrJavaTestCase {
   // not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
   // This should be dealt with.
   public void testNoDDocInCache() {
-   OpenDefinitionsDocument doc1 = _model.newFile();
-   _model.closeFile(doc1);
-   assertFalse("The document should now be closed", _adapterTable.get(doc1).isReady());
+    OpenDefinitionsDocument doc1 = _model.newFile();
+    _model.closeFile(doc1);
+    assertFalse("The document should now be closed", _adapterTable.get(doc1).isReady());
   }
-
-
+  
+  
   public void testNumListeners() {
-   OpenDefinitionsDocument doc1 = _model.newFile();
-   OpenDefinitionsDocument doc2 = _model.newFile();
-   OpenDefinitionsDocument doc3 = _model.newFile();
-   OpenDefinitionsDocument doc4 = _model.newFile();
-   OpenDefinitionsDocument doc5 = _model.newFile();
-
-   int numDocListeners = doc1.getDocumentListeners().length;
-   int numUndoListeners = doc1.getUndoableEditListeners().length;
-   
-   doc1.getCurrentLine();
-   doc2.getCurrentLine();
-   doc3.getCurrentLine();
-   doc4.getCurrentLine();
-
-   // this will kick document one out of the cache
-   doc5.getCurrentLine();
- 
-   // this will reconstruct document 1
-   doc1.getCurrentLine();
-   
-   assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, 
-                doc1.getDocumentListeners().length);
-   assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, 
-                doc1.getUndoableEditListeners().length);
-
+    OpenDefinitionsDocument doc1 = _model.newFile();
+    OpenDefinitionsDocument doc2 = _model.newFile();
+    OpenDefinitionsDocument doc3 = _model.newFile();
+    OpenDefinitionsDocument doc4 = _model.newFile();
+    OpenDefinitionsDocument doc5 = _model.newFile();
+    
+    int numDocListeners = doc1.getDocumentListeners().length;
+    int numUndoListeners = doc1.getUndoableEditListeners().length;
+    
+    doc1.getCurrentLine();
+    doc2.getCurrentLine();
+    doc3.getCurrentLine();
+    doc4.getCurrentLine();
+    
+    // this will kick document one out of the cache
+    doc5.getCurrentLine();
+    
+    // this will reconstruct document 1
+    doc1.getCurrentLine();
+    
+    assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, 
+                 doc1.getDocumentListeners().length);
+    assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, 
+                 doc1.getUndoableEditListeners().length);
+    
   }
   
   /**
@@ -497,13 +497,13 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // Adding the listeners will load the document into the cache
     
-   
+    
     OpenDefinitionsDocument doc1 = openFile(tempFile(1));
     OpenDefinitionsDocument doc2 = openFile(tempFile(2));
     OpenDefinitionsDocument doc3 = openFile(tempFile(3));
     OpenDefinitionsDocument doc4 = openFile(tempFile(4));
     OpenDefinitionsDocument doc5 = openFile(tempFile(5));
-        
+    
     doc1.addFinalizationListener(fl);
     doc2.addFinalizationListener(fl);
     doc3.addFinalizationListener(fl);

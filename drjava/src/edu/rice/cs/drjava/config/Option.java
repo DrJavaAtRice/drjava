@@ -44,51 +44,51 @@ import java.util.Vector;
 // TODO: Do these need to be synchronized?
 
 /** An instance of this class represents a configurable option in DrJava that has static type T.  Classes can extend
- *  this class and the rest of the Configuration typing framework will work for it.  Named subclasses aren't even 
- *  necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
- *  options of static type Integer, with the name "indent.level", you could use the following code:
- *  <pre>
- *  Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
- *          public Integer parse(String s) {
- *              return new Integer(s);
- *          }
- *      };
- *  </pre>
- *  The precedinjg example is simple because Integers (like most data-type classes defined in the Java
- *  libraries) have handy toString() / parsing methods/constructors.
- *
- *  @version $Id$
- */
+  *  this class and the rest of the Configuration typing framework will work for it.  Named subclasses aren't even 
+  *  necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
+  *  options of static type Integer, with the name "indent.level", you could use the following code:
+  *  <pre>
+  *  Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
+  *          public Integer parse(String s) {
+  *              return new Integer(s);
+  *          }
+  *      };
+  *  </pre>
+  *  The precedinjg example is simple because Integers (like most data-type classes defined in the Java
+  *  libraries) have handy toString() / parsing methods/constructors.
+  *
+  *  @version $Id$
+  */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
-
+  
   /** A hashtable that maps Configuration Objects to a list of listeners for this particular option.  Part of the magic
-   *  inner workings of this package.
-   */
+    * inner workings of this package.
+    */
   final Hashtable<Configuration,Vector<OptionListener<T>>> listeners =
     new Hashtable<Configuration,Vector<OptionListener<T>>>();
-
+  
   /** Constructor that takes in a name and default value
-   *  @param name the name of this option (eg. "indent.level");
-   *  @param def the default value for this option (eg. "2")
-   */
+    * @param name the name of this option (eg. "indent.level");
+    * @param def the default value for this option (eg. "2")
+    */
   public Option(String name, T def) { super(name,def); }
-
-  /** Formats a statically typed T value to a String.  Since T is an Object, the default implementation uses the 
-   *  toString() method.
-   *  @param value the statically-typed value to format into a String
-   *  @throws {@link NullPointerException} if value is null
-   */
+  
+  /** Formats a statically typed T value as a String.  The default implementation uses the toString() method.
+    * @param value the statically-typed value to format into a String
+    * @throws {@link NullPointerException} if value is null
+    */
   public String format(T value) { return value.toString(); }
-
+  
   public String getDefaultString() { return format(getDefault()); }
-
+  
   /* PACKAGE PRIVATE MAGIC STUFF
-   * This package-private magic stuff makes all of the config "magic" types work. Basically, it's achieved via a 
-   * double-dispatch stunt, so that the type information is saved. */
+   * This package-private magic stuff makes all of the config "magic" types work. Basically, it's achieved using 
+   * double-dispatch, so that the type information is saved. 
+   */
   
   /** Uses format() and getOption() so that any changes in format will automatically be applied to getString(). */
   String getString(DefaultOptionMap om) { return format(getOption(om)); }
-
+  
   /** Sends an OptionEvent to all OptionListeners who have registered on this Option. */
   void notifyListeners(Configuration config, T val) {
     final Vector<OptionListener<T>> v = listeners.get(config);
@@ -100,7 +100,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
       }
     });
   }
-
+  
   /** Magic listener-bag adder */
   void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
@@ -110,7 +110,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     }
     v.add(l);
   }
-
+  
   /** Magic listener-bag remover */
   void removeListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);

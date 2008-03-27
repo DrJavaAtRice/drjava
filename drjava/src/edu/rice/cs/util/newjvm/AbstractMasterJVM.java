@@ -51,10 +51,10 @@ import java.util.Properties;
 import java.util.Map;
 
 /** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
- *  machine. This class is used by subclassing it. (See package documentation for more details.)
- *  This class runs in both the master and the slave JVMs.
- *  @version $Id$
- */
+  *  machine. This class is used by subclassing it. (See package documentation for more details.)
+  *  This class runs in both the master and the slave JVMs.
+  *  @version $Id$
+  */
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ implements MasterRemote/*<SlaveType>*/ {
   
   public static final Log _log  = new Log("MasterSlave.txt", false);
@@ -72,43 +72,42 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
   
   /** The slave JVM remote stub if it's connected; null if not connected. */
   protected volatile SlaveRemote _slave;
-
+  
   /** Is slave JVM in the process of starting up?  INVARIANT: _startupInProgess => _slave == null. */
   private volatile boolean _startupInProgress = false;
-
- /** This flag is set when a quit request is issued before the slave has finished starting up. 
-   * In that case, immediately after starting up, we quit it. INVARIANT: _quitOnStartUp => _startupInProgress 
-   */
+  
+  /** This flag is set when a quit request is issued before the slave has finished starting up. 
+    * In that case, immediately after starting up, we quit it. INVARIANT: _quitOnStartUp => _startupInProgress 
+    */
   private volatile boolean _quitOnStartup = false;
   
 //  /** Lock used in exporting this object to a file and loading it in the slaveJVM; protects stub variables. */
 //  final static Object Lock = new Object();
   
   /** The current remote stub for this main JVM object. This field is null except between the time the slave
-   *  JVM is first invoked and the time the slave registers itself.
-   */
+    * JVM is first invoked and the time the slave registers itself.
+    */
   private volatile MasterRemote _masterStub = null;
   
   /** The file containing the serialized remote stub. This field is null except between the time the slave
-   *  JVM is first invoked and the time the slave registers itself.
-   */
+    * JVM is first invoked and the time the slave registers itself.
+    */
   private volatile File _masterStubFile;
   
   /** The fully-qualified name of the slave JVM class. */
   private final String _slaveClassName;
   
   /** The thread monitoring the Slave JVM, waiting for it to terminate.  This feature inhibits the creation
-   *  of more than one Slave JVM corresponding to "this" 
-   */
+    * of more than one Slave JVM corresponding to "this" 
+    */
   private volatile Thread _monitorThread;
   
 //  /** The lock used to protect _monitorThread. */
 //  private final Object _monitorLock = new Object();
-
+  
   /** Sets up the master JVM object, but does not actually invoke the slave JVM.
-    * @param slaveClassName The fully-qualified class name of the class to start up in the second JVM. This 
-    *    class must implement the interface specified by this class's type parameter, which must be a subclass 
-    *    of {@link SlaveRemote}.
+    * @param slaveClassName The fully-qualified class name of the class to start up in the second JVM. This class must
+    * implement the interface specified by this class's type parameter, which must be a subclass of {@link SlaveRemote}.
     */
   protected AbstractMasterJVM(String slaveClassName) throws RemoteException {
     super();
@@ -121,37 +120,37 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
     // Make sure RMI doesn't use an IP address that might change
     System.setProperty("java.rmi.server.hostname", "127.0.0.1");
   }
-
+  
   /** Callback for when the slave JVM has connected, and the bidirectional communications link has been 
-   *  established.  During this call, {@link #getSlave} is guaranteed to not return null.
-   */
+    * established.  During this call, {@link #getSlave} is guaranteed to not return null.
+    */
   protected abstract void handleSlaveConnected();
   
   /** Callback for when the slave JVM has quit. During this call, {@link #getSlave} is guaranteed to return null.
-   *  @param status The exit code returned by the slave JVM.
-   */
+    * @param status The exit code returned by the slave JVM.
+    */
   protected abstract void handleSlaveQuit(int status);
   
   /** Invokes slave JVM without any JVM arguments.
-   *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
-   */
+    * @throws IllegalStateException if slave JVM already connected or startUp is in progress.
+    */
   protected final void invokeSlave() throws IOException, RemoteException {
     invokeSlave(new String[0], FileOps.NULL_FILE);
   }
   
   /** Invokes slave JVM, using the system classpath.
-   *  @param jvmArgs Array of arguments to pass to the JVM on startUp
-   *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
-   */
+    * @param jvmArgs Array of arguments to pass to the JVM on startUp
+    * @throws IllegalStateException if slave JVM already connected or startUp is in progress.
+    */
   protected final void invokeSlave(String[] jvmArgs, File workDir) throws IOException, RemoteException {
     invokeSlave(jvmArgs, System.getProperty("java.class.path"), workDir);
   }
- 
+  
   /** Creates and invokes slave JVM.
-   *  @param jvmArgs Array of arguments to pass to the JVM on startUp
-   *  @param cp Classpath to use when starting the JVM
-   *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
-   */
+    * @param jvmArgs Array of arguments to pass to the JVM on startUp
+    * @param cp Classpath to use when starting the JVM
+    * @throws IllegalStateException if slave JVM already connected or startUp is in progress.
+    */
   protected final void invokeSlave(final String[] jvmArgs, final String cp, final File workDir) throws IOException, 
     RemoteException {
     
@@ -165,9 +164,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
     _log.log(this + ".invokeSlave(...) called");
     
     /******************************************************************************************************
-     * First, we we export ourselves to a file, if it has not already been done on a previous invocation. *
-     *****************************************************************************************************/
-
+      * First, we we export ourselves to a file, if it has not already been done on a previous invocation. *
+      *****************************************************************************************************/
+    
     if (_masterStub == null) {
       try { _masterStub = (MasterRemote) UnicastRemoteObject.exportObject(this, 0); }
       catch (RemoteException re) {
@@ -229,7 +228,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
             _monitorThread = null;
             _masterJVMLock.notifyAll();  // signal that Slave JVM died to any thread waiting for _monitorThread == null
           }
-            
+          
 //          _log.log(asString() + " calling handleSlaveQuit(" + status + ")");
           handleSlaveQuit(status);
         }
@@ -248,10 +247,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
     try { synchronized(_masterJVMLock) { while (_monitorThread != null) _masterJVMLock.wait(); }}
     catch(InterruptedException e) { throw new UnexpectedException(e); } 
   }
-    
+  
   /** Action to take if the slave JVM quits before registering.  Assumes _masterJVMLock is held.
-   *  @param status Status code of the JVM
-   */
+    * @param status Status code of the JVM
+    */
   protected void slaveQuitDuringStartup(int status) {
     // Reset Master JVM state (in case invokeSlave is called again on this object)
     _startupInProgress = false;
@@ -260,8 +259,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
   }
   
   /** Called if the slave JVM dies before it is able to register.
-   *  @param cause The Throwable which caused the slave to die.
-   */
+    * @param cause The Throwable which caused the slave to die.
+    */
   public abstract void errorStartingSlave(Throwable cause) throws RemoteException;
   
   /** No-op to prove that the master is still alive. */
@@ -316,8 +315,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
   }
   
   /** Quits slave JVM.  On exit, _slave == null.  _quitOnStartup may be true
-   *  @throws IllegalStateException if no slave JVM is connected
-   */
+    * @throws IllegalStateException if no slave JVM is connected
+    */
   protected final void quitSlave() throws RemoteException {
     SlaveRemote dyingSlave;
     synchronized(_masterJVMLock) {

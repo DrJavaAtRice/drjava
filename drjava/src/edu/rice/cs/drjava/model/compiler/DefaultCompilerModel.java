@@ -65,9 +65,9 @@ import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
- *  (as opposed to testing DrJava).
- *  @version $Id$
- */
+  *  (as opposed to testing DrJava).
+  *  @version $Id$
+  */
 public class DefaultCompilerModel implements CompilerModel {
   
   /** The available compilers */
@@ -75,13 +75,13 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Current compiler -- one of _compilers, or a NoCompilerAvailable */
   private CompilerInterface _active;
-
+  
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
-
+  
   /** The global model to which this compiler model belongs. */
   private final GlobalModel _model;
-
+  
   /** The error model containing all current compiler errors. */
   private CompilerErrorModel _compilerErrorModel;
   
@@ -111,63 +111,54 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Returns the lock used to prevent simultaneous compilation and JUnit testing */
   public Object getCompilerLock() { return _compilerLock; }
-
+  
   //-------------------------- Listener Management --------------------------//
-
-  /** Add a CompilerListener to the model.
-   *  @param listener a listener that reacts to compiler events
-   * 
-   *  This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
-   */
+  
+  /** Adds a CompilerListener to the model.  This operation is synchronized by the readers/writers protocol in 
+    * EventNotifier<T>.
+    * @param listener  A listener that reacts to compiler events.
+    */
   public void addListener(CompilerListener listener) { _notifier.addListener(listener); }
-
-  /** Remove a CompilerListener from the model.  If the listener is not currently
-   *  listening to this model, this method has no effect.
-   *  @param listener a listener that reacts to compiler events
-   * 
-   *  This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
-   */
+  
+  /** Removes a CompilerListener from the model.  If the listener is not installed, this method has no effect.
+    * @param listener a listener that reacts to compiler events
+    * This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
+    */
   public void removeListener(CompilerListener listener) { _notifier.removeListener(listener); }
-
+  
   /** Removes all CompilerListeners from this model. */
   public void removeAllListeners() { _notifier.removeAllListeners(); }
-
+  
   //-------------------------------- Triggers --------------------------------//
-
-
+  
+  
   /** Compile all open documents.
-   *
-   *  <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
-   *  step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
-   *  the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
-   *  (which includes drjava.jar, containing JUnit classes).</p>
-   *  
-   *  This method formerly only compiled documents which were out of sync with their class file, as a performance 
-   *  optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
-   *  case this command would not recompile a file in some situations when it should.  Since we value correctness over
-   *  performance, we now always compile all open documents.</p>
-   *
-   *  @throws IOException if a filesystem-related problem prevents compilation
-   */
+    * <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
+    * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
+    * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
+    * (which includes drjava.jar, containing JUnit classes).</p>
+    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
+    * case this command would not recompile a file in some situations when it should.  Since we value correctness over
+    * performance, we now always compile all open documents.</p>
+    * @throws IOException if a filesystem-related problem prevents compilation
+    */
   public void compileAll() throws IOException {
     if (_prepareForCompile()) {
       _doCompile(_model.getOpenDefinitionsDocuments());
     }
   }
   
-   /** Compiles all documents in the project source tree.  Assumes DrJava currently contains an active project.
-    *
-    *  <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
-    *  step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
-    *  the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
-    *  (which includes drjava.jar, containing JUnit classes).</p>
-    *  
-    *  This method formerly only compiled documents which were out of sync with their class file, as a performance 
-    *  optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
-    *  case this command would not recompile a file in some situations when it should.  Since we value correctness over
-    *  performance, we now always compile all open documents.</p>
-    *
-    *  @throws IOException if a filesystem-related problem prevents compilation
+  /** Compiles all documents in the project source tree.  Assumes DrJava currently contains an active project.
+    * <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
+    * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
+    * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
+    * (which includes drjava.jar, containing JUnit classes).</p>
+    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
+    * case this command would not recompile a file in some situations when it should.  Since we value correctness over
+    * performance, we now always compile all open documents.</p>
+    * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compileProject() throws IOException {
     if (! _model.isProjectActive()) 
@@ -179,19 +170,15 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Compiles all of the given files.
-   *
-   *  <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
-   *  step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
-   *  the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
-   *  (which includes drjava.jar, containing JUnit classes).</p>
-   *  
-   *  This method formerly only compiled documents which were out of sync with their class file, as a performance 
-   *  optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
-   *  case this command would not recompile a file in some situations when it should.  Since we value correctness over
-   *  performance, we now always compile all open documents.</p>
-   *
-   *  @throws IOException if a filesystem-related problem prevents compilation
-   */
+    * <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
+    * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
+    * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
+    * (which includes drjava.jar, containing JUnit classes).</p>
+    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
+    * case this command would not recompile a file in some situations when it should.  Since we value correctness over
+    * performance, we now always compile all open documents.</p>                                                                                                                              @throws IOException if a filesystem-related problem prevents compilation
+    */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
     if (_prepareForCompile()) {
       _doCompile(defDocs);
@@ -199,18 +186,15 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Compiles the given file.
-    *
-    *  <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
-    *  step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
-    *  the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
-    *  (which includes drjava.jar, containing JUnit classes).</p>
-    *  
-    *  This method formerly only compiled documents which were out of sync with their class file, as a performance 
-    *  optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
-    *  case this command would not recompile a file in some situations when it should.  Since we value correctness over
-    *  performance, we now always compile all open documents.</p>
-    *
-    *  @throws IOException if a filesystem-related problem prevents compilation
+    * <p>Before compiling, all unsaved and untitled documents are saved, and compilation ends if the user cancels this 
+    * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
+    * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
+    * (which includes drjava.jar, containing JUnit classes).</p>
+    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
+    * case this command would not recompile a file in some situations when it should.  Since we value correctness over
+    * performance, we now always compile all open documents.</p>
+    * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compile(OpenDefinitionsDocument doc) throws IOException {
     if (_prepareForCompile()) {
@@ -246,7 +230,7 @@ public class DefaultCompilerModel implements CompilerModel {
       }
       else excludedFiles.add(doc.getFile());
     }
-      
+    
     _notifier.compileStarted();
     try {
       if (!packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
@@ -274,9 +258,9 @@ public class DefaultCompilerModel implements CompilerModel {
     finally { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
   }
   
-
+  
   //-------------------------------- Helpers --------------------------------//
-
+  
   /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
   private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
     final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
@@ -309,14 +293,12 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Compile the given files and update the model with any errors that result.  Does not notify listeners.  
-   *  All public compile methods delegate to this one so this method is the only one that uses synchronization to 
-   *  prevent compiling and unit testing at the same time.
-   * 
-   * @param files The files to be compiled
-   * @param buildDir The output directory for all the .class files; @code{null} means output to the same 
-   *                 directory as the source file
-   * 
-   */
+    * All public compile methods delegate to this one so this method is the only one that uses synchronization to 
+    * prevent compiling and unit testing at the same time.
+    * @param files The files to be compiled
+    * @param buildDir The output directory for all the .class files; @code{null} means output to the same 
+    *                 directory as the source file
+    */
   private void _compileFiles(List<? extends File> files, File buildDir) throws IOException {
     if (! files.isEmpty()) {
       /* Canonicalize buildDir */
@@ -402,12 +384,12 @@ public class DefaultCompilerModel implements CompilerModel {
     _compilerErrorModel = new CompilerErrorModel(errors.toArray(new CompilerError[0]), _model);
     _model.setNumCompErrors(_compilerErrorModel.getNumCompErrors());  // cache number of compiler errors in global model
   }
-
+  
   //----------------------------- Error Results -----------------------------//
-
+  
   /** Gets the CompilerErrorModel representing the last compile. */
   public CompilerErrorModel getCompilerErrorModel() { return _compilerErrorModel; }
-
+  
   /** Gets the total number of errors in this compiler model. */
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
   
@@ -416,15 +398,15 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Gets the total number of current warnings. */  
   public int getNumWarnings() { return getCompilerErrorModel().getNumWarnings(); }
-
+  
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
     _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
   }
-
+  
   //-------------------------- Compiler Management --------------------------//
-
+  
   /**
    * Returns all registered compilers that are actually available.  If there are none,
    * the result is {@link NoCompilerAvailable#ONLY}.
@@ -433,14 +415,14 @@ public class DefaultCompilerModel implements CompilerModel {
     if (_compilers.isEmpty()) { return IterUtil.singleton(NoCompilerAvailable.ONLY); }
     else { return IterUtil.snapshot(_compilers); }
   }
-
+  
   /**
    * Gets the compiler that is the "active" compiler.
    *
    * @see #setActiveCompiler
    */
   public CompilerInterface getActiveCompiler() { return _active; }
-
+  
   /**
    * Sets which compiler is the "active" compiler.
    *

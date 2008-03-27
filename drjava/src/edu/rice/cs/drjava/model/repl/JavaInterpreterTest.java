@@ -390,8 +390,8 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 //  }
 //
 // /** Test the operation of the TypeCheckerExtension by performing the operations ((false) ? 2/0 : 1) and 
-//  *  ((false) ? 2%0 : 1), which should not throw Exceptions in the Java interpreter.
-//  */
+//   * ((false) ? 2%0 : 1), which should not throw Exceptions in the Java interpreter.
+//   */
 //  public void testTypeCheckerExtension() {
 //    try { _interpreter.interpret("(false) ? 2/0 : 1 "); }
 //    catch(ExceptionReturnedException e) {
@@ -409,7 +409,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 //  }
 //
 //  /** Test the operation of the EvaluationVisitorExtension by performing a computation with no results (interpreter
-//   *  should return NO_RESULT and not null)
+//    * should return NO_RESULT and not null)
 //   */
 //  public void testEvaluationVisitorExtensionNO_RESULT() {
 //    try {
@@ -481,8 +481,8 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 //  }
 //  
 //  /** Test that the Interactions Pane will or won't allow access to private members
-//   *  given the value of the ALLOW_PRIVATE_ACCESS configuration option.
-//   */
+//    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
+//    */
 //  public void testAllowPrivateAccess() throws ExceptionReturnedException {
 //    // The real option listener is in DefaultGlobalModel, so add one here.
 //    DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {

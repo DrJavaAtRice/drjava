@@ -39,30 +39,30 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Class to store and retrieve all configurable options.
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public class Configuration {  
   
   /** OptionMap used to store all option settings. */
   protected OptionMap map;
   
   /** Any exception that is caught when initializing this Configuration object.
-   *  Used later by the UI to display a useful message to the user.
-   */
+    * Used later by the UI to display a useful message to the user.
+    */
   protected Exception _startupException;
   
   /** Initializes this Configuration object with the given OptionMap.
-   *  @param om An empty OptionMap.
-   */
+    * @param om An empty OptionMap.
+    */
   public Configuration(OptionMap om) {
     map = om;
     _startupException = null;
   }
   
   /** Sets the given option to the given value and notifies all listeners of that option of the change.
-   *  @param op Option to set
-   *  @param value New value for the option
-   */
+    * @param op Option to set
+    * @param value New value for the option
+    */
   public <T> T setSetting(final Option<T> op, final T value) {
     T ret = map.setOption(op, value);
     Utilities.invokeLater(new Runnable() { public void run() { op.notifyListeners(Configuration.this, value); } });
@@ -73,9 +73,9 @@ public class Configuration {
   public <T> T getSetting(Option<T> op) { return map.getOption(op); }
   
   /** Adds an OptionListener to the given Option, to be notified each time the option changes.
-   *  @param op Option to listen for changes on
-   *  @param l OptionListener wishing to listen
-   */
+    * @param op Option to listen for changes on
+    * @param l OptionListener wishing to listen
+    */
   public <T> void addOptionListener(Option<T> op, OptionListener<T> l) { op.addListener(this,l); }
   
   /** Removes an OptionListener from an Option to which it was listening. */
@@ -91,8 +91,8 @@ public class Configuration {
   public Exception getStartupException() { return _startupException; }
   
   /** Stores exception caught during creation of this Configuration object, so it can be displayed later by the UI.
-   *  @param e Exception caught during startUp
-   */
+    * @param e Exception caught during startUp
+    */
   public void storeStartupException(Exception e) { _startupException = e; }
   
   /** Returns a string representation of the contents of the OptionMap. */

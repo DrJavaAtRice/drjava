@@ -46,20 +46,18 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /** Allows users to pass filenames to a command-line indenter.  Unfortunately, this uses the Swing API (high 
- *  overhead), but we attempt to run the indentation in "headless AWT" mode to prevent a Java icon from showing 
- *  up on the OS X dock.
- *  @version $Id$
- */
+  *  overhead), but we attempt to run the indentation in "headless AWT" mode to prevent a Java icon from showing 
+  * up on the OS X dock.
+  * @version $Id$
+  */
 public class IndentFiles {
   
-  /**
-   * Command line interface to the indenter.
-   * Usage:
-   *   java edu.rice.cs.drjava.IndentFile [-indent N] [filenames]
-   *   Where N is the number of spaces in an indentation level
-   * 
-   * @param args Command line arguments
-   */
+  /** Command line interface to the indenter.
+    * Usage:
+    *   java edu.rice.cs.drjava.IndentFile [-indent N] [filenames]
+    *   Where N is the number of spaces in an indentation level
+    * @param args Command line arguments
+    */
   public static void main(String[] args) {
     Vector<String> fileNames = new Vector<String>();
     int indentLevel = 2;
@@ -94,10 +92,10 @@ public class IndentFiles {
   }
   
   /** Applies the indent logic to each file in the list of file names, saving the new copy of each one.
-   * @param fileNames Vector of filenames of files to be indented
-   * @param indentLevel The number of spaces to use for a level of indentation
-   * @param silent Whether to print any output to System.out
-   */
+    * @param fileNames Vector of filenames of files to be indented
+    * @param indentLevel The number of spaces to use for a level of indentation
+    * @param silent Whether to print any output to System.out
+    */
   public static void indentFiles(Vector<String> fileNames, int indentLevel, boolean silent) {
     //System.setProperty("java.awt.headless", "true"); // attempt headless AWT
     //System.out.println("Using Headless AWT: "+isHeadless());
@@ -134,17 +132,16 @@ public class IndentFiles {
     if (!silent) System.out.println();
   }
 
-  /**
-   * Java versions 1.4 or above should have this implemented.  
-   * Return false, if earlier version.
-   *
-  private static boolean isHeadless() {
-    try {
-      Method isHeadless = java.awt.GraphicsEnvironment.class.getMethod("isHeadless", new Class[0]);
-      return ((Boolean) isHeadless.invoke(null,new Object[0])).booleanValue();
-    }
-    catch(Exception e) {
-      return false;
-    }
-  }*/
+//  /** Java versions 1.4 or above should have this implemented.  
+//    * Return false, if earlier version.
+//    */
+//  private static boolean isHeadless() {
+//    try {
+//      Method isHeadless = java.awt.GraphicsEnvironment.class.getMethod("isHeadless", new Class[0]);
+//      return ((Boolean) isHeadless.invoke(null,new Object[0])).booleanValue();
+//    }
+//    catch(Exception e) {
+//      return false;
+//    }
+//  }
 }

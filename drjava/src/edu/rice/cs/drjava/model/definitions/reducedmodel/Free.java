@@ -46,19 +46,16 @@ public class Free extends ReducedModelState {
   
   private Free() { }
   
-  /**
-   *  Walk function for when we're not inside a string or comment.
-   *  Self-recursive and mutually recursive with other walk functions.
-   *  <ol>
-   *   <li> atEnd: return
-   *   <li> If we find / *, * /, or / /, combine them into a single Brace,
-   *        and keep the cursor on that Brace.
-   *   <li> If current brace = //, go to next then call updateLineComment.<BR>
-   *        If current brace = /*, go to next then call updateBlockComment.<BR>
-   *        If current brace = ", go to next then call updateInsideDoubleQuote.<BR>
-   *        Else, mark current brace as FREE, go to the next brace, and recur.
-   * </ol>
-   */
+  /** Walk function for when we're not inside a string or comment. Mutually recursive with other walk functions.
+    * <ol>
+    *  <li> atEnd: return
+    *  <li> If we find / *, * /, or / /, combine them into a single Brace, and keep the cursor on that Brace.
+    *  <li> If current brace = //, go to next then call updateLineComment.<BR>
+    *       If current brace = /*, go to next then call updateBlockComment.<BR>
+    *       If current brace = ", go to next then call updateInsideDoubleQuote.<BR>
+    *       Else, mark current brace as FREE, go to the next brace, and recur.
+    * </ol>
+    */
   ReducedModelState update(TokenList.Iterator copyCursor) {
     if (copyCursor.atEnd()) return STUTTER;
     
@@ -69,7 +66,7 @@ public class Free extends ReducedModelState {
     _combineCurrentAndNextIfFind("/","/*",copyCursor);
     _combineCurrentAndNextIfFind("/","//",copyCursor);
     _combineCurrentAndNextIfEscape(copyCursor);
- 
+    
     String type = copyCursor.current().getType();
     if (type.equals("*/")) {
       copyCursor._splitCurrentIfCommentBlock(true,false);

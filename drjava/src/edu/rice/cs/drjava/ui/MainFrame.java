@@ -224,12 +224,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile File _currentProjFile;
   
   /** Timer to display "Stepping..." message if a step takes longer than a certain amount of time.  All accesses
-    *  must be synchronized on it.
+    * must be synchronized on it.
     */
   private final Timer _debugStepTimer;
   
   /** The current highlight displaying the location of the debugger's thread,
-    *  if there is one.  If there is none, this is null.
+    * if there is one.  If there is none, this is null.
     */
   private volatile HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
@@ -452,7 +452,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Asks user for directory name and and reads it's files (and subdirectories files, on request) to
-    *  the definitions pane.
+    * the definitions pane.
     */
   private final Action _openFolderAction  = new AbstractAction("Open Folder...") {
     public void actionPerformed(ActionEvent ae) { 
@@ -470,7 +470,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Asks user for project file name and and reads the associated files into the file navigator (and places the first
-    *  source file in the editor pane)
+    * source file in the editor pane)
     */
   private final Action _openProjectAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) { _openProject(); }
@@ -566,16 +566,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Supports MainFrameTest.*/
   public boolean saveEnabledHuh() { return _saveAction.isEnabled(); }
   
-  /** Asks the user for a file name and saves the document
-    *  currently in the definitions pane to that file.
-    */
+  /** Asks the user for a file name and saves the active document (in the definitions pane) to that file. */
   private final Action _saveAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) { _saveAs(); }
   };
   
-  /** Asks the user for a file name and renames and saves the document
-    *  currently in the definitions pane to that file.
-    */
+  /** Asks the user for a file name and renames and saves the active document (in the definitions pane) to that file. */
   private final Action _renameAction = new AbstractAction("Rename") {
     public void actionPerformed(ActionEvent ae) { _rename(); }
   };  
@@ -918,7 +914,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Copies whatever is currently in the interactions pane at the prompt to the definitions pane.  If the 
-    *  current string is empty, then it will attempt to return the last entry from the interactions pane's history.
+    * current string is empty, then it will attempt to return the last entry from the interactions pane's history.
     */
   private final Action _copyInteractionToDefinitionsAction =
     new AbstractAction("Lift Current Interaction to Definitions") {
@@ -938,7 +934,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Action that copies the previous interaction to the definitions pane.
-    *  Is there a good way to get the last history element without perturbing the current document?
+    * Is there a good way to get the last history element without perturbing the current document?
     Action copyPreviousInteractionToDefinitionsAction = new AbstractAction("Copy previous interaction to definitions") {
     public void actionPerformed(ActionEvent e) {
     _putTextIntoDefinitions(_interactionsController.getDocument().getCurrentInput() + "\n");
@@ -2205,8 +2201,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** This takes a component and gives it focus, showing it if it's a tab. The interactionsPane and consolePane
-    *  are wrapped in scrollpanes, so we have to specifically check for those and unwrap them.
-    *  @param c the pane to switch focus to
+    * are wrapped in scrollpanes, so we have to specifically check for those and unwrap them.
+    * @param c the pane to switch focus to
     */
   private void _switchToPane(Component c) {
     Component newC = c;
@@ -2216,7 +2212,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** This method allows the user to cycle through the definitions pane and all of the open tabs.
-    *  @param next true if we want to go to the next pane, false if the previous.
+    * @param next true if we want to go to the next pane, false if the previous.
     */
   private void _switchPaneFocus(boolean next) {
     int numTabs = _tabbedPane.getTabCount();
@@ -2453,7 +2449,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Moves the caret to the "intelligent" beginning of the line.
-    *  @see #_getBeginLinePos
+    * @see #_getBeginLinePos
     */
   private final Action _beginLineAction = new AbstractAction("Begin Line") {
     public void actionPerformed(ActionEvent ae) {
@@ -2463,7 +2459,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Selects to the "intelligent" beginning of the line.
-    *  @see #_getBeginLinePos
+    * @see #_getBeginLinePos
     */
   private final Action _selectionBeginLineAction = new AbstractAction("Select to Beginning of Line") {
     public void actionPerformed(ActionEvent ae) {
@@ -2676,9 +2672,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   
   /** This manager is meant to retrieve the correct icons for the given filename. The only files recognized 
-    *  are the files obviously listed below in the function (.java, .dj0, .dj1, .dj2). The icons that represent 
-    *  each filetype are given into the managers constructor upon instantiation.  This class is static since
-    *  it currently does not depend of the main frame for information.
+    * are the files obviously listed below in the function (.java, .dj0, .dj1, .dj2). The icons that represent 
+    * each filetype are given into the managers constructor upon instantiation.  This class is static since
+    * it currently does not depend of the main frame for information.
     */
   private static class DJFileDisplayManager extends DefaultFileDisplayManager {
     private final Icon _java;
@@ -2730,9 +2726,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     private final FileDisplayManager _default;
     
     /** Standard constructor.
-      *  @param star The star icon will be put flush to the left 1/4 the way down
-      *  @param junitPass indicator of junit success, placed at bottom right
-      *  @param junitFail indicator of junit failure, placed at bottom right
+      * @param star The star icon will be put flush to the left 1/4 the way down
+      * @param junitPass indicator of junit success, placed at bottom right
+      * @param junitFail indicator of junit failure, placed at bottom right
       */
     public OddDisplayManager(FileDisplayManager fdm, Icon star, Icon junitPass, Icon junitFail) {
       _star = star;
@@ -3570,7 +3566,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   JButton getCloseButton() { return _closeButton; }
   
   /** For testing purposes.
-    *  @return The frame's compileAll button (Package private accessor)
+    * @return The frame's compileAll button (Package private accessor)
     */
   JButton getCompileAllButton() { return _compileButton; }
   
@@ -3697,9 +3693,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Prompt the user to select a place to open files from, then load them. Ask the user if they'd like to save 
-    *  previous changes (if the current document has been modified) before opening.
-    *  @param jfc the open dialog from which to extract information
-    *  @return an array of the files that were chosen
+    * previous changes (if the current document has been modified) before opening.
+    * @param jfc the open dialog from which to extract information
+    * @return an array of the files that were chosen
     */
   public File[] getOpenFiles(JFileChooser jfc) throws OperationCanceledException {
     int rc = jfc.showOpenDialog(this);
@@ -3763,7 +3759,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Makes sure save and compile buttons and menu items are enabled and disabled appropriately after document
-    *  modifications.
+    * modifications.
     */
   private void _installNewDocumentListener(final OpenDefinitionsDocument d) {
     d.addDocumentListener(new DocumentUIListener() {
@@ -3806,7 +3802,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Changes the message text toward the right of the status bar
-    *  @param msg The message to place in the status bar
+    * @param msg The message to place in the status bar
     */
   public void setStatusMessage(String msg) { _statusReport.setText(msg); }
   
@@ -3814,12 +3810,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public void clearStatusMessage() { _statusReport.setText(""); }
   
   /** Sets the font of the status bar message
-    *  @param f The new font of the status bar message
+    * @param f The new font of the status bar message
     */
   public void setStatusMessageFont(Font f) { _statusReport.setFont(f); }
   
   /** Sets the color of the text in the status bar message
-    *  @param c The color of the text
+    * @param c The color of the text
     */
   public void setStatusMessageColor(Color c) { _statusReport.setForeground(c); }
   
@@ -3991,8 +3987,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }  
   
   /** Oversees the opening of the project by delegating to the model to parse and initialize the project 
-    *  while resetting the navigator pane and opening up the files itself.
-    *  @param projectFile the file of the project to open
+    * while resetting the navigator pane and opening up the files itself.
+    * @param projectFile the file of the project to open
     */
   private void _openProjectHelper(File projectFile) {
     _currentProjFile = projectFile;
@@ -4112,8 +4108,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public File getCurrentProject() { return _currentProjFile;  }
   
   /** Opens all the files returned by the FileOpenSelector prompting the user to handle the cases where files are 
-    *  already open, files are missing, or the action was canceled by the user
-    *  @param openSelector the selector that returns the files to open
+    * already open, files are missing, or the action was canceled by the user
+    * @param openSelector the selector that returns the files to open
     */
   public void open(FileOpenSelector openSelector) {
     try {
@@ -4159,7 +4155,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   
   /** Opens all the files in the directory returned by the FolderSelector.
-    *  @param chooser the selector that returns the files to open
+    * @param chooser the selector that returns the files to open
     */
   public void openFolder(DirectoryChooser chooser) {
     String type = "'." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
@@ -4184,8 +4180,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Opens all the files in the specified directory; it opens all files in nested folders if rec is true.
-    *  @param dir the specified directory
-    *  @param rec true if files in nested folders should be opened
+    * @param dir the specified directory
+    * @param rec true if files in nested folders should be opened
     */
   private void _openFolder(File dir, boolean rec) {
     hourglassOn();
@@ -4475,8 +4471,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Pops up the _saveChooser dialog, asks the user for a new project file name, and sets the project file to the 
-    *  specified file.  Nothing is written in the file system; this action is performed by a subsequent _saveAll().
-    *  @return false if the user canceled the action */
+    * specified file.  Nothing is written in the file system; this action is performed by a subsequent _saveAll().
+    * @return false if the user canceled the action */
   private boolean _saveProjectAs() {
     
 //    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
@@ -4528,9 +4524,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     return map;
   }
   /** Gets the information to be save for a project document.
-    *  Implementation may change if the scroll/selection information is later stored in a place other than the
-    *  definitions pane.  Hopefully this info will eventually be backed up in the OpenDefinitionsDocument in which 
-    *  case all this code should be refactored into the model's _saveProject method
+    * Implementation may change if the scroll/selection information is later stored in a place other than the
+    * definitions pane.  Hopefully this info will eventually be backed up in the OpenDefinitionsDocument in which 
+    * case all this code should be refactored into the model's _saveProject method
     */
   private DocumentInfoGetter _makeInfoGetter(final OpenDefinitionsDocument doc) {
     JScrollPane s = _defScrollPanes.get(doc);
@@ -5041,8 +5037,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Sets the enabled status to false of all actions that  could conflict with JUnit while its is running a test.
-    *  This method saves aside the previous enable state of each action so that when the test is finished, any action
-    *  disabled before the test will remain disabled afterward.
+    * This method saves aside the previous enable state of each action so that when the test is finished, any action
+    * disabled before the test will remain disabled afterward.
     */
   private void _disableJUnitActions() {
     // _compileProjectActionEnabled = _compileProjectAction.isEnabled();
@@ -5296,11 +5292,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Returns the File selected by the JFileChooser.
-    *  @param fc File chooser presented to the user
-    *  @param choice return value from fc
-    *  @return Selected File
-    *  @throws OperationCanceledException if file choice canceled
-    *  @throws RuntimeException if fc returns a bad file or choice
+    * @param fc File chooser presented to the user
+    * @param choice return value from fc
+    * @return Selected File
+    * @throws OperationCanceledException if file choice canceled
+    * @throws RuntimeException if fc returns a bad file or choice
     */
   private File getChosenFile(JFileChooser fc, int choice) throws OperationCanceledException {
     switch (choice) {
@@ -5396,7 +5392,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Removes the ErrorCaretListener corresponding to the given document, after that document has been closed.
-    *  (Allows pane and listener to be garbage collected...)
+    * (Allows pane and listener to be garbage collected...)
     */
   private void _removeErrorListener(OpenDefinitionsDocument doc) {
     JScrollPane scroll = _defScrollPanes.get(doc);
@@ -5407,7 +5403,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Initializes all action objects.  Adds icons and descriptions to several of the actions. Note: this 
-    *  initialization will later be done in the constructor of each action, which will subclass AbstractAction.
+    * initialization will later be done in the constructor of each action, which will subclass AbstractAction.
     */
   private void _setUpActions() {
     _setUpAction(_newAction, "New", "Create a new document");
@@ -5577,9 +5573,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   
   /** Returns the icon with the given name. All icons are assumed to reside in the /edu/rice/cs/drjava/ui/icons
-    *  directory.
-    *  @param name Name of icon image file
-    *  @return ImageIcon object constructed from the file
+    * directory.
+    * @param name Name of icon image file
+    * @return ImageIcon object constructed from the file
     */
   private ImageIcon _getIcon(String name) { return getIcon(name); }
   
@@ -5600,7 +5596,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Sets up the components of the menu bar and links them to the private fields within MainFrame.  This method 
-    *  serves to make the code more legible on the higher calling level, i.e., the constructor.
+    * serves to make the code more legible on the higher calling level, i.e., the constructor.
     */
   private void _setUpMenuBar() {
     
@@ -5615,9 +5611,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Adds an Action as a menu item to the given menu, using the specified configurable keystroke.
-    *  @param menu Menu to add item to
-    *  @param a Action for the menu item
-    *  @param opt Configurable keystroke for the menu item
+    * @param menu Menu to add item to
+    * @param a Action for the menu item
+    * @param opt Configurable keystroke for the menu item
     */
   private void _addMenuItem(JMenu menu, Action a, Option<KeyStroke> opt) {
     JMenuItem item;
@@ -5626,9 +5622,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Sets the given menu item to have the specified configurable keystroke.
-    *  @param item Menu item containing the action
-    *  @param a Action for the menu item
-    *  @param opt Configurable keystroke for the menu item
+    * @param item Menu item containing the action
+    * @param a Action for the menu item
+    * @param opt Configurable keystroke for the menu item
     */
   private void _setMenuShortcut(JMenuItem item, Action a, Option<KeyStroke> opt) {
     KeyStroke ks = DrJava.getConfig().getSetting(opt);
@@ -5958,8 +5954,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Enables and disables the appropriate menu items in the debug menu depending upon the state of the current thread.
-    *  @param isSuspended is true when the current thread has just been suspended
-    *         false if the current thread has just been resumed
+    * @param isSuspended is true when the current thread has just been suspended
+    *        false if the current thread has just been resumed
     */
   private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
     //_suspendDebugAction.setEnabled(!isSuspended);
@@ -6096,7 +6092,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Sets up the toolbar with several useful buttons.  Most buttons are always enabled, but those that are not are
-    *  maintained in fields to allow enabling and disabling.
+    * maintained in fields to allow enabling and disabling.
     */
   private void _setUpToolBar() {
     
@@ -6172,7 +6168,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }  
   
   /** Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED, or 
-    *  FONT_TOOLBAR (name, style, text)
+    * FONT_TOOLBAR (name, style, text)
     */
   private void _updateToolbarButtons() {
     _updateToolBarVisible();
@@ -7138,9 +7134,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Returns a JRadioButtonMenuItem that looks like a JCheckBoxMenuItem. This is a workaround for a known 
-    *  bug on OS X's version of Java. (See http://developer.apple.com/qa/qa2001/qa1154.html)
-    *  @param action Action for the menu item
-    *  @return JRadioButtonMenuItem with a checkbox icon
+    * bug on OS X's version of Java. (See http://developer.apple.com/qa/qa2001/qa1154.html)
+    * @param action Action for the menu item
+    * @return JRadioButtonMenuItem with a checkbox icon
     */
   private JMenuItem _newCheckBoxMenuItem(Action action) {
     String RADIO_ICON_KEY = "RadioButtonMenuItem.checkIcon";
@@ -7161,8 +7157,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Gets the absolute file, or if necessary, the canonical file.
-    *  @param f the file for which to get the full path
-    *  @return the file representing the full path to the given file
+    * @param f the file for which to get the full path
+    * @return the file representing the full path to the given file
     */
   private File _getFullFile(File f) throws IOException {
     if (PlatformFactory.ONLY.isWindowsPlatform() &&
@@ -7330,8 +7326,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Checks if debugPanel's status bar displays the DEBUGGER_OUT_OF_SYNC message but the current document is 
-    *  in sync.  Clears the debugPanel's status bar in this case.  Does not assume that frame is in debug mode.
-    *  Must be executed in event thread.
+    * in sync.  Clears the debugPanel's status bar in this case.  Does not assume that frame is in debug mode.
+    * Must be executed in event thread.
     */
   private void _updateDebugStatus() {
     if (! isDebuggerReady()) return;
@@ -7445,9 +7441,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
-    *  @param doc Document to display
-    *  @param offset Offset to display
-    *  @param shouldHighlight true iff the line should be highlighted.
+    * @param doc Document to display
+    * @param offset Offset to display
+    * @param shouldHighlight true iff the line should be highlighted.
     */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
                                         final boolean shouldHighlight) {
@@ -7455,10 +7451,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
-    *  @param doc Document to display
-    *  @param offset Offset to display
-    *  @param shouldHighlight true iff the line should be highlighted.
-    *  @param shouldAddToHistory true if the location before and after the switch should be added to the browser history
+    * @param doc Document to display
+    * @param offset Offset to display
+    * @param shouldHighlight true iff the line should be highlighted.
+    * @param shouldAddToHistory true if the location before and after the switch should be added to the browser history
     */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
                                         final boolean shouldHighlight, final boolean shouldAddToHistory) {
@@ -7549,10 +7545,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }    
     
     /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
-      *  displayed.  Must be executed only in the event thread.
-      *  @param doc Document to display
-      *  @param lineNumber Line to display or highlight
-      *  @param shouldHighlight true iff the line should be highlighted.
+      * displayed.  Must be executed only in the event thread.
+      * @param doc Document to display
+      * @param lineNumber Line to display or highlight
+      * @param shouldHighlight true iff the line should be highlighted.
       */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
       scrollToDocumentAndOffset(doc, doc.getOffset(lineNumber), shouldHighlight);
@@ -7978,8 +7974,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     /** Called when the active interpreter is changed.
-      * @param inProgress Whether the new interpreter is currently in progress
-      *         with an interaction (ie. whether an interactionEnded event will be fired)
+      * @param inProgress Whether the new interpreter is currently in progress with an interaction (i.e., whether an 
+      *        interactionEnded event will be fired)
       */
     public void interpreterChanged(final boolean inProgress) {
       Utilities.invokeLater(new Runnable() {
@@ -8805,7 +8801,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** @param listener The ComponentListener to add to the open documents list
-    *  This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
+    * This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
     */
   public void addComponentListenerToOpenDocumentsList(ComponentListener listener) {
     _docSplitPane.getLeftComponent().addComponentListener(listener);
@@ -9041,11 +9037,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }    
   }
   
-  /**
-   * Convert a string with URIs to a list of files.
-   * @param data string with URIs
-   * @return list of files
-   */
+  /** Convrert a string with URIs to a list of files.
+    * @param data string with URIs
+    * @return list of files
+    */
   private static java.util.List<File> textURIListToFileList(String data) {
     java.util.List<File> list = new java.util.ArrayList<File>();
     java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n");

@@ -72,30 +72,29 @@ import edu.rice.cs.drjava.model.EventNotifier;
  * @version $Id$
  */
 class JavadocEventNotifier extends EventNotifier<JavadocListener>
-    implements JavadocListener {
-
+  implements JavadocListener {
+  
   /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted() {
     _lock.startRead();
     try { for (JavadocListener jl: _listeners) { jl.javadocStarted(); } }
     finally { _lock.endRead(); }
   }
-
+  
   /** Called after Javadoc is finished.
-   *  @param success whether the Javadoc operation generated proper output
-   *  @param destDir if (success == true) the location where the output was
-   *                 generated, otherwise undefined (possibly null)
-   *  @param allDocs Whether Javadoc was run for all open documents
-   */
+    * @param success whether the Javadoc operation generated proper output
+    * @param destDir  if (success == true) the location where the output was generated, otherwise undefined (null?)
+    * @param allDocs Whether Javadoc was run for all open documents
+    */
   public void javadocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
     try { for (JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); } }
     finally { _lock.endRead();}
   }
-
-  /** Called before attempting Javadoc, to give users a chance to save.
-   *  Do not continue with Javadoc if the user doesn't save!
-   */
+  
+  /** Asks the user if all files should be saved before running javadoc (assuming the proper listener has been 
+    * installed). Does not continue with javadoc if the user fails to save!
+    */
   public void saveBeforeJavadoc() {
     _lock.startRead();
     try { for (JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }

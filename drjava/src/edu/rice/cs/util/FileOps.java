@@ -48,11 +48,11 @@ import edu.rice.cs.util.Log;
 
 import edu.rice.cs.plt.io.IOUtil;
 /** A class to provide some convenient file operations as static methods.
- *  It's abstract to prevent (useless) instantiation, though it can be subclassed
- *  to provide convenient namespace importation of its methods.
- *
- *  @version $Id$
- */
+  *  It's abstract to prevent (useless) instantiation, though it can be subclassed
+  *  to provide convenient namespace importation of its methods.
+  *
+  *  @version $Id$
+  */
 public abstract class FileOps {
   
   private static Log _log = new Log("FileOpsTest.txt", false);
@@ -95,16 +95,15 @@ public abstract class FileOps {
     //public URI toURI() {} (Defer to super implementation.)
     //public URL toURL() {} (Defer to super implementation.)
   };
-
+  
   /** Special sentinal file used in FileOption and test classes among others. */
   public static final File NULL_FILE = new NoFile("") { public boolean exists() { return false; } };
-
+  
 //  /** Special File object corresponding to a dummy file. Simliar to NULL_FILE but exists() returns false. */
 //  public static final File NULL_FILE = new NoFile("") { public boolean exists() { return false; } };
   
-  /** @deprecated  If a best-attempt canonical file is needed, use 
-    *              {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead
-    *              (for example, {@code IOUtil.attemptCanonicalFile(new File(path))})
+  /** @deprecated For a best-attempt canonical file, use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.
+    *             (for example, {@code IOUtil.attemptCanonicalFile(new File(path))})
     */
   @Deprecated public static File makeFile(String path) { 
     File f = new File(path);
@@ -112,9 +111,8 @@ public abstract class FileOps {
     catch(IOException e) { return f; }
   }
   
-  /** @deprecated  If a best-attempt canonical file is needed, 
-    *              use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead
-    *              (for example, {@code IOUtil.attemptCanonicalFile(new File(parentDir, child))})
+  /** @deprecated For a best-attempt canonical file, use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.
+    *             (for example, {@code IOUtil.attemptCanonicalFile(new File(path))})
     */
   @Deprecated public static File makeFile(File parentDir, String child) { 
     File f = new File(parentDir, child);
@@ -123,10 +121,9 @@ public abstract class FileOps {
   }
   
   /** Determines whether the specified file in within the specified file tree. 
-    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#isMember} instead.  Note that the
-    *              replacement method does not test for {@code null} values and does not
-    *              convert to canonical paths -- if these things are necessary, they should
-    *              be done before invoking the method.
+    * @deprecated Use {@link edu.rice.cs.plt.io.IOUtil#isMember} instead.  Note that the new method does not test for 
+    *             {@code null} values and does not convert to canonical paths -- if these things are necessary, they 
+    *             should be done before invoking the method.
     */
   @Deprecated public static boolean inFileTree(File f, File root) {
     if (root == null || f == null) return false;
@@ -159,18 +156,16 @@ public abstract class FileOps {
     * 
     * <p>In Linux/Unix, if the file f is <code>/home/username/folder/file.java</code> and the file b is 
     * <code>/home/username/folder/sublevel/file2.java</code>, then the resulting File path from this method would be 
-    * <code>../file.java</code> while its canoncial path would be <code>/home/username/folder/file.java</code>.</p>
-    * 
-    * <p>Warning: making paths relative is inherently broken on some file systems, because a relative path
+    * <code>../file.java</code> while its canoncial path would be <code>/home/username/folder/file.java</code>.</p><p>
+    * Warning: making paths relative is inherently broken on some file systems, because a relative path
     * requires that both the file and the base have the same root. The Windows file system, and therefore also
     * the Java file system model, however, support multiple system roots (see {@link File#listRoots}).
     * Thus, two files with different roots cannot have a relative path. In that case the absolute path of
-    * the file will be returned</p>
-    * 
+    * the file will be returned</p> 
     * @param f The path that is to be made relative to the base file
     * @param b The file to make the next file relative to
     * @return A new file whose path is relative to the base file while the value of <code>getCanonicalPath()</code> 
-    *    for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
+    *         for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
     */
   public static File makeRelativeTo(File f, File b) throws IOException, SecurityException {
     try {
@@ -227,12 +222,12 @@ public abstract class FileOps {
   }
   
   /** Splits a file into an array of strings representing each parent folder of the given file.  The file whose path
-   *  is <code>/home/username/txt.txt</code> in linux would be split into the string array: 
-   *  {&quot;&quot;,&quot;home&quot;,&quot;username&quot;,&quot;txt.txt&quot;}. Delimeters are excluded.
-   *  @param fileToSplit the file to split into its directories.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#fullPath} instead.  It returns a list of {@code File}
-   *               objects rather than strings, but they appear in the same order.
-   */
+    * is <code>/home/username/txt.txt</code> in linux would be split into the string array: 
+    * {&quot;&quot;,&quot;home&quot;,&quot;username&quot;,&quot;txt.txt&quot;}. Delimeters are excluded.
+    * @param fileToSplit  the file to split into its directories.
+    * @deprecated Use {@link edu.rice.cs.plt.io.IOUtil#fullPath} instead.  It returns a list of {@code File}
+    *             objects rather than strings, but they appear in the same order.
+    */
   @Deprecated public static String[] splitFile(File fileToSplit) {
     String path = fileToSplit.getPath();
     ArrayList<String> list = new ArrayList<String>();
@@ -251,15 +246,15 @@ public abstract class FileOps {
   }
   
   /** List all files (that is, {@code File}s for which {@code isFile()} is {@code true}) matching the provided filter in
-   *  the given directory.
-   *  @param d  The directory to search.
-   *  @param recur  Whether subdirectories accepted by {@code f} should be recursively searched.  Note that 
-   *         subdirectories that <em>aren't</em> accepted by {@code f} will be ignored.
-   *  @param f  The filter to apply to contained {@code File}s.
-   *  @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptListFilesAsIterable} or
-   *               {@link edu.rice.cs.plt.io.IOUtil#listFilesRecursively(File, FileFilter, FileFilter)} instead.
-   */
+    * the given directory.
+    * @param d  The directory to search.
+    * @param recur  Whether subdirectories accepted by {@code f} should be recursively searched.  Note that 
+    *               subdirectories that <em>aren't</em> accepted by {@code f} will be ignored.
+    * @param f  The filter to apply to contained {@code File}s.
+    * @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list.
+    * @deprecated Use {@link edu.rice.cs.plt.io.IOUtil#attemptListFilesAsIterable} or
+    *             {@link edu.rice.cs.plt.io.IOUtil#listFilesRecursively(File, FileFilter, FileFilter)} instead.
+    */
   @Deprecated public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f) {
     ArrayList<File> l = new ArrayList<File>();
     getFilesInDir(d, l, recur, f);
@@ -267,8 +262,8 @@ public abstract class FileOps {
   }
   
   /** Helper fuction for getFilesInDir(File d, boolean recur). {@code acc} is mutated to contain
-   *  a list of <c>File</c>s in the directory specified, not including directories.
-   */
+    * a list of <c>File</c>s in the directory specified, not including directories.
+    */
   private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter) {
     if (d.isDirectory()) {
       File[] files = d.listFiles(filter);
@@ -282,11 +277,10 @@ public abstract class FileOps {
   }
   
   /** @return the canonical file equivalent to f.  Identical to f.getCanonicalFile() except it does not throw an 
-   *  exception when the file path syntax is incorrect (or an IOException or SecurityException occurs for any
-   *  other reason).  It returns the absolute File intead.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile}, which provides the same
-   *               functionality, instead.
-   */
+    * exception when the file path syntax is incorrect (or an IOException or SecurityException occurs for any
+    * other reason).  It returns the absolute File intead.
+    * @deprecated Use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.
+    */
   @Deprecated public static File getCanonicalFile(File f) {
     if (f == null) return f;
     try { return f.getCanonicalFile(); }
@@ -296,12 +290,12 @@ public abstract class FileOps {
   }
   
   /** @return the canonical path for f.  Identical to f.getCanonicalPath() except it does not throw an 
-   *  exception when the file path syntax is incorrect; it returns the absolute path instead.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile}, which provides the same
-   *               functionality, instead.  (The result will be a {@code File} instead of a {@code String}.)
-   */
+    * exception when the file path syntax is incorrect; it returns the absolute path instead.
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.  (The result will be a 
+    * {@code File} instead of a {@code String}.)
+    */
   @Deprecated public static String getCanonicalPath(File f) { return getCanonicalFile(f).getPath(); }
-    
+  
   /** @return the file f unchanged if f exists; otherwise returns NULL_FILE. */
   public static File validate(File f) {
     if (f.exists()) return f;
@@ -309,8 +303,8 @@ public abstract class FileOps {
   }
   
   /** This filter checks for files with names that end in ".java".  (Note that while this filter was <em>intended</em>
-    *              to be a {@code javax.swing.filechooser.FileFilter}, it actually implements a {@code java.io.FileFilter},
-    *              because thats what {@code FileFilter} means in the context of this source file.)
+    * to be a {@code javax.swing.filechooser.FileFilter}, it actually implements a {@code java.io.FileFilter}, because
+    * that is what {@code FileFilter} means in the context of this source file.)
     * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#extensionFileFilter} instead.  Example:
     *              {@code IOUtil.extensionFileFilter("java")}.  
     */
@@ -331,27 +325,27 @@ public abstract class FileOps {
 //    public String getDescription() { return "Java Source Files (*.java)"; }
   };
   
-  /** Reads the stream until it reaches EOF, and then returns the read contents as a byte array. This call may 
-   *  block, since it will not return until EOF has been reached.
-   *  @param stream Input stream to read.
-   *  @return Byte array consisting of all data read from stream.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#toByteArray} instead, which provides the same functionality.
-   *               Note that the {@code IOUtil} method will not close the {@code InputStream}, while this method does.
-   */
+  /** Reads the stream until it reaches EOF, and then returns the read contents as a byte array. This call may block, 
+    * since it will not return until EOF has been reached.
+    * @param stream  Input stream to read.
+    * @return Byte array consisting of all data read from stream.
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#toByteArray} instead.  Note that the {@code IOUtil} method will
+    * not close the {@code InputStream}, while this method does.
+    */
   @Deprecated public static byte[] readStreamAsBytes(final InputStream stream) throws IOException {
     BufferedInputStream buffered;
-
+    
     if (stream instanceof BufferedInputStream) buffered = (BufferedInputStream) stream;
     else  buffered = new BufferedInputStream(stream);
-
+    
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+    
     int readVal = buffered.read();
     while (readVal != -1) {
       out.write(readVal);
       readVal = buffered.read();
     }
-
+    
     stream.close();
     return out.toByteArray();
   }
@@ -361,7 +355,7 @@ public abstract class FileOps {
   public static String readFileAsSwingText(final File file) throws IOException {
     FileReader reader = new FileReader(file);
     final StringBuilder buf = new StringBuilder();
-
+    
     char pred = (char) 0; // initialize as null character
     while (reader.ready()) {
       char c = (char) reader.read();
@@ -372,84 +366,82 @@ public abstract class FileOps {
       
       pred = c;
     }
-
+    
     reader.close();
     return buf.toString();
   }
-
+  
   /** Reads the entire contents of a file and return them as a String.
     * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#toString(File)} instead, which provides the same functionality.
     */
   @Deprecated public static String readFileAsString(final File file) throws IOException {
     FileReader reader = new FileReader(file);
     final StringBuilder buf = new StringBuilder();
-
+    
     while (reader.ready()) {
       char c = (char) reader.read();
       buf.append(c);
     }
-
+    
     reader.close();
     return buf.toString();
   }
   
   /** Copies the text of one file into another.
-   *  @param source the file to be copied
-   *  @param dest the file to be copied to
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#copyFile} instead, which provides the same functionality
-   *               but scales in a much more efficient manner.
-   */
+    * @param source the file to be copied
+    * @param dest the file to be copied to
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#copyFile} instead; it scales in a much more efficiently.
+    */
   @Deprecated public static void copyFile(File source, File dest) throws IOException {
     String text = readFileAsString(source);
     writeStringToFile(dest, text);
   }
-
+  
   /** Creates a new temporary file and writes the given text to it. The file will be deleted on exit.
-   *  @param prefix Beginning part of file name, before unique number
-   *  @param suffix Ending part of file name, after unique number
-   *  @param text Text to write to file
-   *  @return name of the temporary file that was created
-   *  @deprecated  Instead, create a temp file with {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempFile(String, String)},
-   *               then write to it with {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String)}.
-   */
+    * @param prefix Beginning part of file name, before unique number
+    * @param suffix Ending part of file name, after unique number
+    * @param text Text to write to file
+    * @return name of the temporary file that was created
+    * @deprecated  Instead, create a temp file with {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempFile(String, String)},
+    * then write to it with {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String)}.
+    */
   @Deprecated public static File writeStringToNewTempFile(final String prefix, final String suffix, final String text)
-    throws IOException {
+  throws IOException {
     
     File file = File.createTempFile(prefix, suffix);
     file.deleteOnExit();
     writeStringToFile(file, text);
     return file;
   }
-
+  
   /** Writes text to the file overwriting whatever was there.
-   *  @param file File to write to
-   *  @param text Test to write
-   *  @deprecated  Use the equivalent {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String)} instead
-   */
+    * @param file File to write to
+    * @param text Test to write
+    * @deprecated  Use the equivalent {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String)} instead
+    */
   @Deprecated public static void writeStringToFile(File file, String text) throws IOException {
     writeStringToFile(file, text, false);
   }
   
   /** Writes text to the file.
-   *  @param file File to write to
-   *  @param text Text to write
-   *  @param append whether to append. (false=overwrite)
-   *  @deprecated  Use the equivalent {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String, boolean)} instead
-   */
+    * @param file File to write to
+    * @param text Text to write
+    * @param append whether to append. (false=overwrite)
+    * @deprecated  Use the equivalent {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String, boolean)} instead
+    */
   @Deprecated public static void writeStringToFile(File file, String text, boolean append) throws IOException {
     FileWriter writer = new FileWriter(file, append);
     writer.write(text);
     writer.close();
   }
   
-  /** Writes the text to the given file returning true if it happend and false if it could not.  This is a 
-   *  simple wrapper for writeStringToFile that doesn't throw an IOException.
-   *  @param file File to write to
-   *  @param text Text to write
-   *  @param append whether to append. (false=overwrite)
-   *  @deprecated  Use the equivalent {@link edu.rice.cs.plt.io.IOUtil#attemptWriteStringToFile(File, String, boolean)}
-   *               instead
-   */
+  /** Writes text to the given file returning true if it succeeded and false if not.  This is a simple wrapper for
+    * writeStringToFile that doesn't throw an IOException.
+    * @param file  File to write to
+    * @param text  Text to write
+    * @param append  Whether to append. (false=overwrite)
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptWriteStringToFile(File, String, boolean)} instead.
+    */
   @Deprecated public static boolean writeIfPossible(File file, String text, boolean append) {
     try {
       writeStringToFile(file, text, append);
@@ -459,28 +451,28 @@ public abstract class FileOps {
   }
   
   /** Create a new temporary directory. The directory will be deleted on exit, if empty.
-   *  (To delete it recursively on exit, use deleteDirectoryOnExit.)
-   *  @param name Non-unique portion of the name of the directory to create.
-   *  @return File representing the directory that was created.
-   */
+    * (To delete it recursively on exit, use deleteDirectoryOnExit.)
+    * @param name Non-unique portion of the name of the directory to create.
+    *  @return File representing the directory that was created.
+    */
 //   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String)} instead.
 //   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "")}.
-
-/*  @Deprecated */ public static File createTempDirectory(final String name) throws IOException {
+  
+  /*  @Deprecated */ public static File createTempDirectory(final String name) throws IOException {
     return createTempDirectory(name, null);
   }
-
+  
   /** Create a new temporary directory. The directory will be deleted on exit, if it only contains temp files and temp
-   *  directories created after it.  (To delete it on exit regardless of contents, call deleteDirectoryOnExit after
-   *  constructing the file tree rooted at this directory.  Note that createTempDirectory(..) is not much more helpful 
-   *  than mkdir() in this context (other than generating a new temp file name) because cleanup is a manual process.)
-   *  @param name Non-unique portion of the name of the directory to create.
-   *  @param parent Parent directory to contain the new directory
-   *  @return File representing the directory that was created.
-   */
+    * directories created after it.  (To delete it on exit regardless of contents, call deleteDirectoryOnExit after
+    * constructing the file tree rooted at this directory.  Note that createTempDirectory(..) is not much more helpful 
+    * than mkdir() in this context (other than generating a new temp file name) because cleanup is a manual process.)
+    * @param name Non-unique portion of the name of the directory to create.
+    * @param parent Parent directory to contain the new directory
+    * @return File representing the directory that was created.
+    */
 //   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String, File)} instead.
 //   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "", parent)}.
-
+  
   /* @Deprecated */ public static File createTempDirectory(/* final */ String name, /* final */ File parent) throws IOException {
     File result = File.createTempFile(name, "", parent);
     boolean success = result.delete();
@@ -495,14 +487,14 @@ public abstract class FileOps {
 //
 //    return file;
   }
-
+  
   /** Delete the given directory including any files and directories it contains.
-   *  @param dir File object representing directory to delete. If, for some reason, this file object is not a 
-   *             directory, it will still be deleted.
-   *  @return true if there were no problems in deleting. If it returns false, something failed and the directory
-   *          contents likely at least partially still exist.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#deleteRecursively} instead
-   */
+    * @param dir  File object representing directory to delete. If, for some reason, this file object is not a 
+    *             directory, it will still be deleted.
+    * @return true if there were no problems in deleting. If it returns false, something failed and the directory
+    * contents likely at least partially still exist.
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#deleteRecursively} instead
+    */
   @Deprecated public static boolean deleteDirectory(final File dir) {
 //    System.err.println("Deleting file or directory " + dir);
     if (! dir.isDirectory()) { 
@@ -511,7 +503,7 @@ public abstract class FileOps {
 //      System.err.println("Deletion of " + dir + " returned " + res);
       return res;
     }
-
+    
     boolean ret = true;
     File[] childFiles = dir.listFiles();
     if (childFiles != null) { // listFiles may return null if there's an IO error
@@ -525,12 +517,12 @@ public abstract class FileOps {
   }
   
   /** Instructs Java to recursively delete the given directory and its contents when the JVM exits.
-   *  @param dir File object representing directory to delete. If, for some reason, this file object is not a 
-   *             directory, it will still be deleted.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#deleteOnExitRecursively} instead
-   */
+    * @param dir File object representing directory to delete. If, for some reason, this file object is not a 
+    *            directory, it will still be deleted.
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#deleteOnExitRecursively} instead
+    */
   @Deprecated public static void deleteDirectoryOnExit(final File dir) {
-
+    
     // Delete this on exit, whether it's a directory or file
     _log.log("Deleting file/directory " + dir + " on exit");
     dir.deleteOnExit(); 
@@ -544,12 +536,12 @@ public abstract class FileOps {
       }
     }
   }
-
+  
   /** This function starts from the given directory and finds all  packages within that directory
-   *  @param prefix the package name of files in the given root
-   *  @param root the directory to start exploring from
-   *  @return a list of valid packages, excluding the root ("") package
-   */
+    * @param prefix the package name of files in the given root
+    * @param root the directory to start exploring from
+    * @return a list of valid packages, excluding the root ("") package
+    */
   public static LinkedList<String> packageExplore(String prefix, File root) {
     /* Inner holder class. */
     class PrefixAndFile {
@@ -564,12 +556,12 @@ public abstract class FileOps {
     // This set makes sure we don't get caught in a loop if the filesystem has symbolic links
     // that form a circle by tracking the directories we have already explored
     final Set<File> exploredDirectories = new HashSet<File>();
-
+    
     LinkedList<String> output = new LinkedList<String>();
     Stack<PrefixAndFile> working = new Stack<PrefixAndFile>();
     working.push(new PrefixAndFile(prefix, root));
     exploredDirectories.add(root);
-
+    
     // This filter allows only directories, and accepts each directory only once
     FileFilter directoryFilter = new FileFilter(){
       public boolean accept(File f){
@@ -580,7 +572,7 @@ public abstract class FileOps {
       /* The following method is commented out because it was inaccessible. */
 //      public String getDescription() { return "All Folders"; }
     };
-
+    
     // Explore each directory, adding (unique) subdirectories to the working list.  If a directory has .java 
     // files, add the associated package to the list of packages
     while (! working.empty()) {
@@ -596,7 +588,7 @@ public abstract class FileOps {
         }
       }
       File [] javaFiles = current.root.listFiles(JAVA_FILE_FILTER);
-
+      
       if (javaFiles != null) { // listFiles may return null if there's an IO error
         //Only add package names if they have java files and are not the root package
         if (javaFiles.length != 0 && !current.prefix.equals("")) {
@@ -607,32 +599,29 @@ public abstract class FileOps {
     }
     return output;
   }
-
-  /** Renames the given file to the given destination.  Needed since Windows will not allow a rename to 
-   *  overwrite an existing file.
-   *  @param file the file to rename
-   *  @param dest the destination file
-   *  @return true iff the rename was successful
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptMove}, which is equally Windows-friendly, instead.
-   */
+  
+  /** Renames the given file to the given destination.  Needed since Windows does not allow a rename to overwrite an 
+    * existing file.
+    * @param file the file to rename
+    * @param dest the destination file
+    * @return true iff the rename was successful
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptMove}, which is equally Windows-friendly, instead.
+    */
   @Deprecated public static boolean renameFile(File file, File dest) {
     if (dest.exists()) dest.delete();
     return file.renameTo(dest);
   }
-
-  /** This method writes files correctly; it takes care of catching errors and
-   *  making backups and keeping an unsuccessful file save from destroying the old
-   *  file (unless a backup is made).  It makes sure that the file to be saved is 
-   *  not read-only, throwing an IOException if it is.  Note: if saving fails and a 
-   *  backup was being created, any existing backup will be destroyed (this is 
-   *  because the backup is written before saving begins, and then moved back over 
-   *  the original file when saving fails).  As the old backup would have been destroyed 
-   *  anyways if saving had succeeded, I do not think that this is incorrect or 
-   *  unreasonable behavior.
-   *  @param fileSaver keeps track of the name of the file to write, whether to back up the file, and has 
-   *                   a method that actually performs the writing of the file
-   *  @throws IOException if the saving or backing up of the file fails for any reason
-   */
+  
+  /** This method writes files correctly; it takes care of catching errors, making backups, and keeping an unsuccessful 
+    * file save from destroying the old file (unless a backup is made).  It makes sure that the file to be saved is not 
+    * read-only, throwing an IOException if it is.  Note: if saving fails and a backup was being created, any existing 
+    * backup will be destroyed (because the backup is written before saving begins, then moved back over the original 
+    * file when saving fails).  Since the old backup would have been destroyed anyway if saving had succeeded, this
+    * behavior is appropriate.
+    * @param fileSaver  Keeps track of the name of the file to write, whether to back up the file, and has 
+    *                   a method that actually performs the writing of the file
+    * @throws IOException if the saving or backing up of the file fails for any reason
+    */
   public static void saveFile(FileSaver fileSaver) throws IOException {
     
 //    ScrollableDialog sd1 = new ScrollableDialog(null, "saveFile (" + fileSaver + ") called in FileOps.java", "", "");
@@ -693,18 +682,18 @@ public abstract class FileOps {
       fileSaver.saveTo(bos);
       bos.close();
       fos.close();
-
+      
       if (tempFileUsed && !renameFile(tempFile, file))
         throw new IOException("Save failed. Another process may be using " + file + ".");
-
+      
       success = true;
     } 
     finally {
 //      ScrollableDialog sd4 = new ScrollableDialog(null, "finally clause reached in FileOps.saveFile", "", "");
 //      sd4.show();
-    
+      
       if (tempFileUsed) tempFile.delete(); /* Delete the temp file */
-        
+      
       if (makeBackup) {
         /* On failure, attempt to move the backup back to its original location if we
          made one.  On success, register that a backup was successfully made */
@@ -713,28 +702,28 @@ public abstract class FileOps {
       }
     }
   }
-
+  
   public interface FileSaver {
     
-    /** This method tells what to name the backup of the file, if a backup is to be made.
-     *  It may depend on getTargetFile(), so it can thrown an IOException
-     */
+    /** This method tells what to name the backup file, if a backup is made.  It may depend on getTargetFile(), so it
+      * can throw an IOException.
+      */
     public abstract File getBackupFile() throws IOException;
     
-    /** This method indicates whether or not a backup of the file should be made.  It
-     *  may depend on getTargetFile(), so it can throw an IOException
-     */
+    /** This method indicates whether or not a backup of the file should be made.  It may depend on getTargetFile(), 
+      * so it can throw an IOException.
+      */
     public abstract boolean shouldBackup() throws IOException;
-
-    /** This method specifies if the saving process should continue trying to save
-     *  if it can not create the temp file that is written initially.  If you do
-     *  continue saving in this case, the original file may be lost if saving fails.
-     */
+    
+    /** This method specifies if the saving process should continue trying to save the file if the temp file that is 
+      * written initially cannot be created.  Continue saving in this case is dangerous because the original file may
+      * be lost if saving fails.
+      */
     public abstract boolean continueWhenTempFileCreationFails();
     
     /** This method is called to tell the file saver that a backup was successfully made. */
     public abstract void backupDone();
-
+    
     /**
      * This method actually writes info to a file.  NOTE: It is important that this
      * method write to the stream it is passed, not the target file.  If you write
@@ -743,25 +732,24 @@ public abstract class FileOps {
      * @throws IOException when saving fails for any reason
      */
     public abstract void saveTo(OutputStream os) throws IOException;
-
-    /** This method tells what the file is that we want to save to.  It should
-     *  use the canonical name of the file (this means resolving symlinks).  Otherwise,
-     *  the saver would not deal correctly with symlinks.  Resolving symlinks may cause
-     *  an IOException, so this method throws an IOException.
-     */
+    
+    /** This method specifies the file for saving.  It should return the canonical name of the file, resolving symlinks.
+      * Otherwise, the saver cannot deal correctly with symlinks.  Resolving symlinks may cause an IOException, so this
+      * method declares that it may throw an IOException.
+      */
     public abstract File getTargetFile() throws IOException;
   }
-
-  /** This class is a default implementation of FileSaver that makes only 1 backup
-   *  of each file per instantiation of the program (following Emacs' lead).  It 
-   *  backs up to files named <file>~.  It does not implement the saveTo method.
-   */
+  
+  /** This class is a default implementation of FileSaver that makes only one backup of each file per instantiation of
+    * the program (following the Emacs convention).  It creates a backup file named <file>~.  It does not implement the
+    * saveTo method.
+    */
   public abstract static class DefaultFileSaver implements FileSaver {
-
+    
     private File outputFile = FileOps.NULL_FILE;
     private static Set<File> filesNotNeedingBackup = new HashSet<File>();
     private static boolean backupsEnabled = true;
-
+    
     /** This field keeps track of whether or not outputFile has been resolved to its canonical name. */
     private boolean isCanonical = false;
     
@@ -773,7 +761,7 @@ public abstract class FileOps {
     public boolean continueWhenTempFileCreationFails(){ return true; }
     
     public File getBackupFile() throws IOException{ return new File(getTargetFile().getPath() + "~"); }
-
+    
     public boolean shouldBackup() throws IOException{
       if (!backupsEnabled) return false;
       if (!getTargetFile().exists()) return false;
@@ -785,7 +773,7 @@ public abstract class FileOps {
       try { filesNotNeedingBackup.add(getTargetFile()); } 
       catch (IOException ioe) { throw new UnexpectedException(ioe, "getTargetFile should fail earlier"); }
     }
-
+    
     public File getTargetFile() throws IOException{
       if (!isCanonical) {
         outputFile = outputFile.getCanonicalFile();
@@ -795,19 +783,16 @@ public abstract class FileOps {
     }
   }
   
-  /** Convert all path entries in a path string to absolute paths. The delimiter in the path string is the 
-   *  "path.separator" property.  Empty entries are equivalent to "." and will thus are converted to the 
-   *  "user.dir" (working directory).
-   *  Example:
-   *    ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will be converted to 
-   *    "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
-   * 
-   *  @param path path string with entries to convert
-   *  @return path string with all entries as absolute paths
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#parsePath}, {@link edu.rice.cs.plt.io.IOUtil#getAbsoluteFiles},
-   *               {@link edu.rice.cs.plt.io.IOUtil#attemptAbsoluteFiles}, and {@link edu.rice.cs.plt.io.IOUtil#pathToString},
-   *               as needed, instead.
-   */
+  /** Converts all path entries in a path string to absolute paths. The delimiter in the path string is the 
+    * "path.separator" property.  Empty entries are equivalent to "." and thus are converted to the value of "user.dir".
+    *  Example: ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will be converted to 
+    *    "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
+    *  @param path path string with entries to convert
+    *  @return path string with all entries as absolute paths
+    *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#parsePath}, {@link edu.rice.cs.plt.io.IOUtil#getAbsoluteFiles},
+    *  {@link edu.rice.cs.plt.io.IOUtil#attemptAbsoluteFiles}, and {@link edu.rice.cs.plt.io.IOUtil#pathToString},
+    *  as needed, instead.
+    */
   @Deprecated public static String convertToAbsolutePathEntries(String path) {
     String pathSep = System.getProperty("path.separator");
     
@@ -846,7 +831,7 @@ public abstract class FileOps {
     * @return a valid directory for use */
   public static File getValidDirectory(final File origFile) {
     File file = origFile;
-  
+    
     // if it's the NULL_FILE or null, use "user.home"
     if ((file == FileOps.NULL_FILE) || (file == null)) {
       file = new File(System.getProperty("user.home"));

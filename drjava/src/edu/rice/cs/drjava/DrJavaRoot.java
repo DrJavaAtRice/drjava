@@ -70,8 +70,8 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public class DrJavaRoot {
   
   /* Constants for language levels */
@@ -83,7 +83,7 @@ public class DrJavaRoot {
   
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
-
+  
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
   
@@ -91,9 +91,9 @@ public class DrJavaRoot {
   
   private static boolean _attemptingAugmentedClassPath = false;
   private static SimpleInteractionsWindow _debugConsole = null;
-
+  
   private static boolean anyLineNumbersSpecified = false;
-
+  
   /** Main frame of this DrJava instance. */
   private static MainFrame _mainFrame = null;
   
@@ -105,16 +105,16 @@ public class DrJavaRoot {
     debug.log("Starting up");
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
-
+    
 //    Utilities.show("DrJavaRoot started with args = " + Arrays.toString(args));
     // let DrJava class handle command line arguments
     if (!DrJava.handleCommandLineArgs(args)) {
       System.exit(0);
     }
-
+    
     final String[] filesToOpen = DrJava.getFilesToOpen();
     final int numFiles = filesToOpen.length;
-      
+    
     /* files to open held in filesToOpen[0:numFiles-1] which may be an initial segment of filesToOpen */
     
     /* In some unit test cases, creating a MainFrame in the main thread generated index out of bounds exceptions.  It appear that this
@@ -123,69 +123,69 @@ public class DrJavaRoot {
      */
 //    Utilities.invokeAndWait(new Runnable() {
 //      public void run() {
-        try {
-          String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
-          String currLAFName = UIManager.getLookAndFeel().getClass().getName();
-          if (! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
-          
-          // The MainFrame *must* be constructed after the compiler setup process has
-          // occurred; otherwise, the list of compilers in the UI will be wrong.
-          
+    try {
+      String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
+      String currLAFName = UIManager.getLookAndFeel().getClass().getName();
+      if (! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
+      
+      // The MainFrame *must* be constructed after the compiler setup process has
+      // occurred; otherwise, the list of compilers in the UI will be wrong.
+      
 //      Utilities.showDebug("Creating MainFrame");
-          
-          _mainFrame = new MainFrame();
-          
+      
+      _mainFrame = new MainFrame();
+      
 //      Utilities.showDebug("MainFrame created");
-          
-          // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
-          DrJavaErrorWindow.setFrame(_mainFrame);
-          System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.DrJavaErrorHandler");
-          
-          // false means "do not jump to the line number that may be specified, just open the file"
-          _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, false);
-          
-          /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
-           * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
-           * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
-           * specifying a file (ex: java -jar drjava.jar somefile.java)
-           */
-          SwingUtilities.invokeLater(new Runnable(){ public void run(){ 
-            _mainFrame.start();
-            if (anyLineNumbersSpecified) {
-              // this time, we do want to jump to the line number
-              _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
-            }
-          } });
-          
-          // redirect stdout to DrJava's console
-          System.setOut(new PrintStream(new OutputStreamRedirector() {
-            public void print(String s) { _mainFrame.getModel().systemOutPrint(s); }
-          }));
-          
-          // redirect stderr to DrJava's console
-          System.setErr(new PrintStream(new OutputStreamRedirector() {
-            public void print(String s) { _mainFrame.getModel().systemErrPrint(s); }
-          }));
-          
+      
+      // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
+      DrJavaErrorWindow.setFrame(_mainFrame);
+      System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.DrJavaErrorHandler");
+      
+      // false means "do not jump to the line number that may be specified, just open the file"
+      _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, false);
+      
+      /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
+       * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
+       * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
+       * specifying a file (ex: java -jar drjava.jar somefile.java)
+       */
+      SwingUtilities.invokeLater(new Runnable(){ public void run(){ 
+        _mainFrame.start();
+        if (anyLineNumbersSpecified) {
+          // this time, we do want to jump to the line number
+          _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
+        }
+      } });
+      
+      // redirect stdout to DrJava's console
+      System.setOut(new PrintStream(new OutputStreamRedirector() {
+        public void print(String s) { _mainFrame.getModel().systemOutPrint(s); }
+      }));
+      
+      // redirect stderr to DrJava's console
+      System.setErr(new PrintStream(new OutputStreamRedirector() {
+        public void print(String s) { _mainFrame.getModel().systemErrPrint(s); }
+      }));
+      
 //      Utilities.showDebug("showDebugConsole flag = " + DrJava.getShowDebugConsole());
-          // Show debug console if enabled
-          if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
-        }
-        catch(Throwable t) {
-          // Show any errors to the real System.err and in an DrJavaErrorHandler
-          _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
-          t.printStackTrace(_consoleErr);
-          System.out.println("error thrown");
-          new DrJavaErrorHandler().handle(t);
-        }
+      // Show debug console if enabled
+      if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
+    }
+    catch(Throwable t) {
+      // Show any errors to the real System.err and in an DrJavaErrorHandler
+      _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
+      t.printStackTrace(_consoleErr);
+      System.out.println("error thrown");
+      new DrJavaErrorHandler().handle(t);
+    }
 //      }
 //    });
   }
-
+  
   /** Handle the list of files specified on the command line.  Feature request #509701.
-   *  If file exists, open it in DrJava.  Otherwise, ignore it.
-   *  Is there a better way to handle nonexistent files?  Dialog box, maybe?
-   */
+    * If file exists, open it in DrJava.  Otherwise, ignore it.
+    * Is there a better way to handle nonexistent files?  Dialog box, maybe?
+    */
   static void openCommandLineFiles(final MainFrame mf, final String[] filesToOpen, boolean jump) { 
     openCommandLineFiles(mf, filesToOpen, filesToOpen.length, jump);
   }
@@ -198,7 +198,7 @@ public class DrJavaRoot {
   static void openCommandLineFiles(final MainFrame mf, final String[] filesToOpen, final int len, final boolean jump) { 
     Utilities.invokeAndWait(new Runnable() { public void run() { _openCommandLineFiles(mf, filesToOpen, len, jump); }});
   }
-      
+  
   private static void _openCommandLineFiles(final MainFrame mf, String[] filesToOpen, int len, boolean jump) {
 //    Utilities.showDebug("Files to open: " + Arrays.toString(filesToOpen));
     anyLineNumbersSpecified = false;
@@ -247,7 +247,7 @@ public class DrJavaRoot {
           }
         }
       }
-
+      
       catch (FileNotFoundException ex) {
         // TODO: show a dialog? (file not found)
       }
@@ -266,11 +266,11 @@ public class DrJavaRoot {
       catch (Exception ex) { throw new UnexpectedException(ex); }
     }
   }
-
+  
   /** Shows a separate interactions window with a reference to DrJava's MainFrame defined as "mainFrame".  
-   *  Useful for debugging DrJava.
-   *  @param mf MainFrame to define in the new window
-   */
+    * Useful for debugging DrJava.
+    * @param mf MainFrame to define in the new window
+    */
   public static void showDrJavaDebugConsole(MainFrame mf) {
     if (_debugConsole == null) {
       _debugConsole = new SimpleInteractionsWindow("DrJava Debug Console") {
@@ -288,18 +288,18 @@ public class DrJavaRoot {
     }
     else  _debugConsole.toFront();
   }
-
+  
   /** Get the actual System.err stream.
-   *  @return System.err
-   */
+    * @return System.err
+    */
   public static PrintStream consoleErr() { return  _consoleErr; }
-
+  
   /** Get the actual System.out stream.
     * @return System.out
-   */
+    */
   public static PrintStream consoleOut() { return  _consoleOut; }
   
-    /** User dragged something into the component. */
+  /** User dragged something into the component. */
   public static void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
     _mainFrame.dragEnter(dropTargetDragEvent);
   }

@@ -58,7 +58,7 @@ import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
   * the Swing interactions and definitions documents.
   */
 public class InteractionsDJDocument extends AbstractDJDocument implements ConsoleDocumentInterface {
-
+  
   /** Whether the document currently has a prompt and is ready to accept input. */
   private volatile boolean _hasPrompt;
   
@@ -77,8 +77,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   public boolean hasPrompt() { return _hasPrompt; }
   
   /** Sets the _hasPrompt property. 
-   *  @param val new boolean value for _hasPrompt.
-   */
+    * @param val new boolean value for _hasPrompt.
+    */
   public void setHasPrompt(boolean val) { 
     acquireWriteLock();
     _hasPrompt = val;
@@ -136,8 +136,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   }
   
   /** Attempts to set the coloring on the graphics based upon the content of the styles list
-   *  returns false if the point is not in the list.  Assumes that ReadLock is already held.
-   */
+    * returns false if the point is not in the list.  Assumes that ReadLock is already held.
+    */
   public boolean setColoring(int point, Graphics g) {
     synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
@@ -211,13 +211,13 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
       }
     }
   }
-    
+  
   /** Called when the Interactions pane is reset.  Assumes that ReadLock is already held. */
   public void clearColoring() { synchronized(_stylesList) { _toClear = true; } }
   
   /** Returns true iff the end of the current interaction is an open comment block
-   *  @return true iff the end of the current interaction is an open comment block
-   */
+    * @return true iff the end of the current interaction is an open comment block
+    */
   public boolean inBlockComment() {
     acquireReadLock();
     try {

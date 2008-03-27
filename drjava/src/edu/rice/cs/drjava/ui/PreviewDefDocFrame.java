@@ -45,9 +45,9 @@ import edu.rice.cs.drjava.model.*;
  * @version $Id$
  */
 public class PreviewDefDocFrame extends PreviewFrame {
-
+  
   private OpenDefinitionsDocument _document;
-
+  
   /** Contructs a new PreviewDefDocFrame using a parent model and a MainFrame object. Should only be called in event 
     * thread. 
     */
@@ -56,30 +56,20 @@ public class PreviewDefDocFrame extends PreviewFrame {
   }
   
   /** Sets up the document to be displayed and returns the Pageable object that allows display by pages
-   * 
-   *  @param model the current display model
-   *  @param notUsed not used for this kind of PreviewFrame (only applies to printing the console or interaction)
-   *  
-   *  @return a Pageable object that allows the document to be displayed by pages
-   */
+    * @param model the current display model
+    * @param notUsed not used for this kind of PreviewFrame (only applies to printing the console or interaction)
+    * @return a Pageable object that allows the document to be displayed by pages
+    */
   protected Pageable setUpDocument(SingleDisplayModel model, boolean notUsed) {
     _document = model.getActiveDocument();
     return  _document.getPageable();
   }
-
-
+  
+  
   protected void _print() {
-    try {
-      _document.print();
-    }
-    catch (FileMovedException fme) {
-      _mainFrame._showFileMovedError(fme);
-    }
-    catch (PrinterException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
-    }
-    catch (BadLocationException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
-    }
+    try { _document.print(); }
+    catch (FileMovedException fme) { _mainFrame._showFileMovedError(fme); }
+    catch (PrinterException e) { _showError(e, "Print Error", "An error occured while printing."); }
+    catch (BadLocationException e) { _showError(e, "Print Error", "An error occured while printing."); }
   }
 }

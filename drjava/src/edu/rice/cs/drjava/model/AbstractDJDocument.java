@@ -215,7 +215,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   
   /** Create a set of normal endings, i.e., semi-colons and braces for the purposes of indenting.
-    *  @return the set of normal endings
+    * @return the set of normal endings
     */
   protected static HashSet<String> _makeNormEndings() {
     HashSet<String> normEndings = new HashSet<String>();
@@ -378,7 +378,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   
   /** Checks to see if the current string is a number
-    *  @return true if x is a parseable number
+    * @return true if x is a parseable number
     */
   private boolean _isNum(String x) {
     try {
@@ -389,7 +389,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Checks to see if the current string is a type. A type is assumed to be a primitive type OR
-    *  anything else that begins with a capitalized character
+    * anything else that begins with a capitalized character
     */
   private boolean _isType(String x) {
     if (_primTypes.contains(x)) return true;
@@ -402,20 +402,20 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   private boolean _hasOnlySpaces(String text) { return (text.trim().length() == 0); }
   
   /** Fire event that styles changed from current location to the end.
-    *  Right now we do this every time there is an insertion or removal.
-    *  Two possible future optimizations:
-    *  <ol>
-    *  <li>Only fire changed event if text other than that which was inserted
-    *     or removed *actually* changed status. If we didn't changed the status
-    *     of other text (by inserting or deleting unmatched pair of quote or
-    *     comment chars), no change need be fired.
-    *  <li>If a change must be fired, we could figure out the exact end
-    *     of what has been changed. Right now we fire the event saying that
-    *     everything changed to the end of the document.
-    *  </ol>
+    * Right now we do this every time there is an insertion or removal.
+    * Two possible future optimizations:
+    * <ol>
+    * <li>Only fire changed event if text other than that which was inserted
+    *    or removed *actually* changed status. If we didn't changed the status
+    *    of other text (by inserting or deleting unmatched pair of quote or
+    *    comment chars), no change need be fired.
+    * <li>If a change must be fired, we could figure out the exact end
+    *    of what has been changed. Right now we fire the event saying that
+    *    everything changed to the end of the document.
+    * </ol>
     *
-    *  I don't think we'll need to do either one since it's still fast now.
-    *  I think this is because the UI only actually paints the things on the screen anyway.
+    * I don't think we'll need to do either one since it's still fast now.
+    * I think this is because the UI only actually paints the things on the screen anyway.
     */
   protected abstract void _styleChanged(); 
   
@@ -440,7 +440,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Add a character to the underlying reduced model. ASSUMEs _reduced lock is already held!
-    *  @param curChar the character to be added. */
+    * @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
     _clearCache(_currentLocation);
     _reduced.insertChar(curChar);
@@ -793,7 +793,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** This function finds the given character in the same statement as the given position, and before the given
-    *  position.  It is used by QuestionExistsCharInStmt and QuestionExistsCharInPrevStmt
+    * position.  It is used by QuestionExistsCharInStmt and QuestionExistsCharInPrevStmt
     */
   public boolean findCharInStmtBeforePos(char findChar, int position) {
     if (position == -1) {
@@ -990,7 +990,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param end Position in document to end indenting at
     * @param reason a flag from {@link Indenter} to indicate the reason for the indent
     *        (indent logic may vary slightly based on the trigger action)
-    *  @param pm used to display progress, null if no reporting is desired
+    * @param pm used to display progress, null if no reporting is desired
     */
   private void _indentBlock(final int start, final int end, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException, BadLocationException {
@@ -1026,10 +1026,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public boolean _indentLine(Indenter.IndentReason reason) { return getIndenter().indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
-    *  non-whitespace character, the position of the first non-whitespace character is returned.  
-    *  If currPos is at or to the left of the first non-whitespace character, the beginning of
-    *  the line is returned.
-    *  @param currPos A position on the current line
+    * non-whitespace character, the position of the first non-whitespace character is returned.  
+    * If currPos is at or to the left of the first non-whitespace character, the beginning of
+    * the line is returned.
+    * @param currPos A position on the current line
     */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
     String prefix;
@@ -1410,7 +1410,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Helper method for getFirstNonWSCharPos Determines whether the current character is the start of a comment: 
-    *  "/*" or "//"
+    * "/*" or "//"
     */
   protected static boolean _isStartOfComment(String text, int pos) {
     char currChar = text.charAt(pos);
@@ -1427,8 +1427,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   private boolean _isStartOfComment(int pos) { return _isStartOfComment(getText(), pos); }
   
 //  /** Helper method for findPrevNonWSCharPos. Determines whether the current character is the start of a comment
-//    *  encountered from the end: '/' or '*' preceded by a '/'.
-//    *  @return true if (pos-1,pos) == '/*' or '//'
+//    * encountered from the end: '/' or '*' preceded by a '/'.
+//    * @return true if (pos-1,pos) == '/*' or '//'
 //    */
 //  protected static boolean _isOneCharPastStartOfComment(String text, int pos) {
 //    char currChar = text.charAt(pos);
@@ -1744,7 +1744,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //  }
   
 //  /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
-//    *  in {@link #removeUpdate}.
+//    * in {@link #removeUpdate}.
 //    */
 //  public void remove(final int offset, final int len) throws BadLocationException {
 //    

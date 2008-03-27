@@ -39,10 +39,8 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.drjava.DrJava;
 import java.util.Iterator;
 
-/** Class representing values from the DrJava configuration file that
-  * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+/** Class representing values from the DrJava configuration file that can be inserted as variables in external processes.
+  * @version $Id$
   */
 public class ConfigProperty extends EagerProperty {
   /** Create a configuration property. */

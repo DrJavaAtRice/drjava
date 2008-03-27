@@ -40,52 +40,52 @@ import java.io.File;
 import edu.rice.cs.util.classloader.ClassFileError;
 
 /** Callback interface which allows an JUnitModel to respond to tests running in a remote JVM.
- * 
- * @version $Id$
- */
+  * 
+  * @version $Id$
+  */
 public interface JUnitModelCallback {
   
   /** Called from the JUnitTestManager if its given className is not a test case.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(boolean isTestAll);
   
- /** Called from the JUnitTestManager if it encounters an illegal class file.
-   *  @param e the ClassFileError object describing the error
-   */
+  /** Called from the JUnitTestManager if it encounters an illegal class file.
+    * @param e the ClassFileError object describing the error
+    */
   public void classFileError(ClassFileError e);
   
   /** Called to indicate that a suite of tests has started running.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void testSuiteStarted(int numTests);
   
   /** Called when a particular test is started.
-   *  @param testName The name of the test being started.
-   */
+    * @param testName The name of the test being started.
+    */
   public void testStarted(String testName);
   
   /** Called when a particular test has ended.
-   *  @param testName The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error or simply failed.
-   */
+    * @param testName The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error or simply failed.
+    */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError);
   
   /** Called when a full suite of tests has finished running.
-   *  @param errors The array of errors from all failed tests in the suite.
-   */
+    * @param errors The array of errors from all failed tests in the suite.
+    */
   public void testSuiteEnded(JUnitError[] errors);
   
   /** Called when the JUnitTestManager wants to open a file that is not currently open.
-   *  @param className the name of the class for which we want to find the file
-   *  @return the file associated with the given class
-   */
+    * @param className the name of the class for which we want to find the file
+    * @return the file associated with the given class
+    */
   public File getFileForClassName(String className);
-
+  
   /** Returns the accumulated classpath in use by all Java interpreters */
   public Iterable<File> getClassPath();
-
+  
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady();
 }

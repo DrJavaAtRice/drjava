@@ -46,52 +46,46 @@ import java.util.TreeMap;
 import java.util.Properties;
 import java.util.List;
 
-/**
- * Test functions of StringOps.
- */
+/** Test functions of StringOps. */
 public class StringOpsTest extends DrJavaTestCase {
-  /**
-   *  Test the replace() method of StringOps class
-   */
+  /** Test the replace() method of StringOps class. */
   public void testReplace() {
     String test = "aabbccdd";
     assertEquals("testReplace:", "aab12cdd", StringOps.replace(test, "bc", "12"));
     test = "cabcabc";
     assertEquals("testReplace:", "cabc", StringOps.replace(test, "cabc", "c"));
   }
-
-  /**
-   *  Test the getOffsetAndLength() method of StringOps class
-   */
+  
+  /** Test the getOffsetAndLength() method of StringOps class. */
   public void testGetOffsetAndLength() {
     String test = "123456789\n123456789\n123456789\n";
-
+    
     // The offset is always one less than the first row/col
     // The length includes the start and end positions
     Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 9);
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.second());
-
+    
     oAndL = StringOps.getOffsetAndLength(test, 1, 1, 2, 3);
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", new Integer(13), oAndL.second());
-
+    
     oAndL = StringOps.getOffsetAndLength(test, 1, 5, 2, 3);
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(4), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.second());
-
+    
     oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 1);
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.second());
-
+    
     oAndL = StringOps.getOffsetAndLength(test, 3, 5, 3, 5);
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(24), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.second());
-
+    
     oAndL = StringOps.getOffsetAndLength(test, 2, 3, 3, 6);
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(12), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", new Integer(14), oAndL.second());
-
+    
     try {
       StringOps.getOffsetAndLength(test, 3, 2, 2, 3);
       fail("Should not have been able to compute offset where startRow > endRow");
@@ -99,7 +93,7 @@ public class StringOpsTest extends DrJavaTestCase {
     catch (IllegalArgumentException ex) {
       // correct behavior
     }
-
+    
     try {
       StringOps.getOffsetAndLength(test, 2, 4, 2, 3);
       fail("Should not have been able to compute offset where start > end");
@@ -107,7 +101,7 @@ public class StringOpsTest extends DrJavaTestCase {
     catch (IllegalArgumentException ex) {
       // correct behavior
     }
-
+    
     try {
       StringOps.getOffsetAndLength(test, 4, 4, 5, 5);
       fail("Should not have been able to compute offset where the\n" +
@@ -116,7 +110,7 @@ public class StringOpsTest extends DrJavaTestCase {
     catch (IllegalArgumentException ex) {
       // correct behavior
     }
-
+    
     try {
       StringOps.getOffsetAndLength(test, 3, 4, 3, 12);
       fail("Should not have been able to compute offset where the\n" +
@@ -125,7 +119,7 @@ public class StringOpsTest extends DrJavaTestCase {
     catch (IllegalArgumentException ex) {
       // correct behavior
     }
-
+    
     try {
       StringOps.getOffsetAndLength(test, 2, 15, 3, 1);
       fail("Should not have been able to compute offset where the\n" +
@@ -135,7 +129,7 @@ public class StringOpsTest extends DrJavaTestCase {
       // correct behavior
     }
   }
-
+  
   /**
    * Tests that getting the stack trace of a throwable works correctly.
    */
@@ -148,7 +142,7 @@ public class StringOpsTest extends DrJavaTestCase {
     };
     assertEquals("Should have returned the correct stack trace!", trace, StringOps.getStackTrace(t));
   }
-
+  
   /**
    * Tests converting a string to a literal
    */
@@ -157,27 +151,27 @@ public class StringOpsTest extends DrJavaTestCase {
     String expResult = "\" a  b  c  d\"";
     String actResult = StringOps.convertToLiteral(toConvert);
     assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
-
+    
     toConvert = "\\ hello world \\";
     expResult = "\"\\\\ hello world \\\\\"";
     actResult = StringOps.convertToLiteral(toConvert);
     assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
-
+    
     toConvert = "\\\n\\n";
     expResult = "\"\\\\\\n\\\\n\"";
     actResult = StringOps.convertToLiteral(toConvert);
     assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
-
+    
     toConvert = "\\\"\t\\t";
     expResult = "\"\\\\\\\"\\t\\\\t\"";
     actResult = StringOps.convertToLiteral(toConvert);
     assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
-
+    
     toConvert = "\"\\\"\t\\n\n\\\n\"";
     expResult = "\"\\\"\\\\\\\"\\t\\\\n\\n\\\\\\n\\\"\"";
     actResult = StringOps.convertToLiteral(toConvert);
     assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
-
+    
     toConvert = "    ";
     expResult = "\"    \"";
     actResult = StringOps.convertToLiteral(toConvert);
@@ -221,7 +215,7 @@ public class StringOpsTest extends DrJavaTestCase {
       };
     }
   }
-
+  
   /**
    * Tests for getting the simple name of a class.
    */
@@ -286,8 +280,8 @@ public class StringOpsTest extends DrJavaTestCase {
   }
   
   /** Tests for getting the simple name of a class. Works by comparing with Java 1.5.0's Class.getSimpleName().
-   *  This test is commented out to remove it from regular unit testing because it is incompatible with Java 1.4.
-   */
+    * This test is commented out to remove it from regular unit testing because it is incompatible with Java 1.4.
+    */
 //  public void testGetSimpleName15() {
 //    String exp = java.lang.Integer.class.getSimpleName();
 //    String act = StringOps.getSimpleName(java.lang.Integer.class);
@@ -439,17 +433,17 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("a", l.get(0));
     assertEquals("b", l.get(1));
     assertEquals("c", l.get(2));
-
+    
     l = StringOps.commandLineToList("a'b c'");
     // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a'b c'", l.get(0));
-
+    
     l = StringOps.commandLineToList("a\"b c\"");
     // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b c\"", l.get(0));
-
+    
     l = StringOps.commandLineToList("a\"b 'c'\"");
     // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
@@ -521,5 +515,5 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals(expected, actual);
     assertEquals("${xxx}xyz", StringOps.replaceVariables("$${xxx}xyz",props,PropertyMaps.TO_STRING));
   }
-
+  
 }

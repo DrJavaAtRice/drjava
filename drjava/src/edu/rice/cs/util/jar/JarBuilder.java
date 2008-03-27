@@ -43,7 +43,7 @@ import java.util.jar.Manifest;
 
 public class JarBuilder {
   private JarOutputStream _output;
-
+  
   /**
    * Creates a file file without a manifest
    *
@@ -53,7 +53,7 @@ public class JarBuilder {
   public JarBuilder(File file) throws IOException {
     _output = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(file)), ManifestWriter.DEFAULT);
   }
-
+  
   /**
    * Creates an empty jar file with the given manifest
    *
@@ -64,7 +64,7 @@ public class JarBuilder {
   public JarBuilder(File jar, File manifest) throws IOException {
     _output = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(jar)), new Manifest(new FileInputStream(manifest)));
   }
-
+  
   /**
    * Creates an empty jar file with the given manifest
    *
@@ -80,7 +80,7 @@ public class JarBuilder {
       e.printStackTrace();
     }
   }
-
+  
   /**
    * Takes a parent name and a field name and returns the concatenation of them correctly
    *
@@ -96,7 +96,7 @@ public class JarBuilder {
       return parent + name;
     return parent + sep + name;
   }
-
+  
   /**
    * Adds the file to the given path and name
    *
@@ -106,42 +106,41 @@ public class JarBuilder {
    */
   public void addFile(File file, String parent, String fileName) throws IOException {
     byte data[] = new byte[2048];
-
+    
     FileInputStream fi = new FileInputStream(file.getAbsolutePath());
     BufferedInputStream origin = new BufferedInputStream(fi, 2048);
-
+    
     JarEntry entry = new JarEntry(makeName(parent, fileName));
     _output.putNextEntry(entry);
-
+    
     int count = origin.read(data, 0, 2048);
     while (count != -1) {
       _output.write(data, 0, count);
       count = origin.read(data, 0, 2048);
     }
-
+    
     origin.close();
   }
-
+  
   /** Add the directory into the directory specified by parent
-   *  @param dir the directory to add
-   *  @param parent the path inside the jar that the directory should be added to
-   */
+    * @param dir the directory to add
+    * @param parent the path inside the jar that the directory should be added to
+    */
   public void addDirectoryRecursive(File dir, String parent) {
     addDirectoryRecursiveHelper(dir, parent, new byte[2048], new FileFilter() {
       public boolean accept(File pathname) { return true; }
     });
   }
-
-  /**
-   * Add the directory into the directory specified by parent
-   * @param dir the directory to add
-   * @param parent the path inside the jar that the directory should be added to
-   * @param filter the filter used to filter the files
-   */
+  
+  /** Add the directory into the directory specified by parent
+    * @param dir the directory to add
+    * @param parent the path inside the jar that the directory should be added to
+    * @param filter the filter used to filter the files
+    */
   public void addDirectoryRecursive(File dir, String parent, FileFilter filter) {
     addDirectoryRecursiveHelper(dir, parent, new byte[2048], filter);
   }
-
+  
   /**
    * Add the contents of a directory that match a filter to the archive
    * @param dir the directory to add
@@ -154,16 +153,16 @@ public class JarBuilder {
     try {
       File[] files = dir.listFiles(filter);
       BufferedInputStream origin = null;
-
+      
       if( files == null ) // listFiles may return null if there's an IO error
         return true;
       for (int i = 0; i < files.length; i++) {
         if( files[i].isFile() ) {
           origin = new BufferedInputStream(new FileInputStream(files[i]), 2048);
-
+          
           JarEntry entry = new JarEntry(makeName(parent, files[i].getName()));
           _output.putNextEntry(entry);
-
+          
           int count;
           while((count = origin.read(buffer, 0, 2048)) != -1) {
             _output.write(buffer, 0, count);
@@ -179,7 +178,7 @@ public class JarBuilder {
     }
     return true;
   }
-
+  
   /**
    * Makes a directory in the jar file
    *
@@ -197,7 +196,7 @@ public class JarBuilder {
     }
     return true;
   }
-
+  
   /**
    * Close writing on the jar file
    */

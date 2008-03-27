@@ -56,30 +56,30 @@ import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 /** A simple implementation of InteractionsModel, which uses a DynamicJavaAdapter directly (in the same JVM) to 
- *  interpret code.  It can be used in a standalone interface, such as edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
- *  @version $Id$
- */
+  * interpret code.  It can be used in a standalone interface, such as edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
+  * @version $Id$
+  */
 public class SimpleInteractionsModel extends InteractionsModel {
-
+  
   /** Milliseconds to wait after each println */
   protected static final int WRITE_DELAY = 100;
-
+  
   protected ClassPathManager _classPathManager;
   protected Interpreter _interpreter;
-
+  
   /** Creates a new InteractionsModel using a InteractionsDJDocument. */
   public SimpleInteractionsModel() { this(new InteractionsDJDocument()); }
-
+  
   /** Creates a new InteractionsModel with the given document adapter.
-   *  @param document Toolkit-independent document adapter
-   */
+    * @param document Toolkit-independent document adapter
+    */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
     _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
-
+  
   /**
    * Interprets the given command.
    * @param toEval command to be evaluated
@@ -101,7 +101,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     }
     finally { _interactionIsOver(); }
   }
-
+  
   /**
    * Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
@@ -114,7 +114,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     }
     catch (InterpreterException e) { return ""; }
   }
-
+  
   /**
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
@@ -124,46 +124,46 @@ public class SimpleInteractionsModel extends InteractionsModel {
 //    Class c = _interpreter.getVariableClass(var);
 //    return c.getName();
   }
-
+  
   /** Adds the given path to the interpreter's classpath.
-   *  @param path Path to add
-   */
+    * @param path Path to add
+    */
   public void addProjectClassPath(File path) { _classPathManager.addProjectCP(path); }
-
+  
   /** Adds the given path to the interpreter's classpath.
-   *  @param path Path to add
-   */
+    * @param path Path to add
+    */
   public void addBuildDirectoryClassPath(File path) { _classPathManager.addBuildDirectoryCP(path); }
-
+  
   /** Adds the given path to the interpreter's classpath.
-   *  @param path Path to add
-   */
+    * @param path Path to add
+    */
   public void addProjectFilesClassPath(File path) { _classPathManager.addProjectFilesCP(path); }
-
+  
   /** Adds the given path to the interpreter's classpath.
-   *  @param path Path to add
-   */
+    * @param path Path to add
+    */
   public void addExternalFilesClassPath(File path) { _classPathManager.addExternalFilesCP(path); }
-
+  
   /** Adds the given path to the interpreter's classpath.
-   *  @param path Path to add
-   */
+    * @param path Path to add
+    */
   public void addExtraClassPath(File path) { _classPathManager.addExtraCP(path); }
-
-
+  
+  
   /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
   public void setInterpreterPrivateAccessible(boolean accessible) {
     // TODO: implement this with the Options object
     //_interpreter.setPrivateAccessible(accessible);
   }
-
+  
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
-   *  @param t The Throwable thrown by System.exit
-   */
+    * @param t The Throwable thrown by System.exit
+    */
   protected void _interpreterResetFailed(Throwable t) {
     _document.insertBeforeLastPrompt("Reset Failed!" + _newLine, InteractionsDocument.ERROR_STYLE);
   }
-
+  
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) {
     interpreterResetting();
@@ -171,42 +171,42 @@ public class SimpleInteractionsModel extends InteractionsModel {
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     interpreterReady(wd);
   }
-
+  
   /** Notifies listeners that an interaction has started. */
   protected void _notifyInteractionStarted() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
   }
-
+  
   /** Notifies listeners that an interaction has ended. */
   protected void _notifyInteractionEnded() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionEnded(); } });
   }
-
+  
   /** Notifies listeners that an interaction contained a syntax error. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionErrorOccurred(offset, length); } });
   }
-
+  
   /** Notifies listeners that the interpreter is resetting. */
   protected void _notifyInterpreterResetting() {  /* do nothing */  }
-
+  
   /** Notifies listeners that the interpreter is ready.  */
   public void _notifyInterpreterReady(File wd) {
     //  Ok, we don't need to do anything special
   }
-
+  
   /** Notifies listeners that the interpreter has exited unexpectedly.
-   *  @param status Status code of the dead process
-   */
+    * @param status Status code of the dead process
+    */
   protected void _notifyInterpreterExited(final int status) {
     // Won't happen in a single JVM
   }
-
+  
   /** Notifies listeners that the interpreter reset failed. */
   protected void _notifyInterpreterResetFailed(Throwable t) {
     // Won't happen in a single JVM
   }
-
+  
   /** Notifies listeners that the interperaction was incomplete. */
   protected void _notifyInteractionIncomplete() {
     // Oh well.  Nothing to do.
@@ -214,7 +214,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   
   /** Notifies listeners that the slave JVM has been used. */
   protected void _notifySlaveJVMUsed() { /* do nothing; no slave JVM */ }
-   
+  
   /** Returns null because console tab document is not supported in this model */
   public ConsoleDocument getConsoleDocument() { return null; }
 }

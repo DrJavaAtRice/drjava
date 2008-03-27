@@ -37,21 +37,21 @@
 package edu.rice.cs.util.docnavigation;
 
 /** A listener that runs when a document is selected in the navigator and when a document is deselected. The object 
- *  passed to the listener is a NodeData, which only supports processing via the interface NodeDataVisitor, whose 
- *  methods, rather than getting the NodeData host, receive the data they were holding.  
- *  This way, the listener does not need to know what type of information is in the selected node until it is used.
- */
+  *  passed to the listener is a NodeData, which only supports processing via the interface NodeDataVisitor, whose 
+  *  methods, rather than getting the NodeData host, receive the data they were holding.  
+  *  This way, the listener does not need to know what type of information is in the selected node until it is used.
+  */
 
 public interface INavigationListener<ItemT extends INavigatorItem> {
   /** Runs when an item in a navigator is selected
-   *  @param dat the NodeData data wrapper for the data in the newly selected node of the navigator
-   *  @param modelInitiated whether the change was initated by the model (true) or by the user (false)
-   */
+    * @param dat the NodeData data wrapper for the data in the newly selected node of the navigator
+    * @param modelInitiated whether the change was initated by the model (true) or by the user (false)
+    */
   public void gainedSelection(NodeData<? extends ItemT> dat, boolean modelInitiated);
   
   /** Runs when an item in a navigator is unselected
-   *  @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
-   *  @param modelInitiated whether the change was initated by the model (true) or by the user (false)
-   */
+    * @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
+    * @param modelInitiated whether the change was initated by the model (true) or by the user (false)
+    */
   public void lostSelection(NodeData<? extends ItemT> dat, boolean modelInitiated);
 }

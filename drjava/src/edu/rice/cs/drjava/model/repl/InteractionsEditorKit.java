@@ -81,8 +81,8 @@ public class InteractionsEditorKit extends StyledEditorKit {
   };
   
   /** Get the MIME content type of the document.
-   *  @return "text/java"
-   */
+    * @return "text/java"
+    */
   public String getContentType() { return "text/java"; }
   
   /** We want to use our ColoringView to render text, so here we return a factory that creates ColoringViews. */

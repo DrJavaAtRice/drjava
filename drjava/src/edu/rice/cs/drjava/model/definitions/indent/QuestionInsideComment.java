@@ -40,17 +40,16 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /** Asks whether the beginning of the current line is inside a C-style comment.
- *
- *  @version $Id$
- */
+  * @version $Id$
+  */
 class QuestionInsideComment extends IndentRuleQuestion {
   
   QuestionInsideComment(final IndentRule yesRule, final IndentRule noRule) { super(yesRule, noRule); }
-
+  
   /** Determines if the (start of the) current line in the document is in a block comment.
-   *  @param doc AbstractDJDocument containing the line to be indented.
-   *  @return true if this node's rule holds.
-   */
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @return true if this node's rule holds.
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { 
     return doc.inBlockComment(doc.getCurrentLocation()); 
   }

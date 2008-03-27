@@ -45,14 +45,14 @@ import edu.rice.cs.util.swing.Utilities;
 //import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /** This class is an extension of JList that adds data shadowing the model embedded in a JList.
- *  Since all changes to the model (except for the selected item!) must go through this interface,
- *  we can support access to methods from non-event threads as long as these methods do not modify
- *  the model.  However, all of the public methods that access and modify the model (the latter only running
- *  in the event thread) must be atomic relative to each other, so synchronization is required in most
- *  cases.
- * 
- *  TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
- */
+  *  Since all changes to the model (except for the selected item!) must go through this interface,
+  *  we can support access to methods from non-event threads as long as these methods do not modify
+  *  the model.  However, all of the public methods that access and modify the model (the latter only running
+  *  in the event thread) must be atomic relative to each other, so synchronization is required in most
+  *  cases.
+  * 
+  *  TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
+  */
 
 class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDocumentNavigator<ItemT> {
   
@@ -83,8 +83,8 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     addListSelectionListener(new ListSelectionListener() {
       /** Called when the list value has changed. Should only run in the event thread.
-       *  @param e the event corresponding to the change
-       */
+        * @param e the event corresponding to the change
+        */
       public void valueChanged(final ListSelectionEvent e) {
         Utilities.invokeLater( new Runnable() {
           public void run() {
@@ -119,31 +119,30 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Adds the document doc to this navigator.  Should only be executed in event thread.
-   *  @param doc the document to add
-   */
+    * @param doc the document to add
+    */
   public void addDocument(ItemT doc) { synchronized(_model) { _model.addElement(doc); } }
   
   /** Adds the document to this navigator and ignores the specified path.  Should only be
-   *  executed in event thread.
-   *  @param doc the document to add -- assumed to be of type T
-   *  @param path  unused parameter in this class 
-   */
+    * executed in event thread.
+    * @param doc the document to add -- assumed to be of type T
+    * @param path  unused parameter in this class 
+    */
   public void addDocument(ItemT doc, String path) { addDocument(doc); }
   
   /** A typesafe version of {@code _model.get(i)}.  This is a workaround for the
-   * non-generic implementation of DefaultListModel, and should be removed once that
-   * is fixed.
-   */
+    * non-generic implementation of DefaultListModel, and should be removed once that
+    * is fixed.
+    */
   protected ItemT getFromModel(int i) {
     @SuppressWarnings("unchecked") ItemT result = (ItemT) _model.get(i);
     return result;
   }
   
   /** Gets the next document after doc in the series.
-   *  @param doc the document to reference from
-   *  @return the document after doc in the list; if doc is the last
-   *  document, returns doc
-   */
+    * @param doc the document to reference from
+    * @return the document after doc in the list; if doc is the last document, returns doc
+    */
   public ItemT getNext(ItemT doc) { 
     synchronized(_model) {
       int i = _model.indexOf(doc);
@@ -156,9 +155,9 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Gets the previous document in the series.
-   *  @param doc to reference from
-   *  @return the document which comes before doc in the list
-   */
+    * @param doc to reference from
+    * @return the document which comes before doc in the list
+    */
   public ItemT getPrevious(ItemT doc) {  
     synchronized(_model) {
       int i = _model.indexOf(doc);
@@ -170,13 +169,13 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Gets the first document in the series.
-   *  @return the first document in the collection
-   */
+    * @return the first document in the collection
+    */
   public ItemT getFirst() { synchronized(_model) { return getFromModel(0); } }
   
   /** Gets the first document in the series.
-   *  @return the first document in the collection
-   */
+    * @return the first document in the collection
+    */
   public ItemT getLast() { synchronized(_model) { return getFromModel(_model.size() - 1); } }
   
   /** Returns the currently selected item, or null if none. */
@@ -186,8 +185,8 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public Object getModelLock() { return _model; }
   
   /** Removes the document from the navigator.  Should only be executed in event thread.
-   *  @param doc the document to remove
-   */
+    * @param doc the document to remove
+    */
   public ItemT removeDocument(ItemT doc) {
     synchronized(_model) {
       // System.err.println("removing from old list " + doc);
@@ -199,13 +198,12 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
       return result;
     }
   }
-
+  
   /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its
-   *  display to reflect any changes made in the model.  Should only be executed in event thread.
-   *  @param doc the docment to be refreshed
-   *  @throws IllegalArgumentException if this navigator contains no document
-   *  that is equal to the passed document.
-   */
+    * display to reflect any changes made in the model.  Should only be executed in event thread.
+    * @param doc the docment to be refreshed
+    * @throws IllegalArgumentException if this navigator contains no document that is equal to the passed document.
+    */
   public void refreshDocument(ItemT doc, String path) {
     synchronized(_model) {
       removeDocument(doc);
@@ -214,8 +212,8 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Sets the specified document as selected.  Should only be called from event thread.
-   *  @param doc the document to select
-   */
+    *  @param doc the document to select
+    */
   public void setActiveDoc(ItemT doc) { 
     boolean found;
     synchronized(_model) {
@@ -226,7 +224,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //        _current = doc;  // already done by ListSelectionEvent listener created in init()
 //    }
   }
-    
+  
   /** Returns whether or not the navigator contains the document
     * @param doc the document to find
     * @return true if this list contains doc (using identity as equality measure), false if not.
@@ -281,9 +279,9 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public void clear() { synchronized(_model) { _model.clear(); } }
   
   /** Executes the list case of the visitor.
-   *  @param algo the visitor to execute
-   *  @param input the input to run on the visitor
-   */
+    * @param algo the visitor to execute
+    * @param input the input to run on the visitor
+    */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<ItemT, InType, ReturnType> algo, InType input) {
     return algo.forList(this, input);
   }
@@ -292,11 +290,10 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public Container asContainer() { return this; }
   
   /** Selects the document at the x,y coordinate of the navigator pane and sets it to be
-   *  the currently active document.  Should only be called from event-handling thread.
-   *  @param x the x coordinate of the navigator pane
-   *  @param y the y coordinate of the navigator pane
-   * 
-   */
+    * the currently active document.  Should only be called from event-handling thread.
+    * @param x the x coordinate of the navigator pane
+    * @param y the y coordinate of the navigator pane
+    */
   public boolean selectDocumentAt(final int x, final int y) {
     synchronized(_model) {
       final int idx = locationToIndex(new java.awt.Point(x,y));
@@ -323,7 +320,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //      return isSelectedIndex(idx);
 //    }
   }
-
+  
   /** @return the renderer for this object. */
   public Component getRenderer(){ return _renderer; }
   
@@ -332,19 +329,19 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   
   /** @return true if at least one group of INavigatorItems is selected; always false for JListNavigator */
   public boolean isGroupSelected() { return false; }
-      
+  
   /** @return the number of groups selected. Always 0 for JListSortNavigator */
   public int getGroupSelectedCount() { return 0; }
-
+  
   /** @return the folders currently selected. Always empty for JListSortNavigator */
   public java.util.List<File> getSelectedFolders() { return new ArrayList<File>(); }
-
+  
   /** @return true if at least one document is selected; always true for JListNavigator */
   public boolean isDocumentSelected() { return true; }
   
   /** @return the number of documents selected. Same as getSelectionCount for JListSortNavigator. */
   public int getDocumentSelectedCount() { return getSelectionCount(); }
-
+  
   /** @return the documents currently selected. Only runs in event thread. */
   @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
 //    Object[] selected = getSelectedValues();
@@ -357,7 +354,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   
   /** Returns true if the root is selected. Only runs in event thread. */
   public boolean isRootSelected() { return false; }
-
+  
   /** @return true if the INavigatorItem is in the selected group, if a group is selected. */
   public boolean isSelectedInGroup(ItemT i) { return false; }
   
@@ -373,12 +370,12 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Since in the JListNavigator it is impossible to select anything but an INavigatorItem,
-   *  this method doesn't need to do anything.  See JTreeSortNavigator and IDocumentNavigator.
-   */
+    * this method doesn't need to do anything.  See JTreeSortNavigator and IDocumentNavigator.
+    */
   public void requestSelectionUpdate(ItemT doc) { /* nothing */ }
   
 //  /** Notify this ListModel that doc has changed and may need updating (if it has changed
-//   *  from modified to unmodified). Should only be performed in the event thread
+//    * from modified to unmodified). Should only be performed in the event thread
 //   */
 //  public void activeDocumentModified() {
 //    synchronized(_model) {
@@ -400,7 +397,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
       * @param hasFocus
       */
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
-
+      
       super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
       setText(((INavigatorItem)value).getName());
       return this;

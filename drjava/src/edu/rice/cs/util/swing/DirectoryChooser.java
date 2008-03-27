@@ -63,19 +63,19 @@ public class DirectoryChooser extends JFileChooser {
   public DirectoryChooser(Component owner) { this(owner, null, false, false); }
   
   /** Creates a DirectoryChooser rooted at the file system root, allowing multiple selection as specified.
-   *  @param allowMultiple whether to allow multiple selection
-   */
+    * @param allowMultiple whether to allow multiple selection
+    */
   public DirectoryChooser(Component owner, boolean allowMultiple) { this(owner, null, allowMultiple, false); }
   
   /** Creates a DirectoryChooser with the given root, allowing only a single selection.
-   *  @param root the root directory to display in the tree
-   */
+    * @param root the root directory to display in the tree
+    */
   public DirectoryChooser(Component owner, File root) { this(owner, root, false, false); }
   
   /** Creates a DirectoryChooser with the given root, allowing multiple selections as specified.
-   *  @param root the root directory to display in the tree. If null, then show entire file system
-   *  @param allowMultiple whether to allow multiple selection
-   */
+    * @param root the root directory to display in the tree. If null, then show entire file system
+    * @param allowMultiple whether to allow multiple selection
+    */
   public DirectoryChooser(Component owner, File root, boolean allowMultiple, boolean showHidden) {
     /* This super call sets current directory to root if it is valid directory, root.parentFile() if it is a valid 
      * non-directory file, and the system default otherwise. */
@@ -84,7 +84,7 @@ public class DirectoryChooser extends JFileChooser {
   }
   
   /*---------- INITIALIZATION METHODS ----------*/
-    
+  
   /** Sets up the GUI components of the dialog */
   private void _init(Component owner, final File root, boolean allowMultiple, boolean showHidden) {
     
@@ -102,7 +102,7 @@ public class DirectoryChooser extends JFileChooser {
       if (! root.exists()) _root = null;
       else if (! root.isDirectory()) _root = root.getParentFile();
     }
-
+    
     setMultiSelectionEnabled(allowMultiple);
     setFileHidingEnabled(! showHidden);
     setFileSelectionMode(DIRECTORIES_ONLY);
@@ -123,18 +123,18 @@ public class DirectoryChooser extends JFileChooser {
   public void setOwner(Component owner) { _owner = owner; }
   
   /** Shows the dialog with the same selection as the last time the dialog was shown. If this is the first time it is
-   *  shown, then the root is selected.
-   */
+    * shown, then the root is selected.
+    */
   public int showDialog() { return showDialog(_owner, null); }
   
   /** returns which directories were selected in the tree
-   *  @return an array of files for the selected directories
-   */
+    * @return an array of files for the selected directories
+    */
   public File[] getSelectedDirectories() { return getSelectedFiles(); }
   
   /** returns which directory was selected in the tree
-   *  @return the file for the selected directory, null if none selected
-   */
+    * @return the file for the selected directory, null if none selected
+    */
   public File getSelectedDirectory() { return getSelectedFile(); }
   
 //  public boolean isTraversable(File f) {

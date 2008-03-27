@@ -46,10 +46,8 @@ import java.io.File;
 import java.io.IOException;
 import edu.rice.cs.util.StringOps;
 
-/** Class representing values that are always up-to-date and that
-  * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+/** Class representing values that are always up-to-date and that can be inserted as variables in external processes.
+  * @version $Id$
   */
 public abstract class EagerFileListProperty extends EagerProperty {
   /** Separating string. */

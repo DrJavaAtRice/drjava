@@ -62,7 +62,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
  * @version $Id$
  */
 public class ColoringView extends PlainView implements OptionConstants {
- 
+  
   public static Color COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
   public static Color DOUBLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
   public static Color SINGLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
@@ -81,11 +81,11 @@ public class ColoringView extends PlainView implements OptionConstants {
   public static Color DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
   
   /** Constructs a new coloring view.
-   *  @param elem the element
-   */
+    * @param elem the element
+    */
   public ColoringView(Element elem) {
     super(elem);
-
+    
     // Listen for updates to configurable colors
     final ColorOptionListener col = new ColorOptionListener();
     final FontOptionListener fol = new FontOptionListener();
@@ -132,23 +132,20 @@ public class ColoringView extends PlainView implements OptionConstants {
       });
     }
   }
-
-  /** Renders the given range in the model as normal unselected text.
-   *  Note that this is text that's all on one line. The superclass deals
-   *  with breaking lines and such. So all we have to do here is draw the
-   *  text on [p0,p1) in the model. We have to start drawing at (x,y), and
-   *  the function returns the x coordinate when we're done.
-   *
-   *  @param g  The graphics context
-   *  @param x  The starting X coordinate
-   *  @param y  The starting Y coordinate
-   *  @param start  The beginning position in the model
-   *  @param end  The ending position in the model
-   *  @return  The x coordinate at the end of the range
-   *  @throws BadLocationException  If the range is invalid
-   */
+  
+  /** Renders the given range in the model as normal unselected text. Note that this is text that's all on one line.
+    * The superclass deals with breaking lines and such. So all we have to do here is draw the text on [p0,p1) in the
+    * model. We have to start drawing at (x,y), and the function returns the x coordinate when we're done.
+    * @param g  The graphics context
+    * @param x  The starting X coordinate
+    * @param y  The starting Y coordinate
+    * @param start  The beginning position in the model
+    * @param end  The ending position in the model
+    * @return  The x coordinate at the end of the range
+    * @throws BadLocationException  If the range is invalid
+    */
   protected int drawUnselectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
-        
+    
     // Might be a PlainDocument (when AbstractDJPane is first constructed).
     //   See comments for DefinitionsEditorKit.createNewDocument() for details.
     Document doc = getDocument();
@@ -159,7 +156,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
     if (start == end) return  x;
-
+    
     Vector<HighlightStatus> stats = _doc.getHighlightStatus(start, end);
     if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
     
@@ -188,16 +185,16 @@ public class ColoringView extends PlainView implements OptionConstants {
     //DrJava.consoleErr().println("returning x: " + x);
     return  x;
   }
-
+  
   /** Draws the selected text image at the specified location.
-   * @param g  The text image
-   * @param x  The x coordinate for the drawn text
-   * @param y  The y coordinate for the drawn text
-   * @param start  The beginning position in the model
-   * @param end  The end position in the model
-   * @return  The location of the end of the image (range)
-   * @throws BadLocationException
-   */
+    * @param g  The text image
+    * @param x  The x coordinate for the drawn text
+    * @param y  The y coordinate for the drawn text
+    * @param start  The beginning position in the model
+    * @param end  The end position in the model
+    * @return  The location of the end of the image (range)
+    * @throws BadLocationException
+    */
   protected int drawSelectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
     /*
      DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
@@ -208,11 +205,11 @@ public class ColoringView extends PlainView implements OptionConstants {
     
     return  super.drawSelectedText(g, x, y, start, end);
   }
-
+  
   /** Given a particular state, assign it a color.
-   *  @param g Graphics object
-   *  @param state a given state
-   */
+    * @param g Graphics object
+    * @param state a given state
+    */
   private void setFormattingForState(Graphics g, int state) {
     switch (state) {
       case HighlightStatus.NORMAL:
@@ -241,22 +238,22 @@ public class ColoringView extends PlainView implements OptionConstants {
     }
     g.setFont(MAIN_FONT);
   }
-
+  
   /** Called when a change occurs.
-   *  @param changes document changes
-   *  @param a a Shape
-   *  @param f a ViewFactory
-   */
+    * @param changes document changes
+    * @param a a Shape
+    * @param f a ViewFactory
+    */
   public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
     super.changedUpdate(changes, a, f);
     // Make sure we redraw since something changed in the formatting
     Container c = getContainer();
     if (c != null) c.repaint();
   }
-
+  
   /** Called when an OptionListener perceives a change in any of the colors */
   public void updateColors() {
-
+    
     COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
     DOUBLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
     SINGLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
@@ -270,11 +267,11 @@ public class ColoringView extends PlainView implements OptionConstants {
     INTERACTIONS_SYSTEM_OUT_COLOR = DrJava.getConfig().getSetting(SYSTEM_OUT_COLOR);
     ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
     DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
-
+    
     // Avoid the ColoringView that does not have a container.
     if ( getContainer() != null) getContainer().repaint();
   }
-
+  
   /** The OptionListeners for DEFINITIONS COLORs */
   private class ColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) { updateColors(); }

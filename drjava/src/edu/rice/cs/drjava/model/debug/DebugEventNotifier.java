@@ -90,10 +90,10 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
 
   /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
-    *  displayed.  Must be executed only in the event thread.
-    *  @param doc Document to display
-    *  @param lineNumber Line to display or highlight
-    *  @param shouldHighlight true iff the line should be highlighted.
+    * displayed.  Must be executed only in the event thread.
+    * @param doc Document to display
+    * @param lineNumber Line to display or highlight
+    * @param shouldHighlight true iff the line should be highlighted.
     */
   public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber,  boolean shouldHighlight) {
     assert EventQueue.isDispatchThread();
@@ -108,9 +108,9 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
 
   /** Called when a breakpoint is set in a document.  Must be executed in event thread.
-   *  @param bp the breakpoint
-   *  @param index the index at which it was added
-   */
+    * @param bp the breakpoint
+    * @param index the index at which it was added
+    */
   public void regionAdded(Breakpoint bp, int index) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
@@ -139,9 +139,9 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
 
   /** Called when a breakpoint is changed during execution. Must be executed in event thread.
-   *  @param bp the breakpoint
-   *  @param index the index at which it was changed
-   */
+    * @param bp the breakpoint
+    * @param index the index at which it was changed
+    */
   public void regionChanged(Breakpoint bp, int index) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
@@ -157,8 +157,8 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
   
   /** Called when a watch is set.  Must be executed in event thread.
-   *  @param w the watch
-   */
+    * @param w the watch
+    */
   public void watchSet(DebugWatchData w) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
@@ -170,8 +170,8 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
   
   /** Called when a watch is removed.  Must be executed in event thread.
-   *  @param w the watch
-   */
+    * @param w the watch
+    */
   public void watchRemoved(DebugWatchData w) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
@@ -183,8 +183,8 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
 
   /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
-   *  @param bp the breakpoint
-   */
+    * @param bp the breakpoint
+    */
   public void regionRemoved(Breakpoint bp) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
@@ -261,8 +261,8 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   }
 
   /** Called when the current (selected) thread is set in the debugger.
-   *  @param thread the thread that was set as current
-   */
+    * @param thread the thread that was set as current
+    */
   public void currThreadSet(DebugThreadData thread) {
     _lock.startRead();
     try {

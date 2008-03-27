@@ -38,50 +38,28 @@ package edu.rice.cs.util;
 
 import java.util.LinkedList;
 
-/**
- * This class implements synchronization primitives to solve the classic
- * readers/writers problem without allowing deadlock or starvation.
- * 
- * <p>
- * Problem: Suppose multiple threads want to read and write to a resource.
- * Multiple readers can be active at a time, but only a single writer can
- * be active at a time, and no readers can be active while the writer is
- * active.
- * </p>
- * 
- * <p>
- * We must be careful to avoid starvation in our solution, so that a steady
- * flow of reader threads cannot block waiting writer threads indefinitely.
- * This can be achieved by imposing an ordering on the incoming readers
- * and writers.
- * </p>
- * 
- * <p>
- * To use this class, instantiate a ReaderWriterLock in the class holding
- * the shared resource.  Any methods which read from the resource must call
- * startRead before reading and endRead after reading, and must not be
- * synchronized themselves.  Similarly, any methods which write to the resource
- * must not be synchronized and must call startWrite before writing and endWrite
- * after writing.
- * </p>
- * 
- * <p>
- * This class enforces that any readers and writers that are forced to wait
- * are allowed access to the shared resource in the order in which they arrive.
- * Groups of readers are allowed to proceed simultaneously, where each group
- * contains all waiting readers that arrived before the next waiting writer.
- * </p>
- * 
- * <p>
- * This class is loosely adapted from the "Starvation-Free Readers and Writers
- * Monitor" available from Stephen J. Hartley (Drexel University) at:
- * http://www.mcs.drexel.edu/~shartley/ConcProgJava/monitors.html
- * We have imposed an ordering on the pending waiting readers and writers
- * using an ordered queue.
- * </p>
- * 
- * @version $Id$
- */
+/** This class implements synchronization primitives to solve the classic readers/writers problem without deadlock or
+  * starvation. <p>
+  * Problem: Suppose multiple threads want to read and write a resource. Multiple threads can safely read at the same
+  * time, but only one thread can safely write at a time, and no threads can read while a thread is writing. </p> <p>
+  * We must be careful to avoid starvation in our solution, so that a steady flow of reader threads cannot block 
+  * waiting writer threads indefinitely. This property can be achieved by imposing an ordering on the incoming readers
+  * and writers. </p> <p>
+  * To use this class, instantiate a ReaderWriterLock in the class holding the shared resource.  Any methods which read
+  * from the resource must call startRead before reading and endRead after reading, and must not be synchronized 
+  * themselves.  Similarly, any methods which write to the resource must not be synchronized and must call startWrite 
+  * before writing and endWrite after writing. </p> <p>
+  * This class enforces that any readers and writers that are forced to wait are given access to the shared resource in 
+  * the order in which they arrive. Groups of readers are allowed to proceed simultaneously, where each group contains 
+  * all waiting readers that arrived before the next waiting writer.
+  * </p> <p>
+  * This class is loosely adapted from the "Starvation-Free Readers and Writers Monitor" available from Stephen J. 
+  * Hartley (Drexel University) at: http://www.mcs.drexel.edu/~shartley/ConcProgJava/monitors.html
+  * We have imposed an ordering on the pending waiting readers and writers using an ordered queue.
+  * </p>
+  * TODO: revise this formulation of readers/writers to allow writers to recursively readLock and writeLock!
+  * @version $Id$
+  */
 public class ReaderWriterLock {
   /** The number of readers currently reading. */
   private volatile int _numActiveReaders = 0;
@@ -92,14 +70,11 @@ public class ReaderWriterLock {
   /** The number of writers waiting to write. */
   private volatile int _numWaitingWriters = 0;
   
-  /**
-   * Queue of all waiting reader and writer threads.  The front of the queue
-   * (first element of the list) represents the thread which arrived first;
-   * new waiting threads are added at the end.
-   * "Groups" on the queue refer to several sequential Readers or a
-   * single Writer.  (We can wake up the front group on the queue each
-   * time a writer finishes and each time the last reader finishes.)
-   */
+  /** Queue of all waiting reader and writer threads.  The front of the queue (first element of the list) represents 
+    * the thread which arrived first; new waiting threads are added at the end. "Groups" on the queue refer to several
+    * sequential Readers or a single Writer.  (We can wake up the front group on the queue each time a writer finishes 
+    * and each time the last reader finishes.)
+    */
   private final LinkedList<ReaderWriterThread> _waitQueue;
   
   /**
@@ -117,10 +92,10 @@ public class ReaderWriterLock {
   }
   
   /** Must be called by each reader thread before starting to read.  The calling method must <i>not</i> be 
-   *  synchronized.  This method blocks the reader if there are current active or waiting writers, until those 
-   *  writers have finished.
-   *  @throws IllegalStateException if the thread is already a reader or writer
-   */
+    * synchronized.  This method blocks the reader if there are current active or waiting writers, until those 
+    * writers have finished.
+    * @throws IllegalStateException if the thread is already a reader or writer
+    */
   public synchronized void startRead() {
     // If we're already reading, we can perform another read without waiting
     if (!_alreadyReading()) {
@@ -146,10 +121,9 @@ public class ReaderWriterLock {
   }
   
   /** Must be called by each reader thread after it is finished reading.  The calling method must <i>not</i> be 
-   *  synchronized. This method wakes up a waiting writer if there are no remaining reader threads actively reading.
-   * 
-   *  @throws IllegalStateException if the thread is already a reader or writer
-   */
+    * synchronized. This method wakes up a waiting writer if there are no remaining reader threads actively reading. 
+    * @throws IllegalStateException if the thread is already a reader or writer
+    */
   public synchronized void endRead() {
     if (_numActiveReaders == 0) {
       throw new IllegalStateException("Trying to end a read with no active readers!");
@@ -175,11 +149,10 @@ public class ReaderWriterLock {
   
   
   /** Must be called by each writer thread before starting to write.  The calling method must <i>not</i> be 
-   *  synchronized. This method blocks the writer if there are any active readers or writers, and prevents any new 
-   *  readers from starting to read until this writer gets a chance to write.
-   * 
-   *  @throws IllegalStateException if the thread is already a reader or writer
-   */
+    * synchronized. This method blocks the writer if there are any active readers or writers, and prevents any new 
+    * readers from starting to read until this writer gets a chance to write.
+    * @throws IllegalStateException if the thread is already a reader or writer
+    */
   public synchronized void startWrite() {
     // Make sure this thread isn't already reading or writing.
     _ensureNotAlreadyRunning();
@@ -202,7 +175,7 @@ public class ReaderWriterLock {
       
       Writer w = new Writer();
       w.startWaiting();
-
+      
       _numWaitingWriters--;
     }
     
@@ -212,11 +185,10 @@ public class ReaderWriterLock {
   }
   
   /** Must be called by each writer thread after it is finished writing.  The calling method must <i>not</i> be 
-   *  synchronized. This method wakes up any waiting readers and writers.  If there are waiting readers, they read 
-   *  before the next writer, but any new readers (after this call) wait until the next waiting writer writes.
-   * 
-   *  @throws IllegalStateException if the thread is already a reader or writer
-   */
+    * synchronized. This method wakes up any waiting readers and writers.  If there are waiting readers, they read 
+    * before the next writer, but any new readers (after this call) wait until the next waiting writer writes.
+    * @throws IllegalStateException if the thread is already a reader or writer
+    */
   public synchronized void endWrite() {
     if (_numActiveWriters != 1) {
       throw new IllegalStateException("Trying to end a write with " +
@@ -242,14 +214,14 @@ public class ReaderWriterLock {
     // If the current thread is active, and there are active readers, then
     //  the current thread must be a reader and not a writer.
     return _numActiveReaders > 0 &&
-           _runningThreads.contains(Thread.currentThread());
-      
+      _runningThreads.contains(Thread.currentThread());  // How can the executing thread not be among those running?
+    
   }
-
-  /** Ensures that the current thread is not already considered a reader or writer.  This prevents the deadlock which 
-   *  would occur if a reader thread tries to write (or vice versa).
-   *  @throws IllegalStateException if the thread is already a reader or writer
-   */
+  
+  /** Ensures that the current thread is not already considered a reader or writer.  This prevents deadlock if a reader 
+    * thread is trying to write (or vice versa).
+    * @throws IllegalStateException if the thread is already a reader or writer
+    */
   private void _ensureNotAlreadyRunning() {
     if (_runningThreads.contains(Thread.currentThread())) {
       throw new DeadlockException("Same thread cannot read or write multiple " +
@@ -257,12 +229,12 @@ public class ReaderWriterLock {
     }
   }
   
-  /**  Ensures that the current thread is not already considered a reader or writer.  This prevents the deadlock which 
-   *   would occur if a reader thread tries to write (or vice versa).
-   *   @throws IllegalStateException if the thread is already a reader or writer
-   */
+  /** Ensures that the current thread is already considered a reader or writer.  This prevents deadlock if a reader 
+    * thread is trying to write (or vice versa).
+    * @throws IllegalStateException if the thread is already a reader or writer
+    */
   private void _ensureAlreadyRunning() {
-    if (!_runningThreads.contains(Thread.currentThread())) {
+    if (! _runningThreads.contains(Thread.currentThread())) {
       throw new IllegalStateException("Current thread did not initiate a read or write!");
     }
   }
@@ -292,11 +264,11 @@ public class ReaderWriterLock {
   
   
   /** Represents a thread waiting to either read or write.  Instances of this class are placed in a queue to enforce
-   *  the correct order when allowing new threads to read or write.  The waiting thread must call wait() on this object,
-   *  allowing it to be notified when it reaches the front of the queue.  This object will remain on the queue until the
-   *  thread completes its read or write, allowing us to check for and prevent deadlock if the same thread tries to both 
-   *  read and write at the same time.
-   */
+    * the correct order when allowing new threads to read or write.  The waiting thread must call wait() on this object,
+    * allowing it to be notified when it reaches the front of the queue.  This object will remain on the queue until the
+    * thread completes its read or write, allowing us to check for and prevent deadlock if the same thread tries to both 
+    * read and write at the same time.
+    */
   public abstract class ReaderWriterThread {
     private volatile boolean _isWaiting = true;
     /** Returns whether this ReaderWriter is a writer. */
@@ -305,7 +277,7 @@ public class ReaderWriterLock {
     public abstract boolean isReader();
     
     /** Causes this ReaderWriterThread to wait until stopWaiting is called. While it's waiting, it is on the waitQueue.
-     */
+      */
     public void startWaiting() {
       synchronized(ReaderWriterLock.this) {
         _isWaiting = true;

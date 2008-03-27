@@ -43,22 +43,22 @@ import edu.rice.cs.util.Log;
 import java.io.*;
 
 /** This class contains the basic fields and methods that are necessary for any test file that needs to use the
- *  JPDADebugger.
- *  @version $Id$
- */
+  *  JPDADebugger.
+  *  @version $Id$
+  */
 public abstract class DebugTestCase extends GlobalModelTestCase {
-
+  
 //  protected final boolean printEvents = true;
 //  protected final boolean printMessages = true;
 //  protected PrintStream printStream = System.err; 
   
   // _log inherited from GlabalModelTestCase
-
+  
   protected volatile int _pendingNotifies = 0;
   protected final Object _notifierLock = new Object();
-
+  
   protected volatile Debugger _debugger;
-
+  
   protected static final String DEBUG_CLASS =
     /*  1 */ "class DrJavaDebugClass {\n" +
     /*  2 */ "  public void foo() {\n" +
@@ -77,7 +77,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 15 */ "    new DrJavaDebugClass().bar();\n" +
     /* 16 */ "  }\n" +
     /* 17 */ "}";
-
+  
   protected static final String DEBUG_CLASS_WITH_PACKAGE =
     /*  1 */ "package a;\n" +
     /*  2 */ "public class DrJavaDebugClassWithPackage {\n" +
@@ -86,7 +86,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /*  5 */ "    System.out.println(\"foo line 2\");\n" +
     /*  6 */ "  }\n" +
     /*  7 */ "}";
-
+  
   protected static final String SUSPEND_CLASS =
     "class Suspender {\n" +
     "  public static void main(String[] args) {\n" +
@@ -99,7 +99,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     "    t1.start();\n" +
     "  }\n" +
     "}";
-
+  
   protected static final String MONKEY_CLASS =
     /* 1 */    "class Monkey {\n" +
     /* 2 */    "  public static void main(String[] args) {\n" +
@@ -124,7 +124,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 21 */    "    }\n" +
     /* 22 */    "  }\n" +
     /* 23 */    "}\n";
-
+  
   protected static final String MONKEY_WITH_INNER_CLASS =
     /* 1 */    "class Monkey {\n" +
     /* 2 */    "  static int foo = 6; \n" +
@@ -169,7 +169,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 41 */   "    int z = 3;\n" +
     /* 42 */   "  }\n" +
     /* 43 */   "}\n";
-
+  
   protected static final String INNER_CLASS_WITH_LOCAL_VARS =
     /*  1 */ "class InnerClassWithLocalVariables {\n" +
     /*  2 */ "  public static void main(final String[] args) {\n" +
@@ -184,7 +184,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 11 */ "    }.run();\n" +
     /* 12 */ "  }\n" +
     /* 13 */ "}\n";
-
+  
   protected static final String CLASS_WITH_STATIC_FIELD =
     /*  1 */    "public class DrJavaDebugStaticField {\n" +
     /*  2 */    "  public static int x = 0;\n" +
@@ -201,7 +201,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 13 */    "    new DrJavaDebugStaticField().bar();\n" +
     /* 14 */    "  }\n" +
     /* 15 */    "}";
-
+  
   protected static final String MONKEY_STATIC_STUFF =
     /*1*/ "class MonkeyStaticStuff {\n" +
     /*2*/ "  static int foo = 6;\n" +
@@ -224,7 +224,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /*19*/"    }\n" +
     /*20*/"  }\n" +
     /*21*/"}";
-
+  
   protected static final String THREAD_DEATH_CLASS =
     /*  1 */ "class Jones {\n" +
     /*  2 */ "  public static void threadShouldDie() {\n" +
@@ -238,7 +238,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 10 */ "    System.out.println(\"Thread died.\");\n" +
     /* 11 */ "  }\n" +
     /* 12 */ "}";
-
+  
   /** Sets up the debugger for each test. */
   public void setUp() throws Exception {
     _log.log("Setting up (DebugTestCase)" + this);
@@ -246,26 +246,26 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _debugger = _model.getDebugger();
     assertNotNull("Debug Manager should not be null", _debugger);
   }
-
+  
   /** Cleans up the debugger after each test. */
   public void tearDown() throws Exception {
     _log.log("Tearing down (DebugTestCase)" + this);
     _debugger = null;
     super.tearDown();
   }
-
+  
   /** Ensures that the given object will wait for n notifications. Callers must call o.wait() AFTER this is 
-   *  called.  Use _notifyLock instead of o.notify() when using this method. Only one object (o) can use this 
-   *  synchronization protocol at a time, since it uses a field to store the number of pending notifications.
-   *  @param n The number of times to be "notified" through _notifyLock
-   */
+    * called.  Use _notifyLock instead of o.notify() when using this method. Only one object (o) can use this 
+    * synchronization protocol at a time, since it uses a field to store the number of pending notifications.
+    * @param n The number of times to be "notified" through _notifyLock
+    */
   protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
       _log.log("Waiting for " + n + " notifications ...");
       _pendingNotifies = n;
     }
   }
-
+  
   /** Notifies _notifierLock if the after the notify count has expired. See _setPendingNotifies. */
   protected void _notifyLock() {
     synchronized(_notifierLock) {
@@ -278,25 +278,25 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       if (_pendingNotifies < 0) fail("Notified too many times");
     }
   }
-
-  /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the 
-   *  file will compile successfully.
-   *  @param fileName Name of the file to save in a temp directory
-   *  @param classText String containing the code for the class to compile
-   *  @return OpenDefinitionsDocument containing the compiled source file
-   */
+  
+  /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the file will
+    * compile successfully.
+    * @param fileName Name of the file to save in a temp directory
+    * @param classText String containing the code for the class to compile
+    * @return OpenDefinitionsDocument containing the compiled source file
+    */
   protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText) throws Exception {
     // Create a file in the temporary directory
     File file = IOUtil.attemptCanonicalFile(new File(_tempDir, fileName));
     return _startupDebugger(file, classText);
   }
-
+  
   /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the 
-   *  file will compile successfully.
-   *  @param file File to save the class in
-   *  @param classText String containing the code for the class to compile
-   *  @return OpenDefinitionsDocument containing the compiled source file
-   */
+    * file will compile successfully.
+    * @param file File to save the class in
+    * @param classText String containing the code for the class to compile
+    * @return OpenDefinitionsDocument containing the compiled source file
+    */
   protected OpenDefinitionsDocument _startupDebugger(File file, String classText) throws Exception {
     // Compile the file
     _log.log("Compiling " + file);
@@ -311,12 +311,12 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Finished starting debugger in " + this);
     return doc;
   }
-
+  
   /** Cleanly shuts down the debugger, without having to wait for a suspended interaction to complete. */
   protected void _shutdownWithoutSuspendedInteraction() throws Exception {
     _log.log("Shutting down debugger in " + this + " without waiting");
     _model.getBreakpointManager().clearRegions();
-
+    
     // Shutdown the debugger
     _log.log("Shutting down...");
     synchronized(_notifierLock) {
@@ -327,20 +327,20 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Shut down.");
     _log.log("Completed debugger shutdown for " + this);
   }
-
+  
   /** Cleanly shuts down the debugger, waiting for a suspended interaction to complete. */
   protected void _shutdownAndWaitForInteractionEnded() throws Exception {
-        _log.log("Shutting down debugger in " + this + " with waiting");
+    _log.log("Shutting down debugger in " + this + " with waiting");
     _model.getBreakpointManager().clearRegions();
-
+    
     // Shutdown the debugger
     _log.log("Shutting down...");
     InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress) {
-         // Don't notify: happens in the same thread
+      public void interpreterChanged(boolean inProgress) {
+        // Don't notify: happens in the same thread
         interpreterChangedCount++;
-       }
-     };
+      }
+    };
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // interactionEnded, shutdown
@@ -350,16 +350,16 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     interpretListener.assertInteractionEndCount(1);
     interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
     _model.removeListener(interpretListener);
-
+    
     _log.log("Shut down.");
     _log.log("Completed debugger shutdown for " + this);
   }
-
+  
   /** Sets the current debugger thread to the specified thread t.*/
   protected void _doSetCurrentThread(final DebugThreadData t) throws DebugException {
     _debugger.setCurrentThread(t);
   }
-
+  
   /** Resumes the debugger asynchronously so as to avoid getting notified before we start waiting for notifies. */
   protected void _asyncStep(final Debugger.StepType type) {
     new Thread("asyncStep Thread") {
@@ -372,7 +372,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }.start();
   }
-
+  
   /**
    * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
@@ -388,7 +388,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }.start();
   }
-
+  
   /** Sets the current thread in a new thread to avoid being notified of events before we start waiting for them. */
   protected void _asyncDoSetCurrentThread(final DebugThreadData th) {
     new Thread("asyncDoSetCurrentThread Thread") {
@@ -401,7 +401,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }.start();
   }
-
+  
   /** Listens to events from the debugger to ensure that they happen at the correct times. */
   protected class DebugTestListener implements DebugListener {
     protected volatile int debuggerStartedCount = 0;
@@ -422,113 +422,113 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected volatile int nonCurrThreadDiedCount = 0;
     
     public DebugTestListener() {}
-
+    
     public void assertDebuggerStartedCount(int i) {
       assertEquals("number of times debuggerStarted fired", i, debuggerStartedCount);
     }
-
+    
     public void assertDebuggerShutdownCount(int i) {
       assertEquals("number of times debuggerShutdown fired", i, debuggerShutdownCount);
     }
-
+    
     public void assertThreadLocationUpdatedCount(int i) {
       assertEquals("number of times threadLocationUpdated fired", i, threadLocationUpdatedCount);
     }
-
+    
     public void assertBreakpointReachedCount(int i) {
       assertEquals("number of times breakpointReached fired", i, breakpointReachedCount);
     }
-
+    
     public void assertRegionAddedCount(int i) {
       assertEquals("number of times regionAdded fired", i, regionAddedCount);
     }
-
+    
     public void assertRegionChangedCount(int i) {
       assertEquals("number of times regionChanged fired", i, regionChangedCount);
     }
-
+    
     public void assertRegionRemovedCount(int i) {
       assertEquals("number of times regionRemoved fired", i, regionRemovedCount);
     }
-
+    
     public void assertWatchSetCount(int i) {
       assertEquals("number of times watchSet fired", i, watchSetCount);
     }
-
+    
     public void assertWatchRemovedCount(int i) {
       assertEquals("number of times watchRemoved fired", i, watchRemovedCount);
     }
-
+    
     public void assertStepRequestedCount(int i) {
       assertEquals("number of times stepRequested fired", i, stepRequestedCount);
     }
-
+    
     public void assertStepFinishedCount(int i) {
       assertEquals("number of times stepRequested fired", i, stepRequestedCount);
     }
-
+    
     public void assertCurrThreadSuspendedCount(int i) {
       assertEquals("number of times currThreadSuspended fired", i, currThreadSuspendedCount);
     }
-
+    
     public void assertCurrThreadResumedCount(int i) {
       assertEquals("number of times currThreadResumed fired", i, currThreadResumedCount);
     }
-
+    
     public void assertCurrThreadSetCount(int i) {
       assertEquals("number of times currThreadSet fired", i, currThreadSetCount);
     }
-
+    
     public void assertThreadStartedCount(int i) {
       assertEquals("number of times threadStarted fired", i,threadStartedCount);
     }
-
+    
     public void assertCurrThreadDiedCount(int i) {
       assertEquals("number of times currThreadDied fired", i, currThreadDiedCount);
     }
-
+    
     public void assertNonCurrThreadDiedCount(int i) {
       assertEquals("number of times nonCurrThreadDied fired", i, nonCurrThreadDiedCount);
     }
-
-
+    
+    
     public void debuggerStarted() { fail("debuggerStarted fired unexpectedly"); }
-
+    
     public void debuggerShutdown() { fail("debuggerShutdown fired unexpectedly"); }
-
+    
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
       fail("threadLocationUpdated fired unexpectedly");
     }
-
+    
     public void breakpointReached(Breakpoint bp) { fail("breakpointReached fired unexpectedly"); }
-
+    
     public void regionAdded(Breakpoint bp, int index) { fail("regionAdded fired unexpectedly"); }
-
+    
     public void regionChanged(Breakpoint bp, int index) { fail("regionChanged fired unexpectedly"); }
-
+    
     public void regionRemoved(Breakpoint bp) { fail("regionRemoved fired unexpectedly"); }
-
+    
     public void watchSet(DebugWatchData w) { fail("watchSet fired unexpectedly"); }
-
+    
     public void watchRemoved(DebugWatchData w) { fail("watchRemoved fired unexpectedly"); }
-
+    
     public void stepRequested() { fail("stepRequested fired unexpectedly"); }
-
+    
     public void currThreadSuspended() { fail("currThreadSuspended fired unexpectedly"); }
-
+    
     public void currThreadResumed() { fail("currThreadResumed fired unexpectedly"); }
-
+    
     public void currThreadSet(DebugThreadData dtd) { fail("currThreadSet fired unexpectedly"); }
-
+    
     /** This won't fail because threads could be starting at any time. We have to expect this to be fired. */
     public void threadStarted() { threadStartedCount++; }
-
+    
     public void currThreadDied() { fail("currThreadDied fired unexpectedly"); }
-
+    
     /** This won't fail because threads could be dying at any time. We have to expect this to be fired. */
     public void nonCurrThreadDied() { nonCurrThreadDiedCount++; }
   }
-
+  
   /** DebugTestListener for all tests starting the debugger. */
   protected class DebugStartAndStopListener extends DebugTestListener {
     
@@ -551,7 +551,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }
   }
-
+  
   /** DebugTestListener for all tests setting breakpoints. */
   protected class BreakpointTestListener extends DebugStartAndStopListener {
     
@@ -574,7 +574,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       regionRemovedCount++;
       _log.log("regionRemoved " + regionRemovedCount);
     }
-
+    
     public void currThreadSuspended() {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
@@ -620,7 +620,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       _log.log("watchRemoved " + watchRemovedCount);
     }
   }
-
+  
   /** DebugTestListener for all tests using the stepper. */
   protected class StepTestListener extends BreakpointTestListener {
     
@@ -632,9 +632,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       _log.log("stepRequested " + stepRequestedCount);
     }
   }
-
+  
   /** TestListener that listens for an interpretation to end, and then notifies anyone waiting on it.  
-   *  (Necessary to prevent tests from overlapping.) */
+    * (Necessary to prevent tests from overlapping.) */
   protected class InterpretListener extends TestListener {
     
     public InterpretListener() {}
@@ -653,7 +653,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
         _notifyLock();
       }
     }
-
+    
     public void interpreterChanged(boolean inProgress) {
       synchronized(_notifierLock) {
         interpreterChangedCount++;

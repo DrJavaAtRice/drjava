@@ -52,39 +52,39 @@ public class FileSelectorStringComponent extends JPanel {
   
   /** The default number of columns for the text box. */
   public static final int DEFAULT_NUM_COLS = 30;
-
+  
   /** The default font size for the text box. */
   public static final float DEFAULT_FONT_SIZE = 10f;
-
+  
   /** The parent component of this component. */
   protected final Component _parent;
-
+  
   /** Text field with the name of the selected file. */
   protected final JTextField _textField;
-
+  
   /**  "..." button to open the file chooser. */
   protected final JButton _chooserButton;
-
+  
   /** File chooser to open when clicking the "..." button. */
   protected final FileChooser _chooser;
-
+  
   /** The current file */
   protected volatile File _file;
   
   /** Creates a new DirectorySelectorStringComponent with default dimensions.
-   *  @param parent  Parent of this component.
-   *  @param chooser File chooser to display from the "..." button.  Assumed non-null!
-   */
+    * @param parent  Parent of this component.
+    * @param chooser File chooser to display from the "..." button.  Assumed non-null!
+    */
   public FileSelectorStringComponent(Component parent, FileChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
   }
-
+  
   /** Creates a new DirectorySelectorStringComponent.
-   *  @param parent   Parent of this component.  
-   *  @param chooser  File chooser to display from the "..." button.  Assumed non-null!
-   *  @param numCols  Number of columns to display in the text field
-   *  @param fontSize Font size for the text field
-   */
+    * @param parent   Parent of this component.  
+    * @param chooser  File chooser to display from the "..." button.  Assumed non-null!
+    * @param numCols  Number of columns to display in the text field
+    * @param fontSize Font size for the text field
+    */
   public FileSelectorStringComponent(Component parent, FileChooser chooser, int numCols, float fontSize) {
     _parent = parent;
     _chooser = chooser;
@@ -107,7 +107,7 @@ public class FileSelectorStringComponent extends JPanel {
     this.add(_textField);
     this.add(_chooserButton);
   }
-
+  
   public void setEnabled(boolean isEnabled) {
     _textField.setEnabled(isEnabled);
     _chooserButton.setEnabled(isEnabled);
@@ -116,17 +116,17 @@ public class FileSelectorStringComponent extends JPanel {
   
   /** Returns the file text field. */
   public JTextField getTextField() { return _textField; }
-
+  
   /** Returns the file chooser. */
   public FileChooser getFileChooser() { return _chooser; }
-
+  
   /** Converts a string representation from the text field into a File. */
   public File convertStringToFile(String s) {
     s = s.trim();
     if (s.equals("")) return null;
     return new File(s);
   }
-
+  
   /** Converts a file to the string representation of the text field. */
   public String convertFileToString(File f) {    
     if (f == null)  return "";
@@ -144,19 +144,19 @@ public class FileSelectorStringComponent extends JPanel {
     }
     
     if (newFile != null && ! newFile.exists()) newFile = _file;
-
+    
     return newFile;
   }
-
+  
   /** Returns the string in the text field. */
   public String getText() { return _textField.getText(); }
-
+  
   /** Sets the string in the text field. */
   public void setText(String s) { _textField.setText(s); }
   
   /** Sets the text of the file field to be the given file.
-   *  @param file File to display in the file field.
-   */
+    * @param file File to display in the file field.
+    */
   public void setFileField(File file) {
     _file = file;
     if (file != null && ! file.getPath().equals("")) {
@@ -165,18 +165,18 @@ public class FileSelectorStringComponent extends JPanel {
     }
     resetFileField();
   }
-
+  
   public void resetFileField() {
     _textField.setText(convertFileToString(_file));
     _textField.setCaretPosition(_textField.getText().length());
   }
-
+  
   public void setToolTipText(String text) {
     super.setToolTipText(text);
     _textField.setToolTipText(text);
     _chooserButton.setToolTipText(text);
   }
-
+  
   /** Adds a filter to decide if a directory can be chosen. */
   public void addChoosableFileFilter(FileFilter filter) {
     _chooser.addChoosableFileFilter(filter);
@@ -190,7 +190,7 @@ public class FileSelectorStringComponent extends JPanel {
   public void clearChoosableFileFilters() {
     _chooser.resetChoosableFileFilters();
   }
-
+  
   /** Opens the file chooser to select a file, putting the result in the file field. */
   private void _chooseFile() { 
     File f = getFileFromField();
@@ -204,5 +204,5 @@ public class FileSelectorStringComponent extends JPanel {
       if (chosen != null) { setFileField(chosen); }
     }
   }
-
+  
 }

@@ -64,14 +64,14 @@ public interface JavadocModel {
    * @param listener a listener that reacts to Javadoc events
    */
   public void addListener(JavadocListener listener);
-
+  
   /**
    * Remove a JavadocListener from the model.  If the listener is not currently
    * listening to this model, this method has no effect.
    * @param listener a listener that reacts to Javadoc events
    */
   public void removeListener(JavadocListener listener);
-
+  
   /** Removes all JavadocListeners from this model. */
   public void removeAllListeners();
   
@@ -91,27 +91,25 @@ public interface JavadocModel {
    */
   public File suggestJavadocDestination(OpenDefinitionsDocument doc);
   
-  /**
-   * Javadocs all open documents, after ensuring that all are saved.
-   * The user provides a destination, and the gm provides the package info.
-   * 
-   * @param select a command object for selecting a directory and warning a user
-   *        about bad input
-   * @param saver a command object for saving a document (if it moved/changed)
-   * 
-   * @throws IOException if there is a problem manipulating files
-   */
+  /** Javadocs all open documents, after ensuring that all are saved.
+    * The user provides a destination, and the gm provides the package info.
+    * 
+    * @param select a command object for selecting a directory and warning a user
+    *        about bad input
+    * @param saver a command object for saving a document (if it moved/changed)
+    * 
+    * @throws IOException if there is a problem manipulating files
+    */
   public void javadocAll(DirectorySelector select, FileSaveSelector saver) throws IOException;
   
-  /**
-   * Generates Javadoc for the given document only, after ensuring it is saved.
-   * Saves the output to a temporary directory, which is provided in the
-   * javadocEnded event on the provided listener.
-   * 
-   * @param doc Document to generate Javadoc for
-   * @param saver a command object for saving the document (if it moved/changed)
-   * 
-   * @throws IOException if there is a problem manipulating files
-   */
+  /** Generates Javadoc for the given document only, after ensuring it is saved.
+    * Saves the output to a temporary directory, which is provided in the
+    * javadocEnded event on the provided listener.
+    * 
+    * @param doc Document to generate Javadoc for
+    * @param saver a command object for saving the document (if it moved/changed)
+    * 
+    * @throws IOException if there is a problem manipulating files
+    */
   public void javadocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException;
 }

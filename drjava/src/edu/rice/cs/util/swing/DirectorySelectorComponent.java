@@ -48,29 +48,29 @@ import java.io.*;
 import edu.rice.cs.util.FileOps;
 
 /** A JPanel with a text box and a "..." button to select a file or directory.  The file name is editable in the text
- *  box, and a JFileChooser is displayed if the user clicks the "..." button.
- *  @version $Id$
- */
+  *  box, and a JFileChooser is displayed if the user clicks the "..." button.
+  *  @version $Id$
+  */
 public class DirectorySelectorComponent extends JPanel {
   
   /** The default number of columns for the text box. */
   public static final int DEFAULT_NUM_COLS = 30;
-
+  
   /** The default font size for the text box. */
   public static final float DEFAULT_FONT_SIZE = 10f;
-
+  
   /** The parent component of this component. */
   protected final Component _parent;
-
+  
   /** Text field with the name of the selected file. */
   protected final JTextField _fileField;
-
+  
   /**  "..." button to open the file chooser. */
   protected final JButton _chooserButton;
-
+  
   /** File chooser to open when clicking the "..." button. */
   protected final DirectoryChooser _chooser;
-
+  
   /** The current file */
   protected File _file;
   
@@ -78,30 +78,30 @@ public class DirectorySelectorComponent extends JPanel {
   protected boolean _mustExist;
   
   /** Creates a new DirectorySelectorComponent with default dimensions whose file must exist.
-   *  @param parent  Parent of this component.
-   *  @param chooser File chooser to display from the "..." button.
-   */
+    * @param parent  Parent of this component.
+    * @param chooser File chooser to display from the "..." button.
+    */
   public DirectorySelectorComponent(Component parent, DirectoryChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
   }
-
+  
   /** Creates a new DirectorySelectorComponent whose file must exist.
-   *  @param parent   Parent of this component.
-   *  @param chooser  File chooser to display from the "..." button.
-   *  @param numCols  Number of columns to display in the text field
-   *  @param fontSize Font size for the text field
-   */
+    * @param parent   Parent of this component.
+    * @param chooser  File chooser to display from the "..." button.
+    * @param numCols  Number of columns to display in the text field
+    * @param fontSize Font size for the text field
+    */
   public DirectorySelectorComponent(Component parent, DirectoryChooser chooser, int numCols, float fontSize) {
     this(parent, chooser, numCols, fontSize, true);
   }
-
+  
   /** Creates a new DirectorySelectorComponent.
-   *  @param parent   Parent of this component.
-   *  @param chooser  File chooser to display from the "..." button.
-   *  @param numCols  Number of columns to display in the text field
-   *  @param fontSize Font size for the text field
-   *  @param mustExist true if the file specified in the field must exist
-   */
+    * @param parent   Parent of this component.
+    * @param chooser  File chooser to display from the "..." button.
+    * @param numCols  Number of columns to display in the text field
+    * @param fontSize Font size for the text field
+    * @param mustExist true if the file specified in the field must exist
+    */
   public DirectorySelectorComponent(Component parent, DirectoryChooser chooser, int numCols, float fontSize,
                                     boolean mustExist) {
     
@@ -138,7 +138,7 @@ public class DirectorySelectorComponent extends JPanel {
     this.add(_fileField);
     this.add(_chooserButton);
   }
-
+  
   public void setEnabled(boolean isEnabled) {
     _fileField.setEnabled(isEnabled);
     _chooserButton.setEnabled(isEnabled);
@@ -147,10 +147,10 @@ public class DirectorySelectorComponent extends JPanel {
   
   /** Returns the file text field. */
   public JTextField getFileField() { return _fileField; }
-
+  
   /** Returns the file chooser. */
   public DirectoryChooser getFileChooser() { return _chooser; }
-
+  
   /** Returns the file currently typed into the file field. THE SIDE EFFECTS OF THIS METHOD ARE OBSCENE!  Corky 2/5/06 */
   public File getFileFromField() {
     String txt = _fileField.getText().trim();
@@ -159,10 +159,10 @@ public class DirectorySelectorComponent extends JPanel {
     
     return _file;
   }
-
+  
   /** Sets the text of the file field to be the given file.
-   *  @param file File to display in the file field.
-   */
+    * @param file File to display in the file field.
+    */
   public void setFileField(File file) {
     _file = file;
     if (file != null && ! file.getPath().equals("")) {
@@ -171,7 +171,7 @@ public class DirectorySelectorComponent extends JPanel {
     }
     resetFileField();
   }
-
+  
   public void resetFileField() {
     if (_file == null) _fileField.setText("");
     else {
@@ -179,13 +179,13 @@ public class DirectorySelectorComponent extends JPanel {
       _fileField.setCaretPosition(_fileField.getText().length());
     }
   }
-
+  
   public void setToolTipText(String text) {
     super.setToolTipText(text);
     _fileField.setToolTipText(text);
     _chooserButton.setToolTipText(text);
   }
-
+  
   /** Adds a filter to decide if a directory can be chosen. */
   public void addChoosableFileFilter(FileFilter filter) { _chooser.addChoosableFileFilter(filter); }
   
@@ -193,15 +193,15 @@ public class DirectorySelectorComponent extends JPanel {
   public void removeChoosableFileFilter(FileFilter filter) { _chooser.removeChoosableFileFilter(filter); }
   
   public void clearChoosableFileFilters() { _chooser.resetChoosableFileFilters(); }
-   
+  
   /** Flag indicating that validation by the focus listener or action listener is pending.  The flag is used to avoid
-   *  duplicating the validation process. 
-   */
+    * duplicating the validation process. 
+    */
   private boolean _validationInProgress = false;
   
   /** The chooser method for the validation of filenames that are manually entered into the text field.
-   *  @return False, if file does not exist. True, otherwise.
-   */
+    * @return False, if file does not exist. True, otherwise.
+    */
   public boolean validateTextField() {
     if (_validationInProgress) return true;
     _validationInProgress = true;
@@ -230,7 +230,7 @@ public class DirectorySelectorComponent extends JPanel {
   
   /** Opens the file chooser to select a file, putting the result in the file field. */
   private void _chooseFile() {
-
+    
     // Get the file from the chooser
     int returnValue = _chooser.showDialog(_file);
     if (returnValue == DirectoryChooser.APPROVE_OPTION) {
@@ -238,5 +238,5 @@ public class DirectorySelectorComponent extends JPanel {
       if (chosen != null) setFileField(chosen);
     }
   }
-
+  
 }

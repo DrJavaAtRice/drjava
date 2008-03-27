@@ -47,9 +47,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A partial implementation of a {@link SlaveRemote} that provides the quit functionality and that also periodically 
- *  checks if the master is still alive and automatically quits if not.
- *  @version $Id$
- */
+  *  checks if the master is still alive and automatically quits if not.
+  *  @version $Id$
+  */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 1;
   
@@ -57,15 +57,15 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
   
 //  /** remote reference to the Master JVM; after initialization it is immutable until quit is executed. */
 //  public volatile MasterRemote _master;
-
+  
   /** Name of the thread to quit the slave. */
   protected volatile String _quitSlaveThreadName = "Quit SlaveJVM Thread";
-
+  
   /** Name of the thread to periodically poll the master. */
   protected volatile String _pollMasterThreadName = "Poll MasterJVM Thread";
   
   private volatile Thread _checkMaster = null;
-
+  
   private final Object _slaveJVMLock = new Object();
   
   private volatile boolean _slaveExited = false;
@@ -91,7 +91,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     
     _slaveExited = false;
 //    Utilities.showDebug("quit() called");
-
+    
     // put exit into another thread to allow this RMI call to return normally.
     Thread t = new Thread(_quitSlaveThreadName) {
       public void run() {
@@ -111,7 +111,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
         }
       }
     };
-
+    
     t.start();
 //    _log.log(this + ".quit() RMI call exited");
     synchronized(_slaveJVMLock) { 
@@ -119,25 +119,25 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
       _slaveJVMLock.notify();  // There does not appear to be any constraint forcing this thread to exit before shutdown
     }
   }
-
+  
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
   protected void beforeQuit() { }
-
+  
   /** This method is called if the interpreterJVM cannot be exited (likely because of a unexpected security manager.) */
   protected void quitFailed(Throwable th) { }
-
+  
   /** Initializes the Slave JVM including starting background thread to periodically poll the master JVM and 
-   *  automatically quit if it's dead.  Unsynchronized because 
-   *  (i)   this method can only be called once (without throwing an error) and _master is immutable once assigned here
-   *        until quit() 
-   *  (ii)  this method does not depend on any mutable state in this (which constrains {@link #handleStart}); and
-   *  (iii) this method (and perhaps {@link #handleStart}) perform remote calls on master.
-   *  This method delegates starting actions other than polling master to {@link #handleStart}.
-   */
+    * automatically quit if it's dead.  Unsynchronized because 
+    * (i)   this method can only be called once (without throwing an error) and _master is immutable once assigned here
+    *       until quit() 
+    * (ii)  this method does not depend on any mutable state in this (which constrains {@link #handleStart}); and
+    * (iii) this method (and perhaps {@link #handleStart}) perform remote calls on master.
+    * This method delegates starting actions other than polling master to {@link #handleStart}.
+    */
   public final void start(final MasterRemote master) throws RemoteException {
     
     if (_checkMaster != null) throw new UnexpectedException(this + ".start(...) called a second time");
-
+    
     _checkMaster = new Thread(_pollMasterThreadName) {
       public void run() { // Note: this method is NOT synchronized; it runs in a different thread.
         while (true) {
@@ -155,16 +155,16 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
       }
     };
     
-   
-
+    
+    
     _checkMaster.setDaemon(true);
     _checkMaster.start();
     _log.log(_checkMaster + " created and STARTed by " + this);
-
+    
     handleStart(master);  // master is passed as parameter because in some refactorings, _master is eliminated
-
+    
   }
-
+  
   /** Called when the slave JVM has started running.  Subclasses must implement this method. */
   protected abstract void handleStart(MasterRemote master);
   

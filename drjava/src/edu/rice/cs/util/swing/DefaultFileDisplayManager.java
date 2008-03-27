@@ -48,9 +48,9 @@ public class DefaultFileDisplayManager implements FileDisplayManager {
   public DefaultFileDisplayManager() { _jfc = new JFileChooser(); }
   
   /** Given a file, decide which icon to use
-   *  @param f The file to base the icon decision on
-   *  @return The icon to display for the given file
-   */
+    * @param f The file to base the icon decision on
+    * @return The icon to display for the given file
+    */
   public Icon getIcon(File f) {
     // avoid problem with windows filesystem drivers that would cause a filenotfound exception
     if (f != null && ! f.exists()) f = null; 
@@ -59,29 +59,28 @@ public class DefaultFileDisplayManager implements FileDisplayManager {
   }
   
   /** Given a file, decide on which name to display for it
-   *  @param f The file to base the naming decison on
-   *  @return The name to display for the file
-   */
+    * @param f The file to base the naming decison on
+    * @return The name to display for the file
+    */
   public String getName(File f) { return _jfc.getName(f); }
   
   /** Creates a file display that displays a file as this manager specifies
-   *  @param f the file to display using the display manager
-   *  @return the file display object used to display a file's name
-   */
+    * @param f the file to display using the display manager
+    * @return the file display object used to display a file's name
+    */
   public FileDisplay makeFileDisplay(File f) { return new FileDisplay(f, this); }
   
   /** Creates a file display that displays a file as this manager specifies
-   *  @param parent the parent of the file to display using the display manager
-   *  @param child the name of the child such that <code>new File(parent, child)</code> is 
-   *         the file to be displayed.
-   *  @return the file display object used to display a file's name
-   */
+    * @param parent the parent of the file to display using the display manager
+    * @param child the name of the child such that <code>new File(parent, child)</code> is the file to be displayed.
+    * @return the file display object used to display a file's name
+    */
   public FileDisplay makeFileDisplay(File parent, String child) { return new FileDisplay(parent, child, this); }
   
   /** Creates a FileDisplay representing a new untitled folder that is yet to be created.
-   *  @param parent the parent folder of the new folder
-   *  @return the new file display
-   */
+    * @param parent the parent folder of the new folder
+    * @return the new file display
+    */
   public FileDisplay makeNewFolderDisplay(File parent) { return FileDisplay.newFile(parent, this); }
   
   /** Updates the UI to reflect any changes in the fs. */

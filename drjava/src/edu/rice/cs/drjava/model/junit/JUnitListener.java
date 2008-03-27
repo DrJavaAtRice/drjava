@@ -49,46 +49,45 @@ import edu.rice.cs.util.classloader.ClassFileError;
  * @version $Id$
  */
 public interface JUnitListener {
-
+  
   /** Called when trying to test a non-TestCase class.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(boolean isTestAll);
   
   /** Called when JUnit encounters an illegal class file.
-   *  @param e the error or exception thrown by loading and resolving f.
-   */
+    * @param e the error or exception thrown by loading and resolving f.
+    */
   public void classFileError(ClassFileError e);
-
+  
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted();
-
+  
   /** Called when testing a specific list of classes given their source files. */
   public void junitClassesStarted();
   
   /** Called to indicate that a suite of tests has started running.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void junitSuiteStarted(int numTests);
-
+  
   /** Called when a particular test is started.
-   *  @param name The name of the test being started.
-   */
+    * @param name The name of the test being started.
+    */
   public void junitTestStarted(String name);
-
+  
   /** Called when a particular test has ended.
-   *  @param name The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error or simply failed.
-   */
+    * @param name The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error or simply failed.
+    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError);
-
+  
   /** Called after JUnit is finished running tests. */
   public void junitEnded();
   
-  /** Called to demand that all source files be in sync before running JUnit tests.
-   *  It is up to the caller of this method to check if the documents are in sync
-   *  using OpenDefinitionsDocument.checkIfClassFileInSync().
-   */
+  /** Demands that all source files be in sync before running JUnit tests. The caller of this method must check if the 
+    * documents are in sync with their class files using OpenDefinitionsDocument.checkIfClassFileInSync().
+    */
   public void compileBeforeJUnit(final CompilerListener l);
 }

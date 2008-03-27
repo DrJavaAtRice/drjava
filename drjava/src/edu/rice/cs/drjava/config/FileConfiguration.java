@@ -39,24 +39,24 @@ import java.io.*;
 import edu.rice.cs.util.FileOps;
 
 /** A Configuration object that is backed by a file.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class FileConfiguration extends SavableConfiguration {  
   
   public final File file;
   
   /** Creates a new Configuration object using the values stored in file f.  Any values not specified by f will be 
-   *  set to defaults from OptionConstants.
-   *  @param f Properties file containing customized values
-   */
+    * set to defaults from OptionConstants.
+    * @param f Properties file containing customized values
+    */
   public FileConfiguration(File f) {
     super(new DefaultOptionMap());
     file = f.getAbsoluteFile();
   }
   
   /** Calls SavableConfiguration.loadConfiguration, which loads all values from the file, based on the defaults in
-   *  OptionConstants.
-   */
+    * OptionConstants.
+    */
   public void loadConfiguration() throws IOException {
     loadConfiguration(new BufferedInputStream(new FileInputStream(file)));
   }
@@ -67,8 +67,8 @@ public class FileConfiguration extends SavableConfiguration {
   }
   
   /** Saves the current settings to the stored properties file.
-   *  @param header Description of the properties list
-   */
+    * @param header Description of the properties list
+    */
   public void saveConfiguration(final String header) throws IOException {
     FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
       public void saveTo(OutputStream os) throws IOException {

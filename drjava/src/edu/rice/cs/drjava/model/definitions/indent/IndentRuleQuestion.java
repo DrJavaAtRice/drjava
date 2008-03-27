@@ -38,48 +38,40 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * A question node in the decision tree for the indentation system.
- * Calls to <code>indentLine</code> on an IndentRuleQuestion will
- * make a decision based on context and call the same method on
- * one of its children.  The leaves of the tree are represented
- * by IndentRuleAction objects.
- * @version $Id$
- */
+/** A question node in the decision tree for the indentation system. Calls to <code>indentLine</code> on an 
+  * IndentRuleQuestion will make a decision based on context and call the same method on one of its children.  
+  * The leaves of the tree are represented by IndentRuleAction objects.
+  * @version $Id$
+  */
 public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
-  /**
-   * Node in decision tree to use if the rule holds in this context.
-   */
+  /** Node in decision tree to use if the rule holds in this context. */
   private final IndentRule _yesRule;
-
-  /**
-   * Node in decision tree to use if the rule does not hold in this context.
-   */
+  
+  /** Node in decision tree to use if the rule does not hold in this context. */
   private final IndentRule _noRule;
-
-  /**
-   * Constructs a new Question indent rule using the two given children.
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
+  
+  /** Constructs a new Question indent rule using the two given children.
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    */
   public IndentRuleQuestion(final IndentRule yesRule, final IndentRule noRule) {
     _yesRule = yesRule;
     _noRule = noRule;
   }
-
+  
   /** Determines if the given rule holds in this context.
-   *  @param doc AbstractDJDocument containing the line to be indented.
-   *  @param reason The reason that indentation was initiated, specified in Indenter
-   *  @return true if this node's rule holds.
-   */
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that indentation was initiated, specified in Indenter
+    * @return true if this node's rule holds.
+    */
   abstract boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason);
-
+  
   /** Determines if the given rule holds in this context.
-   *  @param doc AbstractDJDocument containing the line to be indented.
-   *  @param pos Position within line to be indented.
-   *  @param reason The reason that indentation was initiated, specified in Indenter
-   *  @return true if this node's rule holds.
-   */
+    * @param doc  The AbstractDJDocument containing the line to be indented.
+    * @param pos  The Position within line to be indented.
+    * @param reason  The reason that indentation was initiated, specified in Indenter
+    * @return true if this node's rule holds.
+    */
   boolean applyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
@@ -88,7 +80,7 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     doc.setCurrentLocation(oldPos);
     return result;
   }
-
+  
   /** Determines if the given rule holds in this context and calls the same method on one of its child nodes.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that indentation was initiated, specified in Indenter

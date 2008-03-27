@@ -63,47 +63,47 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
-
+  
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
   
   /** Lock used to protect _wrappedPosListLock in DefinitionsDocument.  Placed here to ensure that it initialized before
     * use! */
   protected static final Object _wrappedPosListLock = new Object();
-
+  
   /** Creates a new document adapter for a Swing StyledDocument. TODO: convert _styles and _condition to lazily 
     * initialized volatiles as soon as support for Java 1.4 is dropped and the double-check idiom is safe. */
   public SwingDocument() { 
     _styles = new Hashtable<String, AttributeSet>();
     _condition = new DocumentEditCondition();
   }
-
+  
   /** Adds the given AttributeSet as a style with the given name. It can then be used in insertString.
-   *  @param name Name of the style, to be passed to insertString
-   *  @param s AttributeSet to use for the style
-   */
+    * @param name Name of the style, to be passed to insertString
+    * @param s AttributeSet to use for the style
+    */
   public void setDocStyle(String name, AttributeSet s) {
     _styles.put(name, s);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
-
+  
   /** Returns the style with the given name, or null if no such named style exists. */
   public AttributeSet getDocStyle(String name) {
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
-    
+  
   /** Adds the given coloring style to the styles list.  Not supported in SwingDocument. 
     * Assumes that WriteLock is already held.
     */
   public void addColoring(int start, int end, String style) { }
-
+  
   /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.
-   *  @return an Object to determine legality of inputs
-   */
+    * @return an Object to determine legality of inputs
+    */
   public DocumentEditCondition getEditCondition() { return _condition; }
-
+  
   /** Provides an object which can determine whether an insert or remove edit should be applied, based on the inputs.
-   *  @param condition Object to determine legality of inputs
-   */
+    * @param condition Object to determine legality of inputs
+    */
   public void setEditCondition(DocumentEditCondition condition) {
     acquireWriteLock();
     try { _condition = condition; }
@@ -147,7 +147,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     try { super.insertString(offs, str, s); }
     catch (BadLocationException e) { throw new EditDocumentException(e); }  // should never happen
   }
-
+  
   /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
     * @param offs Offset into the document
     * @param str String to be inserted
@@ -159,58 +159,58 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     try { _forceInsertText(offs, str, style); }
     finally { releaseWriteLock(); }
   }
-     
+  
   /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
-   *  which sees a null style name.
-   */
+    * which sees a null style name.
+    */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
     acquireWriteLock();  // locking is used to make the test and modification atomic
     try { if (_condition.canInsertText(offs)) super.insertString(offs, str, set); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Removes a portion of the document, if the edit condition allows it.
-   *  @param offs Offset to start deleting from
-   *  @param len Number of characters to remove
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @param offs Offset to start deleting from
+    * @param len Number of characters to remove
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public void removeText(int offs, int len) {
     acquireWriteLock();  // locking is used to make the test and modification atomic
     try { _removeText(offs, len); }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Removes a portion of the document, if the edit condition allows it, as above.  Assume sthat WriteLock is held */
   public void _removeText(int offs, int len) {
     if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); 
   }
   
   /** Removes a portion of the document, regardless of the edit condition.
-   *  @param offs Offset to start deleting from
-   *  @param len Number of characters to remove
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @param offs Offset to start deleting from
+    * @param len Number of characters to remove
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public void forceRemoveText(int offs, int len) {
     /* Using a writeLock is unnecessary because remove is already thread-safe */
     try { super.remove(offs, len); }
     catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
-
+  
   /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
     acquireWriteLock(); // locking is used to make the test and modification atomic
     try { if (_condition.canRemoveText(offs))  super.remove(offs, len); }
     finally { releaseWriteLock(); }
   }
-
+  
 //  /** Returns the length of the document. */
 //  public int getDocLength() { return getLength(); } // locking is unnecessary because getLength is already thread-safe
-
+  
   /** Returns a portion of the document.
-   *  @param offs First offset of the desired text
-   *  @param len Number of characters to return
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @param offs First offset of the desired text
+    * @param len Number of characters to return
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public String getDocText(int offs, int len) {
     try { return getText(offs, len); }  // locking is unnecessary because getText is already thread-safe
     catch (BadLocationException e) { throw new EditDocumentException(e); }
@@ -236,7 +236,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     try { insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
   }
-    
+  
   /** Appends given string with specified named style to end of this document. */
   public void append(String str, String style) { append(str, style == null ? null : getDocStyle(style)); }
   
@@ -258,20 +258,20 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
 //    _lockState++;
     readLock();
   }
-   
+  
   /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
   public /* synchronized */ void releaseReadLock() {
     readUnlock();
 //    _lockState--;
   }
-
+  
   /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
   public /* synchronized */ void acquireWriteLock() { 
 //    _lockState = MODIFYLOCKED;
     writeLock(); 
   }
   
-   /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
+  /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
   public /* synchronized*/ void releaseWriteLock() { 
     writeUnlock();
 //   _lockState = UNLOCKED;

@@ -54,13 +54,13 @@ public final class DrJavaBookTest extends DrJavaTestCase {
   private DrJavaBook book = null;
   
   /** Standard constructor.
-   * @param name name of this DrJavaBook test
-   */
+    * @param name name of this DrJavaBook test
+    */
   public DrJavaBookTest(String name) { super(name); }
   
   /** Creates a test suite for JUnit to run.
-   *  @return a test suite based on the methods in this class
-   */
+    * @return a test suite based on the methods in this class
+    */
   public static Test suite() { return  new TestSuite(DrJavaBookTest.class); }
   
   public void setUp() throws Exception {

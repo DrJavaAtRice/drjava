@@ -42,26 +42,24 @@ import java.io.File;
 public interface FileDisplayManager extends DisplayManager<File> {
   
   /** Creates a file display that displays a file as this manager specifies
-   *  @param f the file to display using the display manager
-   *  @return the file display object used to display a file's name
-   */
+    * @param f the file to display using the display manager
+    * @return the file display object used to display a file's name
+    */
   public FileDisplay makeFileDisplay(File f);
   
   /** Creates a file display that displays a file as this manager specifies
-   *  @param parent the parent of the file to display using the display manager
-   *  @param child the name of the child such that <code>new File(parent, child)</code> is 
-   *         the file to be displayed.
-   *  @return the file display object used to display a file's name
-   */
+    * @param parent the parent of the file to display using the display manager
+    * @param child the name of the child such that <code>new File(parent, child)</code> is the file to be displayed.
+    * @return the file display object used to display a file's name
+    */
   public FileDisplay makeFileDisplay(File parent, String child);
   
   /** Creates a FileDisplay representing a new untitled folder that is  yet to be created.
-   *  @param parent the parent location to place this new folder
-   *  @return the new file display
-   */
+    * @param parent the parent location to place this new folder
+    * @return the new file display
+    */
   public FileDisplay makeNewFolderDisplay(File parent);
   
-  /** Notifies the manager that the file system has changed. This may affect the way the manager chooses icons for the files. */
+  /** Notifies manager that the file system has changed. May affect the way the manager chooses icons for the files. */
   public void update();
-  
 }

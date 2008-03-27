@@ -44,20 +44,17 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
-/** Determines whether or not the current line in the document starts with a specific character sequence, 
- *  skipping over any comments on that line. The character sequence is passed to the constructor of the class 
- *  as a String argument.
- *  @version $Id$
- */
+/** Determines whether the current line in the document starts with a specific character sequence, skipping over any 
+  * comments on that line. The character sequence is passed to the constructor of the class as a String argument.
+  * @version $Id$
+  */
 public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
-  /** The String to be matched. This String may not contain whitespace characters
-   *  or comment-delimiting characters.
-   */
+  /** The String to be matched. This String may not contain whitespace characters or comment-delimiting characters. */
   private String _prefix;
   
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.
-   *  @param noRule The decision subtree for the case that this rule does not apply in the current context.
-   */
+    * @param noRule The decision subtree for the case that this rule does not apply in the current context.
+    */
   public QuestionCurrLineStartsWithSkipComments(String prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
@@ -84,8 +81,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
       
       for (int i = 0; i < lineLength; i++) {
         // Get state for walker position.
-        //BraceReduction reduced = doc.getReduced();
-
+        
         doc.move( startPos - currentPos + i);
         ReducedModelState state = doc.getStateAtCurrent();
         doc.move(-startPos + currentPos - i);

@@ -63,72 +63,69 @@ public interface MainJVMRemoteI extends MasterRemote {
    * @param s String that was printed in the other JVM
    */
   public void systemOutPrint(String s) throws RemoteException;
-
+  
   /**
    * Asks the main jvm for input from the console.
    * @return the console input
    */
   public String getConsoleInput() throws RemoteException;
-
+  
   /** This method is called by the interpreter JVM if it cannot be exited (likely because of its having a security 
-   *  manager)
-   *  @param th The Throwable thrown by System.exit
-   */
+    * manager)
+    * @param th The Throwable thrown by System.exit
+    */
   public void quitFailed(Throwable th) throws RemoteException;
-
+  
   /** Called if JUnit is invoked on a non TestCase class.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(boolean isTestAll) throws RemoteException;
-
+  
   /** Called if the slave JVM encounters an illegal class file during testing.
-   * @param e the ClassFileError object describing the error when loading the class file.
-   */
+    * @param e the ClassFileError object describing the error when loading the class file.
+    */
   public void classFileError(ClassFileError e) throws RemoteException;
   
   /** Called to indicate that a suite of tests has started running.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void testSuiteStarted(int numTests) throws RemoteException;
-
+  
   /** Called when a particular test is started.
-   *  @param testName The name of the test being started.
-   */
+    * @param testName The name of the test being started.
+    */
   public void testStarted(String testName) throws RemoteException;
-
+  
   /** Called when a particular test has ended.
-   *  @param testName The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
-   */
+    * @param testName The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error
+    * or simply failed.
+    */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError)
     throws RemoteException;
-
-  /**
-   * Called when a full suite of tests has finished running.
-   * @param errors The array of errors from all failed tests in the suite.
-   */
+  
+  /** Called when a full suite of tests has finished running.
+    * @param errors The array of errors from all failed tests in the suite.
+    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException;
-
-  /**
-   * Called when the JUnitTestManager wants to open a file that is not currently open.
-   * @param className the name of the class for which we want to find the file
-   * @return the file associated with the given class
-   */
+  
+  /** Called when the JUnitTestManager wants to open a file that is not currently open.
+    * @param className the name of the class for which we want to find the file
+    * @return the file associated with the given class
+    */
   public File getFileForClassName(String className) throws RemoteException;
-
-  /**
-   * Notifies the main jvm that an assignment has been made in the given debug
-   * interpreter.
-   * Does not notify on declarations.
-   *
-   * This method is not currently necessary, since we don't copy back
-   * values in a debug interpreter until the thread has resumed.
-   *
-   * @param name the name of the debug interpreter
-   *
-  public void notifyDebugInterpreterAssignment(String name) throws RemoteException;
-  */
-
+  
+  /** Notifies the main jvm that an assignment has been made in the given debug
+    * interpreter.
+    * Does not notify on declarations.
+    *
+    * This method is not currently necessary, since we don't copy back
+    * values in a debug interpreter until the thread has resumed.
+    *
+    * @param name the name of the debug interpreter
+    *
+    public void notifyDebugInterpreterAssignment(String name) throws RemoteException;
+    */
+  
 }

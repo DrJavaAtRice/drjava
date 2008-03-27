@@ -49,35 +49,35 @@ import java.lang.reflect.Method;
 import edu.rice.cs.drjava.model.*;
 
 /** DrJava's print preview window
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public abstract class PreviewFrame extends JFrame {
-
+  
   protected final SingleDisplayModel _model;
   protected final MainFrame _mainFrame;
   protected final Pageable _print;
   protected volatile int _pageNumber;
-
+  
 //  private JTextField _pageTextField = new JTextField("" + (_pageNumber + 1), 2) {
 //    public Dimension getMaximumSize() {
 //      return getPreferredSize();
 //    }
 //  };
-
+  
   private final PageChangerUpdater _pageChanger;
-
+  
   private static abstract class PageChangerUpdater {
     abstract void update(int pageNumber) throws Exception;
     abstract JComponent getComponent();
   }
-
+  
   private class JTextFieldChanger extends PageChangerUpdater {
     private final JTextField textfield;
     private JTextFieldChanger(JTextField tf) { textfield = tf; }
     void update(int pageNumber) throws Exception { textfield.setText(String.valueOf(pageNumber)); }
     JComponent getComponent() { return textfield; }
   }
-
+  
   private class JSpinnerChanger extends PageChangerUpdater {
     private volatile JComponent spinner;
     private volatile Method setValueMethod;
@@ -92,7 +92,7 @@ public abstract class PreviewFrame extends JFrame {
     }
     JComponent getComponent() { return spinner; }
   }
-
+  
   // Print Preview Dimensions
   private final int PREVIEW_WIDTH;
   private final int PREVIEW_HEIGHT;
@@ -103,11 +103,11 @@ public abstract class PreviewFrame extends JFrame {
   private static final int PAGE_BORDER = 20;
   private static final int TOOLBAR_HEIGHT = 35;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
-
+  
   // Components
   private JToolBar _toolBar;
   private PagePreview _pagePreview;
-
+  
   // Actions
   /** Prints the current document. */
   private final ActionListener _printListener = new ActionListener() {
@@ -116,27 +116,27 @@ public abstract class PreviewFrame extends JFrame {
       _close();
     }
   };
-
+  
   /** Prints the current document. */
   private final Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent ae) { _close(); }
   };
-
+  
   /** Displays the next page of the document. */
   private final Action _nextPageAction = new AbstractAction("Next Page") {
     public void actionPerformed(ActionEvent ae) { _nextPage(); }
   };
-
+  
   /** Displays the previous page of the document. */
   private final Action _prevPageAction = new AbstractAction("Previous Page") {
     public void actionPerformed(ActionEvent ae) { _previousPage(); }
   };
-
+  
   /** How Preview Pane responds to window events. */
   private final WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowClosing(WindowEvent ev) { _close(); }
   };
-
+  
   /** Contructs a new PreviewFrame using a parent model and a Pageable object print to show. Should only be called in 
     * event thread. 
     */
@@ -152,20 +152,20 @@ public abstract class PreviewFrame extends JFrame {
     
     /* Initialize constants. */
     PageFormat first = _print.getPageFormat(0);
-
+    
     PREVIEW_PAGE_WIDTH = (int) (PAGE_ZOOM * first.getWidth());
     PREVIEW_PAGE_HEIGHT = (int) (PAGE_ZOOM * first.getHeight());
-
+    
     PREVIEW_WIDTH = PREVIEW_PAGE_WIDTH + (2 * PAGE_BORDER);
     PREVIEW_HEIGHT = PREVIEW_PAGE_HEIGHT + (2 * PAGE_BORDER) + TOOLBAR_HEIGHT;
-
+    
     _setUpActions();
     _setUpToolBar();
-
+    
     _pagePreview = new PagePreview(PREVIEW_PAGE_WIDTH, PREVIEW_PAGE_HEIGHT);
     _pageNumber = 0;
-
-
+    
+    
     PagePreviewContainer ppc = new PagePreviewContainer();
     ppc.add(_pagePreview);
     JPanel tbCont = new JPanel(new BorderLayout());
@@ -177,62 +177,62 @@ public abstract class PreviewFrame extends JFrame {
     cp.setBorder(new EmptyBorder(5,5,5,5));
     cp.add(tbCont, BorderLayout.NORTH);
     cp.add(ppc, BorderLayout.SOUTH);
-
+    
     addWindowListener(_windowCloseListener);
-
+    
     showPage();
     _updateActions();
-
+    
     setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setVisible(true);
   }
-
+  
   /** Prints the document being previewed */
   abstract protected void _print();
   
   /** Sets up the document to be displayed and returns the Pageable object that allows display by pages
-   *  @param model the current display model
-   *  @param interactions whether the document is an interactions document
-   *  @return a Pageable object that allows the document to be displayed by pages
-   */
+    * @param model the current display model
+    * @param interactions whether the document is an interactions document
+    * @return a Pageable object that allows the document to be displayed by pages
+    */
   abstract protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions);
-
+  
   private void _close() {
     dispose();
     _mainFrame.hourglassOff();
   }
-
+  
   private void _nextPage() {
     _pageNumber++;
     _goToPage(_pageNumber);
   }
-
+  
   private void _previousPage() {
     _pageNumber--;
     _goToPage(_pageNumber);
   }
-
+  
   private void _goToPage(int pi) {
     _pageNumber = pi;
     showPage();
     _updateActions();
   }
-
+  
   protected void _showError(Exception e, String title, String message) {
     JOptionPane.showMessageDialog(this, message + "\n" + e, title, JOptionPane.ERROR_MESSAGE);
   }
-
+  
   /** Updates all of the buttons on the page to reflect the current state of the PreviewWindows. Enables/Disables the
-   *  page buttons, and updates the gotopage field.
-   */
+    * page buttons, and updates the gotopage field.
+    */
   private void _updateActions() {
     _nextPageAction.setEnabled(_print.getNumberOfPages() > (_pageNumber + 1));
     _prevPageAction.setEnabled(_pageNumber > 0);
     try { _pageChanger.update(_pageNumber + 1); }
     catch(Exception e) { /* ignore */ }
   }
-
+  
   /** Initializes all action objects. Adds icons and descriptions to several of the actions. */
   private void _setUpActions() {
     //_printAction.putValue(Action.SHORT_DESCRIPTION, "Print");
@@ -243,7 +243,7 @@ public abstract class PreviewFrame extends JFrame {
     _prevPageAction.putValue(Action.SMALL_ICON, _getIcon("Back16.gif"));
     _prevPageAction.putValue(Action.SHORT_DESCRIPTION, "Previous Page");
   }
-
+  
   private PageChangerUpdater createPageChanger() {
     //_pageTextField.setAction(_goToPageAction);
     // _goToPageAction.putValue(Action.SHORT_DESCRIPTION, "Goto Page");
@@ -288,23 +288,23 @@ public abstract class PreviewFrame extends JFrame {
       return new JTextFieldChanger(tf);
     }
   }
-
+  
   private static Object callMethod(Object rec, Class<?> c, String name, Class<?>[] ca, Object[] args) throws Exception {
     Method m = c.getMethod(name,ca);
     return m.invoke(rec,args);
   }
-
+  
   /** Mirrored from MainFrame, will later use the same Icon access code. */
   private ImageIcon _getIcon(String name) {
     URL url = PreviewFrame.class.getResource(ICON_PATH + name);
     if (url != null) return new ImageIcon(url);
     return null;
   }
-
+  
   /** Sets up the toolbar with all of the necessary buttons. */
   private void _setUpToolBar() {
     _toolBar.setFloatable(false);
-
+    
     // Print and Close buttons
     JButton printButton = new JButton("Print...",_getIcon("Print16.gif"));
     printButton.setToolTipText("Print this document");
@@ -312,19 +312,19 @@ public abstract class PreviewFrame extends JFrame {
     _toolBar.add(printButton);
     _toolBar.addSeparator();
     _toolBar.add(_closeAction);
-
+    
     // Horizontal Gap
     _toolBar.add(Box.createHorizontalGlue());
-
+    
     // Navigation components
     _toolBar.add(_prevPageAction);
     _toolBar.add(_nextPageAction);
     _toolBar.addSeparator();
-
+    
     JLabel gotop = new JLabel("Page");
-
+    
     JLabel of = new JLabel(" of " + _print.getNumberOfPages());
-
+    
     _toolBar.add(gotop);
     _toolBar.addSeparator();
     JComponent c = _pageChanger.getComponent();
@@ -337,7 +337,7 @@ public abstract class PreviewFrame extends JFrame {
     _toolBar.add(c);
     _toolBar.add(of);
   }
-
+  
   /** Generates an Image, prints to it, and then displays the image on the page. */
   private void showPage() {
     BufferedImage img = new BufferedImage((int) _model.getPageFormat().getWidth(),
@@ -346,36 +346,36 @@ public abstract class PreviewFrame extends JFrame {
     Graphics g = img.getGraphics();
     g.setColor(Color.white);
     g.fillRect(0, 0, (int) _model.getPageFormat().getWidth(), (int) _model.getPageFormat().getHeight());
-
+    
     try {
       _print.getPrintable(_pageNumber).print(g, _model.getPageFormat(), _pageNumber);
       _pagePreview.setImage(img);
     } 
     catch (PrinterException e) { /* ignore */ }
   }
-
+  
   /** Internal class which holds (and places) the PagePreview object. */
   class PagePreviewContainer extends JPanel {
     public Dimension getPreferredSize() { return getParent().getSize(); }
-
+    
     /** Places the PagePreview component into the center of this object */
     public void doLayout() {
       Component cp = getComponent(0);
-
+      
       Dimension dm = cp.getPreferredSize();
       int Hindent = (int) (getPreferredSize().getWidth() - dm.getWidth()) / 2;
       int Vindent = TOOLBAR_HEIGHT + (int) ((getPreferredSize().getHeight() - dm.getHeight() - TOOLBAR_HEIGHT) / 2);
       _pagePreview.setBounds(Hindent, Vindent, (int) dm.getWidth(), (int) dm.getHeight());
     }
   }
-
+  
   /** Static inner class which displays the image on the screen, and holds the Image object. */
   static class PagePreview extends JPanel {
     protected final int _width;
     protected final int _height;
     protected volatile Image _source;
     protected volatile Image _image;
-
+    
     /** Constructs a PagePreview object with given width and height. */
     public PagePreview(int width, int height) {
       super();
@@ -384,28 +384,28 @@ public abstract class PreviewFrame extends JFrame {
       setBorder(new MatteBorder(1, 1, 2, 2, Color.black));
       setBackground(Color.white);
     }
-
+    
     /** Scales the interal image to the appropriate size. */
     protected void updateScaled() {
       _image = _source.getScaledInstance(_width, _height, Image.SCALE_SMOOTH);
       _image.flush();
     }
-
+    
     /** Updates the image of this PagePreview.
-     *  @param i The Image to place and show.
-     */
+      * @param i The Image to place and show.
+      */
     public void setImage(Image i) {
       _source = i;
       updateScaled();
       repaint();
     }
-
+    
     public Dimension getPreferredSize() { return new Dimension(_width, _height); }
-
+    
     public Dimension getMaximumSize() { return getPreferredSize(); }
-
+    
     public Dimension getMinimumSize() { return getPreferredSize(); }
-
+    
     public void paint(Graphics g) {
       g.setColor(getBackground());
       g.fillRect(0, 0, _width, _height);

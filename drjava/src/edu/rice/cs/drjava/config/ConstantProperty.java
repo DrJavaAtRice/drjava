@@ -40,10 +40,8 @@ import edu.rice.cs.drjava.DrJava;
 import java.util.HashSet;
 import java.util.Iterator;
 
-/** Class representing values that are constant and that
-  * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+/** Class representing values that are constant and that can be inserted as variables in external processes.
+  * @version $Id$
   */
 public class ConstantProperty extends DrJavaProperty {
   /** Create a constant property. */

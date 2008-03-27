@@ -115,28 +115,20 @@ public interface BraceReduction {
   /** A simplified toString() method. */
   public String simpleString();
 
-  /**
-   * Return all highlight status info for text between the current
-   * location and current location + end.
-   * This should collapse adjoining blocks with the same status into one.
-   * @param start The starting location of the area we want to get status of.
-   *              The reduced model is already at this position, but the
-   *              parameter is needed to determine the absolute positions
-   *              needed in the HighlightStatus objects we return.
-   * @param length How far should we generate info for?
-   */
+  /** Return all highlight status info for text between the current location and current location + end. This should 
+    * collapse adjoining blocks with the same status into one.
+    * @param start  The start location of the area being inspected. The reduced model cursor is already located at this 
+    *               position, but the parameter is needed to determine the absolute positions needed in the 
+    *               HighlightStatus objects we return.
+    * @param length  The length of the text area being inspected.
+    */
   public Vector<HighlightStatus> getHighlightStatus(int start, int length);
 
-  /**
-   *Returns the state at the relLocation, where relLocation is the location
-   *relative to the walker
-   *@param relLocation distance from walker to get state at.
-   */
+  /** Returns the state at the relLocation, where relLocation is the location relative to the walker
+    * @param relLocation distance from walker to get state at.
+    */
   public ReducedModelState moveWalkerGetState(int relLocation);
 
-  /**
-   * Resets the location of the walker in the comment list to where the
-   * current cursor is.
-   */
+  /** Resets the location of the walker in the comment list to where the current cursor is. */
   public void resetLocation();
 }

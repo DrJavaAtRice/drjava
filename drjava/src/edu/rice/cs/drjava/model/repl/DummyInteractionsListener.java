@@ -50,8 +50,8 @@ public class DummyInteractionsListener implements InteractionsListener {
   public void interactionEnded() { }
   
   /** Called when the interactions window generates a syntax error.
-   *  @param offset the error's offset into the InteractionsDocument
-   *  @param length the length of the error
+   * @param offset the error's offset into the InteractionsDocument
+   * @param length the length of the error
    */
   public void interactionErrorOccurred(int offset, int length) { }
 
@@ -62,8 +62,8 @@ public class DummyInteractionsListener implements InteractionsListener {
   public void interpreterReady(File wd) { }
 
   /** Called when the interactions JVM was closed by System.exit
-   *  or by being aborted. Immediately after this the interactions
-   *  will be reset.
+   * or by being aborted. Immediately after this the interactions
+   * will be reset.
    * @param status the exit code
    */
   public void interpreterExited(int status) { }
@@ -72,8 +72,8 @@ public class DummyInteractionsListener implements InteractionsListener {
   public void interpreterResetFailed(Throwable t) { }
   
   /** Called when the active interpreter is changed.
-   *  @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
-   *  interactionEnded event will be fired)
+   * @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
+   * interactionEnded event will be fired)
    */
   public void interpreterChanged(boolean inProgress) { }
 

@@ -47,15 +47,12 @@ public class InsideDoubleQuote extends ReducedModelState {
   /** Singleton constructor */
   private InsideDoubleQuote() { }
   
-  /** Walk function for when inside a quoted string.
-    *  Self-recursive and mutually recursive with other walk functions.
-    *  <ol>
-    *  <li> If we've reached the end of the list, return.
-    *  <li> If we find //, /* or * /, split them into two separate braces.
-    *       The cursor will be on the first of the two new braces.
-    *  <li> If current brace = \n or ", mark current brace FREE, next(), and
-    *       go to updateFree.
-    *       Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
+  /** Walk function for when inside a quoted string.  Mutually recursive with other walk functions.
+    * <ol>
+    * <li> If we've reached the end of the list, return.
+    * <li> If we find //, /* or * /, split them into two separate braces. The cursor will be on the first of the two new braces.
+    * <li> If current brace = \n or ", mark current brace FREE, next(), and go to updateFree.<br>
+    *      Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
     * </ol>   
     */
   ReducedModelState update(TokenList.Iterator copyCursor) {

@@ -50,34 +50,33 @@ public class ManifestWriter {
   private List<String> _classPaths;
   private String _mainClass;
   public static final Manifest DEFAULT = new ManifestWriter().getManifest();
-
+  
   /** Create a new manifest file */
   public ManifestWriter() {
     _classPaths = new LinkedList<String>();
     _mainClass = null;
   }
-
+  
   /** Add a class path to the Manifest
-   *  @param path the path to be added
-   */
+    * @param path the path to be added
+    */
   public void addClassPath(String path) {
     _classPaths.add(_classPaths.size(), path);
   }
-
-  /**
-   * Set the main class of the Manifest
-   * @param mainClass
-   */
+  
+  /** Set the main class of the Manifest
+    * @param mainClass
+    */
   public void setMainClass(String mainClass) {
     _mainClass = mainClass;
   }
-
+  
   /** Get an input stream to the contents of the manifest file
-   * @return an InputStream whose contents are the contents of the Manifest file
-   */
+    * @return an InputStream whose contents are the contents of the Manifest file
+    */
   protected InputStream getInputStream() {
     // NOTE: All significant lines in the manifest MUST end in the end of line character
-
+    
     final StringBuilder sbuf = new StringBuilder();
     sbuf.append(Attributes.Name.MANIFEST_VERSION.toString());
     sbuf.append(": 1.0" + StringOps.EOL);
@@ -100,11 +99,10 @@ public class ManifestWriter {
     try { return new ByteArrayInputStream(sbuf.toString().getBytes("UTF-8")); }
     catch (UnsupportedEncodingException e) { throw new UnexpectedException(e); }
   }
-
-  /**
-   * Get the Manifest object that this object created.
-   * @return the Manifest that this builder created
-   */
+  
+  /** Get the Manifest object that this object created.
+    * @return the Manifest that this builder created
+    */
   public Manifest getManifest() {
     try {
       Manifest m = new Manifest();

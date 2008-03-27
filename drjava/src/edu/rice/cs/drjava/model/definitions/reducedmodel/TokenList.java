@@ -81,9 +81,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     public void setBlockOffset(int offset) { _offset = offset; }
 
     /** Returns the current commented/quoted state at the cursor.
-      *
-      * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
-      *         INSIDE_DOUBLE_QUOTE
+      * @return FREE | INSIDE_BLOCK_COMMENT | INSIDE_LINE_COMMENT | INSIDE_SINGLE_QUOTE | INSIDE_DOUBLE_QUOTE
       */
     public ReducedModelState getStateAtCurrent() {
       if (atFirstItem() || atStart() || TokenList.this.isEmpty())  return FREE;
@@ -259,14 +257,10 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
 
 
-    /**
-     * <P>Update the BraceReduction to reflect text deletion.</P>
-     *
-     * @param count indicates the size and direction of text deletion.
-     *              Negative values delete text to the left of the cursor, positive
-     *              values delete text to the right.
-     *              Always move count spaces to make sure we can delete.
-     */
+    /** <P>Update the BraceReduction to reflect text deletion.</P>
+      * @param count  A number specifying the size and direction of text deletion. Negative values delete text to the 
+      *               left of the cursor; positive values delete text to the right. Assumes deletion is within range!
+      */
     public void delete(int count) {
       if (count == 0) return;
       Iterator copyCursor = copy();
@@ -360,9 +354,8 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       }
     }
 
-    /** Deletes from offset in delFrom to endOffset in delTo.
-     *  Uses ModelList's collapse function to facilitate quick deletion.
-     */
+    /** Deletes from offset in this to endOffset in delTo. Uses ModelList's collapse function to perform quick deletion.
+      */
     int deleteRight(Iterator delTo) {
       this.collapse(delTo);
 

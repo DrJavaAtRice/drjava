@@ -84,8 +84,8 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Starts a compound edit.
-   *  @return the key for the compound edit
-   */
+    *  @return the key for the compound edit
+    */
   public synchronized int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());
     _keys.add(0, new Integer(_nextKey));
@@ -94,9 +94,9 @@ public class CompoundUndoManager extends UndoManager {
     return _keys.get(0).intValue();
   }
   
-  /** Ends the last compound edit that was created.
-   *  Used when a compound edit is created by the _undoListener in DefinitionsPane and the key is not known in DefinitionsDocument.
-   */
+  /** Ends the last compound edit that was created.  Used when a compound edit is created by the _undoListener in
+    * DefinitionsPane and the key is not known in DefinitionsDocument.
+    */
   public synchronized void endLastCompoundEdit() {
     if (_keys.size() == 0) return;
     // NOTE: The preceding can happen if for example uncomment lines does not modify any text.
@@ -104,15 +104,15 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Ends a compound edit.
-   *  @param key the key that was returned by startCompoundEdit()
-   */
+    * @param key the key that was returned by startCompoundEdit()
+    */
   public synchronized void endCompoundEdit(int key) {
     if (_keys.size() == 0) return;
     
     if (_keys.get(0) == key) {
       _keys.remove(0);
       final CompoundEdit ce = _compoundEdits.remove(0);
- 
+      
       ce.end();
       if (ce.canUndo()) {
         if (! _compoundEditInProgress()) {
@@ -125,25 +125,23 @@ public class CompoundUndoManager extends UndoManager {
     else throw new IllegalStateException("Improperly nested compound edits.");
   }
   
-  /** We are getting the last Compound Edit entered into the list.
-   *  This is for making a Compound edit for granular undo.
-   */
+  /** Gets the last Compound Edit entered into the list. Used in making a Compound edit for granular undo. */
   public synchronized CompoundEdit getLastCompoundEdit() { return _compoundEdits.get(0); }
   
   /** Gets the next undo.
-   *  @return the next undo
-   */
+    * @return the next undo
+    */
   public UndoableEdit getNextUndo() { return editToBeUndone(); }
   
   /** Gets the next redo.
-   *  @return the next redo
-   */
+    * @return the next redo
+    */
   public UndoableEdit getNextRedo() { return editToBeRedone(); }
   
   /** Adds an edit.  Checks whether or not the current edit is a compound edit.
-   *  @param e the edit to be added
-   *  @return true if the add is successful, false otherwise
-   */
+    * @param e the edit to be added
+    * @return true if the add is successful, false otherwise
+    */
   public synchronized boolean addEdit(UndoableEdit e) {
     if (_compoundEditInProgress()) {
       //      _notifyUndoHappened(); // added this for granular undo
@@ -157,13 +155,13 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Returns whether or not a compound edit is in progress.
-   *  @return true iff in progress
-   */
+    * @return true iff in progress
+    */
   public synchronized boolean _compoundEditInProgress() { return ! _compoundEdits.isEmpty(); }
   
   /** Returns true when a compound edit is in progress,  or when there are valid stored undoable edits
-   * @return true iff undoing is possible
-   */
+    * @return true iff undoing is possible
+    */
   public synchronized boolean canUndo() { return _compoundEditInProgress() || super.canUndo(); }
   
   /** Returns the presentation name for this undo, or delegates to super if none is available
@@ -210,7 +208,8 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Helper method to notify the view that an undoable edit has occured. Note that lock on this is not held by
-   *  the event thread (even if called from event thread) when notification happens. */
+    * the event thread (even if called from event thread) when notification happens. 
+    */
   private void _notifyUndoHappened() { 
     // Use SwingUtilities.invokeLater so that notification is deferred when running in the event thread.
     SwingUtilities.invokeLater(new Runnable() { public void run() { _notifier.undoableEditHappened(); } });
@@ -232,8 +231,8 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Determines if the document is in the same undo state as it was when it was last saved.
-   *  @return true iff all changes have been undone since the last save
-   */
+    * @return true iff all changes have been undone since the last save
+    */
   public synchronized boolean isModified() { 
 //    Utilities.showDebug("_savePoint = " + _savePoint + " editToBeUndone() = " + editToBeUndone());
     return editToBeUndone() != _savePoint; 

@@ -47,14 +47,14 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  * @version $Id$
  */
 public class DefinitionsEditorKit extends StyledEditorKit {
-
+  
   private GlobalEventNotifier _notifier;
-
+  
   /** Creates a new editor kit with the given listeners.
-   *  @param notifier Keeps track of the listeners to the model
-   */
+    * @param notifier Keeps track of the listeners to the model
+    */
   public DefinitionsEditorKit(GlobalEventNotifier notifier) { _notifier = notifier; }
-
+  
   private static ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
       // The following line is for performance analysis only!
@@ -62,38 +62,35 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       return new ColoringView(elem);
     }
   };
-
-  /** Creates a new DefinitionsDocument. This used to be named createDefaultDocument() so that the view
-   *  (DefinitionsPane) would create a DefinitionsDocument by default when it was constructed.  However, 
-   *  we already have an existing DefinitionsDocument we want to use when the DefinitionsPane is constructed, 
-   *  so this default one was being created and thrown away (very expensive).  Ideally, we would have the
-   *  DefinitionsPane use our existing document from the beginning, but the JEditorPane constructor does 
-   *  not take in a Document.  The only possible approach would be to have this EditorKit return the desired
-   *  existing document when the JEditorPane requests a new one, but since the EditorKit must be kept as a 
-   *  static field on DefinitionsPane since we can't set one until after JEditorPane's constructor is
-   *  finished), there's no clean way to tell the EditorKit which document to return at which time.  (It 
-   *  would require a large synchronization effort each time a DefinitionsPane is constructed.)
-   *
-   *  As an easier alternative, we just let the DefaultEditorKit return a PlainDocument (much lighter weight),
-   *  which can then be thrown away when the true DefinitionsDocument is assigned.
-   *
-   *  Improvements to this approach are welcome...  :)
-   */
+  
+  /** Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() because the view (DefinitionsPane)
+    * would create a DefinitionsDocument by default when it was constructed.  However, this default document was  
+    * immediately discarded because a DefinitionsDocument for the constructed DefinitionsPane already existed. 
+    * Unfortunately, JEditorPane does not have a constructor that takes a Document as input.  We conceivably could
+    * design this EditorKit to return the pre-existing document when the JEditorPane requests a new one, but the 
+    * EditorKit is specified by a static field of DefinitionsPane so there is no clean way to install the proper
+    * EditorKit before the JEditorPane constructor asks for the Document.
+    *
+    * As an easier alternative, we just let the DefaultEditorKit return a PlainDocument (much lighter weight),
+    * which is thrown away when the true DefinitionsDocument is assigned.
+    *
+    * Improvements to this approach are welcome...  :)
+    */
   public DefinitionsDocument createNewDocument() { return  _createDefaultTypedDocument(); }
-
+  
   /** Creates a new DefinitionsDocument.
-   *  @return a new DefinitionsDocument.
-   */
+    * @return a new DefinitionsDocument.
+    */
   private DefinitionsDocument _createDefaultTypedDocument() { return new DefinitionsDocument(_notifier); }
-
+  
   /** Get the MIME content type of the document.
-   *  @return "text/java"
-   */
+    * @return "text/java"
+    */
   public String getContentType() { return "text/java"; }
-
+  
   /** We want to use our ColoringView to render text, so here we return
-   *  a factory that creates ColoringViews.
-   */
+    * a factory that creates ColoringViews.
+    */
   public final ViewFactory getViewFactory() { return _factory; }
 }
 

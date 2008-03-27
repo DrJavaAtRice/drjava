@@ -40,25 +40,25 @@ import java.io.*;
 import edu.rice.cs.util.FileOps;
 
 /** Class representing all configuration options with values of type File.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class FileOption extends Option<File> {
   
   /** @param key The name of this option. */
   public FileOption(String key, File def) { super(key,def); }
   
   /** @param s The String to be parsed, must represent a legal file path for the File to be created.
-   *  @return The absolute File object corresponding to the input path string.
-   */
+    * @return The absolute File object corresponding to the input path string.
+    */
   public File parse(String s) { 
     if (s.trim().equals("")) return FileOps.NULL_FILE;
     
     try { return new File(s).getAbsoluteFile(); }
     catch (NullPointerException e) { throw new OptionParseException(name, s, "Must have a legal filename."); }
   }
-
+  
   /** @param f The instance of class File to be formatted.
-   *  @return A String representing the absolute path of "f".
-   */
+    * @return A String representing the absolute path of "f".
+    */
   public String format(File f) { return f.getAbsolutePath(); }
 }

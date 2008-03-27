@@ -48,28 +48,28 @@ import java.io.*;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
- *  prepared.  (Only DocumentDebugActions have reference types which can be prepared.)
- *  @version $Id$
- */
+  *  prepared.  (Only DocumentDebugActions have reference types which can be prepared.)
+  *  @version $Id$
+  */
 
 public class PendingRequestManager {
   private JPDADebugger _manager;
   private Hashtable<String, Vector<DocumentDebugAction<?>>> _pendingActions;
-
+  
   public PendingRequestManager(JPDADebugger manager) {
     _manager = manager;
     _pendingActions = new Hashtable<String, Vector<DocumentDebugAction<?>>>();
   }
-
+  
   /** Called if a breakpoint is set before its class is prepared
-   * @param action The DebugAction that is pending
-   */
+    * @param action The DebugAction that is pending
+    */
   public void addPendingRequest (DocumentDebugAction<?> action) {
     String className = action.getClassName();
     Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
     if (actions == null) {
       actions = new Vector<DocumentDebugAction<?>>();
-
+      
       // only create a ClassPrepareRequest once per class
       ClassPrepareRequest request =
         _manager.getEventRequestManager().createClassPrepareRequest();
@@ -82,7 +82,7 @@ public class PendingRequestManager {
     actions.add(action);
     _pendingActions.put(className, actions);
   }
-
+  
   /**
    * Called if a breakpoint is set and removed before its class is prepared
    * @param action The DebugAction that was set and removed
@@ -99,12 +99,12 @@ public class PendingRequestManager {
       _pendingActions.remove(className);
     }
   }
-
+  
   /** Recursively look through all nested types to see if the line number exists.
-   *  @param lineNumber line number to look for
-   *  @param rt reference type to start at
-   *  @return true if line number is found
-   */
+    * @param lineNumber line number to look for
+    * @param rt reference type to start at
+    * @return true if line number is found
+    */
   private boolean recursiveFindLineNumber(int lineNumber, ReferenceType rt) {
     try {
       for(Location l: rt.allLineLocations()) {
@@ -114,40 +114,35 @@ public class PendingRequestManager {
         if (recursiveFindLineNumber(lineNumber, nested)==true) { return true; }
       }
     }
-    catch (AbsentInformationException aie) {
-      // ignore, return false
-    }
-    
+    catch (AbsentInformationException aie) { /* fall through and return false */ }
     return false;
   }
   
-  /**
-   * Called by the EventHandler whenever a ClassPrepareEvent occurs.
-   * This will take the event, get the class that was prepared, lookup
-   * the Vector of DebugAction that was waiting for this class's preparation,
-   * iterate through this Vector, and attempt to create the Breakpoints that
-   * were pending. Since the keys to the HashTable are the names of the
-   * outer class, the $ and everything after it must be cropped off from the
-   * class name in order to do the lookup. During the lookup, however, the line
-   * number of each action is checked to see if the line number is contained
-   * in the given event's ReferenceType. If not, we ignore that pending action
-   * since it is not in the class that was just prepared, but may be in one of its
-   * inner classes.
-   * @param event The ClassPrepareEvent that just occured
-   */
+  /** Called by the EventHandler whenever a ClassPrepareEvent occurs.  This will take the event, get the class that was
+    * prepared, lookup the Vector of DebugAction that was waiting for this class's preparation, iterate through this 
+    * Vector, and attempt to create the Breakpoints that
+    * were pending. Since the keys to the HashTable are the names of the
+    * outer class, the $ and everything after it must be cropped off from the
+    * class name in order to do the lookup. During the lookup, however, the line
+    * number of each action is checked to see if the line number is contained
+    * in the given event's ReferenceType. If not, we ignore that pending action
+    * since it is not in the class that was just prepared, but may be in one of its
+    * inner classes.
+    * @param event The ClassPrepareEvent that just occured
+    */
   public void classPrepared (ClassPrepareEvent event) throws DebugException {
     ReferenceType rt = event.referenceType();
     //DrJava.consoleOut().println("In classPrepared. rt: " + rt);
     //DrJava.consoleOut().println("equals getReferenceType: " +
     //                   rt.equals(_manager.getReferenceType(rt.name())));
     String className = rt.name();
-
+    
     // crop off the $ if there is one and anything after it
     int indexOfDollar = className.indexOf('$');
     if (indexOfDollar > 1) {
       className = className.substring(0, indexOfDollar);
     }
-
+    
     // Get the pending actions for this class (and inner classes)
     Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
     Vector<DocumentDebugAction<?>> failedActions =
@@ -177,7 +172,7 @@ public class PendingRequestManager {
               _manager.printMessage(actions.get(i).toString()+" not on an executable line; disabled.");
               actions.get(i).setEnabled(false);
             }
-
+            
             // Requested line number not in reference type, skip this action
             continue;
           }
@@ -198,19 +193,19 @@ public class PendingRequestManager {
         // DrJava.consoleOut().println("Exception preparing request!! " + e);
       }
     }
-
+    
     // For debugging purposes
     /*
-    List l = _manager.getEventRequestManager().breakpointRequests();
-    System.out.println("list of eventrequestmanager's breakpointRequests: " +
-                       l);
-    for (int i = 0; i < l.size(); i++) {
-      BreakpointRequest br = (BreakpointRequest)l.get(i);
-      System.out.println("isEnabled(): " + br.isEnabled() +
-                         " suspendPolicy(): " + br.suspendPolicy() +
-                         " location(): " + br.location());
-    }
-    */
+     List l = _manager.getEventRequestManager().breakpointRequests();
+     System.out.println("list of eventrequestmanager's breakpointRequests: " +
+     l);
+     for (int i = 0; i < l.size(); i++) {
+     BreakpointRequest br = (BreakpointRequest)l.get(i);
+     System.out.println("isEnabled(): " + br.isEnabled() +
+     " suspendPolicy(): " + br.suspendPolicy() +
+     " location(): " + br.location());
+     }
+     */
     if (failedActions.size() > 0) {
       // need to create an exception framework
       throw new DebugException("Failed actions: " + failedActions);

@@ -72,32 +72,31 @@ import edu.rice.cs.util.OperationCanceledException;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** Default implementation of JavadocModel interface; generates Javadoc HTML files for a set of documents.
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public class DefaultJavadocModel implements JavadocModel {
-
+  
   /** Used by CompilerErrorModel to open documents that have errors. */
   private GlobalModel _model;
-
+  
   /**Manages listeners to this model. */
   private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
-
+  
   /** Location of the java command to use (if not the default in {@code java.home}) */
   private final File _javaCommand;
-
+  
   /** Location of the tools library containing the javadoc code (if not on the javaCommand's boot class path) */
   private final Iterable<File> _toolsPath;
   
   /** The error model containing all current Javadoc errors. */
   private CompilerErrorModel _javadocErrorModel;
   
-  /**
-   * Main constructor.
-   * @param model Source of documents for this JavadocModel
-   * @param javaCommand  Location of the java command to use (if not the default in {@code java.home})
-   * @param toolsPath  Location of the tools library containing the javadoc code (if not on the 
-   *                   javaCommand's boot class path)
-   */
+  /** Main constructor.
+    * @param model Source of documents for this JavadocModel
+    * @param javaCommand  Location of the java command to use (if not the default in {@code java.home})
+    * @param toolsPath  Location of the tools library containing the javadoc code (if not on the 
+    *                   javaCommand's boot class path)
+    */
   public DefaultJavadocModel(GlobalModel model, File javaCommand, Iterable<File> toolsPath) {
     _model = model;
     _javaCommand = javaCommand;
@@ -106,35 +105,34 @@ public class DefaultJavadocModel implements JavadocModel {
   }
   
   public boolean isAvailable() { return true; }
-
+  
   //-------------------------- Listener Management --------------------------//
-
+  
   /** Add a JavadocListener to the model.
-   *  @param listener a listener that reacts to Javadoc events
-   */
+    * @param listener a listener that reacts to Javadoc events
+    */
   public void addListener(JavadocListener listener) { _notifier.addListener(listener); }
-
-  /** Remove a JavadocListener from the model.  If the listener is not currently
-   *  listening to this model, this method has no effect.
-   *  @param listener a listener that reacts to Javadoc events
-   */
+  
+  /** Remove a JavadocListener from the model.  If the listener is not installed, this method has no effect.
+    * @param listener a listener that reacts to Javadoc events
+    */
   public void removeListener(JavadocListener listener) { _notifier.removeListener(listener); }
-
+  
   /** Removes all JavadocListeners from this model. */
   public void removeAllListeners() { _notifier.removeAllListeners(); }
-
+  
   //----------------------------- Error Results -----------------------------//
-
+  
   /** Accessor for the Javadoc error model.
-   *  @return the CompilerErrorModel managing Javadoc errors.
-   */
+    * @return the CompilerErrorModel managing Javadoc errors.
+    */
   public CompilerErrorModel getJavadocErrorModel() { return _javadocErrorModel; }
-
+  
   /** Clears all current Javadoc errors. */
   public void resetJavadocErrors() {
     _javadocErrorModel = new CompilerErrorModel();
   }
-
+  
   // -------------------- Javadoc All Documents --------------------
   
   /** Javadocs all open documents, after ensuring that all are saved.  The user provides a destination, and the global 
@@ -144,9 +142,9 @@ public class DefaultJavadocModel implements JavadocModel {
     * @throws IOException if there is a problem manipulating files
     */
   public void javadocAll(DirectorySelector select, final FileSaveSelector saver) throws IOException {
-        
+    
     /* Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination; fixes bug 
-       where pop-up is shown twice) */
+     where pop-up is shown twice) */
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
     Configuration config = DrJava.getConfig();
@@ -195,7 +193,7 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }
     catch (OperationCanceledException oce) { return; } // If the user cancels anywhere, silently return.
-  
+    
     _notifier.javadocStarted();  // fire first so _javadocAllWorker can fire javadocEnded
     // Start a new thread to do the work.
     final File destDirF = destDir;
@@ -203,7 +201,7 @@ public class DefaultJavadocModel implements JavadocModel {
       public void run() { _javadocAllWorker(destDirF, saver); }
     }.start();
   }
-
+  
   /** This method handles most of the logic of performing a Javadoc operation, once we know that it won't be canceled.
     * @param destDirFile the destination directory for the doc files
     * @param saver a command object for saving a document (if it moved/changed)
@@ -212,9 +210,9 @@ public class DefaultJavadocModel implements JavadocModel {
   private void _javadocAllWorker(File destDirFile, FileSaveSelector saver) {
     // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
-
+    
     List<String> docFiles = new ArrayList<String>(); // files to send to Javadoc
-
+    
     for (OpenDefinitionsDocument doc: _model.getOpenDefinitionsDocuments()) {
       try {
         // This will throw an IllegalStateException if no file can be found
@@ -228,18 +226,18 @@ public class DefaultJavadocModel implements JavadocModel {
         // can't access file; ignore
       }
     }
-
+    
     // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
     if (docFiles.size() == 0) return;
-
+    
     // Run the actual Javadoc process
     _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), false);
   }
-
-
-
+  
+  
+  
   // -------------------- Javadoc Current Document --------------------
-
+  
   /** Generates Javadoc for the given document only, after ensuring it is saved. Saves the output in a temp directory
     * which is passed to _javadocDocuemntWorker, which is passed to a subsequent javadocEnded event.
     * @param doc Document to generate Javadoc for
@@ -250,16 +248,16 @@ public class DefaultJavadocModel implements JavadocModel {
     // Prompt to save if necessary
     //  (TO DO: should only need to save the current document)
     if (doc.isUntitled() || doc.isModifiedSinceSave()) _notifier.saveBeforeJavadoc();
-
+    
     // Make sure it is saved
     if (doc.isUntitled() || doc.isModifiedSinceSave()) return;  // The user didn't save, so don't generate Javadoc
-
+    
     // Try to get the file from the document
     final File file = _getFileFromDocument(doc, saver);
-
+    
     // Generate to a temporary directory
     final File destDir = IOUtil.createAndMarkTempDirectory("DrJava-javadoc", "");
-
+    
     _notifier.javadocStarted();  // fire first so _javadocDocumntWorker can fire javadocEnded
     // Start a new thread to do the work.
     new Thread("DrJava Javadoc Thread") {
@@ -269,9 +267,9 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }.start();
   }
-
+  
   // -------------------- Helper Methods --------------------
-
+  
   /** Suggests a default location for generating Javadoc, based on the given document's source root.  (Appends 
     * JavadocModel.SUGGESTED_DIR_NAME to the sourceroot.) Ensures that the document is saved first, or else no 
     * reasonable suggestion will be found.
@@ -280,14 +278,14 @@ public class DefaultJavadocModel implements JavadocModel {
     */
   public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
     _attemptSaveAllDocuments();
-
+    
     try {
       File sourceRoot = doc.getSourceRoot();
       return new File(sourceRoot, SUGGESTED_DIR_NAME);
     }
     catch (InvalidPackageException ipe) { return null; }
   }
-
+  
   /**
    * If any documents are modified, this gives the user a chance
    * to save them before proceeding.
@@ -299,7 +297,7 @@ public class DefaultJavadocModel implements JavadocModel {
     // Only javadoc if all are saved.
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) _notifier.saveBeforeJavadoc();
   }
-
+  
   /**
    * Run a new process to generate javdocs, and then tell the listeners when we're done.
    *
@@ -365,7 +363,7 @@ public class DefaultJavadocModel implements JavadocModel {
       return IterUtil.empty();
     }
   }
-
+  
   /**
    * Reads through javadoc output text, looking for Javadoc errors.  This code will detect Exceptions and 
    * Errors thrown during generation of the output, as well as errors and warnings generated by Javadoc.
@@ -375,7 +373,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private List<CompilerError> _extractErrors(String text) {
     BufferedReader r = new BufferedReader(new StringReader(text));
     List<CompilerError> result = new ArrayList<CompilerError>();
-
+    
     String[] errorIndicators = new String[]{ "Error: ", "Exception: ", "invalid flag:" };
     
     try {
@@ -394,10 +392,10 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }
     catch (IOException e) { error.log(e); /* should not happen, since we're reading from a string */ }
-
+    
     return result;
   }
-
+  
   /** Convert a line of Javadoc text to a CompilerError.  If unable to do so, returns {@code null}. */
   private CompilerError _parseJavadocErrorLine(String line) {
     int errStart = line.indexOf(".java:");
@@ -438,9 +436,9 @@ public class DefaultJavadocModel implements JavadocModel {
     if (lineno >= 0) { return new CompilerError(new File(fileName), lineno, 0, errMessage, isWarning); }
     else { return new CompilerError(new File(fileName), errMessage, isWarning); }
   }
-
-
-
+  
+  
+  
   /**
    * Attempts to get the file from the given document.
    * If the file has moved, we use the given FileSaveSelector to let the user save it
@@ -477,5 +475,5 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }
   }
-
+  
 }

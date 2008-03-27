@@ -49,16 +49,16 @@ import java.util.TimeZone;
   */
 public class Log {
   public static final boolean ENABLE_ALL = false;
-
+  
   /** Whether this particular log is enabled in development mode. */
   protected volatile boolean _isEnabled;
-
+  
   /** The filename of this log. */
   protected volatile String _name;
   
   /** The file object for this log. */
   protected volatile File _file;
-
+  
   /** PrintWriter to print messages to a file. */
   protected volatile PrintWriter _writer;
   
@@ -81,7 +81,7 @@ public class Log {
     _isEnabled = isEnabled;
     _init();
   }
-
+  
   /** Creates the log file, if enabled. */
   @SuppressWarnings("deprecation") 
   protected void _init() {
@@ -98,18 +98,18 @@ public class Log {
       }
     }
   }
-
+  
   /** Sets whether this log is enabled.  Only has an effect if the code is in development mode.
-   *  @param isEnabled  Whether to print messages to the log file
-   */
+    *  @param isEnabled  Whether to print messages to the log file
+    */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
-
+  
   /** Returns whether this log is currently enabled. */
   public boolean isEnabled() { return (_isEnabled || ENABLE_ALL); }
-
+  
   /** Prints a message to the log, if enabled.
-   *  @param message Message to print.
-   */
+    *  @param message Message to print.
+    */
   @SuppressWarnings("deprecation") 
   public synchronized void log(String message) {
     if (isEnabled()) {
@@ -120,26 +120,26 @@ public class Log {
       _writer.flush();
     }
   }
-
+  
   /** Converts a stack trace (StackTraceElement[]) to string form */
   public static String traceToString(StackTraceElement[] trace) {
     final StringBuilder traceImage = new StringBuilder();
     for (StackTraceElement e: trace) traceImage.append("\n\tat " + e.toString());
     return traceImage.toString();
   }
-    
+  
   /** Prints a message and exception stack trace to the log, if enabled.
-   *  @param s  Message to print
-   *  @param trace  Stack track to log
-   */
+    * @param s  Message to print
+    * @param trace  Stack track to log
+    */
   public synchronized void log(String s, StackTraceElement[] trace) {
     if (isEnabled()) log(s + traceToString(trace));
   }
   
   /** Prints a message and exception stack trace to the log, if enabled.
-   *  @param s Message to print
-   *  @param t Throwable to log
-   */
+    * @param s Message to print
+    * @param t Throwable to log
+    */
   public synchronized void log(String s, Throwable t) {
     if (isEnabled()) {
       StringWriter sw = new StringWriter();

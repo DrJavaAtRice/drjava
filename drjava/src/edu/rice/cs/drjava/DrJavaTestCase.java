@@ -46,18 +46,18 @@ import edu.rice.cs.util.swing.Utilities;
 public class DrJavaTestCase extends TestCase {
   /** System property with the name of an alternative DrJava configuration file used during testing. */
   public static final String TEST_DRJAVA_CONFIG_PROPERTY = "test.drjava.config";
-    
+  
   /** Create a new DrJava test case. */
   public DrJavaTestCase() { super(); }
-
+  
   /** Create a new DrJava test case.
-   * @param name name of the test case
-   */
+    * @param name name of the test case
+    */
   public DrJavaTestCase(String name) { super(name); }
-
+  
   /** Set up for every test.
-   * @throws Exception
-   */
+    * @throws Exception
+    */
   protected void setUp() throws Exception {
     super.setUp();
     Utilities.TEST_MODE = true;
@@ -67,9 +67,9 @@ public class DrJavaTestCase extends TestCase {
       DrJava._initConfig();
     }
   }
-
+  
   /** Clean up for every test case.
-   *  @throws Exception
-   */
+    * @throws Exception
+    */
   protected void tearDown() throws Exception { super.tearDown(); }
 }

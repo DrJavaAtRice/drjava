@@ -74,13 +74,13 @@ public class CompilerError implements Comparable, Serializable {
     _isWarning = isWarning;
     if (lineNumber < 0) _noLocation = true;
   }
-    
+  
   /** Constructor for an CompilerError with an associated file but no location in the source */
   public CompilerError(File file, String message, boolean isWarning) { this(file, -1, -1, message, isWarning); }
   
   /** Constructor for CompilerErrors without files.
-   *  @param message the error message
-   */
+    * @param message the error message
+    */
   public CompilerError(String message, boolean isWarning) { this(null, message, isWarning); }
   
   /** This function returns true if and only if the given error has no location */
@@ -155,7 +155,7 @@ public class CompilerError implements Comparable, Serializable {
     if (_file != null) {
       // "this" has a file
       if (other.file() != null) {
-         // "this" and other have files; compare them
+        // "this" and other have files; compare them
         int fileComp = _file.compareTo(other.file());
         if (fileComp != 0) return fileComp;
         // This and other have equal files; compare positions

@@ -53,19 +53,19 @@ import com.sun.jdi.request.*;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest. */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
-
-   private volatile Position _startPos;
-   private volatile Position _endPos;
-
+  
+  private volatile Position _startPos;
+  private volatile Position _endPos;
+  
   /** @throws DebugException if the document does not have a file */
   public JPDABreakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean isEnabled, JPDADebugger manager)
     throws DebugException {
-
+    
     super(manager, doc, offset);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
     _isEnabled = isEnabled;
-
+    
     try {
       _startPos = doc.createPosition(doc.getLineStartPos(offset));
       _endPos = doc.createPosition(doc.getLineEndPos(offset));
@@ -73,7 +73,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
-
+    
     if ((_manager != null) && (_manager.isReady())) {
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
@@ -83,22 +83,21 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     }
   }
   
-  /** Creates appropriate EventRequests from the EventRequestManager and
-   *  stores them in the _requests field.
-   *  @param refTypes All (identical) ReferenceTypes to which this action
-   *  applies.  (There may be multiple if a custom class loader is in use.)
-   *  @throws DebugException if the requests could not be created.
-   */
+  /** Creates appropriate EventRequests from the EventRequestManager and stores them in the _requests field.
+    * @param refTypes  All (identical) ReferenceTypes to which this action applies.  (There may be multiples if a custom
+    *                  class loader is in use.)
+    * @throws DebugException if the requests could not be created.
+    */
   protected void _createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     try {
       for (int i=0; i < refTypes.size(); i++) {
         ReferenceType rt = refTypes.get(i);
-
+        
         if (!rt.isPrepared()) {
           // Not prepared, so skip this one
           continue;
         }
-
+        
         // Get locations for the line number, use the first
         List lines = rt.locationsOfLine(_lineNumber);
         if (lines.size() == 0) {
@@ -117,18 +116,17 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
       throw new DebugException("Could not find line number: " + aie);
     }
   }
-
-  /**
-   * Accessor for the offset of this breakpoint's start position
-   * @return the start offset
-   */
+  
+  /** Accessor for the offset of this breakpoint's start position
+    * @return the start offset
+    */
   public int getStartOffset() {
     return _startPos.getOffset();
   }
-
+  
   /** Accessor for the offset of this breakpoint's end position
-   *  @return the end offset
-   */
+    * @return the end offset
+    */
   public int getEndOffset() {
     return _endPos.getOffset();
   }
@@ -145,7 +143,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     catch(VMDisconnectedException vmde) { /* just ignore */ }
     if (_isEnabled!=old) _manager.notifyBreakpointChange(this);
   }
-
+  
   public String toString() {
     String cn = getClassName();
     if (_exactClassName != null) { cn = _exactClassName.replace('$', '.'); }

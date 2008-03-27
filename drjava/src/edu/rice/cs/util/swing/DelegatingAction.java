@@ -62,25 +62,18 @@ public class DelegatingAction implements Action {
   private HashMap<String, Object> _localProperties = new HashMap<String, Object>();
 
   /** The action to delegate to. If it's null, this action is disabled and all method calls will result in 
-   *  IllegalStateExceptions.
-   */
+    * IllegalStateExceptions.
+    */
   private Action _delegatee;
   private final LinkedList<PropertyChangeListener> _listenerList =
     new LinkedList<PropertyChangeListener>();
 
-  /**
-   * Returns value of the key, from delegatee is it's in {@link #KEYS_TO_DELEGATE}
-   * or from this if not.
-   */
+  /** Returns value of the key, from delegatee is it's in {@link #KEYS_TO_DELEGATE} or from this if not. */
   public Object getValue(String key) {
     _checkState();
-
-    if (_isDelegatedKey(key)) {
-      return _delegatee.getValue(key);
-    }
-    else {
-      return _localProperties.get(key);
-    }
+    
+    if (_isDelegatedKey(key)) return _delegatee.getValue(key);
+    else return _localProperties.get(key);
   }
 
   private boolean _isDelegatedKey(String key) {

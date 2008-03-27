@@ -1,4 +1,4 @@
- /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -36,25 +36,24 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * A refactoring of the common code between ReducedModelComment and 
- * ReducedModelBrace.  Both of the refactored classes extend this class.
- * @version $Id$
- * @author JavaPLT
- */
+/** A refactoring of the common code between ReducedModelComment and ReducedModelBrace.  Both of the refactored classes
+  * extend this class.
+  * @version $Id$
+  * @author JavaPLT
+  */
 public abstract class AbstractReducedModel implements ReducedModelStates {
-    
+  
   /** The character that represents the cursor in toString(). @see #toString() */
   public static final char PTR_CHAR = '#';
   
   /** The reduced model for a document is a list of ReducedTokens (braces and gaps).
-   *  @see ModelList
-   */
+    * @see ModelList
+    */
   TokenList _tokens;
   
   /** Keeps track of cursor position in document.
-   *  @see ModelList.Iterator
-   */
+    * @see ModelList.Iterator
+    */
   TokenList.Iterator _cursor;
   
   /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
@@ -64,22 +63,22 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     // we should be pointing to the head of the list
     _cursor.setBlockOffset(0);
   }
- 
+  
   /** Get the offset into the current ReducedToken.
-   *  @return the number of characters into the token where the cursor sits
-   */
+    *  @return the number of characters into the token where the cursor sits
+    */
   int getBlockOffset() { return _cursor.getBlockOffset(); }
   
   /** Change the offset into the current ReducedToken.
-   *  @param offset the number of characters into the token to set the cursor
-   */
+    *  @param offset the number of characters into the token to set the cursor
+    */
   void setBlockOffset(int offset) { _cursor.setBlockOffset(offset); }
   
   /** Absolute offset for testing purposes. We don't keep track of absolute offset as it causes too much confusion
     * and trouble.
     */
   public int absOffset() { return absOffset(_cursor); }
- 
+  
   /** Absolute offset of the specified iterator for testing purposes. */
   public int absOffset(TokenList.Iterator cursor) {
     int off = cursor.getBlockOffset();
@@ -138,27 +137,25 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return val.toString();
   }
   
-  /** Inserts a character into the reduced model. A method to be implemented in each specific reduced
-   *  sub-model. */
+  /** Inserts a character into the reduced model. A method to be implemented in each specific reduced sub-model. */
   public abstract void insertChar(char ch);
   
-  /**
-   * Inserts a block of text into the reduced model which has no
-   * special consideration in the reduced model.
-   * <OL>
-   *  <li> atStart: if gap to right, augment first gap, else insert
-   *  <li> atEnd: if gap to left, augment left gap, else insert
-   *  <li> inside a gap: grow current gap, move offset by length
-   *  <li> inside a multiple character brace:
-   *   <ol>
-   *    <li> break current brace
-   *    <li> insert new gap
-   *   </ol>
-   *  <li> gap to left: grow that gap and set offset to zero
-   *  <li> gap to right: this case handled by inside gap (offset invariant)
-   *  <li> between two braces: insert new gap
-   * @param length the length of the inserted text
-   */
+  /** Inserts a block of text into the reduced model which has no
+    * special consideration in the reduced model.
+    * <OL>
+    *  <li> atStart: if gap to right, augment first gap, else insert
+    *  <li> atEnd: if gap to left, augment left gap, else insert
+    *  <li> inside a gap: grow current gap, move offset by length
+    *  <li> inside a multiple character brace:
+    *   <ol>
+    *    <li> break current brace
+    *    <li> insert new gap
+    *   </ol>
+    *  <li> gap to left: grow that gap and set offset to zero
+    *  <li> gap to right: this case handled by inside gap (offset invariant)
+    *  <li> between two braces: insert new gap
+    * @param length the length of the inserted text
+    */
   public void _insertGap( int length ) {
     if (_cursor.atStart()) {
       if (_gapToRight()) {
@@ -190,7 +187,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
       _insertNewGap(length); //inserts a gap and goes to the next item
     return;
   }
-
+  
   /**
    * Inserts a gap between a multiple character brace.
    * Because ReducedModelBrace does not keep track of multiple character
@@ -223,53 +220,48 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   }
   
   /** Assuming there is a gap to the left, this function increases the size of that gap.
-   *  @param length the amount of increase
-   */
+    * @param length the amount of increase
+    */
   protected void _augmentGapToLeft(int length) { _cursor.prevItem().grow(length); }
   
   /** Assuming there is a gap to the right, this function increases the size of that gap.
-   *  @param length the amount of increase
-   */
+    * @param length the amount of increase
+    */
   protected void _augmentCurrentGap(int length) {
     _cursor.current().grow(length);
     _cursor.setBlockOffset(length);
   }
   
   /** Helper function for _insertGap. Performs the actual insert and marks the offset appropriately.
-   *  @param length size of gap to insert
-   */
+    * @param length size of gap to insert
+    */
   protected void _insertNewGap(int length) {
     _cursor.insert(new Gap(length, _cursor.getStateAtCurrent()));
     _cursor.next();
     _cursor.setBlockOffset(0);
   }
   
-  /** Returns the state at the relLocation, where relLocation is the location
-   *  relative to the walker
-   *  @param relLocation distance from walker to get state at.
-   */
+  /** Returns the state at the relLocation, where relLocation is the location relative to the walker.
+    * @param relLocation distance from walker to get state at.
+    */
   protected abstract ReducedModelState moveWalkerGetState(int relLocation);
   
   /** Resets the walker to the current position in document. */
   protected abstract void resetWalkerLocationToCursor();
-
-  /**
-   * Get the ReducedToken currently pointed at by the cursor.
-   * @return the current token
-   */
+  
+  /** Get the ReducedToken currently pointed at by the cursor.
+    * @return the current token
+    */
   protected ReducedToken current() { return _cursor.current(); }
   
   /** Move to the token immediately right. This function forwards its responsibilities to the cursor.
-   *  If the cursor is at the end, it will throw an exception.
-   */
+    * If the cursor is at the end, it will throw an exception.
+    */
   protected void  next() { _cursor.next(); }
-
-  /**
-   * Move to the token immediately left.
-   * This function forwards its responsibilities to the TokenList
-   * iterator.  If the cursor is at the start, it will throw an
-   * exception.
-   */
+  
+  /** Move to the token immediately left. This function forwards its responsibilities to the TokenList iterator.  If the
+    * cursor is at the start, it will throw an exception.
+    */
   protected void prev() {
     _cursor.prev();
   }

@@ -211,10 +211,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     * @param x the X coordinate
     * @param y the Y coordinate
     * @param a the allocated region to render into
-    * @param biasReturn always returns <code>Position.Bias.Forward</code>
-    *   as the zero-th element of this array
-    * @return the location within the model that best represents the
-    *  given point in the view
+    * @param biasReturn always returns <code>Position.Bias.Forward</code> as the zero-th element of this array
+    * @return the location within the model that best represents the given point in the view
     * @see View#viewToModel
     */
   public int viewToModel(GlyphView v, float x, float y, Shape a, Position.Bias[] biasReturn) {
@@ -289,9 +287,9 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   }
   
   /** Given a particular state, assign it a color.
-   *  @param g Graphics object
-   *  @param state a given state
-   */
+    * @param g Graphics object
+    * @param state a given state
+    */
   private void setFormattingForState(Graphics g, int state) {
     switch (state) {
       case HighlightStatus.NORMAL:
@@ -323,10 +321,10 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   
   
   /** Called when a change occurs.
-   *  @param changes document changes
-   *  @param a a Shape
-   *  @param f a ViewFactory
-   */
+    * @param changes document changes
+    * @param a a Shape
+    * @param f a ViewFactory
+    */
 //  public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
 //    super.changedUpdate(changes, a, f);
 //    // Make sure we redraw since something changed in the formatting

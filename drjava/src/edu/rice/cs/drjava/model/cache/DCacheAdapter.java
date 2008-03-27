@@ -49,8 +49,8 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public interface DCacheAdapter {
   
   /** Retrieves the document for its corresponding ODD
-   *  @return the definitions document for the corresponding ODD
-   */
+    *  @return the definitions document for the corresponding ODD
+    */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
   public int getLength();
@@ -64,9 +64,9 @@ public interface DCacheAdapter {
   public String getText(int offset, int length) throws BadLocationException;
   
   /** Checks whether the document is ready to be returned.  If false, then the document would have to be
-   *  loaded from disk when getDocument() is called.  
-   *  @return if the document is already loaded
-   */
+    * loaded from disk when getDocument() is called.  
+    * @return if the document is already loaded
+    */
   public boolean isReady();
   
   /** Closes the corresponding document for this adapter. */
@@ -83,5 +83,4 @@ public interface DCacheAdapter {
   
   /* Method for notifying the DCacheAdapter that this document has been reset via undo commands. */
   public void documentReset();
-  
 }
