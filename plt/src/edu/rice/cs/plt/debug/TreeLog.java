@@ -126,6 +126,12 @@ public class TreeLog extends AbstractLog {
     private boolean _pop;
     
     private final DefaultTreeModel _treeModel;
+
+    /**
+     * Keep track of the last painted time in order to ensure that frequent or expensive logging
+     * doesn't freeze the display.
+     */
+    private volatile long _lastPainted;
     
     public ViewerImpl(final String name) {
       DefaultMutableTreeNode root = new DefaultMutableTreeNode(Entry.ROOT);
@@ -133,11 +139,18 @@ public class TreeLog extends AbstractLog {
       _stack.addFirst(root); // root of the tree
       _pop = false;
       _treeModel = new DefaultTreeModel(root);
+      _lastPainted = 0l;
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           JFrame frame = SwingUtil.makeMainApplicationFrame(name, 600, 600);
           
-          final JTree tree = new JTree(_treeModel);
+          final JTree tree = new JTree(_treeModel) {
+            public void paint(Graphics g) {
+              super.paint(g);
+              // keep lastPainted up to date
+              _lastPainted = System.currentTimeMillis();
+            }
+          };
           tree.setRootVisible(false);
           tree.setShowsRootHandles(true);
           tree.setRowHeight(0);
@@ -195,6 +208,13 @@ public class TreeLog extends AbstractLog {
     
     public void write(final String time, final String thread, final String location,
                       final SizedIterable<? extends String> messages) {
+      if (System.currentTimeMillis() - _lastPainted > 200) {
+        // Ensure that paint events are handled periodically.  Without this check,
+        // expensive or frequent logging can lead to all paint events being
+        // coalesced (and placed on the *back* of the queue) before they have a chance
+        // to run.
+        SwingUtil.attemptClearEventQueue();
+      }
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           Entry entry = new Entry(time, thread, location, messages);

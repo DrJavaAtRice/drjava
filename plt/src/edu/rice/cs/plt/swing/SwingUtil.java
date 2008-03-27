@@ -409,9 +409,35 @@ public class SwingUtil {
     }
   }
   
-  /** Wait for all items in the event queue to be handled.  This may be called by any thread. */
-  public static void clearEventQueue() {
-    invokeAndWait(LambdaUtil.NO_OP);
+  /**
+   * Wait for all items in the event queue to be handled.  This thread will block until all items
+   * <em>currently</em> on the event queue have been handled.
+   * @throws IllegalStateException  If this is the event dispatch thread (it is impossible to wait
+   *                                for the event queue to clear if this code is running in the
+   *                                event queue).
+   * @throws InterruptedException  If this thread is interrupted while waiting.
+   */
+  public static void clearEventQueue() throws InterruptedException {
+    if (SwingUtilities.isEventDispatchThread()) {
+      throw new IllegalStateException("Can't clear the event queue from within the event dispatch thread");
+    }
+    try { SwingUtilities.invokeAndWait(LambdaUtil.NO_OP); }
+    catch (InvocationTargetException e) {
+      // Should never happen: Runnable is a no-op.
+      error.log(e);
+    }
+  }
+  
+  /**
+   * Call @link{#clearEventQueue}, but ignore any resulting InterruptedException.  This method does
+   * not guarantee that the queue will actually be cleared.
+   * @throws IllegalStateException  If this is the event dispatch thread (it is impossible to wait
+   *                                for the event queue to clear if this code is running in the
+   *                                event queue).
+   */
+  public static void attemptClearEventQueue() {
+    try { clearEventQueue(); }
+    catch (InterruptedException e) { /* ignore */ }
   }
   
   /** Convert a {@code Runnable} to an {@code ActionListener} */
