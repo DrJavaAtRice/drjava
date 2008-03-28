@@ -46,6 +46,7 @@ import java.awt.datatransfer.*;
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.lang.ref.WeakReference;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -475,27 +476,39 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   /** Getter method for the _findField component */
   JTextPane getFindField() { return _findField; }
-  
+
   /** Performs "find all" command. */
   private void _findAll() {
     String searchStr = _findField.getText();
+    String title = searchStr;
+    OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+    boolean searchAll = _machine.getSearchAllDocuments();
+    if (title.length() > 10) { title = title.substring(0,10) + "..."; }
+    title = "Find: " + title;
+    RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
+    FindResultsPanel panel = _frame.createFindResultsPanel(rm, title, searchStr, searchAll,
+                                                           new WeakReference<OpenDefinitionsDocument>(startDoc),
+                                                           this);
+    findAll(searchStr, searchAll, startDoc, rm, panel);
+  }
+  
+  /** Performs "find all" with the specified options. */
+  public void findAll(String searchStr, final boolean searchAll, final OpenDefinitionsDocument startDoc,
+                      final RegionManager<MovingDocumentRegion> rm, final FindResultsPanel panel) {
     int searchLen = searchStr.length();
     if (searchLen == 0) return;
     
     _frame.updateStatusField("Finding All");
-    String title = searchStr;
-    if (title.length() > 10) { title = title.substring(0,10) + "..."; }
-    title = "Find: " + title;
-    
-    final RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
-    final FindResultsPanel panel = _frame.createFindResultsPanel(rm, title);
-    
-    _updateMachine();
+
+//    _updateMachine();
+    _machine.setDocument(startDoc);
+    if (_machine.getFirstDoc() == null) _machine.setFirstDoc(startDoc);
+    _machine.setPosition(startDoc.getCaretPosition());
+
     _machine.setFindWord(searchStr);
     String replaceStr = _replaceField.getText();
     _machine.setReplaceWord(replaceStr);
     _frame.clearStatusMessage();
-    final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
     final LinkedList<FindResult> results = new LinkedList<FindResult>();
     
     _frame.hourglassOn();

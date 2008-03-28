@@ -58,6 +58,7 @@ import java.util.Enumeration;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.awt.datatransfer.*;
+import java.lang.ref.WeakReference;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
@@ -87,6 +88,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -2372,9 +2374,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Create a new find results tab.
     * @param rm the region manager that will contain the regions
     * @param title the title for the panel
-    * @return new find results tab. */
-  public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title) {
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, title);
+    * @return new find results tab.
+    * @param searchString string that was searched for
+    * @param searchAll whether all files were searched
+    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
+    * @param the FindReplacePanel that created this FindResultsPanel
+    */
+  public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title,
+                                                 String searchString, boolean searchAll,
+                                                 WeakReference<OpenDefinitionsDocument> doc,
+                                                 FindReplacePanel findReplace) {
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, title, searchString, searchAll, doc, findReplace);
     final Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
@@ -2407,6 +2417,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
     
     return panel;
+  }
+  
+  /** Disable "Find Again" on "Find All" tabs that use a document that was closed. */
+  void disableFindAgainOnClose(List<OpenDefinitionsDocument> projDocs) {
+    for(TabbedPanel t: _tabs) {
+      if (t instanceof FindResultsPanel) {
+        FindResultsPanel p = (FindResultsPanel)t;
+        if (projDocs.contains(p.getDocument())) { p.disableFindAgain(); }
+      }
+    }
   }
   
   /** Shows a find results tab. Only runs in event thread. */
@@ -3302,64 +3322,52 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       .listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.slave.jvm.xmx"));
     
     // Files
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.file") {
-      public void update() {
-        try {
-          File f = FileOps.makeRelativeTo(_model.getActiveDocument().getRawFile(),
-                                          new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-          try {
-            f = f.getCanonicalFile();
-          }
-          catch(IOException ioe) { }
-          _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
-        }
-        catch(IOException e) { _value = "Error."; }
-        catch(SecurityException e) { _value = "Error."; }
-      }
-      public void resetAttributes() {
-        _attributes.clear();
-        _attributes.put("dir", DEF_DIR);
-      }
-    });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.working.dir") {
-      public void update() {
-        try {
-          File f;
-          if (_attributes.get("dir").equals("/")) {
-            f = _model.getInteractionsModel().getWorkingDirectory().getAbsoluteFile();
-            try {
-              f = f.getCanonicalFile();
-            }
-            catch(IOException ioe) { }
-            _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
-          }
-          else {
-            f = FileOps.makeRelativeTo(_model.getInteractionsModel().getWorkingDirectory(),
-                                       new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-            _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
-          }
-        }
-        catch(IOException e) { _value = "Error."; }
-        catch(SecurityException e) { _value = "Error."; }
-      }    
-      public void resetAttributes() {
-        _attributes.clear();
-        _attributes.put("dir", "/");
-      }
-    });
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.current.file", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getActiveDocument().getRawFile(); }
+    }));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.working.dir", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getInteractionsModel().getWorkingDirectory(); }
+    }));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getMasterWorkingDirectory(); }
+    }));
     
     // Files
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR) {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getOpenDefinitionsDocuments(); }
+      protected List<File> getList() {
+        ArrayList<File> l = new ArrayList<File>();
+        for(OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) {
+          l.add(odd.getRawFile());
+        }
+        return l;
+      }
     });
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR) {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getProjectDocuments(); }
+      protected List<File> getList() {
+        ArrayList<File> l = new ArrayList<File>();
+        for(OpenDefinitionsDocument odd: _model.getProjectDocuments()) {
+          l.add(odd.getRawFile());
+        }
+        return l;
+      }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR) {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getAuxiliaryDocuments(); }
+      protected List<File> getList() {
+        ArrayList<File> l = new ArrayList<File>();
+        for(OpenDefinitionsDocument odd: _model.getAuxiliaryDocuments()) {
+          l.add(odd.getRawFile());
+        }
+        return l;
+      }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR) {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getNonProjectDocuments(); }
+      protected List<File> getList() {
+        ArrayList<File> l = new ArrayList<File>();
+        for(OpenDefinitionsDocument odd: _model.getNonProjectDocuments()) {
+          l.add(odd.getRawFile());
+        }
+        return l;
+      }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
     
     // Misc
@@ -3390,7 +3398,37 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
-    PropertyMaps.ONLY.setProperty("DrJava", new DrJavaProperty("tmpfile") {
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("if") {
+      public String toString() {
+        invalidate();
+        update();
+        return _value;
+      }
+      public void update() {
+        if (_attributes.get("cond").toLowerCase().equals("true")) {
+          _value = _attributes.get("then");
+        }
+        else if (_attributes.get("cond").toLowerCase().equals("false")) {
+          _value = _attributes.get("else");
+        }
+        else {
+          _value = "Error. cond not set to true or false.";
+          return;
+        }
+      }
+      public String getCurrent() {
+        invalidate();
+        return super.getCurrent();
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("cond", "");
+        _attributes.put("then", "");
+        _attributes.put("else", "");
+      }
+    });
+        
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("tmpfile") {
       java.util.Random _r = new java.util.Random();
       public String toString() {
         invalidate();
@@ -3452,6 +3490,96 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("content", "");
       }
     });
+        
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("input", "(User Input...)") {
+      public String toString() {
+        return "(User Input...)";
+      }
+      public void update() {
+        String msg = _attributes.get("prompt");
+        if (msg==null) msg = "Please enter text for the external process.";
+        String input = _attributes.get("default");
+        if (input==null) input = "";
+        input = JOptionPane.showInputDialog(MainFrame.this, msg, input);
+        if (input==null) input = _attributes.get("default");
+        if (input==null) input = "";
+        _value = input;
+      }
+      public String getCurrent() {
+        invalidate();
+        return super.getCurrent();
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("prompt", null);
+        _attributes.put("default", null);
+      }
+    });
+    
+    // Project
+    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode") {
+      public void update() {
+        long millis = System.currentTimeMillis();
+        String f = _attributes.get("fmt").toLowerCase();
+        Boolean b = _model.isProjectActive();
+        if (f.equals("int")) {
+          _value = b?"1":"0";
+        }
+        else if (f.equals("yes")) {
+          _value = b?"yes":"no";
+        }
+        else {
+          _value = b.toString();
+        }
+      }
+      
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("fmt", "boolean");
+      }
+    });
+    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.changed") {
+      public void update() {
+        long millis = System.currentTimeMillis();
+        String f = _attributes.get("fmt").toLowerCase();
+        Boolean b = _model.isProjectChanged();
+        if (f.equals("int")) {
+          _value = b?"1":"0";
+        }
+        else if (f.equals("yes")) {
+          _value = b?"yes":"no";
+        }
+        else {
+          _value = b.toString();
+        }
+      }
+      
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("fmt", "boolean");
+      }
+    });
+    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.file", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getProjectFile(); }
+    }));
+    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.main.class", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getMainClass(); }
+    }));
+    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.root", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getProjectRoot(); }
+    }));
+    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.build.dir", new Lambda<File,Void>() {
+      public File apply(Void notUsed) { return _model.getBuildDirectory(); }
+    }));
+    // TODO:
+//    PropertyMaps.ONLY.setProperty("Project", new EagerFileListProperty("project.class.files", File.pathSeparator, DEF_DIR) {
+//      protected List<File> getList() { return _model.getClassFiles(); }
+//      // make it lazy again!
+//      public String toString() {
+//        return _value;
+//      }
+//      public boolean isCurrent() { return false; }
+//    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
   }
   
   /** Set a new painters for existing breakpoint highlights. */
@@ -4055,6 +4183,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      System.err.println("projDocs = " + projDocs);
       boolean couldClose = _model.closeFiles(projDocs);
       if (! couldClose) return false;
+      
+      disableFindAgainOnClose(projDocs); // disable "Find Again" for documents that are closed
+
       // project file has been saved and all files closed
       if (quitting) return true;
       _model.closeProject(quitting);
@@ -4199,7 +4330,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     //    _model.closeFiles(l);
     
     // this works with multiple selected files now
-    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
+    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();    
     boolean queryNecessary = false; // is a query necessary because the files are project or auxiliary files?
     for (OpenDefinitionsDocument doc: l) {
       if ((_model.isProjectActive() && doc.inProjectPath()) || doc.isAuxiliaryFile()) {
@@ -4237,6 +4368,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       updateStatusField("Closing " + fileName);
       _model.setProjectChanged(true);
     }
+
+    disableFindAgainOnClose(l); // disable "Find Again" for documents that are closed
+    
     // Either this is an external file or user actually wants to close it
     for(OpenDefinitionsDocument doc: l) {
       _model.closeFile(doc);
@@ -4247,11 +4381,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     OpenDefinitionsDocument d;
     Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+    
     if (_model.getDocumentNavigator().isGroupSelected()) {
       while (e.hasMoreElements()) {
         d = e.nextElement();
         if (_model.getDocumentNavigator().isSelectedInGroup(d)) { l.add(d); }
       }
+      disableFindAgainOnClose(l); // disable "Find Again" for documents that are closed
       _model.closeFiles(l);
       if (! l.isEmpty()) _model.setProjectChanged(true);
     }

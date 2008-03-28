@@ -319,7 +319,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       _saveJavaButton = new JButton(saveJavaAction);
     }
     else {
-            Action runCommandAction = new AbstractAction("Run Command Line") {
+      Action runCommandAction = new AbstractAction("Run Command Line") {
         public void actionPerformed(ActionEvent e) {
           _runCommand();
         }
@@ -1117,11 +1117,11 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                     // found property name
                     // if we have a list of attributes
                     if (attrList.length()>0) {
+                      // +2 for "${", +1 for ";"
                       int subpos = pos + 2 + key.length() + 1;
                       int added = 0;
                       BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                       atok.wordRange(0,255);
-                      atok.addQuotes("\"", "\"");
                       atok.addQuotes("\"", "\"");
                       atok.addKeyword(";");
                       atok.addKeyword("=");
@@ -1238,6 +1238,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
     
+    _windowListenerActive = false;
     if (_commandLinePreview.getText().length()>0) {
       runCommand("", _commandLine.getText(), _commandWorkDirLine.getText());
     }
@@ -1258,6 +1259,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private void _runJava() {
     _mainFrame.updateStatusField("Executing external Java class...");
     
+    _windowListenerActive = false;
     if (_javaCommandLinePreview.getText().length()>0) {
       runJava("", _jvmLine.getText(), _javaCommandLine.getText(),
               _javaCommandWorkDirLine.getText());

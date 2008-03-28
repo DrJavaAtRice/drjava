@@ -36,28 +36,25 @@
 
 package edu.rice.cs.drjava.config;
 
+import edu.rice.cs.util.Lambda;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.io.File;
-import java.io.IOException;
-import edu.rice.cs.util.StringOps;
+import java.io.*;
 
-/** Class representing values that are always up-to-date and that can be inserted as variables in external processes.
-  * @version $Id$
+/** Class representing files that are always up-to-date and that
+  * can be inserted as variables in external processes.
+  *
+  *  @version $Id$
   */
-public abstract class EagerFileListProperty extends EagerProperty {
-  /** Separating string. */
-  protected String _sep;
-  /** Relative directory. */
-  protected String _dir;
-  /** Create an eager property. */
-  public EagerFileListProperty(String name, String sep, String dir) {
+public class EagerFileProperty extends DrJavaProperty {
+  protected Lambda<File,Void> _getFile;
+  /** Create an eager file property. */
+  public EagerFileProperty(String name, Lambda<File,Void> getFile) {
     super(name);
-    _sep = sep;
-    _dir = dir;
+    _getFile = getFile;
     resetAttributes();
   }
   
@@ -83,39 +80,6 @@ public abstract class EagerFileListProperty extends EagerProperty {
     invalidateOthers(new HashSet<DrJavaProperty>());
   }
   
-  /** Abstract factory method specifying the list. */
-  protected abstract List<File> getList();
-  
-  /** Update the value by concatenating the list of documents. */
-  public void update() {
-    List<File> l = getList();
-    if (l.size()==0) { _value = ""; return; }
-    StringBuilder sb = new StringBuilder();
-    for(File fil: l) {
-      sb.append(_attributes.get("sep"));
-      try {
-        File f = FileOps.makeRelativeTo(fil,
-                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-        try {
-          f = f.getCanonicalFile();
-        }
-        catch(IOException ioe) { }
-        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
-        sb.append(s);
-      }
-      catch(IOException e) { /* ignore */ }
-      catch(SecurityException e) { /* ignore */ }
-    }
-    _value = sb.toString().substring(_sep.length());
-  }
-  
-  /** Reset the attributes. */
-  public void resetAttributes() {
-    _attributes.clear();
-    _attributes.put("sep", _sep);
-    _attributes.put("dir", _dir);
-  }
-
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
@@ -130,5 +94,31 @@ public abstract class EagerFileListProperty extends EagerProperty {
     result = 31 * result + (_value.hashCode());
     result = 31 * result + (_isCurrent?1:0);
     return result;
+  }
+  
+  public void update() {
+    try {
+      File f;
+      if (_attributes.get("dir").equals("/")) {
+        f = _getFile.apply(null).getAbsoluteFile();
+        try {
+          f = f.getCanonicalFile();
+        }
+        catch(IOException ioe) { }
+        _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+      }
+      else {
+        f = FileOps.makeRelativeTo(_getFile.apply(null),
+                                   new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+        _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+      }
+    }
+    catch(IOException e) { _value = "Error."; }
+    catch(SecurityException e) { _value = "Error."; }
+  }    
+
+  public void resetAttributes() {
+    _attributes.clear();
+    _attributes.put("dir", "/");
   }
 } 

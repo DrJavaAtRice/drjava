@@ -694,7 +694,6 @@ public abstract class StringOps {
                   BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                   atok.wordRange(0,255);
                   atok.whitespaceRange(0,32); 
-                  atok.addQuotes("${", "}");
                   atok.addQuotes("\"", "\"");
                   atok.addKeyword(";");
                   atok.addKeyword("=");

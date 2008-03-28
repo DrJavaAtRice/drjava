@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.io.File;
+import java.lang.ref.WeakReference;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -75,12 +76,17 @@ import edu.rice.cs.drjava.config.OptionConstants;
   * @version $Id$
   */
 public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
+  protected JButton _findAgainButton;
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
   protected JButton _removeButton;
   protected JComboBox _colorBox;
   protected RegionManager<MovingDocumentRegion> _regionManager;
   protected int _lastIndex;
+  protected String _searchString;
+  protected boolean _searchAll;
+  protected WeakReference<OpenDefinitionsDocument> _doc;
+  protected FindReplacePanel _findReplace;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
   private LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
@@ -90,8 +96,14 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param frame the MainFrame
     * @param rm the region manager associated with this panel
     * @param title for the panel
+    * @param searchString string that was searched for
+    * @param searchAll whether all files were searched
+    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
+    * @param the FindReplacePanel that created this FindResultsPanel
     */
-  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title) {
+  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title,
+                          String searchString, boolean searchAll, WeakReference<OpenDefinitionsDocument> doc,
+                          FindReplacePanel findReplace) {
     super(frame, title);
     _regionManager = rm;
     _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
@@ -102,6 +114,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       }
       public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });
+    _searchString = searchString;
+    _searchAll = searchAll;
+    _doc = doc;
+    _findReplace = findReplace;
     
     OptionListener<Color> temp;
     Pair<Option<Color>, OptionListener<Color>> pair;
@@ -147,6 +163,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Creates the buttons for controlling the regions. Should be overridden. */
   protected JComponent[] makeButtons() {    
+    Action findAgainAction = new AbstractAction("Find Again") {
+      public void actionPerformed(ActionEvent ae) { _findAgain(); }
+    };
+    _findAgainButton = new JButton(findAgainAction);
+
     Action goToAction = new AbstractAction("Go to") {
       public void actionPerformed(ActionEvent ae) { goToRegion(); }
     };
@@ -200,7 +221,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, 
                                               DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
     
-    return new JComponent[] { _goToButton, _bookmarkButton, _removeButton, highlightPanel, _colorBox};
+    updateButtons();
+    return new JComponent[] { _findAgainButton, _goToButton, _bookmarkButton, _removeButton, highlightPanel, _colorBox};
   }
   
   /** @return the selected painter for these find results. */
@@ -208,8 +230,25 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     return DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex];
   }
   
+  /** Find again. */
+  private void _findAgain() {
+    updateButtons();
+    OpenDefinitionsDocument odd = null;
+    if (_searchAll) {
+      odd = _model.getActiveDocument();
+    }
+    else {
+      if (_doc!=null) { odd = _doc.get(); }
+    }
+    if (odd!=null) {
+      _regionManager.clearRegions();
+      _findReplace.findAll(_searchString, _searchAll, odd, _regionManager, this);
+    }
+  }
+  
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {
+    updateButtons();
     for (final MovingDocumentRegion r: getSelectedRegions()) {
       DocumentRegion bookmark = 
         _model.getBookmarkManager().getRegionOverlapping(r.getDocument(), r.getStartOffset(), r.getEndOffset());
@@ -229,6 +268,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Remove the selected regions. */
   private void _remove() {
+    updateButtons();
     for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
     if (_regionManager.getRegions().size()==0) { _close(); }
   }
@@ -236,6 +276,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Update button state and text. */
   protected void updateButtons() {
     ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
+    OpenDefinitionsDocument odd = null;
+    if (_doc!=null) { odd = _doc.get(); }
+    _findAgainButton.setEnabled((odd!=null) || _searchAll);
     _goToButton.setEnabled(regs.size()==1);
     _bookmarkButton.setEnabled(regs.size()>0);
     _removeButton.setEnabled(regs.size()>0);
@@ -274,6 +317,16 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected RegionTreeUserObj<MovingDocumentRegion> makeRegionTreeUserObj(MovingDocumentRegion r) {
     return new FindResultsRegionTreeUserObj(r);
   }
+  
+  /** Return true if all documents were searched. */
+  public boolean isSearchAll() { return _searchAll; }
+  
+  /** Return the document which was searched (or where the search started, if _searchAll is true).
+    * May return null if the weak reference to the document was severed. */
+  public OpenDefinitionsDocument getDocument() { return _doc.get(); }
+
+  /** Disables "Find Again", e.g. because the document was closed. */
+  public void disableFindAgain() {_doc.clear(); updateButtons(); }
   
   /** Class that gets put into the tree. The toString() method determines what's displayed in the tree. */
   protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<MovingDocumentRegion> {
