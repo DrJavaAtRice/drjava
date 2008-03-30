@@ -9409,7 +9409,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Execute an external process. */
-  private final Action _executeExternalProcessAction = new AbstractAction("New external process...") {
+  private final Action _executeExternalProcessAction = new AbstractAction("New External Process...") {
     public void actionPerformed(ActionEvent ae) {
       _executeExternalProcess();
     }

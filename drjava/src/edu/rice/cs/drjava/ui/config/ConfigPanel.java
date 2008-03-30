@@ -96,7 +96,7 @@ public class ConfigPanel extends JPanel {
       OptionComponent comp = _components.get(i);
 
       if (!comp.useEntireColumn()) {
-        c.anchor = GridBagConstraints.NORTH;
+        c.anchor = GridBagConstraints.CENTER;
         c.weightx = 0.0;
         c.gridwidth = 1;
         c.insets = labelInsets;
@@ -116,10 +116,11 @@ public class ConfigPanel extends JPanel {
       else {
         c.anchor = GridBagConstraints.NORTH;
         c.weightx = 0.0;
+        c.gridwidth = 2;
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.insets = compInsets;
 
-        JComponent otherC = comp.getLabel();
+        JComponent otherC = comp.getComponent();
         gridbag.setConstraints(otherC, c);
         panel2.add(otherC);
       }

@@ -56,14 +56,15 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.StringOps;
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$
  */
 public class ConfigFrame extends JFrame {
 
-  private static final int FRAME_WIDTH = 750;
-  private static final int FRAME_HEIGHT = 500;
+  private static final int FRAME_WIDTH = 850;
+  private static final int FRAME_HEIGHT = 550;
 
   private final MainFrame _mainFrame;
 
@@ -82,6 +83,8 @@ public class ConfigFrame extends JFrame {
   private final DirectoryChooser _dirChooser;
   
   private StringOptionComponent javadocCustomParams;
+  
+  protected final String SEPS = " \t\n-,;.(";
   
   private OptionComponent.ChangeListener _changeListener = new OptionComponent.ChangeListener() {
     public Object apply(Object oc) {
@@ -198,7 +201,12 @@ public class ConfigFrame extends JFrame {
     cp.add(bottom, BorderLayout.SOUTH);
 
     // Set all dimensions ----
-    setSize(FRAME_WIDTH, FRAME_HEIGHT);
+    Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    if (dim.width>FRAME_WIDTH) { dim.width = FRAME_WIDTH; }
+    else { dim.width -= 80; }
+    if (dim.height>FRAME_HEIGHT) { dim.height = FRAME_HEIGHT; }
+    else { dim.height -= 80; }
+    setSize(dim);
 
     _mainFrame.setPopupLoc(this);
 
@@ -411,7 +419,8 @@ public class ConfigFrame extends JFrame {
                                                      "<html>Any directories or jar files to add to the classpath<br>"+
                                                      "of the Compiler and Interactions Pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY,
-                                                         "<html>Restore last working directory of<br>the Interactions pane on start up</html>", this,
+                                                         "<html><p align=\"right\">"+StringOps.splitStringAtWordBoundaries("Restore last working directory of the Interactions pane on start up",
+                                                                                                                           33, "<br>", SEPS), this,
                                                          "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>"+
                                                          "or to always use the value of the \"user.home\" Java property<br>"+
                                                          "(currently "+System.getProperty("user.home")+")."));
@@ -431,21 +440,45 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED,
                                                   "Show All Line Numbers", this,
                                                   "Whether to show line numbers on the left side of the Definitions Pane."));
+   
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+        
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.CLIPBOARD_HISTORY_SIZE,
                                                   "Size of Clipboard History", this,
                                                   "Determines how many entries are kept in the clipboard history."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED,
-                                                  "Display Fully-Qualified Class Names in \"Go to File\" Dialog", this,
-                                                  "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
-                                                         "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>"));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
-                                                  "Scan Class Files After Each Compile For Auto-Completion and Auto-Import", this,
-                                                  "<html>Whether to scan the class files after a compile to generate class names<br>"+
-                                                         "used for auto-completion and auto-import.<br>"+
-                                                         "Enabling this option will slow compiles down.</html>"));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_JAVAAPI,
-                                                  "Consider Java API Classes for Auto-Completion", this,
-                                                  "Whether to use the names of the Java API classes for auto-completion as well."));
+    
+    LabelComponent label = new LabelComponent(" ", this);
+    label.setEntireColumn(true);
+    addOptionComponent(panel, label);
+    BooleanOptionComponent checkbox = 
+      new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED,
+                                 "<html><p align=\"right\">"+StringOps.splitStringAtWordBoundaries("Display Fully-Qualified Class Names in \"Go to File\" Dialog",
+                                                                                                   27, "<br>", SEPS)+"</p></html>", this,
+                                 "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
+                                 "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>");
+    addOptionComponent(panel, checkbox);
+    
+    label = new LabelComponent(" ", this);
+    label.setEntireColumn(true);
+    addOptionComponent(panel, label);
+    checkbox =
+      new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
+                                 "<html><p align=\"right\">"+StringOps.splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion and Auto-Import",
+                                                                                                   27, "<br>", SEPS)+"</p></html>", this,
+                                 "<html>Whether to scan the class files after a compile to generate class names<br>"+
+                                 "used for auto-completion and auto-import.<br>"+
+                                 "Enabling this option will slow compiles down.</html>");
+    addOptionComponent(panel, checkbox);
+    
+    label = new LabelComponent(" ", this);
+    label.setEntireColumn(true);
+    addOptionComponent(panel, label);
+    checkbox =
+      new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_JAVAAPI,
+                                 "<html><p align=\"right\">"+StringOps.splitStringAtWordBoundaries("Consider Java API Classes for Auto-Completion",
+                                                                                                   27, "<br>", SEPS)+"</p></html>", this,
+                                 "Whether to use the names of the Java API classes for auto-completion as well.");
+    addOptionComponent(panel, checkbox);
     panel.displayComponents();
   }
 
@@ -521,65 +554,93 @@ public class ConfigFrame extends JFrame {
   /** Add all of the components for the Positions panel of the preferences window. */
   private void _setupPositionsPanel(ConfigPanel panel) {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION,
-                                                  "Save Main Window Position", this,
-                                                  "Whether to save and restore the size and position of the main window."));
+                                                         "Save Main Window Position", this,
+                                                         "Whether to save and restore the size and position of the main window.",false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_CLIPBOARD_HISTORY_STORE_POSITION,
-                                                  "Save \"Clipboard History\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Clipboard History\" dialog."));
+                                                         "Save \"Clipboard History\" Dialog Position", this,
+                                                         "Whether to save and restore the size and position of the \"Clipboard History\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetClipboardHistoryDialogPosition(); }
     }, "Reset \"Clipboard History\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_STORE_POSITION,
-                                                  "Save \"Go to File\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Go to File\" dialog."));
+                                                         "Save \"Go to File\" Dialog Position", this,
+                                                         "Whether to save and restore the size and position of the \"Go to File\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetGotoFileDialogPosition(); }
     }, "Reset \"Go to File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_WORD_STORE_POSITION,
-                                                  "Save \"Auto-Complete Word\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Auto-Complete Word\" dialog."));
+                                                         "Save \"Auto-Complete Word\" Dialog Position", this,
+                                                         "Whether to save and restore the size and position of the \"Auto-Complete Word\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetCompleteWordDialogPosition(); }
     }, "Reset \"Auto-Complete Word\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,
                                                   "Save \"Create Jar File from Project\" Dialog Position", this,
-                                                  "Whether to save and restore the position of the \"Create Jar File from Project\" dialog."));
+                                                  "Whether to save and restore the position of the \"Create Jar File from Project\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         _mainFrame.resetJarOptionsDialogPosition();
       }
     }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
                                                   "Save \"Open Javadoc\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
+                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
     }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION,
                                                   "Save \"Auto Import\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Auto Import\" dialog."));
+                                                  "Whether to save and restore the size and position of the \"Auto Import\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
     }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EXTERNALPROCESS_STORE_POSITION,
                                                   "Save \"Execute External Process\" Dialog Position", this,
-                                                  "Whether to save and restore the position of the \"Execute External Process\" dialog."));
+                                                  "Whether to save and restore the position of the \"Execute External Process\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         _mainFrame.resetExecuteExternalProcessPosition();
       }
     }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EDITEXTERNALPROCESS_STORE_POSITION,
                                                   "Save \"Edit External Process\" Dialog Position", this,
-                                                  "Whether to save and restore the position of the \"Edit External Process\" dialog."));
+                                                  "Whether to save and restore the position of the \"Edit External Process\" dialog.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         _mainFrame.resetEditExternalProcessPosition();
       }
     }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
                                                   "Save \"Open Javadoc\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
+                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog.", false)
+                         .setEntireColumn(true));
     panel.displayComponents();
   }
 
@@ -627,18 +688,26 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Debugger panel of the preferences window.
    */
   private void _setupDebugPanel(ConfigPanel panel) {
-    if (_mainFrame.getModel().getDebugger().isAvailable()) {
+    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
+//      String howto =
+//        "\nThe debugger is not currently active.  To use the debugger, you\n" +
+//        "must include Sun's tools.jar or jpda.jar on your classpath when\n" +
+//        "starting DrJava.  Do not use the \"-jar\" option, because it\n" +
+//        "overrides the classpath and will not include tools.jar.\n" +
+//        "For example, in Windows you might type:\n\n" +
+//        "  java -classpath drjava.jar;c:\\path\\tools.jar edu.rice.cs.drjava.DrJava\n\n" +
+//        "(Substituting the correct path for tools.jar.)\n" +
+//        "See the user documentation for more details.\n";
       String howto =
-        "\nThe debugger is not currently active.  To use the debugger, you\n" +
-        "must include Sun's tools.jar or jpda.jar on your classpath when\n" +
-        "starting DrJava.  Do not use the \"-jar\" option, because it\n" +
-        "overrides the classpath and will not include tools.jar.\n" +
-        "For example, in Windows you might type:\n\n" +
-        "  java -classpath drjava.jar;c:\\path\\tools.jar edu.rice.cs.drjava.DrJava\n\n" +
-        "(Substituting the correct path for tools.jar.)\n" +
+        "\nThe debugger is not currently available. To use the debugger,\n" +
+        "you can enter the location of the tools.jar file in the\n" +
+        "\"Resource Locations\" pane, in case DrJava does not" +
+        "automatically find it.\n" +
         "See the user documentation for more details.\n";
-        addOptionComponent(panel, new LabelComponent(howto, this));
+      LabelComponent label = new LabelComponent(howto, this);
+      label.setEntireColumn(true);
+      addOptionComponent(panel, label);
     }
 
     VectorFileOptionComponent sourcePath =
@@ -659,6 +728,8 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_STEP_DRJAVA,
                                                   "Step Into DrJava Classes", this,
                                                   "Whether the Debugger should step into DrJava's own class files."));
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+
+                                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", this, true));
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.DEBUG_STEP_EXCLUDE,
                                                  "Classes/Packages To Exclude", this,
                                                  "<html>Any classes that the debuggger should not step into.<br>" +
@@ -717,46 +788,54 @@ public class ConfigFrame extends JFrame {
   private void _setupNotificationsPanel(ConfigPanel panel) {
     // Quit
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this,
-                                                  "Whether DrJava should prompt the user before quitting."));
+                                                         "Whether DrJava should prompt the user before quitting.", false)
+                         .setEntireColumn(true));
 
     // Interactions
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.INTERACTIONS_RESET_PROMPT,
-                                                  "Prompt Before Resetting Interactions Pane", this,
-                                                  "<html>Whether DrJava should prompt the user before<br>" +
-                                                  "manually resetting the interactions pane.</html>"));
+                                                         "Prompt Before Resetting Interactions Pane", this,
+                                                         "<html>Whether DrJava should prompt the user before<br>" +
+                                                         "manually resetting the interactions pane.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT,
-                                                  "Prompt if Interactions Pane Exits Unexpectedly", this,
-                                                  "<html>Whether DrJava should show a dialog box if a program<br>" +
-                                                  "in the Interactions Pane exits without the user clicking Reset.</html>"));
+                                                         "Prompt if Interactions Pane Exits Unexpectedly", this,
+                                                         "<html>Whether DrJava should show a dialog box if a program<br>" +
+                                                         "in the Interactions Pane exits without the user clicking Reset.</html>", false)
+                         .setEntireColumn(true));
 
     // Javadoc
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
-                                                  "Prompt for Javadoc Destination", this,
-                                                  "<html>Whether Javadoc should always prompt the user<br>" +
-                                                  "to select a destination directory.</html>"));
+                                                         "Prompt for Javadoc Destination", this,
+                                                         "<html>Whether Javadoc should always prompt the user<br>" +
+                                                         "to select a destination directory.</html>", false)
+                         .setEntireColumn(true));
 
 
     // Clean
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.PROMPT_BEFORE_CLEAN,
-                                                  "Prompt before Cleaning Build Directory", this,
-                                                  "<html>Whether DrJava should prompt before cleaning the<br>" +
-                                                    "build directory of a project</html>"));
+                                                         "Prompt before Cleaning Build Directory", this,
+                                                         "<html>Whether DrJava should prompt before cleaning the<br>" +
+                                                         "build directory of a project</html>", false)
+                         .setEntireColumn(true));
 
     
     // Save before X
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE,
-                                                  "Automatically Save Before Compiling", this,
-                                                  "<html>Whether DrJava should automatically save before<br>" +
-                                                  "recompiling or ask the user each time.</html>"));
+                                                         "Automatically Save Before Compiling", this,
+                                                         "<html>Whether DrJava should automatically save before<br>" +
+                                                         "recompiling or ask the user each time.</html>", false)
+                         .setEntireColumn(true));
     
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.ALWAYS_COMPILE_BEFORE_JUNIT, "Automatically Compile Before Testing", this,
-                                                  "<html>Whether DrJava should automatically compile before<br>" +
-                                                  "testing with JUnit or ask the user each time.</html>")); 
+                                                         "<html>Whether DrJava should automatically compile before<br>" +
+                                                         "testing with JUnit or ask the user each time.</html>", false)
+                         .setEntireColumn(true)); 
     
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC,
-                                                  "Automatically Save Before Generating Javadoc", this,
-                                                  "<html>Whether DrJava should automatically save before<br>" +
-                                                  "generating Javadoc or ask the user each time.</html>"));
+                                                         "Automatically Save Before Generating Javadoc", this,
+                                                         "<html>Whether DrJava should automatically save before<br>" +
+                                                         "generating Javadoc or ask the user each time.</html>", false)
+                         .setEntireColumn(true));
 
 
     // These are very problematic features, and so are disabled for the forseeable future.
@@ -770,28 +849,35 @@ public class ConfigFrame extends JFrame {
 
     // Warnings
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC,
-                                                  "Warn on Breakpoint if Out of Sync", this,
-                                                  "<html>Whether DrJava should warn the user if the class file<br>" +
-                                                  "is out of sync before setting a breakpoint in that file.</html>"));
+                                                         "Warn on Breakpoint if Out of Sync", this,
+                                                         "<html>Whether DrJava should warn the user if the class file<br>" +
+                                                         "is out of sync before setting a breakpoint in that file.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_DEBUG_MODIFIED_FILE,
-                                                  "Warn if Debugging Modified File", this,
-                                                  "<html>Whether DrJava should warn the user if the file being<br>" +
-                                                  "debugged has been modified since its last save.</html>"));
+                                                         "Warn if Debugging Modified File", this,
+                                                         "<html>Whether DrJava should warn the user if the file being<br>" +
+                                                         "debugged has been modified since its last save.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF,
-                                                  "Warn to Restart to Change Look and Feel", this,
-                                                  "<html>Whether DrJava should warn the user that look and feel.<br>" +
-                                                  "(Changes will not be applied until DrJava is restarted.)</html>."));
+                                                         "Warn to Restart to Change Look and Feel", this,
+                                                         "<html>Whether DrJava should warn the user that look and feel.<br>" +
+                                                         "(Changes will not be applied until DrJava is restarted.)</html>.", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_PATH_CONTAINS_POUND,
-                                                  "Warn if File's Path Contains a '#' Symbol", this,
-                                                  "<html>Whether DrJava should warn the user if the file being<br>" +
-                                                  "saved has a path that contains a '#' symbol.<br>" +
-                                                  "Users cannot use such files in the Interactions Pane<br>" +
-                                                  "because of a bug in Java.</html>"));
+                                                         "Warn if File's Path Contains a '#' Symbol", this,
+                                                         "<html>Whether DrJava should warn the user if the file being<br>" +
+                                                         "saved has a path that contains a '#' symbol.<br>" +
+                                                         "Users cannot use such files in the Interactions Pane<br>" +
+                                                         "because of a bug in Java.</html>", false)
+                         .setEntireColumn(true));
 
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED, 
-                                                  "Show a notification window when the first DrJava error occurs", this,
-                                                  "<html>Whether to show a notification window when the first DrJava error occurs.<br>"+
-                                                  "If this is disabled, only the \"DrJava Error\" button will appear.</html>"));
+                                                         "Show a notification window when the first DrJava error occurs", this,
+                                                         "<html>Whether to show a notification window when the first DrJava error occurs.<br>"+
+                                                         "If this is disabled, only the \"DrJava Error\" button will appear.</html>", false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+
+                                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", this, true));
 
     panel.displayComponents();
   }
@@ -888,18 +974,24 @@ public class ConfigFrame extends JFrame {
    */
   private void _setupCompilerPanel(ConfigPanel panel) {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, "Show Unchecked Warnings", this, 
-                                                  "<html>Warn about unchecked conversions involving parameterized types.</html>"));
+                                                  "<html>Warn about unchecked conversions involving parameterized types.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_DEPRECATION_WARNINGS, "Show Deprecation Warnings", this, 
-                                                  "<html>Warn about each use or override of a deprecated method, field, or class.</html>"));
+                                                  "<html>Warn about each use or override of a deprecated method, field, or class.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_PATH_WARNINGS, "Show Path Warnings", this, 
-                                                  "<html>Warn about nonexistent members of the classpath and sourcepath.</html>"));
+                                                  "<html>Warn about nonexistent members of the classpath and sourcepath.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_SERIAL_WARNINGS, "Show Serial Warnings", this, 
-                                                  "<html>Warn about missing <code>serialVersionUID</code> definitions on serializable classes.</html>"));
+                                                  "<html>Warn about missing <code>serialVersionUID</code> definitions on serializable classes.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FINALLY_WARNINGS, "Show Finally Warnings", this,
-                                                  "<html>Warn about <code>finally</code> clauses that cannot complete normally.</html>"));
+                                                  "<html>Warn about <code>finally</code> clauses that cannot complete normally.</html>", false)
+                         .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings", this,
-                                                  "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>"));
-    addOptionComponent(panel, new LabelComponent("<html><br><br>Note: Compiler warnings not shown if<br>compiling any Java language level files.</html>", this, true));
+                                                  "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>", false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new LabelComponent("<html><br><br>Note: Compiler warnings not shown if compiling any Java language level files.</html>", this, true));
     panel.displayComponents();
     
   }

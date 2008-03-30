@@ -132,4 +132,11 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    * Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _jcb; }
+  
+  /** Whether the component should occupy the entire column. */
+  public BooleanOptionComponent setEntireColumn(boolean entireColumn) {
+    _entireColumn = entireColumn;
+    return this;
+  }
+
 }

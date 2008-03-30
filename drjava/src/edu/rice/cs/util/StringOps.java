@@ -772,4 +772,62 @@ public abstract class StringOps {
     
     return sb.toString();
   }
+  
+  /** Split a string into lines at a certain width, at word boundaries.
+    * @param s string to split
+    * @param widthInChars approximate width of the new lines
+    * @param lineBreak string to be inserted at line breaks
+    * @param wordSepChars string of characters that can serve as word separators
+    */
+  public static String splitStringAtWordBoundaries(String s, int widthInChars,
+                                                   String lineBreak,
+                                                   String wordSepChars) {
+    StringBuilder sb = new StringBuilder();
+    // remove word separators at the beginning of the string
+    while(s.length()>0) {
+      if (wordSepChars.indexOf(String.valueOf(s.charAt(0)))>=0) {
+//        System.out.println("Removing leading separator...");
+        s = s.substring(1);
+      }
+      else { break; /* first character that is not a separator */ }
+    }
+    // remove word separators at the end of the string
+    while(s.length()>0) {
+      if (wordSepChars.indexOf(String.valueOf(s.charAt(s.length()-1)))>=0) {
+//        System.out.println("Removing trailing separator...");
+        s = s.substring(0, s.length()-1);
+      }
+      else { break; /* first character that is not a separator */ }
+    }
+//    System.out.println("Removed all leading and trailing separator chars");
+//    System.out.println("String: "+s);
+    
+    java.util.StringTokenizer tok = new java.util.StringTokenizer(s, wordSepChars);
+    StringBuilder sbl = new StringBuilder(); // current line
+//    System.out.println("hasMoreElements? "+tok.hasMoreElements());
+    while(tok.hasMoreElements()) {
+      String token = tok.nextToken();
+//      System.out.println("\ttoken: "+token);
+      sbl.append(token);
+//      System.out.println("\tline (length="+sbl.length()+"): "+sbl.toString());
+      if (sbl.length()>=widthInChars) {
+//        System.out.println("\tnewline");
+//        System.out.println("\t\thasMoreElements? "+tok.hasMoreElements());
+        if (tok.hasMoreElements()) {
+//          System.out.println("\t\tinserting line break");
+          sbl.append(lineBreak);
+        }
+//        System.out.println("\t\tFinal line: "+sbl.toString());
+        sb.append(sbl.toString());
+//        System.out.println("\t\tEntire buffer: "+sb.toString());
+        sbl.setLength(0);
+      }
+      else { sbl.append(" "); }
+    }
+//    System.out.println("No more tokens. Last line: "+sbl.toString());
+    if (sbl.length()>0) { sb.append(sbl.toString()); }
+
+//    System.out.println("Final entire buffer: "+sb.toString());
+    return sb.toString();
+  }
 }

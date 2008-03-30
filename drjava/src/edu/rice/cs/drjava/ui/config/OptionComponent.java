@@ -56,10 +56,13 @@ public abstract class OptionComponent<T> implements Serializable {
   protected final Option<T> _option;
   protected final JLabel _label;
   protected final Frame _parent;
+  protected boolean _entireColumn;
+  protected String _labelText;
     
   public OptionComponent(Option<T> option, String labelText, Frame parent) {
     _option = option;
-    _label = new JLabel(labelText);
+    _labelText = labelText;
+    _label = new JLabel(_labelText);
     _label.setHorizontalAlignment(JLabel.RIGHT);
     _parent = parent;
     if (option != null) {
@@ -83,7 +86,7 @@ public abstract class OptionComponent<T> implements Serializable {
   
   public JLabel getLabel() { return _label; } 
   
-  public boolean useEntireColumn() { return false; }
+  public boolean useEntireColumn() { return _entireColumn; }
   
   /** Returns the JComponent to display for this OptionComponent. */
   public abstract JComponent getComponent();
@@ -94,6 +97,12 @@ public abstract class OptionComponent<T> implements Serializable {
    */
   public abstract void setDescription(String description);
 
+  /** Whether the component should occupy the entire column. */
+  public OptionComponent<T> setEntireColumn(boolean entireColumn) { _entireColumn = entireColumn; return this; }
+
+  /** Whether the component should occupy the entire column. */
+  public boolean getEntireColumn() { return _entireColumn; }
+  
   /**
    * Updates the appropriate configuration option with the new value 
    * if different from the old value and legal. Any changes should be 
