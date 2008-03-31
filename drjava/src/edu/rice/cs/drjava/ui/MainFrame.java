@@ -2381,10 +2381,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     * @param the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title,
-                                                 String searchString, boolean searchAll,
+                                                 String searchString, boolean searchAll, boolean matchCase,
+                                                 boolean wholeWord, boolean noComments,
                                                  WeakReference<OpenDefinitionsDocument> doc,
                                                  FindReplacePanel findReplace) {
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, title, searchString, searchAll, doc, findReplace);
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, title, searchString, searchAll, matchCase,
+                                                        wholeWord, noComments, doc, findReplace);
     final Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =

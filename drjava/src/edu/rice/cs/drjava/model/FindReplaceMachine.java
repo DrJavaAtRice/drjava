@@ -128,8 +128,10 @@ public class FindReplaceMachine {
   }
   
   public void setMatchCase(boolean matchCase) { _matchCase = matchCase; }
+  public boolean getMatchCase() { return _matchCase; }
   
   public void setMatchWholeWord() { _matchWholeWord = true; }
+  public boolean getMatchWholeWord() { return _matchWholeWord; }
   
   public void setFindAnyOccurrence() { _matchWholeWord = false; }  
   
@@ -138,6 +140,7 @@ public class FindReplaceMachine {
   public void setIgnoreCommentsAndStrings(boolean ignoreCommentsAndStrings) {
     _ignoreCommentsAndStrings = ignoreCommentsAndStrings;
   }
+  public boolean getIgnoreCommentsAndStrings() { return _ignoreCommentsAndStrings; }
   
   public void setDocument(OpenDefinitionsDocument doc) { _doc = doc; }
   

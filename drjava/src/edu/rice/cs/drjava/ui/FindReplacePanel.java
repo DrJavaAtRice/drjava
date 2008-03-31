@@ -487,22 +487,39 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     title = "Find: " + title;
     RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
     FindResultsPanel panel = _frame.createFindResultsPanel(rm, title, searchStr, searchAll,
+                                                           _machine.getMatchCase(), _machine.getMatchWholeWord(),
+                                                           _machine.getIgnoreCommentsAndStrings(),
                                                            new WeakReference<OpenDefinitionsDocument>(startDoc),
                                                            this);
-    findAll(searchStr, searchAll, startDoc, rm, panel);
+    findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
+            _machine.getIgnoreCommentsAndStrings(),startDoc, rm, panel);
   }
   
   /** Performs "find all" with the specified options. */
-  public void findAll(String searchStr, final boolean searchAll, final OpenDefinitionsDocument startDoc,
+  public void findAll(String searchStr, final boolean searchAll, final boolean matchCase,
+                      final boolean wholeWord, final boolean noComments,  final OpenDefinitionsDocument startDoc,
                       final RegionManager<MovingDocumentRegion> rm, final FindResultsPanel panel) {
     int searchLen = searchStr.length();
     if (searchLen == 0) return;
     
     _frame.updateStatusField("Finding All");
-
+    OpenDefinitionsDocument oldDoc = _machine.getDocument();
+    OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
+    String oldFindWord = _machine.getFindWord();
+    boolean oldSearchAll = _machine.getSearchAllDocuments();
+    boolean oldMatchCase = _machine.getMatchCase();
+    boolean oldWholeWord = _machine.getMatchWholeWord();
+    boolean oldNoComments = _machine.getIgnoreCommentsAndStrings();
+    int oldPosition = _machine.getCurrentOffset();
+    
 //    _updateMachine();
     _machine.setDocument(startDoc);
     if (_machine.getFirstDoc() == null) _machine.setFirstDoc(startDoc);
+    _machine.setSearchAllDocuments(searchAll);
+    _machine.setMatchCase(matchCase);
+    if (wholeWord) { _machine.setMatchWholeWord(); }
+    else { _machine.setFindAnyOccurrence(); }
+    _machine.setIgnoreCommentsAndStrings(noComments);
     _machine.setPosition(startDoc.getCaretPosition());
 
     _machine.setFindWord(searchStr);
@@ -520,6 +537,17 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           return null;
         }
       });
+      
+      _machine.setDocument(oldDoc);
+      _machine.setFirstDoc(oldFirstDoc);
+      _machine.setFindWord(oldFindWord);
+      _machine.setSearchAllDocuments(oldSearchAll);
+      _machine.setMatchCase(oldMatchCase);
+      if (oldWholeWord) { _machine.setMatchWholeWord(); }
+      else { _machine.setFindAnyOccurrence(); }
+      _machine.setIgnoreCommentsAndStrings(oldNoComments);
+      _machine.setPosition(oldPosition);
+
 //      Utilities.show("Searching complete");
       // Set of documents that have been reverted in the process of "find all"
 //      HashSet<OpenDefinitionsDocument> reverted = new HashSet<OpenDefinitionsDocument>();

@@ -85,6 +85,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected int _lastIndex;
   protected String _searchString;
   protected boolean _searchAll;
+  protected boolean _matchCase;
+  protected boolean _wholeWord;
+  protected boolean _noComments;
   protected WeakReference<OpenDefinitionsDocument> _doc;
   protected FindReplacePanel _findReplace;
   
@@ -102,8 +105,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title,
-                          String searchString, boolean searchAll, WeakReference<OpenDefinitionsDocument> doc,
-                          FindReplacePanel findReplace) {
+                          String searchString, boolean searchAll, final boolean matchCase,
+                          final boolean wholeWord, final boolean noComments,
+                          WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
     super(frame, title);
     _regionManager = rm;
     _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
@@ -116,6 +120,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     });
     _searchString = searchString;
     _searchAll = searchAll;
+    _matchCase = matchCase;
+    _wholeWord = wholeWord;
+    _noComments = noComments;
     _doc = doc;
     _findReplace = findReplace;
     
@@ -242,7 +249,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
     if (odd!=null) {
       _regionManager.clearRegions();
-      _findReplace.findAll(_searchString, _searchAll, odd, _regionManager, this);
+      _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord,
+                           _noComments, odd, _regionManager, this);
     }
   }
   
