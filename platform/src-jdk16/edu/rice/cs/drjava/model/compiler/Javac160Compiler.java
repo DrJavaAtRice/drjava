@@ -44,6 +44,8 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
+import java.io.FileFilter;
 
 // Uses JDK 1.6.0 tools classes
 import javax.tools.JavaFileManager;
@@ -76,9 +78,12 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  *  @version $Id$
  */
 public class Javac160Compiler extends JavacCompiler {
-  
+
+  private final boolean _filterExe;
+
   public Javac160Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
+    _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.4_04")) >= 0;
   }
   
   public boolean isAvailable() {
@@ -114,6 +119,13 @@ public class Javac160Compiler extends JavacCompiler {
                                   "sourceVersion", "showWarnings" },
                               this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
 
+    if (_filterExe) {
+      FileFilter filter = IOUtil.extensionFileFilter("exe");
+      Iterator<? extends File> i = classPath.iterator();
+      while (i.hasNext()) {
+        if (filter.accept(i.next())) { i.remove(); }
+      }
+    }
     Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     new CompilerErrorListener(context, errors);
