@@ -1096,9 +1096,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         final Query key = new Query.IndentOfCurrStmt(lineStart, delims, whitespace);
         final String cached = (String) _checkCache(key);
         if (cached != null) return cached;
-        
-        String lineText;
-        
+
         // Find the previous delimiter (typically an enclosing brace or closing symbol) skipping over balanced braces
         // that are not delims
         boolean reachedStart = false;
@@ -1118,20 +1116,20 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //        if (nextNonWSChar >= lineStart) nextNonWSChar = prevDelim;  
         
         // Get the start of the line of the non-ws char
-        int lineStartStmt = getLineStartPos(nextNonWSChar);
+        int newLineStart = getLineStartPos(nextNonWSChar);
         
-        // Get the position of the first non-ws character on this line
-        int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
-        lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
-        _storeInCache(key, lineText, Math.max(lineStart, 0));
-        return lineText;
+        // Get the position of the first non-ws character on this line (or end of line if no such char
+        int firstNonWS = getLineFirstCharPos(newLineStart);
+        String wSPrefix = getBlankString(firstNonWS - newLineStart);  // ensure that the wsPrefix only contains blanks
+        _storeInCache(key, wSPrefix, firstNonWS);
+        return wSPrefix;
       }
     }
     catch(Exception e) { throw new UnexpectedException(e); }
     finally { releaseReadLock(); }
 //    Utilities.show("getIdentCurrStmt(...) call completed");     
   }
-  
+
   /** Gets the white space prefix preceding the first non-blank/tab character on the line identified by pos. 
     * Assumes that line has nonWS character. */
   public String getWSPrefix(int pos) {
@@ -1145,30 +1143,62 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         int firstNonWSPos = getLineFirstCharPos(pos);
 //      String line = getText(lineStart, getLineEndPos(pos) - lineStart - 1);
 //      System.err.println("Prefix of line: '" + line + "' is '" + (firstNonWSPos - lineStart) + " chars long");
-        return makeBlankString(firstNonWSPos - lineStart);
+        return getBlankString(firstNonWSPos - lineStart);
       }
     }
     catch(Exception e) { throw new UnexpectedException(e); }
     finally { releaseReadLock(); }
   }
   
-  /** Generates a string containng n blanks.  Intended for small values of n (typically < 50). */
-  private static String makeBlankString(int n) {
+  /** Defines blank[k] (k = 0,..,16) as a string consisting of k blanks */
+  private static final String blank0 = "";
+  private static final String blank1 = makeBlankString(1);
+  private static final String blank2 = makeBlankString(2);
+  private static final String blank3 = makeBlankString(3);
+  private static final String blank4 = makeBlankString(4);
+  private static final String blank5 = makeBlankString(5);
+  private static final String blank6 = makeBlankString(6);
+  private static final String blank7 = makeBlankString(7);
+  private static final String blank8 = makeBlankString(8);
+  private static final String blank9 = makeBlankString(9);
+  private static final String blank10 = makeBlankString(10);
+  private static final String blank11 = makeBlankString(11);
+  private static final String blank12 = makeBlankString(12);
+  private static final String blank13 = makeBlankString(13);
+  private static final String blank14 = makeBlankString(14);
+  private static final String blank15 = makeBlankString(15);
+  private static final String blank16 = makeBlankString(16);
+  
+  /** Gets a string consisting of n blanks.  The values for n <= 16 are stored in a switch table.*/
+  private static String getBlankString(int n) {
     switch (n) {
-      case 0: return "";
-      case 1: return " ";
-      case 2: return "  ";
-      case 3: return "   ";
-      case 4: return "    ";
-      case 5: return "     ";
-      case 6: return "      ";
-      case 7: return "       ";
-      case 8: return "        ";
+      case 0: return blank0;
+      case 1: return blank1;
+      case 2: return blank2;
+      case 3: return blank3;
+      case 4: return blank4;
+      case 5: return blank5;
+      case 6: return blank6;
+      case 7: return blank7;
+      case 8: return blank8;
+      case 9: return blank9;
+      case 10: return blank10;
+      case 11: return blank11;
+      case 12: return blank12;
+      case 13: return blank13;
+      case 14: return blank14;
+      case 15: return blank15;
+      case 16: return blank16;
       default:
-        StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < n; i++) buf.append(' ');
-        return buf.toString();
+        return makeBlankString(n);
     }
+  }
+  
+  /** Constructs a new string containng n blanks.  Intended for small values of n (typically < 50). */
+  private static String makeBlankString(int n) {
+    StringBuilder buf = new StringBuilder();
+    for (int i = 0; i < n; i++) buf.append(' ');
+    return buf.toString();
   }
   
   /** Determines if the given character exists on the line where the given cursor position is.  Does not 
@@ -1279,7 +1309,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { releaseReadLock(); }
   }
   
-  /** Returns the absolute position of the first non-blank/tab character on the current line including comment text.
+  /** Returns the absolute position of the first non-blank/tab character on the current line including comment text or
+    * the end of the line if no non-blank/tab character is found.
+    * TODO: get rid of tab character references in AbstractDJDocument and related files and prevent insertion of tabs
     * @param pos position on the line
     * @return position of first non-blank/tab character on this line, or the end of the line if no non-blank/tab 
     *         character is found.
