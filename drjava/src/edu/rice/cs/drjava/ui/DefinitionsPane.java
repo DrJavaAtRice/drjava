@@ -107,13 +107,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Highlight painter for find results.
     * Keep in mind that, while the array is volatile, the elements inside of it are not! */
-  static volatile ReverseHighlighter.DefaultUnderlineHighlightPainter[] FIND_RESULTS_PAINTERS;
+  static volatile LayeredHighlighter.LayerPainter[] FIND_RESULTS_PAINTERS;
   
   static {
-    FIND_RESULTS_PAINTERS = new ReverseHighlighter.DefaultUnderlineHighlightPainter[FIND_RESULTS_COLORS.length+1];
+    FIND_RESULTS_PAINTERS = new LayeredHighlighter.LayerPainter[FIND_RESULTS_COLORS.length+1];
     for(int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
       FIND_RESULTS_PAINTERS[i] =
-        new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLORS[i]), 3);
+        new ReverseHighlighter.DefaultFrameHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLORS[i]), 2);
     }
     FIND_RESULTS_PAINTERS[FIND_RESULTS_COLORS.length] =
         new ReverseHighlighter.DefaultUnderlineHighlightPainter(Color.WHITE, 0);
@@ -247,7 +247,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     public void optionChanged(OptionEvent<Color> oce) {
       synchronized (FIND_RESULTS_PAINTERS) {
         FIND_RESULTS_PAINTERS[_index] =
-          new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, FIND_RESULTS_PAINTERS[_index].getThickness());
+          new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, 2);
       }
     }
   }

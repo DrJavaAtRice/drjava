@@ -69,7 +69,7 @@ import edu.rice.cs.drjava.model.debug.DebugException;
  *  <p> If the change is at the top level, you must modify the evaluateExpression method in this parser and add the 
  *  corresponding methods to the ProjectFileIR, ProjectFileIRImpl, and ProjectFileBuilder</p>
  */
-public class ProjectFileParser {
+public class ProjectFileParser extends ProjectFileParserFacade {
   /** Singleton instance of ProjectFileParser */
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
@@ -80,9 +80,7 @@ public class ProjectFileParser {
   BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();
   
-  private ProjectFileParser() { }
-  
-  /* methods */
+  private ProjectFileParser() { _xmlProjectFile = false; }
   
   /** @param projFile the file to parse
    *  @return the project file IR
@@ -168,16 +166,16 @@ public class ProjectFileParser {
       else if (fList.size() == 0) pfir.setMainClass(null);
       else pfir.setMainClass(fList.get(0));
     }
-//    else if (name.compareToIgnoreCase("create-jar-file") == 0) {
-//      List<File> fList = exp.getRest().accept(fileListVisitor);
-//      if (fList.size() > 1) throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
-//      else if (fList.size() == 0) pfir.setCreateJarFile(null);
-//      else pfir.setCreateJarFile(fList.get(0));
-//    }
-//    else if (name.compareToIgnoreCase("create-jar-flags") == 0) {
-//      Integer i = exp.getRest().accept(NumberVisitor.ONLY);
-//      pfir.setCreateJarFlags(i);
-//    }
+    else if (name.compareToIgnoreCase("create-jar-file") == 0) {
+      List<DocFile> fList = exp.getRest().accept(flv);
+      if (fList.size() > 1) throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
+      else if (fList.size() == 0) pfir.setCreateJarFile(null);
+      else pfir.setCreateJarFile(fList.get(0));
+    }
+    else if (name.compareToIgnoreCase("create-jar-flags") == 0) {
+      Integer i = exp.getRest().accept(NumberVisitor.ONLY);
+      pfir.setCreateJarFlags(i);
+    }
     else if (name.compareToIgnoreCase("breakpoints") == 0) {
        List<DebugBreakpointData> bpList = exp.getRest().accept(breakpointListVisitor);
        pfir.setBreakpoints(bpList);
@@ -477,14 +475,13 @@ public class ProjectFileParser {
     }
     
     public DebugBreakpointData forEmpty(Empty c) {
-      if ((fname == null) || (offset == null) || (lineNumber == null)) {
-        throw new PrivateProjectException("Breakpoint information incomplete, need name, offset and line tags");
+      if ((fname == null) || (lineNumber == null)) {
+        throw new PrivateProjectException("Breakpoint information incomplete, need name and line tags");
       }
       if (pathRoot == null || new File(fname).isAbsolute()) {
         final File f = new File(fname);
         return new DebugBreakpointData() {
           public File getFile() { return f; }
-          public int getOffset() { return offset; }
           public int getLineNumber() { return lineNumber; }
           public boolean isEnabled() { return isEnabled; }
         };
@@ -493,7 +490,6 @@ public class ProjectFileParser {
         final File f = new File(pathRoot, fname);
         return new DebugBreakpointData() {
           public File getFile() { return f; }
-          public int getOffset() { return offset; }
           public int getLineNumber() { return lineNumber; }
           public boolean isEnabled() { return isEnabled; }
         };
@@ -565,6 +561,11 @@ public class ProjectFileParser {
     }
   }
   
+  /** Given a top-level s-expression, this method checks the name of the node and configures the given pfir 
+    * appropriately.  If the expression is empty, it is ignored.
+    * @param e the top-level s-expression to check
+    * @param pfir the ProjectFileIR to update
+    */
   private static class PrivateProjectException extends RuntimeException{
     public PrivateProjectException(String message) { super(message); }
   }

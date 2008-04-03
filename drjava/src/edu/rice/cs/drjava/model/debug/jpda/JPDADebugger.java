@@ -233,8 +233,10 @@ public class JPDADebugger implements Debugger {
       Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_model.getBreakpointManager().getRegions());
       _model.getBreakpointManager().clearRegions();
       for (int i = 0; i < oldBreakpoints.size(); i++) {
-        Breakpoint bp = oldBreakpoints.get(i);        
-        setBreakpoint(new JPDABreakpoint(bp.getDocument(), bp.getOffset(), bp.getLineNumber(), bp.isEnabled(), this));
+        Breakpoint bp = oldBreakpoints.get(i);
+        int lnr = bp.getLineNumber();
+        OpenDefinitionsDocument odd = bp.getDocument();
+        setBreakpoint(new JPDABreakpoint(odd, odd.getOffset(lnr), lnr, bp.isEnabled(), this));
       }
     }
     

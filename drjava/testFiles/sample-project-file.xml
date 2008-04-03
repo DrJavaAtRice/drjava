@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<drjava version="20080403-0244-4427">
+  <project root="src" build="classes" work="" main="src/edu/rice/cs/drjava/DrJava.java">
+    <createjar file="drjava-15.jar" flags="3"/>
+    <source>
+      <file name="edu/rice/cs/drjava/DrJava.java" package="edu.rice.cs.drjava" timestamp="27-Mar-2008 15:05:07" active="true">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="edu/rice/cs/drjava/config/EagerFileProperty.java" package="edu.rice.cs.drjava.config" timestamp="14-Mar-2008 14:18:43">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="edu/rice/cs/drjava/ui/config/BooleanOptionComponent.java" package="edu.rice.cs.drjava.ui.config" timestamp="30-Mar-2008 09:27:01">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="edu/rice/cs/drjava/model/FindReplaceMachine.java" package="edu.rics.cs.drjava.model" timestamp="02-Apr-2008 10:58:15">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="edu/rice/cs/drjava/project/XMLProjectFileParser.java" package="edu.rics.cs.drjava.project" timestamp="01-Apr-2008 14:30:25">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="edu/rice/cs/drjava/ui/BackgroundColorListener.java" package="edu.rics.cs.drjava.ui" timestamp="10-Mar-2008 11:03:08">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+    </source>
+    <included>
+      <file name="/Users/Shared/drjava/drjava/testFiles/sample-project-file.xml" package="" timestamp="13-Sep-2004 06:03:06">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+    </included>
+    <collapsed>
+      <path name="./[ Source Files ]/grammar/util/"/>
+      <path name="./[ Source Files ]/parser/"/>
+    </collapsed>
+    <classpath>
+      <file name="/Users/Shared/drjava/drjava/lib"/>
+      <file name="/Users/Shared/drjava/drjava/lib/buildlib"/>
+    </classpath>
+    <breakpoints>
+      <breakpoint file="edu/rice/cs/drjava/DrJava.java" line="50" enabled="true"/>
+      <breakpoint file="edu/rice/cs/drjava/DrJava.java" line="55" enabled="true"/>
+      <breakpoint file="edu/rice/cs/drjava/DrJava.java" line="53" enabled="true"/>
+    </breakpoints>
+    <watches>
+      <watch name="args[0]"/>
+      <watch name="e"/>
+    </watches>
+    <bookmarks>
+      <bookmark file="edu/rice/cs/drjava/DrJava.java" from="851" to="900"/>
+      <bookmark file="edu/rice/cs/drjava/DrJava.java" from="959" to="1071"/>
+    </bookmarks>
+  </project>
+</drjava>

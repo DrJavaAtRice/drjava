@@ -121,7 +121,7 @@ import edu.rice.cs.drjava.project.DocFile ;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
-import edu.rice.cs.drjava.project.ProjectFileParser ;
+import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
@@ -1382,9 +1382,30 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
   public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     ProjectProfile builder = _makeProjectProfile(file, info);
-    
+    System.out.println("builder.getAuxiliaryFiles().length = "+builder.getAuxiliaryFiles().length);
     // write to disk
     builder.write();
+    
+//    synchronized(_auxiliaryFiles) {
+//      _auxiliaryFiles = new LinkedList<File>();
+//      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
+//    }
+    
+    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass (), 
+                                                      builder.getBuildDirectory(), builder.getWorkingDirectory(), file,
+                                                      builder.getSourceFiles(), builder.getAuxiliaryFiles(),
+                                                      builder.getClassPaths(), builder.getCreateJarFile(), 
+                                                      builder.getCreateJarFlags()));
+  }
+  
+  /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
+    * @param file where to save the project
+    */
+  public void exportOldProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+    ProjectProfile builder = _makeProjectProfile(file, info);
+    
+    // write to disk
+    builder.writeOld();
     
 //    synchronized(_auxiliaryFiles) {
 //      _auxiliaryFiles = new LinkedList<File>();
@@ -1411,7 +1432,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param projectFile The project file to parse
     */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
-    _loadProject(ProjectFileParser.ONLY.parse(projectFile));
+    _loadProject(ProjectFileParserFacade.ONLY.parse(projectFile));
   }
   
   /** Loads the specified project into the document navigator and opens all of the files (if not already open).
@@ -1440,8 +1461,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     getBreakpointManager().clearRegions();
     for (DebugBreakpointData dbd: ir.getBreakpoints()) {
       try {
-        getDebugger().toggleBreakpoint(getDocumentForFile( dbd.getFile()), dbd.getOffset(), dbd.getLineNumber(),
-                                       dbd.isEnabled());
+        int lnr = dbd.getLineNumber();
+        OpenDefinitionsDocument odd = getDocumentForFile( dbd.getFile());
+        getDebugger().toggleBreakpoint(odd, odd.getOffset(lnr), lnr, dbd.isEnabled());
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
     }
@@ -1916,7 +1938,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
     for (OpenDefinitionsDocument doc: lod) {
-      if (doc.isSourceFile() && ! doc.checkIfClassFileInSync()) return true;
+      if ((doc.isSourceFile()) &&
+          (!isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
+          (!doc.checkIfClassFileInSync())) return true;
     }
     return false;
   }

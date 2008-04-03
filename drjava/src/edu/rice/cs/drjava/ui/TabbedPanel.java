@@ -107,6 +107,12 @@ public abstract class TabbedPanel extends JPanel
      _frame.removeTab(this);
   }
 
+  public void setVisible(boolean b) {
+    super.setVisible(b);
+    if (_frame._mainSplit.getDividerLocation() > _frame._mainSplit.getMaximumDividerLocation()) 
+        _frame._mainSplit.resetToPreferredSizes();
+  }
+  
   /** @return whether this tabbedPanel is displayed in a tab */
   public boolean isDisplayed() { return _displayed; }
 

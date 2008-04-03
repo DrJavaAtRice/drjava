@@ -220,6 +220,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     try { _jvm = new MainJVM(workDir); }
+    catch(java.rmi.server.ExportException e) {
+      if (e.getMessage().equals("Listen failed on port: 0")) throw new RuntimeException(e);
+      else throw new UnexpectedException(e);
+    }
     catch(RemoteException e) { throw new UnexpectedException(e); }
 //    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this, compilers);

@@ -507,7 +507,8 @@ public interface GlobalModel extends ILoadDocuments {
     * @return a List of the open definitions documents.
     */
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments();
-  
+  public List<OpenDefinitionsDocument> getAuxiliaryDocuments();  
+
   /** Checks if any open definitions documents have been modified since last being saved.
     * @return whether any documents have been modified
     */

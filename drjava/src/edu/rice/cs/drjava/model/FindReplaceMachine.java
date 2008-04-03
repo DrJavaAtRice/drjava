@@ -73,6 +73,7 @@ public class FindReplaceMachine {
   private boolean _searchAllDocuments;       // Whether to search all documents (or just the current document)
   private boolean _isForward;                // Whether search direction is forward (false means backward)
   private boolean _ignoreCommentsAndStrings; // Whether to ignore matches in comments and strings
+  private boolean _ignoreTestCases;          // Whether to ignore documents that end in *Test.java
   private String _lastFindWord;              // Last word found; set to null by FindReplacePanel if caret is updated
   private boolean _skipText;                 // Whether to skip over the current match if direction is reversed
   private DocumentIterator _docIterator;     // An iterator of open documents; _doc is current
@@ -97,6 +98,7 @@ public class FindReplaceMachine {
     setMatchCase(true);
     setSearchAllDocuments(false);
     setIgnoreCommentsAndStrings(false);
+    setIgnoreTestCases(false);
   }
   
   public void cleanUp() {
@@ -119,7 +121,7 @@ public class FindReplaceMachine {
   
   public void setSearchBackwards(boolean searchBackwards) {
     if (_isForward == searchBackwards) {
-      // If we switch from searching forward to searching backwards or viceversa, isOnMatch is true, and _findword is the
+      // If we switch from searching forward to searching backwards or vice versa, isOnMatch is true, and _findword is the
       // same as the _lastFindWord, we know the user just found _findWord, so skip over this match.
       if (onMatch() && _findWord.equals(_lastFindWord)) _skipText = true;
       else _skipText = false;
@@ -142,6 +144,11 @@ public class FindReplaceMachine {
   }
   public boolean getIgnoreCommentsAndStrings() { return _ignoreCommentsAndStrings; }
   
+  public void setIgnoreTestCases(boolean ignoreTestCases) {
+    _ignoreTestCases = ignoreTestCases;
+  }
+  public boolean getIgnoreTestCases() { return _ignoreTestCases; }
+
   public void setDocument(OpenDefinitionsDocument doc) { _doc = doc; }
   
   public void setFirstDoc(OpenDefinitionsDocument firstDoc) { _firstDoc = firstDoc; }
@@ -502,84 +509,86 @@ public class FindReplaceMachine {
   private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, int len, 
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
+    boolean inTestCase = (_doc.getFileName().endsWith("Test.java"));
     
-    final int docLen = doc.getLength();;     // The length of the segment to be searched
-    final int wordLen = _findWord.length();   // length of search key (word being searched for)
-    
-    assert (start >= 0 && start <= docLen) && (len >= 0 && len <= docLen);
-    
-    if (len == 0 || docLen == 0) return new FindResult(doc, -1, wrapped, allWrapped);
-    
-    if (start + len > docLen) len = docLen - start;
-    
+    if (!_ignoreTestCases || !inTestCase) {
+      final int docLen = doc.getLength();;     // The length of the segment to be searched
+      final int wordLen = _findWord.length();   // length of search key (word being searched for)
+      
+      assert (start >= 0 && start <= docLen) && (len >= 0 && len <= docLen);
+      
+      if (len == 0 || docLen == 0) return new FindResult(doc, -1, wrapped, allWrapped);
+      
+      if (start + len > docLen) len = docLen - start;
+      
 //    if (start + len > docLen) len = docLen - start;
-    
-    String text;             // The text segment to be searched
-    final String findWord;   // copy of word being searched (so it can converted to lower case if necessary
-    
-    try { 
       
+      String text;             // The text segment to be searched
+      final String findWord;   // copy of word being searched (so it can converted to lower case if necessary
+      
+      try { 
+        
 //      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
-      //doc.acquireReadLock(); 
-      text = doc.getText(start, len);
-      //finally { doc.releaseReadLock(); }
-      
-      if (! _matchCase) {
-        text = text.toLowerCase();
-        findWord = _findWord.toLowerCase();  // does not affect wordLen
-      }
-      else findWord = _findWord;
-//       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text + "; len = " + len);     
-      
-      // loop to find first valid (not ignored) occurrence of findWord
-      // loop carried variables are rem, foundOffset; 
-      // loop invariant variables are _doc, docLen, _isForward, findWord, wordLen, start, len.
-      // Invariant:  on forwardsearch, foundOffset + rem == len; on backward search foundOffset == rem.
-      // loop exits by returning match (as FindResult) or by falling through with no match.
-      // if match is returned, _current has been updated to match location
-      int foundOffset = _isForward? 0 : len;
-      int rem = len;
-//      _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward + " rem = " + rem + " foundOffset = " + foundOffset);
-      while (rem >= wordLen) {
+        //doc.acquireReadLock(); 
+        text = doc.getText(start, len);
+        //finally { doc.releaseReadLock(); }
         
-        // Find next match in text
-        foundOffset = _isForward ? text.indexOf(findWord, foundOffset) : text.lastIndexOf(findWord, foundOffset);
-//        _log.log("foundOffset = " + foundOffset);
-        if (foundOffset < 0) break;  // no valid match in this document
-        int foundLocation = start + foundOffset;
-        int matchLocation;
-        
-        if (_isForward) {
-          foundOffset += wordLen;                          // skip over matched word
-//          text = text.substring(adjustedOffset, len);    // len is length of text before update
-          rem = len - foundOffset;                         // len is updated to length of remaining text to search
-          matchLocation = foundLocation + wordLen;         // matchLocation is index in _doc of right edge of match
-//            _current = docToSearch.createPosition(start);          // put caret at beginning of found word
+        if (! _matchCase) {
+          text = text.toLowerCase();
+          findWord = _findWord.toLowerCase();  // does not affect wordLen
         }
-        else { 
+        else findWord = _findWord;
+//       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text + "; len = " + len);     
+        
+        // loop to find first valid (not ignored) occurrence of findWord
+        // loop carried variables are rem, foundOffset; 
+        // loop invariant variables are _doc, docLen, _isForward, findWord, wordLen, start, len.
+        // Invariant:  on forwardsearch, foundOffset + rem == len; on backward search foundOffset == rem.
+        // loop exits by returning match (as FindResult) or by falling through with no match.
+        // if match is returned, _current has been updated to match location
+        int foundOffset = _isForward? 0 : len;
+        int rem = len;
+//      _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward + " rem = " + rem + " foundOffset = " + foundOffset);
+        while (rem >= wordLen) {
           
-          foundOffset -= wordLen;                        // skip over matched word        
-          rem = foundOffset;                             // rem is adjusted to match foundOffset
-          matchLocation = foundLocation;                 // matchLocation is index in _doc of left edge of match
+          // Find next match in text
+          foundOffset = _isForward ? text.indexOf(findWord, foundOffset) : text.lastIndexOf(findWord, foundOffset);
+//        _log.log("foundOffset = " + foundOffset);
+          if (foundOffset < 0) break;  // no valid match in this document
+          int foundLocation = start + foundOffset;
+          int matchLocation;
+          
+          if (_isForward) {
+            foundOffset += wordLen;                          // skip over matched word
+//          text = text.substring(adjustedOffset, len);    // len is length of text before update
+            rem = len - foundOffset;                         // len is updated to length of remaining text to search
+            matchLocation = foundLocation + wordLen;         // matchLocation is index in _doc of right edge of match
+//            _current = docToSearch.createPosition(start);          // put caret at beginning of found word
+          }
+          else { 
+            
+            foundOffset -= wordLen;                        // skip over matched word        
+            rem = foundOffset;                             // rem is adjusted to match foundOffset
+            matchLocation = foundLocation;                 // matchLocation is index in _doc of left edge of match
 //          text = text.substring(0, len);               // len is length of text after update
 //            _current = docToSearch.createPosition(foundLocation);  // put caret at end of found word
-        }
+          }
 //        _log.log("rem = " + rem);
-        
+          
 //        _log.log("Finished iteration with text = " + text + "; len = " + len + "; foundLocation = " + foundLocation);
-        assert foundLocation > -1;
-        if (_shouldIgnore(foundLocation, doc)) continue;
-        
-        //_current = doc.createPosition(matchLocation);   // formerly doc.createPosition(...)
-        setPosition(matchLocation);
-        
+          assert foundLocation > -1;
+          if (_shouldIgnore(foundLocation, doc)) continue;
+          
+          //_current = doc.createPosition(matchLocation);   // formerly doc.createPosition(...)
+          setPosition(matchLocation);
+          
 //        System.err.println("Returning result = " + new FindResult(doc, matchLocation, wrapped, allWrapped));
-        
-        return new FindResult(doc, matchLocation, wrapped, allWrapped);  // return valid match
+          
+          return new FindResult(doc, matchLocation, wrapped, allWrapped);  // return valid match
+        }
       }
-    }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }
-    
+      catch (BadLocationException e) { throw new UnexpectedException(e); }
+    }      
     // loop fell through; search failed in doc segment
     return new FindResult(doc, -1, wrapped, allWrapped);
   }
@@ -600,21 +609,23 @@ public class FindReplaceMachine {
     
     while (_doc != startDoc) {
       if (_doc == _firstDoc) allWrapped = true;
+      boolean inTestCase = (_doc.getFileName().endsWith("Test.java"));
       
+      if (!_ignoreTestCases || !inTestCase) {
 //      System.err.println("_doc = [" + _doc.getText() + "]");
-      
+        
 //      if (_isForward) setPosition(0);
 //      else setPosition(_doc.getLength());
-      
-      
-      // find next match in _doc
-      _doc.acquireReadLock();
-      FindResult fr;
-      try { fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); } 
-      finally { _doc.releaseReadLock(); }
-      
-      if (fr.getFoundOffset() >= 0) return fr;
-      
+        
+        
+        // find next match in _doc
+        _doc.acquireReadLock();
+        FindResult fr;
+        try { fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); } 
+        finally { _doc.releaseReadLock(); }
+        
+        if (fr.getFoundOffset() >= 0) return fr;
+      }
 //      System.err.println("Advancing from '" + _doc.getText() + "' to next doc");        
       _doc = _isForward ? _docIterator.getNextDocument(_doc) : _docIterator.getPrevDocument(_doc);     
 //      System.err.println("Next doc is: '" + _doc.getText() + "'");

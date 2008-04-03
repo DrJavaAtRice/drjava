@@ -72,13 +72,214 @@ public class ProjectTest extends DrJavaTestCase {
       srcDir = new File(parent, "src");
       srcDir.mkdir(); // create the specified directory
       absp = parent.getCanonicalPath() + File.separator; 
-      IOUtil.deleteOnExitRecursively(parent);
     }
     catch(IOException e) { fail("could not initialize temp path string"); }
   }
 
+  public void tearDown() throws Exception {
+    IOUtil.deleteOnExitRecursively(parent);
+    super.tearDown();
+  }
+  
   /** Test to make sure all elements of the project are read correctly into the IR */
   public void testLegacyParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
+    String proj1 =
+      ";; DrJava project file.  Written with build: 20040623-1933\n" +
+      "(source ;; comment\n" +
+      "   (file (name \"src/sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
+      "(auxiliary ;; absolute file names\n" +
+      "   (file (name " + convertToLiteral(new File(parent, "junk/sexp/Tokens.java").getCanonicalPath()) + 
+         ")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name " + convertToLiteral(new File(parent, "jdk1.5.0/JScrollPane.java").getCanonicalPath()) + 
+         ")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
+      "(collapsed ;; relative paths\n" +
+      "   (path \"./[ Source Files ]/sexp/\")\n" +
+      "   (path \"./[ External ]/\"))\n" +
+      "(build-dir ;; absolute path\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
+      "(work-dir ;; absolute path\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "(proj-root ;; absolute path\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "(classpaths\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "(main-class\n" +
+      "   (file (name \"src/sexp/SEList.java\")))";
+    
+    File f = new File(parent, "test1.pjt");
+
+    IOUtil.writeStringToFile(f, proj1);
+//    System.err.println("Project directory is " + parent);
+//    System.err.println("Project file is " + f);
+//    System.err.println("projFile exists? " + f.exists());
+    ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(f);
+//    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
+    assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
+    assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
+    File base = f.getParentFile();
+    assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
+    assertEquals("mod-date value", 
+                 ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
+                 pfir.getSourceFiles()[0].getSavedModDate());
+    assertEquals("last source filename", new File(base,"src/sexp/SEList.java").getPath(), 
+                 pfir.getSourceFiles()[6].getPath());
+    assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
+                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
+    assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
+    assertEquals("build-dir name", new File(base, "built").getCanonicalPath(), 
+                 pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("work-dir name", new File(base, "src").getCanonicalPath(), 
+                 pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
+    assertEquals("main-class name", new File(base, "src/sexp/SEList.java").getCanonicalPath(), 
+                 pfir.getMainClass().getCanonicalPath());
+  }
+
+   /** Test to make sure all elements of the project are read correctly into the IR */
+  public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
+    String proj2 =
+      ";; DrJava project file.  Written with build: 2006??\n" +
+      "(proj-root-and-base (file (name \"src\")))\n" +
+      "(source-files ;; comment\n" +
+      "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
+      "(auxiliary ;; absolute file names\n" +
+      "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +
+          ")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name " + convertToLiteral(new File(parent,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +
+          ")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
+      "(collapsed ;; relative paths\n" +
+      "   (path \"./[ Source Files ]/sexp/\")\n" +
+      "   (path \"./[ External ]/\"))\n" +
+      "(build-dir ;; absolute path\n" +
+      "   (file (name "+ convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
+      "(work-dir (file (name \"src\")))\n" +
+      "(classpaths\n" +
+      "   (file (name "+ convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "(main-class\n" +
+      "   (file (name \"src/sexp/SEList.java\")))";
+    
+    File f = new File(parent, "test2.pjt");
+
+    IOUtil.writeStringToFile(f, proj2);
+//    System.err.println("Project directory is " + parent);
+//    System.err.println("Project file is " + f);
+//    System.err.println("projFile exists? " + f.exists());
+    ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(f);
+//    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
+    assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
+    assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
+    File base = f.getParentFile();
+    File root = new File(base, "src");
+    assertEquals("proj-root-and-base", root.getPath(), pfir.getProjectRoot().getPath());
+    assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
+    assertEquals("mod-date value", 
+                 ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
+                 pfir.getSourceFiles()[0].getSavedModDate());
+    assertEquals("last source filename", new File(root, "sexp/SEList.java").getPath(), 
+                 pfir.getSourceFiles()[6].getPath());
+    assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
+                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
+    assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
+    assertEquals("build-dir name", new File(base, "built").getCanonicalPath(), 
+                 pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("work-dir name", new File(base, "src").getCanonicalPath(), 
+                 pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
+    assertEquals("main-class name", new File(root, "sexp/SEList.java").getCanonicalPath(), 
+                 pfir.getMainClass().getCanonicalPath());
+  }
+  
+  public void testParseFile() throws SExpParseException {
+    SEList c = SExpParser.parse("(file (name \"file-name\") (select 1 2))").get(0);
+    DocFile df = ProjectFileParser.ONLY.parseFile(c,null);
+    Pair<Integer,Integer> p = df.getSelection();
+    assertEquals("First int should be a 1", 1, (int)p.first()); //need cast to prevent ambiguity
+    assertEquals("Second int should be a 2", 2, (int)p.second());//need cast to prevent ambiguity
+    assertEquals("Name should have been file-name", "file-name", df.getPath());
+  }
+
+  public void testWriteFile() throws IOException, MalformedProjectFileException {
+    File pf = new File(parent, "test3.pjt");
+    IOUtil.writeStringToFile(pf, "");
+    ProjectProfile fb = new ProjectProfile(pf);
+    String sr = pf.getCanonicalFile().getParent();
+
+    fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
+    fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
+    fb.addSourceFile(makeGetter(20, 22, 0, 0, "dir2/testfile3.java", "dir2", false, false, pf));
+    fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir2/testfile4.java", "dir2", true, false, pf));
+    fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir3/testfile5.java", "", false, false, pf));
+    fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
+    fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
+    fb.addCollapsedPath("./[ Source Files ]/dir1/");
+    fb.addClassPathFile(new File(parent, "lib"));
+    fb.setBuildDirectory(new File(parent, "built"));
+    fb.setWorkingDirectory(new File(parent, "src"));
+    fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
+
+    String expected = "";
+    String received = "";
+    fb.write();
+
+    FileReader fr = new FileReader(pf);
+    int c = fr.read();
+    while (c >= 0) {
+      received += (char) c;
+      c = fr.read();
+    }
+//    assertEquals("Make relative", "dir1/test.java",
+//                 fb.makeRelative(new File(pf.getParentFile(),"dir1/test.java")));
+//    assertEquals("The file written by the builder", expected, received);
+
+    // parse in the file that was just written.
+    ProjectFileIR pfir = null;
+    try { pfir = ProjectFileParserFacade.ONLY.parse(pf); }
+    catch(MalformedProjectFileException e) {
+      throw new MalformedProjectFileException(e.getMessage() + ", file: " + pf);
+    }
+    assertEquals("number of source files", 5, pfir.getSourceFiles().length);
+    assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
+    assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
+
+    String base = pf.getParent();
+    
+//    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
+//                 pfir.getSourceFiles()[0].getPath());
+//    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
+//                 pfir.getSourceFiles()[4].getPath());
+    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), 
+                 pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
+    assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
+    assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
+    assertEquals("classpath name", new File(parent,"lib"), IterUtil.first(pfir.getClassPaths()));
+    assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
+    pf.delete();
+  }
+  
+  // ----- ProjectFileParser -----
+  
+  /** Test to make sure all elements of the project are read correctly into the IR */
+  public void testLegacyParseProjectPJT() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
@@ -141,8 +342,8 @@ public class ProjectTest extends DrJavaTestCase {
   }
 
    /** Test to make sure all elements of the project are read correctly into the IR */
-  public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
-    String proj1 =
+  public void testParseProjectPJT() throws IOException, MalformedProjectFileException, java.text.ParseException {
+    String proj2 =
       ";; DrJava project file.  Written with build: 2006??\n" +
       "(proj-root-and-base (file (name \"src\")))\n" +
       "(source-files ;; comment\n" +
@@ -169,9 +370,9 @@ public class ProjectTest extends DrJavaTestCase {
       "(main-class\n" +
       "   (file (name \"src/sexp/SEList.java\")))";
     
-    File f = new File(parent, "test1.pjt");
+    File f = new File(parent, "test2.pjt");
 
-    IOUtil.writeStringToFile(f, proj1);
+    IOUtil.writeStringToFile(f, proj2);
 //    System.err.println("Project directory is " + parent);
 //    System.err.println("Project file is " + f);
 //    System.err.println("projFile exists? " + f.exists());
@@ -202,18 +403,9 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("main-class name", new File(root, "sexp/SEList.java").getCanonicalPath(), 
                  pfir.getMainClass().getCanonicalPath());
   }
-  
-  public void testParseFile() throws SExpParseException {
-    SEList c = SExpParser.parse("(file (name \"file-name\") (select 1 2))").get(0);
-    DocFile df = ProjectFileParser.ONLY.parseFile(c,null);
-    Pair<Integer,Integer> p = df.getSelection();
-    assertEquals("First int should be a 1", 1, (int)p.first()); //need cast to prevent ambiguity
-    assertEquals("Second int should be a 2", 2, (int)p.second());//need cast to prevent ambiguity
-    assertEquals("Name should have been file-name", "file-name", df.getPath());
-  }
 
-  public void testWriteFile() throws IOException, MalformedProjectFileException {
-    File pf = new File(parent, "test2.pjt");
+  public void testWriteFilePJT() throws IOException, MalformedProjectFileException {
+    File pf = new File(parent, "test3.pjt");
     IOUtil.writeStringToFile(pf, "");
     ProjectProfile fb = new ProjectProfile(pf);
     String sr = pf.getCanonicalFile().getParent();
@@ -233,7 +425,7 @@ public class ProjectTest extends DrJavaTestCase {
 
     String expected = "";
     String received = "";
-    fb.write();
+    fb.writeOld();
 
     FileReader fr = new FileReader(pf);
     int c = fr.read();
@@ -272,6 +464,68 @@ public class ProjectTest extends DrJavaTestCase {
     pf.delete();
   }
 
+  // ----- XMLProjectFileParser -----
+  
+  public void testWriteFileXML() throws IOException, MalformedProjectFileException {
+    File pf = new File(parent, "test3.xml");
+    IOUtil.writeStringToFile(pf, "");
+    ProjectProfile fb = new ProjectProfile(pf);
+    String sr = pf.getCanonicalFile().getParent();
+
+    fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
+    fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
+    fb.addSourceFile(makeGetter(20, 22, 0, 0, "dir2/testfile3.java", "dir2", false, false, pf));
+    fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir2/testfile4.java", "dir2", true, false, pf));
+    fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir3/testfile5.java", "", false, false, pf));
+    fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
+    fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
+    fb.addCollapsedPath("./[ Source Files ]/dir1/");
+    fb.addClassPathFile(new File(parent, "lib"));
+    fb.setBuildDirectory(new File(parent, "built"));
+    fb.setWorkingDirectory(new File(parent, "src"));
+    fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
+
+    String expected = "";
+    String received = "";
+    fb.write();
+
+    FileReader fr = new FileReader(pf);
+    int c = fr.read();
+    while (c >= 0) {
+      received += (char) c;
+      c = fr.read();
+    }
+//    assertEquals("Make relative", "dir1/test.java",
+//                 fb.makeRelative(new File(pf.getParentFile(),"dir1/test.java")));
+//    assertEquals("The file written by the builder", expected, received);
+
+    // parse in the file that was just written.
+    ProjectFileIR pfir = null;
+    try { pfir = XMLProjectFileParser.ONLY.parse(pf); }
+    catch(MalformedProjectFileException e) {
+      throw new MalformedProjectFileException(e.getMessage() + ", file: " + pf);
+    }
+    assertEquals("number of source files", 5, pfir.getSourceFiles().length);
+    assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
+    assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
+
+    String base = pf.getParent();
+    
+//    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
+//                 pfir.getSourceFiles()[0].getPath());
+//    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
+//                 pfir.getSourceFiles()[4].getPath());
+    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), 
+                 pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
+    assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
+    assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
+    assertEquals("classpath name", new File(parent,"lib"), IterUtil.first(pfir.getClassPaths()));
+    assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
+    pf.delete();
+  }
+  
   private DocumentInfoGetter makeGetter(final int sel1, final int sel2, final int scrollv,
                                         final int scrollh, final String fname, final String pack,
                                         final boolean active, final boolean isUntitled, final File pf) {

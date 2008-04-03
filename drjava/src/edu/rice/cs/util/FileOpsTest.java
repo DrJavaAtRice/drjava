@@ -262,7 +262,7 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   /** Tests that non-empty directories can be deleted on exit. */
-  public void xtestDeleteDirectoryOnExit() throws IOException, InterruptedException {
+  public void testDeleteDirectoryOnExit() throws IOException, InterruptedException {
     
     File tempDir = FileOps.createTempDirectory("DrJavaTestTempDir");
     assertTrue("tempDir exists", tempDir.exists());
@@ -280,7 +280,8 @@ public class FileOpsTest extends DrJavaTestCase {
     File file2 = new File(dir2, "file2");
     file2.createNewFile();
     assertTrue("file2 exists", file2.exists());
-    
+    edu.rice.cs.plt.io.IOUtil.deleteOnExitRecursively(tempDir);
+      
     String className = "edu.rice.cs.util.FileOpsTest";
     String[] args = new String[] {dir1.getAbsolutePath() };  // args = {<Fully qualified name of dir1>}
     
@@ -415,5 +416,7 @@ public class FileOpsTest extends DrJavaTestCase {
     
     assertEquals("non-recursive FilesInDir test", res1, nrfiles);
     assertEquals("recursive FileInDir test", res2, rfiles);
+    
+    edu.rice.cs.plt.io.IOUtil.deleteRecursively(dir1);
   }
 }

@@ -117,13 +117,14 @@ public class DrJavaErrorPopup extends JDialog {
   private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorPopup.this.dispose();
+      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
     }
   };
 
   /** Close this window, but display the full DrJava Errors window. */
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
-      _okAction.actionPerformed(e);
+      DrJavaErrorPopup.this.dispose();
       MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getFrame());
       DrJavaErrorWindow.singleton().setVisible(true);
     }

@@ -44,6 +44,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.io.*;
+import org.w3c.dom.Node;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
@@ -57,6 +58,7 @@ import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.util.XMLConfig;
 
 import static edu.rice.cs.util.StringOps.*;
 
@@ -207,10 +209,158 @@ public class ProjectProfile implements ProjectFileIR {
   public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
   public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
-  /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
+  /** Write project file in XML format. */
   public void write() throws IOException {
-    FileWriter fw = new FileWriter(_projectFile);
+    write(new FileOutputStream(_projectFile));
+  }
+  
+  public void write(OutputStream os) throws IOException {    
+    XMLConfig xc = new XMLConfig();
+    xc.set("drjava.version", edu.rice.cs.drjava.Version.getBuildTimeString()+"-"+edu.rice.cs.drjava.Version.getRevisionNumber());
+    String path = FileOps.makeRelativeTo(_projectRoot, _projectFile).getPath();
+    path = replace(path, File.separator, "/");
+    xc.set("drjava/project.root", path);
+    path = FileOps.makeRelativeTo(_workDir, _projectFile).getPath();
+    path = replace(path, File.separator, "/");
+    xc.set("drjava/project.work", path);
+    if (_buildDir != null && _buildDir.getPath() != "") {
+      path = FileOps.makeRelativeTo(_buildDir, _projectFile).getPath();
+      path = replace(path, File.separator, "/");
+      xc.set("drjava/project.build", path);
+    }
+    if (_mainClass != null && _mainClass.getPath() != "") {
+      path = FileOps.makeRelativeTo(_mainClass, _projectFile).getPath();
+      path = replace(path, File.separator, "/");
+      xc.set("drjava/project.main", path);      
+    }
     
+    if (_createJarFile != null) {
+      path = FileOps.makeRelativeTo(_createJarFile, _createJarFile).getPath();
+      path = replace(path, File.separator, "/");
+      xc.set("drjava/project/createjar.file", path);
+    }
+    if (_createJarFlags != 0) {
+      xc.set("drjava/project/createjar.flags", String.valueOf(_createJarFlags));
+    }
+    
+    xc.createNode("drjava/project/source");
+    if (!_sourceFiles.isEmpty()) {
+      DocFile active = null;
+      for(DocFile df: _sourceFiles) {
+        if(df.isActive()) {
+          active = df;
+          break; //Assert that there is only one active document in the project
+        }
+      }
+      for(DocFile df: _sourceFiles) {
+        path = FileOps.makeRelativeTo(df, _projectRoot).getPath();
+        path = replace(path, File.separator, "/");
+        Pair<Integer,Integer> pSel = df.getSelection();
+        Pair<Integer,Integer> pScr = df.getScroll();
+        String s = MOD_DATE_FORMAT.format(new Date(df.lastModified()));
+
+        Node f = xc.createNode("drjava/project/source/file", null, false);      
+        xc.set(".name", path, f, true);
+        xc.set(".timestamp", s, f, true);
+        xc.set(".package", df.getPackage(), f, true);
+        xc.set("select.from",   String.valueOf(pSel.first()),  f, true);
+        xc.set("select.to",     String.valueOf(pSel.second()), f, true);
+        xc.set("scroll.column", String.valueOf(pScr.first()),  f, true);
+        xc.set("scroll.row",    String.valueOf(pScr.second()), f, true);
+        if (df==active) xc.set(".active", "true", f, true);
+      }
+    }
+    xc.createNode("drjava/project/included");
+    if (!_sourceFiles.isEmpty()) {
+      DocFile active = null;
+      if (active==null) {
+        for(DocFile df: _auxFiles) {
+          if(df.isActive()) {
+            active = df;
+            break; //Assert that there is only one active document in the project
+          }
+        }
+      }
+      for(DocFile df: _auxFiles) {
+        path = df.getAbsolutePath();
+        path = replace(path, File.separator, "/");
+        Pair<Integer,Integer> pSel = df.getSelection();
+        Pair<Integer,Integer> pScr = df.getScroll();
+        String s = MOD_DATE_FORMAT.format(new Date(df.lastModified()));
+
+        Node f = xc.createNode("drjava/project/included/file", null, false);      
+        xc.set(".name", path, f, true);
+        xc.set(".timestamp", s, f, true);
+        xc.set(".package", df.getPackage(), f, true);
+        xc.set("select.from",   String.valueOf(pSel.first()),  f, true);
+        xc.set("select.to",     String.valueOf(pSel.second()), f, true);
+        xc.set("scroll.column", String.valueOf(pScr.first()),  f, true);
+        xc.set("scroll.row",    String.valueOf(pScr.second()), f, true);
+        if (df==active) { xc.set(".active", "true", f, true);
+        }
+      }
+    }
+    xc.createNode("drjava/project/collapsed");
+    if (!_collapsedPaths.isEmpty()) {
+      for(String s: _collapsedPaths) {
+        Node f = xc.createNode("drjava/project/collapsed/path", null, false);
+        xc.set(".name", s, f, true);
+      }
+    }
+    xc.createNode("drjava/project/classpath");
+    if (!_classPathFiles.isEmpty()) {
+      for(File cp: _classPathFiles) {
+        Node f = xc.createNode("drjava/project/classpath/file", null, false);
+        xc.set(".name", cp.getAbsolutePath(), f, true);
+      }
+    }
+    xc.createNode("drjava/project/breakpoints");
+    if (!_breakpoints.isEmpty()) {
+      for(DebugBreakpointData bp: _breakpoints) {
+        Node f = xc.createNode("drjava/project/breakpoints/breakpoint", null, false);
+        path = FileOps.makeRelativeTo(bp.getFile(), _projectRoot).getPath();
+        path = replace(path, File.separator, "/");
+        xc.set(".file", path, f, true);
+        xc.set(".line", String.valueOf(bp.getLineNumber()), f, true);
+        xc.set(".enabled", String.valueOf(bp.isEnabled()), f, true);
+      }
+    }
+    xc.createNode("drjava/project/watches");
+    if (!_watches.isEmpty()) {
+      for(DebugWatchData w: _watches) {
+        Node f = xc.createNode("drjava/project/watches/watch", null, false);
+        xc.set(".name", w.getName(), f, true);
+      }
+    }
+    xc.createNode("drjava/project/bookmarks");
+    if (!_bookmarks.isEmpty()) {
+      for(DocumentRegion bm: _bookmarks) {
+        Node f = xc.createNode("drjava/project/bookmarks/bookmark", null, false);
+        path = FileOps.makeRelativeTo(bm.getFile(), _projectRoot).getPath();
+        path = replace(path, File.separator, "/");
+        xc.set(".file", path, f, true);
+        xc.set(".from", String.valueOf(bm.getStartOffset()), f, true);
+        xc.set(".to", String.valueOf(bm.getEndOffset()), f, true);
+      }
+    }
+    xc.save(os);
+  }
+  
+  /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
+  public void writeOld() throws IOException {
+    writeOld(new FileWriter(_projectFile));
+  }
+  
+  public String toString() {
+    try {
+      StringWriter w = new StringWriter();
+      writeOld(w);
+      return w.toString();
+    }
+    catch(IOException e) { return e.toString(); }
+  }
+  
+  public void writeOld(Writer fw) throws IOException {    
     // write opening comment line
     fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString() + ", revision " + Version.getRevisionNumber());
     fw.write("\n;; files in the source tree are relative to: " + _projectRoot.getCanonicalPath());
@@ -301,19 +451,19 @@ public class ProjectProfile implements ProjectFileIR {
     }
     else fw.write("\n;; no main class");
     
-//    // write the create jar file
-//    if (_createJarFile != null) {
-//      fw.write("\n(create-jar-file");
-//      fw.write("\n" + encodeFile(_createJarFile, "  ", true));
-//      fw.write(")");
-//    }
-//    else fw.write("\n;; no create jar file");
-//    
-//    // write the create jar flags
-//    if (_createJarFlags != 0) {
-//      fw.write("\n(create-jar-flags " + _createJarFlags + ")");
-//    }
-//    else fw.write("\n;; no create jar flags");
+    // write the create jar file
+    if (_createJarFile != null) {
+      fw.write("\n(create-jar-file");
+      fw.write("\n" + encodeFileRelative(_createJarFile, "  ", _projectFile));
+      fw.write(")");
+    }
+    else fw.write("\n;; no create jar file");
+    
+    // write the create jar flags
+    if (_createJarFlags != 0) {
+      fw.write("\n(create-jar-flags " + _createJarFlags + ")");
+    }
+    else fw.write("\n;; no create jar flags");
 
     // write breakpoints
     if (!_breakpoints.isEmpty()) {
@@ -449,10 +599,8 @@ public class ProjectProfile implements ProjectFileIR {
     path = replace(path,File.separator,"/");
     ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
     
-    int offset = bp.getOffset();
     int lineNumber = bp.getLineNumber();
     ret += "\n" + prefix + "      ";
-    ret += "(offset " + offset + ")";
     ret += "(line " + lineNumber + ")";
     if (bp.isEnabled()) ret += "(enabled)";
     ret += ")"; // close the breakpoint expression
@@ -478,15 +626,15 @@ public class ProjectProfile implements ProjectFileIR {
    *  @param prefix the indent level to place the s-expression at
    *  @return the s-expression syntax to describe the given breakpoint.
    */
-  private String encodeBookmarkRelative(DocumentRegion bp, String prefix) throws IOException {
+  private String encodeBookmarkRelative(DocumentRegion bm, String prefix) throws IOException {
     String ret = "";
-    String path = FileOps.makeRelativeTo(bp.getDocument().getFile(), _projectRoot).getPath();
+    String path = FileOps.makeRelativeTo(bm.getFile(), _projectRoot).getPath();
     
     path = replace(path,File.separator,"/");
     ret += prefix + "(bookmark (name " + convertToLiteral(path) + ")";
     
-    int startOffset = bp.getStartOffset();
-    int endOffset = bp.getEndOffset();
+    int startOffset = bm.getStartOffset();
+    int endOffset = bm.getEndOffset();
     ret += "\n" + prefix + "      ";
     ret += "(start " + startOffset + ")";
     ret += "(end " + endOffset + ")";

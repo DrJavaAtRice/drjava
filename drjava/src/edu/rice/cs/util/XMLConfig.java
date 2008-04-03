@@ -82,6 +82,21 @@ public class XMLConfig {
   private Document _document;
   
   /**
+   * XMLConfig to delegate to, or null.
+   */
+  private XMLConfig _parent = null;
+  
+  /**
+   * Node where this XMLConfig starts if delegation is used, or null.
+   */
+  private Node _startNode = null;
+  
+  /**
+   * Path where this XMLConfig starts, or null.
+   */
+  private String _startPath = null;
+  
+  /**
    * Creates an empty configuration.
    */
   public XMLConfig() {
@@ -110,6 +125,19 @@ public class XMLConfig {
    */
   public XMLConfig(Reader r) {
     init(new InputSource(r));
+  }
+  
+  /**
+   * Creates a configuration that is a part of another configuration, starting at the specified node.
+   * @param parent the configuration that contains this part
+   * @param node the node in the parent configuration where this part starts
+   */
+  public XMLConfig(XMLConfig parent, Node node) {
+    if ((parent==null) || (node==null)) { throw new XMLConfigException("Error in ctor: parent or node is null"); }
+    _parent = parent;
+    _startNode = node;
+    _startPath = getNodePath(node);
+    _document = null;
   }
   
   /**
@@ -156,11 +184,15 @@ public class XMLConfig {
     }
   }
   
+  public boolean isDelegated() { return (_parent!=null); }
+  
   /**
    * Saves configuration to an output stream
    * @param os output stream
    */
   public void save(OutputStream os) {
+    if (isDelegated()) { _parent.save(os); return; }
+    
     // Prepare the DOM document for writing
     Source source = new DOMSource(_document);
     /*
@@ -193,6 +225,7 @@ public class XMLConfig {
    * @param f file
    */
   public void save(File f) {
+    if (isDelegated()) { _parent.save(f); return; }
     try {
       save(new FileOutputStream(f));
     }
@@ -209,6 +242,8 @@ public class XMLConfig {
     save(new File(filename));
   }
   
+  // ----- String ------
+  
   /**
    * Returns the value as specified by the DOM path.
    * @param path DOM path
@@ -219,6 +254,192 @@ public class XMLConfig {
     if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
     return r.get(0);
   }
+
+  /**
+   * Returns the value as specified by the DOM path.
+   * @param path DOM path
+   * @param root node where the search should start
+   * @return value.
+   */
+  public String get(String path, Node root) {
+    List<String> r = getMultiple(path, root);
+    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    return r.get(0);
+  }
+  
+    /**
+   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+   * @param path DOM path
+   * @param defaultVal default value in case value is not in DOM
+   * @return value.
+   */
+  public String get(String path, String defaultVal) {
+    try {
+      return get(path);
+    }
+    catch(XMLConfigException e) {
+      return defaultVal;
+    }
+  }
+  
+  /**
+   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+   * @param path DOM path
+   * @param root node where the search should start
+   * @param defaultVal default value in case value is not in DOM
+   * @return value.
+   */
+  public String get(String path, Node root, String defaultVal) {
+    try {
+      return get(path, root);
+    }
+    catch(XMLConfigException e) {
+      return defaultVal;
+    }
+  }
+  
+  // ----- Integer ------
+  
+  /**
+   * Returns the value as specified by the DOM path.
+   * @param path DOM path
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public int getInt(String path) {
+    List<String> r = getMultiple(path);
+    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    try {
+      return new Integer(r.get(0));
+    }
+    catch(NumberFormatException nfe) { throw new IllegalArgumentException("Not an integer value.", nfe); }
+  }
+
+  /**
+   * Returns the value as specified by the DOM path.
+   * @param path DOM path
+   * @param root node where the search should start
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public int getInt(String path, Node root) {
+    List<String> r = getMultiple(path, root);
+    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    try {
+      return new Integer(r.get(0));
+    }
+    catch(NumberFormatException nfe) { throw new IllegalArgumentException("Not an integer value.", nfe); }
+  }
+  
+  /**
+   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+   * @param path DOM path
+   * @param defaultVal default value in case value is not in DOM
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public int getInt(String path, int defaultVal) {
+    try {
+      return getInt(path);
+    }
+    catch(XMLConfigException e) {
+      return defaultVal;
+    }
+  }
+  
+  /**
+   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+   * @param path DOM path
+   * @param root node where the search should start
+   * @param defaultVal default value in case value is not in DOM
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public int getInt(String path, Node root, int defaultVal) {
+    try {
+      return getInt(path, root);
+    }
+    catch(XMLConfigException e) {
+      return defaultVal;
+    }
+  }
+
+  // ----- Boolean ------
+  
+  /**
+   * Returns the value as specified by the DOM path.
+   * @param path DOM path
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public boolean getBool(String path) {
+    List<String> r = getMultiple(path);
+    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    String s = r.get(0).toLowerCase().trim();
+    if ((s.equals("true")) ||
+        (s.equals("yes")) ||
+        (s.equals("on"))) return true;
+    if ((s.equals("false")) ||
+        (s.equals("no")) ||
+        (s.equals("off"))) return false;
+    throw new IllegalArgumentException("Not a Boolean vlaue.");
+  }
+
+  /**
+   * Returns the value as specified by the DOM path.
+   * @param path DOM path
+   * @param root node where the search should start
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public boolean getBool(String path, Node root) {
+    List<String> r = getMultiple(path, root);
+    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    String s = r.get(0).toLowerCase().trim();
+    if ((s.equals("true")) ||
+        (s.equals("yes")) ||
+        (s.equals("on"))) return true;
+    if ((s.equals("false")) ||
+        (s.equals("no")) ||
+        (s.equals("off"))) return false;
+    throw new IllegalArgumentException("Not a Boolean vlaue.");
+
+  }
+  
+  /**
+   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+   * @param path DOM path
+   * @param defaultVal default value in case value is not in DOM
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public boolean getBool(String path, boolean defaultVal) {
+    try {
+      return getBool(path);
+    }
+    catch(XMLConfigException e) {
+      return defaultVal;
+    }
+  }
+  
+  /**
+   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+   * @param path DOM path
+   * @param root node where the search should start
+   * @param defaultVal default value in case value is not in DOM
+   * @return value.
+   * @throws IllegalArgumentException
+   */
+  public boolean getBool(String path, Node root, boolean defaultVal) {
+    try {
+      return getBool(path, root);
+    }
+    catch(XMLConfigException e) {
+      return defaultVal;
+    }
+  }
+  
+  // ----- Other -----
   
   /**
    * Returns the value as specified by the DOM path.
@@ -226,6 +447,8 @@ public class XMLConfig {
    * @return list of values.
    */
   public List<String> getMultiple(String path) {
+    if (isDelegated()) { return getMultiple(path, _startNode); }
+
     return getMultiple(path, _document);
   }
   
@@ -264,13 +487,14 @@ public class XMLConfig {
     return strings;
   }
   
-  
   /**
    * Returns the nodes as specified by the DOM path.
    * @param path DOM path
    * @return list of nodes.
    */
   public List<Node> getNodes(String path) {
+    if (isDelegated()) { return getNodes(path, _startNode); }
+
     return getNodes(path, _document);
   }
   
@@ -364,27 +588,15 @@ public class XMLConfig {
     NamedNodeMap attrMap = n.getAttributes();
     if (path.equals("*")) {
       for(int i=0; i<attrMap.getLength(); ++i) {
-        accum.add(attrMap.item(i));
+        Node attr = attrMap.item(i);
+        accum.add(attr);
       }
     }
     else {
       Node attr = attrMap.getNamedItem(path);
-      accum.add(attr);
-    }
-  }
-  
-  /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
-   * @param path DOM path
-   * @param defaultVal default value in case value is not in DOM
-   * @return value.
-   */
-  public String get(String path, String defaultVal) {
-    try {
-      return get(path);
-    }
-    catch(XMLConfigException e) {
-      return defaultVal;
+      if (attr!=null) {
+        accum.add(attr);
+      }
     }
   }
   
@@ -395,6 +607,8 @@ public class XMLConfig {
    * @return the node that was created, or the parent node of the attribute if it was an attribute
    */
   public Node set(String path, String value) {
+    if (isDelegated()) { return set(path, value, _startNode, true); }
+
     return set(path, value, _document, true);
   }
   
@@ -406,6 +620,8 @@ public class XMLConfig {
    * @return the node that was created, or the parent node of the attribute if it was an attribute
    */
   public Node set(String path, String value, boolean overwrite) {
+    if (isDelegated()) { return set(path, value, _startNode, overwrite); }
+
     return set(path, value, _document, overwrite);
   }
   
@@ -419,6 +635,8 @@ public class XMLConfig {
    * @return the node that was created, or the parent node of the attribute if it was an attribute
    */
   public Node set(String path, String value, Node n, boolean overwrite) {
+    if (isDelegated()) { return _parent.set(path, value, n, overwrite); }
+    
     int dotPos = path.lastIndexOf('.');
     Node node;
     if (dotPos==0) {
@@ -443,6 +661,8 @@ public class XMLConfig {
    * @return the node that was created, or the parent node of the attribute if it was an attribute
    */
   public Node createNode(String path) {
+    if (isDelegated()) { return createNode(path, _startNode, true); }
+    
     return createNode(path, _document, true);
   }
   
@@ -464,6 +684,8 @@ public class XMLConfig {
    * @return the node that was created, or the parent node of the attribute if it was an attribute
    */
   public Node createNode(String path, Node n, boolean overwrite) {
+    if (isDelegated()) { return _parent.createNode(path, n, overwrite); }
+
     if (n==null) { n = _document; }
     while(path.indexOf('/') > -1) {
       Node child = null;

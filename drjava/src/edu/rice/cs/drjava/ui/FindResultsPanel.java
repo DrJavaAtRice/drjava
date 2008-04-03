@@ -48,6 +48,7 @@ import javax.swing.event.*;
 import javax.swing.tree.*;
 import javax.swing.table.*;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.LayeredHighlighter;
 import java.awt.event.*;
 import java.awt.*;
 import javax.swing.text.BadLocationException;
@@ -88,6 +89,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected boolean _matchCase;
   protected boolean _wholeWord;
   protected boolean _noComments;
+  protected boolean _noTestCases;
   protected WeakReference<OpenDefinitionsDocument> _doc;
   protected FindReplacePanel _findReplace;
   
@@ -106,7 +108,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     */
   public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title,
                           String searchString, boolean searchAll, final boolean matchCase,
-                          final boolean wholeWord, final boolean noComments,
+                          final boolean wholeWord, final boolean noComments, final boolean noTestCases,
                           WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
     super(frame, title);
     _regionManager = rm;
@@ -123,6 +125,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _matchCase = matchCase;
     _wholeWord = wholeWord;
     _noComments = noComments;
+    _noTestCases = noTestCases;
     _doc = doc;
     _findReplace = findReplace;
     
@@ -136,13 +139,14 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  static class ColorComboRenderer extends JPanel implements ListCellRenderer {
-    private Color m_c = Color.black;
+  class ColorComboRenderer extends JPanel implements ListCellRenderer {
+    private Color m_c = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
     private DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
-    private final static Dimension preferredSize = new Dimension(0, 20);    
+    private final Dimension preferredSize = new Dimension(0, 20);    
     
     public ColorComboRenderer() {
       super();
+      setBackground(m_c);
       setBorder(new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black)));
     }
     
@@ -158,12 +162,13 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
         renderer = l;
       }
       // Taken out because this is a 1.5 method; not sure if it's necessary
-      //renderer.setPreferredSize(preferredSize);
+      renderer.setPreferredSize(preferredSize);
       return renderer;
     }
     
     public void paint(Graphics g) {
       setBackground(m_c);
+      setBorder(new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black)));
       super.paint(g);
     }
   }
@@ -195,6 +200,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     final Color normalColor = highlightPanel.getBackground();
     highlightPanel.add(new JLabel("Highlight:"));
     
+    // find the first available color, or choose "None"
+    int smallestIndex = 0;
+    int smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
+    for(_lastIndex=0; _lastIndex<OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
+      if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex]<smallestUsage) {
+        smallestIndex = _lastIndex;
+        smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
+      }
+    }
+    _lastIndex = smallestIndex;
+    ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     _colorBox = new JComboBox();    
     for(int i=0; i<OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
@@ -217,13 +233,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
                                                   DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
       }
     });
-    // find the first available color, or choose "None"
-    for(_lastIndex=0; _lastIndex<OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
-      if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex]==0) break;
-    }
-    if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
-      ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
-    }
+    _colorBox.setMaximumRowCount(OptionConstants.FIND_RESULTS_COLORS.length+1);
+    _colorBox.addPopupMenuListener(new PopupMenuListener() {
+      public void popupMenuCanceled(PopupMenuEvent e) { _colorBox.revalidate(); }
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { _colorBox.revalidate(); }
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e) { _colorBox.revalidate(); }
+    });
     _colorBox.setSelectedIndex(_lastIndex);
     _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, 
                                               DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
@@ -233,7 +248,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   /** @return the selected painter for these find results. */
-  public ReverseHighlighter.DefaultUnderlineHighlightPainter getSelectedPainter() {
+  public LayeredHighlighter.LayerPainter getSelectedPainter() {
     return DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex];
   }
   
@@ -250,7 +265,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     if (odd!=null) {
       _regionManager.clearRegions();
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord,
-                           _noComments, odd, _regionManager, this);
+                           _noComments, _noTestCases, odd, _regionManager, this);
     }
   }
   

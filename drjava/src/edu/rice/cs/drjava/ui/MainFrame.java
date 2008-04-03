@@ -179,7 +179,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   // Split panes for layout
   private final JSplitPane _docSplitPane;
   private final JSplitPane _debugSplitPane;
-  private final JSplitPane _mainSplit;
+  final JSplitPane _mainSplit;
   
   // private Container _docCollectionWidget;
   private volatile JButton _compileButton;
@@ -188,6 +188,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile JButton _redoButton;
   private volatile JButton _runButton;
   private volatile JButton _junitButton;
+  private JButton _errorsButton;
   
   private final JToolBar _toolBar;
   private final JFileChooser _interactionsHistoryChooser;
@@ -262,12 +263,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Filter for regular java files (.java and .j). */
   private final javax.swing.filechooser.FileFilter _javaSourceFilter = new JavaSourceFilter();
   
-  /** Filter for drjava project files (.pjt) */
+  /** Filter for drjava project files (.xml and .pjt) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
-      return f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION);
+      return f.isDirectory() || 
+        f.getPath().endsWith(PROJECT_FILE_EXTENSION) ||
+        f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
-    public String getDescription() { return "DrJava Project Files (*.pjt)"; }
+    public String getDescription() { return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")"; }
   };
   
   /** Filter for any files (*.*) */
@@ -589,6 +592,19 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (_saveProjectAs()) {  // asks the user for a new project file name; sets _projectFile in global model to this value
         _saveAll();  // performs a save all operation using this new project file name, but ONLY if the "Save as" was not cancelled
       }
+    }
+  };
+
+  private final Action _exportProjectInOldFormatAction = new AbstractAction("Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format") {
+    public void actionPerformed(ActionEvent ae) {
+      File cpf = _currentProjFile;
+      _currentProjFile = FileOps.NULL_FILE;
+      if (_saveProjectAs()) {  // asks the user for a new project file name; sets _projectFile in global model to this value
+        _saveAllOld();
+      }
+      _currentProjFile = cpf;
+      _model.setProjectFile(cpf);
+      _recentProjectManager.updateOpenFiles(cpf);
     }
   };
   
@@ -2382,11 +2398,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title,
                                                  String searchString, boolean searchAll, boolean matchCase,
-                                                 boolean wholeWord, boolean noComments,
+                                                 boolean wholeWord, boolean noComments, boolean noTestCases,
                                                  WeakReference<OpenDefinitionsDocument> doc,
                                                  FindReplacePanel findReplace) {
     final FindResultsPanel panel = new FindResultsPanel(this, rm, title, searchString, searchAll, matchCase,
-                                                        wholeWord, noComments, doc, findReplace);
+                                                        wholeWord, noComments, noTestCases, doc, findReplace);
     final Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
@@ -3262,7 +3278,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         catch(IOException ignored) {
           // ignore
         }
-        if (!System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
+        if (!Utilities.TEST_MODE && !System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
           Object[] options = {"Disable","Ignore"};
           String msg = "<html>Could not start DrJava's remote control server";
           if (RemoteControlClient.getServerUser()!=null) {
@@ -3285,7 +3301,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     
-    setUpDrJavaProperties();                                                
+    setUpDrJavaProperties();  
+    
+    DrJavaErrorHandler.setButton(_errorsButton);
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
@@ -3605,7 +3623,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Set new painter for existing find results highlights. */
   void refreshFindResultsHighlightPainter(FindResultsPanel panel, 
-                                          ReverseHighlighter.DefaultUnderlineHighlightPainter painter) {
+                                          LayeredHighlighter.LayerPainter painter) {
     for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
       if (pair.first()==panel) {
         Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.second();
@@ -4147,6 +4165,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _closeProjectAction.setEnabled(true);
       _saveProjectAction.setEnabled(true);
       _saveProjectAsAction.setEnabled(true);
+      _exportProjectInOldFormatAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
 //      _junitProjectAction.setEnabled(true);
       _junitProjectAction.setEnabled(true);
@@ -4202,6 +4221,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _closeProjectAction.setEnabled(false);
       _saveProjectAction.setEnabled(false);
       _saveProjectAsAction.setEnabled(false);
+      _exportProjectInOldFormatAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
 //      _junitProjectAction.setEnabled(false);
       _jarProjectAction.setEnabled(false);
@@ -4563,6 +4583,20 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     catch (IOException ioe) { _showIOError(ioe); }
     finally { hourglassOff(); }
   }
+
+  void _saveAllOld() {
+    hourglassOn();
+    File file = _currentProjFile;
+    try {
+      if (_model.isProjectActive()) {
+        if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + OLD_PROJECT_FILE_EXTENSION);
+        _model.exportOldProject(file, gatherProjectDocInfo());
+      }
+      _model.saveAllFiles(_saveSelector);
+    }
+    catch (IOException ioe) { _showIOError(ioe); }
+    finally { hourglassOff(); }
+  }
   
   // Called by the ProjectPropertiesFrame
   void saveProject() { _saveProject(); }
@@ -4591,11 +4625,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (pf.exists() && !_verifyOverwrite()) { return; }
       
       String fileName = pf.getName();
-      // ensure that saved file has extesion ".pjt"
-      if (! fileName.endsWith(".pjt")) {
+      // ensure that saved file has extesion ".xml"
+      if (! fileName.endsWith(".xml")) {
         int lastIndex = fileName.lastIndexOf(".");
-        if (lastIndex == -1) pf = new File (pf.getAbsolutePath() + ".pjt");
-        else pf = new File(fileName.substring(0, lastIndex) + ".pjt");
+        if (lastIndex == -1) pf = new File (pf.getAbsolutePath() + ".xml");
+        else pf = new File(fileName.substring(0, lastIndex) + ".xml");
       }
       
       _model.createNewProject(pf); // sets model to a new FileGroupingState for project file pf
@@ -4640,8 +4674,27 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   void _saveProjectHelper(File file) {
     try {
-      if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + ".pjt");
+      if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + PROJECT_FILE_EXTENSION);
       String fileName = file.getCanonicalPath();
+      if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
+        String text = "The project will be saved in XML format." + 
+          "\nDo you want to change the project file's extension to \""+PROJECT_FILE_EXTENSION+"\"?";
+        
+        Object[] options = {"Change to \""+PROJECT_FILE_EXTENSION+"\"", "Keep \""+fileName.substring(fileName.lastIndexOf('.'))+"\""};  
+        int rc = 1;
+        if (!Utilities.TEST_MODE) {
+          rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Change Extension?", JOptionPane.YES_NO_OPTION,
+                                                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        }
+        if (rc == 0) {
+          fileName = fileName.substring(0,fileName.length()-OLD_PROJECT_FILE_EXTENSION.length()) + PROJECT_FILE_EXTENSION;
+          file = new File(fileName);
+          if (! file.exists() || _verifyOverwrite()) { 
+            _model.setProjectFile(file);
+            _currentProjFile = file;
+          }
+        }
+      }
       _model.saveProject(file, gatherProjectDocInfo());
 //      if (!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)) {
 //        _openProjectHelper(file);
@@ -5558,6 +5611,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _saveProjectAction.setEnabled(false);
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
     _saveProjectAsAction.setEnabled(false);
+    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format", "ExportOld", "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format");
+    _exportProjectInOldFormatAction.setEnabled(false);
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     // No longer used
 //    _setUpAction(_revertAllAction, "Revert All", "RevertAll",
@@ -6164,7 +6219,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
     _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS);
+    helpMenu.addSeparator();
     _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT);
+    _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD);
     return helpMenu;
   }
   
@@ -6280,15 +6337,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // DrJava Errors
     _toolBar.addSeparator();
-    final JButton errorsButton = _createToolbarButton(_errorsAction);
-    errorsButton.setVisible(false);
-    errorsButton.setBackground(DrJava.getConfig().getSetting(DRJAVA_ERRORS_BUTTON_COLOR));
-    DrJavaErrorHandler.setButton(errorsButton);
-    _toolBar.add(errorsButton);
+    _errorsButton = _createToolbarButton(_errorsAction);
+    _errorsButton.setVisible(false);
+    _errorsButton.setBackground(DrJava.getConfig().getSetting(DRJAVA_ERRORS_BUTTON_COLOR));
+    _toolBar.add(_errorsButton);
     /** The OptionListener for DRJAVA_ERRORS_BUTTON_COLOR. */
     OptionListener<Color> errBtnColorOptionListener = new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oce) {
-        errorsButton.setBackground(oce.value);
+        _errorsButton.setBackground(oce.value);
       }
     };
     DrJava.getConfig().addOptionListener(DRJAVA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
@@ -8818,6 +8874,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (tp.isDisplayed()) numVisible++;
       }
     }
+    if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+      _mainSplit.resetToPreferredSizes(); 
 //      }
 //    });
   }

@@ -90,6 +90,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private JCheckBox _matchCase;
   private JCheckBox _searchAllDocuments;
   private JCheckBox _matchWholeWord;
+  private JCheckBox _ignoreTestCases;
   
   /* MainFrame _frame is inherited from TabbedPanel */
   
@@ -344,6 +345,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       }
     });
     
+    boolean ignoreTestCasesSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_NO_TEST_CASES);
+    _ignoreTestCases = new JCheckBox("No Test Cases", ignoreTestCasesSelected);
+    _ignoreTestCases.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_TEST_CASES, isSelected);
+        _findField.requestFocusInWindow();
+      }
+    });
+
     // We choose not to preserve backwards searching between sessions
     //_machine.setSearchBackwards(DrJava.getConfig().getSetting(OptionConstants.FIND_SEARCH_BACKWARDS));
     
@@ -365,6 +376,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _matchCaseAndAllDocsPanel.add(_matchCase);
     _matchCaseAndAllDocsPanel.add(_searchAllDocuments);
     _matchCaseAndAllDocsPanel.setMaximumSize(new Dimension(200, 40));
+
+    JPanel _ignoreTestCasesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    _ignoreTestCasesPanel.add(_ignoreTestCases);
+    _ignoreTestCasesPanel.setMaximumSize(new Dimension(200, 40));
     
     BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
     BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
@@ -392,6 +407,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     optionsPanel.setLayout(gbLayout);
     optionsPanel.add(_matchCaseAndAllDocsPanel);
     optionsPanel.add(_lowerCheckPanel);
+    optionsPanel.add(_ignoreTestCasesPanel);
     optionsPanel.add(emptyPanel);
     
     c.fill = GridBagConstraints.HORIZONTAL;
@@ -400,6 +416,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     c.weightx = 1.0;
     gbLayout.setConstraints(_matchCaseAndAllDocsPanel, c);
     gbLayout.setConstraints(_lowerCheckPanel, c);
+    gbLayout.setConstraints(_ignoreTestCasesPanel, c);
     
     c.fill = GridBagConstraints.BOTH;
     c.anchor = GridBagConstraints.SOUTH;
@@ -479,6 +496,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   /** Performs "find all" command. */
   private void _findAll() {
+    _machine.setSearchBackwards(false);
+    _findLabelBot.setText("Next");
+
     String searchStr = _findField.getText();
     String title = searchStr;
     OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
@@ -489,16 +509,18 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     FindResultsPanel panel = _frame.createFindResultsPanel(rm, title, searchStr, searchAll,
                                                            _machine.getMatchCase(), _machine.getMatchWholeWord(),
                                                            _machine.getIgnoreCommentsAndStrings(),
+                                                           _ignoreTestCases.isSelected(),
                                                            new WeakReference<OpenDefinitionsDocument>(startDoc),
                                                            this);
     findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
-            _machine.getIgnoreCommentsAndStrings(),startDoc, rm, panel);
+            _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, panel);
   }
   
   /** Performs "find all" with the specified options. */
   public void findAll(String searchStr, final boolean searchAll, final boolean matchCase,
-                      final boolean wholeWord, final boolean noComments,  final OpenDefinitionsDocument startDoc,
-                      final RegionManager<MovingDocumentRegion> rm, final FindResultsPanel panel) {
+                      final boolean wholeWord, final boolean noComments, final boolean noTestCases,
+                      final OpenDefinitionsDocument startDoc, final RegionManager<MovingDocumentRegion> rm,
+                      final FindResultsPanel panel) {
     int searchLen = searchStr.length();
     if (searchLen == 0) return;
     
@@ -510,6 +532,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     boolean oldMatchCase = _machine.getMatchCase();
     boolean oldWholeWord = _machine.getMatchWholeWord();
     boolean oldNoComments = _machine.getIgnoreCommentsAndStrings();
+    boolean oldNoTestCases = _machine.getIgnoreTestCases();
     int oldPosition = _machine.getCurrentOffset();
     
 //    _updateMachine();
@@ -521,6 +544,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     else { _machine.setFindAnyOccurrence(); }
     _machine.setIgnoreCommentsAndStrings(noComments);
     _machine.setPosition(startDoc.getCaretPosition());
+    _machine.setIgnoreTestCases(noTestCases);
 
     _machine.setFindWord(searchStr);
     String replaceStr = _replaceField.getText();
@@ -546,6 +570,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       if (oldWholeWord) { _machine.setMatchWholeWord(); }
       else { _machine.setFindAnyOccurrence(); }
       _machine.setIgnoreCommentsAndStrings(oldNoComments);
+      _machine.setIgnoreTestCases(oldNoTestCases);
       _machine.setPosition(oldPosition);
 
 //      Utilities.show("Searching complete");
@@ -992,10 +1017,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     int from, to;
     
     if (_machine.isSearchBackwards()) {
-      from = offset;
-      to = offset + length;
+      from = offset + length;
+      // "to" is the offset where the caret will be positioned
+      // when searching backwards, "to" has to be the smaller offset
+      to = offset;
     }
-    else {                   
+    else {
       from = offset - length;
       to = offset;
     }

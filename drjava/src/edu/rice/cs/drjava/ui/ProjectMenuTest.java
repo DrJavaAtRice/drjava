@@ -38,11 +38,12 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
-import edu.rice.cs.drjava.project.ProjectFileParser;
+import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
@@ -129,6 +130,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   public void tearDown() throws Exception {
     IOUtil.deleteOnExitRecursively(_parent);
     _auxFile.delete();
+    //FileOps.deleteDirectory(_parent);
     _frame.dispose();
     _projFile = FileOps.NULL_FILE;
     _model = null;
@@ -201,6 +203,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
         });
         _frame._moveToAuxiliary();
 
+        List<OpenDefinitionsDocument> auxDocs = _model.getAuxiliaryDocuments();
+        assertEquals("One auxiliary document", 1, auxDocs.size());
         _frame.saveProject();
         _frame._closeProject();
       } 
@@ -209,7 +213,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     assertEquals("One empty document remaining", 1, docs.size());
     assertEquals("Name is (Untitled)", "(Untitled)", _model.getActiveDocument().toString());
     
-    ProjectFileIR pfir = ProjectFileParser.ONLY.parse(_projFile);
+    ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(_projFile);
     DocFile[] src = pfir.getSourceFiles();
 //    System.err.println(Arrays.toString(src));
     DocFile[] aux = pfir.getAuxiliaryFiles();

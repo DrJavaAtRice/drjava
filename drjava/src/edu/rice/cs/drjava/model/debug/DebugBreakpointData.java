@@ -43,9 +43,6 @@ public interface DebugBreakpointData {
   /** @return the file the breakpoint is in. */
   public File getFile();
 
-  /** @return offset of the breakpoint. */
-  public int getOffset();
-  
   /** @return line number of the breakpoint. */
   public int getLineNumber();
   

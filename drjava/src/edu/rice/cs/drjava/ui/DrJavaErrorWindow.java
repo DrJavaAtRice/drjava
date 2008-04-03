@@ -338,6 +338,7 @@ public class DrJavaErrorWindow extends JDialog {
   private final Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorWindow.this.dispose();
+      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
     }
   };
   

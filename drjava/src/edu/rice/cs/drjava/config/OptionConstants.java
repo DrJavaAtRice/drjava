@@ -71,8 +71,11 @@ public interface OptionConstants {
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
+  /** The extension for an old DrJava project file */
+  public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
+
   /** The extension for a DrJava project file */
-  public static final String PROJECT_FILE_EXTENSION = ".pjt";
+  public static final String PROJECT_FILE_EXTENSION = ".xml";
   
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
   
@@ -122,15 +125,27 @@ public interface OptionConstants {
   public static final ColorOption FIND_RESULTS_COLOR2 = 
     new ColorOption("find.results.color2", new Color(0x30, 0xC9, 0x96));
   public static final ColorOption FIND_RESULTS_COLOR3 = 
-    new ColorOption("find.results.color3", new Color(0x30, 0xFC, 0xFC));
+    new ColorOption("find.results.color3", Color.ORANGE);
   public static final ColorOption FIND_RESULTS_COLOR4 = 
-    new ColorOption("find.results.color4", new Color(0xFF, 0x66, 0xCC));
+    new ColorOption("find.results.color4", Color.MAGENTA);
+  public static final ColorOption FIND_RESULTS_COLOR5 = 
+    new ColorOption("find.results.color5", new Color(0xCD, 0x5C, 0x5C));
+  public static final ColorOption FIND_RESULTS_COLOR6 = 
+    new ColorOption("find.results.color6", Color.DARK_GRAY);
+  public static final ColorOption FIND_RESULTS_COLOR7 = 
+    new ColorOption("find.results.color7", Color.GREEN);
+  public static final ColorOption FIND_RESULTS_COLOR8 = 
+    new ColorOption("find.results.color8", Color.BLUE);
   
   public static final ColorOption[] FIND_RESULTS_COLORS = new ColorOption[] {
     FIND_RESULTS_COLOR1,
       FIND_RESULTS_COLOR2,
       FIND_RESULTS_COLOR3,
-      FIND_RESULTS_COLOR4
+      FIND_RESULTS_COLOR4,
+      FIND_RESULTS_COLOR5,
+      FIND_RESULTS_COLOR6,
+      FIND_RESULTS_COLOR7,
+      FIND_RESULTS_COLOR8
   };
   
   /** Color for highlighting breakpoints. */
@@ -212,7 +227,10 @@ public interface OptionConstants {
     
     /** Return the look-and-feel to use by default */
     public static String getDefaultLookAndFeel() {
-      return UIManager.getSystemLookAndFeelClassName();
+      if (PlatformFactory.ONLY.isMacPlatform())
+        return UIManager.getSystemLookAndFeelClassName();
+      else
+        return UIManager.getCrossPlatformLookAndFeelClassName();
     }
     
     /** Need to ensure that a look-and-feel can be instantiated and is valid.
@@ -295,7 +313,10 @@ public interface OptionConstants {
     new KeyStrokeOption("key.save.all.files",
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK |
                                                InputEvent.ALT_MASK));
-  
+    /** The key binding for exporting in the old project file format */
+  public static final KeyStrokeOption KEY_EXPORT_OLD =
+    new KeyStrokeOption("key.export.old", KeyStrokeOption.NULL_KEYSTROKE);
+
   /**
    * The key binding for renaming a file
    */
@@ -833,6 +854,8 @@ public interface OptionConstants {
   public static final BooleanOption FIND_NO_COMMENTS_STRINGS =
     new BooleanOption("find.replace.no.comments.strings", Boolean.FALSE);
   
+  public static final BooleanOption FIND_NO_TEST_CASES =
+    new BooleanOption("find.replace.no.test.cases", Boolean.FALSE);
   
   /* ---------- Debugger Options ---------- */
   

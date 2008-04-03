@@ -133,8 +133,26 @@ public class DrJavaRoot {
       
 //      Utilities.showDebug("Creating MainFrame");
       
-      _mainFrame = new MainFrame();
-      
+      try {
+        _mainFrame = new MainFrame();
+      }
+      catch(RuntimeException e) {
+        Throwable c = e.getCause();
+        if ((c instanceof java.rmi.server.ExportException) && (c.getMessage().equals("Listen failed on port: 0"))) {
+          JOptionPane.showMessageDialog(null,
+                                        "DrJava could not communicate with its Interactions Pane.\n"+
+                                        "This can happen if a firewall does not allow DrJava to access\n"+
+                                        "the network. If you have a firewall, please make sure that\n"+
+                                        "DrJava has network access.\n"+
+                                        "DrJava does not access the internet or other computers, except\n"+
+                                        "for \"Open Java API Javadoc\", but it needs network access to\n"+
+                                        "communicate with the Interactions Pane.",
+                                        "Network Access Failed",
+                                        JOptionPane.ERROR_MESSAGE);
+          System.exit(1);
+        }
+        else throw e;
+      }    
 //      Utilities.showDebug("MainFrame created");
       
       // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
@@ -221,7 +239,8 @@ public class DrJavaRoot {
         currFileName = currFileName.substring(0,pathSepIndex);
       }
       
-      boolean isProjectFile = currFileName.endsWith(".pjt");
+      boolean isProjectFile = currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+        currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
       final File file = new File(currFileName).getAbsoluteFile();
       FileOpenSelector command = new FileOpenSelector() {
         public File[] getFiles() { return new File[] {file}; }

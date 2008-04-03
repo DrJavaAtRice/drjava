@@ -125,7 +125,7 @@ import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.project.ProjectFileIR;
-import edu.rice.cs.drjava.project.ProjectFileParser;
+import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
 import edu.rice.cs.drjava.model.cache.DocumentCache;
@@ -572,6 +572,10 @@ public class DummyGlobalModel implements GlobalModel {
   
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
     throw new UnsupportedOperationException("Tried to getOpenDefinitionsDocuments on a Dummy!");
+  }
+
+  public List<OpenDefinitionsDocument> getAuxiliaryDocuments() {
+    throw new UnsupportedOperationException("Tried to getAuxiliaryDocuments on a Dummy!");
   }
   
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() {
