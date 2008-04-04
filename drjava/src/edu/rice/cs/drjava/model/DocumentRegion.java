@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 
-/** Interface for region data.
+/** Interface for region data.  All implementations inherit from SimpleDocumentRegion.
   * @version $Id$
   */
 public interface DocumentRegion {

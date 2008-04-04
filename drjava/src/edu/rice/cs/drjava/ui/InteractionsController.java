@@ -289,7 +289,7 @@ public class InteractionsController extends AbstractConsoleController {
     _inputCompletionCommand = _defaultInputCompletionCommand;
     _insertTextCommand = _defaultInsertTextCommand;
     _consoleStateListeners = new Vector<ConsoleStateListener>();
-//    _pane.addCaretListener(new CaretListener() {  // Update the cachedCaretPostion 
+//    _pane.addCaretListener(new CaretListener() {  // Update the cachedCaretPosition 
 //      public void caretUpdate(CaretEvent e) { 
 //        _log.log("Caret Event: " + e + " from source " + e.getSource());
 ////        setCachedCaretPos(e.getDot()); 

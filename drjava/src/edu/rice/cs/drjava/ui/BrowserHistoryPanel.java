@@ -79,14 +79,16 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
    */
   public BrowserHistoryPanel(MainFrame frame) {
     super(frame, "Browser History");
-    _model.getBrowserHistoryManager().addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r, int index) {
+    final RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
+    rm.addListener(new RegionManagerListener<DocumentRegion>() {      
+      public void regionAdded(DocumentRegion r) {
+        int index = rm.getIndexOf(r);
         addRegion(r, index);
         _list.ensureIndexIsVisible(index);
       }
-      public void regionChanged(DocumentRegion r, int index) { 
+      public void regionChanged(DocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r, index);
+        regionAdded(r);
       }
       public void regionRemoved(DocumentRegion r) {
         removeRegion(r);
@@ -113,7 +115,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   
   /** Go to the previous region. */
   protected void backRegion() {
-    RegionManager rm = _model.getBrowserHistoryManager();
+    RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
     
     // add current location to history
     _frame.addToBrowserHistory();
@@ -128,7 +130,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   
   /** Go to the next region. */
   protected void forwardRegion() {
-    RegionManager rm = _model.getBrowserHistoryManager();
+    RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
     
     // add current location to history
     _frame.addToBrowserHistory();

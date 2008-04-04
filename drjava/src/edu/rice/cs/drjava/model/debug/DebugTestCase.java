@@ -502,9 +502,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     
     public void breakpointReached(Breakpoint bp) { fail("breakpointReached fired unexpectedly"); }
     
-    public void regionAdded(Breakpoint bp, int index) { fail("regionAdded fired unexpectedly"); }
+    public void regionAdded(Breakpoint bp) { fail("regionAdded fired unexpectedly"); }
     
-    public void regionChanged(Breakpoint bp, int index) { fail("regionChanged fired unexpectedly"); }
+    public void regionChanged(Breakpoint bp) { fail("regionChanged fired unexpectedly"); }
     
     public void regionRemoved(Breakpoint bp) { fail("regionRemoved fired unexpectedly"); }
     
@@ -565,7 +565,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
         _notifyLock();
       }
     }
-    public void regionAdded(Breakpoint bp, int index) {
+    public void regionAdded(Breakpoint bp) {
       // Manager's thread: test shouldn't wait
       regionAddedCount++;
     }

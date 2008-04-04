@@ -39,17 +39,16 @@ package edu.rice.cs.drjava.model;
 import javax.swing.text.Position;
 import java.io.File;
 
-/**
- * Class for a simple document region. If a document is provided, then the region will move within the document.
- * @version $Id$
- */
+/** Class for a simple document region. If a document is provided, then the region will move within the document.
+  * @version $Id$
+  */
 public class SimpleDocumentRegion implements DocumentRegion {
   protected final OpenDefinitionsDocument _doc;
   protected final File _file;
   protected volatile int _startOffset;
   protected volatile int _endOffset;
-  protected volatile Position _startPos = null;
-  protected volatile Position _endPos = null;
+  protected volatile Position _startPosition = null;
+  protected volatile Position _endPosition = null;
   
   /** Create a new simple document region.
     * @param doc document that contains this region, or null if we don't have a document yet
@@ -64,12 +63,39 @@ public class SimpleDocumentRegion implements DocumentRegion {
     _endOffset = eo;
     if (_doc != null) {
       try {
-        _startPos = _doc.createPosition(so);
-        _endPos = _doc.createPosition(eo);
+        _startPosition = _doc.createPosition(so);
+        _endPosition = _doc.createPosition(eo);
       }
       catch(javax.swing.text.BadLocationException e) { /* ignore, offset will be static */ }
     }
   }
+  
+  /** Create a new simple document region with a bona fide document */
+  public SimpleDocumentRegion(OpenDefinitionsDocument doc, Position sp, Position ep) {
+    assert doc != null;
+    _doc = doc;
+    _file = doc.getRawFile();  // don't check the validity of _file here
+    _startPosition = sp;
+    _endPosition = ep;
+  }
+  
+  /** Defines the equality relation on DocumentRegions.  This equivalence relation on allocated objects is finer
+    * grained than the equivalence relation induced by compareTo because it requires equality on Position objects, 
+    * not just equality of the current offsets of Positions. 
+    */
+  public final boolean equals(Object o) {
+    if (o == null || ! (o instanceof SimpleDocumentRegion)) return false;
+    SimpleDocumentRegion r = (SimpleDocumentRegion) o;
+    return _doc == r._doc & getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
+  }
+  
+  private int docHashCode() {
+    if (_doc == null) return 0;
+    return _doc.hashCode();
+  }
+      
+  /** This hash function is consistent with equality. */
+  public int hashCode() { return docHashCode() ^ getStartOffset() ^ getEndOffset(); }
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }
@@ -79,18 +105,18 @@ public class SimpleDocumentRegion implements DocumentRegion {
 
   /** @return the start offset */
   public int getStartOffset() {
-    if (_startPos != null) {
+    if (_startPosition != null) {
       // if we have a position that moves within the document, update the offset
-      _startOffset = _startPos.getOffset();
+      _startOffset = _startPosition.getOffset();
     }
     return _startOffset;
   }
 
   /** @return the end offset */
   public int getEndOffset() {
-    if (_endPos != null) {
+    if (_endPosition != null) {
       // if we have a position that moves within the document, update the offset
-      _endOffset = _endPos.getOffset();
+      _endOffset = _endPosition.getOffset();
     }
     return _endOffset;
   }
@@ -101,28 +127,7 @@ public class SimpleDocumentRegion implements DocumentRegion {
     return o1.equals(o2);
   }
   
-  /** @return true if the specified region is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != getClass()) return false;
-    SimpleDocumentRegion o = (SimpleDocumentRegion) other;
-    return equals(_doc, o._doc) && equals(_file, o._file) &&
-            _startPos.getOffset() == o._startPos.getOffset() &&
-            _endPos.getOffset() == o._endPos.getOffset();
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = (_doc != null ? _doc.hashCode() : 0);
-    result = 31 * result + (_file != null ? _file.hashCode() : 0);
-    result = 31 * result + (_startPos != null ? _startPos.hashCode() : 0);
-    result = 31 * result + (_endPos != null ? _endPos.hashCode() : 0);
-    result = 31 * result + _startOffset;
-    result = 31 * result + _endOffset;
-    return result;
-  }
-
   public String toString() {
-    return (_doc != null ? _doc.toString() : "null") + " "+_startOffset+" .. "+_endOffset;
+    return (_doc != null ? _doc.toString() : "null") + "[" + _startOffset + " .. " + _endOffset + "]";
   }
 }

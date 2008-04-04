@@ -425,7 +425,7 @@ public class FindReplaceMachine {
       len = offset; 
     }
     fr = _findNextInDoc(_doc, start, len, searchAll);
-    if ((fr.getFoundOffset() >= 0) || ! searchAll) return fr;  // match found in _doc or search is local
+    if (fr.getFoundOffset() >= 0 || ! searchAll) return fr;  // match found in _doc or search is local
     
     // find match in other docs
     return _findNextInOtherDocs(_doc, start, len);
@@ -611,7 +611,7 @@ public class FindReplaceMachine {
       if (_doc == _firstDoc) allWrapped = true;
       boolean inTestCase = (_doc.getFileName().endsWith("Test.java"));
       
-      if (!_ignoreTestCases || !inTestCase) {
+      if (! _ignoreTestCases || ! inTestCase) {
 //      System.err.println("_doc = [" + _doc.getText() + "]");
         
 //      if (_isForward) setPosition(0);
@@ -619,8 +619,8 @@ public class FindReplaceMachine {
         
         
         // find next match in _doc
-        _doc.acquireReadLock();
         FindResult fr;
+        _doc.acquireReadLock();
         try { fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); } 
         finally { _doc.releaseReadLock(); }
         

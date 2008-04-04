@@ -47,13 +47,13 @@ public interface RegionManagerListener<R extends DocumentRegion> {
    *  @param r the region
    *  @param index the index at which it was added
    */
-  public void regionAdded(R r, int index);
+  public void regionAdded(R r);
   
   /** Called when a region is changed. Must be executed in event thread.
    *  @param r the region
    *  @param index the index at which it was changed
    */
-  public void regionChanged(R r, int index);
+  public void regionChanged(R r);
   
   /** Called when a region is removed from a document.  Must be executed in event thread.
    *  @param r the region

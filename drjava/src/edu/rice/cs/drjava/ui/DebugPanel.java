@@ -626,8 +626,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public void watchSet(final DebugWatchData w) { }
     public void watchRemoved(final DebugWatchData w) { }
     public void stepRequested() { }
-    public void regionAdded(Breakpoint r, int index) { }
-    public void regionChanged(Breakpoint r, int index) { }
+    public void regionAdded(Breakpoint r) { }
+    public void regionChanged(Breakpoint r) { }
     public void regionRemoved(Breakpoint r) { }
   }
 

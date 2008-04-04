@@ -46,19 +46,12 @@ import edu.rice.cs.util.FileOps;
  * Class for a document region that can move with changes in the document; its text, however, remains constant.
  * @version $Id$Region
  */
-public class MovingDocumentRegion implements DocumentRegion {
-  protected final OpenDefinitionsDocument _doc;
-  protected final File _file;
-  protected final Position _startPosition;
-  protected final Position _endPosition;
+public class MovingDocumentRegion extends SimpleDocumentRegion {
   protected final String _string;
   
   /** Create a new moving document region. */
   public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, String s) {
-    _doc = doc;
-    _file = file;
-    _startPosition = sp;
-    _endPosition = ep;
+    super(doc, sp, ep);
     _string = s;
   }
   
@@ -90,27 +83,27 @@ public class MovingDocumentRegion implements DocumentRegion {
     return a.equals(b);
   }
   
-  /** @return true if the specified region is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    MovingDocumentRegion o = (MovingDocumentRegion) other;
-    return equals(_doc, o._doc) && equals(_file, o._file) &&
-            _startPosition.getOffset() == o._startPosition.getOffset() &&
-            _endPosition.getOffset() == o._endPosition.getOffset() &&
-            _string.equals(o._string);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = (_doc != null ? _doc.hashCode() : 0);
-    result = 31 * result + (_file != null ? _file.hashCode() : 0);
-    result = 31 * result + (_startPosition != null ? _startPosition.hashCode() : 0);
-    result = 31 * result + (_endPosition != null ? _endPosition.hashCode() : 0);
-    result = 31 * result + (_string != null ? _string.hashCode() : 0);
-    return result;
-  }
-  
+//  /** @return true if the specified region is equal to this one. */
+//  public boolean equals(Object other) {
+//    if (other == null || other.getClass() != this.getClass()) return false;
+//    MovingDocumentRegion o = (MovingDocumentRegion) other;
+//    return equals(_doc, o._doc) && equals(_file, o._file) &&
+//            _startPosition.getOffset() == o._startPosition.getOffset() &&
+//            _endPosition.getOffset() == o._endPosition.getOffset() &&
+//            _string.equals(o._string);
+//  }
+//  
+//  /** @return the hash code. */
+//  public int hashCode() {
+//    int result;
+//    result = (_doc != null ? _doc.hashCode() : 0);
+//    result = 31 * result + (_file != null ? _file.hashCode() : 0);
+//    result = 31 * result + (_startPosition != null ? _startPosition.hashCode() : 0);
+//    result = 31 * result + (_endPosition != null ? _endPosition.hashCode() : 0);
+//    result = 31 * result + (_string != null ? _string.hashCode() : 0);
+//    return result;
+//  }
+//  
   public String toString() {
     return 
       (_doc != null ? _doc.toString() : "null") + " " + _startPosition.getOffset() + " .. " + _endPosition.getOffset();

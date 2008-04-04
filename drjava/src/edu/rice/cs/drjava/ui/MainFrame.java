@@ -2144,7 +2144,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       
-      RegionManager rm = _model.getBrowserHistoryManager();
+      RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
       
       // add current location to history
       addToBrowserHistory();
@@ -2166,7 +2166,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       
-      RegionManager rm = _model.getBrowserHistoryManager();
+      RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
       
       // add current location to history
       addToBrowserHistory();
@@ -2356,7 +2356,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     int startSel = _currentDefPane.getSelectionStart();
     int endSel = _currentDefPane.getSelectionEnd();
-//    doc.acquireReadLock();
+    doc.acquireReadLock();  // Must follow readers/writers protocol even in event thread
     try {
       if (startSel > endSel) { int temp = startSel; startSel = endSel; endSel = temp; }
       else if (startSel == endSel) {
@@ -2364,16 +2364,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         endSel = doc.getLineEndPos(startSel);
         startSel = doc.getLineStartPos(startSel);
       }
-      DocumentRegion r = _model.getBookmarkManager().getRegionOverlapping(doc, startSel, endSel);
-      if (r == null) {
-        final Position startPos = doc.createPosition(startSel);
-        final Position endPos = doc.createPosition(endSel);
-        SimpleDocumentRegion newR = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
-        _model.getBookmarkManager().addRegion(newR);
-      }
-      else {
-        _model.getBookmarkManager().removeRegion(r);
-      }
+      final Position startPos = doc.createPosition(startSel);
+      final Position endPos = doc.createPosition(endSel);
+      final RegionManager<DocumentRegion> rm = _model.getBookmarkManager();
+      SimpleDocumentRegion r = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
+      if (rm.contains(r)) rm.addRegion(r);
+      else rm.removeRegion(r);               // bookmark is toggled
     }
     catch (FileMovedException fme) {
       throw new UnexpectedException(fme);
@@ -2381,7 +2377,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
-//    finally { doc.releaseReadLock(); }
+    finally { doc.releaseReadLock(); }
   }
   
   /** Add the current location to the browser history. */
@@ -2411,14 +2407,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // hook highlighting listener to find results manager
     rm.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
-      public void regionAdded(MovingDocumentRegion r, int index) {
+      public void regionAdded(MovingDocumentRegion r) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
         highlights.put(r, bpPane.getHighlightManager().
                          addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
       }
-      public void regionChanged(MovingDocumentRegion r, int index) { 
+      public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r, index);
+        regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
         HighlightManager.HighlightInfo highlight = highlights.get(r);
@@ -6563,7 +6559,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // hook highlighting listener to breakpoint manager
       _model.getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
         /* Called when a breakpoint is added. Only runs in event thread. */
-        public void regionAdded(final Breakpoint bp, int index) {
+        public void regionAdded(final Breakpoint bp) {
           DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
           _documentBreakpointHighlights.
             put(bp, bpPane.getHighlightManager().
@@ -6574,9 +6570,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
         
         /** Called when a breakpoint is changed. Only runs in event thread. */
-        public void regionChanged(Breakpoint bp, int index) { 
+        public void regionChanged(Breakpoint bp) { 
           regionRemoved(bp);
-          regionAdded(bp, index);
+          regionAdded(bp);
         }
         
         /** Called when a breakpoint is removed. Only runs in event thread. */
@@ -6591,15 +6587,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // hook highlighting listener to bookmark manager
     _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() { 
       // listener methods only run in the event thread
-      public void regionAdded(DocumentRegion r, int index) {
+      public void regionAdded(DocumentRegion r) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
         _documentBookmarkHighlights.
           put(r, bpPane.getHighlightManager().
                 addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.BOOKMARK_PAINTER));
       }
-      public void regionChanged(DocumentRegion r, int index) { 
+      public void regionChanged(DocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r, index);
+        regionAdded(r);
       }
       public void regionRemoved(DocumentRegion r) {
         HighlightManager.HighlightInfo highlight = _documentBookmarkHighlights.get(r);
@@ -7772,9 +7768,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void currThreadSet(DebugThreadData dtd) { }
-    public void regionAdded(final Breakpoint bp, int index) { }
+    public void regionAdded(final Breakpoint bp) { }
     public void breakpointReached(Breakpoint bp) { }
-    public void regionChanged(Breakpoint bp, int index) {  }
+    public void regionChanged(Breakpoint bp) {  }
     public void regionRemoved(final Breakpoint bp) { }    
     public void watchSet(final DebugWatchData w) { }
     public void watchRemoved(final DebugWatchData w) { }

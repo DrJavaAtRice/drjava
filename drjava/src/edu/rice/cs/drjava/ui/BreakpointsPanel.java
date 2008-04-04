@@ -84,7 +84,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         *  Must be executed in event thread.
         *  @param bp the breakpoint
         */
-      public void regionAdded(final Breakpoint bp, int index) { 
+      public void regionAdded(final Breakpoint bp) { 
         assert EventQueue.isDispatchThread();
         addRegion(bp); 
       }
@@ -95,7 +95,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
        * @param bp the breakpoint
        * @param index the index of the breakpoint
        */
-      public void regionChanged(final Breakpoint bp, int index) {
+      public void regionChanged(final Breakpoint bp) {
         // Only change GUI from event-dispatching thread
         Runnable doCommand = new Runnable() {
           public void run() {

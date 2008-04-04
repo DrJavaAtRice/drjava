@@ -111,12 +111,12 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
     * @param bp the breakpoint
     * @param index the index at which it was added
     */
-  public void regionAdded(Breakpoint bp, int index) {
+  public void regionAdded(Breakpoint bp) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) { _listeners.get(i).regionAdded(bp, index); }
+      for (int i = 0; i < size; i++) { _listeners.get(i).regionAdded(bp); }
     }
     finally { _lock.endRead(); }
   }
@@ -142,13 +142,13 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
     * @param bp the breakpoint
     * @param index the index at which it was changed
     */
-  public void regionChanged(Breakpoint bp, int index) {
+  public void regionChanged(Breakpoint bp) {
     assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) {
-        _listeners.get(i).regionChanged(bp, index);
+        _listeners.get(i).regionChanged(bp);
       }
     }
     finally {

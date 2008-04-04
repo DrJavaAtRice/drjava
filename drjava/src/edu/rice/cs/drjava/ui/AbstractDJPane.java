@@ -131,7 +131,7 @@ public abstract class AbstractDJPane extends JTextPane
     }
   }
   
-  /** A length checked version of setCaretPostion(int pos) that ensures pos is within the DJDocument. */
+  /** A length checked version of setCaretPosition(int pos) that ensures pos is within the DJDocument. */
   public void setCaretPos(int pos) {
     DJDocument doc = getDJDocument();
     doc.acquireReadLock();
@@ -164,7 +164,7 @@ public abstract class AbstractDJPane extends JTextPane
 
     /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
       * channels.  Thus it may not be in sync with the document's internal position.  For that reason, we grab the
-      * caretPostion and set the current location to that value before calling the insertLine operation.  The logic
+      * caretPosition and set the current location to that value before calling the insertLine operation.  The logic
       * for a single line insert is very dependent on the current location.
       */
     

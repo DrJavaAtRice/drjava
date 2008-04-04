@@ -42,7 +42,11 @@ import java.util.Vector;
 /** Interface for a region manager.
   * @version $Id$
   */
-public interface RegionManager<R extends DocumentRegion> {    
+public interface RegionManager<R extends DocumentRegion> {
+  
+  /** @return the index of the region in the vector, or -1 if not found. Uses ==. */
+  public int getIndexOf(R r);
+  
   /** Returns the region in this manager at the given offset, or null if one does not exist.
    *  @param odd the document
    *  @param offset the offset in the document
@@ -50,14 +54,11 @@ public interface RegionManager<R extends DocumentRegion> {
    */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset);
 
-  /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
-   *  or null if it doesn't exist.
-   *  @param odd the document
-   *  @param startOffset the start offset
-   *  @param endOffset the end offset
-   *  @return the DocumentRegion or null
-   */
-  public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset);
+  /** Tests if specified region r is contained in this manager.
+      * @param r  The region
+      * @return  whether the manager contains region r
+      */
+  public boolean contains(R r);
   
   /** Add the supplied DocumentRegion to the manager.
    *  @param region the DocumentRegion to be inserted into the manager

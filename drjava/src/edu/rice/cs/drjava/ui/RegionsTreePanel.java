@@ -196,8 +196,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
-  protected void updateButtons() {
-  }
+  protected void updateButtons() { }
   
   /** Adds config color support to DefaultTreeCellEditor. */
   class RegionRenderer extends DefaultTreeCellRenderer {
@@ -217,9 +216,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       setClosedIcon(null);
     }
     
-    /**
-     * Overrides the default renderer component to use proper coloring.
-     */
+    /** Overrides the default renderer component to use proper coloring. */
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean isExpanded, 
                                                   boolean leaf, int row, boolean hasFocus) {
       Component renderer = super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, leaf, row, hasFocus);
@@ -240,10 +237,10 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
             doc.acquireReadLock();
             try {
               int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
-              int startOffset = doc.getOffset(lnr-3);
+              int startOffset = doc.getOffset(lnr - 3);
               if (startOffset<0) { startOffset = 0; }
-              int endOffset = doc.getOffset(lnr+3);
-              if (endOffset<0) { endOffset = doc.getLength()-1; }
+              int endOffset = doc.getOffset(lnr + 3);
+              if (endOffset<0) { endOffset = doc.getLength() - 1; }
               
               // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
               String s = doc.getText(startOffset, endOffset-startOffset);
@@ -373,7 +370,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     // Raw type here due to Swing's use of raw types.
     Enumeration documents = _regionRootNode.children();
     boolean done = false;
-    while (!done && (documents.hasMoreElements())) {
+    while (! done && (documents.hasMoreElements())) {
       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
       if (doc.getUserObject().equals(regDocNode.getUserObject())) {
         
@@ -418,7 +415,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       }
     }
     
-    if (!done) {
+    if (! done) {
       // No matching document node was found, so create one
       _regTreeModel.insertNodeInto(regDocNode, _regionRootNode, _regionRootNode.getChildCount());
       DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
@@ -446,14 +443,14 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
         // Find the document node for this region
         Enumeration documents = _regionRootNode.children();
         boolean found = false;
-        while ((!found) && (documents.hasMoreElements())) {
-          DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+        while (! found && documents.hasMoreElements()) {
+          DefaultMutableTreeNode doc = (DefaultMutableTreeNode) documents.nextElement();
           if (doc.getUserObject().equals(regDocNode.getUserObject())) {
             // Find the correct start offset node for this region
             Enumeration existingRegions = doc.children();
             while (existingRegions.hasMoreElements()) {
-              DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
-              if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset()==r.getStartOffset()) {
+              DefaultMutableTreeNode existing = (DefaultMutableTreeNode) existingRegions.nextElement();
+              if (((RegionTreeUserObj) existing.getUserObject()).region().getStartOffset() == r.getStartOffset()) {
                 _regTreeModel.removeNodeFromParent(existing);
                 // notify
                 if (doc.getChildCount() == 0) {
@@ -472,8 +469,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     Utilities.invokeLater(doCommand);
   }
   
-  /** Remove all regions for this document from the tree. Must be executed in event thread.
-    */
+  /** Remove all regions for this document from the tree. Must be executed in event thread. */
   public void removeRegions(final OpenDefinitionsDocument odd) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {

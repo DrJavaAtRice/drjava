@@ -113,10 +113,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     super(frame, title);
     _regionManager = rm;
     _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
-      public void regionAdded(MovingDocumentRegion r, int index) { addRegion(r); }
-      public void regionChanged(MovingDocumentRegion r, int index) { 
+      public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
+      public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r, index);
+        regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });
@@ -256,13 +256,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _findAgain() {
     updateButtons();
     OpenDefinitionsDocument odd = null;
-    if (_searchAll) {
-      odd = _model.getActiveDocument();
-    }
-    else {
-      if (_doc!=null) { odd = _doc.get(); }
-    }
-    if (odd!=null) {
+    if (_searchAll) odd = _model.getActiveDocument();
+    else if (_doc != null) { odd = _doc.get(); }
+    if (odd != null) {
       _regionManager.clearRegions();
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord,
                            _noComments, _noTestCases, odd, _regionManager, this);
@@ -273,9 +269,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _bookmark() {
     updateButtons();
     for (final MovingDocumentRegion r: getSelectedRegions()) {
-      DocumentRegion bookmark = 
-        _model.getBookmarkManager().getRegionOverlapping(r.getDocument(), r.getStartOffset(), r.getEndOffset());
-      if (bookmark == null) {
+      if (! _model.getBookmarkManager().contains(r)) {
         try {
           DocumentRegion newR = 
             new SimpleDocumentRegion(r.getDocument(), r.getDocument().getFile(), r.getStartOffset(), r.getEndOffset());

@@ -2188,6 +2188,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     implements RegionManager<R> {
     /** Vector of regions.  Primitive operations are thread safe. */
     protected volatile Vector<R> _regions = new Vector<R>();
+    protected volatile Set<R> _regionsSet = Collections.synchronizedSet(new HashSet<R>());
     protected volatile R _current = null;
     protected volatile int _maxSize;
     
@@ -2211,34 +2212,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return null;
     }
     
-    /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
-      * or null if it doesn't exist.
-      * @param odd the document
-      * @param startOffset the start offset
-      * @param endOffset the end offset
-      * @return the DocumentRegion or null
+    /** Tests if specified region r is contained in this manager.
+      * @param r  The region
+      * @return  whether the manager contains region r
       */
-    public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
-      for (R r: _regions) {        
-        if (! (r.getDocument().equals(odd))) { continue; }
-        
-        if ((r.getStartOffset() >= startOffset && r.getEndOffset() <= endOffset) || // r contained in startOffset-endOffset
-            (r.getStartOffset() <= startOffset && r.getEndOffset() >= endOffset) || // startOffset-endOffset contained in r
-            (r.getStartOffset() >= startOffset && r.getStartOffset() <= endOffset) || // r starts within startOffset-endOffset
-            (r.getEndOffset() >= startOffset && r.getEndOffset() <= endOffset)) { // r ends within startOffset-endOffset
-          // already there
-          return r;
-        }
-      }
-      // not found
-      return null;
-    }
+    public boolean contains(R r) { return _regionsSet.contains(r); }
     
     /** @return the index of the region in the vector, or -1 if not found. Uses ==. */
-    protected int getIndexOf(R region) {
+    public int getIndexOf(R reg) {
       int index = 0;
       for (R r: _regions) {
-        if (region == r) return index;
+        if (reg == r) return index;
         else  ++index;
       }
       return -1;
@@ -2248,24 +2232,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @param region the DocumentRegion to be inserted into the manager
       * @param index the index at which the DocumentRegion was inserted
       */
-    public void addRegion(final R region) {
-      int index = getIndexOf(_current);
-      // only add if current, previous, and next are not already the region; prevents trivial duplicates
-      if (! region.equals(_current) && 
-          (index == _regions.size() - 1 || ! region.equals(_regions.get(index + 1))) &&
-          (index <= 0 || ! region.equals(_regions.get(index - 1)))) {
-        if ((_current != null) && (index >= 0)) _regions.add(index + 1, region);
-        else _regions.add(region);
+    public void addRegion(final R r) {
+      if (! _regionsSet.contains(r)) { // only add if not already present
+        _regions.add(r);
+        _regionsSet.add(r);
+        assert _regions.size() == _regionsSet.size();
+      }
         
-        _current = region;
-        final int regionIndex = getIndexOf(region);
-        final String stackTrace = StringOps.getStackTrace();
+      if (! r.equals(_current)) {
         
+        _current = r;
+ 
         // notify.  invokeLater unnecessary if it only runs in the event thread
         Utilities.invokeLater(new Runnable() { public void run() {
           _lock.startRead();
           try {
-            for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region, regionIndex); }
+            for (RegionManagerListener<R> l: _listeners) { l.regionAdded(r); }
           } finally { _lock.endRead(); }
         } });
         
@@ -2273,10 +2255,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         shrinkManager();
       }
       else {
+        int index = getIndexOf(_current);
         // if next was the region to be added, make that the current region
-        if ((index < _regions.size()-1) && (region.equals(_regions.get(index+1)))) nextCurrentRegion();
+        if (index < _regions.size() - 1 && r.equals(_regions.get(index + 1))) nextCurrentRegion();
         // if previous was the region to be added, make that the current region
-        else if ((index > 0) && (region.equals(_regions.get(index-1)))) prevCurrentRegion();
+        else if (index > 0 && r.equals(_regions.get(index - 1))) prevCurrentRegion();
       }
     }
     
@@ -2310,21 +2293,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Remove the given DocumentRegion from the manager.
       * @param region the DocumentRegion to be removed.
       */
-    public void removeRegion(final R region) {      
+    public void removeRegion(final R r) {      
       // if we're removing the current region, select a more recent region, if available
       // if a more recent region is not available, select a less recent region, if available
       // if a less recent region is not available either, set to null
-      final R cur = _current; // so we can verify if _current got changed
-      if (region == cur) {
-        if (nextCurrentRegion().equals(cur)) {
-          if (prevCurrentRegion().equals(cur)) {
-            _current = null;
-          }
-        }
-      }
-      for(int i = 0; i < _regions.size(); ++i) {
-        if (region == _regions.get(i)) {
+      if (r == _current && nextCurrentRegion().equals(_current) && prevCurrentRegion().equals(_current)) 
+        _current = null;  // Removed last region ?
+
+      for (int i = 0; i < _regions.size(); ++i) {
+        if (r.equals(_regions.get(i))) {
           _regions.remove(i);
+          _regionsSet.remove(r);
+          assert _regions.size() == _regionsSet.size();
           break;
         }
       }
@@ -2333,7 +2313,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       Utilities.invokeLater(new Runnable() { public void run() {
         _lock.startRead();
         try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionRemoved (region); }
+          for (RegionManagerListener<R> l: _listeners) { l.regionRemoved (r); }
         } finally { _lock.endRead(); }
       } });
     }
@@ -2428,7 +2408,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // notify
         _lock.startRead();
         try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r, index); }
+          for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r); }
         } finally { _lock.endRead(); }            
       } });
     }
@@ -2490,6 +2470,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /** @return the superset manager. */
       public RegionManager<R> getSuperSetManager() { return _superSetManager; }
       
+      /** @return the index of the region in the vector, or -1 if not found. Uses ==. */
+      public int getIndexOf(R r) { return _superSetManager.getIndexOf(r); }
+      
       /** Returns the region in this manager at the given offset, or null if one does not exist.
         * @param odd the document
         * @param offset the offset in the document
@@ -2499,16 +2482,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return _superSetManager.getRegionAt(odd, offset);
       }
       
-      /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
-        * or null if it doesn't exist.
-        * @param odd the document
-        * @param startOffset the start offset
-        * @param endOffset the end offset
-        * @return the DocumentRegion or null
+      /** Tests if specified region r is contained in this manager.
+        * @param r  The region
+        * @return  whether the manager contains region r
         */
-      public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
-        return _superSetManager.getRegionOverlapping(odd, startOffset, endOffset);
-      }
+      public boolean contains(R r) { return _superSetManager.contains(r); }
       
       /** Add the supplied DocumentRegion to the manager.
         * @param region the DocumentRegion to be inserted into the manager
@@ -2550,8 +2528,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private RegionManagerListener<R> _decoree;
         public FilteredRegionManagerListener(RegionManagerListener<R> d) { _decoree = d; }
         public RegionManagerListener<R> getDecoree() { return _decoree; }
-        public void regionAdded(R r, int index) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionAdded(r, index); } }
-        public void regionChanged(R r, int index) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionChanged(r, index); } }
+        public void regionAdded(R r) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionAdded(r); } }
+        public void regionChanged(R r) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionChanged(r); } }
         public void regionRemoved(R r) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionRemoved(r); } }
       }
       
