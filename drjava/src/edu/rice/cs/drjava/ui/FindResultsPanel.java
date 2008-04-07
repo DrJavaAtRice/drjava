@@ -151,7 +151,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
     
     public Component getListCellRendererComponent(JList list, Object value, int row, boolean sel, boolean hasFocus) {
-      Component renderer;
+      JComponent renderer;
       if (value instanceof Color) {
         m_c = (Color) value;
         renderer = this;
