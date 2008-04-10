@@ -143,24 +143,24 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
     assertEquals("number of aux files", 1, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 2, IterUtil.sizeOf(pfir.getClassPaths()));
-    File base = new File(System.getProperty("user.dir"));
+    File base = new File(f.getParent());
     File root = new File(base, "src");
-    assertEquals("first source filename", new File(root,"edu/rice/cs/drjava/DrJava.java").getAbsolutePath(),
-                 pfir.getSourceFiles()[0].getPath());
+    assertEquals("first source filename", new File(root,"edu/rice/cs/drjava/DrJava.java").getCanonicalPath(),
+                 pfir.getSourceFiles()[0].getCanonicalPath());
     assertEquals("timestamp value", 
                  ProjectProfile.MOD_DATE_FORMAT.parse("27-Mar-2008 15:05:07").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
-    assertEquals("last source filename", new File(root,"edu/rice/cs/drjava/ui/BackgroundColorListener.java").getAbsolutePath(), 
-                 pfir.getSourceFiles()[5].getPath());
-    assertEquals("first aux filename", System.getProperty("user.dir")+"/testFiles/sample-project-file.xml", 
-                 pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("last source filename", new File(root,"edu/rice/cs/drjava/ui/BackgroundColorListener.java").getCanonicalPath(), 
+                 pfir.getSourceFiles()[5].getCanonicalPath());
+    assertEquals("first aux filename", new File(System.getProperty("user.dir"),"/testFiles/sample-project-file.xml").getCanonicalPath(), 
+                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ Source Files ]/grammar/util/", pfir.getCollapsedPaths()[1]);
     assertEquals("build-dir name", new File(base, "classes").getCanonicalPath(), 
                  pfir.getBuildDirectory().getCanonicalPath());
     assertEquals("work-dir name", new File(base, ".").getCanonicalPath(), 
                  pfir.getWorkingDirectory().getCanonicalPath());
-    assertEquals("classpath name", System.getProperty("user.dir")+"/lib", 
-                 IterUtil.first(pfir.getClassPaths()).getPath());
+    assertEquals("classpath name", new File(System.getProperty("user.dir"),"lib").getCanonicalPath(), 
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
     assertEquals("main-class name", new File(base, "src/edu/rice/cs/drjava/DrJava.java").getCanonicalPath(), 
                  pfir.getMainClass().getCanonicalPath());
   }

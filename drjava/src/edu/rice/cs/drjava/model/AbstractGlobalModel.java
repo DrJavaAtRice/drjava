@@ -1382,7 +1382,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
   public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     ProjectProfile builder = _makeProjectProfile(file, info);
-    System.out.println("builder.getAuxiliaryFiles().length = "+builder.getAuxiliaryFiles().length);
     // write to disk
     builder.write();
     
@@ -1818,7 +1817,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Prepares this model to be thrown away.  Never called outside of tests. This version ignores the slave JVM. */
   public void dispose() {
-    synchronized(_documentsRepos) { _documentsRepos.clear(); }
+    synchronized(_documentsRepos) { 
+      closeAllFiles();
+      _documentsRepos.clear();
+    }
     Utilities.invokeLater(new SRunnable() {
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });

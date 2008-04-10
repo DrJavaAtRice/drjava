@@ -244,8 +244,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       }
       catch(XMLConfigException e) { active = false; /* it's ok if it doesn't exist */ }
       
-      DocFile docF = new DocFile(rootPath,
-                                 name,
+      DocFile docF = new DocFile(((rootPath.length()>0)?new File(rootPath,name):new File(name)).getAbsoluteFile(),
                                  new Pair<Integer,Integer>(selectFrom,selectTo),
                                  new Pair<Integer,Integer>(scrollCol,scrollCol),
                                  active,

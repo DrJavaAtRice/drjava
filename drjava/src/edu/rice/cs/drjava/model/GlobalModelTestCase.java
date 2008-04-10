@@ -122,10 +122,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
     _log.log("Tearing down " + this);
-    boolean ret = IOUtil.deleteRecursively(_tempDir);
-    assertTrue("delete temp directory " + _tempDir, ret);
-
     _model.dispose();
+
+    /*boolean ret =*/ IOUtil.deleteOnExitRecursively(_tempDir);
+    //assertTrue("delete temp directory " + _tempDir, ret);
+
     _tempDir = null;
     _model = null;
 

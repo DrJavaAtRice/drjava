@@ -234,17 +234,16 @@ public class ProjectTest extends DrJavaTestCase {
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
-
-    String expected = "";
-    String received = "";
     fb.write();
 
+    StringBuilder received = new StringBuilder();
     FileReader fr = new FileReader(pf);
     int c = fr.read();
     while (c >= 0) {
-      received += (char) c;
+      received.append((char)c);
       c = fr.read();
     }
+    fr.close();
 //    assertEquals("Make relative", "dir1/test.java",
 //                 fb.makeRelative(new File(pf.getParentFile(),"dir1/test.java")));
 //    assertEquals("The file written by the builder", expected, received);
@@ -266,13 +265,15 @@ public class ProjectTest extends DrJavaTestCase {
 //                 pfir.getSourceFiles()[0].getPath());
 //    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
 //                 pfir.getSourceFiles()[4].getPath());
-    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), 
-                 pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getCanonicalPath(), 
+                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
-    assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
-    assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
-    assertEquals("classpath name", new File(parent,"lib"), IterUtil.first(pfir.getClassPaths()));
-    assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
+    assertEquals("build-dir name", buildDir.getCanonicalPath(), pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("work-dir name", srcDir.getCanonicalPath(), pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(parent,"lib").getCanonicalPath(),
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
+    assertEquals("main-class name", new File(parent,"dir1/testfile1.java").getCanonicalPath(),
+                 pfir.getMainClass().getCanonicalPath());
     pf.delete();
   }
   
@@ -422,17 +423,16 @@ public class ProjectTest extends DrJavaTestCase {
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
-
-    String expected = "";
-    String received = "";
     fb.writeOld();
 
+    StringBuilder received = new StringBuilder();
     FileReader fr = new FileReader(pf);
     int c = fr.read();
     while (c >= 0) {
-      received += (char) c;
+      received.append((char)c);
       c = fr.read();
     }
+    fr.close();
 //    assertEquals("Make relative", "dir1/test.java",
 //                 fb.makeRelative(new File(pf.getParentFile(),"dir1/test.java")));
 //    assertEquals("The file written by the builder", expected, received);
@@ -484,17 +484,16 @@ public class ProjectTest extends DrJavaTestCase {
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
-
-    String expected = "";
-    String received = "";
     fb.write();
 
+    StringBuilder received = new StringBuilder();
     FileReader fr = new FileReader(pf);
     int c = fr.read();
     while (c >= 0) {
-      received += (char) c;
+      received.append((char)c);
       c = fr.read();
     }
+    fr.close();
 //    assertEquals("Make relative", "dir1/test.java",
 //                 fb.makeRelative(new File(pf.getParentFile(),"dir1/test.java")));
 //    assertEquals("The file written by the builder", expected, received);
@@ -516,13 +515,15 @@ public class ProjectTest extends DrJavaTestCase {
 //                 pfir.getSourceFiles()[0].getPath());
 //    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
 //                 pfir.getSourceFiles()[4].getPath());
-    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), 
-                 pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getCanonicalPath(), 
+                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
-    assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
-    assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
-    assertEquals("classpath name", new File(parent,"lib"), IterUtil.first(pfir.getClassPaths()));
-    assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
+    assertEquals("build-dir name", buildDir.getCanonicalPath(), pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("work-dir name", srcDir.getCanonicalPath(), pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(parent,"lib").getCanonicalPath(),
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
+    assertEquals("main-class name", new File(parent,"dir1/testfile1.java").getCanonicalPath(),
+                 pfir.getMainClass().getCanonicalPath());
     pf.delete();
   }
   

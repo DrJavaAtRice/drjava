@@ -243,6 +243,7 @@ public class LogTest extends MultiThreadedTestCase {
     for (int i = 0; i < NUM_THREADS; i++) threads[i] = new LogTestThread(log3, r.nextInt(DELAY));
     for (int i = 0; i < NUM_THREADS; i++) threads[i].start();
     for (int i = 0; i < NUM_THREADS; i++) threads[i].join();
+    log3.close();
     
     BufferedReader fin = new BufferedReader(new FileReader(file3));
     Date now = new Date();

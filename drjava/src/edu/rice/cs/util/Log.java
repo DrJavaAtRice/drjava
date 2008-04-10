@@ -148,4 +148,10 @@ public class Log {
       log(s + "\n" + sw.toString());
     }
   }
+  
+  /** Closes a log file. */
+  public void close() {
+    _writer.close();
+    _writer = null;
+  }
 }
