@@ -83,7 +83,7 @@ public class Javac160Compiler extends JavacCompiler {
 
   public Javac160Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
-    _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.4_04")) >= 0;
+    _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.0_04")) >= 0;
   }
   
   public boolean isAvailable() {
