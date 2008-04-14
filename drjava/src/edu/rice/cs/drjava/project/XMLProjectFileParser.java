@@ -160,6 +160,10 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
         // read source files and included files
         pfir.setSourceFiles(readSourceFiles("source", _srcFileBase.toString()));
         pfir.setAuxiliaryFiles(readSourceFiles("included", ""));      
+        
+        // read excluded files
+        pfir.setExcludedFiles(readSourceFiles("excluded", ""));
+        
       
         // read collapsed paths
         pfir.setCollapsedPaths(readCollapsed());

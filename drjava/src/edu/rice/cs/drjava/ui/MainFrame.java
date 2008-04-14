@@ -4399,6 +4399,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       else {
         fileName = l.size()+" files";
+        //CHELSEA AND PATRICK WHOOOOOOOOOOO!!!!
         String text = "Closing these "+fileName+" will permanently remove them from the current project." + 
           "\nAre you sure that you want to close these files?";
         

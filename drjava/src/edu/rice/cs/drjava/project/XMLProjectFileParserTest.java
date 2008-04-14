@@ -98,6 +98,14 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
       "      </file>\n"+
       
       "    </included>\n"+
+      
+      "    <excluded>\n"+
+      "      <file name=\"edu/rice/cs/drjava/ui/config/ColorOptionComponent.java\" package=\"edu.rice.cs.drjava.ui.config\" timestamp=\"30-Mar-2008 09:27:01\">\n"+
+      "        <select from=\"0\" to=\"0\"/>\n"+
+      "        <scroll column=\"0\" row=\"0\"/>\n"+
+      "      </file>\n"+
+      "    </excluded>\n"+
+      
       "    <collapsed>\n"+
 
       "      <path name=\"./[ Source Files ]/parser/\"/>\n"+
@@ -141,6 +149,7 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
     
     assertEquals("number of source files", 6, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 1, pfir.getAuxiliaryFiles().length);
+    assertEquals("number of excluded files", 1, pfir.getExcludedFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 2, IterUtil.sizeOf(pfir.getClassPaths()));
     File base = new File(f.getParent());

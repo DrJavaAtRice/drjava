@@ -152,4 +152,10 @@ public interface FileGroupingState {
   /** Sets the list of project-specific classpath entries. */
   public void setExtraClassPath(Iterable<File> cp);
   
+  /** Excludes file from the project. */
+  public void addExcludedFile(File f);
+  
+  /** Returns true if the file is excluded from the current project */
+  public boolean isExcludedFile(File f);
+  
 }

@@ -74,6 +74,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private List<DocFile> _sourceFiles = new ArrayList<DocFile>();
   private List<DocFile> _auxFiles = new ArrayList<DocFile>();
+  private List<DocFile> _excludedFiles = new ArrayList<DocFile>();
   private List<String> _collapsedPaths = new ArrayList<String>();
   
   private File _buildDir = FileOps.NULL_FILE;
@@ -118,6 +119,9 @@ public class ProjectProfile implements ProjectFileIR {
     
   /** @return an array full of all the aux files (project outside source tree) in this project. */
   public DocFile[] getAuxiliaryFiles() { return _auxFiles.toArray(new DocFile[_auxFiles.size()]); }
+  
+  /** @return an array chock partially full of most of the excluded files */
+  public DocFile[] getExcludedFiles() { return _excludedFiles.toArray(new DocFile[_excludedFiles.size()]); }
   
   /** @return project file. */
   public File getProjectFile() { return _projectFile; }
@@ -177,6 +181,15 @@ public class ProjectProfile implements ProjectFileIR {
     }
   }
   
+  public void addExcludedFile(DocFile df) { _excludedFiles.add(df); }
+    
+  public void addExcludedFile(DocumentInfoGetter getter) {
+    if (! getter.isUntitled()) {
+      try { addExcludedFile(docFileFromGetter(getter)); }
+      catch(IOException e) { throw new UnexpectedException(e); }
+    }
+  }
+  
   public void addClassPathFile(File cp) { if (cp != null) _classPathFiles.add(cp); }
   public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
   public void setBuildDirectory(File dir) { 
@@ -195,7 +208,8 @@ public class ProjectProfile implements ProjectFileIR {
   }
   public void setCollapsedPaths(List<String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
   public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = new ArrayList<DocFile>(af); }
-
+  public void setExcludedFiles(List<DocFile> ef) { _excludedFiles = new ArrayList<DocFile>(ef); }
+  
   /** Assumes that root.getParentFile != null */
   public void setProjectRoot(File root) { 
     _projectRoot = root; 
@@ -214,6 +228,7 @@ public class ProjectProfile implements ProjectFileIR {
     write(new FileOutputStream(_projectFile));
   }
   
+  // CHELSEA AND PATRICK WHOOOOOHOOOO!!!!!one
   public void write(OutputStream os) throws IOException {    
     XMLConfig xc = new XMLConfig();
     xc.set("drjava.version", edu.rice.cs.drjava.Version.getBuildTimeString()+"-"+edu.rice.cs.drjava.Version.getRevisionNumber());
@@ -271,7 +286,7 @@ public class ProjectProfile implements ProjectFileIR {
       }
     }
     xc.createNode("drjava/project/included");
-    if (!_sourceFiles.isEmpty()) {
+    if (!_auxFiles.isEmpty()) {
       DocFile active = null;
       if (active==null) {
         for(DocFile df: _auxFiles) {
@@ -300,6 +315,38 @@ public class ProjectProfile implements ProjectFileIR {
         }
       }
     }
+    
+    xc.createNode("drjava/project/excluded");
+    if (!_excludedFiles.isEmpty()) {
+      DocFile active = null;
+      if (active==null) {
+        for(DocFile df: _excludedFiles) {
+          if(df.isActive()) {
+            active = df;
+            break; //Assert that there is only one active document in the project
+          }
+        }
+      }
+      for(DocFile df: _excludedFiles) {
+        path = df.getAbsolutePath();
+        path = replace(path, File.separator, "/");
+        Pair<Integer,Integer> pSel = df.getSelection();
+        Pair<Integer,Integer> pScr = df.getScroll();
+        String s = MOD_DATE_FORMAT.format(new Date(df.lastModified()));
+
+        Node f = xc.createNode("drjava/project/excluded/file", null, false);      
+        xc.set(".name", path, f, true);
+        xc.set(".timestamp", s, f, true);
+        xc.set(".package", df.getPackage(), f, true);
+        xc.set("select.from",   String.valueOf(pSel.first()),  f, true);
+        xc.set("select.to",     String.valueOf(pSel.second()), f, true);
+        xc.set("scroll.column", String.valueOf(pScr.first()),  f, true);
+        xc.set("scroll.row",    String.valueOf(pScr.second()), f, true);
+        if (df==active) { xc.set(".active", "true", f, true);
+        }
+      }
+    }
+    
     xc.createNode("drjava/project/collapsed");
     if (!_collapsedPaths.isEmpty()) {
       for(String s: _collapsedPaths) {

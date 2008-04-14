@@ -52,6 +52,11 @@ public interface ProjectFileIR {
    *  @return an array full of all the aux files in this project file
    */
   public DocFile[] getAuxiliaryFiles();
+  
+  /** These files are in the project source tree, but have been explicitly excluded from the project. 
+    * @return an array full of all the excluded files in this project file.  
+    */
+  public DocFile[] getExcludedFiles();
     
   /** @return the build directory stored in this project file */
   public File getBuildDirectory();
@@ -93,6 +98,7 @@ public interface ProjectFileIR {
   
   public void setSourceFiles(List<DocFile> sf);
   public void setAuxiliaryFiles(List<DocFile> aux);
+  public void setExcludedFiles(List<DocFile> ef);
   public void setCollapsedPaths(List<String> paths);
   public void setClassPaths(Iterable<? extends File> cp);
   public void setBuildDirectory(File dir);
@@ -104,4 +110,7 @@ public interface ProjectFileIR {
   public void setBookmarks(List<? extends DocumentRegion> bms);
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
+  
+  
+
 }
