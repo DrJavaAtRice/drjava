@@ -819,6 +819,10 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_ABOUT = 
     new KeyStrokeOption("key.about", KeyStrokeOption.NULL_KEYSTROKE);
   
+  /** The key binding for the check new version dialog */
+  public static final KeyStrokeOption KEY_CHECK_NEW_VERSION = 
+    new KeyStrokeOption("key.check.new.version", KeyStrokeOption.NULL_KEYSTROKE);
+  
   /** The key binding for the "DrJava Errors" dialog */
   public static final KeyStrokeOption KEY_DRJAVA_ERRORS = 
     new KeyStrokeOption("key.drjava.errors", KeyStrokeOption.NULL_KEYSTROKE);
@@ -1331,4 +1335,46 @@ public interface OptionConstants {
     new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"workdirs",
                              new StringOption("",""),
                              new Vector<String>());
+  
+  /** Notification of new versions. */
+  public static final ArrayList<String> NEW_VERSION_NOTIFICATION_CHOICES =
+    VersionNotificationChoices.evaluate();
+  static class VersionNotificationChoices {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add("stable versions only");
+      aList.add("stable and beta versions only");
+      aList.add("all versions");
+      aList.add("none (disabled)");
+      return aList;
+    }
+  }
+  
+  /** The lowest access level of classes and members to include in the javadoc. */
+  public static final ForcedChoiceOption NEW_VERSION_NOTIFICATION =
+    new ForcedChoiceOption("new.version.notification", NEW_VERSION_NOTIFICATION_CHOICES.get(1), NEW_VERSION_NOTIFICATION_CHOICES);
+  
+  /** URLs to check for new versions. */
+  public static final ArrayList<String> NEW_VERSION_NOTIFICATION_URLS =
+    VersionNotificationURLs.evaluate();
+  static class VersionNotificationURLs {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add("http://www.drjava.org/LATEST_VERSION.TXT");
+      aList.add("http://www.drjava.org/LATEST_VERSION.TXT\0"+
+                "http://www.drjava.org/LATEST_BETA_VERSION.TXT");
+      aList.add("http://www.drjava.org/LATEST_VERSION.TXT\0"+
+                "http://www.drjava.org/LATEST_BETA_VERSION.TXT\0"+
+                "http://www.drjava.org/LATEST_DEV_VERSION.TXT");
+      aList.add("");
+      return aList;
+    }
+  }
+  
+  /** The last time we checked for a new version. */
+  public static final LongOption LAST_NEW_VERSION_NOTIFICATION = new LongOption("new.version.notification.last", (long)0);  
+  
+  /** The number of days that have to pass before we automatically check again. */
+  public static final NonNegativeIntegerOption NEW_VERSION_NOTIFICATION_DAYS =
+    new NonNegativeIntegerOption("new.version.notification.days", 7);  
 }

@@ -2085,6 +2085,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
+  /** Pops up a dialog that checks for a new version. */
+  private final Action _checkNewVersionAction = new AbstractAction("Check for New Version") {
+    public void actionPerformed(ActionEvent ae) {
+      NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
+      popup.setVisible(true);
+    }
+  };
+  
   /** Pops up the DrJava errors dialog. */
   private final Action _errorsAction = new AbstractAction("DrJava Errors") {
     public void actionPerformed(ActionEvent ae) {
@@ -3300,6 +3308,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     setUpDrJavaProperties();  
     
     DrJavaErrorHandler.setButton(_errorsButton);
+    
+    // check for new version if desired by user
+    if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
+          .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3))) {
+      int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
+      java.util.Date nextCheck = new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
+                                                      + days * 24 * 60 * 60 * 1000); // x days after last check
+      if (new java.util.Date().after(nextCheck)) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
+            if (popup.checkNewVersion()) { popup.setVisible(true); }
+          }
+        });
+      }
+    }
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
@@ -5607,7 +5631,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _saveProjectAction.setEnabled(false);
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
     _saveProjectAsAction.setEnabled(false);
-    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format", "ExportOld", "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format");
+    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format", "SaveAs", "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format");
     _exportProjectInOldFormatAction.setEnabled(false);
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     // No longer used
@@ -5687,7 +5711,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
     _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
-    _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
+    _setUpAction(_gotoLineAction, "Go to line", "Play", "Go to a line number in the document");
     _setUpAction(_gotoFileAction, "Go to File", "Go to a file specified by its name");
     _setUpAction(gotoFileUnderCursorAction, "Go to File Under Cursor",
                  "Go to the file specified by the word the cursor is located on");
@@ -5748,8 +5772,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
+    _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
     _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
-    _setUpAction(_forceQuitAction, "Force Quit", "Force DrJava to quit without cleaning up");
+    _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
   }
   
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -5914,10 +5939,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
     _addMenuItem(editMenu, _browseBackAction, KEY_BROWSE_BACK);
     _addMenuItem(editMenu, _browseForwardAction, KEY_BROWSE_FORWARD);    
-    _addMenuItem(editMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
-    _addMenuItem(editMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
     _addMenuItem(editMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE);
     _addMenuItem(editMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE);
+    editMenu.addSeparator();
+    _addMenuItem(editMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
+    _addMenuItem(editMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
     
     // access to configurations GUI
     editMenu.addSeparator();
@@ -6213,7 +6239,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     helpMenu.setMnemonic(KeyEvent.VK_H);
     _addMenuItem(helpMenu, _helpAction, KEY_HELP);
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
+    helpMenu.addSeparator();
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
+    _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION);
     _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT);

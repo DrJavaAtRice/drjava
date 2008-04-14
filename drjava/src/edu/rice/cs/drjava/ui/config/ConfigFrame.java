@@ -888,6 +888,12 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,
                                                   "The number of spaces to use for each level of indentation."));
+    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.NEW_VERSION_NOTIFICATION,
+                                                              "Check for new versions?", this,
+                                                              "Whether DrJava should check for new versions on drjava.org."));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.NEW_VERSION_NOTIFICATION_DAYS,
+                                                         "Days between new version check", this,
+                                                         "The number of days between automatic new version checks."));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
                                                   "The number of interactions to remember in the history."));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
