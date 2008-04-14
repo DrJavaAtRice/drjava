@@ -198,11 +198,6 @@ public class ClipboardHistoryFrame extends JFrame {
   /** Initialize the frame.
    */
   private void init() {
-    addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(WindowEvent winEvt) {
-        cancelButtonPressed();
-      }
-    });
     addComponentListener(new java.awt.event.ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         validate();
@@ -316,22 +311,33 @@ public class ClipboardHistoryFrame extends JFrame {
     updateView();
   }
   
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      ClipboardHistoryFrame.this.toFront();
+    }
+    public void windowClosing(WindowEvent we) {
+      cancelButtonPressed();
+    }
+  };
+  
   /** Validates before changing visibility.  Only runs in the event thread.
-    * @param b true if frame should be shown, false if it should be hidden.
+    * @param vis true if frame should be shown, false if it should be hidden.
     */
-  public void setVisible(boolean b) {
+  public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();
     validate();
-    super.setVisible(b);
-    if (b) {
+    if (vis) {
       _mainFrame.hourglassOn();
       updateView();
       _historyList.requestFocus();
+      toFront();
     }
     else {
+      removeWindowFocusListener(_windowListener);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }
+    super.setVisible(vis);
   }
 
   /** Update the displays based on the model. */

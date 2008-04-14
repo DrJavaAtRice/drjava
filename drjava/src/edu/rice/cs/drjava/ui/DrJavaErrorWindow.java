@@ -161,13 +161,33 @@ public class DrJavaErrorWindow extends JDialog {
     getRootPane().setDefaultButton(_okButton);
     init();
   }
-  
-  /** Initialize the dialog when setting to visible. */
-  public void setVisible(boolean b) {
-    if (b) {
-      init();
+
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      DrJavaErrorWindow.this.toFront();
     }
-    super.setVisible(b);
+    public void windowClosing(WindowEvent we) {
+      DrJavaErrorWindow.this.dispose();
+      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
+    }
+  };
+  
+  /** Validates before changing visibility.  Only runs in the event thread.
+    * @param vis true if frame should be shown, false if it should be hidden.
+    */
+  public void setVisible(boolean vis) {
+    assert EventQueue.isDispatchThread();
+    validate();
+    if (vis) {
+      init();
+      addWindowListener(_windowListener);
+      toFront();
+    }
+    else {
+      removeWindowFocusListener(_windowListener);
+      _parentFrame.toFront();
+    }
+    super.setVisible(vis);
   }
   
   /** Initialize the dialog. */

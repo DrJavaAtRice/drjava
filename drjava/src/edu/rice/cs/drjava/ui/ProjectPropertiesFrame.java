@@ -508,8 +508,31 @@ public class ProjectPropertiesFrame extends JFrame {
     return _jarFileSelector;
   }
 
-//public void setVisible(boolean vis) {
-//super.setVisible(vis);
-//reset();
-//}
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      ProjectPropertiesFrame.this.toFront();
+    }
+    public void windowClosing(WindowEvent we) {
+      cancel();
+    }
+  };
+  
+  /** Validates before changing visibility.  Only runs in the event thread.
+    * @param vis true if frame should be shown, false if it should be hidden.
+    */
+  public void setVisible(boolean vis) {
+    assert EventQueue.isDispatchThread();
+    validate();
+    if (vis) {
+      addWindowListener(_windowListener);
+      _mainFrame.hourglassOn();
+      toFront();
+    }
+    else {
+      removeWindowFocusListener(_windowListener);
+      _mainFrame.hourglassOff();
+      _mainFrame.toFront();
+    }
+    super.setVisible(vis);
+  }
 }

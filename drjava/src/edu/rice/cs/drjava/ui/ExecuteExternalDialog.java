@@ -1528,6 +1528,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       _workDirDocumentListener.changedUpdate(null);
       _javaDocumentListener.changedUpdate(null);
       _javaWorkDirDocumentListener.changedUpdate(null);
+      toFront();
     }
     else {
       _windowListenerActive = false;

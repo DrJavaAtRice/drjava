@@ -169,6 +169,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   /** Action to be performed when the user closes the frame using "OK". */
   private final ArrayList<CloseAction<T>> _actions;
   
+  /** The index in the _actions list that cancels the dialog. */
+  private final int _cancelIndex;
+  
   /** Array of strategies. */
   private final java.util.List<PredictiveInputModel.MatchingStrategy<T>> _strategies;
   
@@ -193,7 +196,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
 
   public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              java.util.List<CloseAction<T>> actions, java.util.List<T> items) {
+                              java.util.List<CloseAction<T>> actions, int cancelIndex, java.util.List<T> items) {
     super(title);
     _strategies = strategies;
     _strategyBox = new JComboBox(_strategies.toArray());
@@ -206,6 +209,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _owner = owner;
     _actions = new ArrayList<CloseAction<T>>(actions);
     _buttons = new JButton[actions.size()];
+    _cancelIndex = cancelIndex;
     init(_info != null);
   }
   
@@ -219,8 +223,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              java.util.List<CloseAction<T>> actions, T... items) {
-    this(owner, title, force, ignoreCase, info, strategies, actions, Arrays.asList(items));
+                              java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
+    this(owner, title, force, ignoreCase, info, strategies, actions, cancelIndex, Arrays.asList(items));
   }
   
   /** Returns the last state of the frame, i.e. the location and dimension.
@@ -672,20 +676,31 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     // do nothing by default
   }
   
-  /** Validates before changing visibility,
-   *  @param b true if frame should be shown, false if it should be hidden.
-   */
-  public void setVisible(boolean b) {
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      PredictiveInputFrame.this.toFront();
+    }
+    public void windowClosing(WindowEvent we) {
+      cancel();
+    }
+  };
+  
+  /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
+  public void setVisible(boolean vis) {
+    assert EventQueue.isDispatchThread();
     validate();
-    super.setVisible(b);
-    if (b) {
+    if (vis) {
+      addWindowListener(_windowListener);
       setOwnerEnabled(false);
       _textField.requestFocus();
+      toFront();
     }
     else {
+      removeWindowFocusListener(_windowListener);
       setOwnerEnabled(true);
       _owner.toFront();
     }
+    super.setVisible(vis);
   }
 
   /** Add the listener. */
@@ -739,6 +754,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       _infoLabel.setText("Path:   " + _info.apply(item));
     }
     else _infoLabel.setText("No file selected");
+  }
+  
+  /** Cancel the dialog. */
+  private void cancel() {
+    buttonPressed(_actions.get(_cancelIndex));
   }
   
   /** Handle button pressed. */

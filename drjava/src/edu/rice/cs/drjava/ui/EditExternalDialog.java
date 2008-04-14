@@ -409,6 +409,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
       _mainFrame.hourglassOn();
       addWindowListener(_windowListener);
       _windowListenerActive = true;
+      toFront();
     }
     else {
       _windowListenerActive = false;

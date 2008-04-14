@@ -1206,7 +1206,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                     true, // ignore case
                                                     info,
                                                     strategies,
-                                                    actions,
+                                                    actions, 1, // cancel is action 1
                                                     new GoToFileListEntry(null, "dummyGoto")) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
@@ -1460,7 +1460,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    true, // ignore case
                                                    info,
                                                    strategies,
-                                                   actions,
+                                                   actions, 1, // cancel is action 1
                                                    new JavaAPIListEntry("dummyJavadoc", "dummyJavadoc", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
@@ -1815,7 +1815,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                            true, // ignore case
                                                            info,
                                                            strategies,
-                                                           actions,
+                                                           actions, 2, // cancel is action 23
                                                            new GoToFileListEntry(new DummyOpenDefDoc() {
         public String getPackageNameFromDocument() { return ""; }
       }, "dummyComplete")) {
@@ -9380,7 +9380,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    true, // ignore case
                                                    info,
                                                    strategies,
-                                                   actions,
+                                                   actions, 1, // cancel is action 1
                                                    new JavaAPIListEntry("dummyImport", "dummyImport", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }

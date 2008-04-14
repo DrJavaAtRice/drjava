@@ -756,6 +756,7 @@ public class JarOptionsDialog extends JFrame {
       _loadSettings();
       pf.setVisible(false);
       pf.dispose();
+      toFront();
     }
     else {
       removeWindowFocusListener(_windowListener);
