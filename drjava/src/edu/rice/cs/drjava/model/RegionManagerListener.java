@@ -45,13 +45,11 @@ import edu.rice.cs.util.Lambda;
 public interface RegionManagerListener<R extends DocumentRegion> {
   /** Called when a region is added in a document.  Must be executed in event thread.
    *  @param r the region
-   *  @param index the index at which it was added
    */
   public void regionAdded(R r);
   
   /** Called when a region is changed. Must be executed in event thread.
    *  @param r the region
-   *  @param index the index at which it was changed
    */
   public void regionChanged(R r);
   

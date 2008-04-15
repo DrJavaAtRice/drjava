@@ -109,7 +109,6 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when a breakpoint is set in a document.  Must be executed in event thread.
     * @param bp the breakpoint
-    * @param index the index at which it was added
     */
   public void regionAdded(Breakpoint bp) {
     assert EventQueue.isDispatchThread();
@@ -140,7 +139,6 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when a breakpoint is changed during execution. Must be executed in event thread.
     * @param bp the breakpoint
-    * @param index the index at which it was changed
     */
   public void regionChanged(Breakpoint bp) {
     assert EventQueue.isDispatchThread();

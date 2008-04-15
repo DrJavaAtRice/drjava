@@ -247,12 +247,28 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public File getWorkingDirectory() { return _workingDirectory; }
   
   /** These add the given path to the classpaths used in the interpreter.
-    * @param file  the path to add
+    * @param f  the path to add
     */
   public abstract void addProjectClassPath(File f);
+
+  /** These add the given path to the build directory classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public abstract void addBuildDirectoryClassPath(File f);
+
+  /** These add the given path to the project files classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public abstract void addProjectFilesClassPath(File f);
+
+  /** These add the given path to the external files classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public abstract void addExternalFilesClassPath(File f);
+
+  /** These add the given path to the extra classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public abstract void addExtraClassPath(File f);
   
   /** Handles a syntax error being returned from an interaction

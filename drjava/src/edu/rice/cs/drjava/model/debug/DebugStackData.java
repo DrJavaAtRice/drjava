@@ -46,7 +46,8 @@ public class DebugStackData {
   
   /**
    * Object for keeping track of a stack frame.
-   * @param frame JPDA's reference to the stack frame
+   * @param method name of the method
+   * @param line line number in the file
    */
   public DebugStackData(String method, int line) {
     _method = method;

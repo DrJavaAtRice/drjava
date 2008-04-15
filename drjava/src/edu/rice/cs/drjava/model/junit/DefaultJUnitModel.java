@@ -60,7 +60,6 @@ import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
-//import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.SimpleBox;

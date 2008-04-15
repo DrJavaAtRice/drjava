@@ -138,9 +138,9 @@ public abstract class FileOps {
   
   /** Return true if the directory ancestor is an ancestor of the file f, i.e.
     * you can get from f to ancestor by using getParentFile zero or more times.
-    * @param b the ancestor
+    * @param ancestor the ancestor
     * @param f the file to test
-    * @param true if b is an ancestor of f. */
+    * @return true if ancestor is an ancestor of f. */
   public static boolean isAncestorOf(File ancestor, File f) {
     ancestor = ancestor.getAbsoluteFile();
     f = f.getAbsoluteFile();

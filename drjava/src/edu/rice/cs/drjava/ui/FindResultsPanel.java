@@ -104,7 +104,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param searchString string that was searched for
     * @param searchAll whether all files were searched
     * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
-    * @param the FindReplacePanel that created this FindResultsPanel
+    * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title,
                           String searchString, boolean searchAll, final boolean matchCase,

@@ -2398,7 +2398,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     * @param searchString string that was searched for
     * @param searchAll whether all files were searched
     * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
-    * @param the FindReplacePanel that created this FindResultsPanel
+    * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title,
                                                  String searchString, boolean searchAll, boolean matchCase,

@@ -86,10 +86,10 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
   * Of course, a readLock or writeLock on this must be acquired BEFOFE locking _reducedModel.  This protocol
   * prevents any thread from seeing an inconsistent state in the middle of another thread's changes.
   *
-  * @see edu.rice.cs.drjava.model.definitions.reduced.BraceReduction
-  * @see edu.rice.cs.drjava.model.definitions.reduced.ReducedModelControl
-  * @see edu.rice.cs.drjava.model.definitions.reduced.ReducedModelComment
-  * @see edu.rice.cs.drjava.model.definitions.reduced.ReducedModelBrace
+  * @see edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction
+  * @see edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl
+  * @see edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelComment
+  * @see edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelBrace
   */
 public abstract class AbstractDJDocument extends SwingDocument implements DJDocument, OptionConstants {
   

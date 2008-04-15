@@ -94,17 +94,32 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //    _interpreterControl.addClassPath(path);
 //  }
 //  
+  /** Adds the given path to the interpreter's classpath.
+    * @param f  the path to add
+    */
   public void addProjectClassPath(File f) { _jvm.addProjectClassPath(f); }
   
+  /** These add the given path to the build directory classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public void addBuildDirectoryClassPath(File f) { _jvm.addBuildDirectoryClassPath(f); }
   
+  /** These add the given path to the project files classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public void addProjectFilesClassPath(File f) { 
 //    System.err.println("Adding " + path + " to projectFilesClassPath in the slave JVM");
     _jvm.addProjectFilesClassPath(f); 
   }
   
+  /** These add the given path to the external files classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public void addExternalFilesClassPath(File f) { _jvm.addExternalFilesClassPath(f); }
   
+  /** These add the given path to the extra classpaths used in the interpreter.
+    * @param f  the path to add
+    */
   public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
   
   /** Resets the Java interpreter. */

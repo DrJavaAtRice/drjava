@@ -77,7 +77,7 @@ public class IndentInfo {
   }
 
   /** Creates an indent info with the specified parameters
-    * @param enclosingBraceType the enclosingBraceType
+    * @param lineEnclosingBraceType the enclosingBraceType
     * @param distToLineEnclosingBraceStart the distance to the next newline
     * @param distToLineEnclosingBrace the distance to a brace
     * @param distToStart the distance to the previous newline
