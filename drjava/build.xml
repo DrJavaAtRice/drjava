@@ -140,8 +140,6 @@
     <echo message="       setting the property 'plt.error.log'; default: popup)" />
     <echo message="clean-can-fail: Whether the failure of a 'clean' operation can halt" />
     <echo message="                the build (default: yes)" />
-    <echo message="skip-tag: When making a release, add -Dskip-tag=true to avoid" />
-    <echo message="          creating a new tag in the Subversion repository." />
   </target>
   
   
@@ -399,21 +397,21 @@
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
 
-  <target name="test-15" depends="compile-15"
+  <target name="test-15" depends="compile-15" unless="skip-test"
           description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="do-test-target" value="do-test-15" />
     </antcall>
   </target>
   
-  <target name="test-14" depends="compile-14"
+  <target name="test-14" depends="compile-14" unless="skip-test"
           description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="do-test-target" value="do-test-14" />
     </antcall>
   </target>
   
-  <target name="test-14-in-15" depends="compile-14, assert-15"
+  <target name="test-14-in-15" depends="compile-14, assert-15" unless="skip-test"
           description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="do-test-target" value="do-test-14-in-15" />
@@ -1011,24 +1009,16 @@
     </exec>
   </target>
 
-  <target name="tag" depends="update, resolve-version-tag" 
+  <target name="tag" depends="update, resolve-version-tag" unless="skip-tag"
           description="Copy the working copy to a new Subversion tag (after updating)">
-    <if>
-      <equals arg1="${skip-tag}" arg2="true" />
-      <then>
-        <echo message="SKIPPING: Creating a new Subversion tag with name ${version-tag}"/>
-      </then>
-      <else>
-        <echo message="Creating a new Subversion tag with name ${version-tag}"/>
-        <exec executable="svn" failonerror="yes">
-          <arg value="copy" />
-          <arg value="${basedir}" />
-          <arg value="${svn-repository}/tags/${version-tag}" />
-          <arg value="-m" />
-          <arg value="Created tag ${version-tag}" />
-        </exec>
-      </else>
-    </if>
+    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="-m" />
+      <arg value="Created tag ${version-tag}" />
+    </exec>
   </target>
   
   <target name="branch" depends="update" 
@@ -1053,23 +1043,41 @@
        Release Targets
        *************** -->
        
-  <target name="release-stable" description="Generate all release files tagged with 'stable' and create a Subversion tag for this release">
+  <target name="release-stable" description="Generate release files with a 'stable' version; create a corresponding Subversion tag">
     <antcall target="release">
       <param name="tag-append" value="-stable" />
       <param name="is-development" value="no" />
     </antcall>
   </target>
 
-  <target name="release-beta" description="Generate all release files tagged with 'beta' and create a Subversion tag for this release">
+  <target name="release-beta" description="Generate release files with a 'beta' version; create a corresponding Subversion tag">
     <antcall target="release">
       <param name="tag-append" value="-beta" />
       <param name="is-development" value="no" />
     </antcall>
   </target>
        
+  <target name="release-local-stable" description="Generate release files with a 'stable' version (does not touch Subversion)">
+    <antcall target="release-stable">
+      <param name="skip-tag" value="true" />
+    </antcall>
+  </target>
+
+  <target name="release-local-beta" description="Generate release files with a 'beta' version (does not touch Subversion)">
+    <antcall target="release-beta">
+      <param name="skip-tag" value="true" />
+    </antcall>
+  </target>
+       
+  <target name="release-local" description="Generate release files with a devel version (does not touch Subversion)">
+    <antcall target="release">
+      <param name="skip-tag" value="true" />
+    </antcall>
+  </target>
+  
   <target name="release"
           depends="update, build, tag, src-zip, jar-app, mac-app, windows-app, javadoc-zip"
-          description="Generate all release files (after building) and create a Subversion tag for this release">
+          description="Generate release files with a devel version; create a corresponding Subversion tag">
     <delete dir="${version-tag}" />
   </target>
   
@@ -1088,7 +1096,14 @@
     </copy>
     <copy file="${ant.project.name}.jar" 
           todir="${mac-app-dir}/${readable-project-name}.app/Contents/Resources/Java" />
-    <zip destfile="${version-tag}-osx.zip" basedir="${mac-app-dir}" />
+    <!-- A .zip file would be more convenient, because it unzips in one step.  Unfortunately,
+         permissions in .zip files don't seem to be supported before OS X 10.5. -->
+    <tar tarfile="${version-tag}-osx.tar.gz" compression="gzip">
+      <tarfileset dir="${mac-app-dir}" includes="${readable-project-name}.app/**"
+                  excludes="${readable-project-name}.app/Contents/MacOS/${readable-project-name}" />
+      <tarfileset dir="${mac-app-dir}" mode="755"
+                  includes="${readable-project-name}.app/Contents/MacOS/${readable-project-name}" />
+    </tar>
   </target>
   
   <target name="windows-app" depends="assert-jar-exists, assert-launch4j-exists, resolve-version-tag">
@@ -1112,27 +1127,16 @@
          includes="${readable-project-name}.exe" />
   </target>
 
-  <target name="src-zip" depends="resolve-version-tag">
+  <target name="src-zip" depends="resolve-version-tag" unless="skip-tag">
     <echo message="Creating ${version-tag}-src.zip" />
-     <if>
-      <equals arg1="${skip-tag}" arg2="true" />
-      <then>
-        <zip destfile="${version-tag}-src.zip">
-          <zipfileset dir="src" prefix="${version-tag}/src" />
-        </zip>
-      </then>
-      <else>
-        <echo message="Creating a new Subversion tag with name ${version-tag}"/>
-        <exec executable="svn" failonerror="yes">
-          <arg value="export" />
-          <arg value="${svn-repository}/tags/${version-tag}" />
-          <arg value="${version-tag}/src" />
-        </exec>
-        <zip destfile="${version-tag}-src.zip">
-          <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
-        </zip>
-      </else>
-    </if>
+    <exec executable="svn" failonerror="yes">
+      <arg value="export" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="${version-tag}/src" />
+    </exec>
+    <zip destfile="${version-tag}-src.zip">
+      <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
+    </zip>
   </target>
   
   <target name="javadoc-zip" depends="javadoc, resolve-version-tag">
@@ -1152,24 +1156,7 @@
     </zip>
   </target>
 
-  <target name="local-release-stable" description="Generate all release files tagged with 'stable', but do not touch the Subversion repository">
-    <antcall target="release-stable">
-      <param name="skip-tag" value="true" />
-    </antcall>
-  </target>
 
-  <target name="local-release-beta" description="Generate all release files tagged with 'beta', but do not touch the Subversion repository">
-    <antcall target="release-beta">
-      <param name="skip-tag" value="true" />
-    </antcall>
-  </target>
-       
-  <target name="local-release" description="Generate all release files (after building), but do not touch the Subversion repository">
-    <antcall target="release">
-      <param name="skip-tag" value="true" />
-    </antcall>
-  </target>
-  
   <!-- ********************************
        Misc Occasionally-Useful Targets
        ******************************** -->
