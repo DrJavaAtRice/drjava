@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Question rule in the indentation decision tree.  Determines if the current line starts a new "phrase" within a 
   * parenthesized expression.  Specifically, this rule determines if the previous line ends in a comma, semicolon, 
@@ -48,12 +49,10 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  */
 public class QuestionNewParenPhrase extends IndentRuleQuestion {
   
-  /**
-   * Constructs a new rule to determine if the current line starts
-   * new paren phrase.
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
+  /** Constructs a new rule to determine if the current line starts new paren phrase.
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    */
   public QuestionNewParenPhrase(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
   }
@@ -72,10 +71,7 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
       
       if (startLine > 0) {
         // Find previous delimiter (looking in paren phrases)
-        char[] delims = {';', ',', '(', '[', 
-          '&', '|', '+', '-', '*', '/', '%', 
-          '=', '<', '>', '}'
-        };
+        char[] delims = {';', ',', '(', '[', '&', '|', '+', '-', '*', '/', '%', '=', '<', '>', '}'};
         int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
         if (prevDelim == -1) {
           return false;
@@ -86,7 +82,9 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
         if (nextNonWS == -1) {
           nextNonWS = startLine;
         }
-        return (nextNonWS >= startLine);
+        boolean result = nextNonWS >= startLine;
+//        if (! result) Utilities.show("QuestionNewParenPhrase is returning false at pos " + here);
+        return result;
       }
     }
     catch (BadLocationException e) {

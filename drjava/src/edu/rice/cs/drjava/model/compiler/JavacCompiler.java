@@ -40,13 +40,11 @@ import java.util.List;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
-/**
- * An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
- * To support loading via reflection, all subclasses are assumed to have a public constructor with
- * a matching signature.
- * 
- *  @version $Id$
-*/
+/** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
+  * To support loading via reflection, all subclasses are assumed to have a public constructor with
+  * a matching signature.
+  *  @version $Id$
+  */
 public abstract class JavacCompiler implements CompilerInterface {
   
   private JavaVersion.FullVersion _version;

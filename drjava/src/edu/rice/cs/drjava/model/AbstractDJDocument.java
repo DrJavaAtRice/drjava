@@ -1096,7 +1096,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         final Query key = new Query.IndentOfCurrStmt(lineStart, delims, whitespace);
         final String cached = (String) _checkCache(key);
         if (cached != null) return cached;
-
+        
         // Find the previous delimiter (typically an enclosing brace or closing symbol) skipping over balanced braces
         // that are not delims
         boolean reachedStart = false;
@@ -1129,7 +1129,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { releaseReadLock(); }
 //    Utilities.show("getIdentCurrStmt(...) call completed");     
   }
-
+  
   /** Gets the white space prefix preceding the first non-blank/tab character on the line identified by pos. 
     * Assumes that line has nonWS character. */
   public String getWSPrefix(int pos) {
@@ -1170,7 +1170,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   private static final String blank16 = makeBlankString(16);
   
   /** Gets a string consisting of n blanks.  The values for n <= 16 are stored in a switch table.*/
-  private static String getBlankString(int n) {
+  public static String getBlankString(int n) {
     switch (n) {
       case 0: return blank0;
       case 1: return blank1;
@@ -1422,13 +1422,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           }
           
           // Return position of matching char
-          _storeInCache(key, reducedPos, reducedPos);
+          _storeInCache(key, reducedPos, reducedPos + 1);  // last argument was reducedPos
           _setCurrentLocation(origPos);
           return reducedPos;
         }
         
         // No matching char found
-        _storeInCache(key, -1, endPos - 1);
+        _storeInCache(key, -1, Integer.MAX_VALUE);  // Any change to the document invalidates this result!
         _setCurrentLocation(origPos);
         return -1;
       }

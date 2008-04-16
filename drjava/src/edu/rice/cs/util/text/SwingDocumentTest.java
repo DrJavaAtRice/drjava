@@ -42,8 +42,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 /** Tests the SwingDocument.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class SwingDocumentTest extends DrJavaTestCase {
   protected SwingDocument _doc;
   

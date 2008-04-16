@@ -117,26 +117,23 @@ public class ScrollableDialog implements Serializable {
     //_textArea.requestDefaultFocus();
   }
 
-  /**
-   * Adds buttons to this dialog's button panel.
-   * Subclasses can override this to add different buttons.
-   */
+  /** Adds buttons to this dialog's button panel.
+    * Subclasses can override this to add different buttons.
+    */
   protected void _addButtons() {
     _buttonPanel.add(new JButton(_okAction));
   }
 
-  /** A default "OK" action which disposes this dialog when invoked.
-*/
+  /** A default "OK" action which disposes this dialog when invoked. */
   private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       _dialog.dispose();
     }
   };
 
-  /**
-   * Sets the font for the text area in this dialog.
-   * @param f New font for the text
-   */
+  /** Sets the font for the text area in this dialog.
+    * @param f New font for the text
+    */
   public void setTextFont(Font f) {
     _textArea.setFont(f);
   }

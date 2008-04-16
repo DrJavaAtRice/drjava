@@ -114,13 +114,13 @@ public class KeyBindingManager {
     if (ksd == null) return null;
     return ksd.getName();
   }
-/*
- public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
-    KeyStroke ks = DrJava.getConfig().getSetting(opt);
-    Action a = _keyToActionMap.get(ks);
-    DrJava.getConfig().addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));
-  }
-*/
+
+// public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
+//    KeyStroke ks = DrJava.getConfig().getSetting(opt);
+//    Action a = _keyToActionMap.get(ks);
+//    DrJava.getConfig().addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));
+//  }
+
   /** Assigns the selection action with the given name to the combination of the shift key and the given key stroke
     * option.  Also adds new KeyStrokOptionListeners to the non-shifted Actions
     * @param opt the KeyStroke Option of the Action

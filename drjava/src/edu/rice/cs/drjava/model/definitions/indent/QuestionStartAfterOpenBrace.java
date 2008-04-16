@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
 /** Determines whether or not the closest non-whitespace character previous to the start of the current line (excluding 
-  * any characters inside comments or strings) is an open brace.
+  * any characters inside comments or strings) is an open CURLY brace (class is misnamed!).
   *
   * @version $Id$
   */

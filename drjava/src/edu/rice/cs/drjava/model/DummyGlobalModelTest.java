@@ -42,93 +42,70 @@ import java.io.File;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-/**
-* DummyGetDocumentsTest for unit testing DummyGetDocuments.  Uses
-* JUnit for testing.
-*
-* @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
-* @version $Id$
-*/
+/** DummyGetDocumentsTest for unit testing DummyGetDocuments.  Uses JUnit for testing.
+  * @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
+  * @version $Id$
+  */
 public class DummyGlobalModelTest extends DrJavaTestCase {
-    
-
-    /**
-    * Creates a new instance of DummyGetDocuments, calls
+  
+  /** Creates a new instance of DummyGetDocuments, calls
     * getDocumentsForFile() and ensures the method throws an
     * UnsupportedOperationException. 
-    *
     * @exception java.io.IOException if an error occurs
     */
-    public void testGetDocumentForFile() throws java.io.IOException {
- DummyGlobalModel dummy = new DummyGlobalModel();
- try {
-     dummy.getDocumentForFile(new File(""));
- }
- catch (UnsupportedOperationException e) {
-     assertTrue("This message should never be seen", true);
-     return;
- }
- fail("expected that UnsupportedOperationException is thrown");
+  public void testGetDocumentForFile() throws java.io.IOException {
+    DummyGlobalModel dummy = new DummyGlobalModel();
+    try { dummy.getDocumentForFile(new File("")); }
+    catch (UnsupportedOperationException e) {
+      assertTrue("This message should never be seen", true);
+      return;
     }
-
-    /**
-    * Creates a new instance of DummyGetDocuments, calls
+    fail("expected that UnsupportedOperationException is thrown");
+  }
+  
+  /** Creates a new instance of DummyGetDocuments, calls
     * getDocumentForFile() and ensures the method throws an
     * UnsupportedOperationException.
-    *
     * @exception java.io.IOException if an error occurs
     */
-    public void testIsAlreadyOpen() throws java.io.IOException {
- DummyGlobalModel dummy = new DummyGlobalModel();
- try {
-     dummy.getDocumentForFile(new File(""));
- }
- catch (UnsupportedOperationException e) {
-     assertTrue("This message should never be seen", true);
-     return;
- }
- fail("expected that UnsupportedOperationException is thrown");
+  public void testIsAlreadyOpen() throws java.io.IOException {
+    DummyGlobalModel dummy = new DummyGlobalModel();
+    try { dummy.getDocumentForFile(new File("")); }
+    catch (UnsupportedOperationException e) {
+      assertTrue("This message should never be seen", true);
+      return;
     }
-
-
-    /**
-    * Creates a new instance of DummyGetDocuments, calls
+    fail("expected that UnsupportedOperationException is thrown");
+  }
+  
+  
+  /** Creates a new instance of DummyGetDocuments, calls
     * getOpenDefinitionsDocuments() and ensures the method throws an
     * UnsupportedOperationException.
-    *
     * @exception java.io.IOException if an error occurs
     */
-    public void testGetDefinitionsDocuments() {
- DummyGlobalModel dummy = new DummyGlobalModel();
- try {
-     dummy.getOpenDefinitionsDocuments();
- }
- catch (UnsupportedOperationException e) {
-     assertTrue("This message should never be seen", true);
-     return;
- }
- fail("expected that UnsupportedOperationException is thrown");
+  public void testGetDefinitionsDocuments() {
+    DummyGlobalModel dummy = new DummyGlobalModel();
+    try { dummy.getOpenDefinitionsDocuments(); }
+    catch (UnsupportedOperationException e) {
+      assertTrue("This message should never be seen", true);
+      return;
     }
-
-
-    /**
-    * Creates a new instance of DummyGetDocuments, calls
-    * hasModifiedDocuments() and ensures the method throws an
+    fail("expected that UnsupportedOperationException is thrown");
+  }
+  
+  
+  /** Creates a new instance of DummyGetDocuments, calls hasModifiedDocuments() and ensures the method throws an
     * UnsupportedOperationException.
-    *
     * @exception java.io.IOException if an error occurs
     */
-    public void testHasModifiedDocuments() {
- DummyGlobalModel dummy = new DummyGlobalModel();
- try {
-     dummy.hasModifiedDocuments();
- }
- catch (UnsupportedOperationException e) {
-     assertTrue("This message should never be seen", true);
-     return;
- }
- fail("expected that UnsupportedOperationException is thrown");
+  public void testHasModifiedDocuments() {
+    DummyGlobalModel dummy = new DummyGlobalModel();
+    try { dummy.hasModifiedDocuments(); }
+    catch (UnsupportedOperationException e) {
+      assertTrue("This message should never be seen", true);
+      return;
     }
- 
-
+    fail("expected that UnsupportedOperationException is thrown");
+  }
 }

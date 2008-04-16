@@ -91,19 +91,20 @@ public class Indenter {
       rule26 = new QuestionLineContains(':', rule27, rule30),
       rule25 = new QuestionStartingNewStmt(rule26, rule31),  // Is this line the start of a new statement?
       rule24 = new QuestionPrevLineStartsWith("@", rule60, rule25),  // Does this line follow an annotation?  ??
-      rule23 = rule36,
-      rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'},rule23,rule24),  // Is this line an element of an array initializer?
-      rule21 = rule36,
-      rule20 = new QuestionStartAfterOpenBrace(rule21, rule22),  // does the preceding line end with an open brace?
+      rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'}, rule36, rule24),  // Is this line an element of an array initializer?
+      rule20 = new QuestionStartAfterOpenBrace(rule36, rule22),  // does the preceding line end with an open curly brace?
       rule19 = new ActionStartStmtOfBracePlus(""),  // indents the line to match whitespace preceding the line enclosing brace
       // ANONYMOUS inner class formatting breaks here?
       rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // Does current line begin with '}' ignoring comment text
       rule17 = new QuestionBraceIsCurly(rule18, rule24),  // is brace enclosing this line '{' (as opposed to quotes, etc.); '(', '[' already excluded
       rule16 = new ActionBracePlus(" " + oneLevel),
       rule15 = new ActionBracePlus(" "),
-      rule38 = new QuestionCurrLineStartsWith(")", rule30, rule15), // does current line start with ')'?
-      rule14 = new QuestionNewParenPhrase(rule38, rule16),         // is current line new phrase after open paren?
-      rule13 = new QuestionBraceIsParenOrBracket(rule14, rule17),  // toot of non-comment indent tree: is brace enclosing start of this line in { '(', '['}?  
+      // root of non-comment indent tree: is brace enclosing start of this line in { '(', '['}?  
+      rule38 = new ActionBracePlus(""),
+      rule14 = new QuestionNewParenPhrase(rule15, rule16),  // is current non ) line a new phrase after open paren?
+      rule23 = new QuestionNewParenPhrase(rule30, rule38),  // is current ) line a new phrase after open paren?
+      rule21 = new QuestionCurrLineStartsWith(")", rule23, rule14), // does current line start with ')'?
+      rule13 = new QuestionBraceIsParenOrBracket(rule21, rule17),   
 
       // Comment tree
       rule12 = new ActionStartPrevLinePlus(""),
@@ -136,7 +137,7 @@ public class Indenter {
 
     _topRule = rule01;
   }
-
+    
   /** Indents the current line based on a decision tree which determines the indent based on context.
     * @param doc document containing line to be indented  Assumes that reduced lock is already held.
     * @return true if the condition tested by the top rule holds, false otherwise
