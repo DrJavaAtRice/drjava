@@ -41,85 +41,72 @@ import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.io.*;
+import java.util.regex.Pattern;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.text.TextUtil;
 
-/** Class representing values that are always up-to-date and that can be inserted as variables in external processes.
+/** Class representing a lazy lists of files that are found recursively inside a start directory.
   * @version $Id$
   */
-public abstract class EagerFileListProperty extends EagerProperty {
-  /** Separating string. */
-  protected String _sep;
-  /** Relative directory. */
-  protected String _dir;
-  /** Create an eager property. */
-  public EagerFileListProperty(String name, String sep, String dir) {
-    super(name);
-    _sep = sep;
-    _dir = dir;
+public class RecursiveFileListProperty extends LazyFileListProperty {
+  /** Start directory. */
+  protected String _start;
+  /** Create an recursive file list property. */
+  public RecursiveFileListProperty(String name, String sep, String dir, String start) {
+    super(name, sep, dir);
+    _start = start;
     resetAttributes();
   }
   
-  /** Return the value of the property. If it is not current, update first. */
-  public String getCurrent() {
-    update();
-    if (_value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
-    _isCurrent = true;
-    return _value;
+  public static class RegexFilter implements FileFilter {
+    protected String _regex;
+    public RegexFilter(String regex) {
+      _regex = regex;
+    }
+    public boolean accept(File pathname) {
+      return pathname.getName().matches(_regex);
+    }
   }
-
-  /** Return the value. */
-  public String toString() {
-    return getCurrent();
-  }
-  
-  /** Return true if the value is current. */
-  public boolean isCurrent() { return true; }
-  
-  /** Mark the value as stale. */
-  public void invalidate() {
-    // nothing to do, but tell those who are listening
-    invalidateOthers(new HashSet<DrJavaProperty>());
+  public static class FileMaskFilter extends RegexFilter {
+    public FileMaskFilter(String mask) {
+      super(TextUtil.regexEscape(mask)
+              .replaceAll("\\\\\\*",".*") // turn \* into .*
+              .replaceAll("\\\\\\?",".")); // turn \? into .
+    }
   }
   
   /** Abstract factory method specifying the list. */
-  protected abstract List<File> getList();
-  
-  /** Update the value by concatenating the list of documents. */
-  public void update() {
-    List<File> l = getList();
-    if (l.size()==0) { _value = ""; return; }
+  protected List<File> getList() {
+    FileMaskFilter fFilter = new FileMaskFilter(_attributes.get("filter"));
+    FileMaskFilter fDirFilter = new FileMaskFilter(_attributes.get("dirfilter"));
+    String start = StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
+    start = StringOps.unescapeSpacesWith1bHex(start);
+    Iterable<File> it = edu.rice.cs.plt.io.IOUtil.listFilesRecursively(new File(start), fFilter, fDirFilter);
     StringBuilder sb = new StringBuilder();
-    for(File fil: l) {
-      sb.append(_attributes.get("sep"));
-      try {
-        File f = FileOps.makeRelativeTo(fil,
-                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-        try {
-          f = f.getCanonicalFile();
-        }
-        catch(IOException ioe) { }
-        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
-        sb.append(s);
-      }
-      catch(IOException e) { /* ignore */ }
-      catch(SecurityException e) { /* ignore */ }
+    ArrayList<File> l = new ArrayList<File>();
+    for(File f: it) {
+      l.add(f);
     }
-    _value = sb.toString().substring(_sep.length());
+    return l;
   }
   
   /** Reset the attributes. */
   public void resetAttributes() {
     _attributes.clear();
     _attributes.put("sep", _sep);
-    _attributes.put("dir", _dir);
+    _attributes.put("rel", _dir);
+    _attributes.put("dir", _start);
+    _attributes.put("filter", "*");
+    _attributes.put("dirfilter", "*");
   }
 
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
-    EagerFileListProperty o = (EagerFileListProperty)other;
+    RecursiveFileListProperty o = (RecursiveFileListProperty)other;
     return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
   }
   

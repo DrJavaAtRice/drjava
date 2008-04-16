@@ -45,37 +45,21 @@ import java.io.File;
 import java.io.IOException;
 import edu.rice.cs.util.StringOps;
 
-/** Class representing values that are always up-to-date and that can be inserted as variables in external processes.
+/** Class representing file lists that are not evaluated until necessary.
   * @version $Id$
   */
-public abstract class EagerFileListProperty extends EagerProperty {
+public abstract class LazyFileListProperty extends DrJavaProperty {
   /** Separating string. */
   protected String _sep;
   /** Relative directory. */
   protected String _dir;
-  /** Create an eager property. */
-  public EagerFileListProperty(String name, String sep, String dir) {
+  /** Create an lazy file list property. */
+  public LazyFileListProperty(String name, String sep, String dir) {
     super(name);
     _sep = sep;
     _dir = dir;
     resetAttributes();
   }
-  
-  /** Return the value of the property. If it is not current, update first. */
-  public String getCurrent() {
-    update();
-    if (_value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
-    _isCurrent = true;
-    return _value;
-  }
-
-  /** Return the value. */
-  public String toString() {
-    return getCurrent();
-  }
-  
-  /** Return true if the value is current. */
-  public boolean isCurrent() { return true; }
   
   /** Mark the value as stale. */
   public void invalidate() {
@@ -83,6 +67,9 @@ public abstract class EagerFileListProperty extends EagerProperty {
     invalidateOthers(new HashSet<DrJavaProperty>());
   }
   
+  /** Return true if the value is current. */
+  public boolean isCurrent() { return false; }
+
   /** Abstract factory method specifying the list. */
   protected abstract List<File> getList();
   
@@ -92,10 +79,16 @@ public abstract class EagerFileListProperty extends EagerProperty {
     if (l.size()==0) { _value = ""; return; }
     StringBuilder sb = new StringBuilder();
     for(File fil: l) {
-      sb.append(_attributes.get("sep"));
+      sb.append(StringOps.replaceVariables(_attributes.get("sep"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
       try {
-        File f = FileOps.makeRelativeTo(fil,
-                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+        File f = fil;
+        if (_attributes.get("rel").equals("/")) {
+          f = f.getAbsoluteFile();
+        }
+        else {
+          f = FileOps.makeRelativeTo(fil,
+                                     new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+        }
         try {
           f = f.getCanonicalFile();
         }
@@ -113,13 +106,13 @@ public abstract class EagerFileListProperty extends EagerProperty {
   public void resetAttributes() {
     _attributes.clear();
     _attributes.put("sep", _sep);
-    _attributes.put("dir", _dir);
+    _attributes.put("rel", _dir);
   }
 
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
-    EagerFileListProperty o = (EagerFileListProperty)other;
+    LazyFileListProperty o = (LazyFileListProperty)other;
     return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
   }
   

@@ -3556,6 +3556,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
+    PropertyMaps.ONLY.setProperty("Misc", new RecursiveFileListProperty("find", File.pathSeparator, DEF_DIR, DEF_DIR));
+    
     // Project
     PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode") {
       public void update() {
@@ -3611,15 +3613,21 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.build.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getBuildDirectory(); }
     }));
-    // TODO:
-//    PropertyMaps.ONLY.setProperty("Project", new EagerFileListProperty("project.class.files", File.pathSeparator, DEF_DIR) {
-//      protected List<File> getList() { return _model.getClassFiles(); }
-//      // make it lazy again!
-//      public String toString() {
-//        return _value;
-//      }
-//      public boolean isCurrent() { return false; }
-//    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    RecursiveFileListProperty classFilesProperty = new RecursiveFileListProperty("project.class.files", 
+                                                                                 File.pathSeparator,
+                                                                                 DEF_DIR,
+                                                                                 _model.getBuildDirectory().getAbsolutePath()) {
+      /** Reset the attributes. */
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("sep", _sep);
+        _attributes.put("rel", _dir);
+        _attributes.put("dir", _model.getBuildDirectory().getAbsolutePath());
+        _attributes.put("filter", "*.class");
+        _attributes.put("dirfilter", "*");
+      }
+    };
+    PropertyMaps.ONLY.setProperty("Project", classFilesProperty);
   }
   
   /** Set a new painters for existing breakpoint highlights. */

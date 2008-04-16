@@ -1353,24 +1353,7 @@ public interface OptionConstants {
   /** The lowest access level of classes and members to include in the javadoc. */
   public static final ForcedChoiceOption NEW_VERSION_NOTIFICATION =
     new ForcedChoiceOption("new.version.notification", NEW_VERSION_NOTIFICATION_CHOICES.get(1), NEW_VERSION_NOTIFICATION_CHOICES);
-  
-  /** URLs to check for new versions. */
-  public static final ArrayList<String> NEW_VERSION_NOTIFICATION_URLS =
-    VersionNotificationURLs.evaluate();
-  static class VersionNotificationURLs {
-    public static ArrayList<String> evaluate() {
-      ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add("http://www.drjava.org/LATEST_VERSION.TXT");
-      aList.add("http://www.drjava.org/LATEST_VERSION.TXT\0"+
-                "http://www.drjava.org/LATEST_BETA_VERSION.TXT");
-      aList.add("http://www.drjava.org/LATEST_VERSION.TXT\0"+
-                "http://www.drjava.org/LATEST_BETA_VERSION.TXT\0"+
-                "http://www.drjava.org/LATEST_DEV_VERSION.TXT");
-      aList.add("");
-      return aList;
-    }
-  }
-  
+
   /** The last time we checked for a new version. */
   public static final LongOption LAST_NEW_VERSION_NOTIFICATION = new LongOption("new.version.notification.last", (long)0);  
   
