@@ -109,9 +109,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The interactions pane bundled with this document.  In contrast to a standard MVC decomposition, where the model
     * and the view are independent components, an interactions model inherently includes a prompt and a cursor marking
     * where the next input expression (in progress) begins and where the cursor is within that expression.  In Swing, the
-    * view contains the cursor.  Our InteractionsDocument (a form of ConsoleDocument) contains the prompt.
+    * view contains the cursor.  Our InteractionsDocument (a form of ConsoleDocument) contains the prompt.  Public only for
+    * testing purposes; otherwise protected.
     */
-  protected volatile InteractionsPane _pane;  // initially null
+  public volatile InteractionsPane _pane;  // initially null
   
   /** Banner displayed at top of the interactions document */
   private volatile String _banner;
@@ -469,12 +470,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public String getConsoleInput() { return _inputListener.getConsoleInput(); }
   
   /** Sets the listener for any type of single-source input event. The listener can only be changed with the 
-    * changeInputListener method.
+    * changeInputListener method.except in testing code which needs to install a different listener after the
+    * interactiona controller has been created (method testConsoleInput in GlobalModelIOTest).
     * @param listener a listener that reacts to input requests
     * @throws IllegalStateException if the input listener is locked
     */
   public void setInputListener(InputListener listener) {
-    if (_inputListener == NoInputListener.ONLY) { _inputListener = listener; }
+    if (_inputListener == NoInputListener.ONLY || Utilities.TEST_MODE) { _inputListener = listener; }
     else throw new IllegalStateException("Cannot change the input listener until it is released.");
   }
   
@@ -673,15 +675,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Advances the caret in the interactions pane by n characters and scrolls the pane to make it visible. */
   protected void advanceCaret(final int n) {
-    if (Utilities.TEST_MODE && _pane == null) return;  // Kludge to accommodate legacy unit tests
-    Utilities.invokeLater(new Runnable() {  // initialize caret in the interactions pane
+    /* In legacy unit tests, _pane can apparently be null in some cases.  It can also be mutated in the middle of run() 
+       in InteractionsDJDocumentTest.testStylesListContentAndReset. */
+    final InteractionsPane pane = _pane;  
+    if (Utilities.TEST_MODE && pane == null) return;  // Some legacy unit tests do not set up an interactions pane
+    
+    Utilities.invokeLater(new Runnable() {  // initialize caret in the interactions pane 
       public void run() {
-//        _pane.validate();
-        int caretPos = _pane.getCaretPosition();
+//        pane.validate();
+        int caretPos = pane.getCaretPosition();
         int newCaretPos = Math.min(caretPos + n, _document.getLength());
-        _pane.setCaretPos(newCaretPos);
-        int pos = _pane.getCaretPosition();
-        try { _pane.scrollRectToVisible(_pane.modelToView(pos)); }
+        pane.setCaretPos(newCaretPos);
+        int pos = pane.getCaretPosition();
+        try { pane.scrollRectToVisible(pane.modelToView(pos)); }
         catch(BadLocationException e) { throw new UnexpectedException(e); }
       } 
     });

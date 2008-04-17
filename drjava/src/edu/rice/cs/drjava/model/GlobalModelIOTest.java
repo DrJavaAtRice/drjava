@@ -974,14 +974,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertInteractionEndCount(4);
     _model.removeListener(listener);
     
-    
     _log.log("testSaveClearAndLoadHistory completed");
   }
   
-  /**
-   * Loads two history files, one whose statements end in semicolons, and one whose statements do not.
-   * Makes sure that it doesn't matter.
-   */
+  /** Loads two history files, one whose statements end in semicolons, and one whose statements do not.
+    * Makes sure that it doesn't matter.
+    */
   public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException, 
     InterruptedException {
     

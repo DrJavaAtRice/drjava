@@ -62,6 +62,7 @@ import java.lang.ref.WeakReference;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.RemoteControlClient;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
@@ -109,8 +110,9 @@ import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.StringOps;
 
+import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
-import edu.rice.cs.drjava.RemoteControlClient;
+import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
@@ -270,7 +272,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         f.getPath().endsWith(PROJECT_FILE_EXTENSION) ||
         f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
-    public String getDescription() { return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")"; }
+    public String getDescription() { 
+      return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
+    }
   };
   
   /** Filter for any files (*.*) */
@@ -595,7 +599,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
 
-  private final Action _exportProjectInOldFormatAction = new AbstractAction("Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format") {
+  private final Action _exportProjectInOldFormatAction = 
+    new AbstractAction("Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format") {
     public void actionPerformed(ActionEvent ae) {
       File cpf = _currentProjFile;
       _currentProjFile = FileOps.NULL_FILE;
@@ -898,7 +903,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           // "Clipboard History" dialog position and size.
           if ((DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue())
                 && (_clipboardHistoryDialog != null) && (_clipboardHistoryDialog.getFrameState() != null)) {
-            DrJava.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, (_clipboardHistoryDialog.getFrameState().toString()));
+            DrJava.getConfig().
+              setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, (_clipboardHistoryDialog.getFrameState().toString()));
           }
           else {
             // Reset to defaults to restore pristine behavior.
@@ -1291,9 +1297,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     PredictiveInputModel<GoToFileListEntry> pim =
-      new PredictiveInputModel<GoToFileListEntry>(true,
-                                                  new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
-                                                  list);
+      new PredictiveInputModel<GoToFileListEntry>(true, new PrefixStrategy<GoToFileListEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     odd.acquireReadLock();
     String mask = "";
@@ -1444,11 +1448,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
-      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>> strategies =
-        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>>();
-      strategies.add(new PredictiveInputModel.FragmentStrategy<JavaAPIListEntry>());
-      strategies.add(new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>());
-      strategies.add(new PredictiveInputModel.RegExStrategy<JavaAPIListEntry>());
+      // Note: PredictiveInputModel.* is statically imported
+      java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
+        new java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>>();
+      strategies.add(new FragmentStrategy<JavaAPIListEntry>());
+      strategies.add(new PrefixStrategy<JavaAPIListEntry>());
+      strategies.add(new RegExStrategy<JavaAPIListEntry>());
       List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
         = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
       actions.add(okAction);
@@ -1562,9 +1567,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       return;
     }
     PredictiveInputModel<JavaAPIListEntry> pim =
-      new PredictiveInputModel<JavaAPIListEntry>(true,
-                                                 new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>(),
-                                                 _javaAPIList);
+      new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), _javaAPIList);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     odd.acquireReadLock();
     String mask = "";
@@ -1798,11 +1801,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
-      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<ClassNameAndPackageEntry>> strategies =
-        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<ClassNameAndPackageEntry>>();
-      strategies.add(new PredictiveInputModel.FragmentStrategy<ClassNameAndPackageEntry>());
-      strategies.add(new PredictiveInputModel.PrefixStrategy<ClassNameAndPackageEntry>());
-      strategies.add(new PredictiveInputModel.RegExStrategy<ClassNameAndPackageEntry>());
+      // Note: PredictiveInputModel.* is statically imported
+      java.util.ArrayList<MatchingStrategy<ClassNameAndPackageEntry>> strategies =
+        new java.util.ArrayList<MatchingStrategy<ClassNameAndPackageEntry>>();
+      strategies.add(new FragmentStrategy<ClassNameAndPackageEntry>());
+      strategies.add(new PrefixStrategy<ClassNameAndPackageEntry>());
+      strategies.add(new RegExStrategy<ClassNameAndPackageEntry>());
       List<PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>> actions
         = new ArrayList<PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>>();
       actions.add(okAction);
@@ -1884,9 +1888,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       addJavaAPIToList(list);
     }
     
+    
     PredictiveInputModel<ClassNameAndPackageEntry> pim = 
-      new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PredictiveInputModel.PrefixStrategy<ClassNameAndPackageEntry>(),
-                                                         list);
+      new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     odd.acquireWriteLock();
     boolean uniqueMatch = true;
@@ -2923,8 +2927,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      }
 //    };
 //    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
-//    parsingEnabledListener.optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
-//                                                                  DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
+//    parsingEnabledListener.
+//      optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
+//                                             DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
     
 //    Utilities.show("Global Model started");
     
@@ -3064,10 +3069,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // add recent file and project manager
     
-    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu, new RecentFileManager.RecentFileAction() { public void actionPerformed(FileOpenSelector selector) { open(selector); } }, OptionConstants.RECENT_FILES);
+    RecentFileAction fileAct = new RecentFileManager.RecentFileAction() { 
+      public void actionPerformed(FileOpenSelector selector) { open(selector); }
+    }; 
+    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu, fileAct, 
+                                               OptionConstants.RECENT_FILES);
     
-    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount()-2, _projectMenu, new RecentFileManager.RecentFileAction() { public void actionPerformed(FileOpenSelector selector) { openProject(selector); } },  OptionConstants.RECENT_PROJECTS);
-    
+    RecentFileAction projAct = new RecentFileManager.RecentFileAction() { 
+      public void actionPerformed(FileOpenSelector selector) { openProject(selector); } 
+    };
+    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu, projAct, 
+                                                  OptionConstants.RECENT_PROJECTS);
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());
     
@@ -3477,34 +3489,24 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public void update() {
         try {
-          File f;
-          if (_attributes.get("name").equals("")) {
-            File dir = new File(System.getProperty("java.io.tmpdir"));
-            if (!_attributes.get("dir").equals("")) {
-              dir = new File(_attributes.get("dir"));
-            }
-            f = new File(dir, "DrJava-Execute-"+System.currentTimeMillis()+"-"+(_r.nextInt() & 0xffff)+".tmp");
-            if (!_attributes.get("dir").equals("")) {
-              f = new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT)),
-                           f.getName());
-            }
-          }
+          String name = _attributes.get("name");
+          String dir = _attributes.get("dir");
+          if (name.equals("")) name = "DrJava-Execute-" + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp";
+          if (dir.equals("")) dir = System.getProperty("java.io.tmpdir");
           else {
-            File dir = new File(System.getProperty("java.io.tmpdir"));
-            if (!_attributes.get("dir").equals("")) {
-              dir = new File(StringOps.unescapeSpacesWith1bHex((StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-            }
-            f = new File(dir, _attributes.get("name"));
+            String s = StringOps.replaceVariables(dir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
+            dir = StringOps.unescapeSpacesWith1bHex(s);
           }
-          try {
-            f = f.getCanonicalFile();
-          }
+   
+          File f = new File(dir, name);
+          try { f = f.getCanonicalFile(); }
           catch(IOException ioe) { }
           f.deleteOnExit();
           _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
         }
         catch(SecurityException e) { _value = "Error."; }
       }
+      
       public String getCurrent() {
         invalidate();
         final String s = super.getCurrent();
@@ -3537,12 +3539,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public void update() {
         String msg = _attributes.get("prompt");
-        if (msg==null) msg = "Please enter text for the external process.";
+        if (msg == null) msg = "Please enter text for the external process.";
         String input = _attributes.get("default");
-        if (input==null) input = "";
+        if (input == null) input = "";
         input = JOptionPane.showInputDialog(MainFrame.this, msg, input);
-        if (input==null) input = _attributes.get("default");
-        if (input==null) input = "";
+        if (input == null) input = _attributes.get("default");
+        if (input == null) input = "";
         _value = input;
       }
       public String getCurrent() {
@@ -3564,15 +3566,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
         Boolean b = _model.isProjectActive();
-        if (f.equals("int")) {
-          _value = b?"1":"0";
-        }
-        else if (f.equals("yes")) {
-          _value = b?"yes":"no";
-        }
-        else {
-          _value = b.toString();
-        }
+        if (f.equals("int")) _value = b ? "1" : "0";
+        else if (f.equals("yes")) _value = b ? "yes" : "no";
+        else _value = b.toString();
       }
       
       public void resetAttributes() {
@@ -3580,20 +3576,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.changed") {
+    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.changed") {  //TODO: factor out repeated code!
       public void update() {
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
         Boolean b = _model.isProjectChanged();
-        if (f.equals("int")) {
-          _value = b?"1":"0";
-        }
-        else if (f.equals("yes")) {
-          _value = b?"yes":"no";
-        }
-        else {
-          _value = b.toString();
-        }
+        if (f.equals("int")) _value = b ? "1" : "0";
+        else if (f.equals("yes")) _value = b ? "yes":"no";
+        else  _value = b.toString();
       }
       
       public void resetAttributes() {
@@ -3613,10 +3603,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.build.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getBuildDirectory(); }
     }));
-    RecursiveFileListProperty classFilesProperty = new RecursiveFileListProperty("project.class.files", 
-                                                                                 File.pathSeparator,
-                                                                                 DEF_DIR,
-                                                                                 _model.getBuildDirectory().getAbsolutePath()) {
+    RecursiveFileListProperty classFilesProperty = 
+      new RecursiveFileListProperty("project.class.files", File.pathSeparator, DEF_DIR,
+                                    _model.getBuildDirectory().getAbsolutePath()) {
       /** Reset the attributes. */
       public void resetAttributes() {
         _attributes.clear();
@@ -4023,7 +4012,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (d != null) {
         if (! d.isUntitled()) {
           _model.removeAuxiliaryFile(d);
-          try{
+          try {
             _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
             PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
             PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
@@ -4202,7 +4191,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _jarProjectAction.setEnabled(true);
       if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
       _resetNavigatorPane();
-//      _compileButton.setToolTipText("<html>Compile all documents in the project.source tree<br>Auxiliary and external files are excluded.</html>");
+//      _compileButton.setToolTipText("<html>Compile all documents in the project.source tree<br>" +
+//      "Auxiliary and external files are excluded.</html>");
     }
   }
   
@@ -4709,14 +4699,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         String text = "The project will be saved in XML format." + 
           "\nDo you want to change the project file's extension to \""+PROJECT_FILE_EXTENSION+"\"?";
         
-        Object[] options = {"Change to \""+PROJECT_FILE_EXTENSION+"\"", "Keep \""+fileName.substring(fileName.lastIndexOf('.'))+"\""};  
+        Object[] options = {"Change to \""+PROJECT_FILE_EXTENSION+"\"", "Keep \"" + 
+          fileName.substring(fileName.lastIndexOf('.'))+"\""};  
         int rc = 1;
         if (!Utilities.TEST_MODE) {
           rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Change Extension?", JOptionPane.YES_NO_OPTION,
                                                 JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         }
         if (rc == 0) {
-          fileName = fileName.substring(0,fileName.length()-OLD_PROJECT_FILE_EXTENSION.length()) + PROJECT_FILE_EXTENSION;
+          fileName = fileName.substring(0,fileName.length() - OLD_PROJECT_FILE_EXTENSION.length()) + 
+            PROJECT_FILE_EXTENSION;
           file = new File(fileName);
           if (! file.exists() || _verifyOverwrite()) { 
             _model.setProjectFile(file);
@@ -5289,9 +5281,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _junitFolderAction = _junit_junitFolderDecoratedAction = new DecoratedAction(_junitFolderAction, false);
     _junitAllAction = _junit_junitAllDecoratedAction = new DecoratedAction(_junitAllAction, false);
     _junitAction = _junit_junitDecoratedAction = new DecoratedAction(_junitAction, false);
-    _junitProjectAction = _junit_junitOpenProjectFilesDecoratedAction = new DecoratedAction(_junitProjectAction, false);
+    _junitProjectAction = _junit_junitOpenProjectFilesDecoratedAction = new DecoratedAction(_junitProjectAction, false);  
     _cleanAction = _junit_cleanDecoratedAction = new DecoratedAction(_cleanAction, false);
-    _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = new DecoratedAction(_projectPropertiesAction, false);
+    _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = 
+      new DecoratedAction(_projectPropertiesAction, false);
     _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
     _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
   }
@@ -5529,8 +5522,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           //append the appropriate language level extension if not written by user
           if (fc.getFileFilter() instanceof JavaSourceFilter) {
             if (chosen.getName().indexOf(".") == -1)
-              return new File(chosen.getAbsolutePath() + 
-                              "." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+              return new File(chosen.getAbsolutePath() + "." + 
+                              DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
           }
           return chosen;
         }
@@ -5640,7 +5633,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _saveProjectAction.setEnabled(false);
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
     _saveProjectAsAction.setEnabled(false);
-    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format", "SaveAs", "Export Project In Old \""+OLD_PROJECT_FILE_EXTENSION+"\" Format");
+    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION +
+                 "\" Format", "SaveAs", "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format");
     _exportProjectInOldFormatAction.setEnabled(false);
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     // No longer used
@@ -6083,8 +6077,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     };
     DrJava.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
-    externalSavedCountListener.optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
-                                                                      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
+    externalSavedCountListener.
+      optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
+                                             DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     toolsMenu.addSeparator();
     
     _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
@@ -6575,7 +6570,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     private void updateLocation(int line, int col) { // Not run in event thread because setText is thread safe.
       _currLocationField.setText(line + ":" + col +" \t");  // Space before "\t" required on Mac to avoid obscuring
-//      Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//  Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //      _model.getParsingControl().delay();
     }
   }
@@ -6650,7 +6645,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
 //        System.err.println("Interactions Container Selected");
           _interactionsContainer.setVisible(true);  // kluge to overcome subtle focus bug
-          EventQueue.invokeLater(new Runnable() { public void run() { _interactionsContainer.requestFocusInWindow(); } });
+          EventQueue.invokeLater(new Runnable() { 
+            public void run() { _interactionsContainer.requestFocusInWindow(); } 
+          });
         }
         else if (_tabbedPane.getSelectedIndex() == CONSOLE_TAB) {
           // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
@@ -6660,7 +6657,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
-          _currentDefPane.removeErrorHighlight(); //this line removes the highlighting whenever the current tabbed pane is switched
+          _currentDefPane.removeErrorHighlight(); // removes the highlighting whenever the current tabbed pane is switched
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
         }
       }
@@ -7853,8 +7850,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     String res = (String)JOptionPane.showInputDialog(MainFrame.this,
-                                                     "Your program ran out of memory. You may try to enter a larger\n"+
-                                                     "maximum heap size for the Interactions JVM. The maximum heap size is\n"+
+                                                     "Your program ran out of memory. You may try to enter a larger\n" +
+                                                     "maximum heap size for the Interactions JVM. The maximum heap size is\n" +
                                                      "currently "+value+".",
                                                      "Increase Maximum Heap Size?",
                                                      JOptionPane.QUESTION_MESSAGE,
@@ -7977,11 +7974,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           filePaths.add(f.getPath());
         }
         
-        ScrollableListDialog dialog = new ScrollableListDialog(MainFrame.this,
-                                                               "Files Not Found",
-                                                               "The following files could not be found and have been removed from the project.",
-                                                               filePaths,
-                                                               JOptionPane.ERROR_MESSAGE);
+        ScrollableListDialog dialog = 
+          new ScrollableListDialog(MainFrame.this,
+                                   "Files Not Found",
+                                   "The following files could not be found and have been removed from the project.",
+                                   filePaths,
+                                   JOptionPane.ERROR_MESSAGE);
         
         setPopupLoc(dialog);
         dialog.showDialog();
@@ -7990,7 +7988,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void fileSaved(final OpenDefinitionsDocument doc) {
-//      new ScrollableDialog(null, "fileSaved called in ModelListener", "", "").show();
       Utilities.invokeLater(new Runnable() {
         public void run() {
           doc.documentSaved();  // used to update the document cache
@@ -9372,11 +9369,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
-      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>> strategies =
-        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>>();
-      strategies.add(new PredictiveInputModel.FragmentStrategy<JavaAPIListEntry>());
-      strategies.add(new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>());
-      strategies.add(new PredictiveInputModel.RegExStrategy<JavaAPIListEntry>());
+      
+      java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
+        new java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>>();
+      strategies.add(new FragmentStrategy<JavaAPIListEntry>());
+      strategies.add(new PrefixStrategy<JavaAPIListEntry>());
+      strategies.add(new RegExStrategy<JavaAPIListEntry>());
       List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
         = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
       actions.add(okAction);
@@ -9449,9 +9447,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     PredictiveInputModel<JavaAPIListEntry> pim =
-      new PredictiveInputModel<JavaAPIListEntry>(true,
-                                                 new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>(),
-                                                 autoImportList);
+      new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), autoImportList);
     pim.setMask(s);
     initAutoImportDialog();
     _autoImportDialog.setModel(true, pim); // ignore case

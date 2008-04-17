@@ -45,9 +45,7 @@ import java.util.*;
   * @version $Id$
   */
 public class PropertyMaps {
-  /**
-   * Map of property sets.
-   */
+  /** Map of property sets. */
   protected Map<String,Map<String,DrJavaProperty>> _props = new TreeMap<String,Map<String,DrJavaProperty>>();
   
   /** Singleton instance. */
@@ -71,8 +69,7 @@ public class PropertyMaps {
   /** Create the basic property maps.
     * One is named "Java" and contains the Java system properties.
     * A second one is named "Config" and contains the DrJava configuration items. */
-  public PropertyMaps() {
-  }
+  public PropertyMaps() { }
 
   /** Return the property requested, or null if not found.
     * @throws IllegalArgumentException if category is not known. */

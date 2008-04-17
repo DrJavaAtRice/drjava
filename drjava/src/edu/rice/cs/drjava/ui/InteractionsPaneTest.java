@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
+import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.CompletionMonitor;

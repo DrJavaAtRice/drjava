@@ -51,7 +51,6 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   protected InteractionsDocument _doc;
-  protected InteractionsPane _pane;
   protected MainFrame mf;
   
   /** Initialize fields for each test. */
@@ -62,6 +61,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     _model = gm.getInteractionsModel();
     _adapter = gm.getSwingInteractionsDocument();
     _doc = gm.getInteractionsDocument();
+    assert _model._pane != null;  // MainFrame creates an interactions controller which creates the pane.
   }
   
   private boolean _interpreterRestarted = false;
@@ -78,10 +78,10 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     System.err.println("Styles:\n" + Arrays.toString(_adapter.getStyles()));
     
     int blen = _model.getStartUpBanner().length();
-    System.err.println("StartUpBanner:\n'" + _model.getStartUpBanner() + "'");
-    System.err.println("length = " +  _model.getStartUpBanner().length());
-    System.err.println("Banner:\n'" + _model.getBanner() + "'");
-    System.err.println("length = " +  _model.getBanner().length());                   
+//    System.err.println("StartUpBanner:\n'" + _model.getStartUpBanner() + "'");
+//    System.err.println("length = " +  _model.getStartUpBanner().length());
+//    System.err.println("Banner:\n'" + _model.getBanner() + "'");
+//    System.err.println("length = " +  _model.getBanner().length());                   
     
     /** Elt1, Elt2 are first two elements pushed on the StylesList stack */
     String styleElt1 = "((0, " + blen + "), object.return.style)";

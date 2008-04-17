@@ -902,10 +902,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     synchronized (_reduced) { return _queryCache.get(key); }
   }
   
-  /** Stores the given result in the helper method cache. Calling convention for keys: methodName:arg1:arg2
+  /** Stores the given result in the helper method cache. Query classes define equality structurally.
     * @param query  A canonical description of the query
     * @param answer  The answer returned for the query
-    * @param offset  The offset of bounding the right edge of the text on which the query depends; if (0:offset) in
+    * @param offset  The offset bounding the right edge of the text on which the query depends; if (0:offset) in
     *                the document is unchanged, the query should return the same answer.
     */
   protected void _storeInCache(final Query query, final Object answer, final int offset) {
@@ -1422,7 +1422,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           }
           
           // Return position of matching char
-          _storeInCache(key, reducedPos, reducedPos + 1);  // last argument was reducedPos
+          _storeInCache(key, reducedPos, reducedPos);  // Cached answer depends only on text(0:reducedPos)
           _setCurrentLocation(origPos);
           return reducedPos;
         }

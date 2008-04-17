@@ -256,11 +256,9 @@ public class InteractionsController extends AbstractConsoleController {
     * @param adapter InteractionsDJDocument being used by the model's doc
     */
   public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
-    this(model, adapter, 
-         new InteractionsPane(adapter) {  // creates InteractionsPane
+    this(model, adapter, new InteractionsPane(adapter) {  // creates InteractionsPane
       public int getPromptPos() { return model.getDocument().getPromptPos(); }
-    }
-    );
+    });
   }
   
   /** Glue together the given model and view.

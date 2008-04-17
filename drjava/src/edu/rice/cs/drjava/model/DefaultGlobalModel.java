@@ -381,6 +381,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     * if a valid directory cannot be determined.  In that case, the former working directory is used.
     */
   public void resetInteractions(File wd, boolean forceReset) {
+    assert _interactionsModel._pane != null;
+    
     debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }

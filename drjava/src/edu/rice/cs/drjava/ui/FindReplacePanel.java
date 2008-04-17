@@ -679,9 +679,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         public void run() {
           Toolkit.getDefaultToolkit().beep();
           _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
-          if (count>0) {
-            _frame.showFindResultsPanel(panel);
-          }
+          if (count>0)  _frame.showFindResultsPanel(panel);
           else { panel.freeResources(); }
         }
       });
