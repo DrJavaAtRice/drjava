@@ -46,8 +46,7 @@ import java.util.List;
  */
 public class SExpParserTest extends DrJavaTestCase {
   
-  /**
-   * Creates a temporary file and writes the given string to that file
+  /** Creates a temporary file and writes the given string to that file
    * @param fname the name of the file to create
    * @param text the text to write to the file
    * @return the File that was created
@@ -66,8 +65,7 @@ public class SExpParserTest extends DrJavaTestCase {
     return f;
   }
   
-  /**
-   * There are three ways to input the data to a parse.
+  /** There are three ways to input the data to a parse.
    * this tests to make sure they all three return the same
    * thing.
    */
@@ -89,8 +87,7 @@ public class SExpParserTest extends DrJavaTestCase {
     assertEquals("the 3rd parse wasn't right", ans, sa3);
   }
   
-  /**
-   * Tests to make sure that multiple top-level s-exps 
+  /** Tests to make sure that multiple top-level s-exps 
    * are parsed separately and in tact
    */
   public void testParseMultiple() throws SExpParseException{

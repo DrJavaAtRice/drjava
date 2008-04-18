@@ -49,8 +49,7 @@ public class ForcedChoiceOption extends Option<String>
 {
   private Collection<String> _choices;
 
-  /**
-   * @param key The name of this option.
+  /** @param key The name of this option.
    * @param def The default value of the option.
    * @param choices A collection of all possible values of this Option, as Strings.
    */
@@ -59,8 +58,7 @@ public class ForcedChoiceOption extends Option<String>
     _choices = choices;
   }
 
-  /**
-   * Checks whether the parameter String is a legal value for this option.
+  /** Checks whether the parameter String is a legal value for this option.
    * The input String must be formatted exactly like the original, as defined
    * by String.equals(String).
    * @param s the value to check
@@ -70,24 +68,21 @@ public class ForcedChoiceOption extends Option<String>
     return _choices.contains(s);
   }
 
-  /**
-   * Gets all legal values of this option.
+  /** Gets all legal values of this option.
    * @return an Iterator containing the set of all Strings for which isLegal returns true.
    */
   public Iterator<String> getLegalValues() {
     return _choices.iterator();
   }
 
-  /**
-   * Gets the number of legal values for this option.
+  /** Gets the number of legal values for this option.
    * @return an int indicating the number of legal values.
    */
   public int getNumValues() {
     return _choices.size();
   }
 
-  /**
-   * Parses an arbitrary String into an acceptable value for this option.
+  /** Parses an arbitrary String into an acceptable value for this option.
    * @param s The String to be parsed.
    * @return s, if s is a legal value of this option.
    * @exception IllegalArgumentException if "s" is not one of the allowed values.
@@ -102,8 +97,7 @@ public class ForcedChoiceOption extends Option<String>
     }
   }
 
-  /**
-   * @param s The String to be formatted.
+  /** @param s The String to be formatted.
    * @return "s", no actual formatting is performed.
    */
   public String format(String s) {

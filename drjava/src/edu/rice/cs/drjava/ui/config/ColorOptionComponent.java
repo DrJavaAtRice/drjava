@@ -174,8 +174,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     _colorField.setText(getLabelText() + " ("+_option.format(c)+")");
   }
   
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _panel; }
   

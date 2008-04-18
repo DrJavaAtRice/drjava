@@ -47,13 +47,11 @@ import  javax.swing.filechooser.FileFilter;
  */
 public class InteractionsHistoryFilter extends FileFilter {
 
-  /**
-   * Extension to match for History files.
+  /** Extension to match for History files.
    */
   public static final String HIST_EXTENSION = "hist";
   
-  /**
-   * Returns true if the file matches the Interactions History filter.
+  /** Returns true if the file matches the Interactions History filter.
    */
   public boolean accept(File f) {
     if (f.isDirectory()) {
@@ -66,8 +64,7 @@ public class InteractionsHistoryFilter extends FileFilter {
     return false;
   }
 
-  /**
-   * @return A description of this filter to display
+  /** @return A description of this filter to display
    */
   public String getDescription() {
     return "Interaction History Files";

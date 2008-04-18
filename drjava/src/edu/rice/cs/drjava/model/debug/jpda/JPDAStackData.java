@@ -44,8 +44,7 @@ import edu.rice.cs.drjava.model.debug.DebugStackData;
  * @version $Id: DebugStackData.java 3901 2006-06-30 05:28:11Z rcartwright $
  */
 public class JPDAStackData extends DebugStackData {
-  /**
-   * Object for keeping track of a stack frame.
+  /** Object for keeping track of a stack frame.
    * @param frame JPDA's reference to the stack frame
    */
   public JPDAStackData(StackFrame frame) {

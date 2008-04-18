@@ -119,16 +119,14 @@ public class BalancingStreamTokenizer {
 
   public volatile Token _token = Token.NONE;
   
-  /**
-   * Create a new balancing stream tokenizer.
+  /** Create a new balancing stream tokenizer.
    * @param r reader to tokenize
    */
   public BalancingStreamTokenizer(Reader r) {
     this(r,null);
   }
   
-  /**
-   * Create a new balancing stream tokenizer.
+  /** Create a new balancing stream tokenizer.
    * @param r reader to tokenize
    * @param escape escape character or null
    */
@@ -189,8 +187,7 @@ public class BalancingStreamTokenizer {
     addQuotes("${", "}");
   }
   
-  /**
-   * Return the next token from the reader, or from the stack if it isn't empty.
+  /** Return the next token from the reader, or from the stack if it isn't empty.
    * @return next token or -1 when end of stream
    */
   protected int nextToken() throws IOException {
@@ -202,22 +199,19 @@ public class BalancingStreamTokenizer {
     }
   }
   
-  /**
-   * Push a token back onto the stack.
+  /** Push a token back onto the stack.
    * @param token token to push back
    */
   protected void pushToken(int token) {
     _pushed.push(token);
   }
   
-  /**
-   * Return a copy of the current state of the tokenizer.
+  /** Return a copy of the current state of the tokenizer.
    * @return copy of the state
    */
   public State getState() { return new State(_state); }
   
-  /**
-   * Set the stream tokenizer the the state specified.
+  /** Set the stream tokenizer the the state specified.
    * @param state state
    */
   public void setState(State state) {
@@ -237,8 +231,7 @@ public class BalancingStreamTokenizer {
   /** Returns the type of the current token. */
   public Token token() { return _token; }
   
-  /**
-   * Specify a range characters as word characters.
+  /** Specify a range characters as word characters.
    * @param lo the character beginning the word character range, inclusive
    * @param hi the character ending the word character range, inclusive
    */
@@ -274,8 +267,7 @@ public class BalancingStreamTokenizer {
     }
   }
 
-  /**
-   * Specify one or more characters as word characters.
+  /** Specify one or more characters as word characters.
    * @param c the character(s)
    */
   public void wordChars(int... c) {
@@ -310,8 +302,7 @@ public class BalancingStreamTokenizer {
     }
   }
   
-  /**
-   * Specify a range characters as whitespace.
+  /** Specify a range characters as whitespace.
    * @param lo the character beginning the whitespace range, inclusive
    * @param hi the character ending the whitespace range, inclusive
    */
@@ -347,8 +338,7 @@ public class BalancingStreamTokenizer {
     }
   }
 
-  /**
-   * Specify one or more characters as whitespace.
+  /** Specify one or more characters as whitespace.
    * @param c the character(s)
    */
   public void whitespace(int... c) {
@@ -383,8 +373,7 @@ public class BalancingStreamTokenizer {
     }
   }
 
-  /**
-   * Specify a pair of quotes.
+  /** Specify a pair of quotes.
    * @param begin the beginning quotation mark
    * @param end the ending quotation mark
    */
@@ -439,8 +428,7 @@ public class BalancingStreamTokenizer {
     for(String s: kwToRemove) { _state.keywords.remove(s); }
   }
   
-  /**
-   * Specify a new keyword.
+  /** Specify a new keyword.
    * @param kw the new keyword
    */
   public void addKeyword(String kw) {
@@ -472,8 +460,7 @@ public class BalancingStreamTokenizer {
     _state.keywords.add(kw);
   }
   
-  /**
-   * Return the next token, or null if the end of the stream has been reached.
+  /** Return the next token, or null if the end of the stream has been reached.
    * @return next token, or null if end of stream has been reached.
    */
   public String getNextToken() throws IOException {
@@ -696,8 +683,7 @@ public class BalancingStreamTokenizer {
     return null;
   }
   
-  /**
-   * Return the subset of the set whose entries begin with the prefix.
+  /** Return the subset of the set whose entries begin with the prefix.
    * @param set parent set
    * @param prefix prefix string
    * @return subset of only those entries that begin with the prefix

@@ -48,13 +48,11 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  * @version $Id$
  */
 public class QuestionLineContains extends IndentRuleQuestion {
-  /**
-   * Character to search for
+  /** Character to search for
    */
   private char _findChar;
   
-  /**
-   * Constructs a new rule which determines if the line
+  /** Constructs a new rule which determines if the line
    * contains the given character.
    * @param findChar Character to search for
    * @param yesRule Rule to use if this rule holds
@@ -65,8 +63,7 @@ public class QuestionLineContains extends IndentRuleQuestion {
     _findChar = findChar;
   }
   
-  /**
-   * Determines if the given character exists on the current line.
+  /** Determines if the given character exists on the current line.
    * Does not search in quotes or comments.
    * <p>
    * <b>Does not work if character being searched for is a '/' or a '*'</b>

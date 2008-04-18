@@ -81,8 +81,7 @@ public class IndentFiles {
     }
   }
 
-  /**
-   * Displays a message showing how to use this class.
+  /** Displays a message showing how to use this class.
    */
   private static void _displayUsage() {
     System.out.println(

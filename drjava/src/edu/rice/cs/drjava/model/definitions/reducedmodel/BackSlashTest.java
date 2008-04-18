@@ -50,8 +50,7 @@ public final class BackSlashTest extends BraceReductionTestCase
   protected ReducedModelControl model1;
   protected ReducedModelControl model2;
 
-  /**
-   * Initializes the reduced models used in the tests.
+  /** Initializes the reduced models used in the tests.
    */
   protected void setUp() throws Exception {
     super.setUp();
@@ -60,16 +59,14 @@ public final class BackSlashTest extends BraceReductionTestCase
     model2 = new ReducedModelControl();
   }
 
-  /**
-   * Creates a test suite for JUnit to use.
+  /** Creates a test suite for JUnit to use.
    * @return a test suite for JUnit
    */
   public static Test suite() {
     return  new TestSuite(BackSlashTest.class);
   }
 
-  /**
-   * Convenience function to insert a number of non-special characters into a reduced model.
+  /** Convenience function to insert a number of non-special characters into a reduced model.
    * @param model the model being modified
    * @param size the number of characters being inserted
    */
@@ -79,8 +76,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     }
   }
 
-  /**
-   * Tests the relationship between backslash characters and quote characters.
+  /** Tests the relationship between backslash characters and quote characters.
    * It focuses on the case where the backslash is inserted first before the quote.
    */
   public void testInsideQuotePrevious() {
@@ -120,8 +116,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#4.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
   }
 
-  /**
-   * Tests the relationship between backslashes and quotes.
+  /** Tests the relationship between backslashes and quotes.
    * Focuses on the case where a backslash is inserted and turns a regular quote
    * into an escaped quote.
    */
@@ -165,8 +160,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#5.2", 1, model1.getBlockOffset());
   }
 
-  /**
-   * Tests the case when a backslash is inserted before two backslashes.
+  /** Tests the case when a backslash is inserted before two backslashes.
    * The existing double escape is broken and the first two backslashes become
    * a double escape with the third backslash ending up alone.
    */
@@ -189,8 +183,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#1.2", "\"", model2.currentToken().getType());
   }
 
-  /**
-   * Tests the case where a backslash breaks up two backslashes together.
+  /** Tests the case where a backslash breaks up two backslashes together.
    * The newly inserted backslash and the first backslash form a new double escape
    * and the second backslash in the previous double escape becomes free.
    */
@@ -235,8 +228,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#3.2", "\"", model0.currentToken().getType());
   }
 
-  /**
-   * Tests the case where deletion combines a backslash and a quote or two backslashes.
+  /** Tests the case where deletion combines a backslash and a quote or two backslashes.
    * The deletion of characters in between the two special characters brings them together
    * and unites them into a 2-character special token.
    */
@@ -259,8 +251,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#3.1", 2, model0.currentToken().getSize());
   }
 
-  /**
-   * Tests more of the same sort of cases as found in testDeleteAndCombine().
+  /** Tests more of the same sort of cases as found in testDeleteAndCombine().
    */
   public void testDeleteAndCombine2() {
     model0.insertChar('\\');
@@ -281,8 +272,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#2.0", "\\", model1.currentToken().getType());
   }
 
-  /**
-   * More of the same sort of cases as found in testDeleteAndCombine().
+  /** More of the same sort of cases as found in testDeleteAndCombine().
    */
   public void testDeleteAndCombine3() {
     model0.insertChar('\\');
@@ -303,8 +293,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     assertEquals("#1.1", 1, model1.absOffset());
   }
 
-  /**
-   * Tests cases where a long chain of backslashes and quotes can be all altered with a simple
+  /** Tests cases where a long chain of backslashes and quotes can be all altered with a simple
    * insertion or deletion of a special character.
    */
   public void testChainEffect() {

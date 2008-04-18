@@ -54,8 +54,7 @@ import java.util.Properties;
 public class JVMProcessCreator extends ProcessCreator { 
   protected String _jvmArgs;
 
-  /**
-   * Creates a new process creator.
+  /** Creates a new process creator.
    * @param jvmArgs arguments for the JVM
    * @param cmdline command line
    * @param workdir working directory
@@ -66,16 +65,14 @@ public class JVMProcessCreator extends ProcessCreator {
   }
   
 
-  /**
-   * Get the command line.
+  /** Get the command line.
    * @return command line
    */
   public String cmdline() {
     return ExecJVM.getExecutable() + " " + _jvmArgs + _cmdline;
   }
   
-  /**
-   * Starts a new JCM process using the attributes of this process creator.
+  /** Starts a new JCM process using the attributes of this process creator.
    */
   public Process start() throws IOException {
     List<String> jvmArgs = StringOps.commandLineToList(StringOps.replaceVariables(_jvmArgs, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));;

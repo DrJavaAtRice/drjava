@@ -121,8 +121,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -146,8 +145,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
     _component.setFileField(value);
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
     return _component;
@@ -161,8 +159,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
 //    _component.setFileField(c);
 //  }
 
-  /**
-   * Set the file filter for this file option component
+  /** Set the file filter for this file option component
    */
   public void setFileFilter(FileFilter fileFilter) {
 //    _fileFilter = fileFilter;

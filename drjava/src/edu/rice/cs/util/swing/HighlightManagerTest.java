@@ -51,8 +51,7 @@ import java.awt.*;
  */
 public class HighlightManagerTest extends DrJavaTestCase {
   
-  /**
-   * A test method.
+  /** A test method.
    * (Replace "X" with a name describing the test.  You may write as
    * many "testSomething" methods in this class as you wish, and each
    * one will be called when running JUnit over this class.)

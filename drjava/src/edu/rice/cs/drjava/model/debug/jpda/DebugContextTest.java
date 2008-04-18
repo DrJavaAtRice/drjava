@@ -633,8 +633,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     debug.logEnd();
   }
 
-  /**
-   * Tests that watches can correctly see the values of local
+  /** Tests that watches can correctly see the values of local
    * variables, fields and fields of outer classes.
    */
   public void XXXtestStaticWatches() throws Exception {

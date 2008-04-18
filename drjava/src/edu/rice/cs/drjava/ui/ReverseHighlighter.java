@@ -52,8 +52,7 @@ import javax.swing.*;
  * no efficient way to make use of inheritance.
  */
 public class ReverseHighlighter extends DefaultHighlighter { 
-  /**
-   * Creates a new ReverseHighlighter object.
+  /** Creates a new ReverseHighlighter object.
    */
   public ReverseHighlighter() {
     drawsLayeredHighlights = true;
@@ -61,8 +60,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   
   // ---- Highlighter methods ----------------------------------------------
   
-  /**
-   * Renders the highlights.
+  /** Renders the highlights.
    *
    * @param g the graphics context
    */
@@ -170,8 +168,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     return i;
   }
   
-  /**
-   * Removes a highlight from the view.
+  /** Removes a highlight from the view.
    *
    * @param tag the reference to the highlight
    */
@@ -189,8 +186,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     highlights.removeElement(tag);
   }
   
-  /**
-   * Removes all highlights.
+  /** Removes all highlights.
    */
   public void removeAllHighlights() {
     TextUI mapper = component.getUI();
@@ -253,8 +249,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
   }
   
-  /**
-   * Changes a highlight.
+  /** Changes a highlight.
    *
    * @param tag the highlight tag
    * @param p0 the beginning of the range >= 0
@@ -294,8 +289,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
   }
   
-  /**
-   * Makes a copy of the highlights.  Does not actually clone each highlight,
+  /** Makes a copy of the highlights.  Does not actually clone each highlight,
    * but only makes references to them.
    *
    * @return the copy
@@ -311,8 +305,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     return h;
   }
   
-  /**
-   * When leaf Views (such as LabelView) are rendering they should
+  /** When leaf Views (such as LabelView) are rendering they should
    * call into this method. If a highlight is in the given region it will
    * be drawn immediately.
    *
@@ -353,8 +346,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     safeDamageRange(doc.createPosition(a0), doc.createPosition(a1));
   }
   
-  /**
-   * If true, highlights are drawn as the Views draw the text. That is
+  /** If true, highlights are drawn as the Views draw the text. That is
    * the Views will call into <code>paintLayeredHighlight</code> which
    * will result in a rectangle being drawn before the text is drawn
    * (if the offsets are in a highlighted region that is). For this to
@@ -522,8 +514,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   }
   
   
-  /**
-   * Simple highlight painter that underlines text.
+  /** Simple highlight painter that underlines text.
    */
   public static class DefaultUnderlineHighlightPainter extends LayeredHighlighter.LayerPainter {
     
@@ -681,8 +672,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   }
   
   
-  /**
-   * This class is a wrapper for the DefaultHighlightPainter that allows us to tell whether a highlight was
+  /** This class is a wrapper for the DefaultHighlightPainter that allows us to tell whether a highlight was
    * requested by DrJava or by Swing (as in selected text).
    */
   public static class DrJavaHighlightPainter extends DefaultHighlightPainter {
@@ -694,8 +684,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   }
   
   
-  /**
-   * LayeredHighlightPainter is used when a drawsLayeredHighlights is
+  /** LayeredHighlightPainter is used when a drawsLayeredHighlights is
    * true. It maintains a rectangle of the region to paint.
    */
   class LayeredHighlightInfo extends HighlightInfo {

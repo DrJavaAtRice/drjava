@@ -73,8 +73,7 @@ public class ScrollableListDialog extends JDialog {
   /** The list of items displayed. */
   protected final JList list;
   
-  /**
-   * <p>Creates a new ScrollableListDialog with the given title, leader
+  /** <p>Creates a new ScrollableListDialog with the given title, leader
    * text, and items. The list of items is used to construct an
    * internal string list that is not backed by the original list.
    * Changes made to the list or items after dialog construction will
@@ -93,8 +92,7 @@ public class ScrollableListDialog extends JDialog {
     this(owner, dialogTitle, leaderText, listItems, JOptionPane.PLAIN_MESSAGE);
   }
   
-  /**
-   * <p>Creates a new ScrollableListDialog with the given title, leader
+  /** <p>Creates a new ScrollableListDialog with the given title, leader
    * text, items, and message type. The list of items is used to
    * construct an internal string list that is not backed by the
    * original list. Changes made to the list or items after dialog
@@ -119,8 +117,7 @@ public class ScrollableListDialog extends JDialog {
     this(owner, dialogTitle, leaderText, listItems, messageType, DEFAULT_WIDTH, DEFAULT_HEIGHT, null, true);
   }
   
-  /**
-   * <p>Creates a new ScrollableListDialog with the given title, leader
+  /** <p>Creates a new ScrollableListDialog with the given title, leader
    * text, items, message type, width, height, and icon. The list of
    * items is used to construct an internal string list that is not
    * backed by the original list. Changes made to the list or items
@@ -147,8 +144,7 @@ public class ScrollableListDialog extends JDialog {
     this(owner, dialogTitle, leaderText, listItems, messageType, width, height, icon, false);
   }
   
-  /**
-   * <p>Creates a new ScrollableListDialog with the given title, leader
+  /** <p>Creates a new ScrollableListDialog with the given title, leader
    * text, items, message type, width, height, and icon. The list of
    * items is used to construct an internal string list that is not
    * backed by the original list. Changes made to the list or items
@@ -265,8 +261,7 @@ public class ScrollableListDialog extends JDialog {
     setSize(dialogSize);
   }
   
-  /**
-   * A method to check if they given message type is a know message
+  /** A method to check if they given message type is a know message
    * type.
    * 
    * @param messageType The message type to check
@@ -280,8 +275,7 @@ public class ScrollableListDialog extends JDialog {
       messageType == JOptionPane.PLAIN_MESSAGE;
   }
   
-  /**
-   * Lookup the icon associated with the given messageType. The message
+  /** Lookup the icon associated with the given messageType. The message
    * type must be one of the message types from
    * {@link javax.swing.JOptionPane}.
    * 
@@ -313,8 +307,7 @@ public class ScrollableListDialog extends JDialog {
     return null;
   }
   
-  /**
-   * Adds buttons to the bottom of the dialog. By default, a single
+  /** Adds buttons to the bottom of the dialog. By default, a single
    * &quot;OK&quot; button is added that calls {@link #closeDialog}. It
    * is also set as the dialog's default button.
    *
@@ -336,24 +329,21 @@ public class ScrollableListDialog extends JDialog {
     getRootPane().setDefaultButton(okButton);
   }
   
-  /**
-   * Shows the dialog.
+  /** Shows the dialog.
    */
   public void showDialog() {
     pack();
     setVisible(true);
   }
   
-  /**
-   * Should be called when the dialog should be closed. The default
+  /** Should be called when the dialog should be closed. The default
    * implementation simply hides the dialog.
    */
   protected void closeDialog() {
     setVisible(false);
   }
   
-  /**
-   * A simple main method for testing purposes.
+  /** A simple main method for testing purposes.
    * 
    * @param args Not used.
    */

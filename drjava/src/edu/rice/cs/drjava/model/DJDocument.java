@@ -112,8 +112,7 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
-  /**
-   * Searching forwards, finds the position of the enclosing brace.
+  /** Searching forwards, finds the position of the enclosing brace.
    * NB: ignores comments.
    * @param pos Position to start from
    * @param opening opening brace character
@@ -123,8 +122,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
-  /**
-   * 
+  /** 
    * Searching backwards, finds the position of the first character that is one
    * of the given delimiters.  Does not look for delimiters inside paren phrases.
    * (eg. skips semicolons used inside for statements.)
@@ -136,8 +134,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
   
-  /**
-   * Searching backwards, finds the position of the first character that is one
+  /** Searching backwards, finds the position of the first character that is one
    * of the given delimiters.  Will not look for delimiters inside a paren
    * phrase if skipParenPhrases is true.
    * NB: ignores comments.
@@ -150,15 +147,13 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
-  /**
-   * This function finds the given character in the same statement as the given
+  /** This function finds the given character in the same statement as the given
    * position, and before the given position.  It is used by QuestionExistsCharInStmt and
    * QuestionExistsCharInPrevStmt
    */
   public boolean findCharInStmtBeforePos(char findChar, int position);
   
-  /**
-   * Finds the position of the first non-whitespace character before pos.
+  /** Finds the position of the first non-whitespace character before pos.
    * NB: Skips comments and all whitespace, including newlines
    * @param pos Position to start from
    * @param whitespace chars considered as white space
@@ -202,8 +197,7 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
   
-  /**
-   * Returns the indent level of the start of the statement
+  /** Returns the indent level of the start of the statement
    * that the cursor is on.
    * @param pos Cursor position
    * @param delims Delimiter characters denoting end of statement
@@ -212,8 +206,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
     throws BadLocationException;
   
-  /**
-   * Determines if the given character exists on the line where
+  /** Determines if the given character exists on the line where
    * the given cursor position is. Does not search in quotes or comments.
    * <p>
    * <b>Does not work if character being searched for is a '/' or a '*'</b>
@@ -223,8 +216,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int findCharOnLine(int pos, char findChar);
   
-  /**
-   * Returns the absolute position of the beginning of the
+  /** Returns the absolute position of the beginning of the
    * current line.  (Just after most recent newline, or 0)
    * Doesn't ignore comments.
    * @param pos Any position on the current line
@@ -232,16 +224,14 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int getLineStartPos(int pos);
   
-  /**
-   * Returns the absolute position of the end of the current
+  /** Returns the absolute position of the end of the current
    * line.  (At the next newline, or the end of the document.)
    * @param pos Any position on the current line
    * @return position of the end of this line
    */
   public int getLineEndPos(int pos);
   
-  /**
-   * Returns the absolute position of the first non-whitespace character
+  /** Returns the absolute position of the first non-whitespace character
    * on the current line.
    * NB: Doesn't ignore comments.
    * @param pos position on the line
@@ -250,8 +240,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int getLineFirstCharPos(int pos) throws BadLocationException;
   
-  /**
-   * Finds the position of the first non-whitespace character after pos.
+  /** Finds the position of the first non-whitespace character after pos.
    * NB: Skips comments and all whitespace, including newlines
    * @param pos Position to start from
    * @return position of first non-whitespace character after pos,
@@ -259,8 +248,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException;
   
-  /**
-   * Similar to the single-argument version, but allows including comments.
+  /** Similar to the single-argument version, but allows including comments.
    * @param pos Position to start from
    * @param acceptComments if true, find non-whitespace chars in comments
    * @return position of first non-whitespace character after pos,
@@ -269,8 +257,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public int getFirstNonWSCharPos(int pos, boolean acceptComments) 
     throws BadLocationException;
   
-  /**
-   * Finds the position of the first non-whitespace character after pos.
+  /** Finds the position of the first non-whitespace character after pos.
    * NB: Skips comments and all whitespace, including newlines
    * @param pos Position to start from
    * @param whitespace array of whitespace chars to ignore
@@ -283,8 +270,7 @@ public interface DJDocument extends SwingDocumentInterface {
   
   public int findPrevNonWSCharPos(int pos) throws BadLocationException;
   
-  /**
-   * Returns true if the given position is inside a paren phrase.
+  /** Returns true if the given position is inside a paren phrase.
    * @param pos the position we're looking at
    * @return true if pos is immediately inside parentheses
    */

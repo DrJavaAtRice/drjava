@@ -52,20 +52,17 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   * @version $Id$
   */
 public class QuestionExistsCharInStmt extends IndentRuleQuestion {
-  /**
-   * The character to search for
+  /** The character to search for
    */
   private char _findChar;
   
-  /**
-   * The character which marks the end of the search
+  /** The character which marks the end of the search
    * space. i.e. search from the start of the statment
    * to the end char.
    */
   private char _endChar;
   
-  /**
-   * Constructs a rule to determine if findChar exists
+  /** Constructs a rule to determine if findChar exists
    * between the start of the current statement and endChar.
    *
    * @param findChar Character to search for from the start of the

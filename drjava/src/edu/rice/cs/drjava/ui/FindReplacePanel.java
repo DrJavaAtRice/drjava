@@ -215,16 +215,19 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     // Define custom key bindings for 'enter' and 'tab'
     KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     KeyStroke ctrlEnter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Event.CTRL_MASK);
+    KeyStroke shiftEnter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Event.SHIFT_MASK);
     KeyStroke ctrlTab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.CTRL_MASK);
     InputMap findIM = _findField.getInputMap();
     InputMap replaceIM = _replaceField.getInputMap();
     findIM.put(enter, "Do Find");
     findIM.put(ctrlEnter, "Insert Newline");
+    findIM.put(shiftEnter, "Insert Newline");
     findIM.put(ctrlTab, "Insert Tab");
     findIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), "Cut");
     findIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), "Copy");
     replaceIM.put(enter, "Insert Newline");
     replaceIM.put(ctrlEnter, "Insert Newline");
+    replaceIM.put(shiftEnter, "Insert Newline");
     replaceIM.put(ctrlTab, "Insert Tab");
     replaceIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), "Cut");
     replaceIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), "Copy");
@@ -705,6 +708,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _replaceAction.setEnabled(false);
     _replaceFindNextAction.setEnabled(false);
     _replaceFindPreviousAction.setEnabled(false);
+    _model.refreshActiveDocument();  // Rationale: a giant replaceAll left the definitions pane is a strange state
   }
   
   private void _replaceFindNext() {

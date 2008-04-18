@@ -186,8 +186,7 @@ public abstract class ArgumentTokenizer {
     return argList;
   }
   
-  /**
-   * Inserts backslashes before any occurrences of a backslash or
+  /** Inserts backslashes before any occurrences of a backslash or
    * quote in the given string.  Also converts any special characters
    * appropriately.
    */

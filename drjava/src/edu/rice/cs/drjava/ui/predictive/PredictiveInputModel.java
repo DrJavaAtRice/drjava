@@ -577,8 +577,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     setList(items);
   }
 
-  /**
-   * Create a new predictive input model.
+  /** Create a new predictive input model.
    * @param ignoreCase true if case should be ignored
    * @param strategy matching strategy to use
    * @param items varargs/array of items
@@ -589,24 +588,21 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     setList(items);
   }
 
-  /**
-   * Sets the strategy
+  /** Sets the strategy
    */
   public void setStrategy(MatchingStrategy<T> strategy) {
     _strategy = strategy;
     updateMatchingStrings(_items);
   }
 
-  /**
-   * Returns a copy of the list of items.
+  /** Returns a copy of the list of items.
    * @return list of items
    */
   public List<T> getList() {
     return new ArrayList<T>(_items);
   }
   
-  /**
-   * Sets the list.
+  /** Sets the list.
    * @param items list of items
    */
   public void setList(List<T> items) {
@@ -735,16 +731,14 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
   }
 
-  /**
-   * Get matching items.
+  /** Get matching items.
    * @return list of matching items
    */
   public List<T> getMatchingItems() {
     return new ArrayList<T>(_matchingItems);
   }
 
-  /**
-   * Returns the shared mask extension.
+  /** Returns the shared mask extension.
    * The shared mask extension is the string that can be added to the mask such that the list of
    * matching strings does not change.
    * @return shared mask extension
@@ -753,8 +747,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     return _strategy.getSharedMaskExtension(_matchingItems, this);
   }
 
-  /**
-   * Extends the mask. This operation can only narrow the list of matching strings and is thus faster than
+  /** Extends the mask. This operation can only narrow the list of matching strings and is thus faster than
    * setting the mask.
    * @param extension string to append to mask
    */
@@ -764,8 +757,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   }
   
 
-  /**
-   * Extends the mask by the shared string.
+  /** Extends the mask by the shared string.
    */
   public void extendSharedMask() {
     _mask = _strategy.getExtendedSharedMask(_matchingItems, this);

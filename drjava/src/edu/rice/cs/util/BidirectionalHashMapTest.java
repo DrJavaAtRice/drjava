@@ -191,8 +191,7 @@ public class BidirectionalHashMapTest extends DrJavaTestCase {
 
     assertFalse("Iterator to cleared list should be empty", dToi.valuesIterator().hasNext());
   }
-  /**
-   * A test method.
+  /** A test method.
    * (Replace "X" with a name describing the test.  You may write as
    * many "testSomething" methods in this class as you wish, and each
    * one will be called when running JUnit over this class.)

@@ -80,8 +80,7 @@ public class JavadocFrame extends HTMLFrame {
     return test.getAbsolutePath();
   }
 
-  /**
-   * Reads through the beginning of the packages.html file to determine
+  /** Reads through the beginning of the packages.html file to determine
    * if it is just a pointer to another file.  Returns either the same
    * file (if it's not a pointer), or the file used for "No frames" (if
    * it is a pointer).
@@ -135,8 +134,7 @@ public class JavadocFrame extends HTMLFrame {
     return packages;
   }
 
-  /**
-   * Constructor.
+  /** Constructor.
    * @param destDir Directory holding the Javadoc
    * @param curClass Name of the class to try to show by default
    * @param allDocs Whether Javadoc was run for all open documents

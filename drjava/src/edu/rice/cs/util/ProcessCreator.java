@@ -55,8 +55,7 @@ public class ProcessCreator {
   protected String _workdir;
   protected Map<String,String> _env;
     
-  /**
-   * Constructor for a process creator with the given command line and map of properties.
+  /** Constructor for a process creator with the given command line and map of properties.
    * @param cmdline command line
    * @param workdir working directory
    */
@@ -65,32 +64,28 @@ public class ProcessCreator {
     _workdir = workdir;
   }
   
-  /**
-   * Get the command line.
+  /** Get the command line.
    * @return command line
    */
   public String cmdline() {
     return _cmdline;
   }
   
-  /**
-   * Returns a map of this process creator's environment.
+  /** Returns a map of this process creator's environment.
    * @return environment map
    */
   public Map<String,String> environment() {
     return _env;
   }
   
-  /**
-   * Returns this process creator's working directory.
+  /** Returns this process creator's working directory.
    * @return working directory
    */
   public String workDir() {
     return _workdir;
   }
 
-  /**
-   * Starts a new process using the attributes of this process creator.
+  /** Starts a new process using the attributes of this process creator.
    */
   public Process start() throws IOException {
     List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));

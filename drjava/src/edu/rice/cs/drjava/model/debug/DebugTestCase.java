@@ -373,8 +373,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }.start();
   }
   
-  /**
-   * Resumes the debugger asynchronously so as to aovid
+  /** Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
   protected void _asyncResume() {

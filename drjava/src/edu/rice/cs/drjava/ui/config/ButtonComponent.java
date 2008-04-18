@@ -49,8 +49,7 @@ import java.awt.event.*;
 public class ButtonComponent extends OptionComponent<Object> {
   protected JButton _jb;
 
-  /**
-   * Constructs a new ButtonComponent.
+  /** Constructs a new ButtonComponent.
    * @param l the listener that gets executed when the button is pressed
    * @param text the text to display with the option
    * @param parent the parent frame
@@ -64,8 +63,7 @@ public class ButtonComponent extends OptionComponent<Object> {
     });
   }
 
-  /**
-   * Constructs a new ButtonComponent with a tooltip description.
+  /** Constructs a new ButtonComponent with a tooltip description.
    * @param l the listener that gets executed when the button is pressed
    * @param text the text to display with the option
    * @param parent the parent frame
@@ -76,8 +74,7 @@ public class ButtonComponent extends OptionComponent<Object> {
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -85,8 +82,7 @@ public class ButtonComponent extends OptionComponent<Object> {
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -94,15 +90,13 @@ public class ButtonComponent extends OptionComponent<Object> {
     return true;
   } 
   
-  /**
-   * Displays the given value.
+  /** Displays the given value.
    */
   public void setValue(Object value) {
     // nothing to do
   }
   
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _jb; }
 }

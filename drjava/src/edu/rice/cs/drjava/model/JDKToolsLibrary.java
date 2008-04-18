@@ -107,8 +107,7 @@ public class JDKToolsLibrary {
     }
   }
   
-  /**
-   * Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
+  /** Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
    * loader that loaded this class.
    */
   public static JDKToolsLibrary makeFromRuntime(GlobalModel model) {

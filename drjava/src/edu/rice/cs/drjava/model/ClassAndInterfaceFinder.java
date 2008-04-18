@@ -132,16 +132,14 @@ public class ClassAndInterfaceFinder {
     }
   }
   
-  /**
-   * returns true iff the token is a word (as defined by StreamTokenizer)
+  /** returns true iff the token is a word (as defined by StreamTokenizer)
    */
   private static boolean isWord(int tt) { return tt == StreamTokenizer.TT_WORD || isEOF(tt); }
   
   private static boolean isEOF(int tt)  { return tt == StreamTokenizer.TT_EOF; }
   
   
-  /**
-   * returns true iff the token is "class" or we're at the end of the file
+  /** returns true iff the token is "class" or we're at the end of the file
    */
   private boolean isClassOrInterfaceWord(int tt, boolean interfaceOK) {
     return  isEOF(tt) || 
@@ -149,8 +147,7 @@ public class ClassAndInterfaceFinder {
       (tt == StreamTokenizer.TT_WORD && interfaceOK && tokenizer.sval.equals("interface"));
   }
   
-  /**
-   * returns true iff the token is "package" or we're at the end of the file
+  /** returns true iff the token is "package" or we're at the end of the file
    */
   private boolean isPackageWord(int tt) {
     return (tt == StreamTokenizer.TT_WORD && tokenizer.sval.equals("package") ||

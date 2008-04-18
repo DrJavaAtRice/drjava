@@ -50,8 +50,7 @@ import java.util.Hashtable;
  */
 public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> implements Comparable {
   private static final int DIALOG_HEIGHT = 185;
-  /**
-   * TODO: should this be synchronized?
+  /** TODO: should this be synchronized?
    */
   public static final Hashtable<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
     new Hashtable<KeyStroke, KeyStrokeOptionComponent>();
@@ -96,8 +95,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     _keyToKSOC.put(_key, this);
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public KeyStrokeOptionComponent(KeyStrokeOption opt, String text,
                                   Frame parent, String description) {
@@ -105,8 +103,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -115,16 +112,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     _label.setToolTipText(description);
   }
 
-  /**
-   * Returns a custom string representation of this option component.
+  /** Returns a custom string representation of this option component.
    */
   public String toString() {
     return "<KSOC>label:" + getLabelText() + "ks: " +
       getKeyStroke() + "jb: " + _button.getText() + "</KSOC>\n";
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -135,16 +130,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     return true;
   }
 
-  /**
-   * Displays the given value.
+  /** Displays the given value.
    */
   public void setValue(KeyStroke value) {
     _key = value;
     _button.setText(_option.format(value));
   }
 
-  /**
-   * Compares two KeyStrokeOptionComponents based on the text of their labels.
+  /** Compares two KeyStrokeOptionComponents based on the text of their labels.
    * @return Comparison based on labels, or 1 if o is not a KeyStrokeOptionComponent
    */
   public int compareTo(Object o) {
@@ -155,27 +148,23 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     else return 1;
   }
 
-  /**
-   * Returns the currently selected KeyStroke.
+  /** Returns the currently selected KeyStroke.
    */
   public KeyStroke getKeyStroke() {
     return _key;
   }
 
-  /**
-   * Returns the KeyStroke current set in the Config settings.
+  /** Returns the KeyStroke current set in the Config settings.
    */
   public KeyStroke getConfigKeyStroke() {
     return DrJava.getConfig().getSetting(_option);
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _panel; }
 
-  /**
-   * A dialog that allows the user to type in a keystroke to be bound
+  /** A dialog that allows the user to type in a keystroke to be bound
    * to the action that was clicked. If the user types a keystroke that
    * is bound to another action, the dialog will display that information.
    */

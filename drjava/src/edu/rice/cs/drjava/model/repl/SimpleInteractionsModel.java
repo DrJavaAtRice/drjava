@@ -80,8 +80,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
   
-  /**
-   * Interprets the given command.
+  /** Interprets the given command.
    * @param toEval command to be evaluated
    */
   protected void _interpret(String toEval) {
@@ -102,8 +101,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     finally { _interactionIsOver(); }
   }
   
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter.
+  /** Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public String getVariableToString(String var) {
@@ -115,8 +113,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     catch (InterpreterException e) { return ""; }
   }
   
-  /**
-   * Gets the class name of a variable in the current interpreter.
+  /** Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public String getVariableType(String var) {

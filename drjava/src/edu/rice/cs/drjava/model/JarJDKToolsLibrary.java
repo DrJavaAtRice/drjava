@@ -245,8 +245,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 //  }
   
   
-  /**
-   * Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
+  /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
    * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
    * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
    * library appears earlier in the result list.

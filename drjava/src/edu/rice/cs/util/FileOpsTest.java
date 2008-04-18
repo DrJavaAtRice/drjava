@@ -115,8 +115,7 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   
-  /**
-   * This method checks that backups are made correctly, that when a save fails,
+  /** This method checks that backups are made correctly, that when a save fails,
    * no data is lost, and that when a save is attempted on a write-protected file,
    * the save fails (bug #782963).
    */
@@ -225,8 +224,7 @@ public class FileOpsTest extends DrJavaTestCase {
     catch(FileNotFoundException e) { } //do nothing, we expected this
   }
   
-  /**
-   * This tests that packageExplore correctly runs through and returns
+  /** This tests that packageExplore correctly runs through and returns
    * non-empty packages
    */
   public void testPackageExplore() throws IOException {

@@ -52,8 +52,7 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
   // private int _position = 0;
   private int _offset = 0;
 
-  /**
-   * Creates a multiline insert rule.  It should be noted that although the suffices
+  /** Creates a multiline insert rule.  It should be noted that although the suffices
    * are referred to as "lines", this class simply appends the strings with a
    * number of spaces for padding.  Any newline characters you intend to place
    * in the document must be explicitly placed within the input strings.

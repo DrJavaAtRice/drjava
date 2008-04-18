@@ -245,8 +245,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#2.2", "/", model1.currentToken().getType());
   }
 
-  /**
-   * Test to ensure that a complex sequence of multi-lined Brace entries does not fail.
+  /** Test to ensure that a complex sequence of multi-lined Brace entries does not fail.
    * Originally, the insertBraceInGap() had the chance of inserting at the beginning
    * of a gap, in which case the gap to be split was actually never shrunk and a new
    * gap of size 0 is added after the newly inserted Brace. This caused problems for
@@ -275,8 +274,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.1", 2, model1.balanceBackward());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testCrazyCase1() {
     model1.insertChar('/');
@@ -338,8 +336,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-2);
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testLineCommentBreakCrazy() {
     model1.insertChar('/');
@@ -379,8 +376,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("3.5", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testBreakBlockCommentWithStar() {
     // /*#//__/__
@@ -407,8 +403,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("4.5", FREE, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testBreakCloseBlockCommentWithStar() {
     model1.insertChar('/');
@@ -434,8 +429,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("5.6", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testBasicBlockComment() {
     model1.insertChar('/');
@@ -457,8 +451,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("1.2", "*/", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testInsertBlockInsideBlockComment() {
     model1.insertChar('/');
@@ -478,8 +471,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("1.2", "*/", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testInsertBlockCommentEnd() { // should not form an end without a start.
     model1.insertChar('*');
@@ -489,8 +481,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#3.1", 1, model1.currentToken().getSize());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testGetStateAtCurrent() {
     assertEquals("#0.0", FREE, model1.getStateAtCurrent());
@@ -523,8 +514,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#4.2", "/", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testQuotesSimple() {
     model1.insertChar('\"');
@@ -538,8 +528,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.4", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testQuotesWithGap() {
     model1.insertChar('\"');
@@ -574,8 +563,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#2.3", FREE, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testInsertQuoteToQuoteBlock() {
     model1.insertChar('\"');
@@ -624,8 +612,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#5.8", true, model1.currentToken().isGap());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testQuoteBreaksComment() {
     model1.insertChar('/');
@@ -665,8 +652,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#5.5", FREE, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testQuoteBreakComment2() {
     model1.insertChar('/');
@@ -692,8 +678,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.4", "*", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testInsertNewlineEndLineComment() {
     model1.insertChar('/');
@@ -712,8 +697,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.5", FREE, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testInsertNewlineEndQuote() {
     model1.insertChar('\"');
@@ -731,8 +715,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.5", FREE, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testInsertNewlineChainReaction() {
     model1.insertChar('/');
@@ -781,8 +764,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#4.6", "*/", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testMoveWithinToken() {
     insertGap(model1, 10);
@@ -805,8 +787,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#5.1", 10, model1.absOffset());
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testMoveOnEmpty() {
     model1.move(0);
@@ -821,8 +802,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     } catch (Exception e) { }
   }
 
-  /**
-   * put your documentation comment here
+  /** put your documentation comment here
    */
   public void testMove0StaysPut() {
     model0.insertChar('/');

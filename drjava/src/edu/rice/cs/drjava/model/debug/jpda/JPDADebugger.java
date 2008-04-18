@@ -406,8 +406,7 @@ public class JPDADebugger implements Debugger {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.watchSet(w); } });
   }
   
-  /**
-   * Removes any watches on the given field or variable.
+  /** Removes any watches on the given field or variable.
    * Has no effect if the given field is not being watched.
    * @param field the name of the field we will watch
    */
@@ -423,8 +422,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /**
-   * Removes the watch at the given index.
+  /** Removes the watch at the given index.
    * @param index Index of the watch to remove
    */
   public synchronized void removeWatch(int index) throws DebugException {
@@ -437,8 +435,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /**
-   * Removes all watches on existing fields and variables.
+  /** Removes all watches on existing fields and variables.
    */
   public synchronized void removeAllWatches() throws DebugException {
     // _ensureReady();
@@ -448,8 +445,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /**
-   * Enable or disable the specified breakpoint.
+  /** Enable or disable the specified breakpoint.
    * @param breakpoint breakpoint to change
    */
   public synchronized void notifyBreakpointChange(Breakpoint breakpoint) {
@@ -550,8 +546,7 @@ public class JPDADebugger implements Debugger {
     return threads;
   }
   
-  /**
-   * Returns a Vector of DebugStackData for the current suspended thread.
+  /** Returns a Vector of DebugStackData for the current suspended thread.
    * @throws DebugException if the current thread is running or there
    * are no suspended threads
    * TO DO: Config option for hiding DrJava subset of stack trace
@@ -762,8 +757,7 @@ public class JPDADebugger implements Debugger {
     return connector;
   }
   
-  /**
-   * Sets the debugger's currently active thread.
+  /** Sets the debugger's currently active thread.
    * This method assumes that the given thread is already suspended.
    * Returns true if this actually changed the suspended thread
    * by pushing it onto the stack of suspended threads.  Returns
@@ -880,8 +874,7 @@ public class JPDADebugger implements Debugger {
     throw new NoSuchElementException("Thread " + d.getName() + " not found in virtual machine!");
   }
   
-  /**
-   * Suspends all the currently running threads in the virtual machine.
+  /** Suspends all the currently running threads in the virtual machine.
    *
    * Not currently in use/available, since it is incompatible with
    * the debug interpreters.
@@ -903,8 +896,7 @@ public class JPDADebugger implements Debugger {
    _runningThread = null;
    }*/
   
-  /**
-   * Suspends execution of the thread referenced by threadData.
+  /** Suspends execution of the thread referenced by threadData.
    *
    * Not in use/available, since it is currently incompatible with the
    * debug interpreters.  (Can't execute code in a suspended thread unless
@@ -1147,8 +1139,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /**
-   * Copy the current selected thread's visible variables (those in scope) into
+  /** Copy the current selected thread's visible variables (those in scope) into
    * an interpreter's environment and then switch the Interactions window's
    * interpreter to that interpreter.
    */
@@ -1212,8 +1203,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /**
-   * @return the prompt to display in the itneractions console
+  /** @return the prompt to display in the itneractions console
    * based upon the ThreadReference threadRef, which is being debugged.
    */
   private String _getPromptString(ThreadReference threadRef) {
@@ -1388,8 +1378,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /**
-   * Returns a unique name for the given thread.
+  /** Returns a unique name for the given thread.
    */
   private String _getUniqueThreadName(ThreadReference thread) {
     return Long.toString(thread.uniqueID());

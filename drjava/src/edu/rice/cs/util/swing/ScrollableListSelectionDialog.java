@@ -64,8 +64,7 @@ import javax.swing.table.AbstractTableModel;
  * @since 2007-04-08
  */
 public class ScrollableListSelectionDialog extends JDialog {
-  /**
-   * A enumeration of the various selection states.
+  /** A enumeration of the various selection states.
    */
   public enum SelectionState {
     /** Indicates that an item is selected. */
@@ -104,8 +103,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     * intrinsic lock. */
   protected final Vector<Boolean> selectedItems;
   
-  /**
-   * <p>Creates a new ScrollableListSelectionDialog with the given
+  /** <p>Creates a new ScrollableListSelectionDialog with the given
    * title, leader text, and items. The list of items is used to
    * construct an internal string list that is not backed by the original
    * list. Changes made to the list or items after dialog construction
@@ -130,8 +128,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     this(owner, dialogTitle, leaderText, listItems, itemDescription, SelectionState.SELECTED, JOptionPane.PLAIN_MESSAGE);
   }
   
-  /**
-   * <p>Creates a new ScrollableListSelectionDialog with the given
+  /** <p>Creates a new ScrollableListSelectionDialog with the given
    * title, leader text, items, and message type. The list of items is
    * used to construct an internal string list that is not backed by the
    * original list. Changes made to the list or items after dialog
@@ -174,8 +171,7 @@ public class ScrollableListSelectionDialog extends JDialog {
          true);
   }
   
-  /**
-   * <p>Creates a new ScrollableListSelectionDialog with the given
+  /** <p>Creates a new ScrollableListSelectionDialog with the given
    * title, leader text, items, message type, width, height, and icon.
    * The list of items is used to construct an internal string list that
    * is not backed by the original list. Changes made to the list or
@@ -224,8 +220,7 @@ public class ScrollableListSelectionDialog extends JDialog {
          false);
   }
   
-  /**
-   * <p>Creates a new ScrollableListSelectionDialog with the given
+  /** <p>Creates a new ScrollableListSelectionDialog with the given
    * title, leader text, items, message type, width, height, and icon.
    * The list of items is used to construct an internal string list that
    * is not backed by the original list. Changes made to the list or
@@ -488,8 +483,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     setSize(dialogSize);
   }
   
-  /**
-   * A method to check if they given message type is a know message
+  /** A method to check if they given message type is a know message
    * type.
    * 
    * @param messageType The message type to check
@@ -503,8 +497,7 @@ public class ScrollableListSelectionDialog extends JDialog {
       messageType == JOptionPane.PLAIN_MESSAGE;
   }
   
-  /**
-   * Lookup the icon associated with the given messageType. The message
+  /** Lookup the icon associated with the given messageType. The message
    * type must be one of the message types from
    * {@link javax.swing.JOptionPane}.
    * 
@@ -536,8 +529,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     return null;
   }
   
-  /**
-   * Adds the &quot;Select All&quot; and &quot;Select None&quot; buttons
+  /** Adds the &quot;Select All&quot; and &quot;Select None&quot; buttons
    * to the given panel.
    * 
    * @param selectButtonsPanel The panel that should contain the buttons.
@@ -554,8 +546,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     selectButtonsPanel.add(selectNoneButton);
   }
   
-  /**
-   * Adds buttons to the bottom of the dialog. By default, a single
+  /** Adds buttons to the bottom of the dialog. By default, a single
    * &quot;OK&quot; button is added that calls {@link #closeDialog}. It
    * is also set as the dialog's default button.
    *
@@ -577,24 +568,21 @@ public class ScrollableListSelectionDialog extends JDialog {
     getRootPane().setDefaultButton(okButton);
   }
   
-  /**
-   * Shows the dialog.
+  /** Shows the dialog.
    */
   public void showDialog() {
     pack();
     setVisible(true);
   }
   
-  /**
-   * Should be called when the dialog should be closed. The default implementation
+  /** Should be called when the dialog should be closed. The default implementation
    * simply hides the dialog.
    */
   protected void closeDialog() {
     setVisible(false);
   }
   
-  /**
-   * Returns the string representation of those items that are
+  /** Returns the string representation of those items that are
    * currently selected. The items will be in the same relative order
    * as they were at construction time. The resultant collection may be
    * empty. The resultant collection is unmodifiable. The resultant
@@ -621,8 +609,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     return Collections.unmodifiableList(results);
   }
   
-  /**
-   * An ActionListener that handles the &quot;Select All&quot; and
+  /** An ActionListener that handles the &quot;Select All&quot; and
    * &quot;Select None&quot; buttons. It will set the selection state
    * of every item to the given selection state.
    */
@@ -661,8 +648,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     }
   }
   
-  /**
-   * A simple main method for testing purposes.
+  /** A simple main method for testing purposes.
    * 
    * @param args Not used.
    */

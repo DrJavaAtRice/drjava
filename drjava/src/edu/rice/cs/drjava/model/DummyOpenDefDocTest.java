@@ -47,8 +47,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 public class DummyOpenDefDocTest extends DrJavaTestCase {
   
   
-  /**
-   * Creates a DummyOpenDefDoc and ensures that it properly
+  /** Creates a DummyOpenDefDoc and ensures that it properly
    * throws UnsupportedOperationException by calling isModifiedOnDisk().
    */
   public void testProperExceptionThrowing() {

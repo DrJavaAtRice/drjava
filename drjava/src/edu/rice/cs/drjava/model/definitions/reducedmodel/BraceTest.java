@@ -47,8 +47,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
   protected Brace rparen;
   protected Brace lparen;
 
-  /**
-   * Set up Braces for testing.
+  /** Set up Braces for testing.
    */
   public void setUp() throws Exception {
     super.setUp();
@@ -56,16 +55,14 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     rparen = Brace.MakeBrace(")", FREE);
   }
 
-  /**
-   * Create the test suite.
+  /** Create the test suite.
    * @return BraceTest test suite
    */
   public static Test suite() {
     return  new TestSuite(BraceTest.class);
   }
 
-  /**
-   * Tests the successful construction of a Brace using the MakeBrace method.
+  /** Tests the successful construction of a Brace using the MakeBrace method.
    */
   public void testMakeBraceSuccess() {
     Brace brace = Brace.MakeBrace("{", FREE);
@@ -73,8 +70,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertEquals(1, brace.getSize());
   }
 
-  /**
-   * Tests the failure to make a Brace with a non-special character.
+  /** Tests the failure to make a Brace with a non-special character.
    */
   public void testMakeBraceFailure() {
     try {
@@ -84,16 +80,14 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     }
   }
 
-  /**
-   * Test the getType function for Braces.
+  /** Test the getType function for Braces.
    */
   public void testGetType() {
     assertEquals("(", lparen.getType());
     assertEquals(")", rparen.getType());
   }
 
-  /**
-   * Test the isShadowed() function.
+  /** Test the isShadowed() function.
    */
   public void testIsShadowed() {
     assertTrue("#0.0", !lparen.isShadowed());
@@ -106,8 +100,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertTrue("#0.3", !rparen.isShadowed());
   }
 
-  /**
-   * Test the isQuoted() function.
+  /** Test the isQuoted() function.
    */
   public void testIsQuoted() {
     assertTrue("#0.0", !lparen.isQuoted());
@@ -117,8 +110,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertTrue("#0.2", !lparen.isQuoted());
   }
 
-  /**
-   * Test the isCommented() function.
+  /** Test the isCommented() function.
    */
   public void testIsCommented() {
     assertTrue("#0.0", !lparen.isCommented());
@@ -128,16 +120,14 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertTrue("#0.2", !lparen.isCommented());
   }
 
-  /**
-   * Test the toString method.
+  /** Test the toString method.
    */
   public void testToString() {
     assertEquals(" (", lparen.toString());
     assertEquals(" )", rparen.toString());
   }
 
-  /**
-   * Test the flip() method.
+  /** Test the flip() method.
    */
   public void testFlip() {
     lparen.flip();
@@ -146,16 +136,14 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertEquals(")", lparen.getType());
   }
 
-  /**
-   * Test isOpen() and isClosed().
+  /** Test isOpen() and isClosed().
    */
   public void testOpenClosed() {
     assertTrue(lparen.isOpen());
     assertTrue(rparen.isClosed());
   }
 
-  /**
-   * Test isMatch(Brace) method.
+  /** Test isMatch(Brace) method.
    */
   public void testIsMatch() {
     Brace bracket = Brace.MakeBrace("]", FREE);

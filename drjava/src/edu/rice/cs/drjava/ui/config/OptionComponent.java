@@ -103,8 +103,7 @@ public abstract class OptionComponent<T> implements Serializable {
   /** Whether the component should occupy the entire column. */
   public boolean getEntireColumn() { return _entireColumn; }
   
-  /**
-   * Updates the appropriate configuration option with the new value 
+  /** Updates the appropriate configuration option with the new value 
    * if different from the old value and legal. Any changes should be 
    * done immediately such that current and future references to the Option 
    * should reflect the changes.
@@ -119,8 +118,7 @@ public abstract class OptionComponent<T> implements Serializable {
     }
   }
   
-  /**
-   * Resets the actual value of the component to the original default.
+  /** Resets the actual value of the component to the original default.
    */
   public void resetToDefault() {
     if (_option != null) {

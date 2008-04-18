@@ -425,8 +425,7 @@ public class DrJavaErrorWindow extends JDialog {
     }
   };
 
-  /**
-   * Canned message for the user.
+  /** Canned message for the user.
    */
   private static final String HEADER_HTML =
     "<html><font size=\"-1\" face=\"sans-serif, Arial, Helvetica, Geneva\"><b>";

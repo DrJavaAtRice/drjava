@@ -79,8 +79,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
     _updateField(_font);
   }
   
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public FontOptionComponent(FontOption opt, String text,
                              Frame parent, String description) {
@@ -88,8 +87,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -98,23 +96,20 @@ public class FontOptionComponent extends OptionComponent<Font> {
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the font field to display the given font.
+  /** Updates the font field to display the given font.
    */
   private void _updateField(Font f) {
     _fontField.setFont(f);
     _fontField.setText(_option.format(f));
   }
     
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
     return _panel;
   }
   
-  /**
-   * Shows a custom font chooser dialog to pick a new font.
+  /** Shows a custom font chooser dialog to pick a new font.
    */
   public void chooseFont() {
     String oldText = _fontField.getText();
@@ -130,8 +125,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
     }
   }
   
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -141,8 +135,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
     return true;
   }
   
-   /**
-   * Displays the given value.
+   /** Displays the given value.
    */
   public void setValue(Font value) {
     _font = value;

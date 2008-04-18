@@ -66,8 +66,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   public static final String ICONS_ONLY= "icons only";
   public static final String TEXT_AND_ICONS = "text and icons";
 
-  /**
-   * The constructor does not take an option since we have specific knowledge of the
+  /** The constructor does not take an option since we have specific knowledge of the
    * two options we'll need for this component. We simpy access them as needed, and use
    * OptionComponent's degenerate constructor.
    * @param title the title for this panel
@@ -137,16 +136,14 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
       
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public ToolbarOptionComponent(String title, Frame parent, String description) {
     this(title, parent);
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -158,8 +155,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     _label.setToolTipText(description);
   }
 
-  /**
-   * Selects the radio button corresponding to the current config options.
+  /** Selects the radio button corresponding to the current config options.
    */
   public void resetToCurrent() {
     _setSelected(DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue(),
@@ -167,8 +163,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
                  DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue());
   }
 
-  /**
-   * Selects the radio button corresponding to the default values.
+  /** Selects the radio button corresponding to the default values.
    */
   public void resetToDefault() {
     _setSelected(OptionConstants.TOOLBAR_TEXT_ENABLED.getDefault().booleanValue(),
@@ -176,8 +171,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
                  OptionConstants.TOOLBAR_ENABLED.getDefault().booleanValue());
   }
 
-  /**
-   * Selects the radio button corresponding to the specified configuration.
+  /** Selects the radio button corresponding to the specified configuration.
    * @param textEnabled Whether toolbar text is enabled
    * @param iconsEnabled Whether toolbar icons are enabled
    */
@@ -194,15 +188,13 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     }
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
     return _buttonPanel;
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -256,8 +248,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   }
 
 
-  /**
-   * Displays the given value.
+  /** Displays the given value.
    */
   public void setValue(Boolean value) {
     resetToCurrent();

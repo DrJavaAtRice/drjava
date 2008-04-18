@@ -188,8 +188,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return;
   }
   
-  /**
-   * Inserts a gap between a multiple character brace.
+  /** Inserts a gap between a multiple character brace.
    * Because ReducedModelBrace does not keep track of multiple character
    * braces, only (),{}, and [], it differed in its implementation of
    * inserGap(int) from ReducedModelComment's.  To pull out the otherwise
@@ -199,8 +198,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   protected abstract void insertGapBetweenMultiCharBrace(int length);
   
-  /**
-   * Make a copy of the token list's iterator.
+  /** Make a copy of the token list's iterator.
    */
   public TokenList.Iterator makeCopyCursor() {
     return _cursor.copy();

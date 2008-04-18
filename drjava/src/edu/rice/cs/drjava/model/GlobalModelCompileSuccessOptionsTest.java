@@ -54,8 +54,7 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompileSuccessTestCase {
 
-  /**
-   * Tests a compile on a file that references a non-public class defined in
+  /** Tests a compile on a file that references a non-public class defined in
    * another class with a name different than the non-public class.
    * Doesn't reset interactions because no interpretations are performed.
    */
@@ -94,8 +93,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
   }
   
-  /**
-   * Test support for assert keyword if enabled.
+  /** Test support for assert keyword if enabled.
    * Note that this test only runs in Java 1.4 or higher.
    * Doesn't reset interactions because no interpretations are performed.
    */

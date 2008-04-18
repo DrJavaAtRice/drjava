@@ -43,8 +43,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  * @version $Id$
  */
 public final class GapTest extends DrJavaTestCase {
-  /**
-   * Tests the ability to grow a Gap.
+  /** Tests the ability to grow a Gap.
    */
   public void testGrow() {
     Gap gap0 = new Gap(0, ReducedToken.FREE);
@@ -57,8 +56,7 @@ public final class GapTest extends DrJavaTestCase {
     assertEquals(1, gap1.getSize());
   }
 
-  /**
-   * Tests the ability to shrink a Gap.
+  /** Tests the ability to shrink a Gap.
    */
   public void testShrink() {
     Gap gap0 = new Gap(5, ReducedToken.FREE);

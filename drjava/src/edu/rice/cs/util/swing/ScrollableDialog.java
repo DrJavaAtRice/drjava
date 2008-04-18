@@ -59,8 +59,7 @@ public class ScrollableDialog implements Serializable {
   /** Panel of buttons at the bottom of this dialog. */
   protected JPanel _buttonPanel;
   
-  /**
-   * Creates a new ScrollableDialog with the default width and height.
+  /** Creates a new ScrollableDialog with the default width and height.
    * @param parent Parent frame for this dialog
    * @param title Title for this dialog
    * @param header Message to display at the top of this dialog
@@ -70,8 +69,7 @@ public class ScrollableDialog implements Serializable {
     this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
   }
   
-  /**
-   * Creates a new ScrollableDialog.
+  /** Creates a new ScrollableDialog.
    * @param parent Parent frame for this dialog
    * @param title Title for this dialog
    * @param header Message to display at the top of this dialog

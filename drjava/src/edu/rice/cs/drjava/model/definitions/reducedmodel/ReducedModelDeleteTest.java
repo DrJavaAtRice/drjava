@@ -43,8 +43,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 public final class ReducedModelDeleteTest extends BraceReductionTestCase
   implements ReducedModelStates
 {
-  /**
-   * Tests that line comments after code are indeted correctly.
+  /** Tests that line comments after code are indeted correctly.
    */
   public void testHalfLineComment() {
     model1.insertChar('/');
@@ -65,8 +64,7 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     assertEquals("#3.0", 0, model1.absOffset());
   }
 
-  /**
-   * Tests that inner gaps are deleted correctcly.
+  /** Tests that inner gaps are deleted correctcly.
    */
   public void testInnerGapDelete() {
     insertGap(model1, 8);
@@ -80,8 +78,7 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     assertEquals("#2.0", 5, model1.absOffset());
   }
 
-  /**
-   * Tests reduced model behavioir for deleting text then merging two gaps.
+  /** Tests reduced model behavioir for deleting text then merging two gaps.
    */
   public void testDeleteAndMergeTwoGaps() {
     insertGap(model1, 5);

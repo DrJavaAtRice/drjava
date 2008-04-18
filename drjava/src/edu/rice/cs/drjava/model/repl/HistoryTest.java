@@ -55,8 +55,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   private History _history;
   private File _tempDir;
 
-  /**
-   * Initialize fields for each test.
+  /** Initialize fields for each test.
    */
   public void setUp() throws Exception {
     super.setUp();
@@ -66,8 +65,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history = new History();
   }
 
-  /**
-   * Cleans up temporary files and tries to free used variables after each test.
+  /** Cleans up temporary files and tries to free used variables after each test.
    */
   public void tearDown() throws Exception {
     boolean ret = IOUtil.deleteRecursively(_tempDir);
@@ -77,8 +75,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     super.tearDown();
   }
 
-  /**
-   * Tests that the history doesn't overwrite files without prompting.
+  /** Tests that the history doesn't overwrite files without prompting.
    */
   public void testSaveAsExistsForOverwrite() throws IOException {
     _history.add("some text");
@@ -114,8 +111,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
                  _history.getCurrent());
   }
 
-  /**
-   * Ensures that Histories are bound to 500 entries.
+  /** Ensures that Histories are bound to 500 entries.
    */
   public void testHistoryIsBounded() {
     int maxLength = 500;
@@ -164,8 +160,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     assertEquals("History size should still be 0", 0, _history.size());
   }
 
-  /**
-   * Tests the getHistoryAsString() method
+  /** Tests the getHistoryAsString() method
    */
   public void testGetHistoryAsString() {
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));

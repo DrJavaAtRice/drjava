@@ -56,8 +56,7 @@ public class ScrollableListSelectionDialogTest extends TestCase {
   private static final java.util.List<String> DATA = Arrays.asList("hello", "there");
   private static final String DESC = "DIALOG DESCRIPTION";
   
-  /**
-   * Tests that all the valid message types are accepted and that they
+  /** Tests that all the valid message types are accepted and that they
    * are the only message types accepted.
    */
   public void testValidMessageTypes() {

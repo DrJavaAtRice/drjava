@@ -105,8 +105,7 @@ public interface RegionManager<R extends DocumentRegion> {
    *  @return new current region */
   public R prevCurrentRegion();
   
-  /**
-   * Set the maximum number of regions that can be stored in this manager.
+  /** Set the maximum number of regions that can be stored in this manager.
    * If the maximum capacity has been reached and another region is added, the region at the end farther
    * away from the insertion location will be discarded.
    * @param size maximum number of regions, or 0 if no maximum

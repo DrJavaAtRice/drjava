@@ -104,8 +104,7 @@ public interface Tokens {
     public boolean getValue() { return _bool; }
   }
   
-  /**
-   * Numbers are string s of only digits (0-9)
+  /** Numbers are string s of only digits (0-9)
    */
   class NumberToken extends SExpToken {
     private double _num;

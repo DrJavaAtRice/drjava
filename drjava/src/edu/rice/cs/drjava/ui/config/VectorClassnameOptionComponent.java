@@ -47,8 +47,7 @@ public class VectorClassnameOptionComponent extends VectorOptionComponent<String
     super(opt, text, parent);
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public VectorClassnameOptionComponent(VectorOption<String> opt, String text, Frame parent, String description) {
     this(opt, text, parent);

@@ -92,8 +92,7 @@ public class StringOptionComponent extends OptionComponent<String> {
     _jtf.setText(value);
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _jtf; }
 }

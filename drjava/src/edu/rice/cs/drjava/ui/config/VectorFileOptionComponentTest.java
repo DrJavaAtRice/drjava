@@ -100,8 +100,7 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
 
-  /**
-   * The equals method for a parameterized Vector.
+  /** The equals method for a parameterized Vector.
    *
    * @param v1 the first Vector<File>
    * @param v2 the Vector<File> to compare with

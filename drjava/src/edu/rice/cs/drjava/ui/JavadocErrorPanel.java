@@ -53,8 +53,7 @@ public class JavadocErrorPanel extends ErrorPanel {
   // TODO:  Is this field necessary?
 //  private boolean _successful;
 
-  /**
-   * Constructor.
+  /** Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
    */
@@ -65,8 +64,7 @@ public class JavadocErrorPanel extends ErrorPanel {
     setErrorListPane(_errorListPane);
   }
 
-  /**
-   * Returns the JavadocErrorListPane that this panel manages.
+  /** Returns the JavadocErrorListPane that this panel manages.
    */
   public JavadocErrorListPane getErrorListPane() {
     return _errorListPane;
@@ -81,8 +79,7 @@ public class JavadocErrorPanel extends ErrorPanel {
     _errorListPane.setJavadocInProgress();
   }
 
-  /**
-   * Clean up when the tab is closed.
+  /** Clean up when the tab is closed.
    */
   protected void _close() {
     super._close();
@@ -99,8 +96,7 @@ public class JavadocErrorPanel extends ErrorPanel {
     _errorListPane.updateListPane(true);
   }
 
-  /**
-   * A pane to show Javadoc errors. It acts a bit like a listbox (clicking
+  /** A pane to show Javadoc errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
   public class JavadocErrorListPane extends ErrorPanel.ErrorListPane {

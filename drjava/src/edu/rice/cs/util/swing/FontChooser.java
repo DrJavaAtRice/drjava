@@ -51,14 +51,12 @@ import java.awt.event.*;
  */
 
 public class FontChooser extends JDialog {
-  /**
-   * Available font styles.
+  /** Available font styles.
    */
   private static final String[] STYLES =
       new String[] { "Plain", "Bold", "Italic", "Bold Italic" };
 
-  /**
-   * Available font sizes.
+  /** Available font sizes.
    */
   private static final String[] SIZES =
       new String[] { "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
@@ -77,8 +75,7 @@ public class FontChooser extends JDialog {
 
   private boolean _clickedOK = false;
 
-  /**
-   * Constructs a new modal FontChooser for the given frame,
+  /** Constructs a new modal FontChooser for the given frame,
    * using the specified font.
    */
   private FontChooser(Frame parent, Font font) {
@@ -92,8 +89,7 @@ public class FontChooser extends JDialog {
     resize();
   }
 
-  /**
-   * Method used to show the font chooser, and select a new font.
+  /** Method used to show the font chooser, and select a new font.
    *
    * @param parent The parent frame.
    * @param title  The title for this window.
@@ -115,8 +111,7 @@ public class FontChooser extends JDialog {
     return (chosenFont);
   }
 
-  /**
-   * Shows the font chooser with a standard title ("Font Chooser").
+  /** Shows the font chooser with a standard title ("Font Chooser").
    */
   public static Font showDialog(Frame parent, Font font) {
     return showDialog(parent, "Font Chooser", font);
@@ -209,23 +204,20 @@ public class FontChooser extends JDialog {
     _sampleText.setVerticalAlignment(SwingConstants.TOP);
   }
 
-  /**
-   * Returns whether the user clicked OK when the dialog was closed.
+  /** Returns whether the user clicked OK when the dialog was closed.
    * (If false, the user clicked cancel.)
    */
   public boolean clickedOK() {
     return _clickedOK;
   }
 
-  /**
-   * Returns the currently selected Font.
+  /** Returns the currently selected Font.
    */
   public Font getFont() {
     return _sampleText.getFont();
   }
 
-  /**
-   * Private inner class for a list which displays a list of options in addition to a label
+  /** Private inner class for a list which displays a list of options in addition to a label
    * indicating the currently selected item.
    */
   public class NwList extends JPanel {

@@ -95,8 +95,7 @@ public class JListSortNavigatorTest extends DrJavaTestCase {
     assertTrue("getDocuments test", Arrays.equals(docsArray, new DummyINavigatorItem[] {i1, i2, i3, i4}));
   }
   
-  /**
-   * Test of getting the list of selected items.
+  /** Test of getting the list of selected items.
    * Commented out when changes from revision 4171 were reverted.
    */
 //  public void testGetSelectedDocuments() {

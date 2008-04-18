@@ -525,8 +525,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   * Adds all of the components for the Color panel of the preferences window.
+  /** Adds all of the components for the Color panel of the preferences window.
    */
   private void _setupColorPanel(ConfigPanel panel) {
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", this,
@@ -671,8 +670,7 @@ public class ConfigFrame extends JFrame {
   }
 
   
-  /**
-   * Adds all of the components for the Key Bindings panel of the preferences window.
+  /** Adds all of the components for the Key Bindings panel of the preferences window.
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treeset because it automatically sorts element upon insertion
@@ -710,8 +708,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   * Add all of the components for the Debugger panel of the preferences window.
+  /** Add all of the components for the Debugger panel of the preferences window.
    */
   private void _setupDebugPanel(ConfigPanel panel) {
     if (!_mainFrame.getModel().getDebugger().isAvailable()) {
@@ -1001,8 +998,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
   
-  /**
-   * Adds all of the components for the Compiler Options Panel of the preferences window
+  /** Adds all of the components for the Compiler Options Panel of the preferences window
    */
   private void _setupCompilerPanel(ConfigPanel panel) {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, "Show Unchecked Warnings", this, 

@@ -56,8 +56,7 @@ public final class DependenciesTest extends DrJavaTestCase {
    */
   public static Test suite() { return  new TestSuite(DependenciesTest.class); }
 
-  /**
-   * This test ensures that the util package version is as new as we expect.
+  /** This test ensures that the util package version is as new as we expect.
    * It is no longer used (since util is no longer a separate jar), but is
    * left here as an example of what could be done with other modules
    * (although it might be worth discussing whether this is really the right way

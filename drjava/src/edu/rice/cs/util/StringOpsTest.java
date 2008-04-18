@@ -130,8 +130,7 @@ public class StringOpsTest extends DrJavaTestCase {
     }
   }
   
-  /**
-   * Tests that getting the stack trace of a throwable works correctly.
+  /** Tests that getting the stack trace of a throwable works correctly.
    */
   public void testGetStackTrace() {
     final String trace = "hello";
@@ -143,8 +142,7 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("Should have returned the correct stack trace!", trace, StringOps.getStackTrace(t));
   }
   
-  /**
-   * Tests converting a string to a literal
+  /** Tests converting a string to a literal
    */
   public void testConvertToLiteral() {
     String toConvert = " a  b  c  d";
@@ -216,8 +214,7 @@ public class StringOpsTest extends DrJavaTestCase {
     }
   }
   
-  /**
-   * Tests for getting the simple name of a class.
+  /** Tests for getting the simple name of a class.
    */
   public void testGetSimpleName() {
     String exp = "Integer";

@@ -79,8 +79,7 @@ public interface InteractionsModelCallback {
     */
   public void replSystemErrPrint(String s);
   
-  /**
-   * Signifies that the most recent interpretation completed successfully,
+  /** Signifies that the most recent interpretation completed successfully,
    * returning no value.
    */
   public void replReturnedVoid();

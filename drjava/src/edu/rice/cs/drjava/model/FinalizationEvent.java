@@ -46,15 +46,13 @@ public class FinalizationEvent<T> {
  
   private T _obj;
   
-  /**
-   * @param obj The object that is being finalized
+  /** @param obj The object that is being finalized
    */
   public FinalizationEvent(T obj) {
     _obj = obj;
   }
   
-  /**
-   * @return the object that should be GC'd
+  /** @return the object that should be GC'd
    */
   public T getObject() {
     return _obj;

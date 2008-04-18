@@ -51,8 +51,7 @@ public class NumberAtom implements Atom {
   public int intValue() { return (int)_num; }
   public double doubleValue() { return _num; }
   
-  /**
-   * Visitor hook for the NumberAtom
+  /** Visitor hook for the NumberAtom
    * @param v the visitor
    * @return result of the given algorithm
    */

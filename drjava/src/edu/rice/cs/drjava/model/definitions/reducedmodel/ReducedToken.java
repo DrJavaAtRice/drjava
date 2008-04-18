@@ -154,8 +154,7 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public abstract boolean isBlockCommentEnd();
   
-  /**
-   * Determines whether the current location is a new line.
+  /** Determines whether the current location is a new line.
    * @return boolean
    */
   public abstract boolean isNewline();

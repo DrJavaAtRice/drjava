@@ -48,30 +48,26 @@ public class DirectoryFilter extends FileFilter {
   /** Name of the filter. */
   private String _description;
 
-  /**
-   * Creates a new directory filter named "Directories".
+  /** Creates a new directory filter named "Directories".
    */
   public DirectoryFilter() {
     this("Directories");
   }
   
-  /**
-   * Creates a new directory filter with the given description.
+  /** Creates a new directory filter with the given description.
    * @param description Name of the filter
    */
   public DirectoryFilter(String description) {
     _description = description;
   }
 
-  /**
-   * Returns true if the file is a directory.
+  /** Returns true if the file is a directory.
    */
   public boolean accept(File f) {
     return f.isDirectory();
   }
 
-  /**
-   * @return A description of this filter to display
+  /** @return A description of this filter to display
    */
   public String getDescription() {
     return _description;

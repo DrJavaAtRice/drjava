@@ -46,15 +46,13 @@ import java.awt.event.*;
  * when the mouse is pressed and when it is released.
  */
 public abstract class RightClickMouseAdapter extends MouseAdapter {
-  /**
-   * Performs the action when the popup trigger is received.
+  /** Performs the action when the popup trigger is received.
    * Generally shows a popup context menu.
    * @param e the MouseEvent that is a popup trigger
    */
   protected abstract void _popupAction(MouseEvent e);
 
-  /**
-   * Signals that the mouse has been pressed.
+  /** Signals that the mouse has been pressed.
    * @param e the MouseEvent that just occurred
    */
   public void mousePressed(MouseEvent e) {
@@ -63,8 +61,7 @@ public abstract class RightClickMouseAdapter extends MouseAdapter {
     }
   }
 
-  /**
-   * Signals that the mouse has been released.
+  /** Signals that the mouse has been released.
    * @param e the MouseEvent that just occurred
    */
   public void mouseReleased(MouseEvent e) {

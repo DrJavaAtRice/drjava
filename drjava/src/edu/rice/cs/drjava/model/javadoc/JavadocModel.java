@@ -50,8 +50,7 @@ import edu.rice.cs.util.DirectorySelector;
  * @version $Id$
  */
 public interface JavadocModel {
-  /**
-   * Name for the suggested destination directory to be placed in the
+  /** Name for the suggested destination directory to be placed in the
    * source root of one of the open documents.  (Value is "doc".)
    */
   public static final String SUGGESTED_DIR_NAME = "doc";
@@ -59,14 +58,12 @@ public interface JavadocModel {
   /** {@code true} iff the classes to run javadoc are available */
   public boolean isAvailable();
   
-  /**
-   * Add a JavadocListener to the model.
+  /** Add a JavadocListener to the model.
    * @param listener a listener that reacts to Javadoc events
    */
   public void addListener(JavadocListener listener);
   
-  /**
-   * Remove a JavadocListener from the model.  If the listener is not currently
+  /** Remove a JavadocListener from the model.  If the listener is not currently
    * listening to this model, this method has no effect.
    * @param listener a listener that reacts to Javadoc events
    */
@@ -81,8 +78,7 @@ public interface JavadocModel {
   /** Clears all current Javadoc errors. */
   public void resetJavadocErrors();
   
-  /**
-   * Suggests a default location for generating Javadoc, based on the given
+  /** Suggests a default location for generating Javadoc, based on the given
    * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
    * the sourceroot.)
    * @param doc Document with the source root to use as the default.

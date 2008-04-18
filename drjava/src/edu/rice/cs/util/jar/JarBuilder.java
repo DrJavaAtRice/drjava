@@ -44,8 +44,7 @@ import java.util.jar.Manifest;
 public class JarBuilder {
   private JarOutputStream _output;
   
-  /**
-   * Creates a file file without a manifest
+  /** Creates a file file without a manifest
    *
    * @param file the file to write the jar to
    * @throws IOException thrown if the file cannot be opened for writing
@@ -54,8 +53,7 @@ public class JarBuilder {
     _output = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(file)), ManifestWriter.DEFAULT);
   }
   
-  /**
-   * Creates an empty jar file with the given manifest
+  /** Creates an empty jar file with the given manifest
    *
    * @param jar      the file to write the jar to
    * @param manifest the file that is the manifest for the archive
@@ -65,8 +63,7 @@ public class JarBuilder {
     _output = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(jar)), new Manifest(new FileInputStream(manifest)));
   }
   
-  /**
-   * Creates an empty jar file with the given manifest
+  /** Creates an empty jar file with the given manifest
    *
    * @param jar      the file to write the jar to
    * @param manifest the manifest file for the jar
@@ -81,8 +78,7 @@ public class JarBuilder {
     }
   }
   
-  /**
-   * Takes a parent name and a field name and returns the concatenation of them correctly
+  /** Takes a parent name and a field name and returns the concatenation of them correctly
    *
    * @param parent The parent directory
    * @param name   The name of the file or directory
@@ -97,8 +93,7 @@ public class JarBuilder {
     return parent + sep + name;
   }
   
-  /**
-   * Adds the file to the given path and name
+  /** Adds the file to the given path and name
    *
    * @param file     the file to be added
    * @param parent   the directory to the path in which the file is to be added
@@ -141,8 +136,7 @@ public class JarBuilder {
     addDirectoryRecursiveHelper(dir, parent, new byte[2048], filter);
   }
   
-  /**
-   * Add the contents of a directory that match a filter to the archive
+  /** Add the contents of a directory that match a filter to the archive
    * @param dir the directory to add
    * @param parent the directory to add into
    * @param buffer a buffer that is 2048 bytes
@@ -179,8 +173,7 @@ public class JarBuilder {
     return true;
   }
   
-  /**
-   * Makes a directory in the jar file
+  /** Makes a directory in the jar file
    *
    * @param parent  The name of the parent that the directory is to be created in
    * @param dirName The name of the directory to be created
@@ -197,8 +190,7 @@ public class JarBuilder {
     return true;
   }
   
-  /**
-   * Close writing on the jar file
+  /** Close writing on the jar file
    */
   public void close() throws IOException {
     _output.flush();

@@ -49,15 +49,13 @@ import java.util.List;
  */
 public class ArgumentTokenizerTest extends DrJavaTestCase {
 
-  /**
-   * Creates a new ArgumentTokenizer to be used in every test.
+  /** Creates a new ArgumentTokenizer to be used in every test.
    */
   public ArgumentTokenizerTest(String name) {
     super(name);
   }
 
-  /**
-   * Asserts that the given string is tokenized to become the
+  /** Asserts that the given string is tokenized to become the
    * given array of string arguments.
    * @param typed A string containing all arguments (as typed by a user)
    * @param expected What the tokenizer should return
@@ -66,8 +64,7 @@ public class ArgumentTokenizerTest extends DrJavaTestCase {
     _assertTokenized(typed, expected, false);
   }
 
-  /**
-   * Asserts that the given string is tokenized to become the
+  /** Asserts that the given string is tokenized to become the
    * given array of string arguments.
    * @param typed A string containing all arguments (as typed by a user)
    * @param expected What the tokenizer should return
@@ -82,8 +79,7 @@ public class ArgumentTokenizerTest extends DrJavaTestCase {
                  expectedList, actual);
   }
 
-  /**
-   * Tests that the argument tokenizer can split up a simple list of arguments.
+  /** Tests that the argument tokenizer can split up a simple list of arguments.
    */
   public void testTokenizeArguments() {
     // a b c
@@ -144,8 +140,7 @@ public class ArgumentTokenizerTest extends DrJavaTestCase {
                      new String[]{"asdf"});
   }
 
-  /**
-   * Tests that escaped characters just return the character itself.
+  /** Tests that escaped characters just return the character itself.
    * Escaped whitespace is considered a character, not a delimiter.
    * (This is how Unix behaves.)
    *
@@ -171,8 +166,7 @@ public class ArgumentTokenizerTest extends DrJavaTestCase {
                      new String[]{"a b"});
   }
 
-  /**
-   * Tests that within a quote, everything is correctly escaped.
+  /** Tests that within a quote, everything is correctly escaped.
    * (Special characters are passed to the program correctly.)
    */
   public void testTokenizeQuotedEscapedArgs() {
@@ -214,8 +208,7 @@ public class ArgumentTokenizerTest extends DrJavaTestCase {
                      new String[]{"\\b"});
   }
 
-  /**
-   * Tests that single quotes can be used as argument delimiters.
+  /** Tests that single quotes can be used as argument delimiters.
    * This is consistent with Unix, not with DOS.
    */
   public void testTokenizeSingleQuotedArgs() {
@@ -233,8 +226,7 @@ public class ArgumentTokenizerTest extends DrJavaTestCase {
                      new String[]{"\\"});
   }
 
-  /**
-   * Tests that arguments can be "stringified" properly.
+  /** Tests that arguments can be "stringified" properly.
    * (ie. formatted to be printed as a String)
    */
   public void testTokenizeAndStringify() {

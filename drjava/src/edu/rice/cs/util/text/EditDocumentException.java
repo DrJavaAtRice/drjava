@@ -42,8 +42,7 @@ package edu.rice.cs.util.text;
 public class EditDocumentException extends RuntimeException {
   private Throwable _value;
 
-   /**
-   * Constructs an exception with
+   /** Constructs an exception with
    * <code>value.toString()</code> as it's message.
    */
   public EditDocumentException(Throwable value) {
@@ -51,8 +50,7 @@ public class EditDocumentException extends RuntimeException {
     _value = value;
   }
 
-   /**
-   * Constructs an exception with a custom message string in
+   /** Constructs an exception with a custom message string in
    * addition to <code>value.toString()</code>.
    */
   public EditDocumentException(Throwable value, String msg) {
@@ -60,8 +58,7 @@ public class EditDocumentException extends RuntimeException {
     _value = value;
   }
 
-  /**
-   * Returns the contained exception.
+  /** Returns the contained exception.
    */
   public Throwable getContainedThrowable() {
     return _value;

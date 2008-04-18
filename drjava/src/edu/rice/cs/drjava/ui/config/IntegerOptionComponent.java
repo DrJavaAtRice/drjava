@@ -60,8 +60,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     });
   }
   
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public IntegerOptionComponent (IntegerOption opt, String text,
                                  Frame parent, String description) {
@@ -69,8 +68,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -78,8 +76,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -104,15 +101,13 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     return true;
   } 
   
-  /**
-   * Displays the given value.
+  /** Displays the given value.
    */
   public void setValue(Integer value) {
     _jtf.setText(_option.format(value));
   }
   
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _jtf; }
     

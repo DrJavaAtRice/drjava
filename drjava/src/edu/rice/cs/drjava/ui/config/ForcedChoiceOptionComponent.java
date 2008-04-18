@@ -52,8 +52,7 @@ import java.util.Iterator;
 public class ForcedChoiceOptionComponent extends OptionComponent<String> {
   private JComboBox _comboBox;
 
-  /**
-   * Main constructor builds a panel containing a set of radio buttons for the
+  /** Main constructor builds a panel containing a set of radio buttons for the
    * legal values of the ForcedChoiceOption.
    */
   public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, Frame parent) {
@@ -77,8 +76,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     resetToCurrent(DrJava.getConfig().getSetting(_option));
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText,
                                      Frame parent, String description) {
@@ -86,8 +84,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -95,8 +92,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     _label.setToolTipText(description);
   }
 
-  /**
-   * Selects the radio button corresponding to the current config options.
+  /** Selects the radio button corresponding to the current config options.
    */
   public void resetToCurrent(String current) {
     _comboBox.setSelectedItem(current);
@@ -114,15 +110,13 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 //    }
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
     return _comboBox;
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -136,8 +130,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     return true;
   }
 
-  /**
-   * Displays the given value.
+  /** Displays the given value.
    */
   public void setValue(String value) {
     resetToCurrent(value);

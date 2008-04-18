@@ -50,8 +50,7 @@ import java.io.StringReader;
 public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
   
   
-  /**
-   * Tests to see if string input is properly parsed to obtain interface name.
+  /** Tests to see if string input is properly parsed to obtain interface name.
    */
   public void testStringInterfaceRecognition() {
     try {
@@ -66,8 +65,7 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
   }
   
   
-  /**
-   * Tests to see if string input is properly parsed to reject interface name.
+  /** Tests to see if string input is properly parsed to reject interface name.
    */
   public void testStringInterfaceRejection() {
     try {
@@ -82,8 +80,7 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
   }
   
   
-  /**
-   * Tests to see if string input is properly parsed to obtain class name.
+  /** Tests to see if string input is properly parsed to obtain class name.
    */
   public void testStringClassRecognition() {
     try {
@@ -97,8 +94,7 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
     }
   }
   
-  /**
-   * Tests to see if string input is properly parsed to insert package name.
+  /** Tests to see if string input is properly parsed to insert package name.
    */
   public void testStringPackageRecognition() {
     try {

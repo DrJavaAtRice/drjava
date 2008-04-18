@@ -58,8 +58,7 @@ public class DrJavaScrollableDialog extends ScrollableDialog {
     this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
   }
 
-  /**
-   * Creates a new DrJavaScrollableDialog.
+  /** Creates a new DrJavaScrollableDialog.
    * @param parent Parent frame for this dialog
    * @param title Title for this dialog
    * @param header Message to display at the top of this dialog

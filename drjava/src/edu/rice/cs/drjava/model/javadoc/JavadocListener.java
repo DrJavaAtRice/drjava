@@ -45,8 +45,7 @@ import java.io.File;
  */
 public interface JavadocListener {
   
-  /**
-   * Called to demand that all files be saved before generating Javadoc.
+  /** Called to demand that all files be saved before generating Javadoc.
    * It is up to the caller of this method to check if the documents have been
    * saved, using IGetDocuments.hasModifiedDocuments().
    * Do not continue with Javadoc if the user doesn't save!

@@ -56,8 +56,7 @@ public class InteractionsScriptModel implements Serializable {
   private List<String> _interactions;
   /** The index into the list of the current interaction. */
   private int _currentInteraction;
-  /**
-   * Indicates whether the iterator has "passed" the current interaction,
+  /** Indicates whether the iterator has "passed" the current interaction,
    * which is the case after an execution.
    * In this state, "next" will show the interaction after our index,
    * and "prev" will show the interaction at our index (which was most
@@ -65,8 +64,7 @@ public class InteractionsScriptModel implements Serializable {
    */
   private boolean _passedCurrent;
 
-  /**
-   * Constructs a new interactions script using the given model and interactions.
+  /** Constructs a new interactions script using the given model and interactions.
    * @param model the interactions model
    * @param interactions the interactions that make up the script.
    */
@@ -78,8 +76,7 @@ public class InteractionsScriptModel implements Serializable {
     _passedCurrent = false;
   }
 
-  /**
-   * Enters the next interaction into the interactions pane.
+  /** Enters the next interaction into the interactions pane.
    */
   public void nextInteraction() {
     if (!hasNextInteraction()) {
@@ -90,8 +87,7 @@ public class InteractionsScriptModel implements Serializable {
     _passedCurrent = false;
   }
 
-  /**
-   * Enters the current interaction into the interactions pane.
+  /** Enters the current interaction into the interactions pane.
    *
   public void currentInteraction() {
     if (!hasCurrentInteraction()) {
@@ -107,8 +103,7 @@ public class InteractionsScriptModel implements Serializable {
     }
   }*/
 
-  /**
-   * Enters the previous interaction into the interactions pane.
+  /** Enters the previous interaction into the interactions pane.
    */
   public void prevInteraction() {
     if (!hasPrevInteraction()) {
@@ -122,8 +117,7 @@ public class InteractionsScriptModel implements Serializable {
     _passedCurrent = false;
   }
 
-  /**
-   * Clears the current text at the prompt and shows the current
+  /** Clears the current text at the prompt and shows the current
    * interaction from the script.
    */
   protected void _showCurrentInteraction() {
@@ -137,8 +131,7 @@ public class InteractionsScriptModel implements Serializable {
     }
   }
 
-  /**
-   * Executes the current interaction.
+  /** Executes the current interaction.
    * After this call, we have passed the current interaction.
    */
   public void executeInteraction() {
@@ -146,8 +139,7 @@ public class InteractionsScriptModel implements Serializable {
     _passedCurrent = true;
   }
 
-  /**
-   * Ends the script.
+  /** Ends the script.
    * TODO: Is this method necessary at all?
    */
   public void closeScript() {
@@ -156,22 +148,19 @@ public class InteractionsScriptModel implements Serializable {
     _passedCurrent = false;
   }
 
-  /**
-   * @return true iff this script has another interaction to perform.
+  /** @return true iff this script has another interaction to perform.
    */
   public boolean hasNextInteraction() {
     return _currentInteraction < _interactions.size() - 1;
   }
 
-  /**
-   * @return true iff this script has a current interaction to perform.
+  /** @return true iff this script has a current interaction to perform.
    *
   public boolean hasCurrentInteraction() {
     return _currentInteraction >= 0;
   }*/
 
-  /**
-   * @return true iff this script has a previous interaction to perform.
+  /** @return true iff this script has a previous interaction to perform.
    */
   public boolean hasPrevInteraction() {
     int index = _currentInteraction;

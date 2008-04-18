@@ -43,8 +43,7 @@ public class TextAtom implements Atom {
   
   public String getText() { return _text; }
   
-  /**
-   * Visitor hook for the TextAtom
+  /** Visitor hook for the TextAtom
    * @param v the visitor
    * @return result of the given algorithm
    */
@@ -52,8 +51,7 @@ public class TextAtom implements Atom {
     return v.forTextAtom(this);
   }
   
-  /**
-   * If the given text was a quoted string, the text returned
+  /** If the given text was a quoted string, the text returned
    * excludes the quotes around the string.
    * @return the text that went into making this atom.
    */

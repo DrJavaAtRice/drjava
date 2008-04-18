@@ -321,8 +321,7 @@ public class HTMLFrame extends JFrame {
     else _resetMainPane();
   }
   
-  /**
-   * Prints an error indicating that the HTML file to load in the contentes pane
+  /** Prints an error indicating that the HTML file to load in the contentes pane
    * could not be found
    */
   private void _displayContentsError(URL url) {

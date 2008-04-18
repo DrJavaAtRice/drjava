@@ -45,8 +45,7 @@ import javax.swing.text.BadLocationException;
 public final class ActionDoNothingTest extends IndentRulesTestCase {
 
 
-  /**
-   * Tests empty string
+  /** Tests empty string
    */
   public void testEmptyString() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();
@@ -57,8 +56,7 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
     _assertContents(text);
   }
   
-  /**
-   * Tests no leading spaces
+  /** Tests no leading spaces
    */
   public void testNoLeadingSpaces() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();
@@ -74,8 +72,7 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
     _assertContents(text);
   }
 
-  /**
-   * Tests leading spaces
+  /** Tests leading spaces
    */
   public void testLeadingSpaces() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();

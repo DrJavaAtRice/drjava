@@ -48,8 +48,7 @@ import javax.swing.text.BadLocationException;
  */
 public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTestCase {
   
-  /**
-   * This is a clever (IMHO) factory trick to reuse these methods in TestCases
+  /** This is a clever (IMHO) factory trick to reuse these methods in TestCases
    * for logically similar IndentActions.
    * @see ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
    */
@@ -61,8 +60,7 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
                                                         psrvLine, psrvPos);
   }
   
-  /**
-   * This method abstracts the common processes of the tests so that the tests
+  /** This method abstracts the common processes of the tests so that the tests
    * themselves may only contain information about original conditions and
    * expected results.
    * @param start The text that should be in the document at time rule is called

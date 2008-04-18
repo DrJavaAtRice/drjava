@@ -44,8 +44,7 @@ public class BooleanOption extends Option<Boolean> {
   /** @param key The name of this option.*/
   public BooleanOption(String key, Boolean def) { super(key,def); }
   
-  /**
-   * @param s The String to be parsed.
+  /** @param s The String to be parsed.
    * @return A Boolean instance represented by "s".
    * @exception IllegalArgumentException if "s" is
    * not one of the Strings "true" and "false".

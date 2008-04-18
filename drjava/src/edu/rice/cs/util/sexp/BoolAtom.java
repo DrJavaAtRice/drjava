@@ -43,18 +43,16 @@ public class BoolAtom implements Atom {
   private boolean _bool;
   private BoolAtom(boolean bool) { _bool = bool; }
   
-  /**
-   * @return which type of BoolAtom this is
+  /** @return which type of BoolAtom this is
    */
   public boolean getValue() {
     return _bool;
   }
   
-  /**
-   * Visitor hook for the BoolAtom
-   * @param v the visitor
-   * @return result of the given algorithm
-   */
+  /** Visitor hook for the BoolAtom
+    * @param v the visitor
+    * @return result of the given algorithm
+    */
   public <Ret> Ret accept(SExpVisitor<Ret> v){
     return v.forBoolAtom(this);
   }

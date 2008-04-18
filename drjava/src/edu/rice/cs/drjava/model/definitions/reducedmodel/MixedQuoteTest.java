@@ -47,24 +47,21 @@ public final class MixedQuoteTest extends BraceReductionTestCase
 {
   protected ReducedModelControl _model;
 
-  /**
-   * Initializes the reduced models used in the tests.
+  /** Initializes the reduced models used in the tests.
    */
   protected void setUp() throws Exception {
     super.setUp();
     _model = new ReducedModelControl();
   }
 
-  /**
-   * Creates a test suite for JUnit to use.
+  /** Creates a test suite for JUnit to use.
    * @return a test suite for JUnit
    */
   public static Test suite() {
     return  new TestSuite(MixedQuoteTest.class);
   }
 
-  /**
-   * Convenience function to insert a number of non-special characters into a reduced model.
+  /** Convenience function to insert a number of non-special characters into a reduced model.
    * @param model the model being modified
    * @param size the number of characters being inserted
    */
@@ -74,8 +71,7 @@ public final class MixedQuoteTest extends BraceReductionTestCase
     }
   }
 
-  /**
-   * Tests how a single quote can eclipse the effects of a double quote by inserting
+  /** Tests how a single quote can eclipse the effects of a double quote by inserting
    * the single quote before the double quote.  This test caught an error with
    * getStateAtCurrent(): the check for double quote status checks if there is a double
    * quote immediately preceding, but it didn't make sure the double quote was FREE.
@@ -103,8 +99,7 @@ public final class MixedQuoteTest extends BraceReductionTestCase
     assertTrue("#3.2", _model.currentToken().isGap());
   }
 
-  /**
-   * Tests how a double quote can eclipse the effects of a single quote by inserting
+  /** Tests how a double quote can eclipse the effects of a single quote by inserting
    * the double quote before the single quote.
    */
   public void testDoubleEclipsesSingle() {

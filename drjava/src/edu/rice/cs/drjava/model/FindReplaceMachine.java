@@ -673,7 +673,7 @@ public class FindReplaceMachine {
     * @param ch - a character
     * @return true if ch is a delimiter, false otherwise
     */
-  private boolean isDelimiter(char ch) { return ! Character.isLetterOrDigit(ch); }
+  private boolean isDelimiter(char ch) { return ! Character.isLetterOrDigit(ch)  &&  ch != '_'; }
   
   /** Returns true if the currently found instance should be ignored (either because it is inside a string or comment or
     * because it does not match the whole word when either or both of those conditions are set to true).  Only executes 

@@ -162,8 +162,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logEnd();
   }
 
-  /**
-   * Ensure that switching to a non-existant interpreter throws an Exception.
+  /** Ensure that switching to a non-existant interpreter throws an Exception.
    */
   public void testSwitchToNonExistantInterpreter() {
     debug.logStart();
@@ -178,8 +177,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logEnd();
   }
 
-  /**
-   * Ensure that MainJVM can correctly switch the active interpreter used by
+  /** Ensure that MainJVM can correctly switch the active interpreter used by
    * the interpreter JVM.
    */
   public void testSwitchActiveInterpreter() throws InterruptedException {

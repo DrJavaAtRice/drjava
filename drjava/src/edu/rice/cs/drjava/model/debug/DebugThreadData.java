@@ -51,15 +51,13 @@ public abstract class DebugThreadData {
     _uniqueID = uniqueID;
   }
   
-  /**
-   * Returns the name of this thread.
+  /** Returns the name of this thread.
    */
   public String getName() {
     return _name;
   }
   
-  /**
-   * Returns the status of this thread (at the time of this object's construction)
+  /** Returns the status of this thread (at the time of this object's construction)
    */
   public String getStatus() {
     return _status;
@@ -69,8 +67,7 @@ public abstract class DebugThreadData {
     return _uniqueID;
   }
   
-  /**
-   * Tells whether or not the thread is suspended.
+  /** Tells whether or not the thread is suspended.
    * @return true iff the thread is suspended
    */
   public abstract boolean isSuspended();

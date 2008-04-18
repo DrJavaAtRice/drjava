@@ -45,8 +45,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  */
 public final class BooleanOptionTest extends DrJavaTestCase
 {
-  /**
-   * @param name The name of this test case.
+  /** @param name The name of this test case.
    */
   public BooleanOptionTest(String name) { super(name); }
   

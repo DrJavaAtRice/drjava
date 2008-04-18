@@ -668,8 +668,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _optionsPanel.add(mainButtons, BorderLayout.CENTER);
   }
   
-  /**
-   * Enable or disable owner. Can be overridden to toggle the hourglass, etc.
+  /** Enable or disable owner. Can be overridden to toggle the hourglass, etc.
    * @param b whether the owner should be enabled (true) or disabled
    */
   public void setOwnerEnabled(boolean b) {

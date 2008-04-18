@@ -48,8 +48,7 @@ package edu.rice.cs.drjava.model.definitions;
  */
 public class NoSuchDocumentException extends RuntimeException {
   
-  /**
-   * @param msg The message to send along with this exception
+  /** @param msg The message to send along with this exception
    */
   public NoSuchDocumentException(String msg) {
     super(msg);

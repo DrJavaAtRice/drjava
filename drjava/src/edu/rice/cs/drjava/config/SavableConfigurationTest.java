@@ -50,8 +50,7 @@ import java.util.Date;
   * @version $Id: $
   */
 public class SavableConfigurationTest extends DrJavaTestCase {
-  /**
-   * This is the date format the Date.toString() uses.
+  /** This is the date format the Date.toString() uses.
    */
   SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
   
@@ -62,8 +61,7 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     outputBytes = new ByteArrayOutputStream();
   }
   
-  /**
-   * Tests the saveConfiguration method with no configuration data
+  /** Tests the saveConfiguration method with no configuration data
    */
   public void testEmptyConfiguration() throws IOException {  
     SavableConfiguration emptyConfig = new SavableConfiguration(new DefaultOptionMap());
@@ -88,8 +86,7 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     }
   }
   
-  /**
-   * Tests the saveConfiguration method with some configuration data.
+  /** Tests the saveConfiguration method with some configuration data.
    */
   public void testNonEmptyConfiguration() throws IOException {
     DefaultOptionMap optionsMap = new DefaultOptionMap();

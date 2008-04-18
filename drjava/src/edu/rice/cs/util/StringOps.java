@@ -85,8 +85,7 @@ public abstract class StringOps {
     return fullString;
   }
   
-  /**
-   * Converts the given string to a valid Java string literal.
+  /** Converts the given string to a valid Java string literal.
    * All back slashes, quotes, new-lines, and tabs are converted
    * to their escap character form, and the sourounding quotes 
    * are added.
@@ -102,8 +101,7 @@ public abstract class StringOps {
     return "\"" + output + "\"";
   }
   
-  /**
-   * Verifies that (startRow, startCol) occurs before (endRow, endCol).
+  /** Verifies that (startRow, startCol) occurs before (endRow, endCol).
    * @throws IllegalArgumentException if end is before start
    */
   private static void _ensureStartBeforeEnd(int startRow, int startCol,
@@ -119,8 +117,7 @@ public abstract class StringOps {
     }
   }
 
-  /**
-   * Verifies that the given column position is within the row at rowStartIndex
+  /** Verifies that the given column position is within the row at rowStartIndex
    * in the given String.
    * @param fullString the string in which to check the column
    * @param col the column index that should be within the row
@@ -213,16 +210,14 @@ public abstract class StringOps {
     }
   }
   
-  /**
-   * Character.isDigit answers <tt>true</tt> to some non-ascii
+  /** Character.isDigit answers <tt>true</tt> to some non-ascii
    * digits.  This one does not.
    */
   public static boolean isAsciiDigit(char c) {
     return '0' <= c && c <= '9';
   }
   
-  /**
-   * Returns true if the class is an anonymous inner class.
+  /** Returns true if the class is an anonymous inner class.
    * This works just like Class.isAnonymousClass() in Java 5.0 but is not version-specific.
    * @param c class to check
    * @return true if anonymous inner class
@@ -242,8 +237,7 @@ public abstract class StringOps {
     return false;
   }
   
-  /**
-   * Returns true if the class is a member class.
+  /** Returns true if the class is a member class.
    * This works just like Class.isMemberClass() in Java 5.0 but is not version-specific.
    * @param c class to check
    * @return true if member class
@@ -257,8 +251,7 @@ public abstract class StringOps {
     return !isAnonymousClass(c);
   }
   
-  /**
-   * Returns the simple class name.
+  /** Returns the simple class name.
    * This works just like Class.getSimpleName() in Java 5.0 but is not version-specific.
    * @param c class for which to get the simple name
    * @return simple name
@@ -277,8 +270,7 @@ public abstract class StringOps {
     return simpleName.substring(idx + 1); // strip the package name
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(long[] a) {
     if (a == null)
@@ -299,8 +291,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(int[] a) {
     if (a == null)
@@ -321,8 +312,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(short[] a) {
     if (a == null)
@@ -343,8 +333,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(char[] a) {
     if (a == null)
@@ -365,8 +354,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(byte[] a) {
     if (a == null)
@@ -387,8 +375,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(boolean[] a) {
     if (a == null)
@@ -409,8 +396,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(float[] a) {
     if (a == null)
@@ -431,8 +417,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(double[] a) {
     if (a == null)
@@ -453,8 +438,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /**
-   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
    */
   public static String toString(Object[] a) {
     if (a == null)
@@ -477,8 +461,7 @@ public abstract class StringOps {
     return buf.toString();
   }
 
-  /**
-   * Encode &, <, > and newlines as HTML entities.
+  /** Encode &, <, > and newlines as HTML entities.
    * @param s string to encode
    * @return encoded string
    */
@@ -636,8 +619,7 @@ public abstract class StringOps {
     return cmds;
   }
     
-  /**
-   * Replace variables of the form "${variable}" with the value associated with the string "variable" in the
+  /** Replace variables of the form "${variable}" with the value associated with the string "variable" in the
    * provided hash table.
    * To give the "$" character its literal meaning, it needs to be escaped as "\$" (backslash dollar).
    * To make the "\" character not escaping, escape it as "\\"(double backslash).

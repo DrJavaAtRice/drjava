@@ -48,8 +48,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 public class JarCreationTest extends DrJavaTestCase {
-  /**
-   * Tests the creation of manifest files through the ManifestWriter class
+  /** Tests the creation of manifest files through the ManifestWriter class
    */
   public void testCreateManifest() {
     ManifestWriter mw = new ManifestWriter();
@@ -95,8 +94,7 @@ public class JarCreationTest extends DrJavaTestCase {
     assertEquals("have version and classpath", 3, manifest.getMainAttributes().size());
   }
 
-  /**
-   * Test create addDirectoryRecursive
+  /** Test create addDirectoryRecursive
    */
   public void testCreateJarFromDirectoryRecursive() {
     File dir = new File("temp_dir");
@@ -174,8 +172,7 @@ public class JarCreationTest extends DrJavaTestCase {
 
   }
 
-  /**
-   * Test the manual creation of jar files
+  /** Test the manual creation of jar files
    */
   public void testCreateJar() {
     File f = new File("test.jar");
@@ -222,8 +219,7 @@ public class JarCreationTest extends DrJavaTestCase {
     }
   }
 
-  /**
-   * Check that all files in an a Set are in the jar file
+  /** Check that all files in an a Set are in the jar file
    * @param jar the jar file to check
    * @param fileNames the set of the names of files
    */

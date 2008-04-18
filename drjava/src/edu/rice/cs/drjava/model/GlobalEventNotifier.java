@@ -82,8 +82,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  /**
-   * Performs any UI related steps to handle the case in which a file is being opened that
+  /** Performs any UI related steps to handle the case in which a file is being opened that
    * is already open and modified. The two choices are to revert to the copy on disk, or to
    * keep the current changes.
    * @param doc  {@code true} if the user wishes to revert the document, {@code false} to ignore
@@ -159,8 +158,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  /**
-   * Class model for notifying listeners of an event.
+  /** Class model for notifying listeners of an event.
    * @deprecated Use listener methods directly instead.
    */
   @Deprecated
@@ -168,8 +166,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     public abstract void notifyListener(GlobalModelListener l);
   }
   
-  /**
-   * Class model for asking listeners a yes/no question.
+  /** Class model for asking listeners a yes/no question.
    * @deprecated Use listener methods directly instead.
    */
   @Deprecated

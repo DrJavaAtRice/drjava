@@ -696,17 +696,17 @@ public class InteractionsController extends AbstractConsoleController {
         }
       });
       
-      // Add the input listener for <Shift+Enter>
+      // Add the input listener for <Shift+Enter> and <Cntl+Enter>
       final Action newLineAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) { insert("\n", getCaretPosition()); }
       };
       
       final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.CTRL_MASK), INSERT_NEWLINE_NAME);
       
       final ActionMap am = getActionMap();
       am.put(INSERT_NEWLINE_NAME, newLineAction);
-      
     }
     
     private Border _createBorder() {

@@ -182,8 +182,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /**
-   * Tests that a VerifyError is reported as an error, rather than
+  /** Tests that a VerifyError is reported as an error, rather than
    * simply causing JUnit to blow up.  Note that this test will hang if
    * the error is not reported correctly, because the JUnitTestManager will
    * blow up in the other JVM and never notify us that it's finished.

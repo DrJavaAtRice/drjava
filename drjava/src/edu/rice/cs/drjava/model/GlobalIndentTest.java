@@ -185,8 +185,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
   
-  /**
-   * Do an indent that follows the behavior in line with parentheses.
+  /** Do an indent that follows the behavior in line with parentheses.
    * The cursor is at the start of the line.
    * @exception BadLocationException
    */
@@ -230,8 +229,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   }
   
   
-  /**
-   * The quintessential "make the curly go to the start, even though
+  /** The quintessential "make the curly go to the start, even though
    * method arguments extend over two lines" test.  This behavior is not
    * correctly followed yet, so until it is, leave this method commented.
    * @exception BadLocationException
@@ -250,8 +248,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    }
    */
   
-  /**
-   * Indents block comments with stars as they should.
+  /** Indents block comments with stars as they should.
    * Uncomment this method when the correct functionality is implemented.
    */
 //  public void testIndentBlockCommentStar()

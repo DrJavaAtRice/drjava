@@ -130,8 +130,7 @@ public class DrJavaErrorPopup extends JDialog {
     }
   };
 
-  /**
-   * Contains the canned message for the user
+  /** Contains the canned message for the user
    */
   private final String[] msg = {
     "An error occurred in DrJava:",

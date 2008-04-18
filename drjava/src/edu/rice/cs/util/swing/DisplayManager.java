@@ -47,8 +47,7 @@ public interface DisplayManager<T> {
     */
   public Icon getIcon(T f);
   
-  /**
-   * Given a data, decide on which name to display for it
+  /** Given a data, decide on which name to display for it
    * @param f The data to base the naming decison on
    * @return The name to display for the data
    */

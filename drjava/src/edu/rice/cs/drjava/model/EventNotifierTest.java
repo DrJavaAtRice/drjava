@@ -58,8 +58,7 @@ public final class EventNotifierTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /**
-   * Checks that the notifier adds and removes listeners correctly,
+  /** Checks that the notifier adds and removes listeners correctly,
    * notifying the correct ones on a particular event.
    */
   public void testAddAndRemoveListeners() {
@@ -92,8 +91,7 @@ public final class EventNotifierTest extends DrJavaTestCase {
     listener2.assertInterpreterExitedCount(0);
   }
   
-  /**
-   * Checks that the notifier can poll multiple listeners.
+  /** Checks that the notifier can poll multiple listeners.
    */
   public void testPollListeners() {
     TestListener trueListener = new TestListener() {

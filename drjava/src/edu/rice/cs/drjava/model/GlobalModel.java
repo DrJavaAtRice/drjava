@@ -150,8 +150,7 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public OpenDefinitionsDocument newFile();
   
-  /**
-   * Creates a new junit test case.
+  /** Creates a new junit test case.
    * TODO: Move to JUnitModel?
    * @param name the name of the new test case
    * @param makeSetUp true iff an empty setUp() method should be included
@@ -160,24 +159,21 @@ public interface GlobalModel extends ILoadDocuments {
    */
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown);
   
-  /**
-   * Closes an open definitions document, prompting to save if
+  /** Closes an open definitions document, prompting to save if
    * the document has been changed.  Returns whether the file
    * was successfully closed.
    * @return true if the document was closed
    */
   public boolean closeFile(OpenDefinitionsDocument doc);
   
-  /**
-   * Closes an open definitions document, without prompting to save if
+  /** Closes an open definitions document, without prompting to save if
    * the document has been changed.  Returns whether the file
    * was successfully closed.
    * @return true if the document was closed
    */
   public boolean closeFileWithoutPrompt(OpenDefinitionsDocument doc);
   
-  /**
-   * Attempts to close all open documents.
+  /** Attempts to close all open documents.
    * @return true if all documents were closed
    */
   public boolean closeAllFiles();
@@ -270,8 +266,7 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public DocumentIterator getDocumentIterator();
   
-  /**
-   * Re-runs the global listeners on the active document.
+  /** Re-runs the global listeners on the active document.
    */
   public void refreshActiveDocument();
   

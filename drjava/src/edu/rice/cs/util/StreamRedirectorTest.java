@@ -82,8 +82,7 @@ import java.io.InputStreamReader;
  * Test suite over InputStreamRedirector.
  */
 public class StreamRedirectorTest extends DrJavaTestCase {
-  /**
-   * Tests that an InputStreamRedirector correctly rejects empty input.
+  /** Tests that an InputStreamRedirector correctly rejects empty input.
    */
   public void testEmptyInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
@@ -100,8 +99,7 @@ public class StreamRedirectorTest extends DrJavaTestCase {
     }
   }
 
-  /**
-   * Tests that an InputStreamRedirector correctly redirects input that is static.
+  /** Tests that an InputStreamRedirector correctly redirects input that is static.
    */
   public void testStaticInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
@@ -114,8 +112,7 @@ public class StreamRedirectorTest extends DrJavaTestCase {
     assertEquals("Second read", "Hello World!", br.readLine());  //behavior should be consistent
   }
 
-  /**
-   * Tests that an InputStreamRedirector correctly redirects input that changes.
+  /** Tests that an InputStreamRedirector correctly redirects input that changes.
    */
   public void testDynamicInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
@@ -132,8 +129,7 @@ public class StreamRedirectorTest extends DrJavaTestCase {
     assertEquals("Third read", "2", br.readLine());
   }
 
-  /**
-   * Tests that an InputStreamRedirector correctly calls _getInput() only
+  /** Tests that an InputStreamRedirector correctly calls _getInput() only
    * when it is needed.
    */
   public void testMultiLineInput() throws IOException {

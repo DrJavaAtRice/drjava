@@ -46,8 +46,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
 
-  /**
-   * Tests hitting start of document.
+  /** Tests hitting start of document.
    */
   public void testStartOfDocument() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -58,8 +57,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("second line", !rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having no paren phrase delimiters on prev line.
+  /** Tests having no paren phrase delimiters on prev line.
    */
   public void testNoParenDelims() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -70,8 +68,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("third line", !rule.applyRule(_doc, 9, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having delimiter on prev line, with text preceding
+  /** Tests having delimiter on prev line, with text preceding
    */
   public void testParenDelimsWithText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -85,8 +82,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after close paren", !rule.applyRule(_doc, 24, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having delimiter on prev line, with no text preceding
+  /** Tests having delimiter on prev line, with no text preceding
    */
   public void testParenDelimsNoText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -100,8 +96,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after text", !rule.applyRule(_doc, 12, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having a comment after the delimiter
+  /** Tests having a comment after the delimiter
    */
   public void testParenDelimsWithComment() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -112,8 +107,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("/* */ comment", rule.applyRule(_doc, 45, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having a paren delimiter several lines back, with only
+  /** Tests having a paren delimiter several lines back, with only
    * whitespace inbetween.
    */
   public void testMultipleBlankLinesBack() throws BadLocationException {
@@ -127,8 +121,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("two lines after semicolon", rule.applyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having a paren delimiter several lines back, with only
+  /** Tests having a paren delimiter several lines back, with only
    * blank space and comments inbetween.
    */
   public void testMultipleCommentLinesBack() throws BadLocationException {
@@ -142,8 +135,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("two lines after semicolon", rule.applyRule(_doc, 28, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having text on a line after the delimiter.
+  /** Tests having text on a line after the delimiter.
    */
   public void testDoesNotEndWithParenDelim() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -154,8 +146,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after comma", !rule.applyRule(_doc, 13, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests having an operator as a delimiter.
+  /** Tests having an operator as a delimiter.
    */
   public void testOperatorDelim() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -166,8 +157,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after comma", !rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
   }
   
-  /**
-   * Tests ignoring delims on line.
+  /** Tests ignoring delims on line.
    */
   public void testIgnoreDelimsOnLine() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);

@@ -44,8 +44,7 @@ package edu.rice.cs.drjava.model;
  */
 public interface FinalizationListener<T> {
  
-  /**
-   * Called when the object we registered the
+  /** Called when the object we registered the
    * listener to is garbage collected
    * @param fe an event that contains the object
    * that is going to be GC'ed

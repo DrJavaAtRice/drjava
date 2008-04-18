@@ -50,8 +50,7 @@ import java.awt.event.*;
 public class BooleanOptionComponent extends OptionComponent<Boolean> {
   protected JCheckBox _jcb;
 
-  /**
-   * Constructs a new BooleanOptionComponent.
+  /** Constructs a new BooleanOptionComponent.
    * @param opt the BooleanOption this component represents
    * @param text the text to display with the option
    * @param parent the parent frame
@@ -81,8 +80,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     setDescription(description);
   }
   
-    /**
-   * Constructs a new BooleanOptionComponent.
+    /** Constructs a new BooleanOptionComponent.
    * @param opt the BooleanOption this component represents
    * @param text the text to display with the option
    * @param parent the parent frame
@@ -128,8 +126,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     _jcb.setSelected(value.booleanValue());
   }
   
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _jcb; }
   

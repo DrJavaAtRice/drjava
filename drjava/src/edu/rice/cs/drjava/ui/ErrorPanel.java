@@ -232,8 +232,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     return _model;
   }
   
-  /**
-   * This function returns the correct error model
+  /** This function returns the correct error model
    */
   abstract protected CompilerErrorModel getErrorModel();
   

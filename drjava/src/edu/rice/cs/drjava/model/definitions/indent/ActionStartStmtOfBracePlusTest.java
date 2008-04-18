@@ -46,8 +46,7 @@ import javax.swing.text.BadLocationException;
 public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 
 
-  /**
-   * Tests indenting with a single line contract
+  /** Tests indenting with a single line contract
    */
   public void testSingleLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -68,8 +67,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /**
-   * Tests indenting with an indented single line contract
+  /** Tests indenting with an indented single line contract
    */
   public void testIndentedSingleLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -90,8 +88,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /**
-   * Tests indenting with a multiple line contract
+  /** Tests indenting with a multiple line contract
    */
   public void testMultiLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -121,8 +118,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /**
-   * Tests indenting a for statement (odd semicolons)
+  /** Tests indenting a for statement (odd semicolons)
    */
   public void testForStatement() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -143,8 +139,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /**
-   * Tests indenting a multiple line for statement (odd semicolons)
+  /** Tests indenting a multiple line for statement (odd semicolons)
    */
   public void testMultiLineForStatement() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -177,8 +172,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /**
-   * Tests indenting with nested braces
+  /** Tests indenting with nested braces
    * Note: multiple braces on a line are not yet supported.  This test
    * will be useful in a later version.
    *
@@ -210,8 +204,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
    }*/
   
-  /**
-   * Tests indenting with commented delimiters
+  /** Tests indenting with commented delimiters
    */
   public void testCommentedBrace() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -241,8 +234,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /**
-   * Tests having start of line belong to a different brace
+  /** Tests having start of line belong to a different brace
    * Note: multiple braces on a line are not yet supported.  This test
    * will be useful in a later version.
    *
@@ -274,8 +266,7 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
    }*/
   
-  /**
-   * Tests indenting without an enclosing brace
+  /** Tests indenting without an enclosing brace
    */
   public void testNoBrace() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");

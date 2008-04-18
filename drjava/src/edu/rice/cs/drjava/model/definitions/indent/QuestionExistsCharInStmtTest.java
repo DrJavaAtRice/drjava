@@ -51,8 +51,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
   
-  /**
-   * Ensures that a colon that is part of a ternary operator is detected.
+  /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that this rule works for one line statements.
    */
   public void testColonInTernaryOpOneLineStmts() throws BadLocationException {
@@ -74,8 +73,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that a colon that is part of a ternary operator is detected.
+  /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that this rule works when there are two statements on the same line.
    * Essentially, that it uses the first colon that it finds on the line
    * as the endChar.
@@ -96,8 +94,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
         !rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that a colon that is part of a ternary operator is detected.
+  /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that a colon in a multi-line ternary op statement is detected.
    */
   public void testColonInTernaryOpMultiLineStmts() throws BadLocationException {
@@ -110,8 +107,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that a colon that is part of a ternary operator is detected.
+  /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that whitespace, single-line comments and multi-line comments
    * in between the ':' character and the '?' character are ignored.
    */
@@ -137,8 +133,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that a colon that is part of a ternary operator is detected.
+  /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that a '?' in quotes or single-line comments or multi-line
    * comments is not detected - and hence that a colon is not party of
    * a ternary op.
@@ -166,8 +161,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
 
   }
 
-  /**
-   * Ensures that a colon that is part of a ternary operator is detected.
+  /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that a colon that is part of a multi-line statement is 
    * not falsely identified as belonging to a ternary op.
    */

@@ -474,8 +474,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
   }
   
-  /**
-   * There used to be a memory leak where various listeners, 
+  /** There used to be a memory leak where various listeners, 
    * LeafElements, and other extraneous references from the model, 
    * definitions pane, and main frame would be preventing the
    * definitions panes/documents from being GC'd at the correct

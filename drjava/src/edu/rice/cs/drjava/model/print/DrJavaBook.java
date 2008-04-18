@@ -75,8 +75,7 @@ public class DrJavaBook implements Pageable {
     setUpPagePrinters(text);
   }
   
-  /**
-   * Method which creates all of the individual Printable objects
+  /** Method which creates all of the individual Printable objects
    * given a String text.
    * @param text The text of the document.
    */

@@ -55,8 +55,7 @@ public class PagePrinter implements Printable {
   private String _fileName;
   private DrJavaBook _parent;
 
-  /**
-   * Constructs a PagePrinter for a given page number (which is ignored!), a
+  /** Constructs a PagePrinter for a given page number (which is ignored!), a
    * given filename, and parent.
    */
   public PagePrinter(int page, String fileName, DrJavaBook parent) {
@@ -67,8 +66,7 @@ public class PagePrinter implements Printable {
     _parent = parent;
   }
 
-  /**
-   * Method which adds a TextLayout (and lineNumber) to this
+  /** Method which adds a TextLayout (and lineNumber) to this
    * page.  This is designed to represent a physical line of
    * text to be printed on the document (as opposed to a
    * real line number.
@@ -80,8 +78,7 @@ public class PagePrinter implements Printable {
     _lineNumbers.add(lineNumber);
   }
 
-  /**
-   * Method to support the Printable interface. It prints the
+  /** Method to support the Printable interface. It prints the
    * contents of this PagePrinter onto the Graphics object.
    * @param graphics The Graphics object to print to.
    * @param format The PageFormat to use.
@@ -112,8 +109,7 @@ public class PagePrinter implements Printable {
     return PAGE_EXISTS;
   }
 
-  /**
-   * Method which prints the footer onto the document
+  /** Method which prints the footer onto the document
    * @param g2d The Graphics2D object to print the footer to.
    * @param format The PageFormat to use.
    * @param page The page number to print.

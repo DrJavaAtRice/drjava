@@ -131,8 +131,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     updateButtons();
   }
   
-  /**
-   * Update the tree.
+  /** Update the tree.
    */
   public boolean requestFocusInWindow() {
     // Only change GUI from event-dispatching thread
@@ -497,8 +496,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     Utilities.invokeLater(doCommand);
   }
   
-  /**
-   * Mouse adapter for the region tree.
+  /** Mouse adapter for the region tree.
    */
   protected class RegionMouseAdapter extends RightClickMouseAdapter {
     protected void _popupAction(MouseEvent e) {

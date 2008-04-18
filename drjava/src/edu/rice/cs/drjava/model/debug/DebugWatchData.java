@@ -41,18 +41,15 @@ package edu.rice.cs.drjava.model.debug;
  * @version $Id$
  */
 public class DebugWatchData {
-  /**
-   * String to display if the value is not in scope.
+  /** String to display if the value is not in scope.
    */
   public static final String NO_VALUE = "<not found>";
 
-  /**
-   * String to display if the type is not in scope.
+  /** String to display if the type is not in scope.
    */
   public static final String NO_TYPE = "";
 
-  /**
-   * String to display if the type is not loaded.
+  /** String to display if the type is not loaded.
    */
   public static final String NOT_LOADED = "<not loaded>";
 
@@ -63,8 +60,7 @@ public class DebugWatchData {
   private boolean _showType;
   private boolean _changed;
 
-  /**
-   * Object to keep track of a watched field or variable.
+  /** Object to keep track of a watched field or variable.
    * @param name Name of the field or variable to watch
    */
   public DebugWatchData(String name) {
@@ -76,37 +72,32 @@ public class DebugWatchData {
     _changed = false;
   }
 
-  /**
-   * Returns the name of this field or variable
+  /** Returns the name of this field or variable
    */
   public String getName() {
     return _name;
   }
 
-  /**
-   * Returns the most recently determined value for this field or variable.
+  /** Returns the most recently determined value for this field or variable.
    */
   public String getValue() {
     return (_showValue) ? _value : "";
   }
 
-  /**
-   * Returns the type of this field or variable in the current context.
+  /** Returns the type of this field or variable in the current context.
    */
   public String getType() {
     return (_showType) ? _type : "";
   }
 
-  /**
-   * Sets a new name for this field or variable.
+  /** Sets a new name for this field or variable.
    * @param name Name of the field or variable
    */
   public void setName(String name) {
     _name = name;
   }
 
-  /**
-   * Sets the most recently determined value for this field or variable.
+  /** Sets the most recently determined value for this field or variable.
    * @param value Value of the field or variable
    */
   public void setValue(Object value) {
@@ -121,8 +112,7 @@ public class DebugWatchData {
     _value = valString;
   }
 
-  /**
-   * Hides the value for this watch (when no thread is suspended).
+  /** Hides the value for this watch (when no thread is suspended).
    */
   public void hideValueAndType() {
     _showValue = false;
@@ -130,8 +120,7 @@ public class DebugWatchData {
     _changed = false;
   }
 
-  /**
-   * Called to indicate that this watch has no value in the current scope.
+  /** Called to indicate that this watch has no value in the current scope.
    */
   public void setNoValue() {
     _showValue = true;
@@ -139,8 +128,7 @@ public class DebugWatchData {
     _changed = false;
   }
 
-  /**
-   * Sets the most recently determined type of this field or variable.
+  /** Sets the most recently determined type of this field or variable.
    * @param type Type of the field or variable
    */
   public void setType(String type) {
@@ -148,31 +136,27 @@ public class DebugWatchData {
     _type = type;
   }
 
-  /**
-   * Called to indicate that this watch has no type in the current scope.
+  /** Called to indicate that this watch has no type in the current scope.
    */
   public void setNoType() {
     _showType = true;
     _type = NO_TYPE;
   }
 
-  /**
-   * Called to indicate that this watch's type has not been loaded.
+  /** Called to indicate that this watch's type has not been loaded.
    */
   public void setTypeNotLoaded() {
     _showType = true;
     _type = NOT_LOADED;
   }
 
-  /**
-   * Returns whether this value has changed since the last call to setValue.
+  /** Returns whether this value has changed since the last call to setValue.
    */
   public boolean isChanged() {
     return _changed;
   }
 
-  /**
-   * Returns a legible representation of the type, name, and value.
+  /** Returns a legible representation of the type, name, and value.
    */
   public String toString() {
     return _type + " " + _name + ": " + _value;

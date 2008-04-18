@@ -57,8 +57,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
   public final char delim;
   public final String footer;
 
-  /**
-   * @param key The name of this option.
+  /** @param key The name of this option.
    * @param parser the parsing strategy for an element in this option
    * @param formatter the formatting strategy for an element in this option
    */
@@ -77,8 +76,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     this(key, strategy, strategy, header, delim, footer,def);
   }
 
-  /**
-   * Defaults the "header", "footer", and "delim" fields
+  /** Defaults the "header", "footer", and "delim" fields
    * to open bracket, close bracket, and comma, repsectively.
    * @param key The name of this option.
    * @param option The object that knows how to parse and format
@@ -88,8 +86,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     this(key,option,option,"[",',',"]",def);
   }
 
-  /**
-   * @param s The String to be parsed.
+  /** @param s The String to be parsed.
    * @return An instance of Vector<T> represented by "s".
    * @exception IllegalArgumentException if "s" is not formatted
    * according to the method Vector<T>.toString().

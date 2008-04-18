@@ -88,8 +88,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     _doc.insertString(0, text, null);
   }
   
-  /**
-   * Sets the number of spaces to include in the indent string.
+  /** Sets the number of spaces to include in the indent string.
    *
   protected final void _setIndentSize(int size) {
     _indent = "";
@@ -98,16 +97,14 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     }
   }*/
   
-  /**
-   * Gets the length of the indent string.
+  /** Gets the length of the indent string.
    * @return Number of spaces in the indent string.
    *
   protected final int _getIndentSize() {
     return _indent.length();
   }*/
   
-  /**
-   * Get a string containing the specified number of indents.
+  /** Get a string containing the specified number of indents.
    * @param numLevels Number of indent strings to return
    *
   protected String _getIndentString(int numLevels) {
@@ -118,8 +115,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     return indent;
   }*/
 
-  /**
-   * Inserts an indent of the specificed number of levels at the given
+  /** Inserts an indent of the specificed number of levels at the given
    * index in the string.
    * @param text String to insert indent into
    * @param index Position in string to add indent

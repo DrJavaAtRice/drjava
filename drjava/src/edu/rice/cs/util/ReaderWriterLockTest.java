@@ -192,8 +192,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   }
 
 
-  /**
-   * We would like to test the following schedule.
+  /** We would like to test the following schedule.
    *
    * <pre>
    * W1 |***********|

@@ -56,8 +56,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when an asynchronous task must be run in the model */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI);
   
-  /**
-   * Performs any UI related steps to handle the case in which a file is being opened that
+  /** Performs any UI related steps to handle the case in which a file is being opened that
    * is already open and modified. The two choices are to revert to the copy on disk, or to
    * keep the current changes.
    * @param doc  {@code true} if the user wishes to revert the document, {@code false} to ignore

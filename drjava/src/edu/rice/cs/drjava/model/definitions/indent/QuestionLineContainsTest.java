@@ -48,8 +48,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionLineContainsTest extends IndentRulesTestCase {
 
-  /**
-   * Ensures that a line containing a colon is detected.
+  /** Ensures that a line containing a colon is detected.
    * Tests that a line of text containing a colon is detected.
    */
   public void testLineContainsColon() throws BadLocationException {
@@ -69,8 +68,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }    
   
-  /**
-   * Ensures that a line containing a colon is detected.
+  /** Ensures that a line containing a colon is detected.
    * Tests that a line does not contain a colon.
    */
   public void testLineDoesNotContainColon() throws BadLocationException {
@@ -84,8 +82,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
     assertTrue("line of close brace (no colon in text)", !rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that a line containing a colon is detected.
+  /** Ensures that a line containing a colon is detected.
    * Tests that a line containing a commented out colon is identified as a
    * line that does not contain a colon.
    */
@@ -107,8 +104,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
     assertTrue("no colon, colon in multi-line comment", !rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that a line containing a colon is detected.
+  /** Ensures that a line containing a colon is detected.
    * Tests that a line containing a colon in quotes is identified as a
    * line that does not contain a colon.
    */

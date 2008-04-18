@@ -165,8 +165,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
   }
   
   
-  /**
-   * Test that when two threads are suspended setCurrentThread can be used
+  /** Test that when two threads are suspended setCurrentThread can be used
    * to switch between them in the debugger
    */
   public synchronized void XXXtestMultiThreadedSetCurrentThread() throws Exception {
@@ -210,8 +209,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     _debugger.removeListener(debugListener);
   }
   
-  /**
-   * Tests that setCurrentThread works for multiple threads
+  /** Tests that setCurrentThread works for multiple threads
    *
    * This test has been commented out because we do not support setting the
    * current thread to be an unsuspended thread right now
@@ -345,8 +343,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
   
   
   
-  /**
-   * Tests that breakpoints behave correctly.
+  /** Tests that breakpoints behave correctly.
    */
   public synchronized void XXXtestBreakpoints() throws Exception {
     _log.log("----testBreakpoints----");
@@ -430,8 +427,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     _debugger.removeListener(debugListener);
   }
   
-  /**
-   * Tests that the debugger will stop at a breakpoint in one class
+  /** Tests that the debugger will stop at a breakpoint in one class
    * when the invoking method resides in a class with the same
    * prefix in its name.  (bug #769764)
    * (ie. Class DrJavaDebugTest2 has a method which calls something
@@ -495,8 +491,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     _debugger.removeListener(debugListener);
   }
   
-  /**
-   * Tests that breakpoints and steps behave correctly.
+  /** Tests that breakpoints and steps behave correctly.
    */
   public void XXXtestStepInto() throws Exception {
     _log.log("----testStepInto----");
@@ -687,8 +682,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     _debugger.removeListener(debugListener);
   }
   
-  /**
-   * Tests that stepping works in a public class with a package
+  /** Tests that stepping works in a public class with a package
    */
   public synchronized void XXXtestStepOverWithPackage() throws Exception {
     _log.log("----testStepOverWithPackage----");
@@ -781,8 +775,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     _debugger.removeListener(debugListener);
   }
   
-  /**
-   * Tests the utility function to get a relative directory for a package.
+  /** Tests the utility function to get a relative directory for a package.
    */
   public void XXXtestGetPackageDir() {
     String class1 = "edu.rice.cs.drjava.model.MyTest";

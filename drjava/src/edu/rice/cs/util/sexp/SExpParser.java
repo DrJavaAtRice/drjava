@@ -74,8 +74,7 @@ public class SExpParser {
     }
   }
   
-  /**
-   * A new helper is instantiated for each time
+  /** A new helper is instantiated for each time
    * the user wants to parse data.  This is not
    * reused.  The instances of the ParseHelpers are
    * handled solely in the outer class SExpParser.
@@ -201,8 +200,7 @@ public class SExpParser {
     }
   }
   
-  /**
-   * This runtime exception makes it easier to write the parser since
+  /** This runtime exception makes it easier to write the parser since
    * the methods of the helper class won't need to constantly declare
    * the SExpParseException to be thrown.
    */

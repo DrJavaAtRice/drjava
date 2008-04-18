@@ -55,8 +55,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   public boolean runTestSuite() throws RemoteException;
   
-  /**
-   * @param show Whether to show a message if a reset operation fails.
+  /** @param show Whether to show a message if a reset operation fails.
    */
   public void setShowMessageOnResetFailure(boolean show) throws RemoteException;
   
@@ -66,15 +65,13 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   
   
-  /**
-   * Adds a named Interpreter to the list.
+  /** Adds a named Interpreter to the list.
    * @param name the unique name for the interpreter
    * @throws IllegalArgumentException if the name is not unique
    */
   public void addInterpreter(String name) throws RemoteException;
   
-  /**
-   * Removes the interpreter with the given name, if it exists.
+  /** Removes the interpreter with the given name, if it exists.
    * @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) throws RemoteException;
@@ -111,8 +108,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     */
   public String getVariableType(String var) throws RemoteException;
   
-  /**
-   * Returns the current class path. (List rather than Iterable to avoid conflicts between RMI and 
+  /** Returns the current class path. (List rather than Iterable to avoid conflicts between RMI and 
    * Retroweaver.)
    */
   public List<File> getClassPath() throws RemoteException;  

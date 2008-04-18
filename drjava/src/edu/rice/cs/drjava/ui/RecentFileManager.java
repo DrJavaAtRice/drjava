@@ -177,8 +177,7 @@ public class RecentFileManager implements OptionConstants {
     }
   }
   
-  /**
-   * Trims the recent file list to the configured size and numbers the
+  /** Trims the recent file list to the configured size and numbers the
    * remaining files according to their position in the list
    */
   public void numberItems() {
@@ -201,8 +200,7 @@ public class RecentFileManager implements OptionConstants {
     if (MAX == 0 && !wasEmpty) { _fileMenu.remove(--_pos); }
   }
   
-  /**
-   * This interface is to be implemented and passed to the manager
+  /** This interface is to be implemented and passed to the manager
    * upon creation. This action specifies what is performed when the
    * user selects a file from the list
    */

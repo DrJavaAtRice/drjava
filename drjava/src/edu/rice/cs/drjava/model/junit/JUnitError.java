@@ -52,8 +52,7 @@ public class JUnitError extends CompilerError implements Comparable, Serializabl
   private String _className;
   private String _stackTrace;
   
-  /**
-   * Constructor.
+  /** Constructor.
    * @param file the file where the error occurred
    * @param lineNumber the line number of the error
    * @param startColumn the starting column of the error
@@ -69,8 +68,7 @@ public class JUnitError extends CompilerError implements Comparable, Serializabl
     _stackTrace = stackTrace;
   }
 
-  /**
-   * Constructor for an error with no associated location.  This constructor also
+  /** Constructor for an error with no associated location.  This constructor also
    * provides a default stackTrace.
    * @param message  the error message
    * @param isWarning true if the error is a warning
@@ -80,24 +78,21 @@ public class JUnitError extends CompilerError implements Comparable, Serializabl
     this(null, -1, -1, message, isWarning, test, "", "No associated stack trace");
   }
 
-  /**
-   * Gets the test name
+  /** Gets the test name
    * @return the test name
    */
   public String testName() {
     return _test;
   }
 
-  /**
-   * Gets the class name
+  /** Gets the class name
    * @return the class name
    */
   public String className() {
     return _className;
   }
 
-  /**
-   * All JUnit errors are Throwables that have been thrown, so all have
+  /** All JUnit errors are Throwables that have been thrown, so all have
    * a stack trace
    * @return the stack trace associated with the error
    */

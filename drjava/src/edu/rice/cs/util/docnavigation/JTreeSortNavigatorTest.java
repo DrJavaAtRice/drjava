@@ -184,8 +184,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
   }
   
 //  private String _name;
-  /**
-   * When the node is the only child of its parent and it is refreshed it should not
+  /** When the node is the only child of its parent and it is refreshed it should not
    * try to delete the parent.
    */
   public void testRenameDocument() {
@@ -215,8 +214,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { tree.removeDocument(newItem); } });
   }
   
-  /**
-   * Test the enumeration of items based on top-level bins.
+  /** Test the enumeration of items based on top-level bins.
    */
   public void testGetDocumentsInBin() {
     Enumeration<DummyINavigatorItem> e = tree.getDocumentsInBin(SOURCE_BIN_NAME);
@@ -254,8 +252,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     assertFalse(EXTERNAL_BIN_NAME+" bin should not have 5 items", e.hasMoreElements());
   }
   
-  /**
-   * Test of getting the list of selected items.
+  /** Test of getting the list of selected items.
    */
   public void testGetSelectedDocuments() {
     tree.clearSelection();
@@ -325,8 +322,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     assertEquals("Wrong item 2", auxi3, l.get(1));
   }
   
-  /**
-   * Test of getting the list of selected items.
+  /** Test of getting the list of selected items.
    */
   public void testGetNamesOfSelectedTopLevelGroup() {
     java.util.Set<String> s = null;

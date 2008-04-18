@@ -80,8 +80,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  */
 public final class DebugWatchDataTest extends DrJavaTestCase {
  
-  /**
-   * Tests the state of a watch after its creation.
+  /** Tests the state of a watch after its creation.
    */
   public void testFirstCreation() {
     DebugWatchData data = new DebugWatchData("foo");
@@ -94,8 +93,7 @@ public final class DebugWatchDataTest extends DrJavaTestCase {
     assertTrue("should not be changed on startUp", !data.isChanged());
   }
   
-  /**
-   * Tests that a watch displays its value and type correctly,
+  /** Tests that a watch displays its value and type correctly,
    * then hides it when the thread resumes.  Also tests that
    * the changed flag works correctly.
    */
@@ -128,8 +126,7 @@ public final class DebugWatchDataTest extends DrJavaTestCase {
                data.isChanged());
   }
   
-  /**
-   * Tests that a watch displays correctly if it is not in scope.
+  /** Tests that a watch displays correctly if it is not in scope.
    */
   public void testNotInScope() {
     DebugWatchData data = new DebugWatchData("bar");

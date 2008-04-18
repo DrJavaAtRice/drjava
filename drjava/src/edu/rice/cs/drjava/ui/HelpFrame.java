@@ -60,8 +60,7 @@ public class HelpFrame extends HTMLFrame {
     addHyperlinkListener(_linkListener);
   }
   
-  /**
-   * Used by subclass QuickStartFrame to instantiate fields of frame.
+  /** Used by subclass QuickStartFrame to instantiate fields of frame.
    */
   public HelpFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
     super(frameName, introUrl, indexUrl, iconString);

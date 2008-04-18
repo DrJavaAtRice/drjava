@@ -70,8 +70,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   //  return false;
   //}
 
-  /**
-   * Creates an appropriate EventRequest from the EventRequestManager and
+  /** Creates an appropriate EventRequest from the EventRequestManager and
    * stores it in the _request field.
    * @throws DebugException if the request could not be created.
    */

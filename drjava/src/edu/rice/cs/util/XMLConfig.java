@@ -71,33 +71,27 @@ import java.util.*;
  * @author Mathias Ricken
  */
 public class XMLConfig {
-  /**
-   * Newline string.
+  /** Newline string.
    */
   public static final String NL = System.getProperty("line.separator");
   
-  /**
-   * XML document.
+  /** XML document.
    */
   private Document _document;
   
-  /**
-   * XMLConfig to delegate to, or null.
+  /** XMLConfig to delegate to, or null.
    */
   private XMLConfig _parent = null;
   
-  /**
-   * Node where this XMLConfig starts if delegation is used, or null.
+  /** Node where this XMLConfig starts if delegation is used, or null.
    */
   private Node _startNode = null;
   
-  /**
-   * Path where this XMLConfig starts, or null.
+  /** Path where this XMLConfig starts, or null.
    */
   private String _startPath = null;
   
-  /**
-   * Creates an empty configuration.
+  /** Creates an empty configuration.
    */
   public XMLConfig() {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -111,24 +105,21 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Creates a configuration from an input stream.
+  /** Creates a configuration from an input stream.
    * @param is input stream
    */
   public XMLConfig(InputStream is) {
     init(new InputSource(is));
   }
   
-  /**
-   * Creates a configuration from a reader.
+  /** Creates a configuration from a reader.
    * @param r reader
    */
   public XMLConfig(Reader r) {
     init(new InputSource(r));
   }
   
-  /**
-   * Creates a configuration that is a part of another configuration, starting at the specified node.
+  /** Creates a configuration that is a part of another configuration, starting at the specified node.
    * @param parent the configuration that contains this part
    * @param node the node in the parent configuration where this part starts
    */
@@ -140,8 +131,7 @@ public class XMLConfig {
     _document = null;
   }
   
-  /**
-   * Initialize this XML configuration.
+  /** Initialize this XML configuration.
    * @param is the XML input source
    */
   private void init(InputSource is) {
@@ -158,8 +148,7 @@ public class XMLConfig {
     _document.normalize();
   }
   
-  /**
-   * Creates a configuration from a file.
+  /** Creates a configuration from a file.
    * @param f file
    */
   public XMLConfig(File f) {
@@ -171,8 +160,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Creates a configuration from a file name.
+  /** Creates a configuration from a file name.
    * @param filename file name
    */
   public XMLConfig(String filename)  {
@@ -186,8 +174,7 @@ public class XMLConfig {
   
   public boolean isDelegated() { return (_parent!=null); }
   
-  /**
-   * Saves configuration to an output stream
+  /** Saves configuration to an output stream
    * @param os output stream
    */
   public void save(OutputStream os) {
@@ -220,8 +207,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Saves configuration to a file.
+  /** Saves configuration to a file.
    * @param f file
    */
   public void save(File f) {
@@ -234,8 +220,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Saves configuration to a file specified by a file name.
+  /** Saves configuration to a file specified by a file name.
    * @param filename file name
    */
   public void save(String filename) {
@@ -244,8 +229,7 @@ public class XMLConfig {
   
   // ----- String ------
   
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
    */
@@ -255,8 +239,7 @@ public class XMLConfig {
     return r.get(0);
   }
 
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
@@ -267,8 +250,7 @@ public class XMLConfig {
     return r.get(0);
   }
   
-    /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+    /** Returns the value as specified by the DOM path, or the default value if the value could not be found.
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
@@ -282,8 +264,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+  /** Returns the value as specified by the DOM path, or the default value if the value could not be found.
    * @param path DOM path
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
@@ -300,8 +281,7 @@ public class XMLConfig {
   
   // ----- Integer ------
   
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
    * @throws IllegalArgumentException
@@ -315,8 +295,7 @@ public class XMLConfig {
     catch(NumberFormatException nfe) { throw new IllegalArgumentException("Not an integer value.", nfe); }
   }
 
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
@@ -331,8 +310,7 @@ public class XMLConfig {
     catch(NumberFormatException nfe) { throw new IllegalArgumentException("Not an integer value.", nfe); }
   }
   
-  /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+  /** Returns the value as specified by the DOM path, or the default value if the value could not be found.
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
@@ -347,8 +325,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+  /** Returns the value as specified by the DOM path, or the default value if the value could not be found.
    * @param path DOM path
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
@@ -366,8 +343,7 @@ public class XMLConfig {
 
   // ----- Boolean ------
   
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
    * @throws IllegalArgumentException
@@ -385,8 +361,7 @@ public class XMLConfig {
     throw new IllegalArgumentException("Not a Boolean vlaue.");
   }
 
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
@@ -406,8 +381,7 @@ public class XMLConfig {
 
   }
   
-  /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+  /** Returns the value as specified by the DOM path, or the default value if the value could not be found.
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
@@ -422,8 +396,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Returns the value as specified by the DOM path, or the default value if the value could not be found.
+  /** Returns the value as specified by the DOM path, or the default value if the value could not be found.
    * @param path DOM path
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
@@ -441,8 +414,7 @@ public class XMLConfig {
   
   // ----- Other -----
   
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return list of values.
    */
@@ -452,8 +424,7 @@ public class XMLConfig {
     return getMultiple(path, _document);
   }
   
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @param root node where the search should start
    * @return list of values.
@@ -487,8 +458,7 @@ public class XMLConfig {
     return strings;
   }
   
-  /**
-   * Returns the nodes as specified by the DOM path.
+  /** Returns the nodes as specified by the DOM path.
    * @param path DOM path
    * @return list of nodes.
    */
@@ -498,8 +468,7 @@ public class XMLConfig {
     return getNodes(path, _document);
   }
   
-  /**
-   * Returns the nodes as specified by the DOM path.
+  /** Returns the nodes as specified by the DOM path.
    * @param path DOM path
    * @param root node where the search should start
    * @return list of nodes.
@@ -510,8 +479,7 @@ public class XMLConfig {
     return accum;
   }
   
-  /**
-   * Returns the value as specified by the DOM path.
+  /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @param n node where the search begins
    * @param accum accumulator
@@ -600,8 +568,7 @@ public class XMLConfig {
     }
   }
   
-  /**
-   * Set the value of the node or attribute specified by the DOM path.
+  /** Set the value of the node or attribute specified by the DOM path.
    * @param path DOM path
    * @param value node or attribute value
    * @return the node that was created, or the parent node of the attribute if it was an attribute
@@ -612,8 +579,7 @@ public class XMLConfig {
     return set(path, value, _document, true);
   }
   
-  /**
-   * Set the value of the node or attribute specified by the DOM path.
+  /** Set the value of the node or attribute specified by the DOM path.
    * @param path DOM path
    * @param value node or attribute value
    * @param overwrite whether to overwrite (true) or add (false)
@@ -626,8 +592,7 @@ public class XMLConfig {
   }
   
   
-  /**
-   * Set the value of the node or attribute specified by the DOM path.
+  /** Set the value of the node or attribute specified by the DOM path.
    * @param path DOM path
    * @param value node or attribute value
    * @param n node where the search should start
@@ -655,8 +620,7 @@ public class XMLConfig {
     return node;
   }
   
-  /**
-   * Create the node specified by the DOM path.
+  /** Create the node specified by the DOM path.
    * @param path DOM path
    * @return the node that was created, or the parent node of the attribute if it was an attribute
    */
@@ -666,8 +630,7 @@ public class XMLConfig {
     return createNode(path, _document, true);
   }
   
-  /**
-   * Create the node specified by the DOM path.
+  /** Create the node specified by the DOM path.
    * @param path DOM path
    * @param n node where the search should start, or null for the root
    * @return the node that was created, or the parent node of the attribute if it was an attribute
@@ -676,8 +639,7 @@ public class XMLConfig {
     return createNode(path, n, true);
   }
   
-  /**
-   * Create the node specified by the DOM path.
+  /** Create the node specified by the DOM path.
    * @param path DOM path
    * @param n node where the search should start, or null for the root
    * @param overwrite whether to overwrite (true) or add (false) -- only applies for last node!
@@ -767,8 +729,7 @@ public class XMLConfig {
   }
   
   
-  /**
-   * Returns a string representation of the object.
+  /** Returns a string representation of the object.
    * @return a string representation of the object.
    */
   public String toString() {
@@ -777,8 +738,7 @@ public class XMLConfig {
     return os.toString();
   }
   
-  /**
-   * Return the path of a node as it is used in XMLConfig.
+  /** Return the path of a node as it is used in XMLConfig.
    * @param n node
    * @return path
    */
@@ -793,8 +753,7 @@ public class XMLConfig {
     return path.substring(0,path.length()-1);
   }
   
-  /**
-   * Exception in XMLConfig methods.
+  /** Exception in XMLConfig methods.
    */
   public static class XMLConfigException extends RuntimeException {
     public XMLConfigException() {

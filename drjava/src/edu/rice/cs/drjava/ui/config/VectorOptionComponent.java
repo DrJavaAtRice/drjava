@@ -64,8 +64,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected static final int NUM_ROWS = 5;
   protected static final int PIXELS_PER_ROW = 18;
 
-  /**
-   * Builds a new VectorOptionComponent.
+  /** Builds a new VectorOptionComponent.
    * @param opt the option
    * @param text the label to display
    * @param parent the parent frame
@@ -165,8 +164,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _buttonPanel.add(_removeButton);
   }
   
-  /**
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    */
   public VectorOptionComponent(VectorOption<T> opt, String text,
                                Frame parent, String description) {
@@ -174,8 +172,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) {
@@ -184,8 +181,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -195,8 +191,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     return true;
   }
   
-  /**
-   * Accessor to the current contents of the list.
+  /** Accessor to the current contents of the list.
    * @return The contents of the list in this component
    * in the form of a Vector.
    */

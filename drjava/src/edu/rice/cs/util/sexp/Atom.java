@@ -42,8 +42,7 @@ package edu.rice.cs.util.sexp;
  * algorithms on them.
  */
 public interface Atom extends SExp {
-  /**
-   * Visitor hook for the different kinds of Atom
+  /** Visitor hook for the different kinds of Atom
    * @param v the visitor
    * @return result of the given algorithm
    */

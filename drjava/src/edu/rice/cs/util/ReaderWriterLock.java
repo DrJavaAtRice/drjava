@@ -77,8 +77,7 @@ public class ReaderWriterLock {
     */
   private final LinkedList<ReaderWriterThread> _waitQueue;
   
-  /**
-   * A list of the Threads that are currently reading or writing.
+  /** A list of the Threads that are currently reading or writing.
    * We maintain this list to prevent the deadlock which would occur if
    * a Thread which is reading or writing attempted to read or write again.
    * (If that happens, we throw an IllegalStateException.)

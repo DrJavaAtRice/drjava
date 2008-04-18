@@ -47,8 +47,7 @@ class RootNode<ItemT extends INavigatorItem> extends DefaultMutableTreeNode impl
   public File getData() { return (File) super.getUserObject(); }
   public String toString() { return getData().toString(); }
 
-  /**
-   * Execute the specified visitor, passing a variable number of parameters.
+  /** Execute the specified visitor, passing a variable number of parameters.
    * @param v visitor to execute
    * @param p parameters as varargs
    */

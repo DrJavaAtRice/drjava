@@ -66,8 +66,7 @@ public class LineEnumRule extends JComponent {
   /** font metrics for the new font */
   protected FontMetrics _nfm;
 
-  /**
-   * Create a new component to display line numbers along the left of
+  /** Create a new component to display line numbers along the left of
    * the definitions pane.
    * @param p the pane to show line numbers on
    */
@@ -82,16 +81,14 @@ public class LineEnumRule extends JComponent {
     SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
   }
 
-  /**
-   * Return a new Dimension using our set width, and the height of the def. pane
+  /** Return a new Dimension using our set width, and the height of the def. pane
    * return Dimension
    */
   public Dimension getPreferredSize() {
     return new Dimension( SIZE, (int)_pane.getPreferredSize().getHeight());
   }
 
-  /**
-   * Updates the row header's font information.
+  /** Updates the row header's font information.
    * Uses a custom config setting for this purpose.
    */
   public void updateFont() {
@@ -103,8 +100,7 @@ public class LineEnumRule extends JComponent {
     SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
   }
 
-  /**
-   * Paints the line enumeration component.
+  /** Paints the line enumeration component.
    */
   public void paintComponent(Graphics g) {
     Rectangle drawHere = g.getClipBounds();
@@ -154,8 +150,7 @@ public class LineEnumRule extends JComponent {
     }
   }
 
-  /**
-   * Get the font for line numbers, making sure that it is vertically smaller
+  /** Get the font for line numbers, making sure that it is vertically smaller
    * than the definitions pane font.
    * @return a valid font for displaying line numbers
    */

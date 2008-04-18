@@ -312,8 +312,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, doc);
   }
   
-  /**
-   * Regression test for switch statements.
+  /** Regression test for switch statements.
    */
   public void testIndentSwitch() throws BadLocationException {
     String text =
@@ -813,8 +812,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("   {\n     ", doc);
   }
   
-  /**
-   * Cascading indent is not used anymore.
+  /** Cascading indent is not used anymore.
    *
    public void testOpenCurlyCascade () throws BadLocationException {
    // just paren
@@ -824,8 +822,7 @@ public final class IndentTest extends DrJavaTestCase {
    _assertContents("if\n  if\n    if\n    {", doc);
    }*/
   
-  /**
-   * Cascading indent is not used anymore.
+  /** Cascading indent is not used anymore.
    *
    public void testOpenCurlyCascade2 () throws BadLocationException {
    // just paren
@@ -885,8 +882,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hello\n{\n  {\n    {", doc);
   }
   
-  /**
-   * Regression test for bug in drjava-20010802-1020:
+  /** Regression test for bug in drjava-20010802-1020:
    * Indent block on a file containing just "  x;\n  y;\n" would throw an
    * exception.
    * @exception BadLocationException
@@ -936,8 +932,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("\n\n", doc);
   }
   
-  /**
-   * Regression test for arrays.
+  /** Regression test for arrays.
    */
   public void testAnonymousInnerClass() throws BadLocationException {
     String text =
@@ -1128,8 +1123,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indentedAfter, doc);
   }
   
-  /**
-   * tests that an if statment nested in a switch will be indented properly
+  /** tests that an if statment nested in a switch will be indented properly
    * @throws BadLocationException
    */
   public void testNestedIfInSwitch() throws BadLocationException {

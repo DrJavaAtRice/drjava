@@ -213,8 +213,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseWriteLock(); }
   } 
    
-  /**
-   * Returns whether this document is currently untitled
+  /** Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
    * @return true if the document is untitled and has no file
    */
@@ -222,8 +221,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    return (_file == null);
 //  }
   
-  /**
-   * Returns the file for this document.  If the document
+  /** Returns the file for this document.  If the document
    * is untitled and has no file, it throws an IllegalStateException.
    * @return the file for this document
    * @throws IllegalStateException if file has not been set

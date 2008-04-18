@@ -46,8 +46,7 @@ import java.util.ArrayList;
  * @version $Id$
  */
 public final class ForcedChoiceOptionTest extends DrJavaTestCase {
-  /**
-   * @param name The name of this test case.
+  /** @param name The name of this test case.
    */
   public ForcedChoiceOptionTest(String name) { super(name); }
   

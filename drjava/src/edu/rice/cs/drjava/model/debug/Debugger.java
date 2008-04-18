@@ -139,14 +139,12 @@ public interface Debugger {
   /** Returns a Vector of StackData for the current thread. */
   public Vector<DebugStackData> getCurrentStackFrameData() throws DebugException;
   
-  /**
-   * @return true if there are any threads in the program currently being
+  /** @return true if there are any threads in the program currently being
    * debugged which have been suspended (by the user or by hitting a breakpoint).
    */
   public boolean hasSuspendedThreads() throws DebugException;
   
-  /**
-   * Returns whether the thread the debugger is tracking is now running.
+  /** Returns whether the thread the debugger is tracking is now running.
    */
   public boolean hasRunningThread() throws DebugException;
   

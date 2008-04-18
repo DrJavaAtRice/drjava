@@ -63,18 +63,15 @@ import java.util.*;
  * This class cannot be robustly subclassed because the constructor starts a thread.
  */
 public class RemoteControlServer {
-  /**
-   * Prefix of a legitimate query by a client.
+  /** Prefix of a legitimate query by a client.
    */
   public static final String QUERY_PREFIX = "DrJava Remote Control?";
 
-  /**
-   * Prefix of a legitimate response by this server.
+  /** Prefix of a legitimate response by this server.
    */
   public static final String RESPONSE_PREFIX = "DrJava Remote Control ";
 
-  /**
-   * Prefix of a legitimate response by this server, including the user name.
+  /** Prefix of a legitimate response by this server, including the user name.
    */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name")+"!";
 
@@ -87,8 +84,7 @@ public class RemoteControlServer {
     rcsThread.start();
   }
   
-  /**
-   * Thread class for the server.
+  /** Thread class for the server.
    */
   public static class RCServerThread extends Thread {
     /**

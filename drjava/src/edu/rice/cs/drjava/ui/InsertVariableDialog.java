@@ -56,28 +56,23 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
   /** Tab pane. */
   JTabbedPane _tabbedPane = new JTabbedPane();
   
-  /**
-   * Table with variables.
+  /** Table with variables.
    */
   private Map<String, JTable> _varTable = new HashMap<String, JTable>();
   
-  /**
-   * Model for the table.
+  /** Model for the table.
    */
   private Map<String, DefaultTableModel> _varTableModel = new HashMap<String, DefaultTableModel>();
   
-  /**
-   * Field to preview the value of the variable.
+  /** Field to preview the value of the variable.
    */
   private JTextField _varValueField;
   
-  /**
-   * Button to accept the selection.
+  /** Button to accept the selection.
    */
   private JButton _okBtn;
   
-  /**
-   * Button to cancel.
+  /** Button to cancel.
    */
   private JButton _cancelBtn;
   

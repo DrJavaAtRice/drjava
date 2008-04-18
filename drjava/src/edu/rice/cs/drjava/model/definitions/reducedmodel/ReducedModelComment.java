@@ -317,8 +317,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     return;
   }
   
-  /**
-   * Helper function for insertQuote.  Creates a new quote Brace and puts it in the
+  /** Helper function for insertQuote.  Creates a new quote Brace and puts it in the
    * reduced model.
    * @param quote the quote to insert
    */
@@ -336,8 +335,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   
   public int walkerOffset() { return absOffset(_walker); }
   
-  /**
-   * Helper function for insertNewQuote.  In the case where a backslash
+  /** Helper function for insertNewQuote.  In the case where a backslash
    * precedes the point of insertion, it removes the backslash and returns
    * the text for an escaped quote.  The type of quote depends on the given
    * argument.

@@ -46,8 +46,7 @@ import edu.rice.cs.drjava.model.debug.DebugThreadData;
 public class JPDAThreadData extends DebugThreadData {
   private final ThreadReference _thread;
   
-  /**
-   * Object for keeping track of a thread in the debuggee JVM.
+  /** Object for keeping track of a thread in the debuggee JVM.
    * @param thread JPDA's reference to the thread
    */
   public JPDAThreadData(ThreadReference thread) {
@@ -89,8 +88,7 @@ public class JPDAThreadData extends DebugThreadData {
     return status;
   }
   
-  /**
-   * Tells whether or not the thread is suspended.
+  /** Tells whether or not the thread is suspended.
    * @return true iff the thread is suspended
    */
   public boolean isSuspended() { return safeIsSuspended(_thread); }

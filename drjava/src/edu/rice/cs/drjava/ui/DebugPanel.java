@@ -479,8 +479,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }
 
-  /**
-   * Initializes the pop-up menu that is revealed when the user
+  /** Initializes the pop-up menu that is revealed when the user
    * right-clicks on a row in the thread table or stack table.
    */
   private void _initPopup() {
@@ -562,8 +561,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * gets the thread that is currently selected in the thread table
+  /** gets the thread that is currently selected in the thread table
    * @return the highlighted thread
    */
   public DebugThreadData getSelectedThread() {
@@ -632,8 +630,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
 
 
-  /**
-   * Enables and disables the appropriate buttons depending on if the current
+  /** Enables and disables the appropriate buttons depending on if the current
    * thread has been suspended or resumed
    * @param isSuspended indicates if the current thread has been suspended
    */
@@ -651,8 +648,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
   public String getStatusText() { return _statusBar.getText(); }
 
-  /**
-   * Updates the UI to a new look and feel.
+  /** Updates the UI to a new look and feel.
    * Need to update the contained popup menus as well.
    *
    * Currently, we don't support changing the look and feel
@@ -671,8 +667,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }*/
 
-  /**
-   * Concrete DebugTableMouseAdapter for the thread table.
+  /** Concrete DebugTableMouseAdapter for the thread table.
    */
   private class ThreadMouseAdapter extends DebugTableMouseAdapter {
     public ThreadMouseAdapter() {
@@ -695,8 +690,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * Concrete DebugTableMouseAdapter for the stack table.
+  /** Concrete DebugTableMouseAdapter for the stack table.
    */
   private class StackMouseAdapter extends DebugTableMouseAdapter {
     public StackMouseAdapter() {
@@ -717,8 +711,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * A mouse adapter that allows for double-clicking and
+  /** A mouse adapter that allows for double-clicking and
    * bringing up a right-click menu.
    */
   private abstract class DebugTableMouseAdapter extends RightClickMouseAdapter {

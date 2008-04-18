@@ -72,22 +72,19 @@ public class LabelComponent extends OptionComponent<Object> {
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.  (Does nothing.)
+  /** Updates the config object with the new setting.  (Does nothing.)
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
     return true;
   }
 
-  /**
-   * Displays the given value.  (Never changes.)
+  /** Displays the given value.  (Never changes.)
    */
   public void setValue(Object value) {
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
+  /** Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _text; }
 

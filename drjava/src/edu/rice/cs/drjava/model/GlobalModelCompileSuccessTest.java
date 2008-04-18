@@ -51,8 +51,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
-  /**
-   * Tests calling compileAll with different source roots works.
+  /** Tests calling compileAll with different source roots works.
    */
   public void testCompileAllDifferentSourceRoots()
     throws BadLocationException, IOException, InterruptedException
@@ -89,8 +88,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
   }
   
 
-  /**
-   * Test that one compiled file can depend on the other and that when a keyword
+  /** Test that one compiled file can depend on the other and that when a keyword
    * is part of a field name, the file will compile.
    * We compile DrJavaTestFoo and then DrJavaTestFoo2 (which extends
    * DrJavaTestFoo). This shows that the compiler successfully found
@@ -135,8 +133,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener2);
   }
 
-  /**
-   * Test that one compiled file can depend on the other.
+  /** Test that one compiled file can depend on the other.
    * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends
    * DrJavaTestFoo). This shows that the compiler successfully found
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.

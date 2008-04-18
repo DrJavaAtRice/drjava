@@ -44,8 +44,7 @@ import java.util.ListIterator;
 import java.util.LinkedList;
 
 public class DelegatingAction implements Action {
-  /**
-   * These keys will be copied from the delegatee. All other keys are held in this action itself.
+  /** These keys will be copied from the delegatee. All other keys are held in this action itself.
    */
   private static final String[] KEYS_TO_DELEGATE = {
     //DEFAULT,

@@ -151,8 +151,7 @@ public class CompilerErrorModel {
     _calculatePositions();
   }
   
-  /**
-   * Accessor for errors maintained here.
+  /** Accessor for errors maintained here.
    * @param idx the index of the error to retrieve
    * @return the error at index idx
    * @throws NullPointerException if this object was improperly initialized

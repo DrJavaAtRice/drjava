@@ -54,8 +54,7 @@ public class InteractionsScriptController implements Serializable {
   /** Interactions pane. */
   private InteractionsPane _interactionsPane;
 
-  /**
-   * Builds a new interactions script pane and links it to the given model.
+  /** Builds a new interactions script pane and links it to the given model.
    * @param model the InteractionsScriptModel to use
    * @param closeAction how to close this script.
    */
@@ -81,8 +80,7 @@ public class InteractionsScriptController implements Serializable {
     setActionsEnabled();
   }
 
-  /**
-   * Sets the navigation actions to be enabled, if appropriate.
+  /** Sets the navigation actions to be enabled, if appropriate.
    */
   public void setActionsEnabled() {
     _nextInteractionAction.setEnabled(_model.hasNextInteraction());
@@ -90,8 +88,7 @@ public class InteractionsScriptController implements Serializable {
     _executeInteractionAction.setEnabled(true);
   }
 
-  /**
-   * Disables navigation actions
+  /** Disables navigation actions
    */
   public void setActionsDisabled() {
     _nextInteractionAction.setEnabled(false);
@@ -99,8 +96,7 @@ public class InteractionsScriptController implements Serializable {
     _executeInteractionAction.setEnabled(false);
   }
 
-  /**
-   * @return the interactions script pane controlled by this controller.
+  /** @return the interactions script pane controlled by this controller.
    */
   public InteractionsScriptPane getPane() {
     return _pane;
@@ -137,8 +133,7 @@ public class InteractionsScriptController implements Serializable {
     }
   };*/
 
-  /**
-   * Sets up fields on the given Action, such as the name and tooltip.
+  /** Sets up fields on the given Action, such as the name and tooltip.
    * @param a Action to modify
    * @param name Default name for the Action (for buttons)
    * @param desc Short description of the Action (for tooltips)

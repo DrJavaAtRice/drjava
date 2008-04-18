@@ -58,8 +58,7 @@ public class AsyncCompletionArgs<R> {
     _cancelRequested = wasCanceled;
   }
   
-  /**
-   * Returns the result of the asynchronous computation performed by the
+  /** Returns the result of the asynchronous computation performed by the
    * <code>AsyncTask</code>. If the task threw an exception, this value will
    * be null. The exception can be obtained by calling
    * <code>getCaughtException</code>

@@ -44,16 +44,14 @@ package edu.rice.cs.drjava.model;
 public class DocumentClosedException extends RuntimeException {
   private OpenDefinitionsDocument _document;
   
-  /**
-   * Creates a DocumentClosedException for the given file
+  /** Creates a DocumentClosedException for the given file
    */
   public DocumentClosedException(OpenDefinitionsDocument d, String s) {
     super(s);
     _document = d;
   }
   
-  /**
-   * Get the document which caused this exception.
+  /** Get the document which caused this exception.
    */
   public OpenDefinitionsDocument getDocument() {
     return _document;

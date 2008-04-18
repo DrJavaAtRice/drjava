@@ -55,8 +55,7 @@ import java.util.*;
  * @author Mathias Ricken
  */
 public class XMLConfigTest extends TestCase {
-  /**
-   * Newline string.
+  /** Newline string.
    */
   public static final String NL = System.getProperty("line.separator");
   public void testNodes() throws Exception {

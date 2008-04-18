@@ -83,8 +83,7 @@ public class PendingRequestManager {
     _pendingActions.put(className, actions);
   }
   
-  /**
-   * Called if a breakpoint is set and removed before its class is prepared
+  /** Called if a breakpoint is set and removed before its class is prepared
    * @param action The DebugAction that was set and removed
    */
   public void removePendingRequest (DocumentDebugAction<?> action) {

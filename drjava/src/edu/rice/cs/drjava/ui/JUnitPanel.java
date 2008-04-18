@@ -537,8 +537,7 @@ public class JUnitPanel extends ErrorPanel {
   }
   
   
-  /**
-   * A progress bar showing the status of JUnit tests.
+  /** A progress bar showing the status of JUnit tests.
    * Green until a test fails, then red.
    * Adapted from JUnit code.
    */

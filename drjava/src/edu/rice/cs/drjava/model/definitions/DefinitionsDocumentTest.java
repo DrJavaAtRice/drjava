@@ -66,8 +66,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     super(name);
   }
   
-  /**
-   * Create a definitions document to work with.
+  /** Create a definitions document to work with.
    */
   protected void setUp() throws Exception {
     super.setUp();
@@ -76,16 +75,14 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     DrJava.getConfig().resetToDefaults();
   }
   
-  /**
-   * Create a test suite for JUnit to run.
+  /** Create a test suite for JUnit to run.
    * @return a test suite based on this class
    */
   public static Test suite() {
     return  new TestSuite(DefinitionsDocumentTest.class);
   }
   
-  /**
-   * Test insertion.
+  /** Test insertion.
    */
   public void testInsertToDoc() throws BadLocationException {
     _defModel.insertString(0, "a/*bc */\"\\{}()", null);
@@ -137,8 +134,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("2.93", ")", _reduced.currentToken().getType());
   }
   
-  /**
-   * Test inserting a star between a star-slash combo.
+  /** Test inserting a star between a star-slash combo.
    * @exception BadLocationException
    */
   public void testInsertStarIntoStarSlash() throws BadLocationException {
@@ -157,8 +153,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
   }
   
-  /**
-   * Test inserting a slash between a star-slash combo.
+  /** Test inserting a slash between a star-slash combo.
    * @exception BadLocationException
    */
   public void testInsertSlashIntoStarSlash() throws BadLocationException {
@@ -298,8 +293,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 2, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Test going to a specific line.
+  /** Test going to a specific line.
    * @exception BadLocationException
    */
   public void testGotoLine2() throws BadLocationException {
@@ -309,8 +303,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 5, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Test going to the fourth line in a four line document.
+  /** Test going to the fourth line in a four line document.
    * @exception BadLocationException
    */
   public void testGotoLine3() throws BadLocationException {
@@ -320,8 +313,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 6, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Test going to a line beyond the number of lines in a document
+  /** Test going to a line beyond the number of lines in a document
    * just goes to the end of the file.
    * @exception BadLocationException
    */
@@ -332,8 +324,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 6, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Test going to the first line of an empty document
+  /** Test going to the first line of an empty document
    * doesn't do anything funny.  It should stay in the same
    * location.
    */
@@ -342,8 +333,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 0, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Test going to a line that is greater than the line count
+  /** Test going to a line that is greater than the line count
    * of an empty document just keeps you in your current location.
    */
   public void testGotoLine6() {
@@ -351,8 +341,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 0, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Test that going to a line within the document's line count
+  /** Test that going to a line within the document's line count
    * sets the current position to the first character of the line.
    * @exception BadLocationException
    */
@@ -363,8 +352,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 11, _defModel.getCurrentLocation());
   }
   
-  /**
-   * Tests returning the current column in the document.
+  /** Tests returning the current column in the document.
    */
   public void testGetColumn1() throws BadLocationException {
     final String s = "1234567890";
@@ -376,8 +364,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   
-  /**
-   * Tests returning the current column in the document.
+  /** Tests returning the current column in the document.
    */
   public void testGetColumn2() throws BadLocationException {
     final String s = "1234567890\n1234\n12345";
@@ -385,8 +372,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 5, _defModel.getCurrentCol() );
   }
   
-  /**
-   * Test returning second line in a two-line document.
+  /** Test returning second line in a two-line document.
    * @exception BadLocationException
    */
   public void testGetLine1() throws BadLocationException {
@@ -396,8 +382,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 2, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test going to a specific line.
+  /** Test going to a specific line.
    * @exception BadLocationException
    */
   public void testGetLine2() throws BadLocationException {
@@ -409,8 +394,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.1", 2, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test going to the fourth line in a four line document.
+  /** Test going to the fourth line in a four line document.
    * @exception BadLocationException
    */
   public void testGetLine3() throws BadLocationException {
@@ -420,8 +404,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 4, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test going to a line beyond the number of lines in a document
+  /** Test going to a line beyond the number of lines in a document
    * just goes to the end of the file.
    * @exception BadLocationException
    */
@@ -432,8 +415,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 4, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test going to the first line of an empty document
+  /** Test going to the first line of an empty document
    * doesn't do anything funny.  It should stay in the same
    * location.
    */
@@ -442,8 +424,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 1, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test going to a line that is greater than the line count
+  /** Test going to a line that is greater than the line count
    * of an empty document just keeps you in your current location.
    */
   public void testGetLine6() {
@@ -451,8 +432,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 1, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test that going to a line within the document's line count
+  /** Test that going to a line within the document's line count
    * sets the current position to the first character of the line.
    * @exception BadLocationException
    */
@@ -467,8 +447,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.2", 4, _defModel.getCurrentLine());
   }
   
-  /**
-   * Tests line numbering output after deletion of a block
+  /** Tests line numbering output after deletion of a block
    */
   public void testGetLineDeleteText() throws BadLocationException{
     final String s = "123456789\n123456789\n123456789\n123456789\n";
@@ -480,8 +459,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("After delete", 1, _defModel.getCurrentLine() );
   }
   
-  /**
-   * Tests line numbering output after deletion of a block
+  /** Tests line numbering output after deletion of a block
    */
   public void testGetLineDeleteText2() throws BadLocationException {
     final String s = "123456789\n123456789\n123456789\n123456789\n";
@@ -492,8 +470,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("After delete", 2, _defModel.getCurrentLine());
   }
   
-  /**
-   * Test whether removeTabs actually removes all tabs.
+  /** Test whether removeTabs actually removes all tabs.
    */
   public void testRemoveTabs1() {
     _defModel.setIndent(1);
@@ -502,8 +479,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals( "  this   is a      test  ", result);
   }
   
-  /**
-   * As of drjava-20020122-1534, files with tabs ended up garbled, with
+  /** As of drjava-20020122-1534, files with tabs ended up garbled, with
    * some of the text jumbled all around (bug #506630).
    * This test aims to replicate the problem.
    */
@@ -530,8 +506,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals(bigExp.toString(), result);
   }
   
-  /**
-   * Test whether tabs are removed as appropriate on call to insertString.
+  /** Test whether tabs are removed as appropriate on call to insertString.
    */
   public void testTabRemovalOnInsertString2() throws BadLocationException {
     String[] inputs = {
@@ -673,8 +648,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
   }
   
-  /**
-   * Tests that the word class is not recognized if it is not followed
+  /** Tests that the word class is not recognized if it is not followed
    * by whitespace.
    */
   public void testTopLevelClassNameWithClassloaderImport()
@@ -1185,8 +1159,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Should have undone the indenting and inserting.", "", _defModel.getText());
   }
   
-  /**
-   * Verifies that the undo manager correctly determines if the document has
+  /** Verifies that the undo manager correctly determines if the document has
    * been modified since the last save.
    */
   public void testUndoOrRedoSetsUnmodifiedState() throws BadLocationException {
@@ -1449,8 +1422,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "  }" + NEWLINE +
     "}/*eof*/" + NEWLINE;
   
-  /**
-   * Test finding anonymous class index on document.
+  /** Test finding anonymous class index on document.
    */
   public void testAnonymousClassIndex() throws BadLocationException, ClassNameNotFoundException {
     _defModel.insertString(0, NESTED_CLASSES_TEXT, null);
@@ -1484,8 +1456,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("index at "+substr+" exp=`"+exp+"`, act=`"+act+"`", exp, act);
   }
   
-  /**
-   * Test exact class name-finding on document.
+  /** Test exact class name-finding on document.
    */
   public void testExactClassName() throws BadLocationException, ClassNameNotFoundException {
     _defModel.insertString(0, NESTED_CLASSES_TEXT, null);

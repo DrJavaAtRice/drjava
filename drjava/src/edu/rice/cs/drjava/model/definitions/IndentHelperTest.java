@@ -408,8 +408,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  _doc.getReduced().absOffset());
   }
   
-  /**
-   * Tests that the "intelligent" beginning of line can be found, given
+  /** Tests that the "intelligent" beginning of line can be found, given
    * a position on the line.  Very similar to getFirstNonWSCharPos, except
    * that comments are treated as non-whitespace, and less parsing needs
    * to be done.

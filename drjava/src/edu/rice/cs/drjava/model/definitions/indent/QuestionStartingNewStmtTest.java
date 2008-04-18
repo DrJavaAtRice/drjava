@@ -46,8 +46,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
 
-  /**
-   * Ensures that the current line is the first line of a statement.
+  /** Ensures that the current line is the first line of a statement.
    * This is done by testing if the previous character is one of
    * the following: docstart, ';', '{', '}'
    * These characters are here-on refered to as 'end-characters'.
@@ -80,8 +79,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }  
 
-  /**
-   * Ensures that the current line is the first line of a statement.
+  /** Ensures that the current line is the first line of a statement.
    * Tests that whitespace, single-line and multi-line comments
    * are ignored when searching for the end-characters.
    */
@@ -128,8 +126,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
-  /**
-   * Ensures that the current line is the first line of a statement.
+  /** Ensures that the current line is the first line of a statement.
    * Tests that end characters in single-line comments, multi-line
    * comments or quotes are ignored.
    */

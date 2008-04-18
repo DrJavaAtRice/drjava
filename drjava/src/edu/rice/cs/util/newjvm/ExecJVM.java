@@ -249,8 +249,7 @@ public final class ExecJVM {
     return OS_NAME.indexOf("netware") != -1;
   }
   
-  /**
-   * Find the java executable.
+  /** Find the java executable.
    * This logic comes from Ant.
    */
   public static String getExecutable() {

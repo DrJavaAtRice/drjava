@@ -59,8 +59,7 @@ public class QuickStartFrame extends HelpFrame {
     addHyperlinkListener(_linkListener);
   }
   
-   /**
-   * Shows the page selected by the hyperlink event.
+   /** Shows the page selected by the hyperlink event.
    * (theo) changed to anonymous inner class for encapsulation purposes
    */
   private HyperlinkListener _linkListener = new HyperlinkListener() {

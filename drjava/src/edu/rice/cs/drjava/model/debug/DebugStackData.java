@@ -44,8 +44,7 @@ public class DebugStackData {
   private final String _method;
   private final int _line;
   
-  /**
-   * Object for keeping track of a stack frame.
+  /** Object for keeping track of a stack frame.
    * @param method name of the method
    * @param line line number in the file
    */
@@ -54,13 +53,11 @@ public class DebugStackData {
     _line = line;
   }
   
-  /**
-   * Returns the name of the method at this frame of the stack.
+  /** Returns the name of the method at this frame of the stack.
    */
   public String getMethod() { return _method; }
   
-  /**
-   * Returns the line number of this frame of the stack.
+  /** Returns the line number of this frame of the stack.
    */
   public int getLine() { return _line; }
 }

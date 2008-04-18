@@ -45,39 +45,33 @@ import java.util.Vector;
  */
 
 public interface BraceReduction {
-  /**
-   * Get the absolute character offset of the document represented by BraceReduction.
+  /** Get the absolute character offset of the document represented by BraceReduction.
    */
   public int absOffset();
 
-  /**
-   * Get the current token in the BraceReduction.
+  /** Get the current token in the BraceReduction.
    * @return the current token
    */
   ReducedToken currentToken();
 
-  /**
-   * Get the state of the token at the current cursor position.
+  /** Get the state of the token at the current cursor position.
    * @return the current state
    */
   ReducedModelState getStateAtCurrent();
 
-  /**
-   * Insert a character into the BraceReduction.
+  /** Insert a character into the BraceReduction.
    * @param ch the character to be inserted
    */
   public void insertChar(char ch);
 
-  /**
-   * <P>Updates the BraceReduction to reflect cursor movement.
+  /** <P>Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move
    * right. </P>
    * @param count indicates the direction and magnitude of cursor movement
    */
   public void move(int count );
 
-  /**
-   * <P>Update the BraceReduction to reflect text deletion.</P>
+  /** <P>Update the BraceReduction to reflect text deletion.</P>
    * @param count indicates the size and direction of text deletion.
    * Negative values delete text to the left of the cursor, positive
    * values delete text to the right.
@@ -85,8 +79,7 @@ public interface BraceReduction {
   public void delete(int count );
 
 
-  /**
-   * <P>Finds the closing brace that matches the next significant
+  /** <P>Finds the closing brace that matches the next significant
    * brace iff that brace is an open brace.</P>
    * @return the distance until the matching closing brace.  On
    * failure, returns -1.
@@ -94,8 +87,7 @@ public interface BraceReduction {
    */
   public int balanceForward();
 
-  /**
-   * <P>Finds the open brace that matches the previous significant
+  /** <P>Finds the open brace that matches the previous significant
    * brace iff that brace is an closing brace.</P>
    * @return the distance until the matching open brace.  On
    * failure, returns -1.

@@ -48,8 +48,7 @@ import java.awt.*;
  */
 public class InteractionsEditorKit extends StyledEditorKit {
   
-  /**
-   * Creates a new editor kit 
+  /** Creates a new editor kit 
    */
   public InteractionsEditorKit() {
   }

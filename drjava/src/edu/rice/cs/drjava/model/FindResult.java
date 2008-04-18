@@ -51,8 +51,7 @@ public class FindResult {
   private boolean _wrapped;
   private boolean _allWrapped;
   
-  /**
-   * Constructor for a FindResult.
+  /** Constructor for a FindResult.
    * @param document the document where the found instance is located
    * @param foundoffset the offset of the instance found
    * @param wrapped {@code true} if the search wrapped to the beginning (or end) of the document

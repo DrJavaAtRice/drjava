@@ -50,8 +50,7 @@ import java.io.IOException;
  * @version $Id$
  */
 public class ExecJVMTest extends DrJavaTestCase {
-  /**
-   * Setup for every test case.
+  /** Setup for every test case.
    */
   public void setUp() throws Exception {
     super.setUp();

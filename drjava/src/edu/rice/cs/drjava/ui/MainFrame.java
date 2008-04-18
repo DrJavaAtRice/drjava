@@ -2355,6 +2355,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
+//  /** Selects the next recent document. */
+//  private final Action _nextRecentDocumentAction = new Abstract Action("Select Next Recent Document") {
+//    public void actionPerformed(ActionEvent ae) { nextRecentDoc(); }
+//  };
+//  
+//  /** Selects the previous recent document. */
+//  private final Action _prevRecentDocumentAction = new Abstract Action("Select Previous Recent Document") {
+//    public void actionPerformed(ActionEvent ae) { prevRecentDoc(); }
+//  };
+  
   /** Toggles a bookmark. */
   private final Action _toggleBookmarkAction = new AbstractAction("Toggle Bookmark") {
     public void actionPerformed(ActionEvent ae) { toggleBookmark(); }
@@ -2808,6 +2818,28 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public String getName(INavigatorItem name) { return name.getName(); }
   };
   
+  /** These listeners support the travel operations that cycle through recent documents. */
+  KeyListener _historyListener = new KeyListener() {
+    public void keyPressed(KeyEvent e) {
+      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && !e.isShiftDown()) nextRecentDoc();
+      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && e.isShiftDown()) prevRecentDoc();
+//    else if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE) {
+//        transferFocusUpCycle();
+//    }
+    }
+    public void keyReleased(KeyEvent e) {
+      if (e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL) hideRecentDocFrame();
+    }
+    public void keyTyped(KeyEvent e) { /* noop */ }
+  };
+  
+  FocusListener _focusListenerForRecentDocs = new FocusListener() {
+    public void focusLost(FocusEvent e) { hideRecentDocFrame();  }
+    public void focusGained(FocusEvent e) { }
+  };
+  
+  
+  
   
   public static DJFileDisplayManager getFileDisplayManager20() { return _djFileDisplayManager20; }
   public static DJFileDisplayManager getFileDisplayManager30() { return _djFileDisplayManager30; }
@@ -2887,7 +2919,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     _defScrollPanes = new Hashtable<OpenDefinitionsDocument, JScrollPane>();
     
-    /* Other panes */
+    /* Set up tabbed pane and navigation pane. */
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) {
@@ -2901,6 +2933,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public void focusLost(FocusEvent e) { }
     });
+    
+    _tabbedPane.addFocusListener(_focusListenerForRecentDocs);
+    _tabbedPane.addKeyListener(_historyListener);    // TODO: can this code be moved to the MainFrame keymap?
     
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     
@@ -5533,8 +5568,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         throw  new RuntimeException("Filechooser returned bad rc " + choice);
     }
   }
-  /**
-   * Returns the Files selected by the JFileChooser.
+  /** Returns the Files selected by the JFileChooser.
    * @param fc File chooser presented to the user
    * @param choice return value from fc
    * @return Selected Files - this array will be size 1 for single-selection dialogs.
@@ -5851,8 +5885,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // Also check that the keystroke isn't the NULL_KEYSTROKE, which
     //  can strangely be triggered by certain keys in Windows.
     KeyBindingManager.Singleton.put(opt, a, item, item.getText());
-    if ((ks != KeyStrokeOption.NULL_KEYSTROKE) &&
-        (KeyBindingManager.Singleton.get(ks) == a)) {
+    if (ks != KeyStrokeOption.NULL_KEYSTROKE &&
+        KeyBindingManager.Singleton.get(ks) == a) {
       item.setAccelerator(ks);
       //KeyBindingManager.Singleton.addListener(opt, item);
     }
@@ -6156,8 +6190,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     return debugMenu;
   }
   
-  /**
-   * Called every time the debug mode checkbox is toggled. The resume and step
+  /** Called every time the debug mode checkbox is toggled. The resume and step
    * functions should always be disabled.
    */
   private void _setDebugMenuItemsEnabled(boolean isEnabled) {
@@ -6666,6 +6699,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _tabbedPane.add("Interactions", _interactionsContainer);
     _tabbedPane.add("Console", _consoleScroll);
     
+    _interactionsPane.addKeyListener(_historyListener);
+    _interactionsPane.addFocusListener(_focusListenerForRecentDocs);
+    
+    _consoleScroll.addKeyListener(_historyListener);
+    _consoleScroll.addFocusListener(_focusListenerForRecentDocs);
+    
+    
     _tabs.addLast(_compilerErrorPanel);
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
@@ -7088,11 +7128,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   private void nextRecentDoc() {
+//    Utilities.show("BACK_QUOTE typed");
     if (_recentDocFrame.isVisible()) _recentDocFrame.next();
     else _recentDocFrame.setVisible(true);
   }
   
   private void prevRecentDoc() {
+//    Utilities.show("BACK_QUOTE typed");
     if (_recentDocFrame.isVisible()) _recentDocFrame.prev();
     else _recentDocFrame.setVisible(true);
   }
@@ -7108,26 +7150,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
   }
-  
-  KeyListener _historyListener = new KeyListener() {
-    public void keyPressed(KeyEvent e) {
-      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && !e.isShiftDown()) nextRecentDoc();
-      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && e.isShiftDown()) prevRecentDoc();
-//    else if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE) {
-//        transferFocusUpCycle();
-//    }
-    }
-    public void keyReleased(KeyEvent e) {
-      if (e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL) hideRecentDocFrame();
-    }
-    public void keyTyped(KeyEvent e) { /* noop */ }
-  };
-  
-  FocusListener _focusListenerForRecentDocs = new FocusListener() {
-    public void focusLost(FocusEvent e) { hideRecentDocFrame();  }
-    public void focusGained(FocusEvent e) { }
-  };
-  
   
   /** Create a new DefinitionsPane and JScrollPane for an open definitions document.  Package private for testing purposes.
     * @param doc The open definitions document to wrap
@@ -8910,8 +8932,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    });
   }
   
-  /**
-   * Sets the location of the main divider.
+  /** Sets the location of the main divider.
    * (not currently used)
    private void _setDividerLocation() {
    int divLocation = _mainSplit.getHeight() -
@@ -8937,8 +8958,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     return false;
   }
   
-  /**
-   * Confirms with the user that the file should be overwritten.
+  /** Confirms with the user that the file should be overwritten.
    * @return <code>true</code> iff the user accepts overwriting.
    */
   private boolean _verifyOverwrite() {
@@ -9014,6 +9034,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     KeyBindingManager.Singleton.put(KEY_UP, _actionMap.get(DefaultEditorKit.upAction), null, "Up");
     KeyBindingManager.Singleton.addShiftAction(KEY_UP, DefaultEditorKit.selectionUpAction);
+    
+//    KeyBindingManager.Singleton.put(KEY_NEXT_RECENT_DOCUMENT, _nextRecentDocAction, null, "Next Recent Document");
+//    KeyBindingManager.Singleton.put(KEY_PREV_RECENT_DOCUMENT, _prevRecentDocAction, null, "Previous Recent Document");
     
     // These last methods have no default selection methods
     KeyBindingManager.Singleton.put(KEY_PAGE_DOWN, _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");

@@ -46,8 +46,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
  */
 public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTest {
   
-  /**
-   * Factory to enable reuse of methods from ActionStartPrevLinePlusTest.
+  /** Factory to enable reuse of methods from ActionStartPrevLinePlusTest.
    * This creates an action that should behave identically to an instance of
    * ActionStartPrevLinePlus.
    * @param suffix the text to be added by this rule after indent padding
@@ -57,8 +56,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
     return new ActionStartPrevLinePlusBackup(suffix, suffix.length());
   }
   
-  /**
-   * Factory to enable reuse of methods from ActionStartPrevLinePlusBackupTest.
+  /** Factory to enable reuse of methods from ActionStartPrevLinePlusBackupTest.
    * This works similarly to {@link #makeAction(String)}.
    * @param suffix the text to be added by this rule after indent padding
    * @param position the character within the suffix string before which to
@@ -76,8 +74,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
   private String _evenIndentRes = "  foo\n  abc bar";
   private String _unevenIndentRes = "  foo\n  abc bar";
   
-  /**
-   * Attempts to move current location to the start of the suffix.
+  /** Attempts to move current location to the start of the suffix.
    */
   public void testMoveToStart() throws javax.swing.text.BadLocationException {
     moveTestHelper(_noIndent, _noIndentRes, 0, 7, 0, 4);
@@ -85,8 +82,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
     moveTestHelper(_unevenIndent, _unevenIndentRes, 2, 9, 0, 8);
   }
   
-  /**
-   * Attempts to move current location to the end of the suffix.
+  /** Attempts to move current location to the end of the suffix.
    */
   public void testMoveToEnd() throws javax.swing.text.BadLocationException {
     moveTestHelper(_noIndent, _noIndentRes, 0, 4, 4, 8);
@@ -94,8 +90,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
     moveTestHelper(_unevenIndent, _unevenIndentRes, 2, 6, 4, 12);
   }
   
-  /**
-   * Attempts to move current location to the middle of the suffix.
+  /** Attempts to move current location to the middle of the suffix.
    */
   public void testMoveToMiddle() throws javax.swing.text.BadLocationException {
     moveTestHelper(_noIndent, _noIndentRes, 0, 4, 2, 6);
