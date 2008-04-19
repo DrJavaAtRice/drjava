@@ -1249,10 +1249,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Wrapper for Position objects to allow relinking to a new Document. */
-  //TODO: move this class to OpenDefinitionsDocument interface
   public static class WrappedPosition implements Position {
     private Position _wrapped;
-    public WrappedPosition(Position w) { setWrapped(w); }
+    /** Constructor is only called from createPosition below. */
+    WrappedPosition(Position w) { setWrapped(w); }
     public void setWrapped(Position w) { _wrapped = w; }
     public int getOffset() { return _wrapped.getOffset(); }
   }

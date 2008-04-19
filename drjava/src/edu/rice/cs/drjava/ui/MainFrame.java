@@ -2158,8 +2158,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       
       RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
       
-      // add current location to history
-      addToBrowserHistory();
+//      // add current location to history
+//      addToBrowserHistory();
       
       // then move back    
       DocumentRegion r = rm.prevCurrentRegion();
@@ -2180,8 +2180,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       
       RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
       
-      // add current location to history
-      addToBrowserHistory();
+//      // add current location to history
+//      addToBrowserHistory();
       
       // then move forward
       DocumentRegion r = rm.nextCurrentRegion();
@@ -2390,15 +2390,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       final Position endPos = doc.createPosition(endSel);
       final RegionManager<DocumentRegion> rm = _model.getBookmarkManager();
       SimpleDocumentRegion r = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
-      if (rm.contains(r)) rm.addRegion(r);
+      if (! rm.contains(r)) rm.addRegion(r);
       else rm.removeRegion(r);               // bookmark is toggled
     }
-    catch (FileMovedException fme) {
-      throw new UnexpectedException(fme);
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    catch (FileMovedException fme) { throw new UnexpectedException(fme); }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
     finally { doc.releaseReadLock(); }
   }
   

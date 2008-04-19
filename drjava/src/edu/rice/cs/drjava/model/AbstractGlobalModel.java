@@ -2445,11 +2445,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @param region the DocumentRegion to be removed.
       */
     public void removeRegion(final R r) {      
+      // Update _current if necessary; nextCurrentRegion, prevCurrentRegion change _current
       // if we're removing the current region, select a more recent region, if available
       // if a more recent region is not available, select a less recent region, if available
       // if a less recent region is not available either, set to null
       if (r == _current && nextCurrentRegion().equals(_current) && prevCurrentRegion().equals(_current)) 
-        _current = null;  // Removed last region ?
+        _current = null;  // removed last region
 
       for (int i = 0; i < _regions.size(); ++i) {
         if (r.equals(_regions.get(i))) {
@@ -2510,9 +2511,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public R nextCurrentRegion() {
       if (_current != null) {
         int index = getIndexOf(_current);
-        if (index + 1 < _regions.size()) _current = _regions.get(index+1);
+        if (index + 1 < _regions.size()) {
+          _current = _regions.get(index + 1);
+          return _current;
+        }
       }
-      else _current = _regions.lastElement();
+      _current = _regions.lastElement();
       return _current;
     }
     
@@ -2521,13 +2525,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public R prevCurrentRegion() {
       if (_current != null) {
         int index = getIndexOf(_current);
-        if (index-1 >= 0) {
-          _current = _regions.get(index-1);
+        if (index - 1 >= 0) {
+          _current = _regions.get(index - 1);
+          return _current;
         }
       }
-      else {
-        _current = _regions.lastElement();
-      }
+      _current = _regions.lastElement();
       return _current;
     }
     
@@ -2574,6 +2577,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Add the current location to the browser history.  Aborts if not run in event thread. */
   public void addToBrowserHistory() {
+    assert EventQueue.isDispatchThread();
     if (! EventQueue.isDispatchThread()) return;
     final OpenDefinitionsDocument doc = getActiveDocument();
     
@@ -2581,10 +2585,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int endPos = 0;    // required by javac
     File file = FileOps.NULL_FILE;  // required by javac
     
-    if (doc != null) {
+    if (doc != null) {  // how can doc == null?
       try {
-        startPos = doc.createPosition(doc.getCaretPosition()).getOffset();
-        endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
+        startPos = doc.createUnwrappedPosition(doc.getCaretPosition()).getOffset();
+        endPos = doc.createUnwrappedPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
         file = doc.getFile();
       }
       catch (FileMovedException fme) { /* ignore */ }

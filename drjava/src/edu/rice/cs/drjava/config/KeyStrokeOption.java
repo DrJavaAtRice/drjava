@@ -54,8 +54,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   /** Standard constructor
     * @param key The name of this option.
     */
-  public KeyStrokeOption(String key, KeyStroke def) {
-    super(key,def); }
+  public KeyStrokeOption(String key, KeyStroke def) { super(key,def); }
   
   // This sets up the hashtable that has key-value pairs consisting of
   // ascii codes and Strings that describe the ascii character and are
