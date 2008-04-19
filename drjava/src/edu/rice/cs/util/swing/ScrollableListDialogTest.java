@@ -53,51 +53,59 @@ import javax.swing.JOptionPane;
 public class ScrollableListDialogTest extends TestCase {
   private static final String TITLE = "DIALOG TITLE";
   private static final String LEADER = "DIALOG LEADER";
-  private static final Collection<String> DATA = Arrays.asList("hello", "there");
+  private static final java.util.List<String> DATA = Arrays.asList("hello", "there");
   
-  /** Tests that all the valid message types are accepted and that they
+  /**
+   * Tests that all the valid message types are accepted and that they
    * are the only message types accepted.
    */
   public void testValidMessageTypes() {
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, JOptionPane.ERROR_MESSAGE);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(JOptionPane.ERROR_MESSAGE).build();
     } catch (IllegalArgumentException e) {
       fail("JOptionPane.ERROR_MESSAGE is a valid message type");
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, JOptionPane.INFORMATION_MESSAGE);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(JOptionPane.INFORMATION_MESSAGE).build();
     } catch (IllegalArgumentException e) {
       fail("JOptionPane.INFORMATION_MESSAGE is a valid message type");
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, JOptionPane.WARNING_MESSAGE);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(JOptionPane.WARNING_MESSAGE).build();
     } catch (IllegalArgumentException e) {
       fail("JOptionPane.WARNING_MESSAGE is a valid message type");
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, JOptionPane.QUESTION_MESSAGE);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(JOptionPane.QUESTION_MESSAGE).build();
     } catch (IllegalArgumentException e) {
       fail("JOptionPane.QUESTION_MESSAGE is a valid message type");
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, JOptionPane.PLAIN_MESSAGE);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(JOptionPane.PLAIN_MESSAGE).build();
     } catch (IllegalArgumentException e) {
       fail("JOptionPane.PLAIN_MESSAGE is a valid message type");
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, -128);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(-128).build();
       fail("-128 is not a valid message type");
     } catch (IllegalArgumentException e) {
       //we're good
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA, 42);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).setMessageType(42).build();
       fail("42 is not a valid message type");
     } catch (IllegalArgumentException e) {
       //we're good
@@ -106,13 +114,15 @@ public class ScrollableListDialogTest extends TestCase {
   
   public void testNullData() {
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, DATA);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(DATA).build();
     } catch (IllegalArgumentException e) {
       fail("Data was non-null, so it should have been accepted.");
     }
     
     try {
-      new  ScrollableListDialog(null, TITLE, LEADER, null);
+      new  ScrollableListDialog.Builder<String>()
+        .setOwner(null).setTitle(TITLE).setText(LEADER).setItems(null).build();
       fail("Data was null, so it shouldn't have been accepted.");
     } catch (IllegalArgumentException e) {
       //we're good

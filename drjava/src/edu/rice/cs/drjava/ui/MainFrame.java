@@ -7991,21 +7991,81 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                       JOptionPane.ERROR_MESSAGE);
       }
       else {
-        final Collection<String> filePaths = new ArrayList<String>();
+        final java.util.List<String> filePaths = new ArrayList<String>();
         for (File f : files) {
           filePaths.add(f.getPath());
         }
         
-        ScrollableListDialog dialog = 
-          new ScrollableListDialog(MainFrame.this,
-                                   "Files Not Found",
-                                   "The following files could not be found and have been removed from the project.",
-                                   filePaths,
-                                   JOptionPane.ERROR_MESSAGE);
+        ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
+          .setOwner(MainFrame.this)
+          .setTitle("Files Not Found")
+          .setText("The following files could not be found and have been removed from the project.")
+          .setItems(filePaths)
+          .setMessageType(JOptionPane.ERROR_MESSAGE)
+          .build();
         
         setPopupLoc(dialog);
         dialog.showDialog();
         PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+      }
+    }
+    
+    public File[] filesReadOnly(FileSaveSelector com, File... files) {
+      if (files.length == 0) return new File[0];
+      _fnfCount += files.length;
+      
+      final ArrayList<String> choices = new java.util.ArrayList<String>();
+      choices.add("Yes");
+      choices.add("No");
+      final java.util.List<String> filePaths = new ArrayList<String>();
+      for (File f : files) {
+        filePaths.add(f.getPath());
+      }
+      ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
+        .setOwner(MainFrame.this)
+        .setTitle("Files are Read-Only")
+        .setText("The following files could not be saved because they are read-only.\n"+
+                 "Do you want to overwrite them anyway?")
+        .setItems(filePaths)
+        .setSelectedItems(filePaths)
+        .setMessageType(JOptionPane.QUESTION_MESSAGE)
+        .clearButtons()
+        .addButton(new JButton("Yes"))
+        .addButton(new JButton("No"))
+        .setSelectable(true)
+        .build();
+
+      boolean overwrite = false;
+      
+      if (files.length == 1) {
+        int res = JOptionPane.showConfirmDialog(MainFrame.this,
+                                                "The following file could not be saved because it is read-only.\n"+
+                                                "Do you want to overwrite it anyway?\n"+
+                                                files[0].getPath(),
+                                                "File is Read-Only",
+                                                JOptionPane.YES_NO_OPTION,
+                                                JOptionPane.QUESTION_MESSAGE);
+        overwrite = (res==0);
+      }
+      else {
+        setPopupLoc(dialog);
+        dialog.showDialog();
+        overwrite = (dialog.getButtonPressed()==0);
+      }
+      
+      if (overwrite) {
+        if (files.length==1) { return files; }
+        else {
+          File[] overwriteFiles = new File[dialog.getSelectedItems().size()];
+          int i = 0;
+          for(String s: dialog.getSelectedItems()) {
+            overwriteFiles[i++] = new File(s);
+          }
+          return overwriteFiles;
+        }
+      }
+      else {
+        return new File[0];
       }
     }
     

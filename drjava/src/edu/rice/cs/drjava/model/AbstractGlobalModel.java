@@ -1299,12 +1299,96 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected void saveAllFilesHelper(FileSaveSelector com) throws IOException {
     
     boolean isProjActive = isProjectActive();
-    
-    for (final OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {  // getOpen... makes a copy
-      // do not force Untitled document to be saved if projectActive() or unmodified
-      if (doc.isUntitled() && (isProjActive || ! doc.isModifiedSinceSave())) continue;  
-      aboutToSaveFromSaveAll(doc);
-      doc.saveFile(com);
+
+    List<OpenDefinitionsDocument> docsToWrite = getOpenDefinitionsDocuments();
+    while(docsToWrite.size()>0) {
+      ArrayList<OpenDefinitionsDocument> readOnlyDocs = new ArrayList<OpenDefinitionsDocument>();
+      for (final OpenDefinitionsDocument doc: docsToWrite) {  // getOpen... makes a copy
+        // do not force Untitled document to be saved if projectActive() or unmodified
+        if (doc.isUntitled() && (isProjActive || ! doc.isModifiedSinceSave())) continue;
+        try {
+          if (doc.getFile().canWrite()) {
+            // file is writable, save
+            aboutToSaveFromSaveAll(doc);
+            doc.saveFile(com);
+          }
+          else {
+            // file is read-only, ask user about it
+            readOnlyDocs.add(doc);
+          }
+        }
+        catch(FileMovedException fme) {
+          // file was moved, but we should still be able to save it
+          aboutToSaveFromSaveAll(doc);
+          doc.saveFile(com);
+        }
+      }
+      docsToWrite.clear();
+      if (readOnlyDocs.size()>0) {
+        ArrayList<File> files = new ArrayList<File>();
+        for(OpenDefinitionsDocument odd: readOnlyDocs) {
+          try { 
+            File roFile = odd.getFile();
+            files.add(roFile);
+          }
+          catch(FileMovedException fme) { /* ignore, don't know what to do here */ }
+        }
+        File[] res = _notifier.filesReadOnly(com, files.toArray(new File[files.size()]));
+        HashSet<File> rewriteFiles = new HashSet<File>(java.util.Arrays.asList(res));
+        for(OpenDefinitionsDocument odd: readOnlyDocs) {
+          try {
+            File roFile = odd.getFile();
+            if (rewriteFiles.contains(roFile)) {
+              docsToWrite.add(odd);
+              // try to make the file writable
+              // strangely enough, there is a File.setReadOnly() method, but
+              // no built-in way to make the file writable
+              // Sun recommends deleting the read-only file (does that work?)
+              File backup = new File(roFile.getAbsolutePath()+"~");
+              boolean noBackup = true;
+              if (backup.exists()) {
+                try {
+                  noBackup = backup.delete();
+                }
+                catch(SecurityException se) {
+                  noBackup = false;
+                }
+              }
+              if (noBackup) {
+                try {
+                  noBackup = roFile.renameTo(backup);
+                  roFile.createNewFile();
+                }
+                catch(SecurityException se) {
+                  noBackup = false;
+                }
+                catch(IOException ioe) { }
+                try {
+                  roFile.createNewFile();
+                }
+                catch(SecurityException se) { }
+                catch(IOException ioe) { }
+              }
+              if (!noBackup) {
+                try {
+                  roFile.delete();
+                }
+                catch(SecurityException se) { /* can't do anything about it */ }
+              }
+              try {
+                edu.rice.cs.plt.io.IOUtil.copyFile(backup, roFile);
+              }
+              catch(SecurityException se) {
+                /* can't do anything about it */
+              }
+              catch(IOException ioe) {
+                /* can't do anything about it */
+              }
+            }
+          }
+          catch(FileMovedException fme) { /* ignore, don't know what to do here */ }
+        }
+      }
     }
   }
   

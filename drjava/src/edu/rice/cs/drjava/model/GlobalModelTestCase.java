@@ -734,6 +734,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       
     public void newFileCreated(OpenDefinitionsDocument doc) { listenerFail("newFileCreated fired unexpectedly"); } 
     public void filesNotFound(File... f) { listenerFail("fileNotFound fired unexpectedly"); }
+    public File[] filesReadOnly(FileSaveSelector com, File... f) { listenerFail("filesReadOnly fired unexpectedly");
+      return new File[0]; }
     // Recent revision defers opening files until the document for a file is requested forcing the following comment out
     public void fileOpened(OpenDefinitionsDocument doc) { /* listenerFail("fileOpened fired unexpectedly"); */ }
     public void fileClosed(OpenDefinitionsDocument doc) { listenerFail("fileClosed fired unexpectedly"); }

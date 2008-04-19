@@ -57,7 +57,13 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   /** Called when trying to open one or more files that do not exist. */
   public void filesNotFound(File... f) {  }
-  
+
+  /** Called when trying to write one or more files that are read-only.
+    * @param comFile file save selector
+    * @param f files that are read-only
+    * @return the files that should be attempted to be rewritten */
+  public File[] filesReadOnly(FileSaveSelector com, File... f) { return new File[0]; }
+
   /** Called when the project's build directory has changed. */
   public void projectBuildDirChanged() {  }
   

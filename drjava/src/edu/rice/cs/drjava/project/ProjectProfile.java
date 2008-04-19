@@ -277,11 +277,12 @@ public class ProjectProfile implements ProjectFileIR {
         Node f = xc.createNode("drjava/project/source/file", null, false);      
         xc.set(".name", path, f, true);
         xc.set(".timestamp", s, f, true);
-        xc.set(".package", df.getPackage(), f, true);
-        xc.set("select.from",   String.valueOf(pSel.first()),  f, true);
-        xc.set("select.to",     String.valueOf(pSel.second()), f, true);
-        xc.set("scroll.column", String.valueOf(pScr.first()),  f, true);
-        xc.set("scroll.row",    String.valueOf(pScr.second()), f, true);
+        String pkg = df.getPackage();
+        xc.set(".package", (pkg!=null)?pkg:"", f, true);
+        xc.set("select.from",   String.valueOf((pSel!=null)?pSel.first():0),  f, true);
+        xc.set("select.to",     String.valueOf((pSel!=null)?pSel.second():0), f, true);
+        xc.set("scroll.column", String.valueOf((pScr!=null)?pScr.first():0),  f, true);
+        xc.set("scroll.row",    String.valueOf((pScr!=null)?pScr.second():0), f, true);
         if (df==active) xc.set(".active", "true", f, true);
       }
     }
@@ -306,11 +307,12 @@ public class ProjectProfile implements ProjectFileIR {
         Node f = xc.createNode("drjava/project/included/file", null, false);      
         xc.set(".name", path, f, true);
         xc.set(".timestamp", s, f, true);
-        xc.set(".package", df.getPackage(), f, true);
-        xc.set("select.from",   String.valueOf(pSel.first()),  f, true);
-        xc.set("select.to",     String.valueOf(pSel.second()), f, true);
-        xc.set("scroll.column", String.valueOf(pScr.first()),  f, true);
-        xc.set("scroll.row",    String.valueOf(pScr.second()), f, true);
+        String pkg = df.getPackage();
+        xc.set(".package", (pkg!=null)?pkg:"", f, true);
+        xc.set("select.from",   String.valueOf((pSel!=null)?pSel.first():0),  f, true);
+        xc.set("select.to",     String.valueOf((pSel!=null)?pSel.second():0), f, true);
+        xc.set("scroll.column", String.valueOf((pScr!=null)?pScr.first():0),  f, true);
+        xc.set("scroll.row",    String.valueOf((pScr!=null)?pScr.second():0), f, true);
         if (df==active) { xc.set(".active", "true", f, true);
         }
       }
@@ -337,11 +339,12 @@ public class ProjectProfile implements ProjectFileIR {
         Node f = xc.createNode("drjava/project/excluded/file", null, false);      
         xc.set(".name", path, f, true);
         xc.set(".timestamp", s, f, true);
-        xc.set(".package", df.getPackage(), f, true);
-        xc.set("select.from",   String.valueOf(pSel.first()),  f, true);
-        xc.set("select.to",     String.valueOf(pSel.second()), f, true);
-        xc.set("scroll.column", String.valueOf(pScr.first()),  f, true);
-        xc.set("scroll.row",    String.valueOf(pScr.second()), f, true);
+        String pkg = df.getPackage();
+        xc.set(".package", (pkg!=null)?pkg:"", f, true);
+        xc.set("select.from",   String.valueOf((pSel!=null)?pSel.first():0),  f, true);
+        xc.set("select.to",     String.valueOf((pSel!=null)?pSel.second():0), f, true);
+        xc.set("scroll.column", String.valueOf((pScr!=null)?pScr.first():0),  f, true);
+        xc.set("scroll.row",    String.valueOf((pScr!=null)?pScr.second():0), f, true);
         if (df==active) { xc.set(".active", "true", f, true);
         }
       }

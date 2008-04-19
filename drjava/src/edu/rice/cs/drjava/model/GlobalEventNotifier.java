@@ -82,6 +82,20 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
+  public File[] filesReadOnly(FileSaveSelector com, File... f) {
+    _lock.startRead();
+    java.util.LinkedList<File> files = new java.util.LinkedList<File>();
+    for(File fi: f) { files.add(fi); }
+    try {
+      for (GlobalModelListener l : _listeners) {
+        java.util.List<File> retry = java.util.Arrays.asList(l.filesReadOnly(com, f));
+        files.retainAll(retry);
+      }
+    }
+    finally { _lock.endRead(); }
+    return files.toArray(new File[files.size()]);
+  }
+  
   /** Performs any UI related steps to handle the case in which a file is being opened that
    * is already open and modified. The two choices are to revert to the copy on disk, or to
    * keep the current changes.

@@ -65,7 +65,13 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   
   /** Called when trying to open one or more files that do not exist. */
   public void filesNotFound(File... f);
-  
+
+  /** Called when trying to write one or more files that are read-only.
+    * @param comFile file save selector
+    * @param f files that are read-only
+    * @return the files that should be attempted to be rewritten */
+  public File[] filesReadOnly(FileSaveSelector com, File... f);
+
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc);
   
