@@ -254,6 +254,33 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return manager for bookmark regions. */
   public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
   
+  /** Toogle the bookmark.
+    * @param pos1 first selection position
+    * @param pos2 second selection position */
+  public void toggleBookmark(int pos1, int pos2) {
+    final OpenDefinitionsDocument doc = getActiveDocument();
+    
+    int startSel = Math.min(pos1,pos2);
+    int endSel = Math.max(pos1,pos2);
+    doc.acquireReadLock();  // Must follow readers/writers protocol even in event thread
+    try {
+      if (startSel == endSel) {
+        // nothing selected
+        endSel = doc.getLineEndPos(startSel);
+        startSel = doc.getLineStartPos(startSel);
+      }
+      final Position startPos = doc.createPosition(startSel);
+      final Position endPos = doc.createPosition(endSel);
+      final RegionManager<DocumentRegion> rm = getBookmarkManager();
+      SimpleDocumentRegion r = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
+      if (!rm.contains(r)) rm.addRegion(r);
+      else rm.removeRegion(r);               // bookmark is toggled
+    }
+    catch (FileMovedException fme) { throw new UnexpectedException(fme); }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    finally { doc.releaseReadLock(); }
+  }
+  
   /** Managers for find result regions. */
   protected final LinkedList<RegionManager<MovingDocumentRegion>> _findResultsManagers;
   

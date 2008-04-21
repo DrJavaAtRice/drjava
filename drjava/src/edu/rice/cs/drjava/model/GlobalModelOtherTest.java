@@ -500,4 +500,63 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     _log.log("testRunMainMethod() completed");
   }
+  
+  public void testBookmark() throws Exception {
+    File dir = makeCanonical(new File(_tempDir, "bar"));
+    dir.mkdir();
+    final File file = makeCanonical(new File(dir, "Foo.java"));
+    java.io.FileWriter fw = new java.io.FileWriter(file);
+    fw.write(FOO_CLASS);
+    fw.close();
+    _model.openFile(new edu.rice.cs.util.FileOpenSelector() {
+      public File[] getFiles() throws edu.rice.cs.util.OperationCanceledException {
+        return new File[] { file };
+      }
+    });
+    assertEquals("Should be 0 bookmarks", 0, _model.getBookmarkManager().getRegions().size());
+    _model.toggleBookmark(3,3);
+    Vector<DocumentRegion> bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 1 bookmarks", 1, bms.size());
+    assertEquals("Start offset should be 0", 0, bms.get(0).getStartOffset());
+    assertEquals("Start offset should be "+FOO_CLASS.indexOf('\n'), FOO_CLASS.indexOf('\n'), bms.get(0).getEndOffset());
+    _model.toggleBookmark(3,3);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 0 bookmarks", 0, bms.size());
+    _model.toggleBookmark(3,6);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 1 bookmarks", 1, bms.size());
+    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
+    assertEquals("Start offset should be 6", 6, bms.get(0).getEndOffset());
+    _model.toggleBookmark(12,8);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 2 bookmarks", 2, bms.size());
+    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
+    assertEquals("Start offset should be 6", 6, bms.get(0).getEndOffset());
+    assertEquals("Start offset should be 8", 8, bms.get(1).getStartOffset());
+    assertEquals("Start offset should be 12", 12, bms.get(1).getEndOffset());
+    _model.toggleBookmark(5,10);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 3 bookmarks", 3, bms.size());
+    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
+    assertEquals("Start offset should be 6", 6, bms.get(0).getEndOffset());
+    assertEquals("Start offset should be 8", 8, bms.get(1).getStartOffset());
+    assertEquals("Start offset should be 12", 12, bms.get(1).getEndOffset());
+    assertEquals("Start offset should be 5", 5, bms.get(2).getStartOffset());
+    assertEquals("Start offset should be 10", 10, bms.get(2).getEndOffset());
+    _model.toggleBookmark(8,12);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 2 bookmarks", 2, bms.size());
+    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
+    assertEquals("Start offset should be 6", 6, bms.get(0).getEndOffset());
+    assertEquals("Start offset should be 5", 5, bms.get(1).getStartOffset());
+    assertEquals("Start offset should be 10", 10, bms.get(1).getEndOffset());
+    _model.toggleBookmark(3,6);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 1 bookmarks", 1, bms.size());
+    assertEquals("Start offset should be 5", 5, bms.get(0).getStartOffset());
+    assertEquals("Start offset should be 10", 10, bms.get(0).getEndOffset());
+    _model.toggleBookmark(10,5);
+    bms = _model.getBookmarkManager().getRegions();
+    assertEquals("Should be 0 bookmarks", 0, bms.size());
+  }
 }
