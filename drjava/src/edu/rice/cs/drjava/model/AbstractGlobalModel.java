@@ -1335,7 +1335,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (doc.isUntitled() && (isProjActive || ! doc.isModifiedSinceSave())) continue;
         try {
           final File docFile = doc.getFile();
-          if (!docFile.exists() || docFile.canWrite()) {
+          if (docFile==null || !docFile.exists() || docFile.canWrite()) {
             // file is writable, save
             aboutToSaveFromSaveAll(doc);
             doc.saveFile(com);
