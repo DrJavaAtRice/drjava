@@ -1324,7 +1324,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Called by saveAllFiles in DefaultGlobalModel */
   protected void saveAllFilesHelper(FileSaveSelector com) throws IOException {
-    
+    boolean first = true;
     boolean isProjActive = isProjectActive();
 
     List<OpenDefinitionsDocument> docsToWrite = getOpenDefinitionsDocuments();
@@ -1334,13 +1334,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // do not force Untitled document to be saved if projectActive() or unmodified
         if (doc.isUntitled() && (isProjActive || ! doc.isModifiedSinceSave())) continue;
         try {
-          if (doc.getFile().canWrite()) {
+          final File docFile = doc.getFile();
+          if (!docFile.exists() || docFile.canWrite()) {
             // file is writable, save
             aboutToSaveFromSaveAll(doc);
             doc.saveFile(com);
           }
-          else {
-            // file is read-only, ask user about it
+          else if (first) {
+            // file is read-only, ask user about it once
             readOnlyDocs.add(doc);
           }
         }
@@ -1360,62 +1361,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           }
           catch(FileMovedException fme) { /* ignore, don't know what to do here */ }
         }
-        File[] res = _notifier.filesReadOnly(com, files.toArray(new File[files.size()]));
+        File[] res = _notifier.filesReadOnly(files.toArray(new File[files.size()]));
         HashSet<File> rewriteFiles = new HashSet<File>(java.util.Arrays.asList(res));
         for(OpenDefinitionsDocument odd: readOnlyDocs) {
-          try {
-            File roFile = odd.getFile();
-            if (rewriteFiles.contains(roFile)) {
-              docsToWrite.add(odd);
-              // try to make the file writable
-              // strangely enough, there is a File.setReadOnly() method, but
-              // no built-in way to make the file writable
-              // Sun recommends deleting the read-only file (does that work?)
-              File backup = new File(roFile.getAbsolutePath()+"~");
-              boolean noBackup = true;
-              if (backup.exists()) {
-                try {
-                  noBackup = backup.delete();
-                }
-                catch(SecurityException se) {
-                  noBackup = false;
-                }
-              }
-              if (noBackup) {
-                try {
-                  noBackup = roFile.renameTo(backup);
-                  roFile.createNewFile();
-                }
-                catch(SecurityException se) {
-                  noBackup = false;
-                }
-                catch(IOException ioe) { }
-                try {
-                  roFile.createNewFile();
-                }
-                catch(SecurityException se) { }
-                catch(IOException ioe) { }
-              }
-              if (!noBackup) {
-                try {
-                  roFile.delete();
-                }
-                catch(SecurityException se) { /* can't do anything about it */ }
-              }
-              try {
-                edu.rice.cs.plt.io.IOUtil.copyFile(backup, roFile);
-              }
-              catch(SecurityException se) {
-                /* can't do anything about it */
-              }
-              catch(IOException ioe) {
-                /* can't do anything about it */
-              }
-            }
+          File roFile = odd.getFile();
+          if (rewriteFiles.contains(roFile)) {
+            docsToWrite.add(odd);
+            FileOps.makeWritable(roFile);
           }
-          catch(FileMovedException fme) { /* ignore, don't know what to do here */ }
         }
       }
+      first = false;
     }
   }
   
@@ -1552,6 +1508,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param file where to save the project
     */
   public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+    // if file is read-only, ask if it should be made writable
+    if (file.exists() && !file.canWrite()) {
+      File[] res = _notifier.filesReadOnly(new File[] {file});
+      for(File roFile: res) {
+        FileOps.makeWritable(roFile);
+      }
+      if (res.length==0) { return; /* read-only, do not overwrite */ }
+    }
+
     ProjectProfile builder = _makeProjectProfile(file, info);
     // write to disk
     builder.write();
@@ -3401,6 +3366,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // Check for # in the path of the file because if there
           // is one, then the file cannot be used in the Interactions Pane
           if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
+          
+          // if file is read-only, ask if it should be made writable
+          if(file.exists() && !file.canWrite()) {
+            File[] res = _notifier.filesReadOnly(new File[] {file});
+            for(File roFile: res) {
+              FileOps.makeWritable(roFile);
+            }
+            if (res.length==0) { return false; /* read-only, do not overwrite */ }
+          }
           
           // have FileOps save the file
 //          System.err.println("Calling FileOps.saveFile to save it");

@@ -116,12 +116,12 @@ public class DrJava {
   /** Starts running DrJava.
     * @param args Command line argument array
     */
-  public static void main(final String[] args) {
-    // Platform-specific UI setup.
-    PlatformFactory.ONLY.beforeUISetup();
-    
+  public static void main(final String[] args) {    
     // handleCommandLineArgs will return true if DrJava should be loaded
     if (handleCommandLineArgs(args)) {
+      // Platform-specific UI setup.
+      PlatformFactory.ONLY.beforeUISetup();
+
       if (!_forceNewInstance &&
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size()>0)) {
@@ -297,16 +297,14 @@ public class DrJava {
   
   /** Displays a usage message about the available options. */
   static void displayUsage() {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("Usage: java -jar drjava.jar [OPTIONS] [FILES]\n\n");
-    buf.append("where options include:\n");
-    buf.append("  -config [FILE]        use a custom config file\n");
-    buf.append("  -new                  force the creation of a new DrJava instance;");
-    buf.append("                        do not connect to existing instance");
-    buf.append("  -help | -?            print this help message\n");
-    buf.append("  -X<jvmOption>         specify a JVM configuration option for the master DrJava JVM\n");      
-    buf.append("  -D<name>[=<value>]    set a Java property for the master DrJava JVM\n");      
-    System.out.print(buf.toString());
+    System.out.println("Usage: java -jar drjava.jar [OPTIONS] [FILES]\n");
+    System.out.println("where options include:");
+    System.out.println("  -config [FILE]        use a custom config file");
+    System.out.println("  -new                  force the creation of a new DrJava instance;");
+    System.out.println("                        do not connect to existing instance");
+    System.out.println("  -help | -?            print this help message");
+    System.out.println("  -X<jvmOption>         specify a JVM configuration option for the master DrJava JVM");      
+    System.out.println("  -D<name>[=<value>]    set a Java property for the master DrJava JVM");
   }
   
 //  /** Prompts the user that the location of tools.jar needs to be specified to be able to use the compiler and/or the

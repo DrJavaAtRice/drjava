@@ -4408,7 +4408,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       else {
         fileName = l.size()+" files";
-        //CHELSEA AND PATRICK WHOOOOOOOOOOO!!!!
         String text = "Closing these "+fileName+" will permanently remove them from the current project." + 
           "\nAre you sure that you want to close these files?";
         
@@ -7986,7 +7985,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     
-    public File[] filesReadOnly(FileSaveSelector com, File... files) {
+    public File[] filesReadOnly(File... files) {
       if (files.length == 0) return new File[0];
       _fnfCount += files.length;
       
@@ -8216,32 +8215,39 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void interactionEnded() {
-      InteractionsModel im = _model.getInteractionsModel();
-      String lastError = im.getLastError();
-      if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
-        if (lastError != null) {
-          // the interaction ended and there was an error
-          // check that this error is different than the last one (second to last may be null):
-          if (!lastError.equals(im.getSecondToLastError())) {
-            // this aborts the auto-importing if the same class comes up twice in a row
-            if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
-              // it was an "undefined class" exception
-              // show auto-import dialog
-              String undefinedClassName = lastError.substring(lastError.indexOf('\'')+1,
-                                                              lastError.lastIndexOf('\''));
-              _showAutoImportDialog(undefinedClassName);
-            }
-            else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
-              askToIncreaseSlaveMaxHeap();
+      final InteractionsModel im = _model.getInteractionsModel();
+      // a strange NullPointerException was reported in this method ([ 1938268 ])
+      // just making sure that all references are non-null
+      if (im != null) {
+        final String lastError = im.getLastError();
+        final edu.rice.cs.drjava.config.FileConfiguration config = DrJava.getConfig();
+        if ((config != null) &&
+            (config.getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED))) {
+          if (lastError != null) {
+            // the interaction ended and there was an error
+            // check that this error is different than the last one (second to last may be null):
+            final String secondToLastError = im.getSecondToLastError();
+            if ((secondToLastError!=null) &&
+                (!lastError.equals(secondToLastError))) {
+              // this aborts the auto-importing if the same class comes up twice in a row
+              if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
+                // it was an "undefined class" exception
+                // show auto-import dialog
+                String undefinedClassName = lastError.substring(lastError.indexOf('\'')+1,
+                                                                lastError.lastIndexOf('\''));
+                _showAutoImportDialog(undefinedClassName);
+              }
+              else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
+                askToIncreaseSlaveMaxHeap();
+              }
             }
           }
         }
+        else {
+          // reset the last errors, so the dialog works again if it is re-enabled
+          im.resetLastErrors();
+        }
       }
-      else {
-        // reset the last errors, so the dialog works again if it is re-enabled
-        im.resetLastErrors();
-      }
-      
       Utilities.invokeLater(new Runnable() {
         public void run() {
           _enableInteractionsPane();

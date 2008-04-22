@@ -555,6 +555,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("Second listener added to model");
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     File file = new File(_tempDir, "NonTestCase.java");
+    System.out.println("-----> file = "+file+" -- canWrite() = "+file.canWrite()+" -- exists() = "+file.exists());
     doc.saveFile(new FileSelector(file));
     
     listener2.compile(doc);

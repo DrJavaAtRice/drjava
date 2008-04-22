@@ -228,7 +228,6 @@ public class ProjectProfile implements ProjectFileIR {
     write(new FileOutputStream(_projectFile));
   }
   
-  // CHELSEA AND PATRICK WHOOOOOHOOOO!!!!!one
   public void write(OutputStream os) throws IOException {    
     XMLConfig xc = new XMLConfig();
     xc.set("drjava.version", edu.rice.cs.drjava.Version.getBuildTimeString()+"-"+edu.rice.cs.drjava.Version.getRevisionNumber());

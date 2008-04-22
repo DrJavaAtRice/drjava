@@ -82,13 +82,14 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  public File[] filesReadOnly(FileSaveSelector com, File... f) {
+  /** @return the intersection of all the return values from the listeners. */
+  public File[] filesReadOnly(File... f) {
     _lock.startRead();
     java.util.LinkedList<File> files = new java.util.LinkedList<File>();
     for(File fi: f) { files.add(fi); }
     try {
       for (GlobalModelListener l : _listeners) {
-        java.util.List<File> retry = java.util.Arrays.asList(l.filesReadOnly(com, f));
+        java.util.List<File> retry = java.util.Arrays.asList(l.filesReadOnly(f));
         files.retainAll(retry);
       }
     }

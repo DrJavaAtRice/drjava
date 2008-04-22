@@ -882,4 +882,66 @@ public abstract class FileOps {
     * to work.)
     */
   public static URL toURL(File f) throws MalformedURLException { return f.toURI().toURL(); }
+  
+  public static boolean makeWritable(File roFile) throws IOException {
+    // try to make the file writable
+    // strangely enough, there is a File.setReadOnly() method, but
+    // no built-in way to make the file writable
+    // Sun recommends deleting the read-only file (does that work on all operating systems?)
+    boolean shouldBackup = edu.rice.cs.drjava.DrJava.getConfig().
+      getSetting(edu.rice.cs.drjava.config.OptionConstants.BACKUP_FILES);
+    boolean madeBackup = false;
+    File backup = new File(roFile.getAbsolutePath()+"~");
+    try {
+      boolean noBackup = true;
+      if (backup.exists()) {
+        try {
+          noBackup = backup.delete();
+        }
+        catch(SecurityException se) {
+          noBackup = false;
+        }
+      }
+      if (noBackup) {
+        try {
+          noBackup = roFile.renameTo(backup);
+          madeBackup = true;
+          roFile.createNewFile();
+        }
+        catch(SecurityException se) {
+          noBackup = false;
+        }
+        catch(IOException ioe) { }
+        try {
+          roFile.createNewFile();
+        }
+        catch(SecurityException se) { }
+        catch(IOException ioe) { }
+      }
+      if (!noBackup) {
+        try {
+          roFile.delete();
+        }
+        catch(SecurityException se) { return false; }
+      }
+      try {
+        edu.rice.cs.plt.io.IOUtil.copyFile(backup, roFile);
+      }
+      catch(SecurityException se) {
+        return false;
+      }
+      catch(IOException ioe) {
+        return false;
+      }
+      return true;
+    }
+    finally {
+      if (!shouldBackup && madeBackup) {
+        try {
+          backup.delete();
+        }
+        catch(Exception e) { /* not so important if we made a backup and now can't delete it */ }
+      }
+    }
+  }
 }
