@@ -187,9 +187,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Creates and returns a new document, makes sure newFile is fired, and then adds some text.  When this method is
-   *  done newCount is reset to 0.
-   *  @return the new modified document
-   */
+    * done newCount is reset to 0.
+    * @return the new modified document
+    */
   protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
     TestListener listener = new TestListener() {
       public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
@@ -199,7 +199,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     // Open a new document
     int numOpen = _model.getOpenDefinitionsDocuments().size();
-    Utilities.invokeAndWait(new Runnable() { public void run () { _doc = _model.newFile(); } });
+//    Utilities.invokeAndWait(new Runnable() { public void run () { 
+    _doc = _model.newFile(); 
+//    } });
     
     assertNumOpenDocs(numOpen + 1);
 

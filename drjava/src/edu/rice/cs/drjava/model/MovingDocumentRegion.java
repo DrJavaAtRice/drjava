@@ -42,8 +42,7 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.util.FileOps;
 
-/**
- * Class for a document region that can move with changes in the document; its text, however, remains constant.
+/** Class for a document region that can move with changes in the document; its text, however, remains constant.
  * @version $Id$Region
  */
 public class MovingDocumentRegion extends SimpleDocumentRegion {
@@ -52,6 +51,7 @@ public class MovingDocumentRegion extends SimpleDocumentRegion {
   /** Create a new moving document region. */
   public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, String s) {
     super(doc, sp, ep);
+    assert doc != null;
     _string = s;
   }
   
@@ -61,16 +61,17 @@ public class MovingDocumentRegion extends SimpleDocumentRegion {
   /** @return the file */
   public File getFile() { return _file; }
 
-  /** @return the start offset */
-  public int getStartOffset() {
-    return 
-      (_doc == null || _doc.getLength() >= _startPosition.getOffset()) ? _startPosition.getOffset() : _doc.getLength();
-  }
-
-  /** @return the end offset */
-  public int getEndOffset() {
-    return (_doc == null || _doc.getLength() >= _endPosition.getOffset()) ? _endPosition.getOffset() : _doc.getLength();
-  }
+// Commented out because getStartOffset and getEndOffset are better defined in SimpleDocumentRegion
+//  /** @return the start offset */
+//  public int getStartOffset() {
+//    return 
+//      (_doc == null || _doc.getLength() >= _startPosition.getOffset()) ? _startPosition.getOffset() : _doc.getLength();
+//  }
+//
+//  /** @return the end offset */
+//  public int getEndOffset() {
+//    return (_doc == null || _doc.getLength() >= _endPosition.getOffset()) ? _endPosition.getOffset() : _doc.getLength();
+//  }
   
   /** @return the string it was assigned */
   public String getString() {
@@ -83,6 +84,7 @@ public class MovingDocumentRegion extends SimpleDocumentRegion {
     return a.equals(b);
   }
   
+// Commented out because equals, hashcode, and toString are defined in SimpleDocumentRegion
 //  /** @return true if the specified region is equal to this one. */
 //  public boolean equals(Object other) {
 //    if (other == null || other.getClass() != this.getClass()) return false;
@@ -104,8 +106,8 @@ public class MovingDocumentRegion extends SimpleDocumentRegion {
 //    return result;
 //  }
 //  
-  public String toString() {
-    return 
-      (_doc != null ? _doc.toString() : "null") + " " + _startPosition.getOffset() + " .. " + _endPosition.getOffset();
-  }
+//  public String toString() {
+//    return 
+//      (_doc != null ? _doc.toString() : "null") + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
+//  }
 }

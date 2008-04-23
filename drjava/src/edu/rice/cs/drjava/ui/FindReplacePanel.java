@@ -852,7 +852,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     if (_findField.getText().length() > 0) {
       
-      _model.addToBrowserHistory();
+//      _model.addToBrowserHistory();
       
       _updateMachine();
       final String findWord = _findField.getText();
@@ -903,7 +903,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             _replaceFindNextAction.setEnabled(true);
             _replaceFindPreviousAction.setEnabled(true);
             _machine.setLastFindWord();
-//            _model.addToBrowserHistory();
+            _model.addToBrowserHistory();
           } };
         
         if (docChanged)

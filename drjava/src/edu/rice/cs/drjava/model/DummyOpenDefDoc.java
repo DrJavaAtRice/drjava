@@ -62,16 +62,23 @@ import edu.rice.cs.util.text.SwingDocument;
 
 public class DummyOpenDefDoc implements OpenDefinitionsDocument { 
   
-   public int id() {
+  public int id() {
     throw new UnsupportedOperationException("Dummy method");
   }
-   
-   public int compareTo(OpenDefinitionsDocument d) {
+  
+  public int compareTo(OpenDefinitionsDocument d) {
     throw new UnsupportedOperationException("Dummy method");
   }
-   
+  
   public boolean modifiedOnDisk() { throw new UnsupportedOperationException("Dummy method"); }
   
+  public void addBrowserRegion(BrowserDocumentRegion r) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void removeBrowserRegion(BrowserDocumentRegion r) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
   public boolean saveFile(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Dummy method");
   }
@@ -94,7 +101,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public File getFile() throws FileMovedException { throw new UnsupportedOperationException("Dummy method"); }
   
-  public File getRawFile() { throw new UnsupportedOperationException("Dummy method"); }
+  public File getRawFile() { return null; }
   
   public File getParentDirectory() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -145,7 +152,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public RegionManager<DocumentRegion> getBrowserHistoryManager() { throw new UnsupportedOperationException("Dummy method"); }
+  public void clearBrowserRegions() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isReady() { throw new UnsupportedOperationException("Dummy method"); }
 
@@ -246,6 +253,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public void append(String str, AttributeSet set) { _defDoc.append(str, set); }
   public void append(String str, Style style) { _defDoc.append(str, style); }
+  public void append(String str) { _defDoc.append(str); }
   public void putProperty(Object key, Object value) { _defDoc.putProperty(key, value); }
   public void remove(int offs, int len) throws BadLocationException { _defDoc.remove(offs, len); }
   public void removeDocumentListener(DocumentListener listener) { _defDoc.removeDocumentListener(listener); }

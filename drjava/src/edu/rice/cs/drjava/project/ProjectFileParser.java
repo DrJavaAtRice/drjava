@@ -49,7 +49,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.DocumentRegion;
-import edu.rice.cs.drjava.model.SimpleDocumentRegion;
+import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
@@ -557,7 +557,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       else {
         f = new File(pathRoot, fname);
       }
-      return new SimpleDocumentRegion(null, f, startOffset, endOffset);
+      return new DummyDocumentRegion(f, startOffset, endOffset);
     }
   }
   

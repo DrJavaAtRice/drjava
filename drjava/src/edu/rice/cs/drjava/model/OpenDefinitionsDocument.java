@@ -54,13 +54,9 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
 
-/**
- * Interface for the GlobalModel's handler of an open
- * DefinitionsDocument.  Provides a means to interact with
- * the document.
- *
- * @version $Id$
- */
+/** Interface for an open document in DrJava. It may not be resident (in DocumentCache).
+  * @version $Id$
+  */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
   Comparable<OpenDefinitionsDocument>, INavigatorItem {
   
@@ -169,21 +165,28 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   
   //----- Major Operations -----//
+  
+  /** Adds region r to the browserRegions collection for this */
+  public void addBrowserRegion(BrowserDocumentRegion r);
+  
+  /** Removes region r from the browserRegions collection */
+  public void removeBrowserRegion(BrowserDocumentRegion r);
+  
   /** Returns the name of the top level class, if any.
-   *  @throws ClassNameNotFoundException if no top level class name found.
-   */
+    * @throws ClassNameNotFoundException if no top level class name found.
+    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
   
   /** If the file exists, returns true. If it does not exist, prompts the user to look it up.  If the user
-   *  chooses a file, returns true, false otherwise. */
+    * chooses a file, returns true, false otherwise. */
   public boolean verifyExists();  
   
   /** Saves the document with a FileWriter.  If the file name is already set, the method will use that name 
-   *  instead of whatever selector is passed in.
-   *  @param com a selector that picks the file name
-   *  @exception IOException
-   *  @return true if the file was saved, false if the operation was canceled
-   */
+    * instead of whatever selector is passed in.
+    * @param com a selector that picks the file name
+    * @exception IOException
+    * @return true if the file was saved, false if the operation was canceled
+    */
   public boolean saveFile(FileSaveSelector com) throws IOException;
 
   /** Revert the document to the version saved on disk. */
@@ -316,8 +319,8 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *  @param rm the global model's region manager. */
   public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
-  /** @return manager for browser history regions. */
-  public RegionManager<DocumentRegion> getBrowserHistoryManager();
+  /** Remove the browser regions for this document from the browser history manager. */
+  public void clearBrowserRegions();
 
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();

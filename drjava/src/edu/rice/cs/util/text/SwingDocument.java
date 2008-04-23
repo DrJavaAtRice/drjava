@@ -240,6 +240,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Appends given string with specified named style to end of this document. */
   public void append(String str, String style) { append(str, style == null ? null : getDocStyle(style)); }
   
+  /** Appends given string with default style to end of this document. */
+  public void append(String str) { append(str, (AttributeSet) null); }
+  
   /** A SwingDocument instance does not have a default style */
   public String getDefaultStyle() { return null; }
   

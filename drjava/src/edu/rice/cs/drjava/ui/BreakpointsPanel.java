@@ -131,14 +131,11 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         Utilities.invokeLater(doCommand);
       }
       
-      /**
-       * Called when a breakpoint is removed from a document.
-       * Removes the breakpoint from the tree of breakpoints.
-       * @param bp the breakpoint
-       */
-      public void regionRemoved(final Breakpoint bp) {
-        removeRegion(bp);
-      }
+      /** Called when a breakpoint is removed from a document.
+        * Removes the breakpoint from the tree of breakpoints.
+        * @param bp the breakpoint
+        */
+      public void regionRemoved(final Breakpoint bp) { removeRegion(bp); }
     });
     _debugger = _model.getDebugger();
   }

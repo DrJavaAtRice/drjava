@@ -270,12 +270,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     updateButtons();
     for (final MovingDocumentRegion r: getSelectedRegions()) {
       if (! _model.getBookmarkManager().contains(r)) {
-        try {
+//        try {
           DocumentRegion newR = 
-            new SimpleDocumentRegion(r.getDocument(), r.getDocument().getFile(), r.getStartOffset(), r.getEndOffset());
+            new SimpleDocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
           _model.getBookmarkManager().addRegion(newR);
-        }
-        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
+//        }
+//        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
       }
     }
   }

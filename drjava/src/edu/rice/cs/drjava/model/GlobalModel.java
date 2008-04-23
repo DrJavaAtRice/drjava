@@ -131,7 +131,7 @@ public interface GlobalModel extends ILoadDocuments {
   public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** @return manager for browser history regions. */
-  public RegionManager<DocumentRegion> getBrowserHistoryManager();
+  public BrowserHistoryManager getBrowserHistoryManager();
   
   /** Add the current location to the browser history. */
   public void addToBrowserHistory();

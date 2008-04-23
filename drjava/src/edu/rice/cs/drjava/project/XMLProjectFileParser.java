@@ -48,7 +48,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.DocumentRegion;
-import edu.rice.cs.drjava.model.SimpleDocumentRegion;
+import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
@@ -331,7 +331,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       File f;
       if ((_srcFileBase==null) || (new File(name).isAbsolute())) { f = new File(name); }
       else { f = new File(_srcFileBase, name); }
-      rList.add(new SimpleDocumentRegion(null, f, from, to));
+      rList.add(new DummyDocumentRegion(f, from, to));
     }
     return rList;
   }

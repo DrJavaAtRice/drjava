@@ -36,45 +36,35 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.UnexpectedException;
-
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import java.io.File;
 
 /** Class for a simple document region. If a document is provided, then the region will move within the document.
   * @version $Id$
   */
-public class SimpleDocumentRegion implements EnhancedDocumentRegion {
-  protected final OpenDefinitionsDocument _doc;
-  protected final File _file;
-  protected volatile Position _startPosition = null; 
-  protected volatile Position _endPosition = null;
+public class BrowserDocumentRegion implements EnhancedDocumentRegion, Comparable<BrowserDocumentRegion> {
+  private static volatile int _indexCounter = 0;  // sequence number counter for browser regions
   
-  /** Create a new simple document region using offsets.
-    * @param doc document that contains this region, or null if we don't have a document yet
+  private final int _index;                       // unique sequence number for this region
+  protected final OpenDefinitionsDocument _doc;    // document for this region
+  protected final File _file;                      // file for this region
+  protected final Position _startPosition;      // start position for this region
+  protected final Position _endPosition;        // final position for this region
+  
+  /** Create a new simple document region.
+    * @param doc document that contains this region
     * @param file file that contains the region
-    * @param so start offset of the region; if doc is non-null, then a Position will be created that moves within the document
-    * @param eo end offset of the region; if doc is non-null, then a Position will be created that moves within the document
+    * @param sp start position of the region 
+    * @param ep end position of the region
     */
-  public SimpleDocumentRegion(OpenDefinitionsDocument doc, int so, int eo) {
-    this(doc, createPosition(doc, so), createPosition(doc, eo));
-  }
- 
   /** Create a new simple document region with a bona fide document */
-  public SimpleDocumentRegion(OpenDefinitionsDocument doc, Position sp, Position ep) {
+  public BrowserDocumentRegion(OpenDefinitionsDocument doc, Position sp, Position ep) {
     assert doc != null;
+    _index = _indexCounter++;    // sequence number records allocation order
     _doc = doc;
     _file = doc.getRawFile();  // don't check the validity of _file here
     _startPosition = sp;
     _endPosition = ep;
-//    _startOffset = sp.getOffset();
-//    _endOffset = ep.getOffset();
-  }
-  
-  private static Position createPosition(OpenDefinitionsDocument doc, int i) {
-    try { return doc.createPosition(i); }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
 
 //  /** Structural equality method that copes with null!  This method should be a member of class Object. */
@@ -83,54 +73,34 @@ public class SimpleDocumentRegion implements EnhancedDocumentRegion {
 //    return o1.equals(o2);
 //  }
   
-  /** Defines the equality relation on DocumentRegions.  This equivalence relation on allocated objects is finer
-    * grained than the equivalence relation induced by compareTo because it requires equality on Position objects, 
-    * not just equality of the current offsets of Positions. 
-    */
-  public final boolean equals(Object o) {
-    if (o == null || ! (o instanceof SimpleDocumentRegion)) return false;
-    SimpleDocumentRegion r = (SimpleDocumentRegion) o;
-    return _doc == r._doc & getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
-  }
-  
-  private int docHashCode() {
-    if (_doc == null) return 0;
-    return _doc.hashCode();
-  }
+  /** Relying on default equality relation. */
       
-  /** This hash function is consistent with equality. */
-  public int hashCode() { return docHashCode() ^ getStartOffset() ^ getEndOffset(); }
+  /** This hash function is consistent with default equality. */
+  public int hashCode() { return _index; }
   
-  /** @return the document, or null if it hasn't been established yet */
+  public int compareTo(BrowserDocumentRegion r) { return _index - r._index; }
+  
+  public int getIndex() { return _index; }
+  
+  /** @return the document. */
   public OpenDefinitionsDocument getDocument() { return _doc; }
 
-  /** @return the file */
+  /** @return the file. */
   public File getFile() { return _file; }
 
   /** @return the start offset */
-  public int getStartOffset() {
-//    if (_startPosition != null) {
-//      // if we have a position that moves within the document, update the offset
-    int _startOffset = _startPosition.getOffset();
-//    }
-    return _startOffset;
-  }
+  public int getStartOffset() { return _startPosition.getOffset(); }
 
   /** @return the end offset */
-  public int getEndOffset() {
-//    if (_endPosition != null) {
-//      // if we have a position that moves within the document, update the offset
-    int _endOffset = _endPosition.getOffset();
-//    }
-    return _endOffset;
-  }
+  public int getEndOffset() { return _endPosition.getOffset(); }
   
   /** @return the start position */
   public Position getStartPosition() { return _startPosition; }
 
   /** @return the end offset */
   public Position getEndPosition() { return _endPosition; }
+
   public String toString() {
-    return (/* _doc != null ? */ _doc.toString() /* : "null" */) + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
+    return _doc.toString() + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
   }
 }

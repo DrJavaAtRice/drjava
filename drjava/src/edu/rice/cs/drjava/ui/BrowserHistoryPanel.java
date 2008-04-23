@@ -50,21 +50,21 @@ import java.awt.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
+import edu.rice.cs.drjava.model.BrowserHistoryManager;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.BrowserDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * Panel for displaying browser history.
- * Currently not used because of synchronization problems.
- * This class is a swing view class and hence should only be accessed from the event-handling thread.
- * @version $Id$
- */
-public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
+/** Panel for displaying browser history.
+  * Currently not used because of synchronization problems.
+  * This class is a swing view class and hence should only be accessed from the event-handling thread.
+  * @version $Id$
+  */
+public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion> {
   protected JButton _backButton;
   protected JButton _forwardButton;
   protected JButton _goToButton;
@@ -79,19 +79,19 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
    */
   public BrowserHistoryPanel(MainFrame frame) {
     super(frame, "Browser History");
-    final RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
-    rm.addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r) {
-        int index = rm.getIndexOf(r);
-        addRegion(r, index);
-        _list.ensureIndexIsVisible(index);
+    final BrowserHistoryManager rm = _model.getBrowserHistoryManager();
+    rm.addListener(new RegionManagerListener<BrowserDocumentRegion>() {      
+      public void regionAdded(BrowserDocumentRegion r) {
+        rm.addBrowserRegion(r);
+//        int index = rm.getCurrentRegion();  // Use current region!
+//        _list.ensureIndexIsVisible(index);
       }
-      public void regionChanged(DocumentRegion r) { 
+      public void regionChanged(BrowserDocumentRegion r) { 
         regionRemoved(r);
         regionAdded(r);
       }
-      public void regionRemoved(DocumentRegion r) {
-        removeRegion(r);
+      public void regionRemoved(BrowserDocumentRegion r) {
+        rm.remove(r);
       }
     });
   }
@@ -103,11 +103,11 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   
   /** Go to region. */
   protected void goToRegion() {
-    ArrayList<DocumentRegion> r = getSelectedRegions();
+    ArrayList<BrowserDocumentRegion> r = getSelectedRegions();
     if (r.size() == 1) {
       _model.getBrowserHistoryManager().setCurrentRegion(r.get(0));
       updateButtons();
-      RegionListUserObj<DocumentRegion> userObj = getUserObjForRegion(r.get(0));
+      RegionListUserObj<BrowserDocumentRegion> userObj = getUserObjForRegion(r.get(0));
       if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
       _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false, false);
     }
@@ -115,30 +115,30 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   
   /** Go to the previous region. */
   protected void backRegion() {
-    RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
+    BrowserHistoryManager rm = _model.getBrowserHistoryManager();
     
     // add current location to history
     _frame.addToBrowserHistory();
     
     // then move back    
-    DocumentRegion r = rm.prevCurrentRegion();
+    BrowserDocumentRegion r = rm.prevCurrentRegion();
     updateButtons();
-    RegionListUserObj<DocumentRegion> userObj = getUserObjForRegion(r);
+    RegionListUserObj<BrowserDocumentRegion> userObj = getUserObjForRegion(r);
     if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
     _frame.scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
   }
   
   /** Go to the next region. */
   protected void forwardRegion() {
-    RegionManager<DocumentRegion> rm = _model.getBrowserHistoryManager();
+    BrowserHistoryManager rm = _model.getBrowserHistoryManager();
     
     // add current location to history
     _frame.addToBrowserHistory();
     
     // then move forward
-    DocumentRegion r = rm.nextCurrentRegion();
+    BrowserDocumentRegion r = rm.nextCurrentRegion();
     updateButtons();
-    RegionListUserObj<DocumentRegion> userObj = getUserObjForRegion(r);
+    RegionListUserObj<BrowserDocumentRegion> userObj = getUserObjForRegion(r);
     if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
     _frame.scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
   }
@@ -178,8 +178,8 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
 
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
-        for (DocumentRegion r: getSelectedRegions()) {
-          _model.getBrowserHistoryManager().removeRegion(r);
+        for (BrowserDocumentRegion r: getSelectedRegions()) {
+          _model.getBrowserHistoryManager().remove(r);
         }
       }
     };
@@ -187,7 +187,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
     
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
-        _model.getBrowserHistoryManager().clearRegions();
+        _model.getBrowserHistoryManager().clearBrowserRegions();
       }
     };
     _removeAllButton = new JButton(removeAllAction);
@@ -205,7 +205,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
 
   /** Update button state and text. */
   protected void updateButtons() {
-    ArrayList<DocumentRegion> regs = getSelectedRegions();
+    ArrayList<BrowserDocumentRegion> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size()==1);
     _removeButton.setEnabled(regs.size()>0);
     _removeAllButton.setEnabled(_listModel.size()>0);
@@ -224,8 +224,8 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
         
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            for (DocumentRegion r: getSelectedRegions()) {
-              _model.getBrowserHistoryManager().removeRegion(r);
+            for (BrowserDocumentRegion r: getSelectedRegions()) {
+              _model.getBrowserHistoryManager().remove(r);
             }
           }
         }
@@ -234,10 +234,10 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   }
   
   /** @return the usser object in the list associated with the region, or null if not found */
-  protected RegionListUserObj<DocumentRegion> getUserObjForRegion(DocumentRegion r) {
+  protected RegionListUserObj<BrowserDocumentRegion> getUserObjForRegion(BrowserDocumentRegion r) {
     for(int i=0; i<_listModel.size(); ++i) {
       @SuppressWarnings("unchecked") 
-      RegionListUserObj<DocumentRegion> userObj = (RegionListUserObj<DocumentRegion>)_listModel.get(i);
+      RegionListUserObj<BrowserDocumentRegion> userObj = (RegionListUserObj<BrowserDocumentRegion>)_listModel.get(i);
       if (userObj.region()==r) {
         return userObj;
       }
@@ -247,13 +247,13 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   
   /** Factory method to create user objects put in the tree.
    *  If subclasses extend RegionListUserObj, they need to override this method. */
-  protected RegionListUserObj<DocumentRegion> makeRegionListUserObj(DocumentRegion r) {
+  protected RegionListUserObj<BrowserDocumentRegion> makeRegionListUserObj(BrowserDocumentRegion r) {
     return new BrowserHistoryListUserObj(r);
   }
 
   /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
-  protected class BrowserHistoryListUserObj extends RegionListUserObj<DocumentRegion> {
-    public BrowserHistoryListUserObj(DocumentRegion r) { super(r); }
+  protected class BrowserHistoryListUserObj extends RegionListUserObj<BrowserDocumentRegion> {
+    public BrowserHistoryListUserObj(BrowserDocumentRegion r) { super(r); }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
       _region.getDocument().acquireReadLock();

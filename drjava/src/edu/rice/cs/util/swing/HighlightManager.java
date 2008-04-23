@@ -209,9 +209,7 @@ public class HighlightManager {
         _startPos = _component.getDocument().createPosition(from);
         _endPos = _component.getDocument().createPosition(to);
       }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
+      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       
       _painter = p;
     }
