@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.project;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 //import java.util.Vector;
 import java.util.Date;
@@ -72,8 +73,8 @@ public class ProjectProfile implements ProjectFileIR {
   
   /* Private fields */
   
-  private List<DocFile> _sourceFiles = new ArrayList<DocFile>();
-  private List<DocFile> _auxFiles = new ArrayList<DocFile>();
+  private List<DocFile> _sourceFiles = new LinkedList<DocFile>();
+  private List<DocFile> _auxFiles = new LinkedList<DocFile>();
   private List<DocFile> _excludedFiles = new ArrayList<DocFile>();
   private List<String> _collapsedPaths = new ArrayList<String>();
   
@@ -201,13 +202,13 @@ public class ProjectProfile implements ProjectFileIR {
   }
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(File main) { _mainClass = main;  }
-  public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new ArrayList<DocFile>(sf); }
+  public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new LinkedList<DocFile>(sf); }
   public void setClassPaths(Iterable<? extends File> cpf) {
     _classPathFiles = new ArrayList<File>();
     for (File f : cpf) { _classPathFiles.add(f); }
   }
   public void setCollapsedPaths(List<String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
-  public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = new ArrayList<DocFile>(af); }
+  public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = new LinkedList<DocFile>(af); }
   public void setExcludedFiles(List<DocFile> ef) { _excludedFiles = new ArrayList<DocFile>(ef); }
   
   /** Assumes that root.getParentFile != null */
@@ -258,14 +259,16 @@ public class ProjectProfile implements ProjectFileIR {
     }
     
     xc.createNode("drjava/project/source");
+    DocFile active = null;
     if (!_sourceFiles.isEmpty()) {
-      DocFile active = null;
       for(DocFile df: _sourceFiles) {
         if(df.isActive()) {
           active = df;
           break; //Assert that there is only one active document in the project
         }
       }
+      // move active document to the front of the list
+      if (active!=null) { _sourceFiles.remove(active); _sourceFiles.add(0,active); }
       for(DocFile df: _sourceFiles) {
         path = FileOps.makeRelativeTo(df, _projectRoot).getPath();
         path = replace(path, File.separator, "/");
@@ -287,7 +290,6 @@ public class ProjectProfile implements ProjectFileIR {
     }
     xc.createNode("drjava/project/included");
     if (!_auxFiles.isEmpty()) {
-      DocFile active = null;
       if (active==null) {
         for(DocFile df: _auxFiles) {
           if(df.isActive()) {
@@ -295,6 +297,8 @@ public class ProjectProfile implements ProjectFileIR {
             break; //Assert that there is only one active document in the project
           }
         }
+        // move active document to the front of the list
+        if (active!=null) { _auxFiles.remove(active); _auxFiles.add(0,active); }
       }
       for(DocFile df: _auxFiles) {
         path = df.getAbsolutePath();
@@ -319,7 +323,6 @@ public class ProjectProfile implements ProjectFileIR {
     
     xc.createNode("drjava/project/excluded");
     if (!_excludedFiles.isEmpty()) {
-      DocFile active = null;
       if (active==null) {
         for(DocFile df: _excludedFiles) {
           if(df.isActive()) {
@@ -327,6 +330,8 @@ public class ProjectProfile implements ProjectFileIR {
             break; //Assert that there is only one active document in the project
           }
         }
+        // move active document to the front of the list
+        if (active!=null) { _excludedFiles.remove(active); _excludedFiles.add(0,active); }      
       }
       for(DocFile df: _excludedFiles) {
         path = df.getAbsolutePath();
