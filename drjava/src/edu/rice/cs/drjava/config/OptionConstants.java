@@ -78,6 +78,12 @@ public interface OptionConstants {
 
   /** The extension for a DrJava project file */
   public static final String PROJECT_FILE_EXTENSION = ".xml";
+
+  /** The extension for stand-alone DrJava external process file. */
+  public static final String EXTPROCESS_FILE_EXTENSION = ".drjavaxml";
+
+  /** The extension for DrJava external process file embedded in its own jar file. */
+  public static final String EXTPROCESS_JAR_FILE_EXTENSION = ".drjavajar";
   
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
   

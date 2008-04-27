@@ -47,6 +47,9 @@ import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.util.BalancingStreamTokenizer;
+import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.util.swing.DropDownButton;
+import edu.rice.cs.util.XMLConfig;
 
 import java.io.StringReader;
 import javax.swing.*;
@@ -61,7 +64,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import edu.rice.cs.plt.tuple.Pair;
 
 public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private static final int FRAME_WIDTH = 750;
@@ -369,7 +371,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     };
     _cancelCommandButton = new JButton(cancelAction);
     _cancelJavaButton = new JButton(cancelAction);
-    
+
     // set up "Command Line" panel
     _commandPanel = makeCommandPane();
     _tabbedPane.addTab("Command Line", null, _commandPanel, "Execute command line process");
@@ -1278,13 +1280,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
   
   /** Save the command line to the menu. */
-  private void _saveCommand() {
-    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
-          
+  private void _saveCommand() {          
     if (_editMode) {
       final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-      final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-      final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
       if (name==null) {
         // Always apply and save settings
@@ -1293,26 +1291,11 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      names.set(_editIndex,name);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
-      
-      String cmdline = _commandLine.getText();
-      cmdlines.set(_editIndex,cmdline);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
-      
-      String workdir = _commandWorkDirLine.getText();
-      workdirs.set(_editIndex,workdir);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+      editInMenu(_editIndex, name, "cmdline", _commandLine.getText(), "", _commandWorkDirLine.getText());
     }
     else {
-      ++count;
-      final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-      final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
-      final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-      final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
-      final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-      
-      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+count);
+      int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1320,42 +1303,19 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      
-      names.add(name);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
-      
-      types.add("cmdline");
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,types);
-      
-      String cmdline = _commandLine.getText();
-      cmdlines.add(cmdline);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
-      
-      jvmargs.add("");
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);
-      
-      String workdir = _commandWorkDirLine.getText();
-      workdirs.add(workdir);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+      addToMenu(name, "cmdline", _commandLine.getText(), "", _commandWorkDirLine.getText());
     }
     
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     if (_cm!=null) { _cm.set(); }
   }
 
   /** Save the Java class to the menu. */
   private void _saveJava() {
-    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
-
     if (_editMode) {
       final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-      final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-      final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
-      final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-      
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
       if (name==null) {
         // Always apply and save settings
@@ -1364,30 +1324,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      names.set(_editIndex,name);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
-      
-      String cmdline = _javaCommandLine.getText();
-      cmdlines.set(_editIndex,cmdline);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
-      
-      String jvm = _jvmLine.getText();
-      jvmargs.set(_editIndex,jvm);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);      
-      
-      String workdir = _javaCommandWorkDirLine.getText();
-      workdirs.set(_editIndex,workdir);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+      editInMenu(_editIndex, name, "java", _javaCommandLine.getText(),
+                 _jvmLine.getText(), _javaCommandWorkDirLine.getText());
     }
     else {
-      ++count;
-      final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-      final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
-      final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-      final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
-      final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-      
-      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+count);
+      int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1395,31 +1337,101 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      
-      names.add(name);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
-      
-      types.add("java");
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,types);
-      
-      String cmdline = _javaCommandLine.getText();
-      cmdlines.add(cmdline);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
-      
-      jvmargs.add(_jvmLine.getText());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);
-      
-      String workdir = _javaCommandWorkDirLine.getText();
-      workdirs.add(workdir);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+      addToMenu(name, "java", _javaCommandLine.getText(),
+                _jvmLine.getText(), _javaCommandWorkDirLine.getText());
     }
     
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
-    
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     if (_cm!=null) { _cm.set(); }
+  }
+
+  /** Add new process to menu.
+    * @param name process name
+    * @param type type of the process, "cmdline" or "java"
+    * @param cmdline command line
+    * @param jvmarg arguments for the new JVM, if type is "java", else ""
+    * @param workdir work directory
+    * @return number of processes in the menu */
+  public static int addToMenu(String name, String type, String cmdline, String jvmarg, String workdir) {
+    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    ++count;
+    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    
+    names.add(name);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+    
+    types.add(type);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,types);
+    
+    cmdlines.add(cmdline);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
+    
+    jvmargs.add(jvmarg);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);
+    
+    workdirs.add(workdir);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+    
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,count);
+    
+    return count;
+  }
+
+  /** Edit existing process in menu.
+    * @param editIndex the index of the process to edit
+    * @param name process name
+    * @param type type of the process, "cmdline" or "java"
+    * @param cmdline command line
+    * @param jvmarg arguments for the new JVM, if type is "java", else ""
+    * @param workdir work directory */
+  public static void editInMenu(int editIndex, String name, String type, String cmdline, String jvmarg, String workdir) {
+    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+
+    names.set(editIndex,name);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+
+    types.set(editIndex,type);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+    
+    cmdlines.set(editIndex,cmdline);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
+    
+    jvmargs.set(editIndex,jvmarg);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);      
+    
+    workdirs.set(editIndex,workdir);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+  }
+  
+  /** Save process to file.
+    * @param index index of the process to save
+    * @param f file */
+  public static void saveToFile(int index, File f) {
+    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+
+    XMLConfig xc = new XMLConfig();
+    System.out.println("saveToFile("+index+", "+f+")");
+    System.out.println("\t"+names.get(index));
+    xc.set("drjava/extprocess/name", names.get(index));
+    xc.set("drjava/extprocess/type", types.get(index));
+    xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
+    xc.set("drjava/extprocess/jvmline", jvmargs.get(index));
+    xc.set("drjava/extprocess/workdir", workdirs.get(index));
+    xc.save(f);
   }
 
   /** Save the settings for this dialog. */

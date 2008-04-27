@@ -157,24 +157,33 @@ public class RemoteControlServer {
               final File f = new File(request);
               
               if (f.exists()) {
-                FileOpenSelector openSelector = new FileOpenSelector() {
-                  public File[] getFiles() throws OperationCanceledException {
-                    return new File[] { f };
+                  String currFileName = f.getName();
+                  if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+                    MainFrame.openExtProcessFile(f);
                   }
-                };
-                if (_frame!=null) { 
-                  _frame.open(openSelector);
-                  if (lineNo>=0) {
-                    final int l = lineNo;
-                    edu.rice.cs.util.swing.Utilities.invokeLater(new Runnable() { 
-                      public void run() { _frame._jumpToLine(l); }
-                    });
+                  else if (currFileName.endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)) {
+                    MainFrame.openExtProcessJarFile(f);
                   }
-                }
+                  else {
+                    FileOpenSelector openSelector = new FileOpenSelector() {
+                      public File[] getFiles() throws OperationCanceledException {
+                        return new File[] { f };
+                      }
+                    };
+                    if (_frame!=null) { 
+                      _frame.open(openSelector);
+                      if (lineNo>=0) {
+                        final int l = lineNo;
+                        edu.rice.cs.util.swing.Utilities.invokeLater(new Runnable() { 
+                          public void run() { _frame._jumpToLine(l); }
+                        });
+                      }
+                    }
+                  }
               }
-              else {
-                dString = dString + " Cannot open file!";
-              }
+            }
+            else {
+              dString = dString + " Cannot open file!";
             }
             
             buf = dString.getBytes();

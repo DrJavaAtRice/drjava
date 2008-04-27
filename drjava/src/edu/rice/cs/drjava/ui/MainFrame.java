@@ -55,6 +55,8 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.awt.datatransfer.*;
@@ -83,6 +85,7 @@ import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.project.*;
+import edu.rice.cs.util.XMLConfig;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -113,6 +116,7 @@ import edu.rice.cs.util.StringOps;
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
+import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
@@ -5546,7 +5550,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
    */
   private File[] getChosenFiles(JFileChooser fc, int choice) throws OperationCanceledException {
     switch (choice) {
-      case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
+      case JFileChooser.CANCEL_OPTION:
+      case JFileChooser.ERROR_OPTION:
         throw new OperationCanceledException();
       case JFileChooser.APPROVE_OPTION:
         File[] chosen = fc.getSelectedFiles();
@@ -9301,6 +9306,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                   (file.getName().endsWith(".txt")))) {
             filteredFileList.add(file);
           }
+          else if ((file.isFile()) && ((file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)))) {
+            openExtProcessFile(file);
+          }
+          else if ((file.isFile()) && ((file.getName().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)))) {
+            openExtProcessJarFile(file);
+          }
         }
         final File[] fileArray = filteredFileList.toArray(new File[filteredFileList.size()]);
         FileOpenSelector fs = new FileOpenSelector() {
@@ -9323,7 +9334,40 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }    
   }
   
-  /** Convrert a string with URIs to a list of files.
+  /** Open stand-alone external process file. */
+  public static void openExtProcessFile(File file) {
+    try {
+      XMLConfig xc = new XMLConfig(file);
+      ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
+                                      xc.get("drjava/extprocess/type"),
+                                      xc.get("drjava/extprocess/cmdline"),
+                                      xc.get("drjava/extprocess/jvmline"),
+                                      xc.get("drjava/extprocess/workdir"));
+    }
+    catch(XMLConfigException xce) { /* ignore drop */ }
+  }
+
+  /** Open external process file in a jar file. */
+  public static void openExtProcessJarFile(File file) {
+    try {
+      System.out.println("openExtProcessJarFile(file="+file+")");
+      JarFile jf = new JarFile(file);
+      JarEntry je = jf.getJarEntry("process.drjavaxml");
+      InputStream is = jf.getInputStream(je);
+      XMLConfig xc = new XMLConfig(is);
+      ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
+                                      xc.get("drjava/extprocess/type"),
+                                      xc.get("drjava/extprocess/cmdline"),
+                                      xc.get("drjava/extprocess/jvmline"),
+                                      xc.get("drjava/extprocess/workdir"));
+      is.close();
+      jf.close();
+    }
+    catch(IOException ioe) { /* ignore drop */ }
+    catch(XMLConfigException xce) { /* ignore drop */ }
+  }
+  
+  /** Convert a string with URIs to a list of files.
     * @param data string with URIs
     * @return list of files
     */

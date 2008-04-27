@@ -40,7 +40,10 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.swing.DropDownButton;
 import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -53,7 +56,6 @@ import java.awt.FontMetrics;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import edu.rice.cs.plt.tuple.Pair;
 
 public class EditExternalDialog extends JFrame implements OptionConstants {
   private static final int FRAME_WIDTH = 503;
@@ -100,6 +102,20 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   private JButton _upButton;
   /** Move down button. */
   private JButton _downButton;
+  /** Import button. */
+  private JButton _importButton;
+  /** Export button. */
+  private JButton _exportButton;
+  /** Move up action. */
+  private Action _upAction;
+  /** Move down action. */
+  private Action _downAction;
+  /** Import action. */
+  private Action _importAction;
+  /** Export action. */
+  private Action _exportAction;
+  /** Drop-down button for additional commands. */
+  private DropDownButton _dropDownButton;
   /** Ok button. */
   private JButton _okButton;
   /** List of commands. */
@@ -107,6 +123,35 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   /** Completion monitor to simulate modal behavior. */
   protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
   
+  /** Filter for drjava project files (.drjavaxml and .drjavajar) */
+  private final FileFilter _extProcFilter = new javax.swing.filechooser.FileFilter() {
+    public boolean accept(File f) {
+      return f.isDirectory() || 
+        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION) ||
+        f.getPath().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION);
+    }
+    public String getDescription() { 
+      return "DrJava Externa Process Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
+    }
+  };
+
+  /** Filter for drjava project files (.drjavaxml only) */
+  private final FileFilter _saveExtProcFilter = new javax.swing.filechooser.FileFilter() {
+    public boolean accept(File f) {
+      return f.isDirectory() || 
+        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
+    }
+    public String getDescription() { 
+      return "DrJava Externa Process Files (*"+PROJECT_FILE_EXTENSION+")";
+    }
+  };
+
+  /** For opening files.  We have a persistent dialog to keep track of the last directory from which we opened. */
+  private JFileChooser _importChooser;
+
+  /** For saving files. We have a persistent dialog to keep track of the last directory from which we saved. */
+  private JFileChooser _exportChooser;
+
   /** Main frame. */
   protected MainFrame _mainFrame;
 
@@ -168,25 +213,47 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
       }
     };
     _removeButton = new JButton(removeAction);
-    Action upAction = new AbstractAction("Move Up") {
+
+    _dropDownButton = new DropDownButton();
+    _upAction = new AbstractAction("Move Up") {
       public void actionPerformed(ActionEvent e) {
         _up();
       }
     };
-    _upButton = new JButton(upAction);
-    Action downAction = new AbstractAction("Move Down") {
+    _downAction = new AbstractAction("Move Down") {
       public void actionPerformed(ActionEvent e) {
         _down();
       }
     };
-    _downButton = new JButton(downAction);
+    
+    _importAction = new AbstractAction("Import...") {
+      public void actionPerformed(ActionEvent e) {
+        _import();
+      }
+    };
+    _exportAction = new AbstractAction("Export...") {
+      public void actionPerformed(ActionEvent e) {
+        _export();
+      }
+    };
+    
+    _importButton = new JButton(_importAction);
+    _exportButton = new JButton(_exportAction);
+    _upButton = new JButton(_upAction);
+    _downButton = new JButton(_downAction);
+
+    _dropDownButton.getPopupMenu().add(_importAction);
+    _dropDownButton.getPopupMenu().add(_exportAction);
+    
+    _dropDownButton.setIcon(new ImageIcon(getClass().getResource("/edu/rice/cs/drjava/ui/icons/Down16.gif")));
+
     Action okAction = new AbstractAction("OK") {
       public void actionPerformed(ActionEvent e) {
         _ok();
       }
     };
     _okButton = new JButton(okAction);
-
+    
     JPanel bottom = new JPanel();
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
@@ -195,6 +262,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     bottom.add(_removeButton);
     bottom.add(_upButton);
     bottom.add(_downButton);
+    bottom.add(_dropDownButton);
     bottom.add(_okButton);
     bottom.add(Box.createHorizontalGlue());
     mainPanel.add(bottom, BorderLayout.SOUTH);
@@ -204,7 +272,9 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     _list.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
         _upButton.setEnabled(_list.getSelectedIndex()>0);
+        _upAction.setEnabled(_list.getSelectedIndex()>0);
         _downButton.setEnabled(_list.getSelectedIndex()<_list.getModel().getSize());
+        _downAction.setEnabled(_list.getSelectedIndex()<_list.getModel().getSize());
       }
     });
     JScrollPane sp = new JScrollPane(_list);
@@ -217,6 +287,27 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     MainFrame.setPopupLoc(this, _mainFrame);
+    
+    _importChooser = new JFileChooser() {
+      public void setCurrentDirectory(File dir) {
+        //next two lines are order dependent!
+        super.setCurrentDirectory(dir);
+        setDialogTitle("Import:  " + getCurrentDirectory());
+      }
+    };
+    _importChooser.setPreferredSize(new Dimension(650, 410));
+    _importChooser.setFileFilter(_extProcFilter);
+    _importChooser.setMultiSelectionEnabled(false);
+
+    _exportChooser = new JFileChooser() {
+      public void setCurrentDirectory(File dir) {
+        //next two lines are order dependent!
+        super.setCurrentDirectory(dir);
+        setDialogTitle("Export:  " + getCurrentDirectory());
+      }
+    };
+    _exportChooser.setPreferredSize(new Dimension(650, 410));
+    _exportChooser.setFileFilter(_saveExtProcFilter);
   }
 
   /** Method that handels the OK button */
@@ -372,6 +463,71 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     updateList(Math.max(0,selectedIndex+1));
   }
   
+  /** Import process. */
+  public void _import() {
+    int rc = _importChooser.showOpenDialog(this);
+    switch (rc) {
+      case JFileChooser.CANCEL_OPTION:
+      case JFileChooser.ERROR_OPTION: {
+        return;
+      }
+      
+      case JFileChooser.APPROVE_OPTION: {
+        File[] chosen = _importChooser.getSelectedFiles();
+        if (chosen == null) {
+          return;
+        } 
+        // If this is a single-selection dialog, getSelectedFiles() will always
+        // return a zero-size array -- handle it differently.
+        if (chosen.length == 0) {
+          MainFrame.openExtProcessFile(_importChooser.getSelectedFile());
+          updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
+        }
+        return;
+      }
+        
+      default: // impossible since rc must be one of these
+        throw new UnexpectedException();
+    }
+  }
+  
+  /** Export process. */
+  public void _export() {
+    System.out.println("_export()");
+    int rc = _exportChooser.showSaveDialog(this);
+    switch (rc) {
+      case JFileChooser.CANCEL_OPTION:
+      case JFileChooser.ERROR_OPTION: {
+        System.out.println("\tcancel/error, rc="+rc);
+        return;
+      }
+      
+      case JFileChooser.APPROVE_OPTION: {
+        System.out.println("\tapprove, rc="+rc);
+        File[] chosen = _exportChooser.getSelectedFiles();
+        if (chosen == null) {
+          System.out.println("\tchosen=null");
+          return;
+        } 
+        System.out.println("\tchosen.length="+chosen.length);
+        // If this is a single-selection dialog, getSelectedFiles() will always
+        // return a zero-size array -- handle it differently.
+        if (chosen.length == 0) {
+          File f = _exportChooser.getSelectedFile();
+          if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+            f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
+          }
+          System.out.println("\tindex="+_list.getSelectedIndex()+", file="+f);
+          ExecuteExternalDialog.saveToFile(_list.getSelectedIndex(), f);
+        }
+        return;
+      }
+        
+      default: // impossible since rc must be one of these
+        throw new UnexpectedException();
+    }
+  }
+  
   /** Update the properties. */
   public void updateList(int selectedIndex) {
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
@@ -386,8 +542,14 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     }
     _upButton.setEnabled((_list.getModel().getSize()>0) &&
                          (_list.getSelectedIndex()>0));
+    _upAction.setEnabled((_list.getModel().getSize()>0) &&
+                         (_list.getSelectedIndex()>0));
     _downButton.setEnabled((_list.getModel().getSize()>0) &&
                            (_list.getSelectedIndex()<_list.getModel().getSize()-1));
+    _downAction.setEnabled((_list.getModel().getSize()>0) &&
+                           (_list.getSelectedIndex()<_list.getModel().getSize()-1));
+    _exportButton.setEnabled(names.size()>0);
+    _exportAction.setEnabled(names.size()>0);
   }
   
   protected volatile boolean _windowListenerActive = false;
