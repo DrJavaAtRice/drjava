@@ -1426,11 +1426,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     ProjectProfile builder = new ProjectProfile(projFile);
     
-    // FileLists for project file
-    ArrayList<DocFile> srcFileList = new ArrayList<DocFile>();
-    LinkedList<DocFile> auxFileList = new LinkedList<DocFile>();
-    ArrayList<File> extFileList = new ArrayList<File>();
-    
+    // FileLists for project file    
     File projectRoot = builder.getProjectRoot();
     
 //    Utilities.show("Fetched project root is " + projectRoot);
@@ -1441,24 +1437,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       File f = doc.getFile();
       
-      if (doc.isUntitled()) extFileList.add(f);
-      else if (IOUtil.isMember(f, projectRoot)) {
-        DocFile file = new DocFile(f);
-        file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
-        builder.addSourceFile(file);
-        srcFileList.add(file);
+      if (!doc.isUntitled()) {
+        if (IOUtil.isMember(f, projectRoot)) {
+          DocFile file = new DocFile(f);
+          file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
+          builder.addSourceFile(file);
+        }
+        else if ( doc.isAuxiliaryFile()) {
+          DocFile file = new DocFile(f);
+          file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
+          builder.addAuxiliaryFile(new DocFile(f));
+        }
       }
-      else if ( doc.isAuxiliaryFile()) {
-        DocFile file = new DocFile(f);
-        file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
-        builder.addAuxiliaryFile(new DocFile(f));
-        auxFileList.add(file);
-      }
-      else /* doc is external file */ extFileList.add(f);
     }
-    
-//    DocFile[] srcFiles = srcFileList.toArray(new DocFile[srcFileList.size()]);
-//    DocFile[] extFiles = extFileList.toArray(new DocFile[extFileList.size()]);
     
     // write to disk
     builder.write();
@@ -1478,19 +1469,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (pr != null) builder.setProjectRoot(pr);
     
     // add opendefinitionsdocument
-    ArrayList<File> srcFileList = new ArrayList<File>();
-    LinkedList<File> auxFileList = new LinkedList<File>();
-    
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       if (doc.inProjectPath()) {
         DocumentInfoGetter g = info.get(doc);
         builder.addSourceFile(g);
-        srcFileList.add(g.getFile());
       }
       else if (doc.isAuxiliaryFile()) {
         DocumentInfoGetter g = info.get(doc);
         builder.addAuxiliaryFile(g);
-        auxFileList.add(g.getFile());
       }
     }
     
@@ -1626,7 +1612,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final DocFile[] auxFiles = ir.getAuxiliaryFiles();
     final DocFile[] excludedFiles = ir.getExcludedFiles();
     final File projectFile = ir.getProjectFile();
-    final File projectRoot = ir.getProjectRoot();
+    File pr = ir.getProjectRoot();
+    try {
+      pr = pr.getCanonicalFile();
+    }
+    catch(IOException ioe) { /* could not canonize file, we'll take what we have */ }
+    final File projectRoot = pr;
     final File buildDir = ir.getBuildDirectory ();
     final File workDir = ir.getWorkingDirectory();
     final File mainClass = ir.getMainClass();
