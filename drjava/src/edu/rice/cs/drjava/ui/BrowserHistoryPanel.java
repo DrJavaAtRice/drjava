@@ -65,24 +65,24 @@ import edu.rice.cs.util.UnexpectedException;
   * @version $Id$
   */
 public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion> {
-  protected JButton _backButton;
-  protected JButton _forwardButton;
-  protected JButton _goToButton;
-  protected JButton _removeButton;
-  protected JButton _removeAllButton;
-  protected AbstractAction _backAction;
-  protected AbstractAction _forwardAction;
+  protected volatile JButton _backButton;
+  protected volatile JButton _forwardButton;
+  protected volatile JButton _goToButton;
+  protected volatile JButton _removeButton;
+  protected volatile JButton _removeAllButton;
+  protected volatile AbstractAction _backAction;
+  protected volatile AbstractAction _forwardAction;
   
   /** Constructs a new browser history panel.
    *  This is swing view class and hence should only be accessed from the event-handling thread.
    *  @param frame the MainFrame
    */
-  public BrowserHistoryPanel(MainFrame frame) {
-    super(frame, "Browser History");
+  public BrowserHistoryPanel(final MainFrame frame) {
+    super(frame, "Browser History");  // initializes inherited field _frame
     final BrowserHistoryManager rm = _model.getBrowserHistoryManager();
     rm.addListener(new RegionManagerListener<BrowserDocumentRegion>() {      
       public void regionAdded(BrowserDocumentRegion r) {
-        rm.addBrowserRegion(r);
+        rm.addBrowserRegion(r, frame.getModel().getNotifier());
 //        int index = rm.getCurrentRegion();  // Use current region!
 //        _list.ensureIndexIsVisible(index);
       }
@@ -121,7 +121,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     _frame.addToBrowserHistory();
     
     // then move back    
-    BrowserDocumentRegion r = rm.prevCurrentRegion();
+    BrowserDocumentRegion r = rm.prevCurrentRegion(_frame.getModel().getNotifier());
     updateButtons();
     RegionListUserObj<BrowserDocumentRegion> userObj = getUserObjForRegion(r);
     if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
@@ -136,7 +136,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     _frame.addToBrowserHistory();
     
     // then move forward
-    BrowserDocumentRegion r = rm.nextCurrentRegion();
+    BrowserDocumentRegion r = rm.nextCurrentRegion(_frame.getModel().getNotifier());
     updateButtons();
     RegionListUserObj<BrowserDocumentRegion> userObj = getUserObjForRegion(r);
     if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }

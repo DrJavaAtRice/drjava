@@ -530,4 +530,7 @@ public interface GlobalModel extends ILoadDocuments {
     * @return OpenDefinitionsDocument containing file
     */
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException;
+  
+  /* Returns the GlobalEventModifier attached to global model. */
+  public GlobalEventNotifier getNotifier();
 }

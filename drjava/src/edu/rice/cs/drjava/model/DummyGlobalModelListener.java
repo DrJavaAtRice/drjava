@@ -62,24 +62,6 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
     * @param f files that are read-only
     * @return the files that should be attempted to be rewritten */
   public File[] filesReadOnly(File... f) { return f; }
-
-  /** Called when the project's build directory has changed. */
-  public void projectBuildDirChanged() {  }
-  
-  /** Called when the project's build directory has changed. */
-  public void projectWorkDirChanged() {  }
-  
-  /** Called when the project is being opened and the model needs the gui to do some stuff for it. */
-  public void projectOpened(File pfile, FileOpenSelector files) {  }
-  
-  /** Called when the project is being closed. */
-  public void projectClosed() {  }
-  
-  /** Called when the projects modified state has changed. */
-  public void projectModified() {  }
-  
-  /** Called when a project's main class has been set/unset. */
-  public void projectRunnableChanged() {  }
   
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc) { }
@@ -205,4 +187,25 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   public void focusOnDefinitionsPane() { }
   
   public void documentNotFound(OpenDefinitionsDocument d, File f) { }
+  
+   /** Called when the project's build directory has changed. */
+  public void projectBuildDirChanged() {  }
+  
+  /** Called when the project's build directory has changed. */
+  public void projectWorkDirChanged() {  }
+  
+  /** Called when the project is being opened and the model needs the gui to do some stuff for it. */
+  public void projectOpened(File pfile, FileOpenSelector files) {  }
+  
+  /** Called when the project is being closed. */
+  public void projectClosed() {  }
+  
+  /** Called when the projects modified state has changed. */
+  public void projectModified() {  }
+  
+  /** Called when a project's main class has been set/unset. */
+  public void projectRunnableChanged() {  }
+  
+  /** Called when the a region is added to the browswing history. */
+  public void browserChanged() { }
 }

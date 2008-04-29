@@ -53,12 +53,12 @@ import edu.rice.cs.util.swing.Utilities;
   * history is simply a list together with a current pointer. 
   */
 public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<BrowserDocumentRegion>> {
-  /** List of regions.  Primitive operations are thread safe. */
-  protected volatile TreeSet<BrowserDocumentRegion> _regions = new TreeSet<BrowserDocumentRegion>();
-  /** Set of regions in the preceding list.  Used to quickly determine membership. */
   
-  protected volatile BrowserDocumentRegion _current = null;
-  protected volatile int _maxSize;
+  /** List of regions.  Public operations are thread safe. */
+  private volatile TreeSet<BrowserDocumentRegion> _regions = new TreeSet<BrowserDocumentRegion>();
+  
+  private volatile BrowserDocumentRegion _current = null;
+  private volatile int _maxSize;
   
   /** Create a new ConcreteRegionManager with the specified maximum size.
     * @param size maximum number of regions that can be stored in this manager.
@@ -78,18 +78,35 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     return r1.getDocument() == r2.getDocument() && r1.getStartOffset() == r2.getStartOffset() &&
       r1.getEndOffset() == r2.getEndOffset();
   }
-  
-  /** Add the supplied DocumentRegion r to the manager and set _currentIndex to refer to r. Only runs in event thread
-    * after initialization.  Notifies regionAdded listeners if _currentIndex is changed.
+
+  /** Add the supplied DocumentRegion r to the manager just above _current and set _current to refer to r.  Only runs
+    * in event thread after initialization.  Notifies regionAdded listeners if _currentIndex is changed.  Assumes 
+    * _regions.isEmpty() || _regions.contains(_current) and _regions.isEmpty() == (_current == null)
     * @param region the DocumentRegion to be inserted into the manager
     * @param index the index at which the DocumentRegion was inserted
     */
-  public synchronized void addBrowserRegion(final BrowserDocumentRegion r) {
-    
-    // ignore addition if the same region is on top of region "stack"
-    if (! _regions.isEmpty() && equals(r, _regions.last())) return;
+  
+  public synchronized void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) {
     
 //    Utilities.show("addBrowserRegion(" + r + ") called with regions = " + _regions + " and current = " + _current);
+    if (_current != null) {
+      // flush the stack of regions above _current
+//      Utilities.show("Flushing elements above current = " + _current);
+      SortedSet<BrowserDocumentRegion> tail = _regions.tailSet(_current); 
+//      Utilities.show("Tail set above current is " + tail);
+      Iterator<BrowserDocumentRegion> it = tail.iterator();
+      if (it.hasNext()) {
+        BrowserDocumentRegion nr = it.next();  // skip over current
+        assert nr == _current;
+//        Utilities.show("Skipped " + nr);
+      }
+      while (it.hasNext()) { 
+        BrowserDocumentRegion nr = it.next(); 
+        it.remove(); 
+//        Utilities.show("Removed " + nr + ", leaving " + _regions);
+      }
+    }
+//    Utilities.show("Before adding, regions = " + _regions);
     _current = r;
     
     _regions.add(r);
@@ -106,10 +123,11 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     
     // remove a region if necessary
     shrinkManager();
+    notifier.browserChanged();
   }
   
   /** Remove regions if there are more than the maximum number allowed. Typically used to remove one region. */
-  protected void shrinkManager() {
+  private void shrinkManager() {
     if (_maxSize > 0) {
       int size = _regions.size();
       int diff = size - _maxSize;
@@ -147,10 +165,10 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   public BrowserDocumentRegion getCurrentRegion() { return _current; }
   
   /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
-  public synchronized boolean isCurrentRegionFirst() { return ! _regions.isEmpty() && _current == _regions.first(); }
+  public synchronized boolean isCurrentRegionFirst() { return (! _regions.isEmpty()) && _current == _regions.first(); }
   
   /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
-  public synchronized boolean isCurrentRegionLast() { return _current == _regions.last();  }
+  public synchronized boolean isCurrentRegionLast() { return (! _regions.isEmpty()) && _current == _regions.last();  }
   
   /** Set the current region. 
     * @param index  the index of the new current region, may be -1. */
@@ -158,29 +176,34 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   
   /** Make the region that is more recent the current region.  If _current is null, set it to refer to first.
     * @return new current region */
-  public synchronized BrowserDocumentRegion nextCurrentRegion() {
+  public synchronized BrowserDocumentRegion nextCurrentRegion(final GlobalEventNotifier notifier) {
 //    Utilities.show("nextCurrentRegion called with regions = " + _regions + " and _current = " + _current);
     if (_regions.isEmpty()) return null;
     if (_current == null) _current = _regions.first();
     else _current = _higher(_regions, _current);
+    notifier.browserChanged();
     return _current;
   }
   
   /** Make the region that is less recent the current region.  If _current is null, set it to refer to last.
     * @return new current region */
-  public synchronized BrowserDocumentRegion prevCurrentRegion() {
+  public synchronized BrowserDocumentRegion prevCurrentRegion(final GlobalEventNotifier notifier) {
 //    Utilities.show("prevCurrentRegion called with regions = " + _regions + " and _current = " + _current);
     if (_regions.isEmpty()) return null;
     if (_current == null) _current = _regions.last();
     else _current = _lower(_regions, _current);
+//    Utilities.show("returning " + _current);
+    notifier.browserChanged();
     return _current;
   }
   
-  /** @return the highest region (using compareTo) less than r; if no such region exists, return the lowest region,
+  /** @return the highest region (using compareTo) <= r; if no such region exists, return the lowest region,
     * which is null if _regions is empty. */
   private BrowserDocumentRegion _lower(TreeSet<BrowserDocumentRegion> regions, BrowserDocumentRegion r) {
     if (_regions.isEmpty()) return null;
-    SortedSet<BrowserDocumentRegion> lowerSet = regions.headSet(r);
+    BrowserDocumentRegion least = _regions.first();
+    SortedSet<BrowserDocumentRegion> lowerSet = regions.subSet(least, r);
+//    Utilities.show("Given regions = " + _regions + ", lowerSet = " + lowerSet);
     if (lowerSet.isEmpty()) return _regions.first();
     return lowerSet.last();
   }

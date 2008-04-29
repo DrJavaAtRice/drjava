@@ -594,4 +594,11 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     try { for (GlobalModelListener l : _listeners) { l.documentNotFound(d,f); } }
     finally { _lock.endRead(); } 
   }
+  
+  // ----- BrowserHistory -----
+  public void browserChanged() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.browserChanged(); } }
+    finally { _lock.endRead(); } 
+  }
 }

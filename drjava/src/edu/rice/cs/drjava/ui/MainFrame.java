@@ -1152,7 +1152,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           if (p.getItem() != null) {
             final OpenDefinitionsDocument newDoc = p.getItem().doc;
             final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
-//            if (docChanged) addToBrowserHistory();
             final boolean docSwitch = _model.getActiveDocument() != newDoc;
             if (docSwitch) _model.setActiveDocument(newDoc);
             final int curLine = newDoc.getCurrentLine();
@@ -1166,7 +1165,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                 final int lineNum = Math.max(1, val);
                 Runnable command = new Runnable() {
                   public void run() {
-                    try { _jumpToLine(lineNum); }
+                    try { _jumpToLine(lineNum); }  // adds this region to browser history
                     catch (RuntimeException e) { _jumpToLine(curLine); }
                   }
                 };
@@ -1178,7 +1177,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               }
               catch(RuntimeException e) { /* ignore */ }
             }
-            if (docChanged) {
+            else if (docChanged) {
               // defer executing this code until after active document switch (if any) is complete
               EventQueue.invokeLater(new Runnable() {
                 public void run() { addToBrowserHistory();
@@ -1258,26 +1257,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           try {
             try {
               File relative = FileOps.makeRelativeTo(d.getFile(), d.getSourceRoot());
-              if (!relative.toString().equals(d.toString())) {
+              if (! relative.toString().equals(d.toString())) {
                 list.add(new GoToFileListEntry(d, d.getPackageName() + "." + d.toString()));
               }
             }
-            catch(IOException e) {
-              // ignore
-            }
-            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { 
-              // ignore
-            }
+            catch(IOException e) { /* ignore */ }
+            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { /* ignore */ }
           }
-          catch(IllegalStateException e) {
-            // ignore
-          }
+          catch(IllegalStateException e) { /* ignore */ }
         }
       }
       _gotoFileDialog.setItems(true, list); // ignore case
-      if (currentEntry != null) {
-        _gotoFileDialog.setCurrentItem(currentEntry);
-      }
+      if (currentEntry != null) _gotoFileDialog.setCurrentItem(currentEntry);
       hourglassOn();
       /* if (!  Utilities.TEST_MODE) */ 
       _gotoFileDialog.setVisible(true);
@@ -2110,7 +2101,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
-//      addToBrowserHistory();
       _model.setActiveNextDocument();
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
@@ -2125,7 +2115,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
-//      addToBrowserHistory();
       _model.setActivePreviousDocument();
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
@@ -2160,10 +2149,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      addToBrowserHistory();
       
       // then move back    
-      DocumentRegion r = rm.prevCurrentRegion();
-      scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
-      
-      this.setEnabled(true);
+      DocumentRegion r = rm.prevCurrentRegion(_model.getNotifier());
+      if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
+      _configureBrowsing();
+//      this.setEnabled(true);
     }
   };
   
@@ -2182,10 +2171,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      addToBrowserHistory();
       
       // then move forward
-      DocumentRegion r = rm.nextCurrentRegion();
-      scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
-      
-      this.setEnabled(true);
+      DocumentRegion r = rm.nextCurrentRegion(_model.getNotifier());
+      if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
+      _configureBrowsing();   
+//      this.setEnabled(true);
     }
   };
   
@@ -4242,9 +4231,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       new ForegroundColorListener(renderer);
       new BackgroundColorListener(renderer);
       _resetNavigatorPane();
-      if (_model.getDocumentCount() == 1) {
-        _model.setActiveFirstDocument();
-      }
+      if (_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
       _closeProjectAction.setEnabled(false);
       _saveProjectAction.setEnabled(false);
       _saveProjectAsAction.setEnabled(false);
@@ -4261,6 +4248,19 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       return true;
     }
     else return false;  // Project closing cancelled in _checkProjectClose dialog
+  }
+  
+  private void _configureBrowsing() {
+    BrowserHistoryManager bm = _model.getBrowserHistoryManager();
+    if (bm.getRegions().isEmpty()) {
+      _browseForwardAction.setEnabled(false);
+      _browseBackAction.setEnabled(false);
+      return;
+    }
+    _browseForwardAction.setEnabled(true);
+    _browseBackAction.setEnabled(true);
+    if (bm.isCurrentRegionFirst()) _browseBackAction.setEnabled(false);
+    if (bm.isCurrentRegionLast()) _browseForwardAction.setEnabled(false);
   }
   
   private boolean _checkProjectClose() {
@@ -8902,6 +8902,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 // The following line was commented out because it breaks when a user want to close but not save a deleted file      
 //      else throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");  // misnamed exception
     }
+    
+    public void browserChanged() { _configureBrowsing(); }
   } // End of ModelListener class
   
   public JViewport getDefViewport() {

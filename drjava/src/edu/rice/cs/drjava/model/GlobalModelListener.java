@@ -147,5 +147,8 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk
     * or cannot be accessed. */
   public void documentNotFound(OpenDefinitionsDocument d, File f);
+  
+  /** Called when the a region is added to the browswing history. */
+  public void browserChanged();
 }
 

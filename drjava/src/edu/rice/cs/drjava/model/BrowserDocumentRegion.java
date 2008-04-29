@@ -73,11 +73,19 @@ public class BrowserDocumentRegion implements EnhancedDocumentRegion, Comparable
 //    return o1.equals(o2);
 //  }
   
-  /** Relying on default equality relation. */
-      
-  /** This hash function is consistent with default equality. */
+  /* Relying on default equals operation. */
+  
+//  /** Equality is determined solely by having the same _index. */
+//  public boolean equals(Object o) {
+//    if (o != null || ! (o instanceof BrowserDocumentRegion)) return false;
+//    BrowserDocumentRegion r = (BrowserDocumentRegion) o;
+//    return _index == r._index;
+//  }
+         
+  /** This hash function is consistent with equals. */
   public int hashCode() { return _index; }
   
+  /** This relation is consistent with equals. */
   public int compareTo(BrowserDocumentRegion r) { return _index - r._index; }
   
   public int getIndex() { return _index; }

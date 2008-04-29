@@ -242,6 +242,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected volatile IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator =
     new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator();
   
+  /** Notifier list for the global model. */
+  public GlobalEventNotifier getNotifier() { return _notifier; }
+  
   /** Manager for breakpoint regions. */
   protected final ConcreteRegionManager<Breakpoint> _breakpointManager;
   
@@ -2578,16 +2581,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** @return the maximum number of regions that can be stored in this manager. */
-    public int getMaximumSize() {
-      return _maxSize;
-    }
+    public int getMaximumSize() { return _maxSize; }
     
     /** Apply the given command to the specified region to change it.
       * @param region the region to find and change
       * @param cmd command that mutates the region. */
     public void changeRegion(R region, Lambda<Object,R> cmd) {
       final int index = getIndexOf(region);
-      if (index<0) { return; }
+      if (index < 0) { return; }
       final R r = _regions.get(index);
       cmd.apply(r);
       Utilities.invokeLater(new Runnable() { public void run() {
@@ -2626,11 +2627,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         catch (BadLocationException ble) { throw new UnexpectedException(ble); }
         
 //        Utilities.show("Adding (" + doc + ", " + startPos + ", " + endPos + ") to browser history");
-        _browserHistoryManager.addBrowserRegion(new BrowserDocumentRegion(doc, startPos, endPos));
+        _browserHistoryManager.addBrowserRegion(new BrowserDocumentRegion(doc, startPos, endPos), _notifier);
       }
     });
   }
-
   
   /** throws an UnsupportedOperationException */
   public Iterable<File> getClassPath() {

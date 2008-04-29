@@ -131,11 +131,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     
     OptionListener<Color> temp;
     Pair<Option<Color>, OptionListener<Color>> pair;
-    for(int i=0; i<OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
+    for(int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       temp = new FindResultsColorOptionListener(i);
       pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], temp);
       _colorOptionListeners.add(pair);
-      DrJava.getConfig().addOptionListener( OptionConstants.FIND_RESULTS_COLORS[i], temp);
+      DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], temp);
     }
   }
   
@@ -287,7 +287,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _remove() {
     updateButtons();
     for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
-    if (_regionManager.getRegions().size()==0) { _close(); }
+    if (_regionManager.getRegions().size() == 0) { _close(); }
   }
   
   /** Update button state and text. */

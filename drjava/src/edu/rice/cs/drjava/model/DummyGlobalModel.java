@@ -147,6 +147,10 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call removeListener on a Dummy");
   }
   
+  public GlobalEventNotifier getNotifier() {
+    throw new UnsupportedOperationException("Tried to call getNotifier on a Dummy");
+  }
+  
   public DefaultInteractionsModel getInteractionsModel() {
     throw new UnsupportedOperationException("Tried to call getInteractionsModel on a Dummy");
   }

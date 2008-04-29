@@ -872,8 +872,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       
       final int pos = fr.getFoundOffset();
       
-      // If there actually *is* a match, then switch active documents. otherwise don't
-      if (searchAll) {
+      if (searchAll) {  // if search was global, reset the active document
         if (docChanged) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
         else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
       } 

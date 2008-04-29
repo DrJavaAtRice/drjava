@@ -113,31 +113,31 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   public static class PrefixStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
     public String toString() { return "Prefix"; }
     public boolean isMatch(X item, PredictiveInputModel<X> pim) {
-      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
-      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      String a = (pim._ignoreCase) ? (item.toString().toLowerCase()) : (item.toString());
+      String b = (pim._ignoreCase) ? (pim._mask.toLowerCase()) : (pim._mask);
       return a.startsWith(b);
     }
     public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
-      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
-      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      String a = (pim._ignoreCase) ? (item.toString().toLowerCase()) : (item.toString());
+      String b = (pim._ignoreCase) ? (pim._mask.toLowerCase()) : (pim._mask);
       return a.equals(b);
     }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
-      String a = (pim._ignoreCase)?(item1.toString().toLowerCase()):(item1.toString());
-      String b = (pim._ignoreCase)?(item2.toString().toLowerCase()):(item2.toString());
+      String a = (pim._ignoreCase) ? (item1.toString().toLowerCase()) : (item1.toString());
+      String b = (pim._ignoreCase) ? (item2.toString().toLowerCase()) : (item2.toString());
       return a.equals(b);
     }
     public int compare(X item1, X item2, PredictiveInputModel<X> pim) {
-      String a = (pim._ignoreCase)?(item1.toString().toLowerCase()):(item1.toString());
-      String b = (pim._ignoreCase)?(item2.toString().toLowerCase()):(item2.toString());
+      String a = (pim._ignoreCase) ? (item1.toString().toLowerCase()) : (item1.toString());
+      String b = (pim._ignoreCase) ? (item2.toString().toLowerCase()) : (item2.toString());
       return a.compareTo(b);
     }
     public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim) {
       X longestMatch = null;
       int matchLength = -1;
       for(X i: items) {
-        String s = (pim._ignoreCase)?(i.toString().toLowerCase()):(i.toString());
-        String t = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+        String s = (pim._ignoreCase) ? (i.toString().toLowerCase()) : (i.toString());
+        String t = (pim._ignoreCase) ? (item.toString().toLowerCase()) : (item.toString());
         int ml = 0;
         while((s.length() > ml) && (t.length() > ml) && (s.charAt(ml) == t.charAt(ml))) {
           ++ml;
@@ -158,12 +158,12 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       boolean allMatching = true;
       int len = pim._mask.length();
       while((allMatching) && (pim._mask.length() + ext.length() < items.get(0).toString().length())) {
-        char origCh = items.get(0).toString().charAt(pim._mask.length()+ext.length());
-        char ch = (pim._ignoreCase)?(Character.toLowerCase(origCh)):(origCh);
+        char origCh = items.get(0).toString().charAt(pim._mask.length() + ext.length());
+        char ch = (pim._ignoreCase) ? (Character.toLowerCase(origCh)) : (origCh);
         allMatching = true;
         for (X i: items) {
-          String a = (pim._ignoreCase)?(i.toString().toLowerCase()):(i.toString());
-          if (a.charAt(len)!=ch) {
+          String a = (pim._ignoreCase) ? (i.toString().toLowerCase()) : (i.toString());
+          if (a.charAt(len) != ch) {
             allMatching = false;
             break;
           }
@@ -186,8 +186,8 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   public static class FragmentStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
     public String toString() { return "Fragments"; }
     public boolean isMatch(X item, PredictiveInputModel<X> pim) {
-      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
-      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      String a = (pim._ignoreCase) ? (item.toString().toLowerCase()) : (item.toString());
+      String b = (pim._ignoreCase) ? (pim._mask.toLowerCase()) : (pim._mask);
 
       java.util.StringTokenizer tok = new java.util.StringTokenizer(b);
       while(tok.hasMoreTokens()) {
@@ -196,8 +196,8 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       return true;
     }
     public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
-      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
-      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      String a = (pim._ignoreCase) ? (item.toString().toLowerCase()) : (item.toString());
+      String b = (pim._ignoreCase) ? (pim._mask.toLowerCase()) : (pim._mask);
       return a.equals(b);
     }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {

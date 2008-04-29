@@ -735,7 +735,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 //      Utilities.showDebug("ErrorPanel.switchToError called");
       if (error == null) return;
       
-      SingleDisplayModel model = getModel();
+      final SingleDisplayModel model = getModel();
       
       DefinitionsPane prevPane = _frame.getCurrentDefPane();
       prevPane.removeErrorHighlight();  // hide previous error highlight
@@ -752,8 +752,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 //          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
           
           if (! prevDoc.equals(doc)) {
-            model.addToBrowserHistory();
             model.setActiveDocument(doc);
+            EventQueue.invokeLater(new Runnable() { public void run() { model.addToBrowserHistory(); } });
           }
           else model.refreshActiveDocument();
           
