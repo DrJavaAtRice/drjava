@@ -67,7 +67,7 @@ import javax.swing.filechooser.FileFilter;
 public class ProjectPropertiesFrame extends JFrame {
 
   private static final int FRAME_WIDTH = 503;
-  private static final int FRAME_HEIGHT = 318;
+  private static final int FRAME_HEIGHT = 360;
 
   private MainFrame _mainFrame;      
   private SingleDisplayModel _model; 
@@ -83,6 +83,8 @@ public class ProjectPropertiesFrame extends JFrame {
   private DirectorySelectorComponent _buildDirSelector;
   private DirectorySelectorComponent _workDirSelector;
   private FileSelectorComponent _mainDocumentSelector;
+  
+  private JCheckBox _autoRefreshComponent;
 
   private FileSelectorComponent _jarFileSelector;
   private FileSelectorComponent _manifestFileSelector;
@@ -202,6 +204,8 @@ public class ProjectPropertiesFrame extends JFrame {
     final JTextField mcTextField = _mainDocumentSelector.getFileField();
     if (mc == FileOps.NULL_FILE) mcTextField.setText("");
     else _mainDocumentSelector.setFileField(mc);
+    
+    _autoRefreshComponent.setSelected(_getAutoRefreshStatus());
 
     Vector<File> cp = new Vector<File>(IterUtil.asList(_model.getExtraClassPath()));
     _extraClassPathList.setValue(cp);
@@ -235,6 +239,8 @@ public class ProjectPropertiesFrame extends JFrame {
     Vector<File> extras = _extraClassPathList.getValue();
     _model.setExtraClassPath(IterUtil.snapshot(extras));
 
+    _model.setAutoRefreshStatus(_autoRefreshComponent.isSelected());
+    
     //    _mainFrame.saveProject();
     if (projRootChanged) {
       try {
@@ -246,30 +252,35 @@ public class ProjectPropertiesFrame extends JFrame {
 
   /** Returns the current project root in the project profile. */
   private File _getProjRoot() {
-    File projRoot = _mainFrame.getModel().getProjectRoot();
+    File projRoot = _model.getProjectRoot();
     if (projRoot != null) return projRoot;
     return FileOps.NULL_FILE;
   }
 
   /** Returns the current build directory in the project profile. */
   private File _getBuildDir() {
-    File buildDir = _mainFrame.getModel().getBuildDirectory();
+    File buildDir = _model.getBuildDirectory();
     if (buildDir != null) return buildDir;
     return FileOps.NULL_FILE;
   }
 
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
-    File workDir = _mainFrame.getModel().getWorkingDirectory();
+    File workDir = _model.getWorkingDirectory();
     if (workDir != null) return workDir;
     return FileOps.NULL_FILE;
   }
 
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getMainFile() {
-    File mainFile = _mainFrame.getModel().getMainClass();
+    File mainFile = _model.getMainClass();
     if (mainFile != null) return mainFile;
     return FileOps.NULL_FILE;
+  }
+  
+  /** Returns whether the project is set to automatically open new source files */
+  private boolean _getAutoRefreshStatus() {
+    return _model.getAutoRefreshStatus();
   }
 
   private void _setupPanel(JPanel panel) {
@@ -348,7 +359,7 @@ public class ProjectPropertiesFrame extends JFrame {
 
     JLabel classLabel = new JLabel("Main Document");
     classLabel.setToolTipText("<html>The project document containing the<br>" + 
-    "<code>main</code>method for the entire project</html>");
+    "<code>main</code> method for the entire project</html>");
     gridbag.setConstraints(classLabel, c);
     panel.add(classLabel);
 
@@ -381,6 +392,22 @@ public class ProjectPropertiesFrame extends JFrame {
     Component extrasComponent = _extraClassPathComponent();
     gridbag.setConstraints(extrasComponent, c);
     panel.add(extrasComponent);
+    
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    JLabel refreshLabel = new JLabel("Auto Refresh");
+    refreshLabel.setToolTipText("<html>Whether the project will automatically open new files found within the source tree</html>");
+    gridbag.setConstraints(refreshLabel, c);
+    panel.add(refreshLabel);
+    
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    _autoRefreshComponent = new JCheckBox();
+    panel.add(_autoRefreshComponent);
   }
   
    private DocumentListener _applyListener = new DocumentListener() {

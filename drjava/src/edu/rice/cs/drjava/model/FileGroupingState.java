@@ -158,4 +158,10 @@ public interface FileGroupingState {
   /** Returns true if the file is excluded from the current project */
   public boolean isExcludedFile(File f);
   
+  public File[] getExcludedFiles();
+  
+  public boolean getAutoRefreshStatus();
+  
+  public void setAutoRefreshStatus(boolean b);
+  
 }

@@ -94,6 +94,8 @@ public class ProjectProfile implements ProjectFileIR {
   
   private int _createJarFlags = 0;
   
+  private boolean _autoRefreshStatus = false;
+  
   private List<DocumentRegion> _bookmarks = new ArrayList<DocumentRegion>();
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
   private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
@@ -162,6 +164,8 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return an array of the watches in this project. */
   public DebugWatchData[] getWatches() { return _watches.toArray(new DebugWatchData[_watches.size()]); }
   
+  public boolean getAutoRefreshStatus() { return _autoRefreshStatus; }
+  
   /** Public setters, modifiers */
   
   public void addSourceFile(DocFile df) { _sourceFiles.add(df); }
@@ -183,6 +187,7 @@ public class ProjectProfile implements ProjectFileIR {
   }
   
   public void addExcludedFile(DocFile df) { _excludedFiles.add(df); }
+  public void addExcludedFile(File f) { _excludedFiles.add(new DocFile(f)); }
     
   public void addExcludedFile(DocumentInfoGetter getter) {
     if (! getter.isUntitled()) {
@@ -224,6 +229,8 @@ public class ProjectProfile implements ProjectFileIR {
   public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
   public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
+  public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status;}
+  
   /** Write project file in XML format. */
   public void write() throws IOException {
     write(new FileOutputStream(_projectFile));
@@ -248,6 +255,7 @@ public class ProjectProfile implements ProjectFileIR {
       path = replace(path, File.separator, "/");
       xc.set("drjava/project.main", path);      
     }
+    xc.set("drjava/project.autorefresh", String.valueOf(_autoRefreshStatus));
     
     if (_createJarFile != null) {
       path = FileOps.makeRelativeTo(_createJarFile, _createJarFile).getPath();

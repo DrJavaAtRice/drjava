@@ -96,6 +96,8 @@ public interface ProjectFileIR {
   /** @return the array of watches. */
   public DebugWatchData[] getWatches();
   
+  public boolean getAutoRefreshStatus();
+  
   public void setSourceFiles(List<DocFile> sf);
   public void setAuxiliaryFiles(List<DocFile> aux);
   public void setExcludedFiles(List<DocFile> ef);
@@ -110,7 +112,7 @@ public interface ProjectFileIR {
   public void setBookmarks(List<? extends DocumentRegion> bms);
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
-  
+  public void setAutoRefreshStatus(boolean b);
   
 
 }

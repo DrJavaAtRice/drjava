@@ -156,6 +156,13 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
       
+      try {
+        s = _xc.get(".autorefresh");
+        boolean b = Boolean.valueOf(s);
+        pfir.setAutoRefreshStatus(b);
+      } 
+      catch(XMLConfigException e) { /* not important */}
+      
       try { // must all be present
         // read source files and included files
         pfir.setSourceFiles(readSourceFiles("source", _srcFileBase.toString()));

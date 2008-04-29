@@ -452,8 +452,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                                 File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags) {
-    return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags);
+                                 File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refresh) {
+    return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags, refresh);
   }
   
   /** @return true if the class path state has been changed. */
@@ -545,6 +545,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(true);
   }
   
+  /** Gets autorfresh status of the project */
+  public boolean getAutoRefreshStatus() { return _state.getAutoRefreshStatus(); }
+  
+  /** Sets autofresh status of the project */
+  public void setAutoRefreshStatus(boolean status) { _state.setAutoRefreshStatus(status); }
+  
   /** @return the working directory for the Master JVM (editor and GUI). */
   public File getMasterWorkingDirectory() {
     File file;
@@ -600,16 +606,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private boolean _isProjectChanged = false;
     volatile File _createJarFile;
     volatile int _createJarFlags;
+    volatile boolean _autoRefreshStatus;
     
     HashSet<String> _projFilePaths = new HashSet<String>();
     
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
-      this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], IterUtil.<File>empty(), null, 0);
+      this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], IterUtil.<File>empty(), null, 0, false);
     }
     
     ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                             File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags) {
+                             File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refreshStatus) {
       _projRoot = pr;
       _mainFile = main;
       _buildDir = bd;
@@ -627,6 +634,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       _createJarFile = cjf;
       _createJarFlags = cjflags;
+      _autoRefreshStatus = refreshStatus;
     }
     
     public boolean isProjectActive() { return true; }
@@ -715,12 +723,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     public void addExcludedFile(File f) {
+      if(f == null) return;
       synchronized(_excludedFiles) {
         if (_excludedFiles.add(f)) {
           setProjectChanged(true);
         }
         setProjectChanged(true);
       }
+    }
+    
+    public File[] getExcludedFiles() {
+      return _excludedFiles.toArray(new File[_excludedFiles.size()]);
     }
     
     public void setBuildDirectory(File f) { _buildDir = f; }
@@ -775,6 +788,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return false;
       }
     }
+    
+    public boolean getAutoRefreshStatus() { return _autoRefreshStatus; }
+    public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status; }
     
     
     // This only starts the process. It is all done asynchronously.
@@ -928,7 +944,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
     public boolean isExcludedFile(File f) { return false; }
+    public File[] getExcludedFiles() { return null; }
     public void addExcludedFile(File f) {}
+    public boolean getAutoRefreshStatus() {return false;}
+    public void setAutoRefreshStatus(boolean b) {}
     
     public void cleanBuildDirectory() { }
     
@@ -1291,6 +1310,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return null if not in project mode
     */
   public File[] getNewFilesInProject() {
+
     ArrayList<File> files = new ArrayList<File>();
     File projRoot = _state.getProjectRoot();
     if(projRoot == null)
@@ -1301,12 +1321,26 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     } catch(IOException e) { return null; }
     catch(OperationCanceledException e) { return null; }
     catch(AlreadyOpenException e) { return null; }
+
     for(File f : allFiles) {
       if(!_state.inProject(f) && !_state.isExcludedFile(f)) {
         files.add(f);
       }
     }
+
     return files.toArray(new File[files.size()]);
+  }
+  
+  /** Searches the source folder (recursively) for new files and opens them.
+   */
+  public void openNewFilesInProject() {
+    File[] newFiles = getNewFilesInProject();
+    if(newFiles == null)
+      return;
+    try {
+    _openFiles(newFiles);
+    }
+    catch(Exception e) {}
   }
   
   
@@ -1500,6 +1534,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // add bookmarks
     builder.setBookmarks(getBookmarkManager().getRegions());
     
+    builder.setAutoRefreshStatus(_state.getAutoRefreshStatus());
+    
+    //add excluded files
+    File[] exclFiles = _state.getExcludedFiles();
+    for(File f: exclFiles) { builder.addExcludedFile(f); }
+    
     return builder;
   }
   
@@ -1530,7 +1570,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(), 
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags()));
+                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus()));
   }
   
   /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
@@ -1552,7 +1592,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(),
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags()));
+                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus()));
   }
   
   public void reloadProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
@@ -1590,7 +1630,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final Iterable<File> projectClassPaths = ir.getClassPaths();
     final File createJarFile  = ir.getCreateJarFile ();
     int createJarFlags = ir.getCreateJarFlags();
-    
+    final boolean autoRefresh = ir.getAutoRefreshStatus();
+
     // clear browser history
     getBrowserHistoryManager().clearBrowserRegions();
     
@@ -1670,7 +1711,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.show("Project Root loaded into grouping state is " + projRoot);
     
     setFileGroupingState(makeProjectFileGroupingState(projectRoot, mainClass, buildDir, workDir, projectFile, srcFiles,
-                                                      auxFiles, excludedFiles, projectClassPaths, createJarFile, createJarFlags));
+                                                      auxFiles, excludedFiles, projectClassPaths, createJarFile, createJarFlags, 
+                                                      autoRefresh));
     
     resetInteractions(getWorkingDirectory());  // Shutdown debugger and reset interactions pane in new working directory
     
@@ -1688,6 +1730,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       if (f.isActive()) active = f;
       else projFiles.add(f);  // add to projFiles unless active
+      if(f.isActive()) active = f;
     }
     for (DocFile f: auxFiles) {
       if (f.lastModified() > f.getSavedModDate()) {
@@ -1757,7 +1800,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (_documentNavigator instanceof JTreeSortNavigator) 
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths()); 
     
-   
+    
+    if(_state.getAutoRefreshStatus()) { openNewFilesInProject(); }
   }
   
   /** Performs any needed operations on the model after project files have been closed.  This method is not 
@@ -1875,6 +1919,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // if the document was an auxiliary file, remove it from the list
     if (doc.isAuxiliaryFile()) { removeAuxiliaryFile(doc); }
+    //if in source folder, add to black list
+    else { 
+      try { 
+        _state.addExcludedFile(doc.getFile()); 
+      }
+      catch (Exception e) {}
+    }
     
     Utilities.invokeLater (new SRunnable() {
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread

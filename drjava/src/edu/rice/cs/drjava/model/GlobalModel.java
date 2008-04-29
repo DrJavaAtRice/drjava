@@ -433,6 +433,12 @@ public interface GlobalModel extends ILoadDocuments {
   /** Sets the current build directory. */
   public void setBuildDirectory(File f);
   
+  /** Gets autorefresh status of the project */
+  public boolean getAutoRefreshStatus();
+  
+  /** Sets autorefresh status of the project */
+  public void setAutoRefreshStatus(boolean b);
+  
   /** @return the working directory for the Master JVM. */
   public File getMasterWorkingDirectory();
   

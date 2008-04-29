@@ -237,6 +237,12 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call openFolder on a Dummy");
   }
   
+  public void setAutoRefreshStatus(boolean status) { 
+	throw new UnsupportedOperationException("Tried to call setAutoRefreshStatus on a Dummy"); 
+  }
+  
+  public boolean getAutoRefreshStatus() { throw new UnsupportedOperationException("Tried to call getAutoRefreshStatus on a Dummy"); }
+  
   public void saveAllFiles(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Tried to call saveAllFiles on a Dummy");
   }
