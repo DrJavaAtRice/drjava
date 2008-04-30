@@ -45,8 +45,8 @@ import java.util.Iterator;
   */
 public class ConstantProperty extends DrJavaProperty {
   /** Create a constant property. */
-  public ConstantProperty(String name, String value) {
-    super(name);
+  public ConstantProperty(String name, String value, String help) {
+    super(name, help);
     if (value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
     _value = value;
     _isCurrent = true;

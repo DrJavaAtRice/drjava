@@ -474,8 +474,8 @@ public class StringOpsTest extends DrJavaTestCase {
   
   public void testReplaceVariables() {
     PropertyMaps props = new PropertyMaps();
-    props.setProperty("1", new ConstantProperty("var", "foo"));
-    props.setProperty("1", new ConstantProperty("xxx", "bar"));
+    props.setProperty("1", new ConstantProperty("var", "foo", ""));
+    props.setProperty("1", new ConstantProperty("xxx", "bar", ""));
     
     assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
     assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.TO_STRING));
@@ -484,10 +484,10 @@ public class StringOpsTest extends DrJavaTestCase {
   
   public void testReplaceVariables2() {
     PropertyMaps props = new PropertyMaps();
-    props.setProperty("1", new ConstantProperty("var", "foo"));
-    props.setProperty("1", new ConstantProperty("xxx", "bar"));
-    props.setProperty("2", new ConstantProperty("yyy", "bam"));
-    props.setProperty("2", new ConstantProperty("xxx", "new"));
+    props.setProperty("1", new ConstantProperty("var", "foo", ""));
+    props.setProperty("1", new ConstantProperty("xxx", "bar", ""));
+    props.setProperty("2", new ConstantProperty("yyy", "bam", ""));
+    props.setProperty("2", new ConstantProperty("xxx", "new", ""));
     
     assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
     assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.TO_STRING));
@@ -498,8 +498,8 @@ public class StringOpsTest extends DrJavaTestCase {
   
   public void testReplaceVariables3() {
     PropertyMaps props = new PropertyMaps();
-    props.setProperty("1", new ConstantProperty("var", "foo"));
-    props.setProperty("1", new ConstantProperty("xxx", "bar"));
+    props.setProperty("1", new ConstantProperty("var", "foo", ""));
+    props.setProperty("1", new ConstantProperty("xxx", "bar", ""));
     
     assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
     assertEquals("fooxyz", StringOps.replaceVariables("${var}xyz",props,PropertyMaps.TO_STRING));

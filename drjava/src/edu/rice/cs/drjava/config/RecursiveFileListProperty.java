@@ -55,8 +55,8 @@ public class RecursiveFileListProperty extends LazyFileListProperty {
   /** Start directory. */
   protected String _start;
   /** Create an recursive file list property. */
-  public RecursiveFileListProperty(String name, String sep, String dir, String start) {
-    super(name, sep, dir);
+  public RecursiveFileListProperty(String name, String sep, String dir, String start, String help) {
+    super(name, sep, dir, help);
     _start = start;
     resetAttributes();
   }

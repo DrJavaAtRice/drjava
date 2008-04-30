@@ -52,8 +52,8 @@ import java.io.*;
 public class EagerFileProperty extends DrJavaProperty {
   protected Lambda<File,Void> _getFile;
   /** Create an eager file property. */
-  public EagerFileProperty(String name, Lambda<File,Void> getFile) {
-    super(name);
+  public EagerFileProperty(String name, Lambda<File,Void> getFile, String help) {
+    super(name,help);
     _getFile = getFile;
     resetAttributes();
   }
@@ -99,7 +99,7 @@ public class EagerFileProperty extends DrJavaProperty {
   public void update() {
     try {
       File f;
-      if (_attributes.get("dir").equals("/")) {
+      if (_attributes.get("rel").equals("/")) {
         f = _getFile.apply(null).getAbsoluteFile();
         try {
           f = f.getCanonicalFile();
@@ -109,16 +109,16 @@ public class EagerFileProperty extends DrJavaProperty {
       }
       else {
         f = FileOps.makeRelativeTo(_getFile.apply(null),
-                                   new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+                                   new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
         _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
       }
     }
-    catch(IOException e) { _value = "Error."; }
-    catch(SecurityException e) { _value = "Error."; }
+    catch(IOException e) { _value = "(Error...)"; }
+    catch(SecurityException e) { _value = "(Error...)"; }
   }    
 
   public void resetAttributes() {
     _attributes.clear();
-    _attributes.put("dir", "/");
+    _attributes.put("rel", "/");
   }
 } 

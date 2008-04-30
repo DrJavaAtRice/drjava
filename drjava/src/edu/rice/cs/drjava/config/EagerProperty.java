@@ -45,8 +45,8 @@ import java.util.Iterator;
   */
 public abstract class EagerProperty extends DrJavaProperty {
   /** Create an eager property. */
-  public EagerProperty(String name) {
-    super(name);
+  public EagerProperty(String name, String help) {
+    super(name, help);
     resetAttributes();
   }
   

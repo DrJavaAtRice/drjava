@@ -45,7 +45,7 @@ import java.util.Iterator;
 public class ConfigProperty extends EagerProperty {
   /** Create a configuration property. */
   public ConfigProperty(String name) {
-    super(name);
+    super(name, "Help not available.");
     resetAttributes();
   }
 

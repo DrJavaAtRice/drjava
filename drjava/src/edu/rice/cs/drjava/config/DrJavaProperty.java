@@ -55,6 +55,8 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   protected String _value = "--uninitialized--";
   /** Is the value current? */
   protected boolean _isCurrent = false;
+  /** Help page for this property. */
+  protected String _help = "Help unavailable.";
   /** Map of attributes. */
   protected HashMap<String,String> _attributes = new HashMap<String,String>();
   /** Set of other properties that are listening to this property, i.e.
@@ -62,16 +64,18 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   protected Set<DrJavaProperty> _listening = new HashSet<DrJavaProperty>();
   
   /** Create a property. */
-  public DrJavaProperty(String name) {
+  public DrJavaProperty(String name, String help) {
     if (name==null) { throw new IllegalArgumentException("DrJavaProperty name is null"); }
     _name = name;
+    if (help!=null) { _help = help; } 
     resetAttributes();
   }
 
   /** Create a property. */
-  public DrJavaProperty(String name, String value) {
-    this(name);
+  public DrJavaProperty(String name, String value, String help) {
+    this(name, help);
     if (value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (help!=null) { _help = help; } 
     _value = value;
     _isCurrent = true;
   }
@@ -125,6 +129,11 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
     return _value;
   }
   
+  /** Return the value, which might be stale. */
+  public String getHelp() {
+    return _help;
+  }
+
   /** Return true if the value is current. */
   public boolean isCurrent() { return _isCurrent; }
     

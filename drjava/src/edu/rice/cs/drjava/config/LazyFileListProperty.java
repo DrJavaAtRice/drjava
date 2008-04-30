@@ -54,8 +54,8 @@ public abstract class LazyFileListProperty extends DrJavaProperty {
   /** Relative directory. */
   protected String _dir;
   /** Create an lazy file list property. */
-  public LazyFileListProperty(String name, String sep, String dir) {
-    super(name);
+  public LazyFileListProperty(String name, String sep, String dir, String help) {
+    super(name, help);
     _sep = sep;
     _dir = dir;
     resetAttributes();

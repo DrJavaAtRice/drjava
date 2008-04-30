@@ -3340,11 +3340,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     super.setVisible(b); 
   }
   
+  /** This method sets up all the DrJava properties that can be used as variables
+    * in external process command lines. */
   public void setUpDrJavaProperties() {
     final String DEF_DIR = "${drjava.working.dir}";
     
     // fake "Config" properties
-    PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.master.jvm.args.combined") {
+    PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.master.jvm.args.combined",
+                                                              "This property contains all the JVM arguments passed "+
+                                                              "to DrJava's master JVM, i.e. the JVM the user is editing "+
+                                                              "programs in. The arguments from the \"JVM Args for "+
+                                                              "Main JVM\" and the special -X arguments from \"Maximum "+
+                                                              "Heap Size for Main JVM\" are combined.") {
       public void update() {
         StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(MASTER_JVM_XMX));
         if (sb.length()>0) { sb.append(" "); }
@@ -3357,7 +3364,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.master.jvm.args"))
       .listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.master.jvm.xmx"));
     
-    PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.slave.jvm.args.combined") {
+    PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.slave.jvm.args.combined",
+                                                              "This property contains all the JVM arguments passed "+
+                                                              "to DrJava's master JVM, i.e. the JVM the user is editing "+
+                                                              "programs in. The arguments from the \"JVM Args for "+
+                                                              "Slave JVM\" and the special -X arguments from \"Maximum "+
+                                                              "Heap Size for Main JVM\" are combined.") {
       public void update() {
         StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
         if (sb.length()>0) { sb.append(" "); }
@@ -3373,16 +3385,29 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // Files
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.current.file", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getActiveDocument().getRawFile(); }
-    }));
+    }, 
+                                                                  "Returns the current document in DrJava.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which the output should be relative\""));
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.working.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getInteractionsModel().getWorkingDirectory(); }
-    }));
+    },
+                                                                  "Returns the current working directory of DrJava.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which output should be relative\""));
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMasterWorkingDirectory(); }
-    }));
-    
+    },
+                                                                  "Returns the working directory of the DrJava master JVM.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which output should be relative\""));
+
     // Files
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
+                                                                      "Returns a list of all files open in DrJava.\n"+
+                                                                      "Optional attributes:\n"+
+                                                                      "\trel=\"<dir to which output should be relative\"\n"+
+                                                                      "\tsep=\"<separator between files>\"") {
       protected List<File> getList() {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) {
@@ -3391,7 +3416,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         return l;
       }
     });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR,
+                                                                      "Returns a list of all files open in DrJava that belong "+
+                                                                      "to a project and are underneath the project root.\n"+
+                                                                      "Optional attributes:\n"+
+                                                                      "\trel=\"<dir to which output should be relative\"\n"+
+                                                                      "\tsep=\"<separator between files>\"") {
       protected List<File> getList() {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getProjectDocuments()) {
@@ -3400,7 +3430,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         return l;
       }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR,
+                                                                      "Returns a list of all files open in DrJava that are "+
+                                                                      "not underneath the project root but are included in "+
+                                                                      "the project.\n"+
+                                                                      "Optional attributes:\n"+
+                                                                      "\trel=\"<dir to which output should be relative\"\n"+
+                                                                      "\tsep=\"<separator between files>\"") {
       protected List<File> getList() {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getAuxiliaryDocuments()) {
@@ -3409,7 +3445,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         return l;
       }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
+                                                                      "Returns a list of all files open in DrJava that are "+
+                                                                      "not underneath the project root and are not included in "+
+                                                                      "the project.\n"+
+                                                                      "Optional attributes:\n"+
+                                                                      "\trel=\"<dir to which output should be relative\"\n"+
+                                                                      "\tsep=\"<separator between files>\"") {
       protected List<File> getList() {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getNonProjectDocuments()) {
@@ -3420,7 +3462,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
     
     // Misc
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.time.millis") {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.time.millis",
+                                                              "Returns the current time in milliseconds since 01/01/1970, "+
+                                                              "unless other format is specified by the fmt attribute.\n"+
+                                                              "Optional attributes:\n"+
+                                                              "\tfmt=\"full\" or \"long\" or \"medium\" or \"short\"") {
       public void update() {
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
@@ -3447,13 +3493,25 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
-    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("if") {
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("if",
+                                                             "If the cond attribute evaluates to true, returns "+
+                                                             "the evaluation of the then attribute, otherwise "+
+                                                             "the evaluation of the else attribute.\n"+
+                                                             "Required attribute:\n"+
+                                                             "\tcond=\"<string evaluating to true of false>\"\n"+
+                                                             "Optional attributes:\n"+
+                                                             "\tthen=\"<evaluated if true>\"\n"+
+                                                             "\telse=\"<evaluated if false>\"") {
       public String toString() {
         invalidate();
         update();
         return _value;
       }
       public void update() {
+        if (_attributes.get("cond")==null) {
+          _value = "(if Error...)";
+          return;
+        }
         if (_attributes.get("cond").toLowerCase().equals("true")) {
           _value = _attributes.get("then");
         }
@@ -3461,7 +3519,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _value = _attributes.get("else");
         }
         else {
-          _value = "Error. cond not set to true or false.";
+          _value = "(if Error...)";
           return;
         }
       }
@@ -3471,13 +3529,19 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public void resetAttributes() {
         _attributes.clear();
-        _attributes.put("cond", "");
+        _attributes.put("cond", null);
         _attributes.put("then", "");
         _attributes.put("else", "");
       }
     });
         
-    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("tmpfile") {
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("tmpfile",
+                                                             "Creates a temporary file and returns the name of it.\n"+
+                                                             "Optional attributes:\n"+
+                                                             "\tname=\"<name for temp file>\"\n"+
+                                                             "\tdir=\"<dir for temp file>\"\n"+
+                                                             "\tkeep=\"<true if the file should not be erased>\"\n"+
+                                                             "\tcontent=\"<text to go into the file>\"") {
       java.util.Random _r = new java.util.Random();
       public String toString() {
         invalidate();
@@ -3530,7 +3594,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
         
-    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("input", "(User Input...)") {
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("input", "(User Input...)",
+                                                             "Get an input string from the user.\n"+
+                                                             "Optional attributes:\n"+
+                                                             "\tprompt=\"<prompt to display>\"\n"+
+                                                             "\tdefault=\"<suggestion to the user>\"") {
       public String toString() {
         return "(User Input...)";
       }
@@ -3555,10 +3623,130 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
-    PropertyMaps.ONLY.setProperty("Misc", new RecursiveFileListProperty("find", File.pathSeparator, DEF_DIR, DEF_DIR));
+    PropertyMaps.ONLY.setProperty("Misc", new RecursiveFileListProperty("find", File.pathSeparator, DEF_DIR, DEF_DIR,
+                                                                        "Return a list of files found in the starting dir.\n"+
+                                                                        "Optional attributes:\n"+
+                                                                        "\tsep=\"<separator between files>\"\n"+
+                                                                        "\tdir=\"<dir where to start>\"\n"+
+                                                                        "\trel=\"<dir to which the files are relative>\"\n"+
+                                                                        "\tfilter=\"<filter, like *.txt, for files to list>\"\n"+
+                                                                        "\tdirfilter=\"<filter for which dirs to recurse>\""));
+
+    // XML properties, correspond to XMLConfig
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("xml.in", "(XML Input...)",
+                                                             "Read data from an XML file.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file with the XML>\"\n"+
+                                                             "\tpath=\"<path into the XML tree>\"\n"+
+                                                             "\tdefault=\"<default value if not found>\"\n"+
+                                                             "\tmulti=\"<true if multiple values are allowed>\"\n"+
+                                                             "\tsep=\"<separator between results>\"") {
+      public String toString() {
+        return "(XML Input...)";
+      }
+      public void update() {
+        String xmlfile = _attributes.get("file");
+        String xmlpath = _attributes.get("path");
+        String defval = _attributes.get("default");
+        String multi = _attributes.get("multi");
+        String sep = _attributes.get("sep");
+        if ((xmlfile==null) ||
+            (xmlpath==null) ||
+            (defval==null)) {
+          _value = "(XML Input Error...)";
+          return;
+        }
+        try {
+          File f = new File(xmlfile);
+          if (!f.exists()) {
+            _value = defval;
+            return;
+          }
+          XMLConfig xc = new XMLConfig(f);
+          List<String> values = xc.getMultiple(xmlpath);
+          if (!"true".equals(multi.toLowerCase())) {
+            if (values.size()!=1) {
+              _value = defval;
+              return;
+            }
+            _value = values.get(0);
+            return;
+          }
+          StringBuilder sb = new StringBuilder();
+          for (String v: values) {
+            sb.append(sep);
+            sb.append(v);
+          }
+          _value = sb.toString().substring(1);
+        }
+        catch(XMLConfigException xce) {
+          _value = defval;
+        }
+      }
+      public String getCurrent() {
+        invalidate();
+        return super.getCurrent();
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("path", null);
+        _attributes.put("default", null);
+        _attributes.put("multi", "true");
+        _attributes.put("sep", File.pathSeparator);
+      }
+    });
     
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("xml.out.action", "(XML Output...)",
+                                                             "Write data to an XML file. Since this is an "+
+                                                             "action, it will not produce any output, but it will "+
+                                                             "write to the XML file.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file with the XML>\"\n"+
+                                                             "\tpath=\"<path into the XML tree>\"\n"+
+                                                             "\tcontent=\"<value to write into the XML>\"\n"+
+                                                             "\tappend=\"<true to append, false to overwrite existing>\"") {
+      public String toString() {
+        return "(XML Output...)";
+      }
+      public void update() {
+        String xmlfile = _attributes.get("file");
+        String xmlpath = _attributes.get("path");
+        String content = _attributes.get("content");
+        String append = _attributes.get("append");
+        if ((xmlfile==null) ||
+            (xmlpath==null)) {
+          _value = "(XML Output Error...)";
+        }
+        try {
+          File f = new File(xmlfile);
+          XMLConfig xc;
+          if (f.exists()) { xc = new XMLConfig(f); }
+          else { xc = new XMLConfig(); }
+          xc.set(xmlpath, content, append.toLowerCase().equals("false"));
+          xc.save(xmlfile);
+          _value = "";
+        }
+        catch(XMLConfigException xce) {
+          _value = "(XML Output Error...)";
+        }
+      }
+      public String getCurrent() {
+        invalidate();
+        return super.getCurrent();
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("path", null);
+        _attributes.put("content", "");
+        _attributes.put("append", "false");
+      }
+    });
+
     // Project
-    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode") {
+    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode",
+                                                               "Evaluates to true if a project is loaded.") {
       public void update() {
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
@@ -3573,7 +3761,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.changed") {  //TODO: factor out repeated code!
+    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.changed",
+                                                               "Evaluates to true if the project has been "+
+                                                               "changed since the last save.") {  //TODO: factor out repeated code!
       public void update() {
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
@@ -3590,19 +3780,33 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.file", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getProjectFile(); }
-    }));
+    },
+                                                                   "Returns the current project file in DrJava.\n"+
+                                                                   "Optional attributes:\n"+
+                                                                   "\trel=\"<dir to which the output should be relative\""));
+
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.main.class", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMainClass(); }
-    }));
+    },
+                                                                   "Returns the current project file in DrJava.\n"+
+                                                                   "Optional attributes:\n"+
+                                                                   "\trel=\"<dir to which the output should be relative\""));
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.root", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getProjectRoot(); }
-    }));
+    },
+                                                                   "Returns the current project root in DrJava.\n"+
+                                                                   "Optional attributes:\n"+
+                                                                   "\trel=\"<dir to which the output should be relative\""));
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.build.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getBuildDirectory(); }
-    }));
+    },
+                                                                   "Returns the current build directory in DrJava.\n"+
+                                                                   "Optional attributes:\n"+
+                                                                   "\trel=\"<dir to which the output should be relative\""));
     RecursiveFileListProperty classFilesProperty = 
       new RecursiveFileListProperty("project.class.files", File.pathSeparator, DEF_DIR,
-                                    _model.getBuildDirectory().getAbsolutePath()) {
+                                    _model.getBuildDirectory().getAbsolutePath(),
+                                    "Returns the class files currently in the build directory.") {
       /** Reset the attributes. */
       public void resetAttributes() {
         _attributes.clear();

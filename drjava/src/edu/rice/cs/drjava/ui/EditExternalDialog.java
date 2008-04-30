@@ -313,6 +313,8 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   /** Method that handels the OK button */
   private void _ok() {
     _lastState = new FrameState(this);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,
+                                  DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT));
     this.setVisible(false);
   }
   

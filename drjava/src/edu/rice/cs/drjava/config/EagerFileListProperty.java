@@ -54,8 +54,8 @@ public abstract class EagerFileListProperty extends EagerProperty {
   /** Relative directory. */
   protected String _dir;
   /** Create an eager property. */
-  public EagerFileListProperty(String name, String sep, String dir) {
-    super(name);
+  public EagerFileListProperty(String name, String sep, String dir, String help) {
+    super(name,help);
     _sep = sep;
     _dir = dir;
     resetAttributes();
@@ -95,7 +95,7 @@ public abstract class EagerFileListProperty extends EagerProperty {
       sb.append(_attributes.get("sep"));
       try {
         File f = FileOps.makeRelativeTo(fil,
-                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
         try {
           f = f.getCanonicalFile();
         }
@@ -113,7 +113,7 @@ public abstract class EagerFileListProperty extends EagerProperty {
   public void resetAttributes() {
     _attributes.clear();
     _attributes.put("sep", _sep);
-    _attributes.put("dir", _dir);
+    _attributes.put("rel", _dir);
   }
 
   /** @return true if the specified property is equal to this one. */
