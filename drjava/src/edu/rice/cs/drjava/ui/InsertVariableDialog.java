@@ -68,6 +68,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
    */
   private JTextField _varValueField;
   
+  /** Help/Description for the variable. */
+  private JTextPane _helpPane;
+  
   /** Button to accept the selection.
    */
   private JButton _okBtn;
@@ -117,6 +120,14 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     buttons.add(_okBtn);
     buttons.add(_cancelBtn);
     
+    _helpPane = new JTextPane();
+    _helpPane.setToolTipText("Description of the variable.");
+    _helpPane.setEditable(false);
+    _helpPane.setPreferredSize(new Dimension(500,150));
+    _helpPane.setBorder(new javax.swing.border.EmptyBorder(0,10,0,10));
+    JScrollPane helpPaneSP = new JScrollPane(_helpPane);
+    helpPaneSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+      
     _varValueField = new JTextField();
     updatePanes();
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -127,6 +138,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
         DrJavaProperty value = properties.get(key);
         _varValueField.setText(value.toString());
+        _helpPane.setText(value.getHelp());
         _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
       }
     });
@@ -136,17 +148,27 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     JPanel bottom = new JPanel(new BorderLayout());
     bottom.add(_varValueField, BorderLayout.CENTER);    
     bottom.add(buttons, BorderLayout.SOUTH);
-    new JPanel(new BorderLayout());
     main.add(bottom, BorderLayout.SOUTH);
+
+    GridBagLayout gridbag = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    JPanel top = new JPanel(gridbag);
+    Insets insets = new Insets(0, 10, 5, 10);
+//    JPanel top = new JPanel(new GridLayout(2,1));
     
-    String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
-    Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
-    String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
-    DrJavaProperty value = properties.get(key);
-    _varValueField.setText(value.toString());
-    _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
-    
-    main.add(_tabbedPane, BorderLayout.CENTER);
+    c.fill = GridBagConstraints.BOTH;
+    c.weightx = 1.0;
+    c.weighty = 3.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    gridbag.setConstraints(_tabbedPane, c);
+    top.add(_tabbedPane);
+
+    c.fill = GridBagConstraints.BOTH;
+    c.weighty = 1.0;
+    c.insets = insets;
+    gridbag.setConstraints(_helpPane, c);
+    top.add(_helpPane);
+    main.add(top, BorderLayout.CENTER);
     
     //The following line enables to use scrolling tabs.
     _tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -162,9 +184,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     
     super.getContentPane().add(main);
     super.setResizable(false);
-    pack();
-    
-    MainFrame.setPopupLoc(this, _mainFrame);    
+    pack();        
+
+    MainFrame.setPopupLoc(InsertVariableDialog.this, _mainFrame);
   }
   
   protected JScrollPane createPane(final String category, final Map<String, DrJavaProperty> props) {
@@ -189,9 +211,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     JScrollPane varTableSP = new JScrollPane(_varTable.get(category));
     varTableSP.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     varTableSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-//    _varTable.setMinimumSize(new Dimension(300, 200));
-//    _varTable.setPreferredSize(new Dimension(300, 200));
     _varTable.get(category).setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    _varTable.get(category).setDragEnabled(false);
+    _varTable.get(category).setPreferredScrollableViewportSize(new Dimension(500,250));
     _varTable.get(category).putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
     ListSelectionModel lsm = _varTable.get(category).getSelectionModel();
     lsm.addListSelectionListener(new ListSelectionListener() {
@@ -200,6 +222,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         DrJavaProperty value = PropertyMaps.ONLY.getProperty(category,key);
         _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
         _varValueField.setText(value.toString());
+        _helpPane.setText(value.getHelp());
       }
     });
     _varTable.get(category).setSelectionModel(lsm);
@@ -236,6 +259,15 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     for (String category: PropertyMaps.ONLY.getCategories()) {
       _tabbedPane.addTab(category, createPane(category, PropertyMaps.ONLY.getProperties(category)));
     }
+    _tabbedPane.setSelectedIndex(0);
+    String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
+    Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
+    _varTable.get(category).getSelectionModel().setSelectionInterval(0,0);
+    String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+    DrJavaProperty value = properties.get(key);
+    _varValueField.setText(value.toString());
+    _helpPane.setText(value.getHelp());
+    _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
   }
   
   public edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> getSelected() { return _selected; }

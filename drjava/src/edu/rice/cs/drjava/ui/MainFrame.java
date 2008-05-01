@@ -8046,14 +8046,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   void askToIncreaseSlaveMaxHeap() {
     String value = "set to "+DrJava.getConfig().getSetting(SLAVE_JVM_XMX)+" MB";
     if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
-        (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
+        ((OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
       value = "not set, implying the system's default";
     }
     
     String res = (String)JOptionPane.showInputDialog(MainFrame.this,
                                                      "Your program ran out of memory. You may try to enter a larger\n" +
                                                      "maximum heap size for the Interactions JVM. The maximum heap size is\n" +
-                                                     "currently "+value+".",
+                                                     "currently "+value+".\n"+
+                                                     "A restart is required after changing this setting.",
                                                      "Increase Maximum Heap Size?",
                                                      JOptionPane.QUESTION_MESSAGE,
                                                      null,
@@ -8082,14 +8083,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   void askToIncreaseMasterMaxHeap() {
     String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX)+" MB";
     if ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX)))) &&
-        (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX))))) { 
+        ((OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX))))) { 
       value = "not set, implying the system's default";
     }
     
     String res = (String)JOptionPane.showInputDialog(MainFrame.this,
                                                      "Your program ran out of memory. You may try to enter a larger\n"+
-                                                     "maximum heap size for the Interactions JVM. The maximum heap size is\n"+
-                                                     "currently "+value+".",
+                                                     "maximum heap size for the main JVM. The maximum heap size is\n"+
+                                                     "currently "+value+".\n"+
+                                                     "A restart is required after changing this setting.",
                                                      "Increase Maximum Heap Size?",
                                                      JOptionPane.QUESTION_MESSAGE,
                                                      null,

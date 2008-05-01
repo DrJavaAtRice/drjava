@@ -99,8 +99,12 @@ public class EagerFileProperty extends DrJavaProperty {
   public void update() {
     try {
       File f;
+      if ((_getFile==null)||((f = _getFile.apply(null))==null)) {
+        _value = "(File error...)";
+        return;
+      }
       if (_attributes.get("rel").equals("/")) {
-        f = _getFile.apply(null).getAbsoluteFile();
+        f = f.getAbsoluteFile();
         try {
           f = f.getCanonicalFile();
         }
@@ -108,7 +112,7 @@ public class EagerFileProperty extends DrJavaProperty {
         _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
       }
       else {
-        f = FileOps.makeRelativeTo(_getFile.apply(null),
+        f = FileOps.makeRelativeTo(f,
                                    new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
         _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
       }
