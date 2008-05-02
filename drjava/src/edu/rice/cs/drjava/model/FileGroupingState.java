@@ -160,6 +160,8 @@ public interface FileGroupingState {
   
   public File[] getExcludedFiles();
   
+  public void removeExcludedFile(File f);
+  
   public boolean getAutoRefreshStatus();
   
   public void setAutoRefreshStatus(boolean b);

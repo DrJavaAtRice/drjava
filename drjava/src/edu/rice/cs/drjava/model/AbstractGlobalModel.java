@@ -735,6 +735,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
+    public void removeExcludedFile(File f) {
+      synchronized(_excludedFiles) {
+        for(int i = 0;i<_excludedFiles.size();i++) {
+          try {
+            if(_excludedFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath()))
+              _excludedFiles.remove(i);
+          }
+          catch(IOException e) {}
+        }
+      }
+    }
+    
     public File[] getExcludedFiles() {
       return _excludedFiles.toArray(new File[_excludedFiles.size()]);
     }
@@ -949,6 +961,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isExcludedFile(File f) { return false; }
     public File[] getExcludedFiles() { return null; }
     public void addExcludedFile(File f) {}
+    public void removeExcludedFile(File f) {}
     public boolean getAutoRefreshStatus() {return false;}
     public void setAutoRefreshStatus(boolean b) {}
     
@@ -1227,6 +1240,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         //always return last opened Doc
         retDocs.add(d);
         filesOpened.add(d);
+        if(_state.isExcludedFile(f))
+          _state.removeExcludedFile(f);
       }
       catch (AlreadyOpenException aoe) {
         OpenDefinitionsDocument d = aoe.getOpenDocument();
