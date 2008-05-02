@@ -413,6 +413,11 @@ public class JarOptionsDialog extends JFrame {
     chooser.addChoosableFileFilter(filter);
     
     _mainClassField = new FileSelectorStringComponent(this, chooser, 20, 12f) {
+      protected void _chooseFile() {
+        _mainFrame.removeModalWindowAdapter(JarOptionsDialog.this);
+        super._chooseFile();
+        _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, NO_OP, CANCEL);
+      }
       public File convertStringToFile(String s) { 
         s = s.trim().replace('.', java.io.File.separatorChar) + ".class";
         if (s.equals("")) return null;
@@ -469,7 +474,14 @@ public class JarOptionsDialog extends JFrame {
     fileChooser.setMultiSelectionEnabled(false);
     fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
     
-    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f, false);
+    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f, false) {
+      /** Opens the file chooser to select a file, putting the result in the file field. */
+      protected void _chooseFile() {
+        _mainFrame.removeModalWindowAdapter(JarOptionsDialog.this);
+        super._chooseFile();
+        _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, NO_OP, CANCEL);
+      }
+    };
     _jarFileSelector.setFileFilter(new FileFilter() {
       public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
       public String getDescription() { return "Java Archive Files (*.jar)"; }
@@ -735,14 +747,22 @@ public class JarOptionsDialog extends JFrame {
     return true;
   }
   
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      JarOptionsDialog.this.toFront();
-    }
-    public void windowClosing(WindowEvent we) {
-      _cancel();
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
     }
   };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      _cancel();
+      return null;
+    }
+  };  
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
@@ -750,7 +770,7 @@ public class JarOptionsDialog extends JFrame {
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      addWindowListener(_windowListener);
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();
@@ -759,7 +779,7 @@ public class JarOptionsDialog extends JFrame {
       toFront();
     }
     else {
-      removeWindowFocusListener(_windowListener);
+      _mainFrame.removeModalWindowAdapter(this);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }

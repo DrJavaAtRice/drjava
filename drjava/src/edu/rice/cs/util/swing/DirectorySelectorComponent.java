@@ -229,7 +229,7 @@ public class DirectorySelectorComponent extends JPanel {
   }
   
   /** Opens the file chooser to select a file, putting the result in the file field. */
-  private void _chooseFile() {
+  protected void _chooseFile() {
     
     // Get the file from the chooser
     int returnValue = _chooser.showDialog(_file);

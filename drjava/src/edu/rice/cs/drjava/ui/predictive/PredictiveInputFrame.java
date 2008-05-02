@@ -386,11 +386,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   private void init(boolean info) {
     _buttonPressed = null;
-    addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(WindowEvent winEvt) {
-        buttonPressed(_actions.get(_actions.size()-1));
-      }
-    });
     addComponentListener(new java.awt.event.ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         validate();
@@ -675,27 +670,18 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     // do nothing by default
   }
   
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      PredictiveInputFrame.this.toFront();
-    }
-    public void windowClosing(WindowEvent we) {
-      cancel();
-    }
-  };
-  
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      addWindowListener(_windowListener);
+      edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this);
       setOwnerEnabled(false);
       _textField.requestFocus();
       toFront();
     }
     else {
-      removeWindowFocusListener(_windowListener);
+      edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
       setOwnerEnabled(true);
       _owner.toFront();
     }

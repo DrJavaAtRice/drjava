@@ -210,10 +210,6 @@ public class ConfigFrame extends JFrame {
 
     _mainFrame.setPopupLoc(this);
 
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) { cancel(); }
-    });
-
     // Make sure each row is expanded (this is harder than it seems...)
     _tree.expandRow(0);
     _tree.expandRow(1);
@@ -274,13 +270,21 @@ public class ConfigFrame extends JFrame {
     _applyButton.setEnabled(false);
     ConfigFrame.this.setVisible(false);
   }
-  
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      ConfigFrame.this.toFront();
+
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
     }
-    public void windowClosing(WindowEvent we) {
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
       cancel();
+      return null;
     }
   };
   
@@ -290,14 +294,15 @@ public class ConfigFrame extends JFrame {
   public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();
     validate();
+    // made modal for now
     if (vis) {
-      addWindowListener(_windowListener);
-      _mainFrame.hourglassOn();
+//      _mainFrame.hourglassOn();
+//      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       toFront();
     }
     else {
-      removeWindowFocusListener(_windowListener);
-      _mainFrame.hourglassOff();
+//      _mainFrame.removeModalWindowAdapter(this);
+//      _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }
     super.setVisible(vis);

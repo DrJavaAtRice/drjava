@@ -189,6 +189,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     MainFrame.setPopupLoc(InsertVariableDialog.this, _mainFrame);
   }
   
+  /** Create a scroll pane for the specified category with the properties provided in the map.
+    * @param category category name
+    * @param props map from property names to actual properties in this category */
   protected JScrollPane createPane(final String category, final Map<String, DrJavaProperty> props) {
     _varTableModel.put(category,new DefaultTableModel(0,1) {
       public String getColumnName(int column) {
@@ -243,17 +246,20 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     return varTableSP;
   }
   
+  /** Close the dialog, keeping the last selection in _selected. */
   protected void _okCommand() {
     setVisible(false);
     _cm.set();
   }
   
+  /** Cancel and close the dialog. */
   protected void _cancelCommand() {
     _selected = null;
     setVisible(false);
     _cm.set();
   }
-  
+
+  /** Update the properties in all the panes. */
   protected void updatePanes() {
     _tabbedPane.removeAll();
     for (String category: PropertyMaps.ONLY.getCategories()) {
@@ -269,18 +275,27 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     _helpPane.setText(value.getHelp());
     _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
   }
-  
+
+  /** Return a pair consisting of the name of the property and the property itself. */
   public edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> getSelected() { return _selected; }
   
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      InsertVariableDialog.this.toFront();
-    }
-    public void windowClosing(WindowEvent we) {
-      _cancelCommand();
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
     }
   };
   
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      _cancelCommand();
+      return null;
+    }
+  };
+
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();
@@ -288,10 +303,10 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     if (vis) {
       updatePanes();
       _mainFrame.hourglassOn();
-      addWindowListener(_windowListener);
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
     }
     else {
-      removeWindowFocusListener(_windowListener);
+      _mainFrame.removeModalWindowAdapter(this);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }

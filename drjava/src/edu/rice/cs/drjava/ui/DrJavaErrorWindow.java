@@ -172,6 +172,23 @@ public class DrJavaErrorWindow extends JDialog {
     }
   };
   
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
+    }
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
+      return null;
+    }
+  };
+
   /** Validates before changing visibility.  Only runs in the event thread.
     * @param vis true if frame should be shown, false if it should be hidden.
     */
@@ -180,11 +197,11 @@ public class DrJavaErrorWindow extends JDialog {
     validate();
     if (vis) {
       init();
-      addWindowListener(_windowListener);
+      edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
       toFront();
     }
     else {
-      removeWindowFocusListener(_windowListener);
+      edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
       _parentFrame.toFront();
     }
     super.setVisible(vis);

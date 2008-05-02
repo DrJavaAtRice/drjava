@@ -324,7 +324,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     if ((selectedIndex<0) || (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
       return;
     }
-    _windowListenerActive = false;
+    _mainFrame.removeModalWindowAdapter(this);
     _editExternalDialogMonitor.reset();
     final ExecuteExternalDialog dialog = new ExecuteExternalDialog(_mainFrame,true,selectedIndex,_editExternalDialogMonitor);
     dialog.setVisible(true);
@@ -341,7 +341,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
                 EditExternalDialog.this.toFront();
               }
             });
-            _windowListenerActive = true;
+            _mainFrame.installModalWindowAdapter(EditExternalDialog.this, NO_OP, OK);
             updateList(selectedIndex);
           }
         });
@@ -553,14 +553,21 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     _exportButton.setEnabled(names.size()>0);
     _exportAction.setEnabled(names.size()>0);
   }
-  
-  protected volatile boolean _windowListenerActive = false;
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      if (_windowListenerActive) { EditExternalDialog.this.toFront(); }
+
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
     }
-    public void windowClosing(WindowEvent we) {
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> OK
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
       _ok();
+      return null;
     }
   };
   
@@ -571,13 +578,11 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     if (vis) {
       updateList(0);
       _mainFrame.hourglassOn();
-      addWindowListener(_windowListener);
-      _windowListenerActive = true;
+      _mainFrame.installModalWindowAdapter(this, NO_OP, OK);
       toFront();
     }
     else {
-      _windowListenerActive = false;
-      removeWindowFocusListener(_windowListener);
+      _mainFrame.removeModalWindowAdapter(this);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }

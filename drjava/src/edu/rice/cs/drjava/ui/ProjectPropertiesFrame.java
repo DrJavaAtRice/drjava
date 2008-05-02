@@ -170,10 +170,6 @@ public class ProjectPropertiesFrame extends JFrame {
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     MainFrame.setPopupLoc(this, _mainFrame);
 
-    addWindowListener(new WindowAdapter() { 
-      public void windowClosing(java.awt.event.WindowEvent e) { cancel(); } 
-    });
-
     reset();
   }
 
@@ -423,7 +419,13 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setDialogTitle("Select Project Root Folder");
     dirChooser.setApproveButtonText("Select");
 //  dirChooser.setEditable(true);
-    _projRootSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
+    _projRootSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f) {
+      protected void _chooseFile() {
+        _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+        super._chooseFile();
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+      }
+    };
     //toReturn.add(_buildDirSelector, BorderLayout.EAST);
     
     _projRootSelector.getFileField().getDocument().addDocumentListener(_applyListener);
@@ -440,7 +442,13 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setApproveButtonText("Select");
 //  dirChooser.setEditable(true);
     // (..., false); since build directory does not have to exist
-    _buildDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f, false);
+    _buildDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f, false) {
+      protected void _chooseFile() {
+        _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+        super._chooseFile();
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+      }
+    };
     _buildDirSelector.setFileField(bd);  // the file field is used as the initial file selection
     //toReturn.add(_buildDirSelector, BorderLayout.EAST);
 
@@ -455,7 +463,13 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setDialogTitle("Select Working Directory");
     dirChooser.setApproveButtonText("Select");
 //  dirChooser.setEditable(true);
-    _workDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
+    _workDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f) {
+      protected void _chooseFile() {
+        _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+        super._chooseFile();
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+      }
+    };
     //toReturn.add(_buildDirSelector, BorderLayout.EAST);
 
     _workDirSelector.getFileField().getDocument().addDocumentListener(_applyListener);
@@ -463,7 +477,18 @@ public class ProjectPropertiesFrame extends JFrame {
   }
 
   public Component _extraClassPathComponent() {
-    _extraClassPathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this);
+    _extraClassPathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this) {
+      protected Action _getAddAction() {
+        final Action a = super._getAddAction();
+        return new AbstractAction("Add") {
+          public void actionPerformed(ActionEvent ae) {
+            _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+            a.actionPerformed(ae);
+            _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+          }
+        };
+      }
+    };
     _extraClassPathList.addChangeListener(new OptionComponent.ChangeListener() {
       public Object apply(Object oc) {
         _applyButton.setEnabled(true);
@@ -498,7 +523,13 @@ public class ProjectPropertiesFrame extends JFrame {
     };
 
     chooser.addChoosableFileFilter(filter);
-    _mainDocumentSelector = new FileSelectorComponent(this, chooser, 20, 12f);
+    _mainDocumentSelector = new FileSelectorComponent(this, chooser, 20, 12f) {
+      protected void _chooseFile() {
+        _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+        super._chooseFile();
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+      }
+    };
 
     _mainDocumentSelector.getFileField().getDocument().addDocumentListener(_applyListener);
     return _mainDocumentSelector;
@@ -535,12 +566,20 @@ public class ProjectPropertiesFrame extends JFrame {
     return _jarFileSelector;
   }
 
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      ProjectPropertiesFrame.this.toFront();
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
     }
-    public void windowClosing(WindowEvent we) {
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
       cancel();
+      return null;
     }
   };
   
@@ -551,12 +590,12 @@ public class ProjectPropertiesFrame extends JFrame {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      addWindowListener(_windowListener);
       _mainFrame.hourglassOn();
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       toFront();
     }
     else {
-      removeWindowFocusListener(_windowListener);
+      _mainFrame.removeModalWindowAdapter(this);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }

@@ -198,7 +198,7 @@ public class FileSelectorComponent extends JPanel {
   }
   
   /** Opens the file chooser to select a file, putting the result in the file field. */
-  private void _chooseFile() {
+  protected void _chooseFile() {
     // Set the chooser to be in the right directory
     if (_file != null && _file.exists()) {
       _chooser.setCurrentDirectory(_file);

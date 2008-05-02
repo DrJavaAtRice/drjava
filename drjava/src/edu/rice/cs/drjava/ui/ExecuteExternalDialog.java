@@ -126,7 +126,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private JButton _commandWorkDirBtn;
   /** Last of the two text panes to have focus. */
   private JTextPane _lastCommandFocus;
-
+  
   /** Run Java button. */
   private JButton _runJavaButton;
   /** Save Java button. */
@@ -155,7 +155,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private StyledDocument _javaCommandWorkDirLineDoc;
   /** Java working directory button. */
   private JButton _javaCommandWorkDirBtn;
-
+  
   /** Style for variable the executable part. */
   SimpleAttributeSet _varCommandLineCmdStyle;
   /** Style for erroneous variable the command args part. */
@@ -172,7 +172,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   SimpleAttributeSet _javaCommandLineJVMAS;
   /** Style for normal text */
   SimpleAttributeSet _javaCommandLineCmdAS;
-
+  
   /** Style for variable the executable part. */
   SimpleAttributeSet _javaVarCommandLineCmdStyle;
   /** Style for variable the JVM args part. */
@@ -197,19 +197,19 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   DocumentListener _workDirDocumentListener;
   /** Java work directory document listener. */
   DocumentListener _javaWorkDirDocumentListener;
-
+  
   /** File chooser to open when clicking the "..." button. */
   protected DirectoryChooser _dirChooser;
-
+  
   /** Dialog to insert variables. */
   protected InsertVariableDialog _insertVarDialog;
   
   /** Completion monitor to simulate modal behavior. */
   protected CompletionMonitor _insertVarDialogMonitor = new CompletionMonitor();
-
+  
   /** Completion monitor to tell the calling dialog that we're done. Only used if _editMode is true. */
   private CompletionMonitor _cm;
-
+  
   /** Main frame. */
   protected MainFrame _mainFrame;
   /** Last frame state. It can be stored and restored. */
@@ -225,13 +225,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     "performance reasons. They will be current when executed.</html>";
   
   /** Returns the last state of the frame, i.e. the location and dimension.
-   *  @return frame state
-   */
+    *  @return frame state
+    */
   public FrameState getFrameState() { return _lastState; }
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
-   *  @param ds State to update to, or {@code null} to reset
-   */
+    *  @param ds State to update to, or {@code null} to reset
+    */
   public void setFrameState(FrameState ds) {
     _lastState = ds;
     if (_lastState != null) {
@@ -241,8 +241,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }  
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
-   *  @param s  State to update to, or {@code null} to reset
-   */
+    *  @param s  State to update to, or {@code null} to reset
+    */
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
@@ -250,13 +250,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     else MainFrame.setPopupLoc(this, _mainFrame);
     validate();
   }
-
+  
   /** Create a dialog.
-   *  @param mf the instance of mainframe to query into the project
-   *  @param editMode true if a saved external process is edited
-   *  @param editIndex index of the saved external processes to edit
-   *  @param cm completion monitor telling the calling dialog that we are done
-   */
+    *  @param mf the instance of mainframe to query into the project
+    *  @param editMode true if a saved external process is edited
+    *  @param editIndex index of the saved external processes to edit
+    *  @param cm completion monitor telling the calling dialog that we are done
+    */
   public ExecuteExternalDialog(MainFrame mf, boolean editMode, int editIndex, CompletionMonitor cm) {
     super("Execute External Process");
     _mainFrame = mf;
@@ -290,22 +290,22 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
   
   /** Create a dialog with the "Run" button.
-   *  @param mf the instance of mainframe to query into the project
-   */
+    *  @param mf the instance of mainframe to query into the project
+    */
   public ExecuteExternalDialog(MainFrame mf) {
     this(mf, false, -1, null);
   }
-
+  
   /** Build the dialog. */
   private void initComponents() {
     _dirChooser = new DirectoryChooser(this);
     _dirChooser.setDialogTitle("Select Work Directory");
     _dirChooser.setApproveButtonText("Select");
-
+    
     super.getContentPane().setLayout(new GridLayout(1,1));
-
+    
     _tabbedPane = new JTabbedPane();
-     
+    
     if (_editMode) {
       Action saveCommandAction = new AbstractAction("Save") {
         public void actionPerformed(ActionEvent e) {
@@ -371,7 +371,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     };
     _cancelCommandButton = new JButton(cancelAction);
     _cancelJavaButton = new JButton(cancelAction);
-
+    
     // set up "Command Line" panel
     _commandPanel = makeCommandPane();
     _tabbedPane.addTab("Command Line", null, _commandPanel, "Execute command line process");
@@ -380,7 +380,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _javaPanel = makeJavaPane();
     _tabbedPane.addTab("Java Class", null, _javaPanel, "Execute Java class");
     _tabbedPane.setSelectedComponent(_commandPanel);
-          
+    
     //The following line enables to use scrolling tabs.
     _tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     
@@ -412,7 +412,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     JLabel commandLineLabel = new JLabel("Command line:");
     gridbag.setConstraints(commandLineLabel, c);
     main.add(commandLineLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 32.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
@@ -426,14 +426,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           e.consume();
         }
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-           e.consume();
-           if (e.isShiftDown()) {
-             _insertCommandButton.setEnabled(false);
-             _tabbedPane.requestFocus();
-           }
-           else {
-             _commandWorkDirLine.requestFocus();
-           }
+          e.consume();
+          if (e.isShiftDown()) {
+            _insertCommandButton.setEnabled(false);
+            _tabbedPane.requestFocus();
+          }
+          else {
+            _commandWorkDirLine.requestFocus();
+          }
         }
       }
       public void  keyReleased(KeyEvent e) { }
@@ -452,16 +452,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     commandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(commandLinePreviewLabel, c);
     main.add(commandLinePreviewLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 32.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     _commandLinePreview = new JTextPane();
     _commandLinePreview.setToolTipText(STALE_TOOLTIP);
     _commandLineDoc = (StyledDocument)_commandLinePreview.getDocument();
-
+    
     // Create a style object and then set the style attributes
     _varCommandLineCmdStyle = new SimpleAttributeSet();
     StyleConstants.setBackground(_varCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
@@ -474,7 +474,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     StyleConstants.setBackground(_varErrorCommandLineCmdStyle, DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
     _varCommandLineCmdStyle = new SimpleAttributeSet();
     StyleConstants.setBackground(_varCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
-
+    
     _commandLinePreview.setEditable(false);
     _commandLinePreview.setBackground(Color.LIGHT_GRAY);
     _commandLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
@@ -490,7 +490,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     JLabel workDirLabel = new JLabel("Work directory:");
     gridbag.setConstraints(workDirLabel, c);
     main.add(workDirLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 8.0;
     c.gridwidth = GridBagConstraints.RELATIVE;
@@ -504,19 +504,19 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           e.consume();
         }
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-           e.consume();
-           if (e.isShiftDown()) {
-             _commandLine.requestFocus();
-           }
-           else {
-             _insertCommandButton.setEnabled(false);
-             if (_editMode) {
-               _saveCommandButton.requestFocus();
-             }
-             else {
-               _runCommandButton.requestFocus();
-             }
-           }
+          e.consume();
+          if (e.isShiftDown()) {
+            _commandLine.requestFocus();
+          }
+          else {
+            _insertCommandButton.setEnabled(false);
+            if (_editMode) {
+              _saveCommandButton.requestFocus();
+            }
+            else {
+              _runCommandButton.requestFocus();
+            }
+          }
         }
       }
       public void  keyReleased(KeyEvent e) { }
@@ -547,16 +547,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     commandWorkDirLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(commandWorkDirLinePreviewLabel, c);
     main.add(commandWorkDirLinePreviewLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 8.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     _commandWorkDirLinePreview = new JTextPane();
     _commandWorkDirLinePreview.setToolTipText(STALE_TOOLTIP);
     _commandWorkDirLineDoc = (StyledDocument)_commandWorkDirLinePreview.getDocument();
-
+    
     _commandWorkDirLinePreview.setEditable(false);
     _commandWorkDirLinePreview.setBackground(Color.LIGHT_GRAY);
     _commandWorkDirLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
@@ -564,7 +564,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     commandWorkDirLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(commandWorkDirLinePreviewSP, c);
     main.add(commandWorkDirLinePreviewSP);
-
+    
     panel.add(main, BorderLayout.CENTER);
     JPanel bottom = new JPanel();
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -588,10 +588,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           StringBuilder sb = new StringBuilder();
           String text = StringOps.replaceVariables(_commandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           /* List<String> cmds = StringOps.commandLineToList(text);
-          for(String s: cmds) {
-            sb.append(s);
-            sb.append(' ');
-          } */
+           for(String s: cmds) {
+           sb.append(s);
+           sb.append(' ');
+           } */
           _commandLineDoc.insertString(_commandLineDoc.getLength(),
                                        StringOps.unescapeSpacesWith1bHex(text), null);
           
@@ -602,7 +602,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
-
+          
         }
         catch(BadLocationException ble) {
           _commandLinePreview.setText("Error.");
@@ -614,7 +614,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     };
     _commandLine.getDocument().addDocumentListener(_documentListener);
     _documentListener.changedUpdate(null);
-
+    
     // update the preview of the actual command line post substitution
     _workDirDocumentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
@@ -643,7 +643,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _commandWorkDirLine.getDocument().addDocumentListener(_workDirDocumentListener);
     _commandWorkDirLine.setText("${drjava.working.dir}");
     _workDirDocumentListener.changedUpdate(null);
-
+    
     DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oce) {
         StyleConstants.setForeground(_javaCommandLineExecutableStyle, oce.value);
@@ -658,7 +658,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         _workDirDocumentListener.changedUpdate(null);
       }
     });
-
+    
     _lastCommandFocus = _commandLine;
     // do not allow preview to have focus
     _commandLine.addFocusListener(new FocusAdapter() {
@@ -708,7 +708,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     JLabel jvmArgsLabel = new JLabel("JVM arguments:");
     gridbag.setConstraints(jvmArgsLabel, c);
     main.add(jvmArgsLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 32.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
@@ -723,14 +723,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           e.consume();
         }
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-           e.consume();
-           if (e.isShiftDown()) {
-             _insertJavaButton.setEnabled(false);
-             _tabbedPane.requestFocus();
-           }
-           else {
-             _javaCommandLine.requestFocus();
-           }
+          e.consume();
+          if (e.isShiftDown()) {
+            _insertJavaButton.setEnabled(false);
+            _tabbedPane.requestFocus();
+          }
+          else {
+            _javaCommandLine.requestFocus();
+          }
         }
       }
       public void  keyReleased(KeyEvent e) { }
@@ -740,7 +740,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     jvmLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(jvmLineSP, c);
     main.add(jvmLineSP);
-
+    
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = 1;
@@ -748,12 +748,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     JLabel javaCommandLineLabel = new JLabel("Java command line:");
     gridbag.setConstraints(javaCommandLineLabel, c);
     main.add(javaCommandLineLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 32.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     _javaCommandLine = new JTextPane();
     // do not allow a newline
     _javaCommandLine.addKeyListener(new KeyListener() {
@@ -762,13 +762,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           e.consume();
         }
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-           e.consume();
-           if (e.isShiftDown()) {
-             _jvmLine.requestFocus();
-           }
-           else {
-             _javaCommandWorkDirLine.requestFocus();
-           }
+          e.consume();
+          if (e.isShiftDown()) {
+            _jvmLine.requestFocus();
+          }
+          else {
+            _javaCommandWorkDirLine.requestFocus();
+          }
         }
       }
       public void  keyReleased(KeyEvent e) { }
@@ -778,7 +778,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     javaCommandLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(javaCommandLineSP, c);
     main.add(javaCommandLineSP);
-
+    
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = 1;
@@ -787,16 +787,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     javaCommandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(javaCommandLinePreviewLabel, c);
     main.add(javaCommandLinePreviewLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 32.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     _javaCommandLinePreview = new JTextPane();
     _javaCommandLinePreview.setToolTipText(STALE_TOOLTIP);
     _javaCommandLineDoc = (StyledDocument)_javaCommandLinePreview.getDocument();
-
+    
     // Create a style object and then set the style attributes
     _javaCommandLineExecutableStyle = _javaCommandLineDoc.addStyle("ExecutableStyle", null);
     StyleConstants.setItalic(_javaCommandLineExecutableStyle, true);
@@ -823,7 +823,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     StyleConstants.setBackground(_javaVarErrorCommandLineCmdStyle, DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
     _javaVarCommandLineCmdStyle = new SimpleAttributeSet();
     StyleConstants.setBackground(_javaVarCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
-
+    
     _javaCommandLinePreview.setEditable(false);
     _javaCommandLinePreview.setBackground(Color.LIGHT_GRAY);
     _javaCommandLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
@@ -831,7 +831,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     javaCommandLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(javaCommandLinePreviewSP, c);
     main.add(javaCommandLinePreviewSP);
-
+    
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = 1;
@@ -839,7 +839,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     JLabel javaWorkDirLabel = new JLabel("Work directory:");
     gridbag.setConstraints(javaWorkDirLabel, c);
     main.add(javaWorkDirLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 12.0;
     c.gridwidth = GridBagConstraints.RELATIVE;
@@ -853,14 +853,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           e.consume();
         }
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-           e.consume();
-           if (e.isShiftDown()) {
-             _javaCommandLine.requestFocus();
-           }
-           else {
-             _insertJavaButton.setEnabled(false);
-             _runJavaButton.requestFocus();
-           }
+          e.consume();
+          if (e.isShiftDown()) {
+            _javaCommandLine.requestFocus();
+          }
+          else {
+            _insertJavaButton.setEnabled(false);
+            _runJavaButton.requestFocus();
+          }
         }
       }
       public void  keyReleased(KeyEvent e) { }
@@ -870,7 +870,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     javaCommandWorkDirLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(javaCommandWorkDirLineSP, c);
     main.add(javaCommandWorkDirLineSP);
-
+    
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
@@ -891,16 +891,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     javaCommandWorkDirLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(javaCommandWorkDirLinePreviewLabel, c);
     main.add(javaCommandWorkDirLinePreviewLabel);
-
+    
     c.weightx = 1.0;
     c.weighty = 12.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     _javaCommandWorkDirLinePreview = new JTextPane();
     _javaCommandWorkDirLinePreview.setToolTipText(STALE_TOOLTIP);
     _javaCommandWorkDirLineDoc = (StyledDocument)_javaCommandWorkDirLinePreview.getDocument();
-
+    
     _javaCommandWorkDirLinePreview.setEditable(false);
     _javaCommandWorkDirLinePreview.setBackground(Color.LIGHT_GRAY);
     _javaCommandWorkDirLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
@@ -908,7 +908,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     javaCommandWorkDirLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(javaCommandWorkDirLinePreviewSP, c);
     main.add(javaCommandWorkDirLinePreviewSP);
-
+    
     panel.add(main, BorderLayout.CENTER);
     JPanel bottom = new JPanel();
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -963,7 +963,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _javaCommandLineJVMAS,
                          _javaVarCommandLineJVMStyle,
                          _javaVarErrorCommandLineJVMStyle);
-
+          
           // Java Command line
           colorVariables(_javaCommandLine,
                          PropertyMaps.ONLY,
@@ -971,7 +971,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _javaCommandLineCmdAS,
                          _javaVarCommandLineCmdStyle,
                          _javaVarErrorCommandLineCmdStyle);
-
+          
         }
         catch(BadLocationException ble) {
           _javaCommandLinePreview.setText("Error.");
@@ -984,7 +984,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _javaCommandLine.getDocument().addDocumentListener(_javaDocumentListener);
     _jvmLine.getDocument().addDocumentListener(_javaDocumentListener);
     _javaDocumentListener.changedUpdate(null);
-
+    
     // update the preview of the actual work dir post substitution
     _javaWorkDirDocumentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
@@ -1001,7 +1001,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _javaCommandLineCmdAS,
                          _javaVarCommandLineCmdStyle,
                          _javaVarErrorCommandLineCmdStyle);
-
+          
         }
         catch(BadLocationException ble) {
           _javaCommandWorkDirLinePreview.setText("Error: "+ble);
@@ -1090,7 +1090,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
         tok.wordRange(0,255);
         tok.addQuotes("${", "}");
-
+        
         int pos = 0;
         doc.setCharacterAttributes(0,str.length(),normal,true);
         String next = null;
@@ -1115,7 +1115,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                   if (p!=null) {
                     found = true;
                     doc.setCharacterAttributes(pos,pos+next.length(),variable,true);
-
+                    
                     // found property name
                     // if we have a list of attributes
                     if (attrList.length()>0) {
@@ -1196,7 +1196,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     this.setVisible(false);
     if (_cm!=null) { _cm.set(); }
   }
-
+  
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
   
   /** Run a command and return an external process panel. */
@@ -1240,7 +1240,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
     
-    _windowListenerActive = false;
+    _mainFrame.removeModalWindowAdapter(this);
     if (_commandLinePreview.getText().length()>0) {
       runCommand("", _commandLine.getText(), _commandWorkDirLine.getText());
     }
@@ -1250,18 +1250,18 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                                     "Invalid Command Line",
                                     JOptionPane.ERROR_MESSAGE);
     }
-
+    
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
     if (_cm!=null) { _cm.set(); }    
   }
-
+  
   /** Execute the Java class. */
   private void _runJava() {
     _mainFrame.updateStatusField("Executing external Java class...");
     
-    _windowListenerActive = false;
+    _mainFrame.removeModalWindowAdapter(this);
     if (_javaCommandLinePreview.getText().length()>0) {
       runJava("", _jvmLine.getText(), _javaCommandLine.getText(),
               _javaCommandWorkDirLine.getText());
@@ -1272,7 +1272,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                                     "Invalid Command Line",
                                     JOptionPane.ERROR_MESSAGE);
     }
-
+    
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
@@ -1283,7 +1283,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private void _saveCommand() {          
     if (_editMode) {
       final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+      _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1295,7 +1297,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     }
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+      _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1311,12 +1315,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     this.setVisible(false);
     if (_cm!=null) { _cm.set(); }
   }
-
+  
   /** Save the Java class to the menu. */
   private void _saveJava() {
     if (_editMode) {
       final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+      _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1329,7 +1335,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     }
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+      _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1346,7 +1354,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     this.setVisible(false);
     if (_cm!=null) { _cm.set(); }
   }
-
+  
   /** Add new process to menu.
     * @param name process name
     * @param type type of the process, "cmdline" or "java"
@@ -1382,7 +1390,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     
     return count;
   }
-
+  
   /** Edit existing process in menu.
     * @param editIndex the index of the process to edit
     * @param name process name
@@ -1396,10 +1404,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-
+    
     names.set(editIndex,name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
-
+    
     types.set(editIndex,type);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
     
@@ -1422,7 +1430,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-
+    
     XMLConfig xc = new XMLConfig();
     System.out.println("saveToFile("+index+", "+f+")");
     System.out.println("\t"+names.get(index));
@@ -1433,7 +1441,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     xc.set("drjava/extprocess/workdir", workdirs.get(index));
     xc.save(f);
   }
-
+  
   /** Save the settings for this dialog. */
   private boolean _saveSettings() {
     _lastState = new FrameState(this);
@@ -1442,7 +1450,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Insert a variable into the command line. */
   private void _insertVariableCommand() {
-    _windowListenerActive = false;
+    _mainFrame.removeModalWindowAdapter(this);
     _insertVarDialogMonitor.reset();
     _insertVarDialog.setVisible(true);
     // start a new thread to wait for the dialog to finish
@@ -1458,7 +1466,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                 ExecuteExternalDialog.this.toFront();
               }
             });
-            _windowListenerActive = true;
+            _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, NO_OP, CANCEL);
+
             edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
             if (selected!=null) {
               String text = _lastCommandFocus.getText();
@@ -1481,7 +1490,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** insert a variable Java class command line. */
   private void _insertVariableJava() {
-    _windowListenerActive = false;
+    _mainFrame.removeModalWindowAdapter(this);
     _insertVarDialogMonitor.reset();
     _insertVarDialog.setVisible(true);
     // start a new thread to wait for the dialog to finish
@@ -1497,7 +1506,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                 ExecuteExternalDialog.this.toFront();
               }
             });
-            _windowListenerActive = true;
+            _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, NO_OP, CANCEL);
+
             edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
             if (selected!=null) {
               String text = _lastJavaFocus.getText();
@@ -1518,13 +1528,20 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     }).start();
   }
   
-  protected volatile boolean _windowListenerActive = false;
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      if (_windowListenerActive) { ExecuteExternalDialog.this.toFront(); }
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
     }
-    public void windowClosing(WindowEvent we) {
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
       _cancel();
+      return null;
     }
   };
   
@@ -1534,8 +1551,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      addWindowListener(_windowListener);
-      _windowListenerActive = true;
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       _documentListener.changedUpdate(null);
       _workDirDocumentListener.changedUpdate(null);
       _javaDocumentListener.changedUpdate(null);
@@ -1543,8 +1559,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       toFront();
     }
     else {
-      _windowListenerActive = false;
-      removeWindowFocusListener(_windowListener);
+      _mainFrame.removeModalWindowAdapter(this);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }
@@ -1560,9 +1575,11 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         (!wd.isDirectory())) {
       wd = new File(System.getProperty("user.dir"));
     }
-
+    
     _dirChooser.setSelectedFile(wd);
+    _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _dirChooser.showDialog(wd);
+    _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);      
     if (returnValue == DirectoryChooser.APPROVE_OPTION) {
       File chosen = _dirChooser.getSelectedDirectory();
       if (chosen != null) { pane.setText(chosen.toString()); };

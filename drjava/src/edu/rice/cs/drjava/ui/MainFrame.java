@@ -257,6 +257,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Listener for Main JVM */
   final private ConfigOptionListeners.MasterJVMXMXListener _masterJvmXmxListener;
   
+  /** Window adapter for "pseudo-modal" dialogs, i.e. non-modal dialogs that insist on keeping the focus. */
+  protected java.util.HashMap<Window,WindowAdapter> _modalWindowAdapters 
+    = new java.util.HashMap<Window,WindowAdapter>();
+
+  /** The owner of the modal window listener has already been taken by another window. */
+  protected volatile Window _modalWindowAdapterOwner = null;
+  
   /** For opening files.  We have a persistent dialog to keep track of the last directory from which we opened. */
   private final JFileChooser _openChooser;
   
@@ -1103,7 +1110,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       fullPackage = "";
       if (doc!=null) {
         try {
-          fullPackage = doc.getPackageNameFromDocument();
+          fullPackage = doc.getPackageName();
           if (fullPackage.length()>0) { fullPackage += '.'; }
         }
         catch(Exception e) { fullPackage = ""; }
@@ -9863,4 +9870,120 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _editExternalDialog.setVisible(true);
     }
   };
+  
+//  edu.rice.cs.util.Log MODAL_LOG = new edu.rice.cs.util.Log("modal.txt",true);
+  /** Return the modal window adapter if available, otherwise returns a non-modal dummy listener.
+    * @param w window trying to get the modal window adapter
+    * @return window adapter */
+  public synchronized void installModalWindowAdapter(Window w) {
+//    MODAL_LOG.log("installModalWindowAdapter, window = "+System.identityHashCode(w));
+    if (_modalWindowAdapters.containsKey(w)) {
+      // already installed
+//      MODAL_LOG.log("\talready installed");
+      return;
+    } 
+
+    w.setAlwaysOnTop(true);
+    
+    if (_modalWindowAdapterOwner==null) {
+//      MODAL_LOG.log("\tadapter available");
+      // modal adapter is available, claim it
+      _modalWindowAdapterOwner = w;
+      WindowAdapter wa = new WindowAdapter() {
+        public void windowDeactivated(WindowEvent we) {
+          we.getWindow().toFront();
+          we.getWindow().requestFocus();
+        }
+        public void windowIconified(WindowEvent we) {
+          we.getWindow().toFront();
+          we.getWindow().requestFocus();
+        }
+        public void windowLostFocus(WindowEvent we) {
+          we.getWindow().toFront();
+          we.getWindow().requestFocus();
+        }
+      };
+      _modalWindowAdapters.put(w, wa);
+      // install it
+      w.addWindowListener(wa);
+      w.addWindowFocusListener(wa);
+    }
+    // else nothing to do; modal adapter is already owned by another window
+  }
+
+  /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
+    * @param w window trying to get the modal window listener
+    * @param toFrontAction action to be performed after the window has been moved to the front again
+    * @param closeAction action to be performed when the window is closing
+    * @return window listener */
+  public synchronized void installModalWindowAdapter(final Window w,
+                                                     final Lambda<Void,WindowEvent> toFrontAction,
+                                                     final Lambda<Void,WindowEvent> closeAction) {
+//    MODAL_LOG.log("installModalWindowAdapter, window = "+System.identityHashCode(w));
+    if (_modalWindowAdapters.containsKey(w)) {
+      // already installed
+//      MODAL_LOG.log("\talready installed");
+      return;
+    }
+    
+    w.setAlwaysOnTop(true);
+    WindowAdapter wa;
+    if (_modalWindowAdapterOwner==null) {
+//      MODAL_LOG.log("\tadapter available");
+      // modal listener is available, claim it
+      _modalWindowAdapterOwner = w;
+      // create a window adapter performs the specified actions after delegating
+      // to the modal window adapter
+      wa = new WindowAdapter() {
+        public void windowDeactivated(WindowEvent we) {
+          we.getWindow().toFront();
+          we.getWindow().requestFocus();
+          toFrontAction.apply(we);
+        }
+        public void windowIconified(WindowEvent we) {
+          we.getWindow().toFront();
+          we.getWindow().requestFocus();
+          toFrontAction.apply(we);
+        }
+        public void windowLostFocus(WindowEvent we) {
+          we.getWindow().toFront();
+          we.getWindow().requestFocus();
+          toFrontAction.apply(we);
+        }
+        public void windowClosing(WindowEvent we) {
+          closeAction.apply(we);
+        }
+      };
+    }
+    else {
+      // modal listener is already owned by another window
+      // create a window adapter that just performs the specified actions
+      wa = new WindowAdapter() {
+        public void windowDeactivated(WindowEvent we) { toFrontAction.apply(we); }
+        public void windowIconified(WindowEvent we) { toFrontAction.apply(we); }
+        public void windowLostFocus(WindowEvent we) { toFrontAction.apply(we); }
+        public void windowClosing(WindowEvent we) { closeAction.apply(we); }
+      };
+    }
+    // install it
+    _modalWindowAdapters.put(w, wa);
+    w.addWindowListener(wa);
+    w.addWindowFocusListener(wa);
+  }
+  
+  /** Removethe modal window adapter.
+    * @param w window releasing the modal window adapter */
+  public synchronized void removeModalWindowAdapter(Window w) {
+//    MODAL_LOG.log("removeModalWindowListener, window = "+System.identityHashCode(w));
+    if (!_modalWindowAdapters.containsKey(w)) {
+      // the specified window does not have a modal windowadapter
+//      MODAL_LOG.log("\tno modal window adapter installed for this window");
+      return;
+    }
+    w.setAlwaysOnTop(false);
+    w.removeWindowListener(_modalWindowAdapters.get(w));
+    w.removeWindowFocusListener(_modalWindowAdapters.get(w));
+    _modalWindowAdapterOwner = null;
+    _modalWindowAdapters.remove(w);
+  }
 }

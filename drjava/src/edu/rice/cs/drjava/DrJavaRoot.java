@@ -45,12 +45,15 @@ import java.util.StringTokenizer;
 import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
+import java.awt.Window;
 import java.awt.dnd.*;
 import java.awt.datatransfer.*;
+import java.awt.event.WindowEvent;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
+import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -332,6 +335,30 @@ public class DrJavaRoot {
   /** User dropped something on the component. */
   public static void drop(DropTargetDropEvent dropTargetDropEvent) {
     _mainFrame.drop(dropTargetDropEvent);
+  }
+  
+    /** Return the modal window adapter if available, otherwise returns a non-modal dummy listener.
+    * @param w window trying to get the modal window adapter
+    * @return window adapter */
+  public static void installModalWindowAdapter(Window w) {
+    _mainFrame.installModalWindowAdapter(w);
+  }
+
+  /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
+    * @param w window trying to get the modal window listener
+    * @param toFrontAction action to be performed after the window has been moved to the front again
+    * @param closeAction action to be performed when the window is closing
+    * @return window listener */
+  public static void installModalWindowAdapter(final Window w,
+                                               final Lambda<Void,WindowEvent> toFrontAction,
+                                               final Lambda<Void,WindowEvent> closeAction) {
+    _mainFrame.installModalWindowAdapter(w, toFrontAction, closeAction);
+  }
+  
+  /** Removethe modal window adapter.
+    * @param w window releasing the modal window adapter */
+  public static void removeModalWindowAdapter(Window w) {
+    _mainFrame.removeModalWindowAdapter(w);
   }
 }
 

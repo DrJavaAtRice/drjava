@@ -179,15 +179,6 @@ public class NewVersionPopup extends JDialog {
     public void actionPerformed(ActionEvent e) { downloadAction(); }
   };
 
-  protected WindowAdapter _windowListener = new WindowAdapter() {
-    public void windowDeactivated(WindowEvent we) {
-      NewVersionPopup.this.toFront();
-    }
-    public void windowClosing(WindowEvent we) {
-      closeAction();
-    }
-  };
-
   protected void closeAction() {
     NewVersionPopup.this.setVisible(false);
     NewVersionPopup.this.dispose();
@@ -388,16 +379,33 @@ public class NewVersionPopup extends JDialog {
     }
   }
   
+    /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
+    }
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      closeAction();
+      return null;
+    }
+  };
+  
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      addWindowListener(_windowListener);
+      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
     }
     else {
-      removeWindowFocusListener(_windowListener);
+      _mainFrame.removeModalWindowAdapter(this);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }
