@@ -9882,8 +9882,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      MODAL_LOG.log("\talready installed");
       return;
     } 
-
-    w.setAlwaysOnTop(true);
     
     if (_modalWindowAdapterOwner==null) {
 //      MODAL_LOG.log("\tadapter available");
@@ -9926,7 +9924,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       return;
     }
     
-    w.setAlwaysOnTop(true);
     WindowAdapter wa;
     if (_modalWindowAdapterOwner==null) {
 //      MODAL_LOG.log("\tadapter available");
@@ -9980,7 +9977,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      MODAL_LOG.log("\tno modal window adapter installed for this window");
       return;
     }
-    w.setAlwaysOnTop(false);
     w.removeWindowListener(_modalWindowAdapters.get(w));
     w.removeWindowFocusListener(_modalWindowAdapters.get(w));
     _modalWindowAdapterOwner = null;
