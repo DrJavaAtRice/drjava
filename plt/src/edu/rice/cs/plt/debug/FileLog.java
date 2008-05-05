@@ -109,6 +109,15 @@ public class FileLog extends TextLog {
   }
   
   /** 
+   * Create a file log with no filter.  Shortcut for {@code new FileLog(new File(topLevelFileName))}.
+   * All logging messages will be recorded in the given file.  {@link #addFile} may be used to create 
+   * additional log files.
+   *
+  public FileLog(String topLevelFileName) {
+    this(new File(topLevelFileName));
+  }
+  
+  /** 
    * Create an empty, filtered file log.  Until {@link #addFile} is invoked, log messages will not be written 
    * anywhere.  Afterwards, messages that are permitted by the filter and mapped to some file will be recorded there.
    */

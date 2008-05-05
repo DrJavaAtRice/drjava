@@ -39,8 +39,17 @@ import edu.rice.cs.plt.lambda.Lambda;
 
 public class ContinuationTest extends TestCase {
   
+  /** Simulates a small bounded stack by failing if the stack exceeds a certain size. */
+  private static void checkStack() {
+	// stack trace is automatically filled in by the constructor
+    RuntimeException e = new RuntimeException();
+	if (e.getStackTrace().length > 100) { throw e; }
+  }
+    
+  
   /** A simple recursive function.  Should cause a stack overflow on large inputs. */
   public static boolean isEven(int x) {
+    checkStack();
     if (x == 0) { return true; }
     if (x == 1) { return false; }
     else { return isEven(x - 2); }
@@ -48,6 +57,7 @@ public class ContinuationTest extends TestCase {
   
   /** Continuation-based version of {@code isEven}.  Should be able to handle large inputs. */
   public static Continuation<Boolean> safeIsEven(final int x) {
+    checkStack();
     if (x == 0) { return ValueContinuation.make(true); }
     if (x == 1) { return ValueContinuation.make(false); }
     else {
@@ -71,21 +81,23 @@ public class ContinuationTest extends TestCase {
     assertFalse(safeIsEven(7).value());
 
     // this should cause a stack overflow
-    try { isEven(300000); fail("isEven(300000) did not overflow the stack"); }
-    catch (StackOverflowError e) { /* expected behavior */ }
+    try { isEven(500); fail("isEven(500) did not overflow the stack"); }
+    catch (RuntimeException e) { /* expected behavior */ }
     
     // this should execute without a stack overflow
-    assertTrue(safeIsEven(300000).value());
+    assertTrue(safeIsEven(500).value());
   }
   
   
   public static long sum(int n) {
+    checkStack();
     if (n == 0) return 0l;
     else return n + sum(n-1);
   }
   
   /** Continuation-based version of {@code sum}.  Should be able to handle large inputs. */
   public static Continuation<Long> safeSum(final int n) {
+    checkStack();
     if (n == 0) { return ValueContinuation.make(0l); }
     else {
       return new ArgContinuation<Long, Long>() {
@@ -115,13 +127,13 @@ public class ContinuationTest extends TestCase {
     assertEquals(21l, (long) safeSum(6).value());
 
     // this should cause a stack overflow
-    try { sum(300000); fail("sum(300000) did not overflow the stack"); }
-    catch (StackOverflowError e) { /* expected behavior */ }
+    try { sum(500); fail("sum(500) did not overflow the stack"); }
+    catch (RuntimeException e) { /* expected behavior */ }
     
     // this should execute without a stack overflow
-    long bigResult = safeSum(300000).value();
-    assertTrue(bigResult > 300000l);
-    assertTrue(bigResult < (300000l * 300000l));
+    long bigResult = safeSum(500).value();
+    assertTrue(bigResult > 500l);
+    assertTrue(bigResult < (500l * 500l));
   }
   
   
@@ -130,6 +142,7 @@ public class ContinuationTest extends TestCase {
   }
   
   private static double fibHelp(int n, double[] results) {
+    checkStack();
     if (results[n] != 0) { return results[n]; }
     else {
       double result;
@@ -146,6 +159,7 @@ public class ContinuationTest extends TestCase {
   }
   
   private static Continuation<Double> safeFibHelp(final int n, final double[] results) {
+    checkStack();
     if (results[n] != 0.0) { return ValueContinuation.make(results[n]); }
     else {
       if (n == 0) { results[0] = 0.0; return ValueContinuation.make(0.0); }
@@ -184,11 +198,11 @@ public class ContinuationTest extends TestCase {
 
   
     // this should cause a stack overflow
-    try { fib(300000); fail("fib(300000) did not overflow the stack"); }
-    catch (StackOverflowError e) { /* expected behavior */ }
+    try { fib(500); fail("fib(500) did not overflow the stack"); }
+    catch (RuntimeException e) { /* expected behavior */ }
     
     // this should execute without a stack overflow
-    assertEquals(Double.POSITIVE_INFINITY, safeFib(300000));
+    assertTrue(safeFib(500) > 500.0);
   }
   
 }
