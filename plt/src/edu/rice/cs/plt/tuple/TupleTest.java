@@ -121,13 +121,17 @@ public class TupleTest extends TestCase {
   public void OptionTest() {
     Option<String> o1 = Option.none();
     Option<String> o2 = Option.some("foo");
-    try { Option.unwrap(o1, new RuntimeException("custom exception")); fail("No exception on unwrap"); }
-    catch (RuntimeException e) { assertEquals("custom exception", e.getMessage()); }
-    assertSame("foo", Option.unwrap(o2, new RuntimeException()));
+    
+    try { o1.unwrap(); fail("No exception on unwrap"); }
+    catch (OptionUnwrapException e) { /* expected behavior */ }
+    assertSame("bar", o1.unwrap("bar"));
     o1.apply(new OptionVisitor<String, Void>() {
       public Void forNone() { /* okay */ return null; }
       public Void forSome(String s) { fail("Visitor should go to none case"); return null; }
     });
+    
+    assertSame("foo", o2.unwrap());
+    assertSame("foo", o2.unwrap("bar"));
     o2.apply(new OptionVisitor<String, Void>() {
       public Void forNone() { fail("Visitor should go to some case"); return null; }
       public Void forSome(String s) { assertSame("foo", s); return null; }

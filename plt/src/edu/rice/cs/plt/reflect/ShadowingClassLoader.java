@@ -70,7 +70,7 @@ public class ShadowingClassLoader extends ClassLoader {
    * Create a ShadowingClassLoader that will hide all non-bootstrap classes except those matching the
    * given prefixes.
    * @param parent  The parent loader
-   * @param excludePrefixes  A set of class name prefixes to match.  Each prefix must be a package or class
+   * @param includePrefixes  A set of class name prefixes to match.  Each prefix must be a package or class
    *                         name (partial names, like {@code "java.lang.Stri"}, will not match the full class
    *                         name).
    */

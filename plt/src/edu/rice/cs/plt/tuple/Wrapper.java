@@ -50,6 +50,10 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
   
   public T value() { return _value; }
   
+  public T unwrap() { return _value; }
+  
+  public T unwrap(T forNone) { return _value; }
+  
   public <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor) {
     return visitor.forSome(_value);
   }
