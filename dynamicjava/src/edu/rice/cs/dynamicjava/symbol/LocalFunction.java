@@ -53,7 +53,7 @@ public class LocalFunction implements Function {
       return null;
     }
     catch (StatementEvaluator.ReturnException e) {
-      return Option.unwrap(e.value(), (Object) null);
+      return e.value().unwrap(null);
     }
     catch (WrappedException e) {
       if (e.getCause() instanceof EvaluatorException) { throw (EvaluatorException) e.getCause(); }
