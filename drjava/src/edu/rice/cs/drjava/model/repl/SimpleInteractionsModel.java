@@ -88,7 +88,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
       Option<Object> result = _interpreter.interpret(toEval);
       if (result.isSome()) {
         String objString = null;
-        try { objString = TextUtil.toString(Option.unwrap(result)); }
+        try { objString = TextUtil.toString(result.unwrap()); }
         catch (Throwable t) { throw new EvaluatorException(t); }
         append(objString + "\n", InteractionsDocument.OBJECT_RETURN_STYLE);
       }
@@ -107,7 +107,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   public String getVariableToString(String var) {
     try {
       Option<Object> value = _interpreter.interpret(var);
-      try { return TextUtil.toString(Option.unwrap(value, "")); }
+      try { return TextUtil.toString(value.unwrap("")); }
       catch (Throwable t) { throw new EvaluatorException(t); }
     }
     catch (InterpreterException e) { return ""; }
