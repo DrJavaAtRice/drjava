@@ -11,94 +11,33 @@ http://drjava.sf.net/devdocs/
 
 -------------------------------------------------------------------------------
 
-Quick Environment Setup Instructions
-  by Brian Stoler (bstoler@rice.edu), Charles Reis (creis@rice.edu)
+QuickStart Guilde For Building DrJava
+  by Corky Cartwright (cork@rice.edu)
 
-1) Get SourceForge.net account and get added to the DrJava group.
+The following guide presumes that you already have a Java 5.0 or 6.0 SDK, subversion (svn) 1.4 or above, and ant 1.7 or above installed on your machine.  If not, follow the instructions at http://www.drjava.org/devdocs/ for setting up a DrJava development environment.
 
-2) Make a directory to be the top-level container of DrJava stuff. I recommend
-   "drjava".
+1) Make a directory to be the top-level container for you drjava code tree.  I recommend  "drjava".
 
-3) Set CVSROOT environment variable to "user@cvs.drjava.sf.net:/cvsroot/drjava",
-   substituting your SourceForge account name for user.
+2) Descend into this new directory by typing the command
 
-4) Set CVS_RSH environment variable to "ssh"
+    cd ~/drjava
 
-5) cd ~/drjava
+3) Download the drjava source code base by typing the command
 
-6) cvs -d $CVSROOT checkout src
+    svn co https://drjava.svn.sourceforge.net/svnroot/drjava/trunk/drjava
 
-7) Install Ant (version 1.5.1 or later): http://jakarta.apache.org/ant
+4) After this download completes, descend into the root directory of the dowloaded code base by typing the command
 
-8) Download the JSR-14 prototype compiler (with generics) from
-   http://developer.java.sun.com/developer/earlyAccess/adding_generics.
-   Then unzip the file you downloaded, and move the included javac.jar to
-   ~/drjava/src/edu/rice/cs/lib/jsr14.jar.
-   (Note that if you download JSR-14 v1.3, you will need Java 1.4.1.)
+     cd ~/drjava
 
-9) Set CLASSPATH environment variable to include all of the following:
-   * ~/drjava/built (this is where compiled classes will go)
-   * ~/drjava/src/edu/rice/cs/lib/jsr14.jar
-   * ~/drjava/src/edu/rice/cs/lib/junit.jar
-   * ~/drjava/src/edu/rice/cs/lib/GJv6.jar
-   * ~/drjava/src/edu/rice/cs/lib/gj-util.jar
-   * ~/drjava/src/edu/rice/cs/lib/dynamicjava.jar
-   * ~/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_0.jar
-   * ~/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_2.jar
-   * The tools.jar file in your JDK's lib directory
+5) To compile the code base and generate a jar file containing the compiled program, enter the command
 
-That should be it! Make sure all the environment variables are exported if
-you're using UNIX. Of course you'll probably want to set them from within
-a script or your .bashrc or .cshrc or whatever.
+   ant jar
 
+   which builds a jar filed named drjava-15.jar
 
-To compile the classes:
+If the build is successful, you can execute the built program by entering the command
 
-1) Change to the src/edu/rice/cs/util/ directory.
+  java -jar drjava-15.jar
 
-2) Run "ant clean compile"
-
-3) Change to the src/edu/rice/cs/drjava/ directory.
-
-4) Run "ant clean compile"
-
-5) Start DrJava with "java edu.rice.cs.drjava.DrJava" or "ant run"
-
-
--------------------------------------------------------------------------------
-
-Some potential problems and their solutions
--------------------------------------------
-Problem: You get an OutOfMemoryError when compiling or testing
-Solution: Increase the maximum JVM memory size for the JVM Ant uses.
-To do this, add to ANT_OPTS "-XmxSIZE", where SIZE is the size you'd like.
-(See "Setting ANT_OPTS" below.)
-
-Problem: Compiling DrJava gives errors at definitions involving parametric
-types 
-Solution: Put jsr14.jar in the bootclasspath. The DrJava build
-script automatically puts JSR14 into the classpath when compiling, and
-usually this works just fine. Sometimes (I've seen it only on MacOS X so
-far), this doesn't work. (On MacOS, it's because the standard
-bootclasspath already contains a copy of javac.) To get around this, we
-must put jsr14.jar in the bootclasspath of Ant's JVM. To do this, add to
-ANT_OPTS "-Xbootclasspath/p:PATH", where PATH is the full path to
-jsr14.jar (which should be $HOME/sf/src/edu/rice/cs/lib/jsr14.jar).
-(See "Setting ANT_OPTS" below.)
-
-Setting ANT_OPTS ---------------- 
-The contents of the environment variable ANT_OPTS are automatically put on
-the command line when invoking the JVM by Ant. There are three ways to set
-this variable: You can set it manually from the shell, you can set it
-automatically in your shell's startup file (.profile or .cshrc), or you
-can set it from within .antrc. .antrc is loaded by the ant shell script
-before invoking the JVM. Since ant is an sh shell script, .antrc must also
-be of that form. Here you can put in a line like this, for example, to set
-the maximum heap size to 256MB:
-
-  ANT_OPTS="$ANT_OPTS -Xmx256M"
-
--------------------------------------------------------------------------------
-To view the most current version of this document in your Web browser, go to:
- 
-http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/drjava/src/edu/rice/cs/README?rev=HEAD&content-type=text/vnd.viewcvs-markup
+If you encounter any problems, consult the Developer Docs at drjava.org by visiting http://www.drjava.org/devdocs/.
