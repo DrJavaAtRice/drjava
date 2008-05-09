@@ -146,6 +146,7 @@
         <include name="**/*.jpeg" />
         <include name="**/*.properties" />
         <!-- Additional resource files should be listed here -->
+	<include name="**/allclasses*" />
       </fileset>
     </copy>
   </target>
