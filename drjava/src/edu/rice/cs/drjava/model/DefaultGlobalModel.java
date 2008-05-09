@@ -174,6 +174,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     public void saveBeforeCompile() { }
     public void saveUntitled() { }
+    public void activeCompilerChanged() { }
   };
   
   // ---- Compiler Fields ----

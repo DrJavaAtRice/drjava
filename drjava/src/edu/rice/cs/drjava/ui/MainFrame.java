@@ -1480,20 +1480,40 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public void generateJavaAPIList() {
     if (_javaAPIList == null) {
       // generate list
-      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       String base = "";
       String suffix = "";
+      if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+        // use the compiler's version of the Java API Javadoc
+        edu.rice.cs.plt.reflect.JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
+        if (ver==edu.rice.cs.plt.reflect.JavaVersion.JAVA_1_4) {
+          linkVersion = JAVADOC_1_4_TEXT;
+        }
+        else if (ver==edu.rice.cs.plt.reflect.JavaVersion.JAVA_5) {
+          linkVersion = JAVADOC_1_5_TEXT;
+        }
+        else if (ver==edu.rice.cs.plt.reflect.JavaVersion.JAVA_6) {
+          linkVersion = JAVADOC_1_6_TEXT;
+        }
+        else {
+          linkVersion = JAVADOC_1_3_TEXT;
+        }
+      }
       if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK);
+        base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
         suffix = "/allclasses-1.3.html";
       }
       else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK);
+        base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK) + "/";
         suffix = "/allclasses-1.4.html";
       }
       else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK);
+        base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK) + "/";
         suffix = "/allclasses-1.5.html";
+      }
+      else if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
+        base = "";
+        suffix = "/allclasses-1.6.html";
       }
       else {
         // no valid Javadoc URL
@@ -1521,7 +1541,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               int lastDot = fullClassName.lastIndexOf('.');
               if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
               try {
-                _javaAPIList.add(new JavaAPIListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
+                URL pageURL = new URL(base + link + ".html");
+                _javaAPIList.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
               }
               catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
             }
@@ -3182,20 +3203,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
-    // The OptionListener for JAVADOC_LINK_VERSION.
+    // The OptionListener for JAVADOC_API_REF_VERSION.
     OptionListener<String> choiceOptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
         _javaAPIList = null;
-        _openJavadocAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
-        _openJavadocUnderCursorAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
       }
     };
-    DrJava.getConfig().addOptionListener(JAVADOC_LINK_VERSION, choiceOptionListener);
+    DrJava.getConfig().addOptionListener(JAVADOC_API_REF_VERSION, choiceOptionListener);
     
     // The OptionListener for JAVADOC_XXX_LINK.
     OptionListener<String> link13OptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
-        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
           _javaAPIList = null;
         }
@@ -3204,7 +3223,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
     OptionListener<String> link14OptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
-        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
           _javaAPIList = null;
         }
@@ -3213,13 +3232,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
     OptionListener<String> link15OptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
-        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
           _javaAPIList = null;
         }
       }
     };
     DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+    OptionListener<String> link16OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+        if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
+          _javaAPIList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
     
     // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
     _documentBreakpointHighlights = new Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
@@ -8521,6 +8549,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _model.refreshActiveDocument();
         }
       });
+    }
+    
+    /** Called after the active compiler has been changed. */
+    public void activeCompilerChanged() {
+      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+      if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+        // use Java API Javadoc of the same version as the compiler
+        // compiler was changed, rebuild list
+        _javaAPIList = null;
+        generateJavaAPIList();
+      }
     }
     
     public void runStarted(final OpenDefinitionsDocument doc) {

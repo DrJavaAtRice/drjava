@@ -432,6 +432,13 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
+  /** Called after the active compiler has been changed. */
+  public void activeCompilerChanged() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.activeCompilerChanged(); } }
+    finally { _lock.endRead(); }
+  }
+  
   //---------------------------------- JUnit ---------------------------------//
   
   /** Called when trying to test a non-TestCase class.

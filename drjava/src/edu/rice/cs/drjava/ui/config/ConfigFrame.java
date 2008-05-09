@@ -316,7 +316,7 @@ public class ConfigFrame extends JFrame {
         DrJava.getConfig().saveConfiguration();
       }
       catch (IOException ioe) {
-        JOptionPane.showMessageDialog(this,"Could not save changes to your '.drjava' file in your home directory. \n\n" + ioe,
+        JOptionPane.showMessageDialog(this,"Could not save changes to your \".drjava\" file in your home directory. \n\n" + ioe,
                                       "Could Not Save Changes",
                                       JOptionPane.ERROR_MESSAGE);
         //return false;
@@ -770,6 +770,10 @@ public class ConfigFrame extends JFrame {
   /** Add all of the components for the Javadoc panel of the preferences window. */
   private void _setupJavadocPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
+                       new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_API_REF_VERSION,
+                                                       "Java Version for \"Open Java API Javadoc\"", this,
+                                                       "The version of the Java API documentation to be used."));
+    addOptionComponent(panel, 
                        new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL,
                                                        "Access Level", this,
                                                        "<html>Fields and methods with access modifiers at this level<br>" +
@@ -790,6 +794,10 @@ public class ConfigFrame extends JFrame {
                        new StringOptionComponent(OptionConstants.JAVADOC_1_5_LINK,
                                                  "Javadoc 1.5 URL", this,
                                                  "The URL to the Java 1.5 API, for generating links to library classes."));
+    addOptionComponent(panel, 
+                       new StringOptionComponent(OptionConstants.JAVADOC_1_6_LINK,
+                                                 "Javadoc 1.6 URL", this,
+                                                 "The URL to the Java 1.6 API, for generating links to library classes."));
     
     addOptionComponent(panel, 
                        new DirectoryOptionComponent(OptionConstants.JAVADOC_DESTINATION,
@@ -805,7 +813,7 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
                                                   "Generate Javadoc From Source Roots", this,
-                                                  "<html>Whether 'Javadoc All' should generate Javadoc for all packages<br>" +
+                                                  "<html>Whether \"Javadoc All\" should generate Javadoc for all packages<br>" +
                                                   "in an open document's source tree, rather than just the document's<br>" +
                                                   "own package and sub-packages.</html>"));
     

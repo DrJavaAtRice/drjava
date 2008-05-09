@@ -55,4 +55,7 @@ public interface CompilerListener {
 
   /** Called to demand that the active document, which is untitled, be saved before compiling. */
   public void saveUntitled();
+  
+  /** Called after the active compiler has been changed. */
+  public void activeCompilerChanged();
 }

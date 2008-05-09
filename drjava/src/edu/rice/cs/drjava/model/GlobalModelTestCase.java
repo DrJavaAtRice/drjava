@@ -485,6 +485,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile int classFileErrorCount;
     protected volatile int compileStartCount;
     protected volatile int compileEndCount;
+    protected volatile int activeCompilerChangedCount;
     protected volatile int runStartCount;
     protected volatile int junitStartCount;
     protected volatile int junitSuiteStartedCount;
@@ -530,6 +531,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       classFileErrorCount = 0;
       compileStartCount = 0;
       compileEndCount = 0;
+      activeCompilerChangedCount = 0;
       runStartCount = 0;
       junitStartCount = 0;
       junitSuiteStartedCount = 0;
@@ -654,6 +656,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times compileEnded fired", i, compileEndCount);
     }
 
+    public void assertActiveCompilerChangedCount(int i) {
+      assertEquals("number of times activeCompilerChanged fired", i, activeCompilerChangedCount);
+    }
+
     public void assertRunStartCount(int i) {
       assertEquals("number of times runStarted fired", i, runStartCount);
     }
@@ -774,7 +780,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void compileStarted() { listenerFail("compileStarted fired unexpectedly"); }
     public void compileEnded(File workDir, List<? extends File> excludedFiles) { listenerFail("compileEnded fired unexpectedly"); }
-    
+    public void activeCompilerChanged() { listenerFail("activeCompilerChanged fired unexpectedly"); }
+
     public void runStarted(OpenDefinitionsDocument doc) { listenerFail("runStarted fired unexpectedly"); }
     
     public void interpreterResetting() { listenerFail("interpreterResetting fired unexpectedly"); }
@@ -960,6 +967,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //      Utilities.showDebug("compileStarted called in CSSListener");
       assertCompileStartCount(0);
       assertCompileEndCount(0);
+      assertActiveCompilerChangedCount(0);
       assertInterpreterResettingCount(0);
       assertInterpreterReadyCount(0);
       assertConsoleResetCount(0);
@@ -969,6 +977,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
+      assertActiveCompilerChangedCount(0);
       assertCompileStartCount(1);
       assertInterpreterResettingCount(0);
       assertInterpreterReadyCount(0);
@@ -976,9 +985,16 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       synchronized(this) { compileEndCount++; }
       _notifyCompileDone();
     }
+
+    @Override public void activeCompilerChanged() {
+//      Utilities.showDebug("compileEnded called in CSSListener");
+      synchronized(this) { activeCompilerChangedCount++; }
+      _notifyCompileDone();
+    }
     
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
+      assertActiveCompilerChangedCount(0);
       assertCompileStartCount(1);
 //      if (_expectReset) {
 //        assertInterpreterResettingCount(1);
@@ -1027,12 +1043,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     @Override public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
+      assertActiveCompilerChangedCount(0);
       synchronized(this) { compileStartCount++; }
     }
     
     @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
+      assertActiveCompilerChangedCount(0);
       assertCompileStartCount(1);
       assertInterpreterResettingCount(0);
       assertInterpreterReadyCount(0);
@@ -1044,6 +1062,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
+      assertActiveCompilerChangedCount(0);
     }
     
   }
@@ -1099,6 +1118,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void resetCompileCounts() { 
       compileStartCount = 0; 
       compileEndCount = 0;
+      activeCompilerChangedCount = 0;
     }
     @Override public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");

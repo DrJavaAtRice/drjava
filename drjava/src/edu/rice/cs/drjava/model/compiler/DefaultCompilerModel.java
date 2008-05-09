@@ -434,6 +434,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     else if (_compilers.contains(compiler)) {
       _active = compiler;
+      _notifier.activeCompilerChanged();
     }
     else {
       throw new IllegalArgumentException("Compiler is not in the list of available compilers: " + compiler);

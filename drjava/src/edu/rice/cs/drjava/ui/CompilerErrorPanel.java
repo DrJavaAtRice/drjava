@@ -105,6 +105,7 @@ public class CompilerErrorPanel extends ErrorPanel {
         if (e.getStateChange() == ItemEvent.SELECTED) {
           CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
           compilerModel.setActiveCompiler(compiler);
+          
           compilerModel.resetCompilerErrors();
           _compileHasOccurred = false;
           reset();

@@ -47,4 +47,5 @@ public class DummyCompilerListener implements CompilerListener {
   public void compileEnded(File workDir, List<? extends File> excludedFiles) { }
   public void saveBeforeCompile() { }
   public void saveUntitled() { }
+  public void activeCompilerChanged() { }
 }
