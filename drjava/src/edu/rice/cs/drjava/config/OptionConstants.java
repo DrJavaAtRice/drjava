@@ -835,7 +835,9 @@ public interface OptionConstants {
   static final String JAVADOC_1_6_TEXT = "1.6";
   static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
   
-  static final String[] choices = new String[]{JAVADOC_NONE_TEXT, JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT};
+  static final String[] choices = new String[]{
+    JAVADOC_NONE_TEXT, JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT,
+      JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT };
   
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(choices));
   
