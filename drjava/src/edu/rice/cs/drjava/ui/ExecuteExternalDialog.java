@@ -1124,6 +1124,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                       int added = 0;
                       BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                       atok.wordRange(0,255);
+                      atok.addQuotes("${", "}");
                       atok.addQuotes("\"", "\"");
                       atok.addKeyword(";");
                       atok.addKeyword("=");

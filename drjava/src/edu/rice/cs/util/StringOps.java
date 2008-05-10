@@ -677,6 +677,7 @@ public abstract class StringOps {
                   atok.wordRange(0,255);
                   atok.whitespaceRange(0,32); 
                   atok.addQuotes("\"", "\"");
+                  atok.addQuotes("${", "}");
                   atok.addKeyword(";");
                   atok.addKeyword("=");
                   // LOG.log("\tProcessing AttrList");
@@ -684,18 +685,18 @@ public abstract class StringOps {
                   while((n=atok.getNextToken())!=null) {
                     if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
                         n.equals(";") || n.equals("=") || n.startsWith("\"")) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected name, but was "+n);
                     }
                     String name = n;
                     // LOG.log("\t\tname = '"+name+"'");
                     n = atok.getNextToken();
                     if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected =, but was "+n);
                     }
                     // LOG.log("\t\tread '='");
                     n = atok.getNextToken();
                     if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected \", but was "+n);
                     }
                     String value = "";
                     if (n.length()>1) {
