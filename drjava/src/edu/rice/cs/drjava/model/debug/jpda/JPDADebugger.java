@@ -1398,14 +1398,14 @@ public class JPDADebugger implements Debugger {
         ArrayReference wrappedVal =
           (ArrayReference) _invokeMethod(_runningThread, _interpreterJVM, "getVariable",
                                          GET_VARIABLE_SIG, name);
-        if (wrappedVal.length() == 1) { // if it can't be found (length is 0), just ignore it
+        if ((wrappedVal!=null) && (wrappedVal.length() == 1)) { // if it can't be found (length is 0), just ignore it
           try {
             Value val = wrappedVal.getValue(0);
             if (var.type() instanceof PrimitiveType) {
               try { val = _unbox((ObjectReference) val, _runningThread); }
               catch (DebugException e) { error.log("Can't unbox variable", e); }
             }
-            if (!oldVal.equals(val)) {
+            if ((oldVal==null) || (!oldVal.equals(val))) {
               try { _runningThread.frame(0).setValue(var, val); }
               catch (InvalidTypeException e) { error.log("Can't set variable", e); }
               catch (ClassNotLoadedException e) { error.log("Can't set variable", e); }
