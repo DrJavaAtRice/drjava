@@ -576,7 +576,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 	<para>To compile all project files (source and auxiliary), even ones not currently open in DrJava, select "Project, Compile Project", or right click on the root of the project and click "Compile Project".</para>
 
-	<para>Note that all files in the External Files folder will not be compiled as part of the project--you must do this seperately.</para>
+	<para>Note that all files in the External Files folder will not be compiled as part of the project--you must do this separately.</para>
 
 	<para>You can compile from the Project Menu:</para>
 	
@@ -875,7 +875,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<listitem><formalpara>
 		<title>Classes/Packages to Exclude:</title>
-		<para> Allows you to  specify other classes/packages to step over.  This should be a comma seperated list with fully qualified names.  You might use this box to exclude instructor provided libraries, for example.</para>
+		<para> Allows you to  specify other classes/packages to step over.  This should be a comma separated list with fully qualified names.  You might use this box to exclude instructor provided libraries, for example.</para>
 	</formalpara></listitem>
 	</itemizedlist>
 
