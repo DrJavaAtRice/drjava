@@ -848,7 +848,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<section id="compileroptions">
 	<title>Compiler Options</title>
 
-	<para> The Compiler Options menu allows you to set what warnings you will be shown in the compilation window on a normal compile. An explaination of each warning is given if you hover the mouse over it.  We recommend that beginning programmers uncheck all of these boxes until they have a solid understanding of what the warnings mean.  </para>
+	<para> The Compiler Options menu allows you to set what warnings you will be shown in the compilation window on a normal compile. An explanation of each warning is given if you hover the mouse over it.  We recommend that beginning programmers uncheck all of these boxes until they have a solid understanding of what the warnings mean.  </para>
 
 		<mediaobject>
        		<imageobject>
