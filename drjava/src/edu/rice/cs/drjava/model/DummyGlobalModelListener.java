@@ -191,7 +191,7 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   public void documentNotFound(OpenDefinitionsDocument d, File f) { }
   
-   /** Called when the project's build directory has changed. */
+  /** Called when the project's build directory has changed. */
   public void projectBuildDirChanged() {  }
   
   /** Called when the project's build directory has changed. */

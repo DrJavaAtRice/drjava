@@ -923,8 +923,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       removeErrorHighlight();
       
       _position = _doc.getCurrentLocation();
-      _selStart = getSelectionStart();
-      _selEnd = getSelectionEnd();
+      _selStart = super.getSelectionStart();
+      _selEnd = super.getSelectionEnd();
 
       _savedVScroll = _scrollPane.getVerticalScrollBar().getValue();
       _savedHScroll = _scrollPane.getHorizontalScrollBar().getValue();
@@ -974,6 +974,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // Explicitly set scrollbar policies fixing bug #1445898 
     _scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
     _scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+  }
+  
+  // if the pane is inactive, use the state stored in the fields, otherwise use the super method
+  public int getSelectionStart() {
+    if (getDocument() == NULL_DOCUMENT) return _selStart;
+    else return super.getSelectionStart();
+  }
+  
+  public int getSelectionEnd() {
+    if (getDocument() == NULL_DOCUMENT) return _selEnd;
+    else return super.getSelectionEnd();
   }
   
   public int getVerticalScroll() {

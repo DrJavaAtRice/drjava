@@ -158,10 +158,15 @@ public interface FileGroupingState {
   /** Returns true if the file is excluded from the current project */
   public boolean isExcludedFile(File f);
   
+  /** Return an array of the files excluded from the current project */
   public File[] getExcludedFiles();
   
+  /** Remove the specified file from the files excluded from the current project */
   public void removeExcludedFile(File f);
   
+  /** Sets the array of files excluded from the current project */
+  public void setExcludedFiles(File[] fs);
+
   public boolean getAutoRefreshStatus();
   
   public void setAutoRefreshStatus(boolean b);

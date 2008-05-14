@@ -1245,12 +1245,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     if (_commandLinePreview.getText().length()>0) {
       runCommand("", _commandLine.getText(), _commandWorkDirLine.getText());
     }
-    else {
-      JOptionPane.showMessageDialog(this,
-                                    "Empty command line.",
-                                    "Invalid Command Line",
-                                    JOptionPane.ERROR_MESSAGE);
-    }
     
     // Always apply and save settings
     _saveSettings();
@@ -1266,12 +1260,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     if (_javaCommandLinePreview.getText().length()>0) {
       runJava("", _jvmLine.getText(), _javaCommandLine.getText(),
               _javaCommandWorkDirLine.getText());
-    }
-    else {
-      JOptionPane.showMessageDialog(this,
-                                    "Empty command line.",
-                                    "Invalid Command Line",
-                                    JOptionPane.ERROR_MESSAGE);
     }
     
     // Always apply and save settings

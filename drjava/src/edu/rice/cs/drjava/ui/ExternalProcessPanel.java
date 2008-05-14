@@ -73,6 +73,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected InputStreamReader _is = null;
   protected InputStreamReader _erris = null;
   protected JButton _updateNowButton;
+  protected JButton _runAgainButton;
   protected Thread _updateThread;
   protected Thread _deathThread;
   private char[] _buf = new char[BUFFER_SIZE];
@@ -197,6 +198,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected void updateButtons() {
     _abortButton.setEnabled((_is!=null) || (_erris!=null));
     _updateNowButton.setEnabled((_is!=null) || (_erris!=null));
+    _runAgainButton.setEnabled((_is==null) || (_erris==null));
   }  
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
@@ -205,7 +207,20 @@ public class ExternalProcessPanel extends AbortablePanel {
     _updateNowButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { updateText(false); }
     });
-    return new JComponent[] { _updateNowButton };
+    _runAgainButton = new JButton("Run Again");
+    _runAgainButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        abortActionPerformed(e);
+        StringBuilder sb = new StringBuilder("Command line:");
+        sb.append(_pc.cmdline());
+        sb.append('\n');
+        _header = sb.toString();
+        initThread(_pc);
+        _textArea.setText(_header);
+        updateText(false);
+      }
+    });
+    return new JComponent[] { _updateNowButton, _runAgainButton };
   }
   
   /** Update the text area if there is new text in the stream.

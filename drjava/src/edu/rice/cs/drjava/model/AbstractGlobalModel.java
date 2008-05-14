@@ -727,6 +727,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void addExcludedFile(File f) {
       if(f == null) return;
+      if (isAlreadyOpen(f)) return; // can't add files to the black list that are currently open
       synchronized(_excludedFiles) {
         if (_excludedFiles.add(f)) {
           setProjectChanged(true);
@@ -749,6 +750,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public File[] getExcludedFiles() {
       return _excludedFiles.toArray(new File[_excludedFiles.size()]);
+    }
+    
+    public void setExcludedFiles(File[] fs) {
+      if(fs == null) return;
+      synchronized(_excludedFiles) {
+        _excludedFiles.clear();
+        for(File f: fs) { addExcludedFile(f); }
+        setProjectChanged(true);
+      }
     }
     
     public void setBuildDirectory(File f) { _buildDir = f; }
@@ -962,6 +972,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File[] getExcludedFiles() { return null; }
     public void addExcludedFile(File f) {}
     public void removeExcludedFile(File f) {}
+    public void setExcludedFiles(File[] fs) {}
     public boolean getAutoRefreshStatus() {return false;}
     public void setAutoRefreshStatus(boolean b) {}
     
@@ -1341,7 +1352,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     catch(AlreadyOpenException e) { return null; }
 
     for(File f : allFiles) {
-      if(!_state.inProject(f) && !_state.isExcludedFile(f)) {
+      if(!isAlreadyOpen(f) && !_state.isExcludedFile(f)) {
         files.add(f);
       }
     }
@@ -1356,7 +1367,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if(newFiles == null)
       return;
     try {
-    _openFiles(newFiles);
+      _openFiles(newFiles);
     }
     catch(Exception e) {}
   }
@@ -1729,6 +1740,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     DocFile active = null;
     ArrayList<DocumentRegion> expiredBookmarks = new ArrayList<DocumentRegion>();
     ArrayList<Breakpoint> expiredBreakpoints = new ArrayList<Breakpoint>();
+    edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("docs.txt",true);
     for (DocFile f: srcFiles) {
       if (f.lastModified() > f.getSavedModDate()) {
         for (DocumentRegion r: getBookmarkManager().getRegions())
@@ -1737,9 +1749,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (r.getFile().equals( f )) expiredBreakpoints.add( r );
         f.setSavedModDate (f.lastModified());
       }
-      if (f.isActive()) active = f;
-      else projFiles.add(f);  // add to projFiles unless active
-      if(f.isActive()) active = f;
+      if (f.isActive()) { active = f; }
+      projFiles.add(f);
     }
     for (DocFile f: auxFiles) {
       if (f.lastModified() > f.getSavedModDate()) {
@@ -1749,15 +1760,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (r.getFile().equals( f )) expiredBreakpoints.add( r );
         f.setSavedModDate (f.lastModified());
       }
-      if (f.isActive()) active = f;
-      else projFiles.add(f);  // add to projFiles unless active
+      if (f.isActive()) { active = f; }
+      projFiles.add(f);
     }
     // Remove bookmarks and breakpoints for files that were modified outside of DrJava
     for (DocumentRegion r: expiredBookmarks) getBookmarkManager().removeRegion( r );
     for (Breakpoint r: expiredBreakpoints) getBreakpointManager().removeRegion( r );
-    
-    // Insert active file as last file on list.
-    if (active != null) projFiles.add(active);   
     
 //    Utilities.showDebug("Project files are: " + projFiles);
     
@@ -1786,31 +1794,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public File[] getFiles() { return filesToOpen; }
     });
     
-//    //Set active document from project file
-//    if(active != null) { //TEMP
-//      setActiveDocument(projDocs.get(projDocs.size() - 1));
-//    }
-//    OpenDefinitionsDocument.getCanonicalPath()
-////  Search for active document within opendefdocs
-//    Utilities.show("Setting Active Document...");
-//    if(active != null) {
-//      String path = projFiles.get(projFiles.size() - 1).getCanonicalPath();
-//      Utilities.show("Active document path: " + path);
-//      for(OpenDefinitionsDocument doc: projDocs) {
-//        Utilities.show("Searching path: " + doc.getCanonicalPath());
-//        if(doc.getCanonicalPath().compareTo(path) == 0) {
-//          setActiveDocument(doc);
-//          Utilities.show("New active document set");
-//          break;
-//        }
-//      }
-//    }
+    //Set active document from project file
+    if(active != null) {
+      setActiveDocument(getDocumentForFile(active));
+    }
     
     if (_documentNavigator instanceof JTreeSortNavigator) 
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths()); 
     
-    
-    if(_state.getAutoRefreshStatus()) { openNewFilesInProject(); }
+    // perform a project auto-refresh if specified
+    if(_state.getAutoRefreshStatus()) { autoRefreshProject(); }
+  }
+  
+  /** Perform an auto-refresh of the project, adding new source files to the project. */
+  public void autoRefreshProject() {
+    openNewFilesInProject();
   }
   
   /** Performs any needed operations on the model after project files have been closed.  This method is not 
@@ -1928,13 +1926,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // if the document was an auxiliary file, remove it from the list
     if (doc.isAuxiliaryFile()) { removeAuxiliaryFile(doc); }
-    //if in source folder, add to black list
-    else { 
-      try { 
-        _state.addExcludedFile(doc.getFile()); 
-      }
-      catch (Exception e) {}
-    }
     
     Utilities.invokeLater (new SRunnable() {
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
@@ -2287,6 +2278,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _state.setExtraClassPath(cp);
     setClassPathChanged(true);
     //System.out.println("Setting project classpath to: " + cp);
+  }
+  
+  /** Return an array of the files excluded from the current project */
+  public File[] getExcludedFiles() {
+    return _state.getExcludedFiles();
+  }
+  
+  /** Sets the array of files excluded from the current project */
+  public void setExcludedFiles(File[] fs) {
+    _state.setExcludedFiles(fs);
   }
   
   /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. */

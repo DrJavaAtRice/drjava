@@ -67,7 +67,7 @@ import javax.swing.filechooser.FileFilter;
 public class ProjectPropertiesFrame extends JFrame {
 
   private static final int FRAME_WIDTH = 503;
-  private static final int FRAME_HEIGHT = 360;
+  private static final int FRAME_HEIGHT = 500;
 
   private MainFrame _mainFrame;      
   private SingleDisplayModel _model; 
@@ -90,6 +90,7 @@ public class ProjectPropertiesFrame extends JFrame {
   private FileSelectorComponent _manifestFileSelector;
 
   private VectorFileOptionComponent _extraClassPathList;
+  private VectorFileOptionComponent _excludedFilesList;
 
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
   public ProjectPropertiesFrame(MainFrame mf) {
@@ -167,7 +168,12 @@ public class ProjectPropertiesFrame extends JFrame {
     cp.add(bottom);
 
     // Set all dimensions ----
-    setSize(FRAME_WIDTH, FRAME_HEIGHT);
+    Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    if (dim.width>FRAME_WIDTH) { dim.width = FRAME_WIDTH; }
+    else { dim.width -= 80; }
+    if (dim.height>FRAME_HEIGHT) { dim.height = FRAME_HEIGHT; }
+    else { dim.height -= 80; }
+    setSize(dim);
     MainFrame.setPopupLoc(this, _mainFrame);
 
     reset();
@@ -205,6 +211,10 @@ public class ProjectPropertiesFrame extends JFrame {
 
     Vector<File> cp = new Vector<File>(IterUtil.asList(_model.getExtraClassPath()));
     _extraClassPathList.setValue(cp);
+
+    cp = new Vector<File>();
+    for(File f: _model.getExcludedFiles()) { cp.add(f); }
+    _excludedFilesList.setValue(cp);
     _applyButton.setEnabled(false);
   }
 
@@ -236,6 +246,8 @@ public class ProjectPropertiesFrame extends JFrame {
     _model.setExtraClassPath(IterUtil.snapshot(extras));
 
     _model.setAutoRefreshStatus(_autoRefreshComponent.isSelected());
+
+    _model.setExcludedFiles(_excludedFilesList.getValue().toArray(new File[0]));
     
     //    _mainFrame.saveProject();
     if (projRootChanged) {
@@ -392,18 +404,38 @@ public class ProjectPropertiesFrame extends JFrame {
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
-    
+
     JLabel refreshLabel = new JLabel("Auto Refresh");
     refreshLabel.setToolTipText("<html>Whether the project will automatically open new files found within the source tree</html>");
     gridbag.setConstraints(refreshLabel, c);
     panel.add(refreshLabel);
+
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+
+    _autoRefreshComponent = new JCheckBox();
+    gridbag.setConstraints(_autoRefreshComponent, c);
+    panel.add(_autoRefreshComponent);    
+
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    //    Files excluded from auto-refresh
+    JLabel excludedLabel = new JLabel("<html>Files Excluded from<br>Auto-Refresh</html>");
+    excludedLabel.setToolTipText("<html>The list of source files excluded from project auto-refresh.<br>"+
+                                 "These files will not be added to the project.</html>");
+    gridbag.setConstraints(excludedLabel, c);
+    panel.add(excludedLabel);
     
     c.weightx = 1.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    _autoRefreshComponent = new JCheckBox();
-    panel.add(_autoRefreshComponent);
+    Component excludedComponent = _excludedFilesComponent();
+    gridbag.setConstraints(excludedComponent, c);
+    panel.add(excludedComponent);
   }
   
    private DocumentListener _applyListener = new DocumentListener() {
@@ -498,6 +530,32 @@ public class ProjectPropertiesFrame extends JFrame {
     return _extraClassPathList.getComponent();
   }
 
+  public Component _excludedFilesComponent() {
+    _excludedFilesList = new VectorFileOptionComponent(null, "Files Excluded from Auto-Refresh", this, false) {
+      protected Action _getAddAction() {
+        final Action a = super._getAddAction();
+        return new AbstractAction("Add") {
+          public void actionPerformed(ActionEvent ae) {
+            _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+            a.actionPerformed(ae);
+            _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+          }
+        };
+      }
+    };
+    _excludedFilesList.setFileFilter(new JavaSourceFilter());
+    _excludedFilesList.addChangeListener(new OptionComponent.ChangeListener() {
+      public Object apply(Object oc) {
+        _applyButton.setEnabled(true);
+        return null;
+      }
+    });
+    if (_model.getProjectRoot()!=null) {
+      _excludedFilesList.setBaseDir(_model.getProjectRoot());
+    }
+    return _excludedFilesList.getComponent();
+  }
+
   public JPanel _mainDocumentSelector() {
     final File projRoot = _getProjRoot();
 
@@ -513,16 +571,7 @@ public class ProjectPropertiesFrame extends JFrame {
 
     chooser.setApproveButtonText("Select");
 
-    FileFilter filter = new FileFilter() {
-      public boolean accept(File f) {
-        String name = f.getName();
-        return  IOUtil.isMember(f, projRoot) && (f.isDirectory() ||
-            (name.endsWith(".java") || name.endsWith(".dj0") || name.endsWith(".dj1") || name.endsWith(".dj2")));
-      }
-      public String getDescription() { return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2) in project"; }
-    };
-
-    chooser.addChoosableFileFilter(filter);
+    chooser.addChoosableFileFilter(new JavaSourceFilter());
     _mainDocumentSelector = new FileSelectorComponent(this, chooser, 20, 12f) {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);

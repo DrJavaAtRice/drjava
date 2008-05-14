@@ -258,22 +258,55 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     setVisible(false);
     _cm.set();
   }
-
+  
   /** Update the properties in all the panes. */
   protected void updatePanes() {
+    edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> sel = getSelected();
+    String selCategory = null;
+    if (sel!=null) {
+      selCategory = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
+    }
     _tabbedPane.removeAll();
     for (String category: PropertyMaps.ONLY.getCategories()) {
       _tabbedPane.addTab(category, createPane(category, PropertyMaps.ONLY.getProperties(category)));
     }
-    _tabbedPane.setSelectedIndex(0);
-    String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
-    Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
-    _varTable.get(category).getSelectionModel().setSelectionInterval(0,0);
-    String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
-    DrJavaProperty value = properties.get(key);
-    _varValueField.setText(value.toString());
-    _helpPane.setText(value.getHelp());
-    _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
+    if (sel!=null) {
+      if (selCategory==null) { sel = null; } else {
+        int i;
+        for (i=0; i<_tabbedPane.getTabCount(); ++i) {
+          if (_tabbedPane.getTitleAt(i).equals(selCategory)) { _tabbedPane.setSelectedIndex(i); break; }
+        }
+        if (i==_tabbedPane.getTabCount()) { sel = null; } else {
+          Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(selCategory);
+          DefaultTableModel tm = _varTableModel.get(selCategory);
+          for (i=0; i<tm.getRowCount(); ++i) {
+            String key = tm.getValueAt(i,0).toString();
+            if (key.equals(sel.second().getName())) {
+              _varTable.get(selCategory).getSelectionModel().setSelectionInterval(i,i);
+              break;
+            }
+          }
+          if (i==tm.getRowCount()) {
+            // not found, select first
+            _varTable.get(selCategory).getSelectionModel().setSelectionInterval(0,0);
+          }
+          _varValueField.setText(sel.second().toString());
+          _helpPane.setText(sel.second().getHelp());
+          _selected = sel;
+        }
+      }
+    }
+    if (sel==null) {
+      _tabbedPane.setSelectedIndex(0);
+      String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
+      Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
+      _varTable.get(category).getSelectionModel().setSelectionInterval(0,0);
+      String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+      DrJavaProperty value = properties.get(key);
+      _varValueField.setText(value.toString());
+      _helpPane.setText(value.getHelp());
+      _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
+    }
   }
 
   /** Return a pair consisting of the name of the property and the property itself. */

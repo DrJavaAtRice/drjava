@@ -53,11 +53,23 @@ import java.util.ArrayList;
 public class VectorFileOptionComponent extends VectorOptionComponent<File> implements OptionConstants {
   private FileFilter _fileFilter;
   private JFileChooser _jfc;
-
+  protected boolean _moveButtonEnabled = true;
+  protected File _baseDir = null;
   
   public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent) {
-    super(opt, text, parent);  // creates all four buttons
+    this(opt, text, parent, false);
+  }
+  
+  /** Constructor that allows for a tooltip description. */
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description) {
+    this(opt, text, parent, description, false);
+  }
 
+  /** Constructor with flag for move buttons. */
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, boolean moveButtonEnabled) {
+    super(opt, text, parent);  // creates all four buttons
+    _moveButtonEnabled = moveButtonEnabled;
+    
     // set up JFileChooser
     File workDir = new File(System.getProperty("user.home"));
 
@@ -70,16 +82,19 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
   }
   
   /** Constructor that allows for a tooltip description. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description) {
-    this(opt, text, parent);
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description,
+                                    boolean moveButtonEnabled) {
+    this(opt, text, parent, moveButtonEnabled);
     setDescription(description);
   }
   
   /** Adds buttons to _buttonPanel */
   protected void _addButtons() {
     super._addButtons();
-    _buttonPanel.add(_moveUpButton);
-    _buttonPanel.add(_moveDownButton);
+    if (_moveButtonEnabled) {
+      _buttonPanel.add(_moveUpButton);
+      _buttonPanel.add(_moveDownButton);
+    }
   }
 
   /** Displays the given value. */
@@ -93,6 +108,11 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     _fileFilter = fileFilter;
   }
   
+  /** Sets the directory where the chooser will start if no file is selected. */
+  public void setBaseDir(File f) {
+    if (f.isDirectory()) { _baseDir = f; }
+  }
+  
   /** Shows a file chooser for adding a file to the element. */
   public void chooseFile() {
     File selection = (File) _list.getSelectedValue();
@@ -101,6 +121,9 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
       if (parent != null) {
         _jfc.setCurrentDirectory(parent);
       }
+    }
+    else {
+      if (_baseDir!=null) { _jfc.setCurrentDirectory(_baseDir); }
     }
 
     _jfc.setFileFilter(_fileFilter);
