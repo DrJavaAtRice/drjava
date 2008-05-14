@@ -1740,7 +1740,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     DocFile active = null;
     ArrayList<DocumentRegion> expiredBookmarks = new ArrayList<DocumentRegion>();
     ArrayList<Breakpoint> expiredBreakpoints = new ArrayList<Breakpoint>();
-    edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("docs.txt",true);
     for (DocFile f: srcFiles) {
       if (f.lastModified() > f.getSavedModDate()) {
         for (DocumentRegion r: getBookmarkManager().getRegions())

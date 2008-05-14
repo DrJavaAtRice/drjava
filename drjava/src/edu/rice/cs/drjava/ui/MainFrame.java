@@ -2627,12 +2627,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             _interactionsHistoryChooser.setSelectedFile(null);
           }
 //          return getSaveFile(_interactionsHistoryChooser);
+          _interactionsHistoryChooser.setMultiSelectionEnabled(false);
           int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
           File c = getChosenFile(_interactionsHistoryChooser, rc);
           //Moved from history itself to here to account for bug #989232, non-existant default
           //history file found
-          if (c.getName().indexOf('.') == -1)
+          if ((c!=null) && (c.getName().indexOf('.') == -1)) {
             c = new File(c.getAbsolutePath() + "." + InteractionsHistoryFilter.HIST_EXTENSION);
+          }
           _interactionsHistoryChooser.setSelectedFile(c);
           return c;
         }
@@ -3930,9 +3932,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // Don't set selected file
     }
     
+    // TODO: Why are we working with _saveChooser first, then call jfc.showSaveDialog(this)? (MGR)
     _saveChooser.removeChoosableFileFilter(_projectFilter);
     _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
     _saveChooser.setFileFilter(_javaSourceFilter);
+    jfc.setMultiSelectionEnabled(false);
     int rc = jfc.showSaveDialog(this);
     return getChosenFile(jfc, rc);
   }
@@ -4689,10 +4693,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     _closeProject(true);  // suppress resetting interactions; it will be done in _model.newProject() below
     _saveChooser.setFileFilter(_projectFilter);
+    _saveChooser.setMultiSelectionEnabled(false);
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {      
       File pf = _saveChooser.getSelectedFile();  // project file
-      if (pf.exists() && !_verifyOverwrite()) { return; }
+      if ((pf==null) || (pf.exists() && !_verifyOverwrite())) { return; }
       
       String fileName = pf.getName();
       // ensure that saved file has extesion ".xml"
@@ -4729,11 +4734,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    }
     
     if (_currentProjFile != FileOps.NULL_FILE) _saveChooser.setSelectedFile(_currentProjFile);
-    
+    _saveChooser.setMultiSelectionEnabled(false);
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if (! file.exists() || _verifyOverwrite()) { 
+      if ((file!=null) && (! file.exists() || _verifyOverwrite())) { 
         _model.setProjectFile(file);
         _currentProjFile = file;
       }

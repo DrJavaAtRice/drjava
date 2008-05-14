@@ -496,6 +496,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   /** Export process. */
   public void _export() {
     System.out.println("_export()");
+    _exportChooser.setMultiSelectionEnabled(false);
     int rc = _exportChooser.showSaveDialog(this);
     switch (rc) {
       case JFileChooser.CANCEL_OPTION:
