@@ -120,7 +120,7 @@ public class PendingRequestManager {
   /** Called by the EventHandler whenever a ClassPrepareEvent occurs.  This will take the event, get the class that was
     * prepared, lookup the Vector of DebugAction that was waiting for this class's preparation, iterate through this 
     * Vector, and attempt to create the Breakpoints that
-    * were pending. Since the keys to the HashTable are the names of the
+    * were pending. Since the keys to the Hashtable are the names of the
     * outer class, the $ and everything after it must be cropped off from the
     * class name in order to do the lookup. During the lookup, however, the line
     * number of each action is checked to see if the line number is contained

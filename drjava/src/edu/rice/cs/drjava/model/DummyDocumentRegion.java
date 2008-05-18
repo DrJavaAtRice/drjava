@@ -38,10 +38,11 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 
-/** Interface for region data.  All implementations inherit from SimpleDocumentRegion.
+/** The concrete class for "dummy document" regions produced by ProjectFileParser.  These degenerate regions, which do
+  * not include a document, are only used transiently during project file input processing.
   * @version $Id$
   */
-public class DummyDocumentRegion implements DocumentRegion {
+public class DummyDocumentRegion implements Region {
 
   protected final File _file;
   protected volatile int _startOffset;
@@ -57,12 +58,9 @@ public class DummyDocumentRegion implements DocumentRegion {
     _startOffset = so;
     _endOffset = eo;
   }
-  
-  /** @return the document, or null if it hasn't been established yet */
-  public OpenDefinitionsDocument getDocument() { return null; }
 
   /** @return the file */
-  public File getFile() throws FileMovedException { return _file; }
+  public File getFile() { return _file; }
 
   /** @return the start offset */
   public int getStartOffset() { return _startOffset; }

@@ -53,7 +53,7 @@ import java.awt.font.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -65,12 +65,12 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
-/**
- * Panel for displaying regions in a list sorted by time of creation.
- * This class is a swing view class and hence should only be accessed from the event-handling thread.
- * @version $Id$
- */
-public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedPanel {
+/** Panel for displaying regions in a list in the order specified by indices passes to addRegion.
+  * This class is a swing view class and hence should only be accessed from the event-handling thread.
+  * Not currently used because BrowserHistoryPanel is not used.
+  * @version $Id$
+  */
+public abstract class RegionsListPanel<R extends IDocumentRegion> extends TabbedPanel {
   protected JPanel _leftPane;
   
   protected JList _list;
@@ -145,22 +145,22 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
         doc.acquireReadLock();
         try {
           int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
-          int startOffset = doc.getOffset(lnr-3);
+          int startOffset = doc.getOffset(lnr - 3);
           if (startOffset<0) { startOffset = 0; }
-          int endOffset = doc.getOffset(lnr+3);
+          int endOffset = doc.getOffset(lnr + 3);
           if (endOffset<0) { endOffset = doc.getLength()-1; }
           
           // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
           String s = doc.getText(startOffset, endOffset-startOffset);
           
           // this highlights the actual region in red
-          int rStart = r.getStartOffset()-startOffset;
+          int rStart = r.getStartOffset() - startOffset;
           if (rStart<0) { rStart = 0; }
-          int rEnd = r.getEndOffset()-startOffset;
+          int rEnd = r.getEndOffset() - startOffset;
           if (rEnd>s.length()) { rEnd = s.length(); }
-          if ((rStart<=s.length()) && (rEnd>=rStart)) {
-            String t1 = StringOps.encodeHTML(s.substring(0,rStart));
-            String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
+          if ((rStart <= s.length()) && (rEnd >= rStart)) {
+            String t1 = StringOps.encodeHTML(s.substring(0, rStart));
+            String t2 = StringOps.encodeHTML(s.substring(rStart, rEnd));
             String t3 = StringOps.encodeHTML(s.substring(rEnd));
             s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
           }
@@ -176,16 +176,10 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     };
     _list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     _list.addListSelectionListener(new ListSelectionListener() {
-      public void valueChanged(ListSelectionEvent e) {
-        updateButtons();
-      }
+      public void valueChanged(ListSelectionEvent e) { updateButtons(); }
     });            
     _list.addKeyListener(new KeyAdapter() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          performDefaultAction();
-        }
-      } 
+      public void keyPressed(KeyEvent e) { if (e.getKeyCode() == KeyEvent.VK_ENTER) performDefaultAction(); } 
     });
     _list.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_DOCLIST));
     
@@ -269,8 +263,8 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   protected RegionListUserObj<R> getUserObjForRegion(R r) {
     for(int i=0; i<_listModel.size(); ++i) {
       @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
-      if ((userObj.region().getStartOffset()==r.getStartOffset()) &&
-          (userObj.region().getEndOffset()==r.getEndOffset()) &&
+      if ((userObj.region().getStartOffset() == r.getStartOffset()) &&
+          (userObj.region().getEndOffset() == r.getEndOffset()) &&
           (userObj.region().getDocument().equals(r.getDocument()))) {
         return userObj;
       }
@@ -320,7 +314,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
         
         for(int i=0; i<_listModel.size(); ++i) {
           @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
-          if (userObj.region()==r) {
+          if (userObj.region() == r) {
             _listModel.removeElementAt(i);
             break;
           }
@@ -332,19 +326,14 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     Utilities.invokeLater(doCommand);
   }
   
-  /** Remove all regions for this document from the tree. Must be executed in event thread.
-    */
+  /** Remove all regions for this document from the tree. Must be executed in event thread. */
   public void removeRegions(final OpenDefinitionsDocument odd) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
         String name = "";
-        try {
-          name = odd.getQualifiedClassName();
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          name = odd.toString();
-        }
+        try { name = odd.getQualifiedClassName(); }
+        catch (ClassNameNotFoundException cnnfe) { name = odd.toString(); }
         
         for(int i=0; i<_listModel.size(); ++i) {
           @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
@@ -367,7 +356,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Class that gets put into the list. The toString() method determines what's displayed in the three. */
-  protected static class RegionListUserObj<R extends DocumentRegion> {
+  protected static class RegionListUserObj<R extends IDocumentRegion> {
     protected R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset())+1; }
     public R region() { return _region; }
@@ -388,7 +377,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
       return sb.toString();
     }
     public boolean equals(Object other) {
-      if ((other==null) || !(other instanceof RegionListUserObj)) { return false; }
+      if ((other == null) || !(other instanceof RegionListUserObj)) { return false; }
       @SuppressWarnings("unchecked") RegionListUserObj<R> o = (RegionListUserObj<R>)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&

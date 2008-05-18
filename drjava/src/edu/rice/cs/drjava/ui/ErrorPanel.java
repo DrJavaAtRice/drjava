@@ -775,7 +775,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           }
           // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
           // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
-          // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefintionsPane.  For example,
+          // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefinitionsPane.  For example,
           // the display behaved as if the editor were in "overwrite" mode.
 //          _frame._switchDefScrollPane(); // resets an out-of-kilter DefinitionsPane on the first error after a compilation
           defPane.requestFocusInWindow();

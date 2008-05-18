@@ -37,15 +37,15 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.util.Lambda;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.Vector;
 
-/** Interface for a region manager.
+/** Interface for a region manager.  Region ordering (as in DocumentRegion) is not required, but it facilitates 
+  * efficient implementation.
   * @version $Id$
   */
-public interface RegionManager<R extends DocumentRegion> {
-  
-  /** @return the index of the region in the vector, or -1 if not found. Uses ==. */
-  public int getIndexOf(R r);
+public interface RegionManager<R extends IDocumentRegion> {
   
   /** Returns the region in this manager at the given offset, or null if one does not exist.
    *  @param odd the document
@@ -69,13 +69,21 @@ public interface RegionManager<R extends DocumentRegion> {
    *  @param region the DocumentRegion to be removed.
    */
   public void removeRegion(R region);
+  
+  /** Remove the given OpenDefinitionsDocument and all of its regions from the manager.
+   *  @param the OpenDefinitionsDocument to be removed.
+   */
+  public void removeRegions(OpenDefinitionsDocument odd);
 
   /** Apply the given command to the specified region to change it.
    *  @param region the region to find and change
    *  @param cmd command that mutates the region. */
   public void changeRegion(R region, Lambda<Object,R> cmd);
-
-  /** @return a Vector<R> containing the DocumentRegion objects in this mangager. */
+  
+  /** @return a Vector<R> containing the DocumentRegion objects for document odd in this manager. */
+  public SortedSet<R> getRegions(OpenDefinitionsDocument odd);
+  
+  /** @return a Vector<R> containing all the DocumentRegion objects in this mangager. */
   public Vector<R> getRegions();
 
   /** Tells the manager to remove all regions. */
@@ -84,37 +92,13 @@ public interface RegionManager<R extends DocumentRegion> {
   /** @return the current region or null if none selected */
   public R getCurrentRegion();
   
-  /** @return the index of the current region or -1 if none selected */
-  public int getCurrentRegionIndex();
-  
-  /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
-  public boolean isCurrentRegionFirst();
-  
-  /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
-  public boolean isCurrentRegionLast();
+  /** @return the set of documents containing regions. */
+  public Set<OpenDefinitionsDocument> getDocuments();
   
   /** Set the current region. 
    *  @param region new current region */
   public void setCurrentRegion(R region);
   
-  /** Make the region that is more recent the current region.
-   *  @return new current region */
-  public R nextCurrentRegion();
-  
-  /** Make the region that is less recent the current region.
-   *  @return new current region */
-  public R prevCurrentRegion();
-  
-  /** Set the maximum number of regions that can be stored in this manager.
-   * If the maximum capacity has been reached and another region is added, the region at the end farther
-   * away from the insertion location will be discarded.
-   * @param size maximum number of regions, or 0 if no maximum
-   */
-  public void setMaximumSize(int size);
-  
-  /** @return the maximum number of regions that can be stored in this manager. */
-  public int getMaximumSize();
-
   /** Adds a listener to the notifier.
    *  @param listener a listener that reacts on events
    */

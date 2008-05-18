@@ -569,12 +569,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
-    public void removeFromDebugger() {
-      while (getBreakpointManager().getRegions().size() > 0) {
-        Breakpoint bp = getBreakpointManager().getRegions().get(0);
-        getBreakpointManager().removeRegion(bp);
-      }
-    }
+    public void removeFromDebugger() { getBreakpointManager().removeRegions(this); }
   } /* End of ConcreteOpenDefDoc */
   
   /** Creates a ConcreteOpenDefDoc for a new DefinitionsDocument.
@@ -627,10 +622,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         setProjectChanged(true);
       }
     });
-    getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {
-      public void regionAdded(DocumentRegion r) { setProjectChanged(true); }
-      public void regionChanged(DocumentRegion r) { setProjectChanged(true); }
-      public void regionRemoved(DocumentRegion r) { setProjectChanged(true); }
+    getBookmarkManager().addListener(new RegionManagerListener<OrderedDocumentRegion>() {
+      public void regionAdded(OrderedDocumentRegion r) { setProjectChanged(true); }
+      public void regionChanged(OrderedDocumentRegion r) { setProjectChanged(true); }
+      public void regionRemoved(OrderedDocumentRegion r) { setProjectChanged(true); }
     });
     
     _debugger.addListener(new DebugListener() {

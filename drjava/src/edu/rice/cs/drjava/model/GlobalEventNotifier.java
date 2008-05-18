@@ -109,9 +109,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
   
   /* -------------- project state ------------------*/
-  public void projectOpened(File pfile, FileOpenSelector files) {
+  public void openProject(File pfile, FileOpenSelector files) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.projectOpened(pfile, files); } }
+    try { for (GlobalModelListener l : _listeners) { l.openProject(pfile, files); } }
     finally { _lock.endRead(); }
   }
   

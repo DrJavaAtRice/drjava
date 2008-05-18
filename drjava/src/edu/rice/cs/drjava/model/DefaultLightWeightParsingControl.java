@@ -199,19 +199,13 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   
   /** Add the listener to this controller.
     * @param l listener to add */
-  public synchronized void addListener(LightWeightParsingListener l) {
-    _listeners.add(l);
-  }
+  public synchronized void addListener(LightWeightParsingListener l) { _listeners.add(l); }
   
   /** Remove the listener from this controller. */
-  public synchronized void removeListener(LightWeightParsingListener l) {
-    _listeners.remove(l);
-  }
+  public synchronized void removeListener(LightWeightParsingListener l) { _listeners.remove(l); }
   
   /** Remove all listeners from this controller. */
-  public synchronized void removeAllListeners() {
-    _listeners.clear();
-  }  
+  public synchronized void removeAllListeners() { _listeners.clear(); }  
   
   /** @return a copy of the list of listeners. */
   public synchronized List<LightWeightParsingListener> getListeners() {

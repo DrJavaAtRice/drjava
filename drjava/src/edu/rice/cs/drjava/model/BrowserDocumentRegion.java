@@ -39,10 +39,10 @@ package edu.rice.cs.drjava.model;
 import javax.swing.text.Position;
 import java.io.File;
 
-/** Class for a simple document region. If a document is provided, then the region will move within the document.
+/** Class for a simple document region.
   * @version $Id$
   */
-public class BrowserDocumentRegion implements EnhancedDocumentRegion, Comparable<BrowserDocumentRegion> {
+public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
   private static volatile int _indexCounter = 0;  // sequence number counter for browser regions
   
   private final int _index;                       // unique sequence number for this region
@@ -81,7 +81,7 @@ public class BrowserDocumentRegion implements EnhancedDocumentRegion, Comparable
 //    BrowserDocumentRegion r = (BrowserDocumentRegion) o;
 //    return _index == r._index;
 //  }
-         
+  
   /** This hash function is consistent with equals. */
   public int hashCode() { return _index; }
   

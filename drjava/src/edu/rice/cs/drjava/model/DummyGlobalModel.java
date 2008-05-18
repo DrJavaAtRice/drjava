@@ -175,13 +175,13 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getBreakpointManager on a Dummy");
   }
   
-  public RegionManager<DocumentRegion> getBookmarkManager() {
+  public RegionManager<OrderedDocumentRegion> getBookmarkManager() {
     throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
   }
   
-  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
-    throw new UnsupportedOperationException("Tried to call getFindResultsManagers on a Dummy");
-  }
+//  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
+//    throw new UnsupportedOperationException("Tried to call getFindResultsManagers on a Dummy");
+//  }
   
   public RegionManager<MovingDocumentRegion> createFindResultsManager() {
     throw new UnsupportedOperationException("Tried to call createFindResultsManager on a Dummy");
@@ -242,7 +242,7 @@ public class DummyGlobalModel implements GlobalModel {
   }
   
   public void setAutoRefreshStatus(boolean status) { 
-	throw new UnsupportedOperationException("Tried to call setAutoRefreshStatus on a Dummy"); 
+ throw new UnsupportedOperationException("Tried to call setAutoRefreshStatus on a Dummy"); 
   }
   
   public boolean getAutoRefreshStatus() { throw new UnsupportedOperationException("Tried to call getAutoRefreshStatus on a Dummy"); }

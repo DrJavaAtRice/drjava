@@ -246,7 +246,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final Hashtable<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
   
   /** Table to map bookmarks to their corresponding highlight objects. */
-  private final Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
+  private final Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
@@ -2182,7 +2182,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      addToBrowserHistory();
       
       // then move back    
-      DocumentRegion r = rm.prevCurrentRegion(_model.getNotifier());
+      BrowserDocumentRegion r = rm.prevCurrentRegion(_model.getNotifier());
       if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
       _configureBrowsing();
 //      this.setEnabled(true);
@@ -2204,7 +2204,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      addToBrowserHistory();
       
       // then move forward
-      DocumentRegion r = rm.nextCurrentRegion(_model.getNotifier());
+      BrowserDocumentRegion r = rm.nextCurrentRegion(_model.getNotifier());
       if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
       _configureBrowsing();   
 //      this.setEnabled(true);
@@ -2438,7 +2438,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (highlight != null) highlight.remove();
         highlights.remove(r);
         // close the panel when all regions have been removed.
-        if (rm.getRegions().size()==0) { panel._close(); }
+        if (rm.getDocuments().size() == 0) { panel._close(); }
       }
     });
     
@@ -3258,7 +3258,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
     _documentBreakpointHighlights = new Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
-    _documentBookmarkHighlights = new Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
+    _documentBookmarkHighlights = new Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo>();
     
     // Initialize cached frames and dialogs 
     _configFrame = new ConfigFrame(this);
@@ -6682,19 +6682,19 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     // hook highlighting listener to bookmark manager
-    _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() { 
+    _model.getBookmarkManager().addListener(new RegionManagerListener<OrderedDocumentRegion>() { 
       // listener methods only run in the event thread
-      public void regionAdded(DocumentRegion r) {
+      public void regionAdded(OrderedDocumentRegion r) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
         _documentBookmarkHighlights.
           put(r, bpPane.getHighlightManager().
                 addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.BOOKMARK_PAINTER));
       }
-      public void regionChanged(DocumentRegion r) { 
+      public void regionChanged(OrderedDocumentRegion r) { 
         regionRemoved(r);
         regionAdded(r);
       }
-      public void regionRemoved(DocumentRegion r) {
+      public void regionRemoved(OrderedDocumentRegion r) {
         HighlightManager.HighlightInfo highlight = _documentBookmarkHighlights.get(r);
         if (highlight != null) highlight.remove();
         _documentBookmarkHighlights.remove(r);
@@ -8926,7 +8926,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       });
     }
     
-    public void projectOpened(File projectFile, FileOpenSelector files) {
+    public void openProject(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
       projectRunnableChanged();
       _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);

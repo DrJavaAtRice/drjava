@@ -61,7 +61,7 @@ import javax.swing.border.MatteBorder;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
-import edu.rice.cs.drjava.model.SimpleDocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.RegionManager;
@@ -271,8 +271,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     for (final MovingDocumentRegion r: getSelectedRegions()) {
       if (! _model.getBookmarkManager().contains(r)) {
 //        try {
-          DocumentRegion newR = 
-            new SimpleDocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
+          OrderedDocumentRegion newR = 
+            new DocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
           _model.getBookmarkManager().addRegion(newR);
 //        }
 //        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
@@ -287,7 +287,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _remove() {
     updateButtons();
     for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
-    if (_regionManager.getRegions().size() == 0) { _close(); }
+    if (_regionManager.getDocuments().size() == 0) { _close(); }
   }
   
   /** Update button state and text. */

@@ -45,7 +45,7 @@ import edu.rice.cs.util.FileOps;
 /** Class for a document region that can move with changes in the document; its text, however, remains constant.
  * @version $Id$Region
  */
-public class MovingDocumentRegion extends SimpleDocumentRegion {
+public class MovingDocumentRegion extends DocumentRegion {
   protected final String _string;
   
   /** Create a new moving document region. */

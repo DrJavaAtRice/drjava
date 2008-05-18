@@ -738,7 +738,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       public void actionPerformed( ActionEvent ae) {
         if (getSelectionStart() == getSelectionEnd()) { // nothing selected
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          // Omit locking since Defintions documents are not accessed from other threads (?)
+          // Omit locking since Definitions documents are not accessed from other threads (?)
 //          _doc.acquireReadLock();
 //          try { 
             setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
@@ -758,7 +758,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       breakpointItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          // Omit locking since Defintions documents are not accessed from other threads (?)
+          // Omit locking since Definitions documents are not accessed from other threads (?)
 //          _doc.acquireReadLock();
 //          try { 
           setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));

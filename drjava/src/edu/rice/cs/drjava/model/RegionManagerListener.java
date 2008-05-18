@@ -42,7 +42,7 @@ import edu.rice.cs.util.Lambda;
  *  and use RegionManager's addListener() method.
  *  @version $Id$
  */
-public interface RegionManagerListener<R extends DocumentRegion> {
+public interface RegionManagerListener<R extends IDocumentRegion> {
   /** Called when a region is added in a document.  Must be executed in event thread.
    *  @param r the region
    */

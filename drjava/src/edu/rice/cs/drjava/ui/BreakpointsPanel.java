@@ -53,7 +53,7 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.drjava.model.RegionManagerListener;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
@@ -61,11 +61,10 @@ import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * Panel for displaying the breakpoints.  This class is a swing view class and hence should only be accessed from the 
- * event-handling thread.
- * @version $Id$
- */
+/** Panel for displaying the breakpoints.  This class is a swing view class and hence should only be accessed from the 
+  * event-handling thread.
+  * @version $Id$
+  */
 public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected JButton _goToButton;
   protected JButton _enableDisableButton;

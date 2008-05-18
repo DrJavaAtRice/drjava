@@ -34,40 +34,23 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.drjava.model;
+
 import java.io.File;
-import java.io.Serializable;
 
-/** A null file.  This class is NOT a singleton because we need multiple, distinct null files for untitled documents. 
-  * The equals method is overridden so that distinct NullFile objects (which all have the same path) are unequal. 
+/** The minimal interface for all region classes.  Excludes a document field because DummyDocumentRegions are created before
+  * their corresponding document.
+  * @version $Id$
   */
-public class NullFile extends File implements Serializable {
+public interface Region {
   
-  private static volatile int ct = 0;
+  /** @return the file */
+  public File getFile();
   
-  private final String _lexiName;
+  /** @return the start offset */
+  public int getStartOffset();
 
-  public NullFile() { 
-    this("*NullFile<" + ct + ">"); 
-    ct++;
-  }
-  
-  private NullFile(String lexiName) {
-    super(lexiName);
-    _lexiName = lexiName;
-  }
-  
-  /* The following two method hide the fact that the name field of this file has the form "*NullFile<ct>".  They can
-   * be commented out for debugging purposes. */
-  public String toString() { return "(Untitled)"; }
-  public String getName() { return "(Untitled)"; }
-  
-  public String getLexiName() { return ""; }
-  
-  /**  All distinct objects of type NullFile are unequal. */
-  public boolean equals(Object o) {
-    if (o == null || o.getClass() != getClass()) return false;
-    return o == this;
-  }
-    
+  /** @return the end offset */
+  public int getEndOffset();
 }
+  

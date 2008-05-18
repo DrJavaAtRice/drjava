@@ -133,7 +133,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
     * @param projectFile the location of the project file
     * @param files The files the gui should open for the model
     */
-  public void projectOpened(File projectFile, FileOpenSelector files);
+  public void openProject(File projectFile, FileOpenSelector files);
   
   /** Called when the project is being closed. */
   public void projectClosed();

@@ -34,40 +34,14 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.drjava.model;
+
+import edu.rice.cs.util.UnexpectedException;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 import java.io.File;
-import java.io.Serializable;
 
-/** A null file.  This class is NOT a singleton because we need multiple, distinct null files for untitled documents. 
-  * The equals method is overridden so that distinct NullFile objects (which all have the same path) are unequal. 
-  */
-public class NullFile extends File implements Serializable {
-  
-  private static volatile int ct = 0;
-  
-  private final String _lexiName;
-
-  public NullFile() { 
-    this("*NullFile<" + ct + ">"); 
-    ct++;
-  }
-  
-  private NullFile(String lexiName) {
-    super(lexiName);
-    _lexiName = lexiName;
-  }
-  
-  /* The following two method hide the fact that the name field of this file has the form "*NullFile<ct>".  They can
-   * be commented out for debugging purposes. */
-  public String toString() { return "(Untitled)"; }
-  public String getName() { return "(Untitled)"; }
-  
-  public String getLexiName() { return ""; }
-  
-  /**  All distinct objects of type NullFile are unequal. */
-  public boolean equals(Object o) {
-    if (o == null || o.getClass() != getClass()) return false;
-    return o == this;
-  }
-    
-}
+/** Interface supported by all bona fide non-browser document regions (e.g., region classes other than DummyDocumentRegion
+  * and BrowserHistoryRegion). */
+public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<OrderedDocumentRegion> { }

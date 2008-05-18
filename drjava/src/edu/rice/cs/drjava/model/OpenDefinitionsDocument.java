@@ -64,7 +64,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** The following methods are forwarding methods required by the rest of the program in order for the 
    *  OpenDefinitionsDocument to handle DefinitionsDocuments */
-  public int id();
+//  public int id();
   public int commentLines(int selStart, int selEnd);
   public int uncommentLines(int selStart, int selEnd);
   public boolean getClassFileInSync();
@@ -74,6 +74,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public int getOffset(int lineNum);
   public String getQualifiedClassName() throws ClassNameNotFoundException;
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException;
+  public String getLexiName();
   public CompoundUndoManager getUndoManager();
   public void resetUndoManager();
   public File getCachedClassFile();
@@ -306,10 +307,10 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public RegionManager<Breakpoint> getBreakpointManager();
     
   /** @return the bookmark region manager. */
-  public RegionManager<DocumentRegion> getBookmarkManager();
+  public RegionManager<OrderedDocumentRegion> getBookmarkManager();
     
-  /** @return managers for find result regions. */
-  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
+//  /** @return managers for find result regions. */
+//  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
   
   /** Add a region manager for find results to this document.
    *  @param rm the global model's region manager */

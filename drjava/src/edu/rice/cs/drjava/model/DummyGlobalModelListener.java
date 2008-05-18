@@ -198,7 +198,7 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   public void projectWorkDirChanged() {  }
   
   /** Called when the project is being opened and the model needs the gui to do some stuff for it. */
-  public void projectOpened(File pfile, FileOpenSelector files) {  }
+  public void openProject(File pfile, FileOpenSelector files) {  }
   
   /** Called when the project is being closed. */
   public void projectClosed() {  }

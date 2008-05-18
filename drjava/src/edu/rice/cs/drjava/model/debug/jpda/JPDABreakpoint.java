@@ -36,9 +36,11 @@
 
 package edu.rice.cs.drjava.model.debug.jpda;
 
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
@@ -56,12 +58,14 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   
   private volatile Position _startPos;
   private volatile Position _endPos;
+  private volatile OpenDefinitionsDocument _doc;
   
   /** @throws DebugException if the document does not have a file */
   public JPDABreakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean isEnabled, JPDADebugger manager)
     throws DebugException {
     
     super(manager, doc, offset);
+    _doc = doc;
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
     _isEnabled = isEnabled;
@@ -120,16 +124,59 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   /** Accessor for the offset of this breakpoint's start position
     * @return the start offset
     */
-  public int getStartOffset() {
-    return _startPos.getOffset();
-  }
+  public int getStartOffset() { return _startPos.getOffset(); }
   
   /** Accessor for the offset of this breakpoint's end position
     * @return the end offset
     */
-  public int getEndOffset() {
-    return _endPos.getOffset();
+  public int getEndOffset() { return _endPos.getOffset(); }
+  
+  /** Accessor for this breakpoint's start position
+    * @return the start position
+    */
+  public Position getStartPosition() { return _startPos; }
+  
+  /** Accessor for this breakpoint's end position
+    * @return the end position
+    */
+  public Position getEndPosition() { return _endPos; }
+  
+  /** Defines the equality relation on DocumentRegions.  This equivalence relation on allocated objects is finer
+    * grained than the equivalence relation induced by compareTo because it requires equality on Position objects, 
+    * not just equality of the current offsets of Positions. 
+    */
+  public final boolean equals(Object o) {
+    if (o == null || ! (o instanceof IDocumentRegion)) return false;
+    IDocumentRegion r = (IDocumentRegion) o;
+    return getDocument() == r.getDocument() & getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
   }
+  
+   /** Totally orders regions lexicographically based on (_doc, startOffset, endOffset). This method is typically applied
+    * to regions within the same document. 
+    */
+  public int compareTo(OrderedDocumentRegion r) {
+    int docRel = getDocument().compareTo(r.getDocument());
+    if (docRel != 0) return docRel;
+    // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
+    
+    assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
+    int start1 = getStartOffset();
+    int start2 = r.getStartOffset();
+    int startDiff = start1 - start2;
+    if (startDiff != 0) return startDiff;
+    
+    int end1 = getEndOffset();
+    int end2 = r.getEndOffset();
+    return end1 - end2;
+  }
+  
+  private int docHashCode() {
+    if (_doc == null) return 0;
+    return _doc.hashCode();
+  }
+      
+  /** This hash function is consistent with equality. */
+  public int hashCode() { return docHashCode() ^ getStartOffset() ^ getEndOffset(); }
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled) {

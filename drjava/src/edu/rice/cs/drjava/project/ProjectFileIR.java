@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.project;
 import java.io.*;
 import java.util.List;
 
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.Region;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 
@@ -88,7 +88,7 @@ public interface ProjectFileIR {
   public int getCreateJarFlags();
   
   /** @return the array of bookmarks. */
-  public DocumentRegion[] getBookmarks();
+  public Region[] getBookmarks();
   
   /** @return the array of breakpoints. */
   public DebugBreakpointData[] getBreakpoints();
@@ -109,7 +109,7 @@ public interface ProjectFileIR {
   public void setProjectRoot(File root);
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);
-  public void setBookmarks(List<? extends DocumentRegion> bms);
+  public void setBookmarks(List<? extends Region> bms);
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
   public void setAutoRefreshStatus(boolean b);

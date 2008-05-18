@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.debug;
 
 import java.util.Vector;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /** Interface for any debugger implementation to be used by DrJava.

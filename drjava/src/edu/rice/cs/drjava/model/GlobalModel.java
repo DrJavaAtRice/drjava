@@ -119,10 +119,10 @@ public interface GlobalModel extends ILoadDocuments {
   public RegionManager<Breakpoint> getBreakpointManager();
   
   /** @return manager for bookmark regions. */
-  public RegionManager<DocumentRegion> getBookmarkManager();
+  public RegionManager<OrderedDocumentRegion> getBookmarkManager();
   
-  /** @return managers for find result regions. */
-  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
+//  /** @return managers for find result regions. */
+//  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
   
   /** @return new manager for find result regions. */
   public RegionManager<MovingDocumentRegion> createFindResultsManager();

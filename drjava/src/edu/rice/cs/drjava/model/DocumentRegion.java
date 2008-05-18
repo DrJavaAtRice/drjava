@@ -36,21 +36,107 @@
 
 package edu.rice.cs.drjava.model;
 
+import edu.rice.cs.util.UnexpectedException;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 import java.io.File;
 
-/** Interface for region data.  All implementations inherit from SimpleDocumentRegion.
+/** Class for a simple document region that records positions rather than offsets.
   * @version $Id$
   */
-public interface DocumentRegion {
+public class DocumentRegion implements OrderedDocumentRegion, Comparable<OrderedDocumentRegion> {
+  protected final OpenDefinitionsDocument _doc;
+  protected final File _file;
+  protected volatile Position _startPosition; 
+  protected volatile Position _endPosition;
+  
+  /** Create a new simple document region using offsets.
+    * @param doc document that contains this region, which cannot be null
+    * @param file file that contains the region
+    * @param so start offset of the region; if doc is non-null, then a Position will be created that moves within the document
+    * @param eo end offset of the region; if doc is non-null, then a Position will be created that moves within the document
+    */
+  public DocumentRegion(OpenDefinitionsDocument doc, int so, int eo) {
+    this(doc, createPosition(doc, so), createPosition(doc, eo));
+  }
+ 
+  /** Create a new simple document region with a bona fide document */
+  public DocumentRegion(OpenDefinitionsDocument doc, Position sp, Position ep) {
+    assert doc != null;
+    _doc = doc;
+    _file = doc.getRawFile();  // don't check the validity of _file here
+    _startPosition = sp;
+    _endPosition = ep;
+  }
+  
+  private static Position createPosition(OpenDefinitionsDocument doc, int i) {
+    try { return doc.createPosition(i); }
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
+  }
+
+//  /** Structural equality method that copes with null!  This method should be a member of class Object. */
+//  public static boolean equals(Object o1, Object o2) { 
+//    if (o1 == null) return o2 == null;
+//    return o1.equals(o2);
+//  }
+  
+  /** Defines the equality relation on DocumentRegions.  This equivalence relation on allocated objects is finer
+    * grained than the equivalence relation induced by compareTo because it requires equality on Position objects, 
+    * not just equality of the current offsets of Positions. 
+    */
+  public final boolean equals(Object o) {
+    if (o == null || ! (o instanceof IDocumentRegion)) return false;
+    IDocumentRegion r = (IDocumentRegion) o;
+    return getDocument() == r.getDocument() & getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
+  }
+  
+   /** Totally orders regions lexicographically based on (_doc, startOffset, endOffset). This method is typically applied
+    * to regions within the same document. 
+    */
+  public int compareTo(OrderedDocumentRegion r) {
+    int docRel = getDocument().compareTo(r.getDocument());
+    if (docRel != 0) return docRel;
+    // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
+    
+    assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
+    int start1 = getStartOffset();
+    int start2 = r.getStartOffset();
+    int startDiff = start1 - start2;
+    if (startDiff != 0) return startDiff;
+    
+    int end1 = getEndOffset();
+    int end2 = r.getEndOffset();
+    return end1 - end2;
+  }
+  
+  private int docHashCode() {
+    if (_doc == null) return 0;
+    return _doc.hashCode();
+  }
+      
+  /** This hash function is consistent with equality. */
+  public int hashCode() { return docHashCode() ^ getStartOffset() ^ getEndOffset(); }
+  
   /** @return the document, or null if it hasn't been established yet */
-  public OpenDefinitionsDocument getDocument();
+  public OpenDefinitionsDocument getDocument() { return _doc; }
 
   /** @return the file */
-  public File getFile() throws FileMovedException;
+  public File getFile() { return _file; }
 
   /** @return the start offset */
-  public int getStartOffset();
+  public int getStartOffset() { return _startPosition.getOffset(); }
 
   /** @return the end offset */
-  public int getEndOffset();
+  public int getEndOffset() { return _endPosition.getOffset(); }
+  
+  /** @return the start position */
+  public Position getStartPosition() { return _startPosition; }
+
+  /** @return the end offset */
+  public Position getEndPosition() { return _endPosition; }
+  
+  public String toString() {
+    return (/* _doc != null ? */ _doc.toString() /* : "null" */) + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
+  }
 }

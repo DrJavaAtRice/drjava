@@ -36,17 +36,19 @@
 
 package edu.rice.cs.drjava.model;
 
-import java.io.File;
-import javax.swing.text.Position;
+import edu.rice.cs.util.UnexpectedException;
 
-/** Interface for region data.  All implementations inherit from SimpleDocumentRegion.
-  * @version $Id$
-  */
-public interface EnhancedDocumentRegion extends DocumentRegion {
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
+import java.io.File;
+
+/** Interface supported by all bona fide document regions (e.g., region classes other than DummyDocumentRegion). */
+public interface IDocumentRegion extends Region {
   
+  /** @return the document, or null if it hasn't been established yet */
+  public OpenDefinitionsDocument getDocument();
   /** @return the start position */
   public Position getStartPosition();
-
   /** @return the end offset */
   public Position getEndPosition();
 }

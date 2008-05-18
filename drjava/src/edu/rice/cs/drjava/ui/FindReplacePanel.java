@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;

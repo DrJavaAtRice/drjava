@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.Region;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
@@ -327,8 +327,8 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     return wList;
   }
     
-  protected List<DocumentRegion> readBookmarks() {
-    List<DocumentRegion> rList = new ArrayList<DocumentRegion>();
+  protected List<Region> readBookmarks() {
+    List<Region> rList = new ArrayList<Region>();
     List<Node> defs = _xc.getNodes("bookmarks/bookmark");
     for(Node n: defs) {
       // now all path names are relative to node n...

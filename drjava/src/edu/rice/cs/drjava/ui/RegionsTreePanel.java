@@ -54,7 +54,7 @@ import java.awt.font.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -69,7 +69,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
   * should only be accessed from the event thread.
   * @version $Id$
   */
-public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedPanel {
+public abstract class RegionsTreePanel<R extends IDocumentRegion> extends TabbedPanel {
   protected JPanel _leftPane;
   
   protected DefaultMutableTreeNode _regionRootNode;
@@ -540,7 +540,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
-  protected static class RegionTreeUserObj<R extends DocumentRegion> {
+  protected static class RegionTreeUserObj<R extends IDocumentRegion> {
     protected R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset())+1; }
     public R region() { return _region; }

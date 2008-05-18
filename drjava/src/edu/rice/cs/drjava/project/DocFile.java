@@ -80,6 +80,8 @@ public class DocFile extends File {
   }
   ///////////////////// Overriden Methods //////////////////////
   
+  /* Relying on equals and hashCode methods inherited from File. */
+  
   
   public DocFile getAbsoluteFile() {
     if (isAbsolute()) return this;
