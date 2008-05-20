@@ -133,7 +133,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     }
   }
   
-  /** Renders the given range in the model as normal unselected text. Note that this is text that's all on one line.
+  /** Renders the given range in the model as normal unselected text. Note that this text is all on one line.
     * The superclass deals with breaking lines and such. So all we have to do here is draw the text on [p0,p1) in the
     * model. We have to start drawing at (x,y), and the function returns the x coordinate when we're done.
     * @param g  The graphics context
@@ -145,43 +145,41 @@ public class ColoringView extends PlainView implements OptionConstants {
     * @throws BadLocationException  If the range is invalid
     */
   protected int drawUnselectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
-    
-    // Might be a PlainDocument (when AbstractDJPane is first constructed).
-    //   See comments for DefinitionsEditorKit.createNewDocument() for details.
-    Document doc = getDocument();
-    AbstractDJDocument _doc = null;
-    if (doc instanceof AbstractDJDocument) _doc = (AbstractDJDocument) doc;
-    else return x; // return if there is no AbstracDJDocument
-    
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
-    if (start == end) return  x;
+    if (start == end) return x;
     
-    Vector<HighlightStatus> stats = _doc.getHighlightStatus(start, end);
-    if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
+    // doc might be a PlainDocument (when AbstractDJPane is first constructed).
+    // See comments for DefinitionsEditorKit.createNewDocument() for details.
+    Document doc = getDocument();
+    if (! (doc instanceof AbstractDJDocument)) return x; // return if there is no AbstracDJDocument
     
-    for (int i = 0; i < stats.size(); i++) {
-      HighlightStatus stat = stats.get(i);
-      int length = stat.getLength();
-      int location = stat.getLocation();
-      // If this highlight status extends past p1, end at p1
-      if (location + length > end) length = end - stat.getLocation();
+    final AbstractDJDocument _doc = (AbstractDJDocument) doc;
+    
+    /* It is not clear if swing only calls this method doc read locked.  So we lock for safety's sake. */
+    _doc.acquireReadLock();
+    try {
       
-      Segment text = getLineBuffer();
+      Vector<HighlightStatus> stats = _doc.getHighlightStatus(start, end);
+      if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
       
-      if (!(_doc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)_doc).setColoring((start+end)/2,g))      
-        setFormattingForState(g, stat.getState());
-      //      else
-      //        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
-      
-      //      
-      //       DrJava.consoleErr().println("Highlight: loc=" + location + " length=" +
-      //       length + " state=" + stat.getState() +
-      //       " text=" + text);
-      //       
-      _doc.getText(location, length, text);
-      x = Utilities.drawTabbedText(text, x, y, g, this, location);
+      for (int i = 0; i < stats.size(); i++) {
+        HighlightStatus stat = stats.get(i);
+        int location = stat.getLocation();
+        int length = stat.getLength();
+        
+        // If this highlight status extends past p1, end at p1
+        if (location + length > end) length = end - stat.getLocation();
+        
+        if (! (_doc instanceof InteractionsDJDocument) || 
+            ! ((InteractionsDJDocument)_doc).setColoring((start + end)/2, g))      
+          setFormattingForState(g, stat.getState());
+        Segment text = getLineBuffer(); 
+        _doc.getText(location, length, text);
+        x = Utilities.drawTabbedText(text, x, y, g, this, location);  // updates x on each iteration
+      }
     }
+    finally { _doc.releaseReadLock(); }
     //DrJava.consoleErr().println("returning x: " + x);
     return  x;
   }
@@ -239,6 +237,13 @@ public class ColoringView extends PlainView implements OptionConstants {
     g.setFont(MAIN_FONT);
   }
   
+  
+  /** Repaints the container associated with this view, if such container exists. */
+  private void repaintContainer() {
+    Container c = getContainer();
+    if (c != null) c.repaint();
+  }
+    
   /** Called when a change occurs.
     * @param changes document changes
     * @param a a Shape
@@ -247,8 +252,7 @@ public class ColoringView extends PlainView implements OptionConstants {
   public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
     super.changedUpdate(changes, a, f);
     // Make sure we redraw since something changed in the formatting
-    Container c = getContainer();
-    if (c != null) c.repaint();
+    repaintContainer();
   }
   
   /** Called when an OptionListener perceives a change in any of the colors */
@@ -269,7 +273,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
     
     // Avoid the ColoringView that does not have a container.
-    if ( getContainer() != null) getContainer().repaint();
+    repaintContainer();
   }
   
   /** The OptionListeners for DEFINITIONS COLORs */

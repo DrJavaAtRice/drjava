@@ -388,13 +388,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _defaultAction.actionPerformed(e);
       
       // Only indent if in code
-      
+
       _doc.acquireWriteLock();  // reduced model lock unnecessary!
       try {
         _doc.setCurrentLocation(getCaretPosition());
         ReducedModelState state = _doc.getStateAtCurrent();
         if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
-        
       }
       finally { _doc.releaseWriteLock(); }
     }

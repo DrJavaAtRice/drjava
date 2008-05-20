@@ -86,9 +86,7 @@ import edu.rice.cs.util.swing.Utilities;
     
     /*  Convinces the type checker to accept EMPTY_SET as a set of R. */
     @SuppressWarnings("unchecked")
-    private <T> T emptySet() { 
-       return (T) EMPTY_SET; 
-    }
+    private <T> T emptySet() { return (T) EMPTY_SET; }
     
     /** Convinces the type checker to accept a DocumentRegion as an R.  This works when you need an R object only for use with compareTo
       * becasue all implementations of IDocumentRegion inherit from DocumentRegion and compareTo is defined in DocumentRegion. */
