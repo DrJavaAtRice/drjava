@@ -183,7 +183,18 @@ import edu.rice.cs.util.swing.Utilities;
     public void removeRegions(OpenDefinitionsDocument doc) {
       assert doc != null;
       boolean found = _documents.remove(doc);
-      if (found) _regions.remove(doc);
+      if (found) {
+        for (final R region: _regions.get(doc)) {
+          // notify
+          Utilities.invokeLater(new Runnable() { public void run() {
+            _lock.startRead();
+            try {
+              for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); }
+            } finally { _lock.endRead(); }
+          } });
+        }
+        _regions.remove(doc);
+      }
     }
     
     /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
@@ -205,7 +216,18 @@ import edu.rice.cs.util.swing.Utilities;
     }
     
     /** Tells the manager to remove all regions. */
-    public void clearRegions() { 
+    public void clearRegions() {
+      for(OpenDefinitionsDocument doc: _documents) {
+        for (final R region: _regions.get(doc)) {
+          // notify
+          Utilities.invokeLater(new Runnable() { public void run() {
+            _lock.startRead();
+            try {
+              for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); }
+            } finally { _lock.endRead(); }
+          } });
+        }
+      }
       _regions.clear(); 
       _documents.clear();
     }
