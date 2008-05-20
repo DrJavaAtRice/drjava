@@ -235,6 +235,7 @@ public class CompilerErrorModel {
         if (betweenDotAndErr.indexOf('\n') == -1) shouldSelect = errorBefore;
       }
       catch (BadLocationException e) { /* source document has been edited; fail silently */ }
+      catch (StringIndexOutOfBoundsException e) { /* source document has been edited; fail silently */ }
     }
     
     if ((shouldSelect == -1) && (errorAfter < end)) {// (errorAfter != _positions.length)) {
@@ -247,6 +248,7 @@ public class CompilerErrorModel {
         if (betweenDotAndErr.indexOf('\n') == -1) shouldSelect = errorAfter;
       }
       catch (BadLocationException e) { /* source document has been edited; fail silently */ }
+      catch (StringIndexOutOfBoundsException e) { /* source document has been edited; fail silently */ }
     }
     
     if (shouldSelect == -1) return null;
@@ -397,6 +399,7 @@ public class CompilerErrorModel {
       }
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    catch (StringIndexOutOfBoundsException e) { throw new UnexpectedException(e); }
   }
   
   /** Finds the first error after numProcessed which has a file and line number.

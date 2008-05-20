@@ -1102,7 +1102,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     * Provides the ability to have the same OpenDefinitionsDocument in there multiple
     * times with different toString() results.
     */
-  private static class GoToFileListEntry extends ClassNameAndPackageEntry {
+  public static class GoToFileListEntry extends ClassNameAndPackageEntry {
     public final OpenDefinitionsDocument doc;
     protected String fullPackage = null;
     protected final String str;
@@ -1145,7 +1145,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           
           if (entry.doc != null) {
             try {
-              try { sb.append(FileOps.makeRelativeTo(entry.doc.getRawFile(), entry.doc.getSourceRoot())); }
+              try { sb.append(FileOps.stringMakeRelativeTo(entry.doc.getRawFile(), entry.doc.getSourceRoot())); }
               catch(IOException e) { sb.append(entry.doc.getFile()); }
             }
             catch(edu.rice.cs.drjava.model.FileMovedException e) { sb.append(entry + " was moved"); }
@@ -1268,8 +1268,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
           try {
             try {
-              File relative = FileOps.makeRelativeTo(d.getFile(), d.getSourceRoot());
-              if (! relative.toString().equals(d.toString())) {
+              String relative = FileOps.stringMakeRelativeTo(d.getFile(), d.getSourceRoot());
+              if (!relative.equals(d.toString())) {
                 list.add(new GoToFileListEntry(d, d.getPackageName() + "." + d.toString()));
               }
             }
@@ -1290,20 +1290,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Goes to the file specified by the word the cursor is on. */
   void _gotoFileUnderCursor() {
 //    Utilities.show("Calling gotoFileUnderCursor()");
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    if ((docs == null) || (docs.size() == 0)) return; // do nothing
-    
-    GoToFileListEntry currentEntry = null;
-    ArrayList<GoToFileListEntry> list;
-    list = new ArrayList<GoToFileListEntry>(docs.size());
-    for(OpenDefinitionsDocument d: docs) {
-      GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
-      if (d.equals(_model.getActiveDocument())) currentEntry = entry;
-      list.add(entry);
-    }
-    
-    PredictiveInputModel<GoToFileListEntry> pim =
-      new PredictiveInputModel<GoToFileListEntry>(true, new PrefixStrategy<GoToFileListEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     odd.acquireReadLock();
     String mask = "";
@@ -1327,10 +1313,30 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       if ((start>=0) && (end<s.length())) {
         mask = s.substring(start, end + 1);
-        pim.setMask(mask);
       }
     }
     finally { odd.releaseReadLock(); }
+    gotoFileMatchingMask(mask);
+  }
+  
+  /** Goes to the file matching the specified mask.
+    * @param mask word specifying the file to go to*/
+  public void gotoFileMatchingMask(String mask) {        
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    if ((docs == null) || (docs.size() == 0)) return; // do nothing
+
+    GoToFileListEntry currentEntry = null;
+    ArrayList<GoToFileListEntry> list;
+    list = new ArrayList<GoToFileListEntry>(docs.size());
+    for(OpenDefinitionsDocument d: docs) {
+      GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
+      if (d.equals(_model.getActiveDocument())) currentEntry = entry;
+      list.add(entry);
+    }
+
+    PredictiveInputModel<GoToFileListEntry> pim =
+      new PredictiveInputModel<GoToFileListEntry>(true, new PrefixStrategy<GoToFileListEntry>(), list);
+    pim.setMask(mask);
     
 //    Utilities.show("Matching items are: " + pim.getMatchingItems());
     
@@ -5133,8 +5139,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               GoToFileListEntry entry = new GoToFileListEntry(dummyDoc, s);
               hs.add(entry);
               try {
-                File rel = FileOps.makeRelativeTo(f, buildDir);
-                String full = rel.toString().replace(java.io.File.separatorChar, '.');
+                String rel = FileOps.stringMakeRelativeTo(f, buildDir);
+                String full = rel.replace(java.io.File.separatorChar, '.');
                 full = full.substring(0, full.lastIndexOf(".class"));
                 if (full.indexOf('$')<0) {
                   // no $ in the name means not an inner class
@@ -9602,8 +9608,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         for(OpenDefinitionsDocument d: docs) {
           if (d.isUntitled()) continue;
           try {
-            File rel = FileOps.makeRelativeTo(d.getRawFile(), projectRoot);
-            String full = rel.toString().replace(java.io.File.separatorChar, '.');
+            String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
+            String full = rel.replace(java.io.File.separatorChar, '.');
             for (String ext: edu.rice.cs.drjava.model.compiler.CompilerModel.EXTENSIONS) {
               if (full.endsWith(ext)) {
                 full = full.substring(0, full.lastIndexOf(ext));

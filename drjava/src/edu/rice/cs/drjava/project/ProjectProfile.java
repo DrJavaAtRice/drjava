@@ -240,26 +240,26 @@ public class ProjectProfile implements ProjectFileIR {
   public void write(OutputStream os) throws IOException {    
     XMLConfig xc = new XMLConfig();
     xc.set("drjava.version", edu.rice.cs.drjava.Version.getBuildTimeString()+"-"+edu.rice.cs.drjava.Version.getRevisionNumber());
-    String path = FileOps.makeRelativeTo(_projectRoot, _projectFile).getPath();
+    String path = FileOps.stringMakeRelativeTo(_projectRoot, _projectFile);
     path = replace(path, File.separator, "/");
     xc.set("drjava/project.root", path);
-    path = FileOps.makeRelativeTo(_workDir, _projectFile).getPath();
+    path = FileOps.stringMakeRelativeTo(_workDir, _projectFile);
     path = replace(path, File.separator, "/");
     xc.set("drjava/project.work", path);
     if (_buildDir != null && _buildDir.getPath() != "") {
-      path = FileOps.makeRelativeTo(_buildDir, _projectFile).getPath();
+      path = FileOps.stringMakeRelativeTo(_buildDir, _projectFile);
       path = replace(path, File.separator, "/");
       xc.set("drjava/project.build", path);
     }
     if (_mainClass != null && _mainClass.getPath() != "") {
-      path = FileOps.makeRelativeTo(_mainClass, _projectFile).getPath();
+      path = FileOps.stringMakeRelativeTo(_mainClass, _projectFile);
       path = replace(path, File.separator, "/");
       xc.set("drjava/project.main", path);      
     }
     xc.set("drjava/project.autorefresh", String.valueOf(_autoRefreshStatus));
     
     if (_createJarFile != null) {
-      path = FileOps.makeRelativeTo(_createJarFile, _createJarFile).getPath();
+      path = FileOps.stringMakeRelativeTo(_createJarFile, _createJarFile);
       path = replace(path, File.separator, "/");
       xc.set("drjava/project/createjar.file", path);
     }
@@ -279,7 +279,7 @@ public class ProjectProfile implements ProjectFileIR {
       // move active document to the front of the list
       if (active!=null) { _sourceFiles.remove(active); _sourceFiles.add(0,active); }
       for(DocFile df: _sourceFiles) {
-        path = FileOps.makeRelativeTo(df, _projectRoot).getPath();
+        path = FileOps.stringMakeRelativeTo(df, _projectRoot);
         path = replace(path, File.separator, "/");
         Pair<Integer,Integer> pSel = df.getSelection();
         Pair<Integer,Integer> pScr = df.getScroll();
@@ -381,7 +381,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (!_breakpoints.isEmpty()) {
       for(DebugBreakpointData bp: _breakpoints) {
         Node f = xc.createNode("drjava/project/breakpoints/breakpoint", null, false);
-        path = FileOps.makeRelativeTo(bp.getFile(), _projectRoot).getPath();
+        path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
         path = replace(path, File.separator, "/");
         xc.set(".file", path, f, true);
         xc.set(".line", String.valueOf(bp.getLineNumber()), f, true);
@@ -399,7 +399,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (!_bookmarks.isEmpty()) {
       for (Region bm: _bookmarks) {
         Node f = xc.createNode("drjava/project/bookmarks/bookmark", null, false);
-        path = FileOps.makeRelativeTo(bm.getFile(), _projectRoot).getPath();
+        path = FileOps.stringMakeRelativeTo(bm.getFile(), _projectRoot);
         path = replace(path, File.separator, "/");
         xc.set(".file", path, f, true);
         xc.set(".from", String.valueOf(bm.getStartOffset()), f, true);
@@ -573,7 +573,7 @@ public class ProjectProfile implements ProjectFileIR {
    *  @return the s-expression syntax to describe the given file.
    */
   private String encodeFileRelative(File f, String prefix, File base) throws IOException {
-    String path = FileOps.makeRelativeTo(f, base).getPath();
+    String path = FileOps.stringMakeRelativeTo(f, base);
     path = replace(path, File.separator, "/");
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
@@ -603,7 +603,7 @@ public class ProjectProfile implements ProjectFileIR {
   private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
     String ret = "";
     String path;
-    if (relative) path = FileOps.makeRelativeTo(df, _projectRoot).getPath();
+    if (relative) path = FileOps.stringMakeRelativeTo(df, _projectRoot);
     else path = IOUtil.attemptCanonicalFile(df).getPath();
 
     path = replace(path, File.separator, "/");
@@ -657,7 +657,7 @@ public class ProjectProfile implements ProjectFileIR {
    */
   private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
     String ret = "";
-    String path = FileOps.makeRelativeTo(bp.getFile(), _projectRoot).getPath();
+    String path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
     
     path = replace(path,File.separator,"/");
     ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
@@ -691,7 +691,7 @@ public class ProjectProfile implements ProjectFileIR {
    */
   private String encodeBookmarkRelative(Region bm, String prefix) throws IOException {
     String ret = "";
-    String path = FileOps.makeRelativeTo(bm.getFile(), _projectRoot).getPath();
+    String path = FileOps.stringMakeRelativeTo(bm.getFile(), _projectRoot);
     
     path = replace(path,File.separator,"/");
     ret += prefix + "(bookmark (name " + convertToLiteral(path) + ")";

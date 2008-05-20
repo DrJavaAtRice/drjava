@@ -428,7 +428,7 @@ public class JarOptionsDialog extends JFrame {
         if (f == null)  return "";
         else {
           try {
-            String s = edu.rice.cs.util.FileOps.makeRelativeTo(f, _rootFile).toString();
+            String s = edu.rice.cs.util.FileOps.stringMakeRelativeTo(f, _rootFile);
             s = s.substring(0, s.lastIndexOf(".class"));
             s = s.replace(java.io.File.separatorChar, '.').replace('$', '.');
             int pos = 0;

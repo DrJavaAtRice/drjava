@@ -91,16 +91,12 @@ public abstract class EagerFileListProperty extends EagerProperty {
     List<File> l = getList();
     if (l.size()==0) { _value = ""; return; }
     StringBuilder sb = new StringBuilder();
+    File dir = new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT)));
     for(File fil: l) {
       sb.append(_attributes.get("sep"));
       try {
-        File f = FileOps.makeRelativeTo(fil,
-                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-        try {
-          f = f.getCanonicalFile();
-        }
-        catch(IOException ioe) { }
-        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+        String f = FileOps.stringMakeRelativeTo(fil,dir);
+        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f);
         sb.append(s);
       }
       catch(IOException e) { /* ignore */ }

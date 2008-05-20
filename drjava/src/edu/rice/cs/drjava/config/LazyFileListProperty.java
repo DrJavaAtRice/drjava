@@ -81,19 +81,15 @@ public abstract class LazyFileListProperty extends DrJavaProperty {
     for(File fil: l) {
       sb.append(StringOps.replaceVariables(_attributes.get("sep"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
       try {
-        File f = fil;
+        String f = fil.toString();
         if (_attributes.get("rel").equals("/")) {
-          f = f.getAbsoluteFile();
+          f = fil.getAbsolutePath();
         }
         else {
-          f = FileOps.makeRelativeTo(fil,
-                                     new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+          f = FileOps.stringMakeRelativeTo(fil,
+                                           new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
         }
-        try {
-          f = f.getCanonicalFile();
-        }
-        catch(IOException ioe) { }
-        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f);
         sb.append(s);
       }
       catch(IOException e) { /* ignore */ }

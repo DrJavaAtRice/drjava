@@ -56,6 +56,11 @@ import java.awt.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.ProcessCreator;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.ui.predictive.*;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.util.FileOps;
+import static edu.rice.cs.drjava.ui.MainFrame.GoToFileListEntry;
 
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
   * This should be used to display the output of an external process.
@@ -97,6 +102,18 @@ public class ExternalProcessPanel extends AbortablePanel {
     _header = sb.toString();
     initThread(pc);
     _textArea.setText(_header);
+    _textArea.addMouseListener(new MouseListener() {
+      public void mouseClicked(MouseEvent e) {
+        if ((SwingUtilities.isLeftMouseButton(e)) &&
+            (e.getClickCount()==2)) {
+          doubleClicked(e);
+        }
+      }
+      public void mouseEntered(MouseEvent e) { }
+      public void mouseExited(MouseEvent e) { }
+      public void mousePressed(MouseEvent e) { }
+      public void mouseReleased(MouseEvent e) { }
+    });
     updateText(false);
     // MainFrame.LOG.log("\tProcessPanel ctor done");
   }
@@ -192,6 +209,157 @@ public class ExternalProcessPanel extends AbortablePanel {
       _p.destroy();
       _p = null;
     }
+  }
+  
+  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("external.txt",true);
+  
+  /** Gets called when the user double-clicks on the text pane. */
+  public void doubleClicked(MouseEvent e) {
+    // LOG.log("doubleClicked");
+    final String t = _textArea.getText();
+    int caret = _textArea.getCaretPosition();
+    int start = caret;
+    int end = start;
+    while((start-1>0) && (t.charAt(start-1)!='\n')) { --start; }
+    while((end<t.length()) && (t.charAt(end)!='\n')) { ++end; }
+    // LOG.log("\tstart="+start+"\n\tend="+end);
+    final String line = t.substring(start,end);
+    // LOG.log("\t'"+line+"'");
+    caret -= start; // calculate caret position within the line
+    if (caret>=line.length()) { caret = line.length()-1; }
+    start = end = caret;
+    char ch;
+    while(end<line.length()) {
+      ch = line.charAt(end);
+      if (ch==':') {
+        if ((end+1<line.length()) && (Character.isDigit(line.charAt(end+1)))) {
+          // perhaps a colon followed by a line number: Foo.java:10
+          // advance to the end of the number, then break
+          do {
+            ++end;
+          } while((end<line.length()) && (Character.isDigit(line.charAt(end))));
+          break;
+        }
+        else {
+          // colon without digit behind it, break here
+          break;
+        }
+      }
+      else if (Character.isJavaIdentifierPart(ch)) {
+        // character is a Java identifier part, advance
+        ++end;
+      }
+      else if ((ch=='.') || (ch==File.separatorChar)) {
+        // allow the period and file separator, could be the part of file name; advance
+        ++end;
+      }
+      else {
+        // character should not be in a Java name, break here
+        break;
+      }
+    }
+
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    if ((docs == null) || (docs.size() == 0)) return; // do nothing
+
+    ArrayList<GoToFileListEntry> list;
+    list = new ArrayList<GoToFileListEntry>(docs.size());
+    // create a list with fully qualified class names
+    for(OpenDefinitionsDocument d: docs) {
+      // LOG.log("Doc: "+d);
+      try {
+        String fullyQualified = d.getPackageName() + "." + d.toString();
+        if (fullyQualified.startsWith(".")) { fullyQualified = fullyQualified.substring(1); }
+        list.add(new GoToFileListEntry(d, fullyQualified));
+        // LOG.log("\tname: "+fullyQualified);
+      }
+      catch(IllegalStateException ex) { /* ignore */ }
+    }
+    PredictiveInputModel<GoToFileListEntry> pim =
+      new PredictiveInputModel<GoToFileListEntry>(true, new PredictiveInputModel.PrefixLineNumStrategy<GoToFileListEntry>(), list);
+    
+    GoToFileListEntry uniqueMatch = null;
+    String name, oldName = null, simpleName = null;
+    do {
+      ch = line.charAt(start);
+      while(start>0) {
+        ch = line.charAt(start);
+        if ((ch==':') || (ch=='.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
+      }
+      // LOG.log("\tstart="+start+"\n\tend="+end);
+      if ((start>=0) && (end>=start)) {
+        name = line.substring(start,end).replace(File.separatorChar,'.');
+        if ((name.length()>0) && (!Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
+        if (simpleName==null) { simpleName = name; }
+        if (name.equals(oldName)) { break; }
+        if ((name.indexOf(".java")>=0) ||
+            (name.indexOf(".j")>=0) ||
+            (name.indexOf(".dj0")>=0) ||
+            (name.indexOf(".dj1")>=0) ||
+            (name.indexOf(".dj2")>=0)) {
+          // LOG.log("\t--> '"+name+"'");
+          uniqueMatch = getUniqueMatch(name, pim);
+          if (uniqueMatch!=null) {
+            // unique match found, go there
+            // LOG.log("\t     ^^^^^^^^^^ unique match found");
+            final OpenDefinitionsDocument newDoc = pim.getCurrentItem().doc;
+            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
+            final boolean docSwitch = _model.getActiveDocument() != newDoc;
+            if (docSwitch) _model.setActiveDocument(newDoc);
+            final int curLine = newDoc.getCurrentLine();
+            final int last = name.lastIndexOf(':');
+            if (last >= 0) {
+              try {
+                String nend = name.substring(last + 1);
+                int val = Integer.parseInt(nend);
+                
+                final int lineNum = Math.max(1, val);
+                Runnable command = new Runnable() {
+                  public void run() {
+                    try { _frame._jumpToLine(lineNum); }  // adds this region to browser history
+                    catch (RuntimeException ex) { _frame._jumpToLine(curLine); }
+                  }
+                };
+                if (docSwitch) {
+                  // postpone running command until after document switch, which is pending in the event queue
+                  EventQueue.invokeLater(command);
+                }
+                else command.run();
+              }
+              catch(RuntimeException ex) { /* ignore */ }
+            }
+            else if (docChanged) {
+              // defer executing this code until after active document switch (if any) is complete
+              EventQueue.invokeLater(new Runnable() { public void run() { _frame.addToBrowserHistory(); } });
+            }
+            break;
+          }
+        }
+        oldName = name;
+      }
+      else {
+        break;
+      }
+      if (ch==File.separatorChar) { --start; } // file separator ('/' or '\'), include preceding directory 
+    } while(start>0);
+    if (uniqueMatch==null) {
+      // couldn't find a unique match, even after gradually including the fully qualified name
+      _frame.gotoFileMatchingMask(simpleName);
+    }
+  }
+  
+  /** Return the unique match for the mask, or null if no match found or not unique.
+    * @param mask word specifying the file to go to
+    * @param pim predictive input model with possible matches
+    * @return unique match, or null if no match found or not unique */
+  GoToFileListEntry getUniqueMatch(String mask, PredictiveInputModel<GoToFileListEntry> pim) {        
+    pim.setMask(mask);
+    
+    if (pim.getMatchingItems().size() == 1) {
+      // exactly one match, go to file
+      if (pim.getCurrentItem() != null) { return pim.getCurrentItem(); }
+    }
+    return null;
   }
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */

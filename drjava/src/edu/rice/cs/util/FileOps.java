@@ -149,7 +149,7 @@ public abstract class FileOps {
     }
     return (ancestor.equals(f));
   }
-  
+
   /** Makes a file equivalent to the given file f that is relative to base file b.  In other words,
     * <code>new File(b,makeRelativeTo(base,abs)).getCanonicalPath()</code> equals
     * <code>f.getCanonicalPath()</code>
@@ -168,6 +168,27 @@ public abstract class FileOps {
     *         for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
     */
   public static File makeRelativeTo(File f, File b) throws IOException, SecurityException {
+    return new File(b, stringMakeRelativeTo(f,b));
+  }
+    
+  /** Makes a file equivalent to the given file f that is relative to base file b.  In other words,
+    * <code>new File(b,makeRelativeTo(base,abs)).getCanonicalPath()</code> equals
+    * <code>f.getCanonicalPath()</code>
+    * 
+    * <p>In Linux/Unix, if the file f is <code>/home/username/folder/file.java</code> and the file b is 
+    * <code>/home/username/folder/sublevel/file2.java</code>, then the resulting File path from this method would be 
+    * <code>../file.java</code> while its canoncial path would be <code>/home/username/folder/file.java</code>.</p><p>
+    * Warning: making paths relative is inherently broken on some file systems, because a relative path
+    * requires that both the file and the base have the same root. The Windows file system, and therefore also
+    * the Java file system model, however, support multiple system roots (see {@link File#listRoots}).
+    * Thus, two files with different roots cannot have a relative path. In that case the absolute path of
+    * the file will be returned</p> 
+    * @param f The path that is to be made relative to the base file
+    * @param b The file to make the next file relative to
+    * @return A new file whose path is relative to the base file while the value of <code>getCanonicalPath()</code> 
+    *         for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
+    */
+  public static String stringMakeRelativeTo(File f, File b) throws IOException, SecurityException {
     try {
       File[] roots = File.listRoots();
       File fRoot = null;
@@ -180,7 +201,7 @@ public abstract class FileOps {
       if ((fRoot==null) || (!fRoot.equals(bRoot))) {
         // f and b have different file system roots
         // just make f absolute and canonical
-        return f.getAbsoluteFile().getCanonicalFile();
+        return f.getAbsoluteFile().getCanonicalFile().toString();
       }
     }
     catch(Exception e) { /* ignore, follow previous procedure */ }
@@ -218,7 +239,7 @@ public abstract class FileOps {
     }
     result.append(last);
 //    System.err.println("makeRelativeTo(" + f + ", " + b + ") = " + result);
-    return new File(result.toString());
+    return result.toString();
   }
   
   /** Splits a file into an array of strings representing each parent folder of the given file.  The file whose path

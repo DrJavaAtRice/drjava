@@ -112,9 +112,9 @@ public class EagerFileProperty extends DrJavaProperty {
         _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
       }
       else {
-        f = FileOps.makeRelativeTo(f,
-                                   new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
-        _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+        String s = FileOps.stringMakeRelativeTo(f,
+                                                new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+        _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(s);
       }
     }
     catch(IOException e) { _value = "(Error...)"; }

@@ -320,19 +320,19 @@ public class FileOpsTest extends DrJavaTestCase {
     base = new File("src/test1/test2/file.txt");
     abs = new File("built/test1/test2/file.txt");
     assertEquals("Wrong Relative Path 1", "../../../built/test1/test2/file.txt",
-                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
+                 fixPathFormat(FileOps.stringMakeRelativeTo(abs,base)));
     base = new File("file.txt");
     abs = new File("built/test1/test2/file.txt");
     assertEquals("Wrong Relative Path 2", "built/test1/test2/file.txt",
-                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
+                 fixPathFormat(FileOps.stringMakeRelativeTo(abs,base)));
     base = new File("built/test1/test2test/file.txt");
     abs = new File("built/test1/test2/file.txt");
     assertEquals("Wrong Relative Path 3", "../test2/file.txt",
-                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
+                 fixPathFormat(FileOps.stringMakeRelativeTo(abs,base)));
     base = new File("file.txt");
     abs = new File("test.txt");
     assertEquals("Wrong Relative Path 4", "test.txt",
-                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
+                 fixPathFormat(FileOps.stringMakeRelativeTo(abs,base)));
   }
   
   /** Main method called by testDeleteDirectoryOnExit.  Runs in new JVM so the files can be deleted.  Exits with status

@@ -50,6 +50,7 @@ import edu.rice.cs.util.BalancingStreamTokenizer;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.swing.DropDownButton;
 import edu.rice.cs.util.XMLConfig;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
 
 import java.io.StringReader;
 import javax.swing.*;
