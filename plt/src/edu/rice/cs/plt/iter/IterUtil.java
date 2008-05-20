@@ -380,6 +380,22 @@ public final class IterUtil {
   public static <T> ImmutableIterable<T> immutable(Iterable<? extends T> iter) {
     return new ImmutableIterable<T>(iter);
   }
+  
+  /**
+   * Allow covariance in situations where wildcards can't be used by wraping the iterable with a less-
+   * precise type parameter.
+   */
+  public static <T> SizedIterable<T> relax(Iterable<? extends T> iter) {
+    return new ImmutableIterable<T>(iter);
+  }
+    
+  /**
+   * Allow covariance in situations where wildcards can't be used by wraping the iterator with a less-
+   * precise type parameter.
+   */
+  public static <T> Iterator<T> relax(Iterator<? extends T> iter) {
+    return new ImmutableIterator<T>(iter);
+  }
     
   /**
    * <p>Create a SizedIterable based on the given values or array; equivalent to {@link #asIterable(Object[])}.</p>

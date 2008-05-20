@@ -112,7 +112,7 @@ public class FileLog extends TextLog {
    * Create a file log with no filter.  Shortcut for {@code new FileLog(new File(topLevelFileName))}.
    * All logging messages will be recorded in the given file.  {@link #addFile} may be used to create 
    * additional log files.
-   *
+   */
   public FileLog(String topLevelFileName) {
     this(new File(topLevelFileName));
   }

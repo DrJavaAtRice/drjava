@@ -53,6 +53,20 @@ public class IterUtilTest extends TestCase {
     assertEquals(expected, actual.charValue());
   }
   
+  public void testRelax() {
+    List<Integer> is = new LinkedList<Integer>();
+    Iterable<Number> ns = IterUtil.<Number>relax(is);
+    is.add(1);
+    is.add(2);
+    is.add(3);
+    Iterator<Integer> iIter = is.iterator();
+    Iterator<Number> nIter = IterUtil.<Number>relax(iIter);
+    assertEquals(Integer.valueOf(1), nIter.next());
+    assertEquals(Integer.valueOf(2), nIter.next());
+    assertEquals(Integer.valueOf(3), nIter.next());
+    assertFalse(nIter.hasNext());
+  }
+  
   public void testAsArray() {
     String[] strings;
     
