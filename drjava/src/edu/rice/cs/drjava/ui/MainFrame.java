@@ -4703,7 +4703,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {      
       File pf = _saveChooser.getSelectedFile();  // project file
-      if ((pf==null) || (pf.exists() && !_verifyOverwrite())) { return; }
       
       String fileName = pf.getName();
       // ensure that saved file has extesion ".xml"
@@ -4712,6 +4711,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (lastIndex == -1) pf = new File (pf.getAbsolutePath() + ".xml");
         else pf = new File(fileName.substring(0, lastIndex) + ".xml");
       }
+
+      if ((pf==null) || (pf.exists() && !_verifyOverwrite())) { return; }
       
       _model.createNewProject(pf); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
