@@ -163,7 +163,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final JavadocErrorPanel _javadocErrorPanel;
   private final FindReplacePanel _findReplace;
   private final BreakpointsPanel _breakpointsPanel;
-  private final BookmarksPanel _bookmarksPanel;
+  final BookmarksPanel _bookmarksPanel;
   private final LinkedList<Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
     new LinkedList<Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
   
@@ -5467,7 +5467,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     try {
       Debugger debugger = _model.getDebugger();
-      debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
+      final int line = _currentDefPane.getCurrentLine();
+      debugger.toggleBreakpoint(doc, doc.getOffsetOfLine(line-1), line, true);
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
@@ -7947,7 +7948,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     String res = (String)JOptionPane.showInputDialog(MainFrame.this,
-                                                     "Your program ran out of memory. You may try to enter a larger\n"+
+                                                     "DrJava ran out of memory. You may try to enter a larger\n"+
                                                      "maximum heap size for the main JVM. The maximum heap size is\n"+
                                                      "currently "+value+".\n"+
                                                      "A restart is required after changing this setting.",

@@ -465,7 +465,7 @@ public class JPDADebugger implements Debugger {
     */
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
-    Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset);
+    Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset, offset);
     
     if (breakpoint == null) {
       if (doc.getLineStartPos(offset) == doc.getLineEndPos(offset)) {

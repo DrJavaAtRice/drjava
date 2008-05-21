@@ -86,6 +86,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   protected DefaultTreeCellRenderer dtcr;
   
+  /** Set to true if a lot of changes are made to the regions one after the other.
+    * Disables some actions until the changes are finished. */
+  protected boolean _isChanging = false;
+  
   /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
     * from the event thread.
     * @param frame the MainFrame
@@ -129,6 +133,20 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   protected void _close() {
     super._close();
     updateButtons();
+  }
+  
+  /** Return true if the regions are changing a lot and some actions are disabled. 
+    * @return true if regions are changing a lot */
+  public boolean isChanging() { return _isChanging; }
+  
+  /** Set the state of the "is changing" flag. When a lot of changes are about to be made,
+    * the flag should be set to true to postpone some actions until the changes are finished.
+    * @param b new state of the "is changing" flag */
+  public void setChanging(boolean b) {
+    _isChanging = b;
+    if (!b) {
+      updateButtons();
+    }
   }
   
   /** Update the tree.
@@ -224,50 +242,52 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       
       _setColors(renderer);
       
-      // set tooltip
-      String tooltip = null;
-      if (DrJava.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
-        if (leaf) {
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-          if (node.getUserObject() instanceof RegionTreeUserObj) {
-            @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)(node.getUserObject())).region();
-            
-            OpenDefinitionsDocument doc = r.getDocument();
-            doc.acquireReadLock();
-            try {
-              int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
-              int startOffset = doc.getOffset(lnr - 3);
-              if (startOffset<0) { startOffset = 0; }
-              int endOffset = doc.getOffset(lnr + 3);
-              if (endOffset<0) { endOffset = doc.getLength() - 1; }
+      if (!_isChanging) {
+        // set tooltip
+        String tooltip = null;
+        if (DrJava.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
+          if (leaf) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+            if (node.getUserObject() instanceof RegionTreeUserObj) {
+              @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)(node.getUserObject())).region();
               
-              // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
-              String s = doc.getText(startOffset, endOffset-startOffset);
-              
-              // this highlights the actual region in red
-              int rStart = r.getStartOffset()-startOffset;
-              if (rStart<0) { rStart = 0; }
-              int rEnd = r.getEndOffset()-startOffset;
-              if (rEnd>s.length()) { rEnd = s.length(); }
-              if ((rStart<=s.length()) && (rEnd>=rStart)) {
-                String t1 = StringOps.encodeHTML(s.substring(0,rStart));
-                String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
-                String t3 = StringOps.encodeHTML(s.substring(rEnd));
-                s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+              OpenDefinitionsDocument doc = r.getDocument();
+              doc.acquireReadLock();
+              try {
+                int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
+                int startOffset = doc.getOffset(lnr - 3);
+                if (startOffset<0) { startOffset = 0; }
+                int endOffset = doc.getOffset(lnr + 3);
+                if (endOffset<0) { endOffset = doc.getLength() - 1; }
+                
+                // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
+                String s = doc.getText(startOffset, endOffset-startOffset);
+                
+                // this highlights the actual region in red
+                int rStart = r.getStartOffset()-startOffset;
+                if (rStart<0) { rStart = 0; }
+                int rEnd = r.getEndOffset()-startOffset;
+                if (rEnd>s.length()) { rEnd = s.length(); }
+                if ((rStart<=s.length()) && (rEnd>=rStart)) {
+                  String t1 = StringOps.encodeHTML(s.substring(0,rStart));
+                  String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
+                  String t3 = StringOps.encodeHTML(s.substring(rEnd));
+                  s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+                }
+                else {
+                  s = StringOps.encodeHTML(s);
+                }
+                tooltip = "<html><pre>"+s+"</pre></html>";
               }
-              else {
-                s = StringOps.encodeHTML(s);
-              }
-              tooltip = "<html><pre>"+s+"</pre></html>";
+              catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
+              finally { doc.releaseReadLock(); }
+              setText(node.getUserObject().toString());
+              renderer = this;
             }
-            catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
-            finally { doc.releaseReadLock(); }
-            setText(node.getUserObject().toString());
-            renderer = this;
           }
         }
+        setToolTipText(tooltip);
       }
-      setToolTipText(tooltip);
       return renderer;
     }
   }
@@ -421,11 +441,13 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _regTreeModel.insertNodeInto(newRegion, regDocNode, regDocNode.getChildCount());
       
       // Make visible
-      TreePath pathToNewRegion = new TreePath(newRegion.getPath());
-      _regTree.scrollPathToVisible(pathToNewRegion);
+      if (!_isChanging) {
+        TreePath pathToNewRegion = new TreePath(newRegion.getPath());
+        _regTree.scrollPathToVisible(pathToNewRegion);
+      }
     }
     
-    updateButtons();
+    if (!_isChanging) updateButtons();
   }
   
   /** Remove a region from the tree. Must be executed in event thread.
@@ -462,7 +484,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
             }
           }
         }
-        updateButtons();
+        if (!_isChanging) updateButtons();
       }
     };
     Utilities.invokeLater(doCommand);
@@ -490,7 +512,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
             _regTreeModel.removeNodeFromParent(doc);
           }
         }
-        updateButtons();
+        if (!_isChanging) updateButtons();
       }
     };
     Utilities.invokeLater(doCommand);
@@ -500,12 +522,14 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
    */
   protected class RegionMouseAdapter extends RightClickMouseAdapter {
     protected void _popupAction(MouseEvent e) {
-      int x = e.getX();
-      int y = e.getY();
-      TreePath path = _regTree.getPathForLocation(x, y);
-      if (path != null && path.getPathCount() == 3) {
-        _regTree.setSelectionRow(_regTree.getRowForLocation(x, y));
-        _regionPopupMenu.show(e.getComponent(), x, y);
+      if (!_isChanging) {
+        int x = e.getX();
+        int y = e.getY();
+        TreePath path = _regTree.getPathForLocation(x, y);
+        if (path != null && path.getPathCount() == 3) {
+          _regTree.setSelectionRow(_regTree.getRowForLocation(x, y));
+          _regionPopupMenu.show(e.getComponent(), x, y);
+        }
       }
     }
     

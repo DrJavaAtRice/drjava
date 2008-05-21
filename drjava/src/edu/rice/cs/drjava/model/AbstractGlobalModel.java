@@ -275,14 +275,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       final Position startPos = doc.createPosition(startSel);
       final Position endPos = doc.createPosition(endSel);
       final RegionManager<OrderedDocumentRegion> rm = getBookmarkManager();
-      OrderedDocumentRegion r = new DocumentRegion(doc, startPos, endPos);
       
-      if (! rm.contains(r)) { 
-        rm.addRegion(r);
+      OrderedDocumentRegion existingRegion = rm.getRegionAt(doc, pos1, pos2);
+      if (existingRegion==null) { 
+        rm.addRegion(new DocumentRegion(doc, startPos, endPos));
 //        Utilities.show("BookmarkManager added region " + r);
       }
       else {
-        rm.removeRegion(r);               // bookmark is toggled
+        rm.removeRegion(existingRegion); // bookmark is toggled
 //        Utilities.show("BookmarkManager removed region " + r);
       }
     }

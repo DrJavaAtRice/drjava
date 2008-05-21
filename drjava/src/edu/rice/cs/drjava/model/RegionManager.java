@@ -46,19 +46,19 @@ import java.util.Vector;
   * @version $Id$
   */
 public interface RegionManager<R extends IDocumentRegion> {
-  
-  /** Returns the region in this manager at the given offset, or null if one does not exist.
-   *  @param odd the document
-   *  @param offset the offset in the document
-   *  @return the DocumentRegion at the given line number, or null if it does not exist.
-   */
-  public R getRegionAt(OpenDefinitionsDocument odd, int offset);
+  /** Returns true if the region manager contains the specified region.
+    * @param region to check
+    * @return true if region is found */
+  public boolean contains(R region);
 
-  /** Tests if specified region r is contained in this manager.
-      * @param r  The region
-      * @return  whether the manager contains region r
-      */
-  public boolean contains(R r);
+  /** Returns the region in the given document overlapping the region [start,end],
+    * or null if one does not exist.
+    * @param odd the document
+    * @param start the start offset in the document
+    * @param end the end offset in the document
+    * @return the DocumentRegion overlapping [start,end], or null if it does not exist.
+    */
+  public R getRegionAt(OpenDefinitionsDocument odd, int start, int end);
   
   /** Add the supplied DocumentRegion to the manager.
    *  @param region the DocumentRegion to be inserted into the manager
