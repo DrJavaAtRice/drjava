@@ -39,8 +39,8 @@ import javax.swing.event.ChangeEvent;
 
 /** A CellEditorListener that delegates to a wrapped list of listeners. */
 public class ComposedCellEditorListener extends ComposedListener<CellEditorListener> implements CellEditorListener {
-  public void editingCancelled(ChangeEvent e) {
-    for (CellEditorListener l : listeners()) { l.editingCancelled(e); }
+  public void editingCanceled(ChangeEvent e) {
+    for (CellEditorListener l : listeners()) { l.editingCanceled(e); }
   }
   public void editingStopped(ChangeEvent e) {
     for (CellEditorListener l : listeners()) { l.editingStopped(e); }
