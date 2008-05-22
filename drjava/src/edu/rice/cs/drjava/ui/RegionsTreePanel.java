@@ -90,6 +90,9 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     * Disables some actions until the changes are finished. */
   protected boolean _isChanging = false;
   
+  /** Last node added. */
+  protected DefaultMutableTreeNode _lastAdded = null;
+  
   /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
     * from the event thread.
     * @param frame the MainFrame
@@ -146,6 +149,12 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     _isChanging = b;
     if (!b) {
       updateButtons();
+      if (_lastAdded!=null) {
+        TreePath pathToNewRegion = new TreePath(_lastAdded.getPath());
+        _regTree.scrollPathToVisible(pathToNewRegion);
+      }
+      expandAll();
+      _regTree.revalidate();
     }
   }
   
@@ -214,6 +223,41 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() { }
+  
+  /** Expand all tree nodes. */
+  public void expandAll() {
+    TreeNode root = (TreeNode)_regTree.getModel().getRoot();
+    
+    // Traverse tree from root
+    expandRecursive(_regTree, new TreePath(root), true);
+  }
+
+  /** Collapse all tree nodes. */
+  public void collapseAll() {
+    TreeNode root = (TreeNode)_regTree.getModel().getRoot();
+    
+    // Traverse tree from root
+    expandRecursive(_regTree, new TreePath(root), false);
+  }
+  
+  private void expandRecursive(JTree tree, TreePath parent, boolean expand) {
+    // Traverse children
+    TreeNode node = (TreeNode)parent.getLastPathComponent();
+    if (node.getChildCount() >= 0) {
+      for (Enumeration e=node.children(); e.hasMoreElements(); ) {
+        TreeNode n = (TreeNode)e.nextElement();
+        TreePath path = parent.pathByAddingChild(n);
+        expandRecursive(tree, path, expand);
+      }
+    }
+    
+    // Expansion or collapse must be done bottom-up
+    if (expand) {
+      tree.expandPath(parent);
+    } else {
+      tree.collapsePath(parent);
+    }
+  }
   
   /** Adds config color support to DefaultTreeCellEditor. */
   class RegionRenderer extends DefaultTreeCellRenderer {
@@ -403,20 +447,26 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
           // if start offset of indexed regions is less than new region, continue
           int ofs = r.getStartOffset();
           if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset() == ofs) {
-            // don't add, already there
-            // just make sure this node is visible
-            _regTree.scrollPathToVisible(new TreePath(existing));
-            done = true;
-            break;
+            if (!_isChanging) {
+              // don't add, already there
+              // just make sure this node is visible
+              _regTree.scrollPathToVisible(new TreePath(existing));
+              _lastAdded = existing;
+              done = true;
+              break;
+            }
           }
           else if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset() > ofs) {
             
             // else, add to the list
             DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
             _regTreeModel.insertNodeInto(newRegion, doc, doc.getIndex(existing));
-            
-            // Make sure this node is visible
-            _regTree.scrollPathToVisible(new TreePath(newRegion.getPath()));
+
+            if (!_isChanging) {
+              // Make sure this node is visible
+              _regTree.scrollPathToVisible(new TreePath(newRegion.getPath()));
+            }
+            _lastAdded = newRegion;
             done = true;
             break;
           }
@@ -427,8 +477,11 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
         DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
         _regTreeModel.insertNodeInto(newRegion, doc, doc.getChildCount());
         
-        // Make sure this node is visible
-        _regTree.scrollPathToVisible(new TreePath(newRegion.getPath()));
+        if (!_isChanging) {
+          // Make sure this node is visible
+          _regTree.scrollPathToVisible(new TreePath(newRegion.getPath()));
+        }
+        _lastAdded = newRegion;
         done = true;
         break;
       }
@@ -445,6 +498,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
         TreePath pathToNewRegion = new TreePath(newRegion.getPath());
         _regTree.scrollPathToVisible(pathToNewRegion);
       }
+      _lastAdded = newRegion;
     }
     
     if (!_isChanging) updateButtons();
@@ -455,6 +509,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     */
   public void removeRegion(final R r) {
     // Only change GUI from event-dispatching thread
+    _lastAdded = null;
     Runnable doCommand = new Runnable() {
       public void run() {
         File file= r.getDocument().getRawFile();
@@ -492,6 +547,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Remove all regions for this document from the tree. Must be executed in event thread. */
   public void removeRegions(final OpenDefinitionsDocument odd) {
+    _lastAdded = null;
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
