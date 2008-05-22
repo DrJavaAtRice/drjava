@@ -196,16 +196,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     _regTree.putClientProperty("JTree.lineStyle", "Angled");
     _regTree.setScrollsOnExpand(true);
     _regTree.addTreeSelectionListener(new TreeSelectionListener() {
-      public void valueChanged(TreeSelectionEvent e) {
-        updateButtons();
-      }
+      public void valueChanged(TreeSelectionEvent e) { updateButtons(); }
     });
     _regTree.addKeyListener(new KeyAdapter() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          performDefaultAction();
-        }
-      } 
+      public void keyPressed(KeyEvent e) { if (e.getKeyCode() == KeyEvent.VK_ENTER) { performDefaultAction(); } } 
     });
     
     // Region tree cell renderer
@@ -512,7 +506,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     _lastAdded = null;
     Runnable doCommand = new Runnable() {
       public void run() {
-        File file= r.getDocument().getRawFile();
+        File file = r.getDocument().getRawFile();
         
         DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
         

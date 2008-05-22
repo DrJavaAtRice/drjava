@@ -105,7 +105,7 @@ public class HighlightManager {
     else {
       //add a new Stack to the empty place in the hashtable
       lineStack = new Stack<HighlightInfo>();
-      _highlights.add(lineStack);
+       _highlights.add(lineStack);
     }
     
     try {
@@ -128,7 +128,7 @@ public class HighlightManager {
     * @param h  the descriptor for the desired region.
     * @return  the corresponding Stack, or null
     */
-  private Stack<HighlightInfo> _getStackAt (HighlightInfo h) {
+  private Stack<HighlightInfo> _getStackAt(HighlightInfo h) {
     
     for (Stack<HighlightInfo> stack : _highlights) {
       if (stack.get(0).matchesRegion(h)) {
@@ -145,14 +145,14 @@ public class HighlightManager {
     * @param p the Highlighter.HighlightPainter for painting
     */
   public synchronized void removeHighlight(int startOffset, int endOffset, Highlighter.HighlightPainter p) {
-    HighlightInfo newLite = new HighlightInfo(startOffset,endOffset,p);
+    HighlightInfo newLite = new HighlightInfo(startOffset, endOffset, p);
     removeHighlight(newLite);
   }
   
   /** Removes a given highlight (HighlightInfo) from the highlighter
     * @param newLite the HighlightInfo object corresponding to the highlight needed to be removed
     */
-  public void removeHighlight (HighlightInfo newLite) {
+  public void removeHighlight(HighlightInfo newLite) {
     
     
 //      int startOffset = newLite.getStartOffset();
@@ -224,26 +224,23 @@ public class HighlightManager {
       * @param o the other HighlightInfo object to compare to this one.
       * @return boolean true, if equivalent; false otherwise.
       */
-    public boolean equals( Object o) {
+    public boolean equals(Object o) {
       
-      if (o == null) return false;
+      if (o == null || ! (o instanceof HighlightInfo)) return false;
       
-      if (o instanceof HighlightInfo) {
         
-        HighlightInfo obj = (HighlightInfo)o;
-        /*
-         //System.out.println("p0: "+p0+"  obj.p0: "+obj.p0);
-         //System.out.println("p1: "+p1+"  obj.p1: "+obj.p1);
-         //System.out.println("p: "+p+"  obj.p: "+obj.p);
-         */
-        boolean result = getStartOffset() == obj.getStartOffset() && 
-          getEndOffset() == obj.getEndOffset() &&
-          getPainter() == obj.getPainter();
-        
-        //System.out.println("HighlightInfo.equals() = "+result);
-        return result;
-      }
-      else return false;
+      HighlightInfo hi = (HighlightInfo)o;
+      /*
+       //System.out.println("p0: "+p0+"  obj.p0: "+obj.p0);
+       //System.out.println("p1: "+p1+"  obj.p1: "+obj.p1);
+       //System.out.println("p: "+p+"  obj.p: "+obj.p);
+       */
+      boolean result = getStartOffset() == hi.getStartOffset() && 
+        getEndOffset() == hi.getEndOffset() &&
+        getPainter() == hi.getPainter();
+      
+      //System.out.println("HighlightInfo.equals() = "+result);
+      return result;
     }
     
     /** Overrides hashCode() for consistency with override of equals(...)  */
@@ -280,7 +277,7 @@ public class HighlightManager {
     }
     
     /** Refreshes this HighlightInfo object, obtaining a new Highlighter. */
-    public void refresh (Highlighter.HighlightPainter p ) {
+    public void refresh(Highlighter.HighlightPainter p ) {
       
       this.remove();
       HighlightInfo newHighlight = addHighlight(getStartOffset(), getEndOffset(), p);

@@ -132,6 +132,8 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 
+
+//import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Lambda;
@@ -257,40 +259,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return manager for bookmark regions. */
   public RegionManager<OrderedDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
   
-  /** Toogle the specified bookmark in the active document.
-    * @param pos1 first selection position
-    * @param pos2 second selection position */
-  public void toggleBookmark(int pos1, int pos2) {
-    final OpenDefinitionsDocument doc = getActiveDocument();
-    
-    int startSel = Math.min(pos1,pos2);
-    int endSel = Math.max(pos1,pos2);
-    doc.acquireReadLock();  // Must follow readers/writers protocol even in event thread
-    try {
-      if (startSel == endSel) {
-        // nothing selected
-        endSel = doc.getLineEndPos(startSel);
-        startSel = doc.getLineStartPos(startSel);
-      }
-      final Position startPos = doc.createPosition(startSel);
-      final Position endPos = doc.createPosition(endSel);
-      final RegionManager<OrderedDocumentRegion> rm = getBookmarkManager();
-      
-      OrderedDocumentRegion existingRegion = rm.getRegionAt(doc, pos1, pos2);
-      if (existingRegion==null) { 
-        rm.addRegion(new DocumentRegion(doc, startPos, endPos));
-//        Utilities.show("BookmarkManager added region " + r);
-      }
-      else {
-        rm.removeRegion(existingRegion); // bookmark is toggled
-//        Utilities.show("BookmarkManager removed region " + r);
-      }
-    }
-//    catch (FileMovedException fme) { throw new UnexpectedException(fme); }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-    finally { doc.releaseReadLock(); }
-  }
-  
   /** Managers for find result regions. */
   protected final LinkedList<RegionManager<MovingDocumentRegion>> _findResultsManagers;
   
@@ -325,6 +293,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return manager for browser history regions. */
   public BrowserHistoryManager getBrowserHistoryManager() { return _browserHistoryManager; }
+  
+  
+//  /** Completion monitor for loading the files of a project (as OpenDefintionsDocuments). */
+//  public final CompletionMonitor projectLoading = new CompletionMonitor();
   
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** Light-weight parsing controller. */
@@ -1071,6 +1043,44 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public void setDocumentNavigator(IDocumentNavigator<OpenDefinitionsDocument> newnav) { _documentNavigator = newnav; }
   
+  /** Toogle the specified bookmark in the active document.
+    * @param pos1 first selection position
+    * @param pos2 second selection position */
+  public void toggleBookmark(int pos1, int pos2) {
+//    Utilities.show("AGM.toggleBookmark called");
+    final OpenDefinitionsDocument doc = getActiveDocument();
+    
+    int startSel = Math.min(pos1,pos2);
+    int endSel = Math.max(pos1,pos2);
+    doc.acquireReadLock();  // Must follow readers/writers protocol even in event thread
+    try {
+      final RegionManager<OrderedDocumentRegion> rm = getBookmarkManager();
+      
+      // Check for match against existing bookmark and remove if present; find rightmost region containing selection
+      OrderedDocumentRegion match = rm.getRegionContaining(doc, startSel, endSel);
+      if (match != null) {
+        rm.removeRegion(match);
+        return;
+      }
+      
+      // No match against existing bookmark
+      if (startSel == endSel) {  // offset only; no selection
+        endSel = doc.getLineEndPos(startSel);
+        startSel = doc.getLineStartPos(startSel);
+      }
+      final Position startPos = doc.createPosition(startSel);
+      final Position endPos = doc.createPosition(endSel);
+      
+      OrderedDocumentRegion r = new DocumentRegion(doc, startPos, endPos);
+//      Utilities.show("Adding bookmark " + r);
+      rm.addRegion(r);
+    }
+//    catch (FileMovedException fme) { throw new UnexpectedException(fme); }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    finally { doc.releaseReadLock(); }
+  }
+  
+  
   /** Creates a new open definitions document and adds it to the list. Public for testing purposes.
     * @return The new open document
     */
@@ -1672,7 +1682,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    Utilities.showDebug("openProject called with file " + projectFile);
     
-    // Sets up the filters that cause documents to load in differentnsections of the tree.  The names of these
+    // Sets up the filters that cause documents to load in different sections of the tree.  The names of these
     // sections are set from the methods such as getSourceBinTitle().  Changing this changes what is considered
     // source, aux, and external.
     
@@ -1739,7 +1749,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    Utilities.showDebug("Project files are: " + projFiles);
     
-    final List<OpenDefinitionsDocument> projDocs = getProjectDocuments();  // project source files
+    final List<OpenDefinitionsDocument> projDocs = getProjectDocuments();  // already OPEN project documents
     
     // No files from the previous project (if any) can be open since it was already closed.  
     // But all other files open at time this project is loaded are eligible for inclusion in the new project.  
@@ -1763,6 +1773,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _notifier.openProject(projectFile, new FileOpenSelector() {
       public File[] getFiles() { return filesToOpen; }
     });
+    
+    /* Files are opened synchronously by the preceding notification.  If this process is made asynchronous, we need to 
+     * wait here (using the projectLoaded CompletionMonitor above (commented out). */
     
     for (DebugBreakpointData dbd: ir.getBreakpoints()) {
       try {

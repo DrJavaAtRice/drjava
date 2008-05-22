@@ -43,14 +43,11 @@ import java.awt.dnd.*;
 import java.awt.datatransfer.*;
 import edu.rice.cs.drjava.DrJavaRoot;
 
-/**
- * Extended by all panels that can dynamically be added or removed from the
- * _tabbedPane in MainFrame. Provides a boolean indicating if the panel is being
- * displayed, and a close button. Attaches an action to the close button which
- * calls the _close method. This method can be overwritten in a subclass if
- * needed.
- * @version $Id$
- */
+/** Extended by all panels that can dynamically be added or removed from the _tabbedPane in MainFrame. Provides a
+  * boolean indicating if the panel is being displayed, and a close button. Attaches an action to the close button
+  * which calls the _close method. This method can be overwritten in a subclass if needed.
+  * @version $Id$
+  */
 public abstract class TabbedPanel extends JPanel 
   implements DropTargetListener{
   // indicates whether this tab is displayed in the tabbed pane

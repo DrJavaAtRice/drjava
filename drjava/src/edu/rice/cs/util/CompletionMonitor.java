@@ -62,7 +62,7 @@ public class CompletionMonitor {
     * If the signal is already set, it returns immediately
     * @return returns true, unless the waiting thread was interrupted */
   public synchronized boolean waitOne() {
-    while (!_flag) {
+    while (! _flag) {
       try { this.wait(); } 
       catch (InterruptedException e) { return false; }
     }

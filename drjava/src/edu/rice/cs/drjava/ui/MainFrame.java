@@ -47,12 +47,15 @@ import java.awt.dnd.*;
 import java.beans.*;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -163,9 +166,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final JavadocErrorPanel _javadocErrorPanel;
   private final FindReplacePanel _findReplace;
   private final BreakpointsPanel _breakpointsPanel;
-  final BookmarksPanel _bookmarksPanel;
-  private final LinkedList<Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
-    new LinkedList<Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
+  private final BookmarksPanel _bookmarksPanel;
+  private final LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
+    new LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
   
   private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
   
@@ -2398,6 +2401,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Toggle a bookmark. */
   public void toggleBookmark() {
+//    Utilities.show("MainFrame.toggleBookmark called");
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
     _model.toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd());
@@ -2420,19 +2424,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                  boolean wholeWord, boolean noComments, boolean noTestCases,
                                                  WeakReference<OpenDefinitionsDocument> doc,
                                                  FindReplacePanel findReplace) {
+    
     final FindResultsPanel panel = new FindResultsPanel(this, rm, title, searchString, searchAll, matchCase,
                                                         wholeWord, noComments, noTestCases, doc, findReplace);
-    final Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
-      new Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>();
-    Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
-      new Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
+    
+    final Map<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
+      Collections.synchronizedMap(new TreeMap<MovingDocumentRegion, HighlightManager.HighlightInfo>());
+    Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
+      new Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
     
     // hook highlighting listener to find results manager
     rm.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) {
-        DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
-        highlights.put(r, bpPane.getHighlightManager().
+        DefinitionsPane pane = getDefPaneGivenODD(r.getDocument());
+//        if (pane == null) Utilities.show("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
+        highlights.put(r, pane.getHighlightManager().
                          addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
       }
       public void regionChanged(MovingDocumentRegion r) { 
@@ -2440,7 +2447,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
+//        Utilities.show("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
+//        Utilities.show("The retrieved highlight is " + highlight);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
         // close the panel when all regions have been removed.
@@ -3688,9 +3697,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Set new painter for existing find results highlights. */
   void refreshFindResultsHighlightPainter(FindResultsPanel panel, 
                                           LayeredHighlighter.LayerPainter painter) {
-    for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+    for(Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
       if (pair.first()==panel) {
-        Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.second();
+        Map<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.second();
         for(HighlightManager.HighlightInfo hi: highlights.values()) {
           hi.refresh(painter);
         }
@@ -4703,6 +4712,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {      
       File pf = _saveChooser.getSelectedFile();  // project file
+      if ((pf==null) || (pf.exists() && !_verifyOverwrite())) { return; }
       
       String fileName = pf.getName();
       // ensure that saved file has extesion ".xml"
@@ -4711,8 +4721,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (lastIndex == -1) pf = new File (pf.getAbsolutePath() + ".xml");
         else pf = new File(fileName.substring(0, lastIndex) + ".xml");
       }
-
-      if ((pf==null) || (pf.exists() && !_verifyOverwrite())) { return; }
       
       _model.createNewProject(pf); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
@@ -5468,8 +5476,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     try {
       Debugger debugger = _model.getDebugger();
-      final int line = _currentDefPane.getCurrentLine();
-      debugger.toggleBreakpoint(doc, doc.getOffsetOfLine(line-1), line, true);
+      debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
@@ -7214,7 +7221,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             // revalidateLineNums();
             if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
             if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
-            for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+            for(Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
               FindResultsPanel panel = pair.first();
               if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
             }
@@ -9015,8 +9022,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // TODO: put all of the _tabbedPane components in _tabs. eliminating special cases for interactions, console (which 
     // are always displayed)
     assert EventQueue.isDispatchThread();
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {
     int numVisible = 0;      
 //        System.err.println("showTab called with c = " + c);
     
@@ -9032,8 +9037,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     else {
       for (TabbedPanel tp: _tabs) {
         if (tp == c) {
-          // 2 right now is a magic number for the number of tabs always visible
-          // interactions & console
+          // 2 right now is a magic number for the number of tabs always visible: interactions & console
           if (! tp.isDisplayed()) {
             _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
             tp.setVisible(true);
@@ -9050,8 +9054,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
-//      }
-//    });
   }
   
   /** Sets the location of the main divider.

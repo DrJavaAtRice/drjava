@@ -735,16 +735,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     toggleBookmarkItem.addActionListener ( new AbstractAction() {
       /** Toggle the selected line as a bookmark.  Only runs in event thread. */
       public void actionPerformed( ActionEvent ae) {
-        if (getSelectionStart() == getSelectionEnd()) { // nothing selected
-          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          // Omit locking since Definitions documents are not accessed from other threads (?)
-//          _doc.acquireReadLock();
-//          try { 
-            setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+        // The following text is commented out so that this menu command has the same effect as KEY_BOOKMARKS_TOGGLE
+//        if (getSelectionStart() == getSelectionEnd()) { // nothing selected
+//          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
+//          // Omit locking since Definitions documents are not accessed from other threads (?)
+////          _doc.acquireReadLock();
+////          try { 
+//            setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
             _mainFrame.toggleBookmark();
 //          }
 //          finally {_doc.releaseReadLock(); }
-        }
+//        }
       }
     });
     _popMenu.add(toggleBookmarkItem);
