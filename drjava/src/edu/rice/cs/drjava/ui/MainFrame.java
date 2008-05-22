@@ -166,7 +166,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final JavadocErrorPanel _javadocErrorPanel;
   private final FindReplacePanel _findReplace;
   private final BreakpointsPanel _breakpointsPanel;
-  private final BookmarksPanel _bookmarksPanel;
+  final BookmarksPanel _bookmarksPanel;
   private final LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
     new LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
   
