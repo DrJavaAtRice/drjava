@@ -1,4 +1,4 @@
-  /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,210 +59,260 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
-  class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements 
-    RegionManager<R> {
+class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements 
+  RegionManager<R> {
+  
+  /** Hashtable mapping documents to collections of regions.  Primitive operations are thread safe. */
+  private volatile Hashtable<OpenDefinitionsDocument, SortedSet<R>> _regions = 
+    new Hashtable<OpenDefinitionsDocument, SortedSet<R>>();
+  
+  /** The domain of the _regions.  This field can be extracted from _regions so it is provided to improve performance
+    * Primitive operations are thread-safe. 
+    */
+  private volatile Set<OpenDefinitionsDocument> _documents = 
+    Collections.synchronizedSet(new HashSet<OpenDefinitionsDocument>());
+  
+  private volatile R _current = null;
+  
+  /* Depending on default constructor */
+  
+  /** @return the current region or null if none selected */
+  public R getCurrentRegion() { return _current; }
+  
+  /** @return the set of documents containing regions. */
+  public Set<OpenDefinitionsDocument> getDocuments() { return _documents; }
+  
+  private static final SortedSet<Object> EMPTY_SET = new TreeSet<Object>();
+  
+  
+  /*  Convinces the type checker to accept EMPTY_SET as a set of R. */
+  @SuppressWarnings("unchecked")
+  private <T> T emptySet() { return (T) EMPTY_SET; }
+  
+  /** Convinces the type checker to accept a DocumentRegion as an R.  This works when you need an R object only for use with compareTo
+    * becasue all implementations of IDocumentRegion inherit from DocumentRegion and compareTo is defined in DocumentRegion. */
+  @SuppressWarnings("unchecked")
+  private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
+    return (T) new DocumentRegion(odd, start, end);
+  }
+  
+  private SortedSet<R> getHeadSet(R r) {
+    SortedSet<R> oddRegions = _regions.get(r.getDocument());
+    if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
+    return oddRegions.headSet(r);
+  }
+  
+  private SortedSet<R> getTailSet(R r) {
+    SortedSet<R> oddRegions = _regions.get(r.getDocument());
+    if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
+    return oddRegions.tailSet(r);
+  }
+  
+  private static <R extends OrderedDocumentRegion> SortedSet<R> reverse(SortedSet<R> inputSet) {
+    if (inputSet.isEmpty()) return inputSet;
+    /* Create outputSet with reverse ordering. */
+    SortedSet<R> outputSet = new TreeSet<R>(new Comparator<OrderedDocumentRegion>() { 
+      public int compare(OrderedDocumentRegion o1, OrderedDocumentRegion o2) { return - o1.compareTo(o2); } 
+    });
+    for (R r: inputSet) outputSet.add(r);
+    return outputSet;
+  }
+  
+  /** Returns the rightmost region in the given document that contains offset, or null if one does not exist.  Assumes
+    * that read lock on odd is held (or equivalent).  Otherwise offset could be invalid.
+    * @param odd the document
+    * @param offset the offset in the document
+    * @return the DocumentRegion at the given offset, or null if it does not exist.
+    */
+  public R getRegionAt(OpenDefinitionsDocument odd, int offset) { return getRegionContaining(odd, offset, offset); }
+  
+  /** Returns the rightmost region in the given document that contains [startOffset, endOffset], or null if one does
+    * not exist.  Assumes that read lock on odd is held (or equivalent).  Otherwise offset args could be invalid.
+    * Note; this method could be implemented  more cleanly using a revserseIterator on the headSet containing all
+    * regions preceding or equal to the selection. but this functionality was not added to TreeSet until Java 6.0.
+    * @param odd the document
+    * @param offset the offset in the document
+    * @return the DocumentRegion at the given offset, or null if it does not exist.
+    */
+  public R getRegionContaining(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
     
-    /** Hashtable mapping documents to collections of regions.  Primitive operations are thread safe. */
-    private volatile Hashtable<OpenDefinitionsDocument, SortedSet<R>> _regions = 
-      new Hashtable<OpenDefinitionsDocument, SortedSet<R>>();
+    /* First try finding the rightmost region on the same line containing the selection. Unnecessary in Java 6.0. */
+    int lineStart = odd.getLineStartPos(startOffset);
     
-    /** The domain of the _regions.  This field can be extracted from _regions so it is provided to improve performance
-      * Primitive operations are thread-safe. 
-      */
-    private volatile Set<OpenDefinitionsDocument> _documents = 
-      Collections.synchronizedSet(new HashSet<OpenDefinitionsDocument>());
-    
-    private volatile R _current = null;
-
-    /* Depending on default constructor */
-    
-    /** @return the current region or null if none selected */
-    public R getCurrentRegion() { return _current; }
-    
-    /** @return the set of documents containing regions. */
-    public Set<OpenDefinitionsDocument> getDocuments() { return _documents; }
-    
-    private static final SortedSet<Object> EMPTY_SET = new TreeSet<Object>();
-    
-    
-    /*  Convinces the type checker to accept EMPTY_SET as a set of R. */
     @SuppressWarnings("unchecked")
-    private <T> T emptySet() { return (T) EMPTY_SET; }
+    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, lineStart, endOffset));
+    // tail is sorted by <startOffset, endOffset>; tail may be empty
+    R match = null;
+    for (R r: tail) {
+      if (r.getStartOffset() <= startOffset) {
+        if (r.getEndOffset() >= endOffset) match = r;
+      }
+      else break;  // for all remaining r : R (r.getStartOffset() > offset)
+    }
+    if (match != null) return match;
     
-    /** Convinces the type checker to accept a DocumentRegion as an R.  This works when you need an R object only for use with compareTo
-      * becasue all implementations of IDocumentRegion inherit from DocumentRegion and compareTo is defined in DocumentRegion. */
+    /* No match found starting on same line; look for best match starting on preceding lines. */
     @SuppressWarnings("unchecked")
-    private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
-      return (T) new DocumentRegion(odd, start, end);
+    SortedSet<R> revHead = reverse(getHeadSet((R) newDocumentRegion(odd, lineStart, lineStart))); // linear cost! Ugh!
+    
+    /* Find first match in revHead */
+    Iterator<R> it = revHead.iterator();  // In Java 6.0, it is computable in constant time from headSet using reverseIterator
+    
+    while (it.hasNext()) {
+      match = it.next();
+      if (match.getEndOffset() >= endOffset) break;
     }
     
-    private SortedSet<R> getTailSet(R r) {
-      SortedSet<R> oddRegions = _regions.get(r.getDocument());
-      if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
-      return oddRegions.tailSet(r);
+    if (match == null) return null; // no match found
+   
+    /* Try to improve the match by narrowing endOffset. */
+    R next;
+    while (it.hasNext()) { 
+      next = it.next();
+      if (next.getStartOffset() < match.getStartOffset()) return match;  // no more improvement possible
+      assert next.getStartOffset() == match.getStartOffset();
+      if (next.getEndOffset() >= endOffset) match = next;  // improvement because next precedes match in getRegions(odd)
     }
 
-    /** Returns the rightmost region in the given document with a startOffset on the same line as offset that contains 
-      * offset, or null if one does not exist.
-      * @param odd the document
-      * @param offset the offset in the document
-      * @return the DocumentRegion at the given offset, or null if it does not exist.
-      */
-    public R getRegionAt(OpenDefinitionsDocument odd, int offset) { return getRegionContaining(odd, offset, offset); }
-    
-    public R getRegionContaining(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
-      
-      int lineStart = odd.getLineStartPos(startOffset);
-      
-      @SuppressWarnings("unchecked")
-      SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, lineStart, endOffset));
-      // tail is sorted by <startOffset, endOffset>; tail may be empty
-      R match = null;
-      for (R r: tail) {
-        if (r.getStartOffset() <= startOffset) {
-          if (r.getEndOffset() >= endOffset) match = r;
-        }
-        else break;  // for all remaining r : R (r.getStartOffset() > offset)
-      }
-      return match;  // match is rightmost region in R containing offset
+    return match;  // last region in revHead was the best match
+  }
+  
+  /** Add the supplied DocumentRegion to the manager.  Only runs in event thread after initialization?
+    * @param region the DocumentRegion to be inserted into the manager
+    * @param index the index at which the DocumentRegion was inserted
+    */
+  public void addRegion(final R region) {
+    final OpenDefinitionsDocument odd = region.getDocument();
+    SortedSet<R> docRegions = _regions.get(odd);
+    if (docRegions == null) { // if necessary create a Hashtable entry for odd and insert it in the _documents set
+      _documents.add(odd);
+      docRegions = Collections.synchronizedSortedSet(new TreeSet<R>()); 
+      _regions.put(odd, docRegions);
     }
     
-    /** Add the supplied DocumentRegion to the manager.  Only runs in event thread after initialization?
-      * @param region the DocumentRegion to be inserted into the manager
-      * @param index the index at which the DocumentRegion was inserted
-      */
-    public void addRegion(final R region) {
-      final OpenDefinitionsDocument odd = region.getDocument();
-      SortedSet<R> docRegions = _regions.get(odd);
-      if (docRegions == null) { // if necessary create a Hashtable entry for odd and insert it in the _documents set
-        _documents.add(odd);
-        docRegions = Collections.synchronizedSortedSet(new TreeSet<R>()); 
-        _regions.put(odd, docRegions);
-      }
-
-      // Check for duplicate region
-      if (! docRegions.contains(region)) { // region does not already exist in manager
-        docRegions.add(region);  // modifies docRegions, which is part of _regions
+    // Check for duplicate region
+    if (! docRegions.contains(region)) { // region does not already exist in manager
+      docRegions.add(region);  // modifies docRegions, which is part of _regions
 //        Utilities.show("Region manager " + this + " added region " + region);
 //        Utilities.show("docRegions for document " + odd + " = " + _regions.get(odd));
-      }
-      
-      _current = region;
+    }
+    
+    _current = region;
 //      final int regionIndex = getIndexOf(region);
 //      final String stackTrace = StringOps.getStackTrace();
-      
-      assert _documents.contains(odd);
-      
-      // notify.  invokeLater unnecessary if it only runs in the event thread
-      Utilities.invokeLater(new Runnable() { public void run() {
-        _lock.startRead();
-        try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
-        } finally { _lock.endRead(); }
-      } });
+    
+    assert _documents.contains(odd);
+    
+    // notify.  invokeLater unnecessary if it only runs in the event thread
+    Utilities.invokeLater(new Runnable() { public void run() {
+      _lock.startRead();
+      try {
+        for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
+      } finally { _lock.endRead(); }
+    } });
+  }
+  
+  /** Remove the given IDocumentRegion from the manager.  If any document's regions are emptied, remove the document
+    * from the keys in _regions.
+    * @param region the IDocumentRegion to be removed.
+    */
+  public void removeRegion(final R region) {      
+    // if we're removing the current region, select a more recent region, if available
+    // if a more recent region is not available, select a less recent region, if available
+    // if a less recent region is not available either, set to null
+    final R current = _current; // so we can verify if _current got changed
+    
+    OpenDefinitionsDocument doc = region.getDocument();
+    SortedSet<R> docRegions = _regions.get(doc);
+    if (docRegions == null) return;  // since region is not stored in this region manager, exit!
+    docRegions.remove(region);  // remove the region from the manager
+    if (docRegions.isEmpty()) {
+      _documents.remove(doc);
+      _regions.remove(doc);
     }
     
-    /** Remove the given IDocumentRegion from the manager.  If any document's regions are emptied, remove the document
-      * from the keys in _regions.
-      * @param region the IDocumentRegion to be removed.
-      */
-    public void removeRegion(final R region) {      
-      // if we're removing the current region, select a more recent region, if available
-      // if a more recent region is not available, select a less recent region, if available
-      // if a less recent region is not available either, set to null
-      final R current = _current; // so we can verify if _current got changed
-
-      OpenDefinitionsDocument doc = region.getDocument();
-      SortedSet<R> docRegions = _regions.get(doc);
-      if (docRegions == null) return;  // since region is not stored in this region manager, exit!
-      docRegions.remove(region);  // remove the region from the manager
-      if (docRegions.isEmpty()) {
-        _documents.remove(doc);
-        _regions.remove(doc);
-      }
-      
+    // notify
+    Utilities.invokeLater(new Runnable() { public void run() {
+      _lock.startRead();
+      try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
+      finally { _lock.endRead(); }
+    } });
+  }
+  
+  /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
+  public void removeRegions(final OpenDefinitionsDocument doc) {
+    assert doc != null;
+    boolean found = _documents.remove(doc);
+    if (found) {
+      final SortedSet<R> regions = _regions.get(doc);
       // notify
-      Utilities.invokeLater(new Runnable() { public void run() {
-        _lock.startRead();
-        try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-        finally { _lock.endRead(); }
-      } });
-    }
-    
-    /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
-    public void removeRegions(final OpenDefinitionsDocument doc) {
-      assert doc != null;
-      boolean found = _documents.remove(doc);
-      if (found) {
-        final SortedSet<R> regions = _regions.get(doc);
-        // notify
-        Utilities.invokeLater(new Runnable() { public void run() {
-          _lock.startRead();
-          try {
-            for (RegionManagerListener<R> l: _listeners) { 
-              for (final R r: regions) { l.regionRemoved(r); }
-            } 
-          } 
-          finally { _lock.endRead(); }
-        } });
-        _regions.remove(doc);
-      }
-    }
-    
-    /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
-    public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
-    
-    public Vector<R> getRegions() {
-      Vector<R> regions = new Vector<R>();
-      for (OpenDefinitionsDocument odd: _documents) regions.addAll(_regions.get(odd));
-//      Utilities.show("in ConcreteRegionManager " + this + ",_documents = " + _documents);
-//      Utilities.show("getRegions returning: " + regions);
-      return regions;
-    }
-    
-    public boolean contains(R region) {
-      for (OpenDefinitionsDocument doc: _documents) {
-        if (_regions.get(doc).contains(region)) return true;
-      }
-      return false;
-    }
-    
-    /** Tells the manager to remove all regions. */
-    public void clearRegions() {
-      final Vector<R> regions = getRegions();
-      // Remove all regions in this manager
-      
-      // Notify all listeners for this manager that all regions have been removed
       Utilities.invokeLater(new Runnable() { public void run() {
         _lock.startRead();
         try {
           for (RegionManagerListener<R> l: _listeners) { 
-            for (R r: regions) { l.regionRemoved(r); }
-          }
+            for (final R r: regions) { l.regionRemoved(r); }
+          } 
         } 
         finally { _lock.endRead(); }
       } });
-      
-      _regions.clear();
-      _documents.clear();
+      _regions.remove(doc);
     }
+  }
+  
+  /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
+  public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
+  
+  public Vector<R> getRegions() {
+    Vector<R> regions = new Vector<R>();
+    for (OpenDefinitionsDocument odd: _documents) regions.addAll(_regions.get(odd));
+//      Utilities.show("in ConcreteRegionManager " + this + ",_documents = " + _documents);
+//      Utilities.show("getRegions returning: " + regions);
+    return regions;
+  }
+  
+  public boolean contains(R region) {
+    for (OpenDefinitionsDocument doc: _documents) {
+      if (_regions.get(doc).contains(region)) return true;
+    }
+    return false;
+  }
+  
+  /** Tells the manager to remove all regions. */
+  public void clearRegions() {
+    final Vector<R> regions = getRegions();
+    // Remove all regions in this manager
     
-    /** Set the current region. 
-      * @param region new current region */
-    public void setCurrentRegion(final R region) { _current = region; }
+    // Notify all listeners for this manager that all regions have been removed
+    Utilities.invokeLater(new Runnable() { public void run() {
+      _lock.startRead();
+      try {
+        for (RegionManagerListener<R> l: _listeners) { 
+          for (R r: regions) { l.regionRemoved(r); }
+        }
+      } 
+      finally { _lock.endRead(); }
+    } });
     
-    /** Apply the given command to the specified region to change it.
-      * @param region the region to find and change
-      * @param cmd command that mutates the region. */
-    public void changeRegion(final R region, Lambda<Object, R> cmd) {
+    _regions.clear();
+    _documents.clear();
+  }
+  
+  /** Set the current region. 
+    * @param region new current region */
+  public void setCurrentRegion(final R region) { _current = region; }
+  
+  /** Apply the given command to the specified region to change it.
+    * @param region the region to find and change
+    * @param cmd command that mutates the region. */
+  public void changeRegion(final R region, Lambda<Object, R> cmd) {
 //      final OpenDefinitionsDocument doc = region.getDocument();
-      cmd.apply(region);
-      Utilities.invokeLater(new Runnable() { public void run() {
-        // notify
-        _lock.startRead();
-        try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); }
-        } finally { _lock.endRead(); }            
-      } });
-    }
-  } 
+    cmd.apply(region);
+    Utilities.invokeLater(new Runnable() { public void run() {
+      // notify
+      _lock.startRead();
+      try {
+        for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); }
+      } finally { _lock.endRead(); }            
+    } });
+  }
+} 
