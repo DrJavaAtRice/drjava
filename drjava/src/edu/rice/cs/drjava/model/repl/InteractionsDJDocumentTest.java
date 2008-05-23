@@ -93,7 +93,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
                  _adapter.getStyles()[0].toString());
     
     // Insert some text
-    _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
     
     /* Third element pushed StylesList stack before reset */
     String styleElt3 = "((" + (blen + 2) + ", " + (blen + 3) + "), number.return.style)";
@@ -139,13 +139,17 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
 //    System.err.println("Text length: " + _adapter.getLength());
 //    System.err.println("The styles list is: " + _adapter.getStylesList());
    
-    // TODO: getStyles() technically requres a ReadLock! 
-    assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStyles().length);
-    
-    assertEquals("The first element pushed on StylesList after reset should be", styleElt1,
-                 _adapter.getStyles()[1].toString());
-    assertEquals("The second element pushed on StylesList after reset should be", styleElt2,
-                 _adapter.getStyles()[0].toString());
+
+    _doc.acquireReadLock();  // assures that any pending updates to _doc have been performed
+    try {
+      assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStyles().length);
+      
+      assertEquals("The first element pushed on StylesList after reset should be", styleElt1,
+                   _adapter.getStyles()[1].toString());
+      assertEquals("The second element pushed on StylesList after reset should be", styleElt2,
+                   _adapter.getStyles()[0].toString());
+    }
+    finally { _doc.releaseReadLock(); }
   }
 
   /** Tests that a null style is not added to the list. Fix for bug #995719. */
@@ -154,13 +158,12 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStyles().length);
 
     // Insert some text
-    _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
 
-    assertEquals("StylesList should contain 3 pairs",
-                 3, _adapter.getStyles().length);
+    assertEquals("StylesList should contain 3 pairs", 3, _adapter.getStyles().length);
 
     // Insert some text with a null style
-    _doc.insertText(_doc.getLength(), "6", null);
+    _doc.append("6", null);
 
     assertEquals("StylesList should still contain 3 pairs - null string should not have been inserted",
                  3, _adapter.getStyles().length);
