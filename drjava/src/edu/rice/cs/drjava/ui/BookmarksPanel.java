@@ -99,20 +99,20 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
 
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
-        setChanging(true);
+        startChanging();
         for (OrderedDocumentRegion r: getSelectedRegions()) {
           _model.getBookmarkManager().removeRegion(r);
         }
-        setChanging(false);
+        finishChanging();
       }
     };
     _removeButton = new JButton(removeAction);
     
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
-        setChanging(true);
+        startChanging();
         _model.getBookmarkManager().clearRegions();
-        setChanging(false);
+        finishChanging();
       }
     };
     _removeAllButton = new JButton(removeAllAction);

@@ -80,7 +80,10 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected JButton _updateNowButton;
   protected JButton _runAgainButton;
   protected Thread _updateThread;
+  protected Thread _readThread;
   protected Thread _deathThread;
+  protected StringBuilder _sb = new StringBuilder();
+  protected volatile int _changeCount = 0;
   private char[] _buf = new char[BUFFER_SIZE];
   private int _red = -1;
   private char[] _errbuf = new char[BUFFER_SIZE];
@@ -96,10 +99,10 @@ public class ExternalProcessPanel extends AbortablePanel {
     */
   public ExternalProcessPanel(MainFrame frame, String title, ProcessCreator pc) {
     super(frame, title);
-    StringBuilder sb = new StringBuilder("Command line:");
-    sb.append(pc.cmdline());
-    sb.append('\n');
-    _header = sb.toString();
+    _sb = new StringBuilder("Command line:");
+    _sb.append(pc.cmdline());
+    _sb.append('\n');
+    _header = _sb.toString();
     initThread(pc);
     _textArea.setText(_header);
     _textArea.addMouseListener(new MouseListener() {
@@ -114,7 +117,8 @@ public class ExternalProcessPanel extends AbortablePanel {
       public void mousePressed(MouseEvent e) { }
       public void mouseReleased(MouseEvent e) { }
     });
-    updateText(false);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() { updateText(); } });
     // MainFrame.LOG.log("\tProcessPanel ctor done");
   }
 
@@ -122,6 +126,13 @@ public class ExternalProcessPanel extends AbortablePanel {
     // MainFrame.LOG.log("\tProcessPanel ctor");
     try {
       _pc = pc;
+      _readThread = new Thread(new Runnable() {
+        public void run() {
+          while((_is!=null) || (_erris!=null)) {
+            readText(false);
+          }
+        }
+      },"External Process Read Thread");
       _updateThread = new Thread(new Runnable() {
         public void run() {
           while((_is!=null) || (_erris!=null)) {
@@ -130,13 +141,14 @@ public class ExternalProcessPanel extends AbortablePanel {
                              getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
             }
             catch(InterruptedException ie) { /* ignore */ }
-            updateText(false);
+            updateText();
           }
         }
-      });
+      },"External Process Update Thread");
       _p = _pc.start();
       _is = new InputStreamReader(_p.getInputStream());
       _erris = new InputStreamReader(_p.getErrorStream());
+      _readThread.start();
       _updateThread.start();
       _updateNowButton.setEnabled(true);
       _deathThread = new Thread(new Runnable() {
@@ -145,12 +157,10 @@ public class ExternalProcessPanel extends AbortablePanel {
             _retVal = _p.waitFor();
             Utilities.invokeLater(new Runnable() {
               public void run() {
-                updateText(true);
-                StringBuilder sb = new StringBuilder(_textArea.getText());
-                sb.append("\n\nProcess returned ");
-                sb.append(_retVal);
-                sb.append("\n");
-                _textArea.setText(sb.toString());
+                _sb.append("\n\nProcess returned ");
+                _sb.append(_retVal);
+                _sb.append("\n");
+                _textArea.setText(_sb.toString());
               }
             });
           }
@@ -158,12 +168,10 @@ public class ExternalProcessPanel extends AbortablePanel {
             Utilities.invokeLater(new Runnable() {
               public void run() {
                 _p.destroy();
-                updateText(true);
-                StringBuilder sb = new StringBuilder(_textArea.getText());
-                sb.append("\n\nProcess returned ");
-                sb.append(_retVal);
-                sb.append("\n");
-                _textArea.setText(sb.toString());
+                _sb.append("\n\nProcess returned ");
+                _sb.append(_retVal);
+                _sb.append("\n");
+                _textArea.setText(_sb.toString());
               }
             });
           }
@@ -171,7 +179,7 @@ public class ExternalProcessPanel extends AbortablePanel {
             abortActionPerformed(null);
           }
         }
-      });
+      },"External Process Death Thread");
       _deathThread.start();
       // MainFrame.LOG.log("\tUpdate thread started");
     }
@@ -187,7 +195,8 @@ public class ExternalProcessPanel extends AbortablePanel {
     return _textArea;
   }
 
-  /** Abort action was performed. Must be overridden to return the component on the left side. */
+  /** Abort action was performed.
+    * @param e action event performed by user, or null if aborted due to problem */
   protected void abortActionPerformed(ActionEvent e) {
     if (_is!=null) {
       try {
@@ -209,6 +218,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       _p.destroy();
       _p = null;
     }
+    updateText();
   }
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("external.txt",true);
@@ -221,15 +231,16 @@ public class ExternalProcessPanel extends AbortablePanel {
     int start = caret;
     int end = start;
     while((start-1>0) && (t.charAt(start-1)!='\n')) { --start; }
-    while((end<t.length()) && (t.charAt(end)!='\n')) { ++end; }
+    while((end>=0) && (end<t.length()) && (t.charAt(end)!='\n')) { ++end; }
     // LOG.log("\tstart="+start+"\n\tend="+end);
+    if ((start<0) || (end<0) || (start>=t.length()) || (end>=t.length())) return;
     final String line = t.substring(start,end);
     // LOG.log("\t'"+line+"'");
     caret -= start; // calculate caret position within the line
     if (caret>=line.length()) { caret = line.length()-1; }
     start = end = caret;
     char ch;
-    while(end<line.length()) {
+    while((end>=0) && (end<line.length())) {
       ch = line.charAt(end);
       if (ch==':') {
         if ((end+1<line.length()) && (Character.isDigit(line.charAt(end+1)))) {
@@ -280,14 +291,14 @@ public class ExternalProcessPanel extends AbortablePanel {
     
     GoToFileListEntry uniqueMatch = null;
     String name, oldName = null, simpleName = null;
-    do {
+    while(start>0) {
       ch = line.charAt(start);
       while(start>0) {
         ch = line.charAt(start);
         if ((ch==':') || (ch=='.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
       }
       // LOG.log("\tstart="+start+"\n\tend="+end);
-      if ((start>=0) && (end>=start)) {
+      if ((start>=0) && (end>=start) && (start<line.length()) && (end<line.length())) {
         name = line.substring(start,end).replace(File.separatorChar,'.');
         if ((name.length()>0) && (!Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
         if (simpleName==null) { simpleName = name; }
@@ -341,7 +352,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         break;
       }
       if (ch==File.separatorChar) { --start; } // file separator ('/' or '\'), include preceding directory 
-    } while(start>0);
+    }
     if (uniqueMatch==null) {
       // couldn't find a unique match, even after gradually including the fully qualified name
       _frame.gotoFileMatchingMask(simpleName);
@@ -373,103 +384,120 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected JComponent[] makeButtons() {
     _updateNowButton = new JButton("Update");
     _updateNowButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { updateText(false); }
+      public void actionPerformed(ActionEvent e) { 
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() { updateText(); } });
+      }
     });
     _runAgainButton = new JButton("Run Again");
     _runAgainButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         abortActionPerformed(e);
-        StringBuilder sb = new StringBuilder("Command line:");
-        sb.append(_pc.cmdline());
-        sb.append('\n');
-        _header = sb.toString();
+        _sb = new StringBuilder("Command line:");
+        _sb.append(_pc.cmdline());
+        _sb.append('\n');
+        _header = _sb.toString();
         initThread(_pc);
         _textArea.setText(_header);
-        updateText(false);
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() { updateText(); } });
       }
     });
     return new JComponent[] { _updateNowButton, _runAgainButton };
   }
-  
-  /** Update the text area if there is new text in the stream.
-    * May not read all new text if there is too much, as that would
-    * block the event thread for too long.
+
+  /** Read new text from the stream.
     * @param finish whether to read the entire rest */
-  protected void updateText(final boolean finish) {
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
-        // MainFrame.LOG.log("updateText");
-        if (((_is!=null) || (_erris!=null)) &&
-            (_updateNowButton.isEnabled())) {
-          _updateNowButton.setEnabled(false);
-          int changeCount = 0;
-          StringBuilder sb = new StringBuilder(_textArea.getText());
-          // MainFrame.LOG.log("\tgot text");
-          try {
-            // MainFrame.LOG.log("\treading...");
-            // abort after reading 5 blocks (50 kB), read more later
-            // don't block the event thread any longer
-            while((_is!=null) &&
-                  (_erris!=null) &&
-                  (changeCount<=BUFFER_READS_PER_TIMER) &&
-                  (_erris!=null) &&
-                  ((_red = _is.read(_buf))>=0)) {
-              // MainFrame.LOG.log("\tread "+_red+" bytes");
-              sb.append(new String(_buf, 0, _red));
-              if (finish) { changeCount = 1; } else { ++changeCount; }
-            }
-            if (_is==null) { sb.append("\nInput stream suddenly became null."); }
-            if (_erris==null) { sb.append("\nError input stream suddenly became null."); }
-            while((changeCount<=BUFFER_READS_PER_TIMER) &&
-                  (_erris!=null) &&
-                  ((_errred = _erris.read(_errbuf))>=0)) {
-              // MainFrame.LOG.log("\tread "+_red+" bytes");
-              sb.append(new String(_errbuf, 0, _errred));
-              if (finish) { changeCount = 1; } else { ++changeCount; }
-            }
-            if ((_red>0) && (changeCount<BUFFER_READS_PER_TIMER)) {
-              sb.append(new String(_buf, 0, _red));
-              if (finish) { changeCount = 1; } else { ++changeCount; }
-            }
-            if ((_errred>0) && (changeCount<BUFFER_READS_PER_TIMER)) {
-              sb.append(new String(_errbuf, 0, _errred));
-              if (finish) { changeCount = 1; } else { ++changeCount; }
-            }
-          }
-          catch(IOException ioe) {
-            // MainFrame.LOG.log("\taborted");
-            // stop polling
-            sb.append("\n\nI/O Exception reading from process\n");
-            if (finish) { changeCount = 1; } else { ++changeCount; }
-            abortActionPerformed(null);
-          }
-          finally {
-            if (changeCount>0) {
-              // MainFrame.LOG.log("\tsetting text");
-              _textArea.setText(sb.toString());
-              int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
-                getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
-              if (maxLines>0) { // if maxLines is 0, buffer is unlimited
-                try {
-                  int start = 0;
-                  int len = _textArea.getText().length();
-                  int curLines = _textArea.getLineCount();
-                  if (curLines>maxLines) {
-                    start = _textArea.getLineStartOffset(curLines-maxLines);
-                    len -= start;
-                    sb = new StringBuilder(_textArea.getText(start,len));
-                    _textArea.setText(sb.toString());
-                  }
-                }
-                catch(javax.swing.text.BadLocationException e) { /* ignore, do not truncate */ }
-              }
-              // MainFrame.LOG.log("\ttext length = "+s.length());
-            }
-          }
+  protected void readText(final boolean finish) {
+    // MainFrame.LOG.log("readText");
+    if (((_is!=null) || (_erris!=null)) &&
+        (_updateNowButton.isEnabled())) {
+      _updateNowButton.setEnabled(false);
+      _changeCount = 0;
+      // MainFrame.LOG.log("\tgot text");
+      try {
+        // MainFrame.LOG.log("\treading...");
+        // abort after reading 5 blocks (50 kB), read more later
+        // don't block the event thread any longer
+        while((_is!=null) &&
+              (_erris!=null) &&
+              (_changeCount<=BUFFER_READS_PER_TIMER) &&
+              (_erris!=null) &&
+              ((_red = _is.read(_buf))>=0)) {
+          // MainFrame.LOG.log("\tread "+_red+" bytes");
+          _sb.append(new String(_buf, 0, _red));
+          if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        // MainFrame.LOG.log("\tupdating buttons");
-        updateButtons();
+        if (_is==null) { _sb.append("\nInput stream suddenly became null."); }
+        if (_erris==null) { _sb.append("\nError input stream suddenly became null."); }
+        while((_changeCount<=BUFFER_READS_PER_TIMER) &&
+              (_erris!=null) &&
+              ((_errred = _erris.read(_errbuf))>=0)) {
+          // MainFrame.LOG.log("\tread "+_red+" bytes");
+          _sb.append(new String(_errbuf, 0, _errred));
+          if (finish) { _changeCount = 1; } else { ++_changeCount; }
+        }
+        if ((_red>0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
+          _sb.append(new String(_buf, 0, _red));
+          if (finish) { _changeCount = 1; } else { ++_changeCount; }
+        }
+        if ((_errred>0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
+          _sb.append(new String(_errbuf, 0, _errred));
+          if (finish) { _changeCount = 1; } else { ++_changeCount; }
+        }
       }
-    });
+      catch(IOException ioe) {
+        // MainFrame.LOG.log("\taborted");
+        // stop polling
+        _sb.append("\n\nI/O Exception reading from process\n");
+        if (finish) { _changeCount = 1; } else { ++_changeCount; }
+        abortActionPerformed(null);
+      }
+    }
+  }
+  
+  /** Update the text area with the text that was read. */
+  protected void updateText() {
+    // MainFrame.LOG.log("updateText");
+    if (_updateNowButton.isEnabled()) {
+      try {
+        if ((_is!=null) && (_p!=null) &&
+            (_is.ready()) &&
+            (_p.getInputStream().available()>0)) { readText(false); }
+      }
+      catch(IOException ioe) {
+        _sb.append("\n\nI/O Exception reading from process\n");
+        abortActionPerformed(null);
+        ++_changeCount;
+      }
+      if (_changeCount>0) {
+        _changeCount = 0;
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            // MainFrame.LOG.log("\tsetting text");
+            _textArea.setText(_sb.toString());
+            int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
+              getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
+            if (maxLines>0) { // if maxLines is 0, buffer is unlimited
+              try {
+                int start = 0;
+                int len = _textArea.getText().length();
+                int curLines = _textArea.getLineCount();
+                if (curLines>maxLines) {
+                  start = _textArea.getLineStartOffset(curLines-maxLines);
+                  len -= start;
+                  _sb = new StringBuilder(_textArea.getText(start,len));
+                  _textArea.setText(_sb.toString());
+                }
+              }
+              catch(javax.swing.text.BadLocationException e) { /* ignore, do not truncate */ }
+            }
+            // MainFrame.LOG.log("\ttext length = "+s.length());
+          }
+        });
+      }
+      // MainFrame.LOG.log("\tupdating buttons");
+      updateButtons();
+    }
   }
 }

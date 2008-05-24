@@ -113,6 +113,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private JButton _cancelCommandButton;
   /** Entered command line. */
   private JTextPane _commandLine;
+  /** Command line preview label. */
+  private JLabel _commandLinePreviewLabel;
   /** Command line preview. */
   private JTextPane _commandLinePreview;
   /** Java command line preview document. */
@@ -449,10 +451,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.weighty = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
-    JLabel commandLinePreviewLabel = new JLabel("Command line preview:");
-    commandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
-    gridbag.setConstraints(commandLinePreviewLabel, c);
-    main.add(commandLinePreviewLabel);
+    _commandLinePreviewLabel = new JLabel("<html>Command line preview:<br>(0 characters)</html>");
+    _commandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
+    gridbag.setConstraints(_commandLinePreviewLabel, c);
+    main.add(_commandLinePreviewLabel);
     
     c.weightx = 1.0;
     c.weighty = 32.0;
@@ -603,7 +605,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
-          
+          _commandLinePreviewLabel.setText("<html>Command line preview:<br>("+_commandLinePreview.getText().length()+
+                                           " characters)</html>");
         }
         catch(BadLocationException ble) {
           _commandLinePreview.setText("Error.");

@@ -268,7 +268,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {
     updateButtons();
-    _frame._bookmarksPanel.setChanging(true);
+    _frame._bookmarksPanel.startChanging();
     for (final MovingDocumentRegion r: getSelectedRegions()) {
       if (! _model.getBookmarkManager().contains(r)) {
 //        try {
@@ -279,7 +279,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 //        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
       }
     }
-    _frame._bookmarksPanel.setChanging(false);
+    _frame._bookmarksPanel.finishChanging();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
@@ -287,9 +287,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Remove the selected regions. */
   private void _remove() {
-    setChanging(true);
+    startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
-    setChanging(false);
+    finishChanging();
     if (_regionManager.getDocuments().size() == 0) { _close(); }
     updateButtons();
   }
