@@ -102,7 +102,10 @@ public abstract class EagerFileListProperty extends EagerProperty {
       catch(IOException e) { /* ignore */ }
       catch(SecurityException e) { /* ignore */ }
     }
-    _value = sb.toString().substring(_sep.length());
+    _value = sb.toString();
+    if (_value.startsWith(_attributes.get("sep"))) {
+      _value= _value.substring(_attributes.get("sep").length());
+    }
   }
   
   /** Reset the attributes. */

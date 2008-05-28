@@ -85,6 +85,9 @@ public interface OptionConstants {
   /** The extension for DrJava external process file embedded in its own jar file. */
   public static final String EXTPROCESS_JAR_FILE_EXTENSION = ".drjavajar";
   
+  /** The configuration XML file that DrJava looks for inside a .drjavajar file */
+  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process"+EXTPROCESS_FILE_EXTENSION;
+  
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
   
   public static final VectorOption<File> EXTRA_CLASSPATH = new ClassPathOption().evaluate("extra.classpath");

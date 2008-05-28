@@ -467,7 +467,9 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   
   /** Import process. */
   public void _import() {
+    _mainFrame.removeModalWindowAdapter(this);
     int rc = _importChooser.showOpenDialog(this);
+    _mainFrame.installModalWindowAdapter(this, NO_OP, OK);
     switch (rc) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION: {
@@ -482,7 +484,13 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
         // If this is a single-selection dialog, getSelectedFiles() will always
         // return a zero-size array -- handle it differently.
         if (chosen.length == 0) {
-          MainFrame.openExtProcessFile(_importChooser.getSelectedFile());
+          File f = _importChooser.getSelectedFile();
+          if (f.getName().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)) {
+            MainFrame.openExtProcessJarFile(f);
+          }
+          else {
+            MainFrame.openExtProcessFile(f);
+          }
           updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
         }
         return;
@@ -495,24 +503,26 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   
   /** Export process. */
   public void _export() {
-    System.out.println("_export()");
+    //System.out.println("_export()");
     _exportChooser.setMultiSelectionEnabled(false);
+    _mainFrame.removeModalWindowAdapter(this);
     int rc = _exportChooser.showSaveDialog(this);
+    _mainFrame.installModalWindowAdapter(this, NO_OP, OK);
     switch (rc) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION: {
-        System.out.println("\tcancel/error, rc="+rc);
+        //System.out.println("\tcancel/error, rc="+rc);
         return;
       }
       
       case JFileChooser.APPROVE_OPTION: {
-        System.out.println("\tapprove, rc="+rc);
+        //System.out.println("\tapprove, rc="+rc);
         File[] chosen = _exportChooser.getSelectedFiles();
         if (chosen == null) {
-          System.out.println("\tchosen=null");
+          //System.out.println("\tchosen=null");
           return;
         } 
-        System.out.println("\tchosen.length="+chosen.length);
+        //System.out.println("\tchosen.length="+chosen.length);
         // If this is a single-selection dialog, getSelectedFiles() will always
         // return a zero-size array -- handle it differently.
         if (chosen.length == 0) {
@@ -520,7 +530,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
           if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
             f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
           }
-          System.out.println("\tindex="+_list.getSelectedIndex()+", file="+f);
+          //System.out.println("\tindex="+_list.getSelectedIndex()+", file="+f);
           ExecuteExternalDialog.saveToFile(_list.getSelectedIndex(), f);
         }
         return;

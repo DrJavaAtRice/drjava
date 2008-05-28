@@ -93,7 +93,8 @@ public class ProcessCreator {
     for (int i=0; i<cmds.size(); ++i) {
       cmdarray[i] = StringOps.unescapeSpacesWith1bHex(cmds.get(i));
     }
-    String workdir = StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
+    String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
+    workdir = StringOps.unescapeSpacesWith1bHex(workdir);
     File dir = null;
     if (!workdir.trim().equals("")) { dir = new File(workdir); }
     String[] env = null;

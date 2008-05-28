@@ -75,7 +75,7 @@ public class JVMProcessCreator extends ProcessCreator {
   /** Starts a new JCM process using the attributes of this process creator.
    */
   public Process start() throws IOException {
-    List<String> jvmArgs = StringOps.commandLineToList(StringOps.replaceVariables(_jvmArgs, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));;
+    List<String> jvmArgs = StringOps.commandLineToList(StringOps.replaceVariables(_jvmArgs, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
     List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
     LinkedList<String> args = new LinkedList<String>();
     args.add(ExecJVM.getExecutable());
@@ -87,6 +87,7 @@ public class JVMProcessCreator extends ProcessCreator {
     }
 
     String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
+    workdir = StringOps.unescapeSpacesWith1bHex(workdir);
     File dir = null;
     if (!workdir.trim().equals("")) { dir = new File(workdir); }
     

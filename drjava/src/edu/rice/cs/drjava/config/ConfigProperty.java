@@ -37,12 +37,17 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
+
+import java.util.Vector;
 import java.util.Iterator;
 
 /** Class representing values from the DrJava configuration file that can be inserted as variables in external processes.
   * @version $Id$
   */
 public class ConfigProperty extends EagerProperty {
+  /** True if this is a list of values. This allows the sep="..." attribute. */
+  protected boolean _isList = false;
+  
   /** Create a configuration property. */
   public ConfigProperty(String name) {
     super(name, "Help not available.");
@@ -57,11 +62,66 @@ public class ConfigProperty extends EagerProperty {
       OptionParser<?> op = it.next();
       String key = op.getName();
       String value = om.getString(op);
-      if (_name.equals("config."+key)) { _value = value; return; }
+      if (_name.equals("config."+key)) {
+        if (op instanceof VectorOption) {
+          @SuppressWarnings("unchecked")
+          Vector<?> vec = ((VectorOption)op).parse(value);
+          StringBuilder sb = new StringBuilder();
+          for(Object o: vec) {
+            sb.append(_attributes.get("sep"));
+            sb.append(o.toString());
+          }
+          _value = sb.toString();
+          if (_value.startsWith(_attributes.get("sep"))) {
+            _value= _value.substring(_attributes.get("sep").length());
+          }
+        }
+        else if (_name.equals("config.debug.step.exclude")) {
+          java.util.StringTokenizer tok = new java.util.StringTokenizer(value);
+          StringBuilder sb = new StringBuilder();
+          while(tok.hasMoreTokens()) {
+            sb.append(_attributes.get("sep"));
+            sb.append(tok.nextToken());
+          }
+          _value = sb.toString();
+          if (_value.startsWith(_attributes.get("sep"))) {
+            _value= _value.substring(_attributes.get("sep").length());
+          }
+        }
+        else {
+          _value = value;
+        }
+        return;
+      }
     }
     _value = "--unknown--";
   }
-  
+
+  /** Reset attributes to their defaults. */
+  public void resetAttributes() {
+    _attributes.clear();
+    OptionMap om = DrJava.getConfig().getOptionMap();
+    Iterator<OptionParser<?>> it = om.keys();
+    while(it.hasNext()) {
+      OptionParser<?> op = it.next();
+      String key = op.getName();
+      if (_name.equals("config."+key)) {
+        if (op instanceof VectorOption) {
+          _isList = true;
+          _attributes.put("sep", java.io.File.pathSeparator);
+        }
+        else if (_name.equals("config.debug.step.exclude")) {
+          _isList = true;
+          _attributes.put("sep", ",");
+        }
+        else {
+          _isList = false;
+        }
+        return;
+      }
+    }
+  }
+
   /** Return the value. */
   public String toString() {
     return getCurrent();

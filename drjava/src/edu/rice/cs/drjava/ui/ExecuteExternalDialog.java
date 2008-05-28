@@ -1262,8 +1262,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     
     _mainFrame.removeModalWindowAdapter(this);
     if (_javaCommandLinePreview.getText().length()>0) {
-      runJava("", _jvmLine.getText(), _javaCommandLine.getText(),
-              _javaCommandWorkDirLine.getText());
+      runJava("", _jvmLine.getText(), _javaCommandLine.getText(), _javaCommandWorkDirLine.getText());
     }
     
     // Always apply and save settings

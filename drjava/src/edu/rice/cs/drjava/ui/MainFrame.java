@@ -3531,9 +3531,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode",
                                                                "Evaluates to true if a project is loaded.") {
       public void update() {
-        long millis = System.currentTimeMillis();
-        String f = _attributes.get("fmt").toLowerCase();
         Boolean b = _model.isProjectActive();
+        String f = _attributes.get("fmt").toLowerCase();
         if (f.equals("int")) _value = b ? "1" : "0";
         else if (f.equals("yes")) _value = b ? "yes" : "no";
         else _value = b.toString();
@@ -3601,7 +3600,51 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     };
     PropertyMaps.ONLY.setProperty("Project", classFilesProperty);
-    
+    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.auto.refresh",
+                                                               "Evaluates to true if project auto-refresh is enabled.") {
+      public void update() {
+        Boolean b = _model.getAutoRefreshStatus();
+        String f = _attributes.get("fmt").toLowerCase();
+        if (f.equals("int")) _value = b ? "1" : "0";
+        else if (f.equals("yes")) _value = b ? "yes" : "no";
+        else _value = b.toString();
+      }
+      
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("fmt", "boolean");
+      }
+    });
+    PropertyMaps.ONLY.setProperty("Project", new EagerFileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
+                                                                       "Returns a list of files that are excluded from DrJava's "+
+                                                                       "project auto-refresh.\n"+
+                                                                       "Optional attributes:\n"+
+                                                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                                                       "\tsep=\"<separator between files>\"") {
+      protected List<File> getList() {
+        ArrayList<File> l = new ArrayList<File>();
+        for(File f: _model.getExcludedFiles()) {
+          l.add(f);
+        }
+        return l;
+      }
+    });
+    PropertyMaps.ONLY.setProperty("Project", new EagerFileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
+                                                                       "Returns a list of files in the project's extra "+
+                                                                       "class path.\n"+
+                                                                       "Optional attributes:\n"+
+                                                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                                                       "\tsep=\"<separator between files>\"") {
+      protected List<File> getList() {
+        ArrayList<File> l = new ArrayList<File>();
+        for(File f: _model.getExtraClassPath()) {
+          l.add(f);
+        }
+        return l;
+      }
+    });
+
+    // Actions
     PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
                                                                      "Execute a \"Save All\" action.") {
       public void update() {
@@ -9434,7 +9477,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     try {
       System.out.println("openExtProcessJarFile(file="+file+")");
       JarFile jf = new JarFile(file);
-      JarEntry je = jf.getJarEntry("process.drjavaxml");
+      JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
       InputStream is = jf.getInputStream(je);
       XMLConfig xc = new XMLConfig(is);
       ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
