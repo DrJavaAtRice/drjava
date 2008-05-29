@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.ui.InteractionsController;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.io.File;
@@ -68,7 +69,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Interprets the given command.
     * @param toEval command to be evaluated
     */
-  protected void _interpret(String toEval) {
+  protected 
+    void _interpret(String toEval) {
     debug.logStart("Interpret " + toEval);
     _jvm.interpret(toEval);
     debug.logEnd();
@@ -166,20 +168,24 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param inProgress whether the interpreter is currently in progress
     * @param updatePrompt whether or not the interpreter has changed
     */
-  private void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
+  private void _updateDocument(final String prompt, final boolean inProgress, boolean updatePrompt) {
     if (updatePrompt) {
-      int len = 0;
-      _document.acquireWriteLock();
-      try {
-        _document.setPrompt(prompt);
-        _document.insertNewline(_document.getLength());
-        _document.insertPrompt();
-        len = _document.getPromptLength();  // updates the interactions pane!
-      }
-      finally { _document.releaseWriteLock(); }
-      advanceCaret(len);
-    }
-    _document.setInProgress(inProgress);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _document.acquireWriteLock();
+          try {
+            _document.setPrompt(prompt);
+            _document.insertNewline(_document.getLength());
+            _document.insertPrompt();
+            int len = _document.getPromptLength();  
+//            advanceCaret(len);
+            _document.setInProgress(inProgress);
+          }
+          finally { _document.releaseWriteLock(); }
+        }
+      });
+      scrollToCaret();
+    }   
   }
   
   /** Notifies listeners that the interpreter has changed. (Subclasses must maintain listeners.)

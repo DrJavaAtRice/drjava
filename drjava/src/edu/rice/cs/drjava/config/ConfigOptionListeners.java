@@ -73,8 +73,7 @@ public class ConfigOptionListeners implements OptionConstants {
     if (((pos>1) && (Character.isWhitespace(value.charAt(pos-1)))) ||
         (pos==0)) {
       int endpos = pos+("-Xmx".length());
-      while((endpos<value.length()) &&
-            (!Character.isWhitespace(value.charAt(endpos)))) {
+      while(endpos<value.length() && (! Character.isWhitespace(value.charAt(endpos)))) {
         ++endpos;
       }
       
@@ -94,33 +93,21 @@ public class ConfigOptionListeners implements OptionConstants {
           break;
         }
         default: {
-          if (!Character.isDigit(size.toLowerCase().charAt(size.length()-1))) {
-            factor = 0;
-          }
+          if (!Character.isDigit(size.toLowerCase().charAt(size.length()-1))) factor = 0;
         }
       }
       try {
-        if (factor==1) {
-          heapSize = new Long(size);
-        }
-        else if (factor>1) {
-          heapSize = new Long(size.substring(0,size.length()-1)) * factor;
-        }
-        else {
-          heapSize = -1;
-        }
+        if (factor == 1)  heapSize = new Long(size);
+        else if (factor > 1) heapSize = new Long(size.substring(0,size.length()-1)) * factor;
+        else heapSize = -1;
       }
-      catch(NumberFormatException nfe) {
-        heapSize = -1; // invalid
-      }
+      catch(NumberFormatException nfe) { heapSize = -1; /* invalid */ }
       long heapSizeMB = (heapSize / 1024) / 1024;
       // find the next bigger of the choices
       String newSetting = getNextBiggerHeapSize(heapSizeMB);
       int result;
       if (heapSize>=0) {
-        String[] options = new String[] { "Copy to \"Maximum Heap\" Setting",
-          "Clean \"Slave JVM Args\"",
-          "Ignore" };
+        String[] options = new String[] { "Copy to \"Maximum Heap\" Setting", "Clean \"Slave JVM Args\"", "Ignore" };
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
@@ -166,9 +153,7 @@ public class ConfigOptionListeners implements OptionConstants {
           public void optionChanged(OptionEvent<String> oe) {
             DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
             SwingUtilities.invokeLater(new Runnable() { 
-              public void run() {
-                DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, l);
-              }
+              public void run() { DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, l); }
             });
           }
         });
@@ -269,12 +254,9 @@ public class ConfigOptionListeners implements OptionConstants {
   }
   
   @SuppressWarnings("fallthrough")
-  public static void sanitizeMasterJVMArgs(JFrame parent,
-                                           String value,
-                                           final OptionListener<String> l) {
+  public static void sanitizeMasterJVMArgs(JFrame parent, String value, final OptionListener<String> l) {
     int pos = value.indexOf("-Xmx");
-    if (((pos>1) && (Character.isWhitespace(value.charAt(pos-1)))) ||
-        (pos==0)) {
+    if ((pos > 1 && Character.isWhitespace(value.charAt(pos-1))) || pos == 0) {
       int endpos = pos+("-Xmx".length());
       while((endpos<value.length()) &&
             (!Character.isWhitespace(value.charAt(endpos)))) {

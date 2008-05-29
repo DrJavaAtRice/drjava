@@ -42,12 +42,11 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
 
-/**
- * Graphical form of an IntegerOption.
- * @version $Id$
- */
+/** Graphical form of an IntegerOption.
+  * @version $Id$
+  */
 public class IntegerOptionComponent extends OptionComponent<Integer> {
-  private JTextField _jtf;
+  private volatile JTextField _jtf;
   
   public IntegerOptionComponent (IntegerOption opt, String text, Frame parent) {
     super(opt, text, parent);
@@ -60,38 +59,32 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     });
   }
   
-  /** Constructor that allows for a tooltip description.
-   */
-  public IntegerOptionComponent (IntegerOption opt, String text,
-                                 Frame parent, String description) {
+  /** Constructor that allows for a tooltip description. */
+  public IntegerOptionComponent (IntegerOption opt, String text, Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
 
   /** Sets the tooltip description text for this option.
-   * @param description the tooltip text
-   */
+    * @param description the tooltip text
+    */
   public void setDescription(String description) {
     _jtf.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
   /** Updates the config object with the new setting.
-   * @return true if the new value is set successfully
-   */
+    * @return true if the new value is set successfully
+    */
   public boolean updateConfig() {
   
     Integer currentValue = DrJava.getConfig().getSetting(_option);
     String enteredString = _jtf.getText().trim();
     //If the current value is the same as the enterd value, there is nothing to do.
-    if (currentValue.toString().equals(enteredString)) {
-      return true;
-    }
+    if (currentValue.toString().equals(enteredString)) return true;
     
     Integer enteredValue;
-    try {
-      enteredValue = _option.parse(enteredString);
-    }
+    try { enteredValue = _option.parse(enteredString); }
     catch (OptionParseException ope) {
       showErrorMessage("Invalid Integer!", ope);
       return false;
@@ -101,14 +94,12 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     return true;
   } 
   
-  /** Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(Integer value) {
     _jtf.setText(_option.format(value));
   }
   
-  /** Return's this OptionComponent's configurable component.
-   */
+  /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _jtf; }
     
 }

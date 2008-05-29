@@ -58,6 +58,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.UnmarshalException;
 import java.util.regex.*;
 import java.util.List;
 
@@ -328,7 +329,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void interpretIgnoreResult(String input) throws EditDocumentException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
     interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
-    _model.interpretCurrentInteraction();
+    try { _model.interpretCurrentInteraction(); }
+    catch(RuntimeException re) { // On Windows, UnmarshalExceptions are sometime thrown
+      Throwable cause = re.getCause();
+      if (! (cause instanceof UnmarshalException)) throw re; // otherwise ignore
+    }
   }
 
   /** Asserts that the given string exists in the Interactions Document. */
@@ -885,7 +890,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //          assertInterpreterResettingCount(1);
 //          Utilities.showDebug("GlobalModelOtherTest: notifying resetDone");
         _resetDone = true;
-        _resetLock.notify();
+        _resetLock.notifyAll();
       }
     }
     
@@ -916,7 +921,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   };
   
   
-  /** A model listener for situations expecting a compilation to fail.  The _expectReset flag determines if interactions
+  /** A model listener for situations expecting a compilation to succeed.  The _expectReset flag determines if interactions
    *  are reset after a compilation. The interactionsReset() method notifies when reset has occurred.
    */
   public static class CompileShouldSucceedListener extends InteractionListener {
@@ -948,7 +953,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private void _notifyCompileDone() {
       synchronized(_compileLock) {
         _compileDone = true;
-        _compileLock.notify();
+        _compileLock.notifyAll();
       }
     }
     

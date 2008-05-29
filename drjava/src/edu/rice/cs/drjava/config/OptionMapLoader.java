@@ -44,12 +44,12 @@ import java.lang.reflect.*;
 public class OptionMapLoader implements OptionConstants {
   
   /** bag of default options (programmatically defined, instead of in an options file) */
-  private static DefaultOptionMap DEFAULTS = new DefaultOptionMap();
-  private static Properties DEFAULT_STRINGS = new Properties();
+  private static final DefaultOptionMap DEFAULTS = new DefaultOptionMap();
+  private static final Properties DEFAULT_STRINGS = new Properties();
+  private static volatile Field[] fields = OptionConstants.class.getDeclaredFields();
   
   static {
     // initialize DEFAULTS objects, based on OptionConstants using reflection.
-    Field[] fields = OptionConstants.class.getDeclaredFields();
     for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
       int mods = field.getModifiers();
@@ -71,8 +71,8 @@ public class OptionMapLoader implements OptionConstants {
         }
         
         String sval = option.getDefaultString();
-        DEFAULT_STRINGS.setProperty(option.name,sval);
-        DEFAULTS.setString(option,sval);
+        DEFAULT_STRINGS.setProperty(option.name, sval);
+        DEFAULTS.setString(option, sval);
       }
     }
   }
@@ -100,7 +100,7 @@ public class OptionMapLoader implements OptionConstants {
     while(options.hasNext()) {
       OptionParser<?> option = options.next();
       String val = prop.getProperty(option.name);
-      map.setString(option,val);
+      map.setString(option, val);
     }
   }
 }

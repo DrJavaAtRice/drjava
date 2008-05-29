@@ -134,7 +134,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     * @param action Action to perform
     */
   public void addActionForKeyStroke(KeyStroke stroke, Action action) {
-    // we don't want multiple keys bound to the same action
+    // we don't want multiple keys bound to the same action; Why NOT?
     KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
     if (keys != null) {
       for (int i = 0; i < keys.length; i++) _keymap.removeKeyStrokeBinding(keys[i]);

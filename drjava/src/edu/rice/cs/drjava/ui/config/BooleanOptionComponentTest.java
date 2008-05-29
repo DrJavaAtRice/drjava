@@ -58,7 +58,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     super.setUp();
     _option = new BooleanOptionComponent( OptionConstants.LINEENUM_ENABLED, "Line Enumeration", new Frame());
     DrJava.getConfig().resetToDefaults();
-
+    Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
@@ -66,7 +66,9 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
+    Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
+    Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
@@ -79,6 +81,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
@@ -90,6 +93,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default

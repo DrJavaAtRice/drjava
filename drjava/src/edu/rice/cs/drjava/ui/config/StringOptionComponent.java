@@ -81,18 +81,13 @@ public class StringOptionComponent extends OptionComponent<String> {
     String oldValue = DrJava.getConfig().getSetting(_option);
     String newValue = _option.parse(_jtf.getText().trim());
 
-    if (!oldValue.equals(newValue)) {
-      DrJava.getConfig().setSetting(_option, newValue);
-    }
+    if (! oldValue.equals(newValue)) { DrJava.getConfig().setSetting(_option, newValue); }
     return true;
   }
 
   /** Displays the given value. */
-  public void setValue(String value) {
-    _jtf.setText(value);
-  }
+  public void setValue(String value) { _jtf.setText(value); }
 
-  /** Return's this OptionComponent's configurable component.
-   */
+  /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _jtf; }
 }

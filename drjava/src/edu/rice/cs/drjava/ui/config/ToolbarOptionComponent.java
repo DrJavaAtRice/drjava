@@ -117,35 +117,28 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
 
     DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_TEXT_ENABLED,
                                          new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oe) {
-        resetToCurrent();
-      }
+      public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
     DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED,
                                          new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oe) {
-        resetToCurrent();
-      }
+      public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
     DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ENABLED,
                                          new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oe) { 
-        resetToCurrent();
-      }
+      public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
       
   }
 
-  /** Constructor that allows for a tooltip description.
-   */
+  /** Constructor that allows for a tooltip description. */
   public ToolbarOptionComponent(String title, Frame parent, String description) {
     this(title, parent);
     setDescription(description);
   }
 
   /** Sets the tooltip description text for this option.
-   * @param description the tooltip text
-   */
+    * @param description the tooltip text
+    */
   public void setDescription(String description) {
     _buttonPanel.setToolTipText(description);
     _noneButton.setToolTipText(description);
@@ -155,16 +148,14 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     _label.setToolTipText(description);
   }
 
-  /** Selects the radio button corresponding to the current config options.
-   */
+  /** Selects the radio button corresponding to the current config options. */
   public void resetToCurrent() {
     _setSelected(DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue(),
                  DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue(),
                  DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue());
   }
 
-  /** Selects the radio button corresponding to the default values.
-   */
+  /** Selects the radio button corresponding to the default values. */
   public void resetToDefault() {
     _setSelected(OptionConstants.TOOLBAR_TEXT_ENABLED.getDefault().booleanValue(),
                  OptionConstants.TOOLBAR_ICONS_ENABLED.getDefault().booleanValue(),
@@ -172,31 +163,24 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   }
 
   /** Selects the radio button corresponding to the specified configuration.
-   * @param textEnabled Whether toolbar text is enabled
-   * @param iconsEnabled Whether toolbar icons are enabled
-   */
+    * @param textEnabled Whether toolbar text is enabled
+    * @param iconsEnabled Whether toolbar icons are enabled
+    */
   private void _setSelected(boolean textEnabled, boolean iconsEnabled, boolean isEnabled) {
-    if (! isEnabled) {
-      _noneButton.setSelected(true);
-    }
-    else if (textEnabled && iconsEnabled) {
-      _textAndIconsButton.setSelected(true);
-    }
+    if (! isEnabled) { _noneButton.setSelected(true); }
+    else if (textEnabled && iconsEnabled) { _textAndIconsButton.setSelected(true); }
     else {
       if (textEnabled) _textButton.setSelected(true);
       else if (iconsEnabled) _iconsButton.setSelected(true);
     }
   }
 
-  /** Return's this OptionComponent's configurable component.
-   */
-  public JComponent getComponent() {
-    return _buttonPanel;
-  }
+  /** Return's this OptionComponent's configurable component. */
+  public JComponent getComponent() { return _buttonPanel; }
 
   /** Updates the config object with the new setting.
-   * @return true if the new value is set successfully
-   */
+    * @return true if the new value is set successfully
+    */
   public boolean updateConfig() {
     String btnIdent = _group.getSelection().getActionCommand();
     boolean textWasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
@@ -204,44 +188,24 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     boolean wasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
     
     if (btnIdent.equals(NONE)) {
-      if (wasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
-      }
+      if (wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE); }
     }
     if (btnIdent.equals(TEXT_ONLY)) {
-      if (!textWasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
-      }
-      if (iconsWereEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE);
-      }
-      if (!wasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
-      }
+      if (! textWasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE); }
+      if (iconsWereEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE); }
+      if (! wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
     }
 
     if (btnIdent.equals(ICONS_ONLY)) {
-      if (!iconsWereEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
-      }
-      if (textWasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE);
-      }
-      if (!wasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
-      }
+      if (! iconsWereEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE); }
+      if (textWasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE); }
+      if (! wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
     }
 
     if (btnIdent.equals(TEXT_AND_ICONS)) {
-      if (!textWasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
-      }
-      if (!iconsWereEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
-      }
-      if (!wasEnabled) {
-        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        
-      }
+      if (! textWasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE); }
+      if (! iconsWereEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE); }
+      if (! wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
     }
 
     return true;

@@ -43,9 +43,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
-/**
- * Tests functionality of this OptionComponent
- */
+/** Tests functionality of this OptionComponent. */
 public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
   private static ForcedChoiceOptionComponent _option;
 
@@ -53,12 +51,14 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
     super.setUp();
     _option = new ForcedChoiceOptionComponent( OptionConstants.JAVADOC_ACCESS_LEVEL, "Private", new Frame());
     DrJava.getConfig().resetToDefaults();
+    Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
     String testForcedChoice = new String(DrJava.getConfig().getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL));
 
     _option.setValue(testForcedChoice);
+    Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
     Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
@@ -74,6 +74,7 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
     String testForcedChoice = new String(DrJava.getConfig().getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL));
 
     _option.setValue(testForcedChoice);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
@@ -85,6 +86,7 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
     String testForcedChoice = new String(DrJava.getConfig().getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL));
 
     _option.setValue(testForcedChoice);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default

@@ -167,8 +167,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       // Only clear interactions if there were no errors and unit testing is not in progress
-      if ( ((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
+      if ( (_compilerModel.getNumErrors() == 0 || _compilerModel.getCompilerErrorModel().hasOnlyWarnings())
             && ! _junitModel.isTestInProgress() && _resetAfterCompile) {
+//        Utilities.show("compileEnded called in clearInteractionsListener");
         resetInteractions(workDir);  // use same working directory as current interpreter
       }
     }

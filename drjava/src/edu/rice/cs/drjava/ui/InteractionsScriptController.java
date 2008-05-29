@@ -80,27 +80,22 @@ public class InteractionsScriptController implements Serializable {
     setActionsEnabled();
   }
 
-  /** Sets the navigation actions to be enabled, if appropriate.
-   */
+  /** Sets the navigation actions to be enabled, if appropriate. */
   public void setActionsEnabled() {
     _nextInteractionAction.setEnabled(_model.hasNextInteraction());
     _prevInteractionAction.setEnabled(_model.hasPrevInteraction());
     _executeInteractionAction.setEnabled(true);
   }
 
-  /** Disables navigation actions
-   */
+  /** Disables navigation actions */
   public void setActionsDisabled() {
     _nextInteractionAction.setEnabled(false);
     _prevInteractionAction.setEnabled(false);
     _executeInteractionAction.setEnabled(false);
   }
 
-  /** @return the interactions script pane controlled by this controller.
-   */
-  public InteractionsScriptPane getPane() {
-    return _pane;
-  }
+  /** @return the interactions script pane controlled by this controller. */
+  public InteractionsScriptPane getPane() { return _pane; }
 
   /** Action to go back in the script. */
   private Action _prevInteractionAction = new AbstractAction("Previous") {

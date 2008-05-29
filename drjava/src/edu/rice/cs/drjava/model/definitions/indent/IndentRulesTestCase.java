@@ -39,14 +39,15 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-/**
- * Superclass for all test classes for the indentation decision tree.
- * @version $Id$
- */
+/** Superclass for all test classes for the indentation decision tree.
+  * @version $Id$
+  */
 public abstract class IndentRulesTestCase extends DrJavaTestCase {
 
   protected volatile AbstractDJDocument _doc;
@@ -75,17 +76,21 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
   
   public void tearDown() throws Exception {
     _doc = null;
-    //_notifier = null;
-    System.gc();
+//    _notifier = null;
+//    System.gc();
     super.tearDown();
   }
   
-  /** Clears the text of the _doc field and sets it to the given string.
-   */
-  protected final void _setDocText(String text)
-    throws BadLocationException {
-    _doc.clear();
-    _doc.insertString(0, text, null);
+  /** Clears the text of the _doc field and sets it to the given string. */
+  protected final void _setDocText(String text) throws BadLocationException {
+    _doc.acquireWriteLock();
+    try {
+      _doc.clear();
+      _doc.insertString(0, text, null);
+    }
+    finally { _doc.releaseWriteLock(); }
+    Utilities.clearEventQueue();  // make sure that all listener actions triggered by this document update have completed
+    Utilities.clearEventQueue();
   }
   
   /** Sets the number of spaces to include in the indent string.

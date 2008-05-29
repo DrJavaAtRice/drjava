@@ -101,7 +101,5 @@ public class DirectoryOptionComponent extends OptionComponent<File> implements O
   public JComponent getComponent() { return _component; }
 
   /** Adds a filter to decide if a directory can be chosen. */
-  public void addChoosableFileFilter(FileFilter filter) {
-    _component.addChoosableFileFilter(filter);
-  }
+  public void addChoosableFileFilter(FileFilter filter) { _component.addChoosableFileFilter(filter); }
 }

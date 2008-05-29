@@ -64,22 +64,22 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   private volatile SingleDisplayModel _model;
   
   /** Temporary files */
-  private File _base;
-  private File _parent;
-  private File _srcDir;
-  private File _projDir;
-  private File _auxFile;
-  private File _projFile;
-  private File _file1;
-  private File _file2;
+  private volatile File _base;
+  private volatile File _parent;
+  private volatile File _srcDir;
+  private volatile File _projDir;
+  private volatile File _auxFile;
+  private volatile File _projFile;
+  private volatile File _file1;
+  private volatile File _file2;
   
-  private String _file1RelName;
-  private String _file2RelName;
+  private volatile String _file1RelName;
+  private volatile String _file2RelName;
   
   /* The reader which reads the test project file */
-  BufferedReader reader = null;
+  volatile BufferedReader reader = null;
   
-  private String _projFileText = null;
+  private volatile String _projFileText = null;
   
   /** Setup method for each JUnit test case in this Test class. */
   public void setUp() throws Exception {
@@ -116,14 +116,14 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
       "   (file (name \"src/test2.java\")(select 32 32)))";
     
     IOUtil.writeStringToFile(_projFile, _projFileText);
-
+    
 //    Utilities.invokeAndWait(new Runnable() { 
 //      public void run() { 
-        _frame = new MainFrame();
-        _frame.pack();
+    _frame = new MainFrame();
+    _frame.pack();
 //      }
 //    });
-
+    Utilities.clearEventQueue();
     _model = _frame.getModel();
   }
 
@@ -145,6 +145,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     //test set build directory when not in project mode
     File f = FileOps.NULL_FILE;
     _model.setBuildDirectory(f);
+    Utilities.clearEventQueue();  // ensure that listener tasks have completed
     assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
     
 //    System.err.println("Opening Project File");
@@ -157,9 +158,12 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
 //    System.err.println("Completed Opening Project File");
 //    System.err.println("Project documents are: " + _model.getProjectDocuments());
     
+    Utilities.clearEventQueue();
+
     assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
     
     _model.setBuildDirectory(f);
+    Utilities.clearEventQueue();
     assertEquals("Build directory should have been set", f, _model.getBuildDirectory());
     
   }
@@ -167,12 +171,14 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   public void testCloseAllClosesProject()  throws MalformedProjectFileException, IOException {
     
 //    Utilities.showDebug("executing testCloseAllClosesProject");
-     Utilities.invokeAndWait(new Runnable() { 
+    Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         try { _model.openProject(_projFile); }
         catch(Exception e) { throw new UnexpectedException(e); }
       } 
     });
+    Utilities.clearEventQueue();
+    
     assertTrue("Project should have been opened", _model.isProjectActive());
     
     Utilities.invokeAndWait(new Runnable() { 
@@ -181,7 +187,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
         catch(Exception e) { throw new UnexpectedException(e); }
       } 
     });
-
+    Utilities.clearEventQueue();
+    
     assertFalse("Project should have been closed", _model.isProjectActive());
   }
   
@@ -209,6 +216,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
         _frame._closeProject();
       } 
     });
+    Utilities.clearEventQueue();
+    
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     assertEquals("One empty document remaining", 1, docs.size());
     assertEquals("Name is (Untitled)", "(Untitled)", _model.getActiveDocument().toString());

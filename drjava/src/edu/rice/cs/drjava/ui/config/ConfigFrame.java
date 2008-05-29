@@ -260,9 +260,7 @@ public class ConfigFrame extends JFrame {
   }
 
   /** Resets the field of each option in the Preferences window to its actual stored value. */
-  public void resetToCurrent() {
-    _rootNode.resetToCurrent();
-  }
+  public void resetToCurrent() { _rootNode.resetToCurrent(); }
 
   /** Resets the frame and hides it. */
   public void cancel() {
@@ -1090,10 +1088,9 @@ public class ConfigFrame extends JFrame {
       return true;
     }
 
-    /**
-     * Tells its panel to reset its displayed value to the currently set value
-     * for this component, and tells all of its children to reset their panels.
-     */
+    /** Tells its panel to reset its displayed value to the currently set value for this component, and tells all of
+      * its children to reset their panels.  Should be performed in the event thread!
+      */
     public void resetToCurrent() {
       _panel.resetToCurrent();
 

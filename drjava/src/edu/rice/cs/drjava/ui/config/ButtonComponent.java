@@ -85,18 +85,11 @@ public class ButtonComponent extends OptionComponent<Object> {
   /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
-  public boolean updateConfig() {
-    // nothing to do
-    return true;
-  } 
+  public boolean updateConfig() { return true; } 
   
-  /** Displays the given value.
-   */
-  public void setValue(Object value) {
-    // nothing to do
-  }
+  /** Displays the given value. */
+  public void setValue(Object value) { /* nothing to do */ }
   
-  /** Return's this OptionComponent's configurable component.
-   */
+  /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _jb; }
 }

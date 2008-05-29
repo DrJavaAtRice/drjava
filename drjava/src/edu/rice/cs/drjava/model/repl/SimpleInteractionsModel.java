@@ -80,7 +80,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
   
-  /** Interprets the given command.
+  /** Interprets the given command.  Must run in event thread to properly sequence updating the interactions pane.
    * @param toEval command to be evaluated
    */
   protected void _interpret(String toEval) {

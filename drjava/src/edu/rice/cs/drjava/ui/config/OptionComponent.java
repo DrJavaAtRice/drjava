@@ -48,16 +48,16 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.swing.Utilities;
 
-/** The graphical form of an Option. Provides a way to see the values of Option
- *  while running DrJava and perform live updating of Options.
- *  @version $Id$
- */
+/** The graphical form of an Option. Provides a way to see the values of Option while running DrJava and perform live 
+  * updating of Options.
+  * @version $Id$
+  */
 public abstract class OptionComponent<T> implements Serializable {
   protected final Option<T> _option;
   protected final JLabel _label;
   protected final Frame _parent;
-  protected boolean _entireColumn;
-  protected String _labelText;
+  protected volatile boolean _entireColumn;
+  protected volatile String _labelText;
     
   public OptionComponent(Option<T> option, String labelText, Frame parent) {
     _option = option;
@@ -67,9 +67,7 @@ public abstract class OptionComponent<T> implements Serializable {
     _parent = parent;
     if (option != null) {
       DrJava.getConfig().addOptionListener(option, new OptionListener<T>() {
-        public void optionChanged(OptionEvent<T> oe) {
-          resetToCurrent();
-        }
+        public void optionChanged(OptionEvent<T> oe) { resetToCurrent(); }
       });
     }
   }
@@ -98,41 +96,38 @@ public abstract class OptionComponent<T> implements Serializable {
   public abstract void setDescription(String description);
 
   /** Whether the component should occupy the entire column. */
-  public OptionComponent<T> setEntireColumn(boolean entireColumn) { _entireColumn = entireColumn; return this; }
+  public OptionComponent<T> setEntireColumn(boolean entireColumn) { 
+    _entireColumn = entireColumn; 
+    return this; 
+  }
 
   /** Whether the component should occupy the entire column. */
   public boolean getEntireColumn() { return _entireColumn; }
   
-  /** Updates the appropriate configuration option with the new value 
-   * if different from the old value and legal. Any changes should be 
-   * done immediately such that current and future references to the Option 
-   * should reflect the changes.
-   * @return false, if value is invalid; otherwise true.
-   */ 
+  /** Updates the appropriate configuration option with the new value if different from the old one and legal. Any 
+    * changes should be done immediately so that current and future references to the Option should reflect the changes.
+    * @return false, if value is invalid; otherwise true.  This method may spawn asynchronous event thread tasks via
+    * firing OptionListeners and textField DocumentListeners.
+    */ 
   public abstract boolean updateConfig();
 
   /** Resets the entry field to reflect the actual stored value for the option. */
   public void resetToCurrent() {
-    if (_option != null) {
-      setValue(DrJava.getConfig().getSetting(_option));
-    }
+    if (_option != null) setValue(DrJava.getConfig().getSetting(_option));
   }
   
-  /** Resets the actual value of the component to the original default.
-   */
+  /** Resets the actual value of the component to the original default. */
   public void resetToDefault() {
     if (_option != null) {
       setValue(_option.getDefault());
-      notifyChangeListeners();
+      notifyChangeListeners();  // spawns event thread task!
     }
   }
   
   /** Sets the value that is currently displayed by this component. */
   public abstract void setValue(T value);
   
-  public void showErrorMessage(String title, OptionParseException e) {
-    showErrorMessage(title, e.value, e.message);
-  }
+  public void showErrorMessage(String title, OptionParseException e) { showErrorMessage(title, e.value, e.message); }
   
   public void showErrorMessage(String title, String value, String message) {
     JOptionPane.showMessageDialog(_parent,
@@ -150,16 +145,16 @@ public abstract class OptionComponent<T> implements Serializable {
   }
   
   /** Adds a change listener to this component.
-   *  @param listener listener to add
-   */
+    * @param listener listener to add
+    */
   public void addChangeListener(ChangeListener listener) { _changeListeners.add(listener); }
   
   /** Removes a change listener to this component.
-   *  @param listener listener to remove
-   */
+    * @param listener listener to remove
+    */
   public void removeChangeListener(ChangeListener listener) { _changeListeners.remove(listener); }
   
-  /** Notify all change listeners of a change. */
+  /** Notify all change listeners of a change. Notification performed in the event thread. */
   protected void notifyChangeListeners() { 
     Utilities.invokeLater(new Runnable() {
       public void run() { 

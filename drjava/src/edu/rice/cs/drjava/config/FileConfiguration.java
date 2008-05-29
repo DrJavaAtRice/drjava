@@ -71,12 +71,8 @@ public class FileConfiguration extends SavableConfiguration {
     */
   public void saveConfiguration(final String header) throws IOException {
     FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
-      public void saveTo(OutputStream os) throws IOException {
-        saveConfiguration(os,header);
-      }
-      public boolean shouldBackup() {
-        return false;
-      }
+      public void saveTo(OutputStream os) throws IOException { saveConfiguration(os,header); }
+      public boolean shouldBackup() { return false; }
     });
   }
 }

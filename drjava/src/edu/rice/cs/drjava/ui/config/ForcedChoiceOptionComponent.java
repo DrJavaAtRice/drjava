@@ -43,18 +43,17 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Iterator;
 
-/**
- * This component displays all legal choices for a ForcedChoiceOption as a list
- * of radio buttons.  The radio buttons are placed within a framed panel titled
- * with the OptionComponent's label.
- * @version $Id$
- */
+/** This component displays all legal choices for a ForcedChoiceOption as a list
+  * of radio buttons.  The radio buttons are placed within a framed panel titled
+  * with the OptionComponent's label.
+  * @version $Id$
+  */
 public class ForcedChoiceOptionComponent extends OptionComponent<String> {
-  private JComboBox _comboBox;
+  private volatile JComboBox _comboBox;
 
   /** Main constructor builds a panel containing a set of radio buttons for the
-   * legal values of the ForcedChoiceOption.
-   */
+    * legal values of the ForcedChoiceOption.
+    */
   public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, Frame parent) {
     super(option, labelText, parent);
 
@@ -63,9 +62,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     _comboBox = new JComboBox();
     
     _comboBox.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
 
     while(values.hasNext()) {
@@ -76,24 +73,21 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     resetToCurrent(DrJava.getConfig().getSetting(_option));
   }
 
-  /** Constructor that allows for a tooltip description.
-   */
-  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText,
-                                     Frame parent, String description) {
+  /** Constructor that allows for a tooltip description. */
+  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, Frame parent, String description) {
     this(option, labelText, parent);
     setDescription(description);
   }
 
   /** Sets the tooltip description text for this option.
-   * @param description the tooltip text
-   */
+    * @param description the tooltip text
+    */
   public void setDescription(String description) {
     _comboBox.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
-  /** Selects the radio button corresponding to the current config options.
-   */
+  /** Selects the radio button corresponding to the current config options. */
   public void resetToCurrent(String current) {
     _comboBox.setSelectedItem(current);
     
@@ -110,29 +104,21 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 //    }
   }
 
-  /** Return's this OptionComponent's configurable component.
-   */
-  public JComponent getComponent() {
-    return _comboBox;
-  }
+  /** Return's this OptionComponent's configurable component. */
+  public JComponent getComponent() { return _comboBox; }
 
   /** Updates the config object with the new setting.
-   * @return true if the new value is set successfully
-   */
+    * @return true if the new value is set successfully
+    */
   public boolean updateConfig() {
     String oldValue = DrJava.getConfig().getSetting(_option);
     String newValue = _comboBox.getSelectedItem().toString();
 
-    if (!newValue.equals(oldValue)) {
-      DrJava.getConfig().setSetting(_option, newValue);
-    }
+    if (!newValue.equals(oldValue)) { DrJava.getConfig().setSetting(_option, newValue); }
 
     return true;
   }
 
-  /** Displays the given value.
-   */
-  public void setValue(String value) {
-    resetToCurrent(value);
-  }
+  /** Displays the given value. */
+  public void setValue(String value) { resetToCurrent(value); }
 }

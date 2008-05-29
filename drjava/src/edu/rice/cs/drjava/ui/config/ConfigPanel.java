@@ -125,10 +125,6 @@ public class ConfigPanel extends JPanel {
         panel2.add(otherC);
       }
     }
-    /*
-     for (int i=0; i<_components.size(); i++) {
-     panel2.add(_components.get(i));
-     }*/
 
     // Reset Button
     JButton _resetToDefaultButton = new JButton("Reset to Defaults");
@@ -161,8 +157,8 @@ public class ConfigPanel extends JPanel {
     for (int i=0; i < _components.size(); i++) _components.get(i).resetToCurrent();
   }
 
-  /** Tells each component to reset its value to the component's default. */
+  /** Tells each component to reset its value to its default. Each component creates an event thread task. */
   public void resetToDefault() {
-    for (int i=0; i < _components.size(); i++) _components.get(i).resetToDefault();
+    for (int i = 0; i < _components.size(); i++) _components.get(i).resetToDefault();
   }
 }

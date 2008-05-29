@@ -44,12 +44,12 @@ import edu.rice.cs.util.swing.Utilities;
 public class Configuration {  
   
   /** OptionMap used to store all option settings. */
-  protected OptionMap map;
+  protected volatile OptionMap map;
   
   /** Any exception that is caught when initializing this Configuration object.
     * Used later by the UI to display a useful message to the user.
     */
-  protected Exception _startupException;
+  protected volatile Exception _startupException;
   
   /** Initializes this Configuration object with the given OptionMap.
     * @param om An empty OptionMap.

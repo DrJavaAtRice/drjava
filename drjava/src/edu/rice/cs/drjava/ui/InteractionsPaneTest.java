@@ -260,20 +260,24 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
         _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_D, UNDEFINED));
       }
     });
-//    System.err.println("Document = '" + _doc.getText() + "'");
+
     Utilities.clearEventQueue();
     Utilities.clearEventQueue();
+    System.err.println("Document = '" + _doc.getText() + "'");
     assertEquals("caret should be at end of document", _doc.getLength(), _pane.getCaretPosition());
     
     final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
+
 //    _controller.setCachedCaretPos(pos);
-//    System.err.println("docLength = " +  _doc.getLength() + " caretPos = " + _pane.getCaretPosition());
+    System.err.println("docLength = " +  _doc.getLength() + " caretPos = " + _pane.getCaretPosition());
     
     // Insert text before the prompt
     _model.replSystemErrPrint("aa");
     Utilities.clearEventQueue();
+
 //    System.err.println("Document = '" + _doc.getText() + "'");
+    System.err.println("docLength = " +  _doc.getLength() + " caretPos = " + _pane.getCaretPosition());
     assertEquals("caret should be in correct position", pos + 2, _pane.getCaretPosition());
     
     // Move caret to prompt and insert more text
@@ -284,6 +288,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     _model.replSystemErrPrint("ccc");
     Utilities.clearEventQueue();
+    System.err.println("promptPos = " + _doc.getPromptPos() + " caretPos = " + _pane.getCaretPosition());
     assertEquals("caret should be at prompt", _doc.getPromptPos(), _pane.getCaretPosition());
     
     // Move caret after prompt and insert more text

@@ -93,9 +93,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
       _colorField.setForeground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
       DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                            new OptionListener<Color>() {
-        public void optionChanged(OptionEvent<Color> oe) {
-          _colorField.setForeground(oe.value);
-        }
+        public void optionChanged(OptionEvent<Color> oe) { _colorField.setForeground(oe.value); }
       });
     }
     else {
@@ -116,8 +114,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   }
   
   /** Constructor that allows for a tooltip description. */
-  public ColorOptionComponent(ColorOption opt, String text,
-                              Frame parent, String description) {
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
@@ -149,10 +146,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!_color.equals(DrJava.getConfig().getSetting(_option))) {
-      DrJava.getConfig().setSetting(_option, _color);
-    }
-
+    if (!_color.equals(DrJava.getConfig().getSetting(_option))) { DrJava.getConfig().setSetting(_option, _color); }
     return true;
   }
   
@@ -165,27 +159,20 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   
   /** Updates the component's field to display the given color. */
   private void _updateField(Color c) {
-    if (_isBackgroundColor) {
-      _colorField.setBackground(c);
-    }
-    else {
-      _colorField.setForeground(c);
-    }
-    _colorField.setText(getLabelText() + " ("+_option.format(c)+")");
+    if (_isBackgroundColor) _colorField.setBackground(c);
+    else _colorField.setForeground(c);
+    _colorField.setText(getLabelText() + " (" + _option.format(c) + ")");
   }
   
-  /** Return's this OptionComponent's configurable component.
-   */
+  /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _panel; }
   
   /** Shows a color chooser dialog for picking a new color. */
   public void chooseColor() {
     Color c = JColorChooser.showDialog(_parent, "Choose '" + getLabelText() + "'", _color);
     if (c != null) {
-      _color = c;
       notifyChangeListeners();
-      _updateField(_color);
+      _updateField(c);
     }    
   }
-  
 }

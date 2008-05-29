@@ -53,6 +53,7 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     super.setUp();
     _option = new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", new Frame());
     DrJava.getConfig().resetToDefaults();
+    Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
@@ -60,9 +61,10 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     testVector.addElement(new File("test"));
 
     _option.setValue(testVector);
+    Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
+    Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
-
     Utilities.clearEventQueue();
     
     assertTrue("Cancel (resetToCurrent) should not change the config",
@@ -75,9 +77,10 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     testVector.addElement(new File("blah"));
 
     _option.setValue(testVector);
-    _option.updateConfig();
-
     Utilities.clearEventQueue();
+    _option.updateConfig();
+    Utilities.clearEventQueue();
+
     assertTrue("Apply (updateConfig) should write change to file",
                vectorEquals(testVector,
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
@@ -88,10 +91,13 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     testVector.addElement(new File("blah"));
 
     _option.setValue(testVector);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
+
     
-    _option.resetToDefault(); // resets to default
+    _option.resetToDefault();     // resets to default
+    Utilities.clearEventQueue();  // preceding line generates event queue tasks
     _option.updateConfig();
     Utilities.clearEventQueue();
     
@@ -101,22 +107,17 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
   }
 
   /** The equals method for a parameterized Vector.
-   *
-   * @param v1 the first Vector<File>
-   * @param v2 the Vector<File> to compare with
-   * @return <code>true</code> iff the two vectors are equal
-   */
+    * @param v1 the first Vector<File>
+    * @param v2 the Vector<File> to compare with
+    * @return <code>true</code> iff the two vectors are equal
+    */
   public boolean vectorEquals(Vector<File> v1, Vector<File> v2) {
     if (v1.size() == v2.size()) {
       for (int i = 0; i < v1.size(); i++) {
-        if (!v1.elementAt(i).equals(v2.elementAt(i))) {
-          return false;
-        }
+        if (!v1.elementAt(i).equals(v2.elementAt(i)))  return false;
       }
       return true;
     }
-    else { // different sizes
-      return false;
-    }
+    else return false; /* different sizes */
   }
 }

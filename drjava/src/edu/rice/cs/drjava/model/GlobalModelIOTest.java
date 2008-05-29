@@ -963,7 +963,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.logInteractionStart();
     _model.loadHistory(fs);
     listener.waitInteractionDone();
-    
+//    Utilities.clearEventQueue();
+        
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
     debug.log(con.getDocText(0, con.getLength()).trim());

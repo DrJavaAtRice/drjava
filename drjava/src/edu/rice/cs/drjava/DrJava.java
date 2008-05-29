@@ -378,7 +378,7 @@ public class DrJava {
     * accidentally used.
     */
   static void setPropertiesFile(String fileName) {
-    if (!fileName.endsWith(".java"))  _propertiesFile = new File(fileName);
+    if (! fileName.endsWith(".java"))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.
@@ -457,5 +457,14 @@ public class DrJava {
 //
 //    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
 //    return result == JOptionPane.YES_OPTION;
-//  }  
+//  } 
+  
+  /* Erase all non-final bindings created in this class.  Only used in testing. */
+  public static void cleanUp() {
+    _propertiesFile = null;
+    _filesToOpen.clear();
+    _jvmArgs.clear();
+    _config = null;
+  }
+     
 }

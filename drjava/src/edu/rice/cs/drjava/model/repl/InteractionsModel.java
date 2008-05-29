@@ -145,7 +145,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Sets the _pane field and initializes the caret position in the pane.  Called in the InteractionsController. */
   public void setUpPane(InteractionsPane pane) { 
     _pane = pane;
-    _caretInit();  // plates the caret (in the UNIQUE interactions pane) at the end of the document
+    _pane.setCaretPosition(_document.getLength());
+//    _caretInit();  // places the caret (in the UNIQUE interactions pane) at the end of the document
   }
   
   /** Adds an InteractionsListener to the model.
@@ -176,9 +177,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
   
-  /** Interprets the current given text at the prompt in the interactions doc. */
+  /** Interprets the current given text at the prompt in the interactions doc. Must run in the event thread to get current 
+    * interaction (which depends on the state of the interactions pane).*/
   public void interpretCurrentInteraction() {
-    
     String toEval;
     _document.acquireWriteLock();
     try {
@@ -187,15 +188,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       String text = _document.getCurrentInteraction();
       toEval = text.trim();
       if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
-      
+//          System.err.println("Preparing to interpret '" + text +"'");
       _prepareToInterpret(text);  // Writes a newLine!
     }
     finally{ _document.releaseWriteLock(); }
     interpret(toEval);
   }
   
-  /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Assumes that Write
-    * Lock is already held on _document. */
+  /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
+    * event thread for newline to be inserted at proper time.  Assumes that Write Lock is already held. */
   private void _prepareToInterpret(String text) {
     _addNewline();
     _notifyInteractionStarted();
@@ -204,7 +205,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
-  /** Appends a newLine to _document assuming that the Write Lock is already held. */
+  /** Appends a newLine to _document assuming that the Write Lock is already held. Must run in the event thread. */
   public void _addNewline() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
   
   /** Interprets the given command.
@@ -370,29 +371,40 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * Interprets the array all at once so if there are any errors, none of the statements after the first 
     * erroneous one are processed.
     */
-  public void loadHistory(FileOpenSelector selector) throws IOException {
+  public void loadHistory(final FileOpenSelector selector) throws IOException {
     ArrayList<String> histories;
     try { histories = _getHistoryText(selector); }
     catch (OperationCanceledException oce) { return; }
-    _document.acquireWriteLock();
-    try {
-      _document.clearCurrentInteraction();
-      
-      // Insert into the document and interpret
-      final StringBuilder buf = new StringBuilder();
-      for (String hist: histories) {
-        ArrayList<String> interactions = _removeSeparators(hist);
-        for (String curr: interactions) {
-          int len = curr.length();
-          buf.append(curr);
-          if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
-          buf.append(StringOps.EOL);
+    final ArrayList<String> _histories = histories;
+
+    Utilities.invokeAndWait(new Runnable() {  // must run in event thread because caret is updated indivisibly
+      public void run() {
+        _document.acquireWriteLock();
+        try {
+          _document.clearCurrentInteraction();
+          
+          // Insert into the document and interpret
+          final StringBuilder buf = new StringBuilder();
+          for (String hist: _histories) {
+            ArrayList<String> interactions = _removeSeparators(hist);
+            for (String curr: interactions) {
+              int len = curr.length();
+              buf.append(curr);
+              if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
+              buf.append(StringOps.EOL);
+            }
+          }
+          String text = buf.toString().trim();
+//          System.err.println("Histtory is: '" + text + "'");
+          append(text, InteractionsDocument.DEFAULT_STYLE);
         }
+        finally { _document.releaseWriteLock(); }
+        interpretCurrentInteraction();  // Must be executed in event thread
       }
-      append(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
-    }
-    finally { _document.releaseWriteLock(); }
-    interpretCurrentInteraction();
+    });
+    // Wait is necessary because interpretation can only be applied after history is loaded
+//    System.err.println("Interpreting loaded history");
+
   }
   
   /* Loads the contents of the specified file(s) into the histories buffer. */
@@ -443,12 +455,16 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param s String to print
     */
   public void replSystemOutPrint(final String s) {
-    _document.acquireWriteLock();  // couple insert with caret update
-    try {  
-      _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
-      advanceCaret(s.length());
-    }
-    finally { _document.releaseWriteLock(); }
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.acquireWriteLock();  // couple insert with caret update
+        try {  
+          _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
+//          advanceCaret(s.length());
+        }
+        finally { _document.releaseWriteLock(); }
+      } });
+    scrollToCaret();
     _writerDelay();      
   }
   
@@ -457,13 +473,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param s String to print 
     */
   public void replSystemErrPrint(final String s) {
-    _document.acquireWriteLock();  // couple insert with caret update
-    try {
-      _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
-      advanceCaret(s.length());
-    }
-    finally { _document.releaseWriteLock(); }
-    _writerDelay();
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _document.acquireWriteLock();  // couple insert with caret update
+          try {
+            _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
+//            advanceCaret(s.length());
+          }
+          finally { _document.releaseWriteLock(); }
+        } });
+      scrollToCaret();
+//      System.err.println(s + " printed; caretPostion = " + _pane.getCaretPosition());
+      _writerDelay();
   }
   
   /** Returns a line of text entered by the user at the equivalent of System.in. */
@@ -499,17 +520,22 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * here. (Do this after calling super()).  Access is public for testing purposes.
     */
   public void _interactionIsOver() {
-    int len = 0;
-    _document.acquireWriteLock();
-    try {
-      _document.addToHistory(_toAddToHistory);
-      _document.setInProgress(false);
-      _document.insertPrompt();
-      len = _document.getPromptLength();
-    }
-    finally { _document.releaseWriteLock(); }
-    advanceCaret(len);         // runs in event thread
-    _notifyInteractionEnded();
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.acquireWriteLock();
+        try {
+          _document.addToHistory(_toAddToHistory);
+          _document.setInProgress(false);
+          _document.insertPrompt();
+          int len = _document.getPromptLength();
+//          advanceCaret(len); 
+        }
+        finally { _document.releaseWriteLock(); }
+        // runs in event thread
+        _notifyInteractionEnded();
+      }
+    });
+    scrollToCaret();
   }
   
   /** Notifies listeners that an interaction has ended. (Subclasses must maintain listeners.) */
@@ -520,11 +546,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param styleName  Name of the style to use for s
     */
   public void append(final String s, final String styleName) {
-    _document.append(s, styleName);
-    advanceCaret(s.length());
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.acquireWriteLock();
+        try {
+          _document.append(s, styleName);
+//          advanceCaret(s.length());
+        }
+        finally { _document.releaseWriteLock(); }
+      } 
+    });
+    scrollToCaret();
   }
-  
-  /** Waits for a small amount of time on a shared writer lock. */
+        /** Waits for a small amount of time on a shared writer lock. */
   public void _writerDelay() {
     synchronized(_writerLock) {
       try {
@@ -670,38 +704,53 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return _banner;
   }
   
-  /** Initializes the caret in a new or reset InteractionsModel. */
-  private void _caretInit() { advanceCaret(_document.getLength()); }
+//  /** Initializes the caret in a new or reset InteractionsModel. */
+//  private void _caretInit() { advanceCaret(_document.getLength()); }
   
-  /** Advances the caret in the interactions pane by n characters and scrolls the pane to make it visible. */
-  protected void advanceCaret(final int n) {
-    /* In legacy unit tests, _pane can apparently be null in some cases.  It can also be mutated in the middle of run() 
-       in InteractionsDJDocumentTest.testStylesListContentAndReset. */
-    final InteractionsPane pane = _pane;  
-    if (Utilities.TEST_MODE && pane == null) return;  // Some legacy unit tests do not set up an interactions pane
-    
-    Utilities.invokeLater(new Runnable() {  // initialize caret in the interactions pane 
+//  /** Advances the caret in the interactions pane by n characters. After component realization, only runs in event thread
+//    * and assumes read lock or write lock is already held. 
+//    */
+//  protected void advanceCaret(final int n) {
+//    /* In legacy unit tests, _pane can apparently be null in some cases.  It can also be mutated in the middle of run() 
+//     in InteractionsDJDocumentTest.testStylesListContentAndReset. */
+//    final InteractionsPane pane = _pane;  
+////    if (Utilities.TEST_MODE && pane == null) return;  // Some legacy unit tests do not set up an interactions pane
+//
+//    int caretPos = pane.getCaretPosition();     
+//    int newCaretPos = Math.min(caretPos + n, _document.getLength());
+//    pane.setCaretPos(newCaretPos);
+//  }
+  
+  protected void scrollToCaret() {
+    Utilities.invokeLater(new Runnable() {
       public void run() {
-//        pane.validate();
-        int caretPos = pane.getCaretPosition();
-        int newCaretPos = Math.min(caretPos + n, _document.getLength());
-        pane.setCaretPos(newCaretPos);
+        final InteractionsPane pane = _pane; 
+        if (pane == null) return;  // Can be called in tests when component has not been realized
         int pos = pane.getCaretPosition();
         try { pane.scrollRectToVisible(pane.modelToView(pos)); }
         catch(BadLocationException e) { throw new UnexpectedException(e); }
-      } 
+      }
     });
   }
   
   /** Called when a new Java interpreter has registered and is ready for use. */
-  public void interpreterReady(File wd) {
+  public void interpreterReady(final File wd) {
 //    System.err.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
 //    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
     if (! _waitingForFirstInterpreter) {
-      _document.reset(generateBanner(wd));
-      _document.setInProgress(false);
-      _caretInit();
-      _notifyInterpreterReady(wd);
+      Utilities.invokeLater(new Runnable() {
+          public void run() {
+            _document.acquireWriteLock();
+              try {
+              _document.reset(generateBanner(wd));
+              _document.setInProgress(false);
+              _pane.setCaretPosition(_document.getLength());
+//              _caretInit();
+            }
+              finally { _document.releaseWriteLock(); }
+          _notifyInterpreterReady(wd);
+          }
+      });
     }
     _waitingForFirstInterpreter = false;
   }

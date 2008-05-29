@@ -44,24 +44,21 @@ import edu.rice.cs.util.swing.FontChooser;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * The Graphical form of a FontOption.
- * @version $Id$
- */ 
+/** The Graphical form of a FontOption.
+  * @version $Id$
+  */ 
 public class FontOptionComponent extends OptionComponent<Font> {
   
-  private JButton _button;
-  private JTextField _fontField;
-  private JPanel _panel;
-  private Font _font;
+  private final JButton _button;
+  private final JTextField _fontField;
+  private final JPanel _panel;
+  private volatile Font _font;
   
   public FontOptionComponent(FontOption opt, String text, Frame parent) {
     super(opt, text, parent);
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        chooseFont();
-      }
+      public void actionPerformed(ActionEvent e) { chooseFont(); }
     });
     _button.setText("...");
     _button.setMaximumSize(new Dimension(10,10));
@@ -79,49 +76,38 @@ public class FontOptionComponent extends OptionComponent<Font> {
     _updateField(_font);
   }
   
-  /** Constructor that allows for a tooltip description.
-   */
-  public FontOptionComponent(FontOption opt, String text,
-                             Frame parent, String description) {
+  /** Constructor that allows for a tooltip description. */
+  public FontOptionComponent(FontOption opt, String text, Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
 
   /** Sets the tooltip description text for this option.
-   * @param description the tooltip text
-   */
+    * @param description the tooltip text
+    */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _fontField.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
-  /** Updates the font field to display the given font.
-   */
+  /** Updates the font field to display the given font. */
   private void _updateField(Font f) {
     _fontField.setFont(f);
     _fontField.setText(_option.format(f));
   }
     
-  /** Return's this OptionComponent's configurable component.
-   */
-  public JComponent getComponent() {
-    return _panel;
-  }
+  /** Return's this OptionComponent's configurable component. */
+  public JComponent getComponent() { return _panel; }
   
-  /** Shows a custom font chooser dialog to pick a new font.
-   */
+  /** Shows a custom font chooser dialog to pick a new font. */
   public void chooseFont() {
     String oldText = _fontField.getText();
-    Font f = FontChooser.showDialog(_parent, 
-                                    "Choose '" + getLabelText() + "'",
-                                    _font);
+    Font f = FontChooser.showDialog(_parent, "Choose '" + getLabelText() + "'", _font);
     if (f != null) {
       _font = f;
       _updateField(_font);
-      if (!oldText.equals(_fontField.getText())) {
-        notifyChangeListeners();        
-      }
+      if (!oldText.equals(_fontField.getText())) { notifyChangeListeners(); }
     }
   }
   
@@ -129,14 +115,11 @@ public class FontOptionComponent extends OptionComponent<Font> {
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!_font.equals(DrJava.getConfig().getSetting(_option))) {
-      DrJava.getConfig().setSetting(_option, _font);
-    }
+    if (!_font.equals(DrJava.getConfig().getSetting(_option))) DrJava.getConfig().setSetting(_option, _font);
     return true;
   }
   
-   /** Displays the given value.
-   */
+   /** Displays the given value. */
   public void setValue(Font value) {
     _font = value;
     _updateField(value);

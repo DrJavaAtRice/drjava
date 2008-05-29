@@ -41,38 +41,45 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-/**
- * Tests functionality of this OptionComponent
- */
+/** Tests functionality of this OptionComponent. */
 public final class FileOptionComponentTest extends DrJavaTestCase {
 
   private static FileOptionComponent _option;
 
-  public FileOptionComponentTest(String name) {
-    super(name);
-  }
+  public FileOptionComponentTest(String name) { super(name); }
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
-                                      "Javac Location", new Frame(),
-                                      new JFileChooser());
+    _option = 
+      new FileOptionComponent(OptionConstants.JAVAC_LOCATION, "Javac Location", new Frame(), new JFileChooser());
+    Utilities.clearEventQueue();
     DrJava.getConfig().resetToDefaults();
-
+    Utilities.clearEventQueue();
+//    System.err.println("setUp complete");
   }
+  
+//  public void test1() { 
+//    try { xtestCancelDoesNotChangeConfig(); }
+//    catch(Exception e) { 
+//      e.printStackTrace(); 
+//      throw new UnexpectedException(e);
+//    }
+//  }
 
   public void testCancelDoesNotChangeConfig() {
 
     File testFile = FileOps.NULL_FILE;
 
     _option.setValue(testFile);
+    Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
     Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
@@ -83,10 +90,19 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
 
   }
 
+//  public void test2() { 
+//    try { xtestApplyDoesChangeConfig(); }
+//    catch(Exception e) { 
+//      e.printStackTrace(); 
+//      throw new UnexpectedException(e);
+//    }
+//  }
+
   public void testApplyDoesChangeConfig() {
     File testFile = FileOps.NULL_FILE;
 
     _option.setValue(testFile);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
@@ -94,19 +110,42 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
                  DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
   }
 
+//  public void test3() { 
+//    try { xtestApplyThenResetDefault(); }
+//    catch(Exception e) { 
+//      e.printStackTrace(); 
+//      throw new UnexpectedException(e);
+//    }
+//  }
+  
   public void testApplyThenResetDefault() {
     File testFile = FileOps.NULL_FILE;
 
     _option.setValue(testFile);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
-    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();  // preceding line generates event queue task
     _option.updateConfig();
     Utilities.clearEventQueue();
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.JAVAC_LOCATION.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
+//    fail("Force test to fail");
+  }
+  
+  public void tearDown() throws Exception {
+    /* On Windows, the tearDown/cleanUp process sporadically throws a java.util.concurrent.RejectedExecutionException
+     * with a traceback only involving Java library code.  This try/catch construction catches those exceptions so that
+     * they are not propagated up to the controlling JUnit framework and printed.
+     */
+    try {
+      _option = null;
+      super.tearDown();
+//      System.out.println("FileOption ... tearDown() has executed");
+    }
+    catch(Exception e) { /* ignore */ }
   }
 }

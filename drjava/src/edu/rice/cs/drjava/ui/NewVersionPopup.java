@@ -87,7 +87,7 @@ public class NewVersionPopup extends JDialog {
     this.setSize(500,150);
 
     _modeBox = new JComboBox(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.toArray());
-    for(int i=0; i<OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
+    for(int i = 0; i < OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
       if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
             .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(i))) {
         _modeBox.setSelectedIndex(i);

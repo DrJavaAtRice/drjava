@@ -39,10 +39,7 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Displays a label in the form of an option component, to be displayed
- * in a config panel.
- */
+/** Displays a label in the form of an option component, to be displayed in a config panel. */
 public class LabelComponent extends OptionComponent<Object> {
   private JTextArea _text;
 
@@ -59,9 +56,7 @@ public class LabelComponent extends OptionComponent<Object> {
     setDescription(description);
   }
 
-  public LabelComponent(String text, Frame parent) {
-    this(text,parent,false);
-  }
+  public LabelComponent(String text, Frame parent) { this(text,parent,false); }
 
   public LabelComponent(String text, Frame parent, String description) {
     this(text, parent, description, false);
@@ -75,17 +70,11 @@ public class LabelComponent extends OptionComponent<Object> {
   /** Updates the config object with the new setting.  (Does nothing.)
    * @return true if the new value is set successfully
    */
-  public boolean updateConfig() {
-    return true;
-  }
+  public boolean updateConfig() { return true; }
 
-  /** Displays the given value.  (Never changes.)
-   */
-  public void setValue(Object value) {
-  }
+  /** Displays the given value.  (Never changes.) */
+  public void setValue(Object value) { }
 
-  /** Return's this OptionComponent's configurable component.
-   */
+  /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _text; }
-
 }

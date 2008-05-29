@@ -225,6 +225,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     acquireWriteLock();
     try {
       int pos = _getPositionBeforePrompt();
+//      System.err.println("_promptPos before update = " + _promptPos);
       _promptPos = _promptPos + text.length();
       _forceInsertText(pos, text, style);
     }
@@ -286,6 +287,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void _forceInsertText(int offs, String str, String style) throws EditDocumentException {      
     _addToStyleLists(offs, str, style);
+//    System.err.println("Inserting text '" + str + "' at position " + offs);
     _document._forceInsertText(offs, str, style);
   }
   

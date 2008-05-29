@@ -133,6 +133,7 @@ public abstract class AbstractDJPane extends JTextPane
   
   /** A length checked version of setCaretPosition(int pos) that ensures pos is within the DJDocument. */
   public void setCaretPos(int pos) {
+//    System.err.println("setCaretPos(" + pos + ") called");
     DJDocument doc = getDJDocument();
     doc.acquireReadLock();
     try {
@@ -145,6 +146,12 @@ public abstract class AbstractDJPane extends JTextPane
     }
     finally { doc.releaseReadLock(); }
   }
+
+// This block of code is used solely for debugging
+//  public void setCaretPosition(int pos) {
+//    super.setCaretPosition(pos);
+//    System.err.println("setCaretPosition(" + pos + ") called");
+//  }
 
   public int getScrollableUnitIncrement(Rectangle visibleRectangle, int orientation, int direction) {
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);

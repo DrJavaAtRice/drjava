@@ -191,7 +191,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     catch (UnmarshalException ume) {
       debug.logEnd();
-      Throwable cause = ume.getCause();
+
+      if (Utilities.TEST_MODE) { 
+//        Utilities.show("Unmarshalling exception found!");
+//        System.err.println("Exception is: " + ume);
+//        ume.printStackTrace();
+        throw new UnexpectedException(ume);
+      }
+        
+      Throwable cause = ume.getCause(); 
       if (cause != null && cause instanceof EOFException) {
         // Interpreter JVM has disappeared (perhaps reset); just ignore error and wait
         // for reset.
@@ -319,7 +327,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void systemErrPrint(String s) throws RemoteException {
     debug.logStart();
-    _interactionsModel.replSystemErrPrint(s);
+    _interactionsModel.replSystemErrPrint(s);  // spawns an event queue task
+//    Utilities.clearEventQueue();               // wait for event queue task to complete
     debug.logEnd();
   }
   
@@ -328,7 +337,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void systemOutPrint(String s) throws RemoteException {
     debug.logStart();
-    _interactionsModel.replSystemOutPrint(s);
+    _interactionsModel.replSystemOutPrint(s);   // spawns an event queue task
+//    Utilities.clearEventQueue();                // wait for event queue task to complete
     debug.logEnd();
   }
   

@@ -231,13 +231,13 @@ public class FileSelectorComponent extends JPanel {
     String newValue = _fileField.getText().trim();
     
     File newFile = FileOps.NULL_FILE;
-    if (!newValue.equals(""))
+    if (! newValue.equals(""))
       newFile = new File(newValue);
     
     if (newFile != FileOps.NULL_FILE && _mustExist && !newFile.exists()) {
       JOptionPane.showMessageDialog(_parent, "The file '"+ newValue + "'\nis invalid because it does not exist.",
                                     "Invalid File Name", JOptionPane.ERROR_MESSAGE);
-      if (_file!=null && !_file.exists()) _file = FileOps.NULL_FILE;
+      if (_file!=null && ! _file.exists()) _file = FileOps.NULL_FILE;
       resetFileField(); // revert if not valid
       
 //      _validationInProgress = false;

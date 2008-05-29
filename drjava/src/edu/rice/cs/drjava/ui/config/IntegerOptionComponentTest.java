@@ -43,18 +43,16 @@ import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
-/**
- * Tests functionality of this OptionComponent
- */
+/** Tests functionality of this OptionComponent. */
 public final class IntegerOptionComponentTest extends DrJavaTestCase {
 
-  private static IntegerOptionComponent _option;
+  private static volatile IntegerOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
     _option = new IntegerOptionComponent(OptionConstants.INDENT_LEVEL, "Indent Level", new Frame());
     DrJava.getConfig().resetToDefaults();
-
+    Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
@@ -62,6 +60,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
     Integer testInteger = new Integer(0);
 
     _option.setValue(testInteger);
+    Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
     Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
@@ -77,6 +76,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
     Integer testInteger = new Integer(10);
 
     _option.setValue(testInteger);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
 
@@ -89,6 +89,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
     Integer testInteger = new Integer(10);
 
     _option.setValue(testInteger);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default

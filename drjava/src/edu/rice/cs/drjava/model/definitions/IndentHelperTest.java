@@ -39,10 +39,9 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
-/**
- * Tests for the helper methods in DefinitionsDocument
- * @version $Id$
- */
+/** Tests for the helper methods in DefinitionsDocument
+  * @version $Id$
+  */
 public final class IndentHelperTest extends IndentRulesTestCase {
 
   /** Tests findPrevDelimiter() */
@@ -59,32 +58,27 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     char[] delimiters4 = {'/', '*'};
     
     _setDocText("/*bar;\nfoo();\nx;*/\nreturn foo;\n");
-    assertEquals("Check that delimiters in multi-line " +
-                 "comments are ignored",
+    assertEquals("Check that delimiters in multi-line comments are ignored",
                  -1,
                  _doc.findPrevDelimiter(23, delimiters1));
     
     _setDocText("foo();\n//bar();\nbiz();\n");
-    assertEquals("Check that delimiters in single-line " +
-                 "comments are ignored",
+    assertEquals("Check that delimiters in single-line comments are ignored",
                  5,
                  _doc.findPrevDelimiter(16, delimiters1));
     
     _setDocText("x=';'\n");
-    assertEquals("Check that delimiters in single-quotes " +
-                 "are ignored",
+    assertEquals("Check that delimiters in single-quotes are ignored",
                  -1,
                  _doc.findPrevDelimiter(5, delimiters1));
     
     _setDocText("x=\";\"\n");
-    assertEquals("Check that delimiters in double-quotes " +
-                 "are ignored",
+    assertEquals("Check that delimiters in double-quotes are ignored",
                  -1,
                  _doc.findPrevDelimiter(5, delimiters1));
     
     _setDocText("foo();\nfor(;;)\n");
-    assertEquals("Check that delimiters in paren phrases " +
-                 "are usually ignored",
+    assertEquals("Check that delimiters in paren phrases are usually ignored",
                  5,
                  _doc.findPrevDelimiter(14, delimiters1));
     
@@ -102,8 +96,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     assertEquals("Check that delimiter is found if it is right after 0",
                  0,
                  _doc.findPrevDelimiter(20, delimiters3));
-    assertEquals("Check that delimiter is not found if " + 
-                 "it is at cursor's position",
+    assertEquals("Check that delimiter is not found if it is at cursor's position",
                  -1,
                  _doc.findPrevDelimiter(5, delimiters1));
     assertEquals("Check that the first delimiter in the list is found",
@@ -116,18 +109,12 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  5,
                  _doc.findPrevDelimiter(13, delimiters1));
     
-    _setDocText("foo *\n" +
-                "// comment\n" +
-                "bar\n");
-    assertEquals("Check that findprevDelimiter ignores comments even" +
-                 "when delimiters include * and / (1)",
+    _setDocText("foo *\n" + "// comment\n" + "bar\n");
+    assertEquals("Check that findprevDelimiter ignores comments even when delimiters include * and / (1)",
                  4,
                  _doc.findPrevDelimiter(17, delimiters4));
-    _setDocText("foo /\n" +
-                "/* comment */\n" +
-                "bar\n");
-    assertEquals("Check that findprevDelimiter ignores comments even" +
-                 "when delimiters include * and / (2)",
+    _setDocText("foo /\n" + "/* comment */\n" + "bar\n");
+    assertEquals("Check that findprevDelimiter ignores comments even when delimiters include * and / (2)",
                  4,
                  _doc.findPrevDelimiter(17, delimiters4));
 
@@ -135,29 +122,23 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     _doc.setCurrentLocation(3);
     int reducedModelPos = _doc.getReduced().absOffset();
     _doc.findPrevDelimiter(8, delimiters2);
-    assertEquals("Check that position in reduced model is unaffected " +
-                 "after call to findPrevDelimiter",
+    assertEquals("Check that position in reduced model is unaffected after call to findPrevDelimiter",
                  reducedModelPos,
                  _doc.getReduced().absOffset());
     
-
   }
 
 
-  public void testPosInParenPhrase() 
-    throws BadLocationException {
+  public void testPosInParenPhrase() throws BadLocationException {
 
       _setDocText("(;)");
-      assertEquals("';' in parent phrase",
-                   true,
-                   _doc.inParenPhrase(1));
+      assertEquals("';' in parent phrase", true, _doc.inParenPhrase(1));
       
       _setDocText("abcdefghijk");
       _doc.setCurrentLocation(3);
       int reducedModelPos = _doc.getReduced().absOffset();
       _doc.inParenPhrase(8);
-      assertEquals("Check that position in reduced model is unaffected " +
-                   "after call to posInParenPhrase",
+      assertEquals("Check that position in reduced model is unaffected after call to posInParenPhrase",
                    reducedModelPos,
                    _doc.getReduced().absOffset());   
     }
@@ -249,12 +230,9 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  _doc.getIndentOfCurrStmt(88));
   }
 
-  public void testGetIndentOfCurrStmtIgnoreDelimsInParenPhrase()
-    throws BadLocationException
-  {
+  public void testGetIndentOfCurrStmtIgnoreDelimsInParenPhrase() throws BadLocationException {
     
-    String text =
-      "  bar.\n (;)\nfoo();";
+    String text = "  bar.\n (;)\nfoo();";
     
     _setDocText(text);
     assertEquals("ignores delimiter in paren phrase",

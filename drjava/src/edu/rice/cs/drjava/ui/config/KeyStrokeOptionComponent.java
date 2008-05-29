@@ -71,18 +71,11 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     _button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
 
-        if (_getKeyDialog == null) {
-          _getKeyDialog =
-            new GetKeyDialog(parent,
-                             "Specify Shortcut",
-                             true);
-        }
+        if (_getKeyDialog == null) { _getKeyDialog = new GetKeyDialog(parent, "Specify Shortcut", true); }
 
         String oldText = _button.getText();
         _getKeyDialog.promptKey(KeyStrokeOptionComponent.this);
-        if (!_button.getText().equals(oldText)) {
-          notifyChangeListeners();
-        }
+        if (!_button.getText().equals(oldText)) { notifyChangeListeners(); }
       }
     });
     _button.setText(_option.format(_key));
@@ -95,8 +88,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     _keyToKSOC.put(_key, this);
   }
 
-  /** Constructor that allows for a tooltip description.
-   */
+  /** Constructor that allows for a tooltip description. */
   public KeyStrokeOptionComponent(KeyStrokeOption opt, String text,
                                   Frame parent, String description) {
     this(opt, text, parent);
@@ -104,16 +96,15 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
   }
 
   /** Sets the tooltip description text for this option.
-   * @param description the tooltip text
-   */
+    * @param description the tooltip text
+    */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _button.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
-  /** Returns a custom string representation of this option component.
-   */
+  /** Returns a custom string representation of this option component. */
   public String toString() {
     return "<KSOC>label:" + getLabelText() + "ks: " +
       getKeyStroke() + "jb: " + _button.getText() + "</KSOC>\n";

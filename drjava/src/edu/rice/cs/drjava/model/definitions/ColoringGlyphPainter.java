@@ -50,6 +50,8 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
+// import edu.rice.cs.util.swing.Utilities;  // conflicts with javax.swing.text.Utilities
+
 
 public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements OptionConstants {
   
@@ -150,8 +152,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   }
   
   /** Determines the span the glyphs given a start location (for tab expansion).  Assumes ReadLock is held. */
-  public float getSpan(GlyphView v, int start, int end, 
-                       TabExpander e, float x) {
+  public float getSpan(GlyphView v, int start, int end, TabExpander e, float x) {
     sync(v);
     Segment text = v.getText(start, end);
     int width = Utilities.getTabbedTextWidth(text, _metrics, (int) x, e, start);
@@ -251,8 +252,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     sync(v);
     TabExpander expander = v.getTabExpander();
     Segment s = v.getText(start, v.getEndOffset());
-    int index = Utilities.getTabbedTextOffset(s, _metrics, (int)x, (int)(x+len),
-                                              expander, start, false);
+    int index = Utilities.getTabbedTextOffset(s, _metrics, (int)x, (int)(x+len), expander, start, false);
     int end = start + index;
     return end;
   }
@@ -281,7 +281,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     }
     
     Document doc = v.getDocument();
-    if (!_listenersAttached && (doc instanceof AbstractDJDocument)) {
+    if (! _listenersAttached && (doc instanceof AbstractDJDocument)) {
       attachOptionListeners((AbstractDJDocument)doc);
     }
   }
@@ -336,6 +336,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     // Listen for updates to configurable colors
     final ColorOptionListener col = new ColorOptionListener();
     final FontOptionListener fol = new FontOptionListener();
+    
+    edu.rice.cs.util.swing.Utilities.clearEventQueue();  // In some unit tests the following statement generated NullPointer exceptions.
     
     // delete the old color listeners, because they're hanging onto the wrong coloringview
     // add color listeners to highlight keywords etc

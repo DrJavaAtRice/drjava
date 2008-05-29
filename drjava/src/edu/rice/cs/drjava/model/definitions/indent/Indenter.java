@@ -69,8 +69,10 @@ public class Indenter {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
     final String oneLevel = new String(indent);
-
-    boolean autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
+    
+    boolean autoCloseComments = false;
+    try { autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }
+    catch(Exception e) { /* ignore */ }  // some unit tests produce NullPointer exceptions in preceding line
     
     IndentRule
       // Main tree

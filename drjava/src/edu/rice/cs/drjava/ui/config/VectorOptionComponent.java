@@ -182,8 +182,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   }
 
   /** Updates the config object with the new setting.
-   * @return true if the new value is set successfully
-   */
+    * @return true if the new value is set successfully
+    */
   public boolean updateConfig() {
     Vector<T> current = getValue();
     DrJava.getConfig().setSetting(_option, current);
@@ -192,9 +192,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   }
   
   /** Accessor to the current contents of the list.
-   * @return The contents of the list in this component
-   * in the form of a Vector.
-   */
+    * @return The contents of the list in this component in the form of a Vector.
+    */
   public Vector<T> getValue() {
     Vector<T> current = new Vector<T>();
     for (int i = 0; i < _listModel.getSize(); i++) {

@@ -59,17 +59,25 @@ public class DrJavaTestCase extends TestCase {
     * @throws Exception
     */
   protected void setUp() throws Exception {
-    super.setUp();
+    super.setUp();  // declared to throw Exception, forcing throws clause on preceding line
     Utilities.TEST_MODE = true;
     final String newName = System.getProperty(TEST_DRJAVA_CONFIG_PROPERTY);
+    assert newName != null;
     if (newName != null) {
+//      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
       DrJava.setPropertiesFile(newName);
+      Utilities.clearEventQueue();
       DrJava._initConfig();
+      Utilities.clearEventQueue();
     }
   }
   
-  /** Clean up for every test case.
+  /** Clean up for every test case.  Only used in unit tests.  Added because Windows would intermittently throw
+    * a java.util.concurrent.RejectedExecutionException during cleanup.
     * @throws Exception
     */
-  protected void tearDown() throws Exception { super.tearDown(); }
+  protected void tearDown() throws Exception { 
+    DrJava.cleanUp();  // clobbers _config
+    super.tearDown();
+  }
 }

@@ -53,7 +53,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     super.setUp();
     _option = new FontOptionComponent( OptionConstants.FONT_MAIN, "Main font", new Frame());
     DrJava.getConfig().resetToDefaults();
-
+    Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
@@ -61,7 +61,9 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     Font testFont = Font.decode("Monospaced-BOLD-10");
 
     _option.setValue(testFont);
+    Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
+    Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
@@ -74,6 +76,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     Font testFont = Font.decode("Monospaced-BOLD-10");
 
     _option.setValue(testFont);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
@@ -85,9 +88,11 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     Font testFont = Font.decode("Monospaced-BOLD-10");
 
     _option.setValue(testFont);
+    Utilities.clearEventQueue();
     _option.updateConfig();
     Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
+    Utilities.clearEventQueue();  // preceding command creates event queue task
     _option.updateConfig();
     Utilities.clearEventQueue();
 

@@ -174,11 +174,11 @@ public class InteractionsController extends AbstractConsoleController {
               
               /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
                * interim. */
-              _doc.acquireReadLock();
+              _doc.acquireWriteLock();
               try { 
                 _pane.setEditable(true);
                 _pane.setCaretPosition(_doc.getLength()); }
-              finally { _doc.releaseReadLock(); }
+              finally { _doc.releaseWriteLock(); }
               _pane.requestFocusInWindow();
               
               completionMonitor.set();
@@ -584,7 +584,7 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveLeftAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        _doc.acquireReadLock(); 
+        _doc.acquireWriteLock(); 
         try {
           int promptPos = _doc.getPromptPos();
           int pos = _pane.getCaretPosition();
@@ -595,7 +595,7 @@ public class InteractionsController extends AbstractConsoleController {
 //            setCachedCaretPos(pos - 1);
           }
         }
-        finally { _doc.releaseReadLock(); }
+        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -603,7 +603,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Moves the caret right or wraps around. */
   AbstractAction moveRightAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireReadLock();
+      _doc.acquireWriteLock();
       try {
         int pos = _pane.getCaretPosition();
         if (pos < _doc.getPromptPos()) moveToEnd();
@@ -613,14 +613,14 @@ public class InteractionsController extends AbstractConsoleController {
 //          setCachedCaretPos(pos + 1);
         }
       }
-      finally { _doc.releaseReadLock(); }
+      finally { _doc.releaseWriteLock(); }
     }
   };
   
   /** Skips back one word.  Doesn't move past the prompt. */
   AbstractAction prevWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireReadLock();
+      _doc.acquireWriteLock();
       try {
         int position = _pane.getCaretPosition();
         int promptPos = _doc.getPromptPos();
@@ -628,14 +628,14 @@ public class InteractionsController extends AbstractConsoleController {
         else if (position == promptPos) moveToEnd(); // Wrap around to the end
         else _pane.getActionMap().get(DefaultEditorKit.previousWordAction).actionPerformed(e);
       }
-      finally { _doc.releaseReadLock(); }
+      finally { _doc.releaseWriteLock(); }
     }
   };
   
   /** Skips forward one word.  Doesn't move past the prompt. */
   AbstractAction nextWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireReadLock();
+      _doc.acquireWriteLock();
       try {
         int position = _pane.getCaretPosition();
         int promptPos = _doc.getPromptPos();
@@ -643,7 +643,7 @@ public class InteractionsController extends AbstractConsoleController {
         else if (position >= _doc.getLength()) moveToPrompt(); // Wrap around to the start
         else _pane.getActionMap().get(DefaultEditorKit.nextWordAction).actionPerformed(e);
       }
-      finally { _doc.releaseReadLock(); }
+      finally { _doc.releaseWriteLock(); }
     }
   };
   
