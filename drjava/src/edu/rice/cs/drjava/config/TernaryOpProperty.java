@@ -37,18 +37,18 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.util.Lambda;
 
 import java.util.HashSet;
 import java.util.Iterator;
 
-/** Class representing binary operations that can be inserted as variables in external processes.
+/** Class representing ternary operations that can be inserted as variables in external processes.
   * @version $Id$
   */
-public class BinaryOpProperty<P,Q,R> extends EagerProperty {
+public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
   /** Operation to perform. */
-  protected Lambda2<P,Q,R> _op;
+  protected Lambda3<O,P,Q,R> _op;
   /** Operator 1 name */
   protected String _op1Name;
   /** Operator 1 default */
@@ -57,24 +57,33 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
   protected String _op2Name;
   /** Operator 2 default */
   protected String _op2Default;
+  /** Operator 3 name */
+  protected String _op3Name;
+  /** Operator 3 default */
+  protected String _op3Default;
   /** Lambda to turn a string into the first operand. */
-  protected Lambda<P,String> _parse1;
-  /** Lambda to turn a string into the first operand. */
-  protected Lambda<Q,String> _parse2;
+  protected Lambda<O,String> _parse1;
+  /** Lambda to turn a string into the second operand. */
+  protected Lambda<P,String> _parse2;
+  /** Lambda to turn a string into the third operand. */
+  protected Lambda<Q,String> _parse3;
   /** Lambda to format the result. */
   protected Lambda<String,R> _format;
   
   /** Create an eager property. */
-  public BinaryOpProperty(String name,
-                          String help,
-                          Lambda2<P,Q,R> op,
-                          String op1Name,
-                          String op1Default,
-                          Lambda<P,String> parse1,
-                          String op2Name,
-                          String op2Default,
-                          Lambda<Q,String> parse2,
-                          Lambda<String,R> format) {
+  public TernaryOpProperty(String name,
+                           String help,
+                           Lambda3<O,P,Q,R> op,
+                           String op1Name,
+                           String op1Default,
+                           Lambda<O,String> parse1,
+                           String op2Name,
+                           String op2Default,
+                           Lambda<P,String> parse2,
+                           String op3Name,
+                           String op3Default,
+                           Lambda<Q,String> parse3,
+                           Lambda<String,R> format) {
     super(name, help);
     _op = op;
     _op1Name = op1Name;
@@ -83,23 +92,27 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
     _op2Name = op2Name;
     _op2Default = op2Default;
     _parse2 = parse2;
+    _op3Name = op3Name;
+    _op3Default = op3Default;
+    _parse3 = parse3;
     _format = format;
     resetAttributes();
   }
-  
+
   /** Create an eager property. */
-  public BinaryOpProperty(String name,
-                          String help,
-                          Lambda2<P,Q,R> op,
-                          Lambda<P,String> parse1,
-                          Lambda<Q,String> parse2,
-                          Lambda<String,R> format) {
-    this(name,help,op,"op1",null,parse1,"op2",null,parse2,format);
+  public TernaryOpProperty(String name,
+                           String help,
+                           Lambda3<O,P,Q,R> op,
+                           Lambda<O,String> parse1,
+                           Lambda<P,String> parse2,
+                           Lambda<Q,String> parse3,
+                           Lambda<String,R> format) {
+    this(name,help,op,"op1",null,parse1,"op2",null,parse2,"op3",null,parse3,format);
   }
   
   /** Update the property so the value is current. */
   public void update() {
-    P op1;
+    O op1;
     if (_attributes.get(_op1Name)==null) {
       _value = "("+_name+" Error...)";
       return;
@@ -113,7 +126,7 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
         return;
       }
     }
-    Q op2;
+    P op2;
     if (_attributes.get(_op2Name)==null) {
       _value = "("+_name+" Error...)";
       return;
@@ -122,29 +135,45 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
       try {
         op2 = _parse2.apply(_attributes.get(_op2Name));
       }
+      catch(Exception e) {
+        _value = "("+_name+" Error...)";
+        return;
+      }
+    }
+    Q op3;
+    if (_attributes.get(_op3Name)==null) {
+      _value = "("+_name+" Error...)";
+      return;
+    }
+    else {
+      try {
+        op3 = _parse3.apply(_attributes.get(_op3Name));
+      }
       catch(Exception ee) {
         _value = "("+_name+" Error...)";
         return;
       }
     }
-    _value = _format.apply(_op.value(op1,op2));
+    _value = _format.apply(_op.value(op1,op2,op3));
   }
   
   public void resetAttributes() {
     _attributes.clear();
     _attributes.put(_op1Name, _op1Default);
     _attributes.put(_op2Name, _op2Default);
+    _attributes.put(_op3Name, _op3Default);
   }
   
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
-    BinaryOpProperty o = (BinaryOpProperty)other;
+    TernaryOpProperty o = (TernaryOpProperty)other;
     return _name.equals(o._name)
       && (_isCurrent == o._isCurrent)
       && _op.equals(o._op)
       && _parse1.equals(o._parse1)
       && _parse2.equals(o._parse2)
+      && _parse3.equals(o._parse3)
       && _format.equals(o._format)
       && _value.equals(o._value);
   }
@@ -156,6 +185,7 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
     result = 31 * result + (_op.hashCode());
     result = 31 * result + (_parse1.hashCode());
     result = 31 * result + (_parse2.hashCode());
+    result = 31 * result + (_parse3.hashCode());
     result = 31 * result + (_format.hashCode());
     result = 31 * result + (_value.hashCode());
     result = 31 * result + (_isCurrent?1:0);

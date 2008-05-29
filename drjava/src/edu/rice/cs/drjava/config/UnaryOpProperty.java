@@ -48,6 +48,10 @@ import java.util.Iterator;
 public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Operation to perform. */
   protected Lambda<R,P> _op;
+  /** Operator name */
+  protected String _op1Name;
+  /** Operator default */
+  protected String _op1Default;
   /** Lambda to turn a string into the operand. */
   protected Lambda<P,String> _parse;
   /** Lambda to format the result. */
@@ -57,25 +61,38 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   public UnaryOpProperty(String name,
                          String help,
                          Lambda<R,P> op,
+                         String op1Name,
+                         String op1Default,
                          Lambda<P,String> parse,
                          Lambda<String,R> format) {
     super(name, help);
     _op = op;
+    _op1Name = op1Name;
+    _op1Default = op1Default;
     _parse = parse;
     _format = format;
     resetAttributes();
+  }
+
+  /** Create an eager property. */
+  public UnaryOpProperty(String name,
+                         String help,
+                         Lambda<R,P> op,
+                         Lambda<P,String> parse,
+                         Lambda<String,R> format) {
+    this(name, help, op, "op", null, parse, format);
   }
   
   /** Update the property so the value is current. */
   public void update() {
     P op;
-    if (_attributes.get("op")==null) {
+    if (_attributes.get(_op1Name)==null) {
       _value = "("+_name+" Error...)";
       return;
     }
     else {
       try {
-        op = _parse.apply(_attributes.get("op"));
+        op = _parse.apply(_attributes.get(_op1Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
@@ -87,7 +104,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   
   public void resetAttributes() {
     _attributes.clear();
-    _attributes.put("op", null);
+    _attributes.put(_op1Name, _op1Default);
   }
   
   /** @return true if the specified property is equal to this one. */
@@ -142,4 +159,10 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
       return s;
     }
   };    
+
+  /** Formatter for Strings. */
+  public static final Lambda<String,String> FORMAT_STRING = 
+    new edu.rice.cs.util.Lambda<String,String>() {
+    public String apply(String s) { return s; }
+  };
 } 

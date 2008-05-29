@@ -276,9 +276,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                             new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1>op2); }
     },
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.FORMAT_BOOL));
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Boolean>("lt",
                                                             "If the op1 is less than op2, returns true,"+
@@ -289,9 +289,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                             new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1<op2); }
     },
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.FORMAT_BOOL));
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Boolean>("gte",
                                                             "If the op1 is greater than or equal to op2, returns true,"+
@@ -302,9 +302,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                             new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1>=op2); }
     },
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.FORMAT_BOOL));
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Boolean>("lte",
                                                             "If the op1 is less than or equal to op2, returns true,"+
@@ -315,9 +315,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                             new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1<=op2); }
     },
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.PARSE_DOUBLE,
-                                                            BinaryOpProperty.FORMAT_BOOL));
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.PARSE_DOUBLE,
+                                                            UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <String,String,Boolean>("eq",
                                                             "If the op1 is equal to op2, returns true,"+
@@ -328,9 +328,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                             new edu.rice.cs.plt.lambda.Lambda2<String,String,Boolean>() {
       public Boolean value(String op1, String op2) { return op1.equals(op2); }
     },
-                                                            BinaryOpProperty.PARSE_STRING,
-                                                            BinaryOpProperty.PARSE_STRING,
-                                                            BinaryOpProperty.FORMAT_BOOL));
+                                                            UnaryOpProperty.PARSE_STRING,
+                                                            UnaryOpProperty.PARSE_STRING,
+                                                            UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Double>("add",
                                                            "Returns the sum of the two operands (op1+op2).\n"+
@@ -340,9 +340,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                            new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 + op2; }
     },
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.FORMAT_DOUBLE));
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.FORMAT_DOUBLE));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Double>("sub",
                                                            "Returns the difference between the two operands (op1-op2).\n"+
@@ -352,9 +352,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                            new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 - op2; }
     },
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.FORMAT_DOUBLE));
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.FORMAT_DOUBLE));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Double>("mul",
                                                            "Returns the product of the two operands (op1*op2).\n"+
@@ -364,9 +364,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                            new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 * op2; }
     },
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.FORMAT_DOUBLE));
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.FORMAT_DOUBLE));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <Double,Double,Double>("div",
                                                            "Returns the quotient of the two operands (op1/op2).\n"+
@@ -376,9 +376,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                            new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 / op2; }
     },
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.PARSE_DOUBLE,
-                                                           BinaryOpProperty.FORMAT_DOUBLE));
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           UnaryOpProperty.FORMAT_DOUBLE));
     PropertyMaps.ONLY.setProperty("Misc", new UnaryOpProperty
                                     <String,Double>("strlen",
                                                     "Returns the length of the operand in characters.\n"+
@@ -403,38 +403,59 @@ public class DrJavaPropertySetup implements OptionConstants {
         return ((double)s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(sep)).length);
       }
     },
+                                                           "op",
+                                                           null,
                                                            UnaryOpProperty.PARSE_STRING,
+                                                           "sep",
+                                                           System.getProperty("path.separator"),
                                                            UnaryOpProperty.PARSE_STRING,
-                                                           UnaryOpProperty.FORMAT_DOUBLE) {
-                                                             /** Update the property so the value is current. */
-                                                             public void update() {
-                                                               String op;
-                                                               if (_attributes.get("op")==null) {
-                                                                 _value = "("+_name+" Error...)";
-                                                                 return;
-                                                               }
-                                                               else {
-                                                                 try {
-                                                                   op = _parse1.apply(_attributes.get("op"));
-                                                                 }
-                                                                 catch(Exception e) {
-                                                                   _value = "("+_name+" Error...)";
-                                                                   return;
-                                                                 }
-                                                               }
-                                                               String sep = _attributes.get("sep");
-                                                               if (sep==null) {
-                                                                 sep = System.getProperty("path.separator");
-                                                               }
-                                                               sep = _parse2.apply(sep);
-                                                               _value = _format.apply(_op.value(op,sep));
-                                                             }
-                                                             public void resetAttributes() {
-                                                               _attributes.clear();
-                                                               _attributes.put("op", null);
-                                                               _attributes.put("sep", null);
-                                                             }
-                                                           });
+                                                           UnaryOpProperty.FORMAT_DOUBLE));
+    PropertyMaps.ONLY.setProperty("Misc", new QuaternaryOpProperty
+                                    <String,Double,Double,String,String>("sublist",
+                                                           "Extracts a sublist of elements from a list, beginning at "+
+                                                           "a specified index, and including a specified number of elements."+
+                                                           "Required attributes:\n"+
+                                                           "\top=\"<list string>\"\n"+
+                                                           "\tindex=\"<index in list, starting with 0>\"\n"+
+                                                           "Optional attributes:\n"+
+                                                           "\tcount=\"<number of items>\"\n"+
+                                                           "(if not specified, 1 will be used)\n"+
+                                                           "\tsep=\"<separator string>\"\n"+
+                                                           "(if none specified, ${path.separator} will be used)",
+                                                           new edu.rice.cs.plt.lambda.Lambda4<String,Double,Double,String,String>() {
+      public String value(String s, Double index, Double count, String sep) {
+        if (s.length()==0) return "";
+        int i = index.intValue();
+        int c = count.intValue();
+        StringBuilder sb = new StringBuilder();
+        String[] els = s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(sep));
+        for(int j=0; j<c; ++j) {
+          if (i+j>=els.length) { break; }
+          sb.append(sep);
+          sb.append(els[i+j]);
+        }
+        s = sb.toString();
+        if (s.length()>=sep.length()) {
+          return s.substring(sep.length());
+        }
+        else {
+          return "";
+        }
+      }
+    },
+                                                           "op",
+                                                           null,
+                                                           UnaryOpProperty.PARSE_STRING,
+                                                           "index",
+                                                           null,
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           "count",
+                                                           "1",
+                                                           UnaryOpProperty.PARSE_DOUBLE,
+                                                           "sep",
+                                                           System.getProperty("path.separator"),
+                                                           UnaryOpProperty.PARSE_STRING,
+                                                           UnaryOpProperty.FORMAT_STRING));
     
     // XML properties, correspond to XMLConfig
     PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("xml.in", "(XML Input...)",
