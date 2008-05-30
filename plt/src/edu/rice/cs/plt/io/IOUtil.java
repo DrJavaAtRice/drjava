@@ -593,7 +593,62 @@ public final class IOUtil {
   }
   
   /**
-   * Copies the text of one file into another.
+   * Produce an Adler-32 hash for the given file.  The result is an int (32 bits).
+   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+   * @throws  SecurityException  If read access to the file is denied
+   */
+  public static int adler32Hash(File file) throws IOException {
+    InputStream input = new FileInputStream(file);
+    try { return adler32Hash(input); }
+    finally { input.close(); }
+  }
+  
+  /**
+   * Produce a CRC-32 hash for the given file.  The result is an int (32 bits).
+   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+   * @throws  SecurityException  If read access to the file is denied
+   */
+  public static int crc32Hash(File file) throws IOException {
+    InputStream input = new FileInputStream(file);
+    try { return crc32Hash(input); }
+    finally { input.close(); }
+  }
+  
+  /**
+   * Produce an MD5 hash for the given file.  The result is 16 bytes (128 bits) long.
+   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+   * @throws  SecurityException  If read access to the file is denied
+   */
+  public static byte[] md5Hash(File file) throws IOException {
+    InputStream input = new FileInputStream(file);
+    try { return md5Hash(input); }
+    finally { input.close(); }
+  }
+  
+  /**
+   * Produce an SHA-1 hash for the given file.  The result is 20 bytes (160 bits) long.
+   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+   * @throws  SecurityException  If read access to the file is denied
+   */
+  public static byte[] sha1Hash(File file) throws IOException {
+    InputStream input = new FileInputStream(file);
+    try { return sha1Hash(input); }
+    finally { input.close(); }
+  }
+  
+  /**
+   * Produce an SHA-256 hash for the given file.  The result is 32 bytes (256 bits) long.
+   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+   * @throws  SecurityException  If read access to the file is denied
+   */
+  public static byte[] sha256Hash(File file) throws IOException {
+    InputStream input = new FileInputStream(file);
+    try { return sha256Hash(input); }
+    finally { input.close(); }
+  }
+  
+  /**
+   * Copies the contents of one file into another.
    * @param source the file to be copied
    * @param dest the file to be copied to
    * @throws  IOException  If one of the files does not exist or cannot be opened, or if an error 
@@ -611,7 +666,7 @@ public final class IOUtil {
   }
 
   /**
-   * Copies the text of one file into another, using the given array as an intermediate buffer.
+   * Copies the contents of one file into another, using the given array as an intermediate buffer.
    * @param source  The file to be copied
    * @param dest  The file to be copied to
    * @param buffer  A buffer to use in copying
@@ -947,7 +1002,7 @@ public final class IOUtil {
   
   /**
    * Create a byte array with the contents of the given stream.  The method will not return
-   * until and end of stream has been reached.
+   * until an end of stream has been reached.
    */
   public static byte[] toByteArray(InputStream stream) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -960,7 +1015,7 @@ public final class IOUtil {
 
   /**
    * Create a StringBuffer with the contents of the given {@code Reader}.  The method will not return
-   * until and end of stream has been reached.  (We use a StringBuffer rather than a
+   * until an end of stream has been reached.  (We use a StringBuffer rather than a
    * StringBuilder because that is what {@link StringWriter} supports.)
    */
   public static StringBuffer toStringBuffer(Reader r) throws IOException {
@@ -974,10 +1029,75 @@ public final class IOUtil {
 
   /**
    * Create a String with the contents of the given {@code Reader}.  The method will not return
-   * until and end of stream has been reached.
+   * until an end of stream has been reached.
    */
   public static String toString(Reader r) throws IOException {
     return toStringBuffer(r).toString();
+  }
+  
+  /**
+   * Produce an Adler-32 hash for the contents of the given stream.  The result is an int (32 bits).
+   * The method will not return until an end of stream has been reached.
+   */
+  public static int adler32Hash(InputStream stream) throws IOException {
+    ChecksumOutputStream out = ChecksumOutputStream.makeAdler32();
+    try {
+      copyInputStream(stream, out);
+      return (int) out.getValue();
+    }
+    finally { out.close(); }
+  }
+  
+  /**
+   * Produce a CRC-32 hash for the contents of the given stream.  The result is an int (32 bits).
+   * The method will not return until an end of stream has been reached.
+   */
+  public static int crc32Hash(InputStream stream) throws IOException {
+    ChecksumOutputStream out = ChecksumOutputStream.makeCRC32();
+    try {
+      copyInputStream(stream, out);
+      return (int) out.getValue();
+    }
+    finally { out.close(); }
+  }
+  
+  /**
+   * Produce an MD5 hash for the contents of the given stream.  The result is 16 bytes (128 bits) long.
+   * The method will not return until an end of stream has been reached.
+   */
+  public static byte[] md5Hash(InputStream stream) throws IOException {
+    MessageDigestOutputStream out = MessageDigestOutputStream.makeMD5();
+    try {
+      copyInputStream(stream, out);
+      return out.digest();
+    }
+    finally { out.close(); }
+  }
+  
+  /**
+   * Produce an SHA-1 hash for the contents of the given stream.  The result is 20 bytes (160 bits) long.
+   * The method will not return until an end of stream has been reached.
+   */
+  public static byte[] sha1Hash(InputStream stream) throws IOException {
+    MessageDigestOutputStream out = MessageDigestOutputStream.makeSHA1();
+    try {
+      copyInputStream(stream, out);
+      return out.digest();
+    }
+    finally { out.close(); }
+  }
+  
+  /**
+   * Produce an SHA-256 hash for the contents of the given stream.  The result is 32 bytes (256 bits) long.
+   * The method will not return until an end of stream has been reached.
+   */
+  public static byte[] sha256Hash(InputStream stream) throws IOException {
+    MessageDigestOutputStream out = MessageDigestOutputStream.makeSHA256();
+    try {
+      copyInputStream(stream, out);
+      return out.digest();
+    }
+    finally { out.close(); }
   }
   
   /** If {@code r} is a {@code BufferedReader}, cast it as such; otherwise, wrap it in a {@code BufferedReader} */

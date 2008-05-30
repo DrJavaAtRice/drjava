@@ -1,0 +1,1 @@
+This is a dummy file to test hashing functions.  It just contains some example data that can be used to compute hashes.  That is all.  It doesn't contain any newlines, because those might be converted by Subversion into different sequences of bytes depending on the platform.

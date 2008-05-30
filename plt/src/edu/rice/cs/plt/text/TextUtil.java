@@ -255,7 +255,26 @@ public final class TextUtil {
     int index = s.lastIndexOf(delim);
     return (index == -1) ? s : s.substring(0, index);
   }
-    
+
+  /** Express a byte array as a sequence of unsigned hexadecimal bytes. */
+  public static String toHexString(byte[] bs) {
+    return toHexString(bs, 0, bs.length);
+  }
+  
+  /** Express a byte array as a sequence of unsigned hexadecimal bytes. */
+  public static String toHexString(byte[] bs, int offset, int length) {
+    StringBuilder result = new StringBuilder();
+    for (int i = offset; i < offset+length; i++) {
+      if (i > offset) { result.append(' '); }
+      byte b = bs[i];
+      // Integer.toHexString pads results in range 128-255 with "ffff...",
+      // and using it on (b & 0xff) excludes leading 0s.
+      result.append(Character.forDigit((b & 0xf0) >> 4, 16));
+      result.append(Character.forDigit(b & 0xf, 16));
+    }
+    return result.toString();
+  }
+  
   
   public static boolean isDecimalDigit(char c) { return c >= '0' && c <= '9'; }
   
