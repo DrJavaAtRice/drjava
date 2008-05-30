@@ -53,7 +53,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new KeyStrokeOptionComponent( OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new Frame());
+    _option = new KeyStrokeOptionComponent(OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new Frame());
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
@@ -65,7 +65,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     _option.resetToCurrent(); // should reset to the original.
     Utilities.clearEventQueue();
-    _option.updateConfig(); // should update with original values therefore no change.
+    _option.updateConfig();   // should update with original values therefore no change.
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.KEY_NEW_FILE.getDefault(),
@@ -94,8 +94,8 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
     _option.resetToDefault(); // resets to default
     Utilities.clearEventQueue();
     _option.updateConfig();
-
-//    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
+    
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.KEY_NEW_FILE.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));

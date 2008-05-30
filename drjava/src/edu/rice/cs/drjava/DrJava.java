@@ -464,7 +464,7 @@ public class DrJava {
     _propertiesFile = null;
     _filesToOpen.clear();
     _jvmArgs.clear();
-    _config = null;
+//    _config = null;  // appears to cause problems in cleanup
   }
      
 }
