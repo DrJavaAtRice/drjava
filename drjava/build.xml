@@ -303,8 +303,9 @@
     <!-- Convert lib classes -->
     <mkdir dir="classes/lib-14" />
     <retroweaver srcdir="classes/lib" destdir="classes/lib-14" target="1.4" verify="no" />
-    <copy todir="classes/lib-14">
+    <copy todir="classes/lib-14" overwrite="yes">
       <fileset dir="classes/lib" excludes="**/*.class" />
+      <fileset dir="classes/lib" includes="org/junit/**" />
     </copy>
     
     <!-- Convert base classes -->
