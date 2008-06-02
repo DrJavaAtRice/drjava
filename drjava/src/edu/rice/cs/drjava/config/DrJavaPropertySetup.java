@@ -40,7 +40,10 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.drjava.DrJava;
 import java.io.*;
+import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
 /** Class setting up the variables for external processes.
@@ -109,15 +112,14 @@ public class DrJavaPropertySetup implements OptionConstants {
           if (name.equals("")) name = "DrJava-Execute-" + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp";
           if (dir.equals("")) dir = System.getProperty("java.io.tmpdir");
           else {
-            String s = StringOps.replaceVariables(dir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
-            dir = StringOps.unescapeSpacesWith1bHex(s);
+            dir = StringOps.unescapeSpacesWith1bHex(dir);
           }
    
           File f = new File(dir, name);
           try { f = f.getCanonicalFile(); }
           catch(IOException ioe) { }
           f.deleteOnExit();
-          _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+          _value = StringOps.escapeSpacesWith1bHex(f.toString());
         }
         catch(SecurityException e) { _value = "Error."; }
       }
@@ -125,12 +127,12 @@ public class DrJavaPropertySetup implements OptionConstants {
       public String getCurrent() {
         invalidate();
         final String s = super.getCurrent();
-        File f = new File(edu.rice.cs.util.StringOps.unescapeSpacesWith1bHex(_value));
+        File f = new File(StringOps.unescapeSpacesWith1bHex(_value));
         final String keep = _attributes.get("keep");
         if (!(keep.equals("true") || keep.equals("yes") || keep.equals("1"))) {
           f.deleteOnExit();
         }
-        String text = edu.rice.cs.util.StringOps.unescapeSpacesWith1bHex(_attributes.get("content"));
+        String text = StringOps.unescapeSpacesWith1bHex(_attributes.get("content"));
         try {
           FileWriter fw = new FileWriter(f);
           fw.write(text, 0, text.length());
@@ -148,7 +150,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.ONLY.setProperty("Misc", new RecursiveFileListProperty("find", File.pathSeparator, DEF_DIR, DEF_DIR,
+    PropertyMaps.ONLY.setProperty("File", new RecursiveFileListProperty("file.find", File.pathSeparator, DEF_DIR, DEF_DIR,
                                                                         "Return a list of files found in the starting dir.\n"+
                                                                         "Optional attributes:\n"+
                                                                         "\tsep=\"<separator between files>\"\n"+
@@ -156,6 +158,411 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                         "\trel=\"<dir to which the files are relative>\"\n"+
                                                                         "\tfilter=\"<filter, like *.txt, for files to list>\"\n"+
                                                                         "\tdirfilter=\"<filter for which dirs to recurse>\""));
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.isdir",
+                                                             "Return true if the specified file is a directory, false "+
+                                                             "otherwise.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file to test>\"\n"+
+                                                             "Multiple files can be specified, separated by ${path.separator}, "+
+                                                             "which is "+File.pathSeparator+" on this machine. If multiple "+
+                                                             "files are specified, then a list of values, each "+
+                                                             "separated by ${path.separator}, is returned.") {
+      public void update() {
+        String s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.isdir Error...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          File f = new File(StringOps.unescapeSpacesWith1bHex(fs));
+          sb.append(File.pathSeparator);
+          sb.append((f.exists() && f.isDirectory())?"true":"false");
+        }
+        s = sb.toString();
+        if (s.startsWith(File.pathSeparator)) {
+          _value = s.substring(File.pathSeparator.length());
+        }
+        else {
+          _value = s;
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+      }
+    });
+    
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.isfile",
+                                                             "Return true if the specified file is a file, not a "+
+                                                             "directory.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file to test>\"\n"+
+                                                             "Multiple files can be specified, separated by ${path.separator}, "+
+                                                             "which is "+File.pathSeparator+" on this machine. If multiple "+
+                                                             "files are specified, then a list of values, each "+
+                                                             "separated by ${path.separator}, is returned.") {
+      public void update() {
+        String s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.isfile Error...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File f = new File(fs);
+          sb.append(File.pathSeparator);
+          sb.append((f.exists() && f.isFile())?"true":"false");
+        }
+        s = sb.toString();
+        if (s.startsWith(File.pathSeparator)) {
+          _value = s.substring(File.pathSeparator.length());
+        }
+        else {
+          _value = s;
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.exists",
+                                                             "Return true if the specified file exists.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file to test>\"\n"+
+                                                             "Multiple files can be specified, separated by ${path.separator}, "+
+                                                             "which is "+File.pathSeparator+" on this machine. If multiple "+
+                                                             "files are specified, then a list of values, each "+
+                                                             "separated by ${path.separator}, is returned.") {
+      public void update() {
+        String s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.exists Error... )";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File f = new File(fs);
+          sb.append(File.pathSeparator);
+          sb.append(f.exists()?"true":"false");
+        }
+        s = sb.toString();
+        if (s.startsWith(File.pathSeparator)) {
+          _value = s.substring(File.pathSeparator.length());
+        }
+        else {
+          _value = s;
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.parent",
+                                                             "Return the path of the parent, or and empty string \"\" if "+
+                                                             "no parent exists.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file for which to return the parent>\"\n"+
+                                                             "Multiple files can be specified, separated by ${path.separator}, "+
+                                                             "which is "+File.pathSeparator+" on this machine. If multiple "+
+                                                             "files are specified, then a list of values, each "+
+                                                             "separated by ${path.separator}, is returned.") {
+      public void update() {
+        String s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.parent Error...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File f = new File(fs);
+          String p = StringOps.escapeSpacesWith1bHex(f.getParent());
+          sb.append(File.pathSeparator);
+          sb.append((p!=null)?p:"");
+        }
+        s = sb.toString();
+        if (s.startsWith(File.pathSeparator)) {
+          _value = s.substring(File.pathSeparator.length());
+        }
+        else {
+          _value = s;
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.abs",
+                                                             "Return the absolute path of the file which has been "+
+                                                             "relative to another file.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file for which to return the absolute path>\"\n"+
+                                                             "\tbase=\"<other file which serves as base path>\"\n"+
+                                                             "Multiple files can be specified for the file attribute, each "+
+                                                             "separated by ${path.separator}, which is "+File.pathSeparator+
+                                                             " on this machine. If multiple files are specified, then a list "+
+                                                             "of values, each separated by ${path.separator}, is returned.") {
+      public void update() {
+        String s = _attributes.get("base");
+        if (s==null) {
+          _value = "(file.rel Error: base missing...)";
+          return;
+        }
+        s = StringOps.unescapeSpacesWith1bHex(s);
+        File b = new File(s);
+        s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.rel Error: file missing...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File f = new File(fs);
+          sb.append(File.pathSeparator);
+          sb.append(StringOps.escapeSpacesWith1bHex(f.getAbsolutePath()));
+        }
+        s = sb.toString();
+        if (s.startsWith(File.pathSeparator)) {
+          _value = s.substring(File.pathSeparator.length());
+        }
+        else {
+          _value = s;
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("base", null);
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.rel",
+                                                             "Return the path of the file, relative to another file.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file for which to return the relative path>\"\n"+
+                                                             "\tbase=\"<other file which serves as base path>\"\n"+
+                                                             "Multiple files can be specified for the file attribute, each "+
+                                                             "separated by ${path.separator}, which is "+File.pathSeparator+
+                                                             " on this machine. If multiple files are specified, then a list "+
+                                                             "of values, each separated by ${path.separator}, is returned.") {
+      public void update() {
+        String s = _attributes.get("base");
+        if (s==null) {
+          _value = "(file.rel Error: base missing...)";
+          return;
+        }
+        s = StringOps.unescapeSpacesWith1bHex(s);
+        File b = new File(s);
+        s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.rel Error: file missing...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File f = new File(fs);
+          try {
+            s = edu.rice.cs.util.FileOps.stringMakeRelativeTo(f,b);
+            if (s.endsWith(File.separator)) {
+              // path ends with "/", check if we can remove the "/"
+              File[] roots = File.listRoots();
+              if (roots!=null) {
+                boolean equalsRoot = false;
+                for(File r: roots) {
+                  if (s.equals(r.toString())) {
+                    equalsRoot = true;
+                    break;
+                  }
+                }
+                if (!equalsRoot) {
+                  // path ends with "/" and does not equal a file system root
+                  // we can remove the trailing "/"
+                  s = s.substring(0, s.length()-1);
+                }
+              }
+            }
+            sb.append(File.pathSeparator);
+            sb.append(StringOps.escapeSpacesWith1bHex(s));
+          }
+          catch(Exception e) {
+            _value = "(file.rel I/O Error...)";
+            return;
+          }
+        }
+        s = sb.toString();
+        if (s.startsWith(File.pathSeparator)) {
+          _value = s.substring(File.pathSeparator.length());
+        }
+        else {
+          _value = s;
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("base", null);
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.mkdir",
+                                                             "Make the directory with the provided name inside the specified "+
+                                                             "parent directory. Evaluates to the empty string \"\" if "+
+                                                             "successful.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tname=\"<name for the new directory>\""+
+                                                             "\tfile=\"<parent directory>\"\n"+
+                                                             "Multiple names can be specified for the name attribute, each "+
+                                                             "separated by ${path.separator}, which is "+File.pathSeparator+
+                                                             " on this machine. If multiple names are specified, then DrJava "+
+                                                             "will attempt to make all those directories.") {
+      public void update() {
+        String s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.mkdir Error: file missing...)";
+          return;
+        }
+        s = StringOps.unescapeSpacesWith1bHex(s);
+        File f = new File(s);
+        s = _attributes.get("name");
+        if (s==null) {
+          _value = "(file.mkdir Error: name missing...)";
+          return;
+        }
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File n = new File(f,fs);
+          if (!n.mkdir()) {
+            _value = "(file.mkdir I/O Error...)";
+            return;
+          }
+        }
+        _value = "";
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("name", null);
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.rm",
+                                                             "Remove the specified file or directory, recursively if desired. "+
+                                                             "Evaluates to the empty string \"\" if successful.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file or directory to remove>\""+
+                                                             "Optional attributes:\n"+
+                                                             "\trec=\"<true for recursive removal>\"\n"+
+                                                             "(if not specified, false is used and removal is not recursive)\n"+
+                                                             "Multiple files can be specified for the file attribute, each "+
+                                                             "separated by ${path.separator}, which is "+File.pathSeparator+
+                                                             " on this machine. If multiple files are specified, then DrJava "+
+                                                             "will attempt to remove all those files.") {
+      public void update() {
+        String s = _attributes.get("rec");
+        boolean rec = new Boolean(s).booleanValue();
+        s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.rm Error...)";
+          return;
+        }
+        s = StringOps.unescapeSpacesWith1bHex(s);
+        boolean res = false;
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+          fs = StringOps.unescapeSpacesWith1bHex(fs);
+          File f = new File(fs);
+          if (rec) {
+            // recursive removal
+            try {
+              res = edu.rice.cs.plt.io.IOUtil.deleteRecursively(f);
+            }
+            catch(Exception e) { res = false; }
+          }
+          else {
+            // non-recursive removal
+            try {
+              res = f.delete();
+            }
+            catch(SecurityException e) { res = false; }
+          }
+        }
+        _value = res?"":"(file.rm I/O Error...)";
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("rec", "false");
+      }
+    });
+    
+    PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.mv",
+                                                             "Move the specified file or directory to a new location. "+
+                                                             "Evaluates to the empty string \"\" if successful.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tfile=\"<file or directory to move>\""+
+                                                             "\tnew=\"<new location>\"") {
+      public void update() {
+        String s = _attributes.get("file");
+        if (s==null) {
+          _value = "(file.mv Error: file missing...)";
+          return;
+        }
+        File f = new File(s);
+        s = _attributes.get("new");
+        if (s==null) {
+          _value = "(file.mv Error: new missing...)";
+          return;
+        }
+        File n = new File(s);
+        boolean res = false;
+        if ((f.getParent()!=null) && (f.getParent().equals(n.getParent()))) {
+          // just renaming a file or directory
+          res = edu.rice.cs.plt.io.IOUtil.attemptRenameTo(f,n);
+        }
+        else {
+          if (f.isFile()) {
+            // just moving a file
+            try {
+              res = edu.rice.cs.plt.io.IOUtil.attemptMove(f,n);
+            }
+            catch(Exception e) { res = false; }
+          }
+          else {
+            // moving a whole directory
+            try {
+              res = edu.rice.cs.util.FileOps.moveRecursively(f,n);
+            }
+            catch(Exception e) { res = false; }
+          }
+        }
+        _value = res?"":"(file.mv I/O Error...)";
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("file", null);
+        _attributes.put("new", null);
+      }
+    });
     
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.time.millis",
                                                               "Returns the current time in milliseconds since 01/01/1970, "+
@@ -187,7 +594,29 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.put("fmt", "millis");
       }
     });
-    
+
+    PropertyMaps.ONLY.setProperty("Misc", new EagerProperty("ignore",
+                                                            "Evaluates the string specified in the command attribute, "+
+                                                            "but ignore the result of the evaluation. Only side effects "+
+                                                            "of the evaluation are apparent. This property always "+
+                                                            "evaluates to the empty string \"\" (unless the command "+
+                                                            "attribute is missing).\n"+
+                                                            "Required attributes:\n"+
+                                                            "\tcmd=\"<command to evaluate>\"") {
+      public void update() {
+        String s = _attributes.get("cmd");
+        if (s==null) {
+          _value = "(ignore Error...)";
+          return;
+        }
+        _value = "";
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("cmd", null);
+      }
+    });
+
     PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("if",
                                                              "If the cond attribute evaluates to true, returns "+
                                                              "the evaluation of the then attribute, otherwise "+
@@ -383,17 +812,19 @@ public class DrJavaPropertySetup implements OptionConstants {
                                     <String,Double>("strlen",
                                                     "Returns the length of the operand in characters.\n"+
                                                     "Required attributes:\n"+
-                                                    "\top=\"<string>\"",
+                                                    "\tlist=\"<string>\"",
                                                     new edu.rice.cs.util.Lambda<Double,String>() {
       public Double apply(String s) { return ((double)s.length()); }
     },
+                                                    "list",
+                                                    null,
                                                     UnaryOpProperty.PARSE_STRING,
                                                     UnaryOpProperty.FORMAT_DOUBLE));
     PropertyMaps.ONLY.setProperty("Misc", new BinaryOpProperty
                                     <String,String,Double>("count",
                                                            "Counts the number of elements in the list.\n"+
                                                            "Required attributes:\n"+
-                                                           "\top=\"<list string>\"\n"+
+                                                           "\tlist=\"<list string>\"\n"+
                                                            "Optional attributes:\n"+
                                                            "\tsep=\"<separator string>\"\n"+
                                                            "(if none specified, ${path.separator} will be used)",
@@ -403,7 +834,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         return ((double)s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(sep)).length);
       }
     },
-                                                           "op",
+                                                           "list",
                                                            null,
                                                            UnaryOpProperty.PARSE_STRING,
                                                            "sep",
@@ -415,7 +846,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                            "Extracts a sublist of elements from a list, beginning at "+
                                                            "a specified index, and including a specified number of elements."+
                                                            "Required attributes:\n"+
-                                                           "\top=\"<list string>\"\n"+
+                                                           "\tlist=\"<list string>\"\n"+
                                                            "\tindex=\"<index in list, starting with 0>\"\n"+
                                                            "Optional attributes:\n"+
                                                            "\tcount=\"<number of items>\"\n"+
@@ -443,7 +874,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         }
       }
     },
-                                                           "op",
+                                                           "list",
                                                            null,
                                                            UnaryOpProperty.PARSE_STRING,
                                                            "index",
@@ -454,6 +885,38 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                            UnaryOpProperty.PARSE_DOUBLE,
                                                            "sep",
                                                            System.getProperty("path.separator"),
+                                                           UnaryOpProperty.PARSE_STRING,
+                                                           UnaryOpProperty.FORMAT_STRING));
+    PropertyMaps.ONLY.setProperty("Misc", new TernaryOpProperty
+                                    <String,String,String,String>("change.sep",
+                                                           "Changes the separator used in a list of values."+
+                                                           "Required attributes:\n"+
+                                                           "\tlist=\"<list string>\"\n"+
+                                                           "\told=\"<old separator>\"\n"+
+                                                           "\tnew=\"<new separator>\"",
+                                                           new edu.rice.cs.plt.lambda.Lambda3<String,String,String,String>() {
+      public String value(String s, String oldSep, String newSep) {
+        if (s.length()==0) return "";
+        StringBuilder sb = new StringBuilder();
+        for(String el: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(oldSep))) {
+          sb.append(newSep);
+          sb.append(el);
+        }
+        s = sb.toString();
+        if (s.startsWith(newSep)) {
+          s = s.substring(newSep.length());
+        }
+        return s;
+      }
+    },
+                                                           "list",
+                                                           null,
+                                                           UnaryOpProperty.PARSE_STRING,
+                                                           "old",
+                                                           null,
+                                                           UnaryOpProperty.PARSE_STRING,
+                                                           "new",
+                                                           null,
                                                            UnaryOpProperty.PARSE_STRING,
                                                            UnaryOpProperty.FORMAT_STRING));
     
@@ -569,5 +1032,205 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
+    // Variables
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("var",
+                                                             "Create a new scope and define a variable with the "+
+                                                             "specified name and value; then evaluate the command "+
+                                                             "with the new variable in the environment.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tname=\"<name of the variable>\"\n"+
+                                                             "\tval=\"<value of the variable>\"\n"+
+                                                             "\tcmd=\"<command to evaluate>\"") {
+      public void update() {
+        String name = _attributes.get("name");
+        String val = _attributes.get("val");
+        String cmd = _attributes.get("cmd");
+        if (name==null) {
+          _value = "(var Error: name missing...)";
+          return;
+        }
+        if (val==null) {
+          _value = "(var Error: val missing...)";
+          return;
+        }
+        if (cmd==null) {
+          _value = "(var Error: cmd missing...)";
+          return;
+        }
+        try {
+          PropertyMaps.ONLY.addVariable(name,val);
+          _value = StringOps.replaceVariables(cmd, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
+          PropertyMaps.ONLY.removeVariable(name);
+        }
+        catch(IllegalArgumentException e) {
+          _value = "(var Error: "+e.getMessage()+"...)";
+        }
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("name", null);
+        _attributes.put("val", null);
+        _attributes.put("cmd", null);
+      }
+      public String toString() { return "--uninitialized--"; }
+      public void setAttributes(HashMap<String,String> attrs, edu.rice.cs.util.Lambda<String,String> replaceLambda) {
+        String value;
+        for(String key: attrs.keySet()) {
+          value = attrs.get(key);
+          if (key.equals("cmd")) {
+            // do not evaluate the cmd attribute yet
+            setAttribute(key, value);
+          }
+          else {
+            setAttribute(key, replaceLambda.apply(value));
+          }
+        }
+      }
+    });
+
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("var.set",
+                                                             "Mutate the value of the variable with the "+
+                                                             "specified name and value.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tname=\"<name of the variable>\"\n"+
+                                                             "\tval=\"<value of the variable>\"") {
+      public void update() {
+        String name = _attributes.get("name");
+        String val = _attributes.get("val");
+        if (name==null) {
+          _value = "(var.set Error: name missing...)";
+          return;
+        }
+        if (val==null) {
+          _value = "(var.set Error: val missing...)";
+          return;
+        }
+        try {
+          PropertyMaps.ONLY.setVariable(name,val);
+        }
+        catch(IllegalArgumentException e) {
+          _value = "(var.set Error: "+e.getMessage()+"...)";
+          return;
+        }
+        _value = "";
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("name", null);
+        _attributes.put("val", null);
+      }
+      public String toString() { return ""; }
+    });
+
+    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("for",
+                                                             "Create a new scope and define a variable with the "+
+                                                             "specified name. Then process the given list in smaller "+
+                                                             "pieces, assigning them to the variable.\n"+
+                                                             "Required attributes:\n"+
+                                                             "\tlist=\"<list string>\"\n"+
+                                                             "\tvar=\"<name of the variable>\"\n"+
+                                                             "\tcmd=\"<command to evaluate for each piece>\"\n"+
+                                                             "Optional attributes:\n"+
+                                                             "\tsep=\"<separator between elements>\"\n"+
+                                                             "(if not defined, ${path.separator}, which is "+File.pathSeparator+
+                                                             "\toutsep=\"<separator between elements in the output>\"\n"+
+                                                             "(if not defined, ${process.separator}, which is "+
+                                                             edu.rice.cs.util.ProcessCreator.PROCESS_SEPARATOR+
+                                                             " on this machine, will be used)\n"+
+                                                             "\teach=\"<number of elements to process as one piece>\"\n"+
+                                                             "(if not defined, 1 is used)") {
+      public void update() {
+        String list = _attributes.get("list");
+        String var = _attributes.get("var");
+        String cmd = _attributes.get("cmd");
+        if (list==null) {
+          _value = "(for Error: list missing...)";
+          return;
+        }
+        if (var==null) {
+          _value = "(for Error: var missing...)";
+          return;
+        }
+        if (cmd==null) {
+          _value = "(for Error: cmd missing...)";
+          return;
+        }
+        String sep = _attributes.get("sep");
+        String outSep = _attributes.get("outsep");
+        int each = 1;
+        try {
+          each = new Integer(_attributes.get("each"));
+          if (each<1) { throw new NumberFormatException(); }
+        }
+        catch(NumberFormatException e) {
+          _value = "(for Error: each not a positive number...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sbVar = new StringBuilder();
+        PropertyMaps.ONLY.addVariable(var,"");
+        String val;
+        try {
+          String[] els = list.split(edu.rice.cs.plt.text.TextUtil.regexEscape(sep));
+          int start = 0;
+          while(start<els.length) {
+            sbVar.setLength(0);
+            for(int i=start; i<start+each; ++i) {
+              if (i>=els.length) break;
+              sbVar.append(sep);
+              sbVar.append(els[i]);
+            }
+            val = sbVar.toString();
+            if (val.startsWith(sep)) {
+              val = val.substring(sep.length());
+            }
+            PropertyMaps.ONLY.setVariable(var,val);
+            sb.append(outSep);
+            sb.append(StringOps.replaceVariables(cmd, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
+            start += each;
+          }
+        }
+        catch(IllegalArgumentException e) {
+          _value = "(for Error: "+e.getMessage()+"...)";
+        }
+        PropertyMaps.ONLY.removeVariable(var);
+        val = sb.toString();
+        if (val.startsWith(outSep)) {
+          val = val.substring(outSep.length());
+        }
+        _value = val;
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("list", null);
+        _attributes.put("var", null);
+        _attributes.put("cmd", null);
+        _attributes.put("sep", File.pathSeparator);
+        _attributes.put("outsep", edu.rice.cs.util.ProcessCreator.PROCESS_SEPARATOR);
+        _attributes.put("each", "1");
+      }
+      public String toString() { return "--uninitialized--"; }
+      public void setAttributes(HashMap<String,String> attrs, edu.rice.cs.util.Lambda<String,String> replaceLambda) {
+        String value;
+        for(String key: attrs.keySet()) {
+          value = attrs.get(key);
+          if (key.equals("cmd")) {
+            // do not evaluate the cmd attribute yet
+            setAttribute(key, value);
+          }
+          else {
+            setAttribute(key, replaceLambda.apply(value));
+          }
+        }
+      }
+    });
+    
+    PropertyMaps.ONLY.setProperty("Config", new ConstantProperty("process.separator",
+                                                                 edu.rice.cs.util.ProcessCreator.PROCESS_SEPARATOR,
+                                                                 "This property contains the separator used between "+
+                                                                 "processes."));
   }
-} 
+}

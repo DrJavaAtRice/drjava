@@ -1442,6 +1442,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Insert a variable into the command line. */
   private void _insertVariableCommand() {
+    PropertyMaps.ONLY.clearVariables();
     _mainFrame.removeModalWindowAdapter(this);
     _insertVarDialogMonitor.reset();
     _insertVarDialog.setVisible(true);

@@ -51,6 +51,9 @@ import java.util.Properties;
  */
 
 public class ProcessCreator {
+  /** Separator used between processes. */
+  public static final String PROCESS_SEPARATOR = (File.pathSeparatorChar==':')?";":":";
+  
   protected String _cmdline;
   protected String _workdir;
   protected Map<String,String> _env;

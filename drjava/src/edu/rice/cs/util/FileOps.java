@@ -965,4 +965,30 @@ public abstract class FileOps {
       }
     }
   }
+  
+  /** Move f to n, recursively if necessary.
+    * @param f file or directory to move
+    * @param n new location and name for the file or directory
+    * @return true if successful */
+  public static boolean moveRecursively(File f, File n) {
+    boolean res = true;
+    try {
+      if (!f.exists()) { return false; }
+      if (f.isFile()) { return edu.rice.cs.plt.io.IOUtil.attemptMove(f,n); }
+      else {
+        // recursively move directory
+        // first create the target directory
+        if (!n.mkdir()) { return false; }
+        // now process children
+        for(String child: f.list()) {
+          File oldChild = new File(f, child);
+          File newChild = new File(n, child);
+          res = res && moveRecursively(oldChild, newChild);
+        }
+        if (!f.delete()) { return false; }
+      }
+    }
+    catch(Exception e) { return false; }
+    return res;
+  }
 }

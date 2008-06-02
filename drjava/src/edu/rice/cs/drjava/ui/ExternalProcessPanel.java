@@ -125,6 +125,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected void initThread(ProcessCreator pc) {
     // MainFrame.LOG.log("\tProcessPanel ctor");
     try {
+      PropertyMaps.ONLY.clearVariables();
       _pc = pc;
       _readThread = new Thread(new Runnable() {
         public void run() {
@@ -428,8 +429,6 @@ public class ExternalProcessPanel extends AbortablePanel {
           _sb.append(new String(_buf, 0, _red));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        if (_is==null) { _sb.append("\nInput stream suddenly became null."); }
-        if (_erris==null) { _sb.append("\nError input stream suddenly became null."); }
         while((_changeCount<=BUFFER_READS_PER_TIMER) &&
               (_erris!=null) &&
               ((_errred = _erris.read(_errbuf))>=0)) {
@@ -444,6 +443,28 @@ public class ExternalProcessPanel extends AbortablePanel {
         if ((_errred>0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
           _sb.append(new String(_errbuf, 0, _errred));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
+        }
+        if ((_p!=null) && (_is==null)) {
+          try {
+            // try to get exitValue() to see if process has terminated; exit value is not otherwise important
+            int ignored = _p.exitValue();
+            // if no exception is thrown, then the process has finished, and the stream may be null
+          }
+          catch(IllegalThreadStateException e) {
+            // process has NOT finished yet, but the stream is null; this is a problem
+            _sb.append("\nInput stream suddenly became null.");
+          }
+        }
+        if ((_p!=null) && (_erris==null)) { 
+          try {
+            // try to get exitValue() to see if process has terminated; exit value is not otherwise important
+            int ignored = _p.exitValue();
+            // if no exception is thrown, then the process has finished, and the stream may be null
+          }
+          catch(IllegalThreadStateException e) {
+            // process has NOT finished yet, but the stream is null; this is a problem
+            _sb.append("\nError input stream suddenly became null.");
+          }
         }
       }
       catch(IOException ioe) {

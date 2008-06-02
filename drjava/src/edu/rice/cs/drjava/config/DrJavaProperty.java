@@ -85,7 +85,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   
   /** Return the value of the property. If it is not current, update first. */
   public String getCurrent() {
-    if (!_isCurrent) {
+    if (!isCurrent()) {
       update();
       if (_value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
       _isCurrent = true;
@@ -111,6 +111,19 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
       throw new IllegalArgumentException("Attribute "+key+" not known to property "+_name);
     }
     _attributes.put(key, value);
+  }
+  
+  /** Set all attribute values. The attributes must already exist in the table.
+    * @param attrs attribute key-value pairs
+    * @param replaceLambda lambda that can be used to replace the variables in a value
+    * @throws IllegalArgumentException if an attribute with a specified key does not already exist in table
+    */
+  public void setAttributes(HashMap<String,String> attrs, edu.rice.cs.util.Lambda<String,String> replaceLambda) {
+    String value;
+    for(String key: attrs.keySet()) {
+      value = attrs.get(key);
+      setAttribute(key, replaceLambda.apply(value));
+    }
   }
   
   /** Return an attribute's value.
@@ -168,7 +181,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
     DrJavaProperty o = (DrJavaProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
+    return _name.equals(o._name) && (isCurrent() == o.isCurrent()) && _value.equals(o._value);
   }
   
   /** @return the hash code. */

@@ -48,6 +48,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.io.IOException;
 
 /**
@@ -628,7 +629,7 @@ public abstract class StringOps {
    * @param getter lambda from a DrJavaProperty to String
    * @return string with variables replaced by values
    */
-  public static String replaceVariables(String str, PropertyMaps props, Lambda<String,DrJavaProperty> getter) {
+  public static String replaceVariables(String str, final PropertyMaps props, final Lambda<String,DrJavaProperty> getter) {
     BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
     tok.wordRange(0,255);
     tok.addQuotes("${", "}");
@@ -663,77 +664,76 @@ public abstract class StringOps {
           }
           // LOG.log("\tKey      = '"+key+"'");
           // LOG.log("\tAttrList = '"+attrList+"'");
-          boolean found = false;
-          for(String category: props.getCategories()) {
-            DrJavaProperty p = props.getProperty(category, key);
-            if (p!=null) {
-              // found property name
-              p.resetAttributes();
-              
-              // if we have a list of attributes
-              try {
-                if (attrList.length()>0) {
-                  BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
-                  atok.wordRange(0,255);
-                  atok.whitespaceRange(0,32); 
-                  atok.addQuotes("\"", "\"");
-                  atok.addQuotes("${", "}");
-                  atok.addKeyword(";");
-                  atok.addKeyword("=");
-                  // LOG.log("\tProcessing AttrList");
-                  String n = null;
-                  while((n=atok.getNextToken())!=null) {
-                    if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
-                        n.equals(";") || n.equals("=") || n.startsWith("\"")) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected name, but was "+n);
-                    }
-                    String name = n;
-                    // LOG.log("\t\tname = '"+name+"'");
-                    n = atok.getNextToken();
-                    if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected =, but was "+n);
-                    }
-                    // LOG.log("\t\tread '='");
-                    n = atok.getNextToken();
-                    if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected \", but was "+n);
-                    }
-                    String value = "";
-                    if (n.length()>1) {
-                      value = n.substring(1,n.length()-1);
-                      // LOG.log("\t\tvalue = '"+value+"'");
-                    }
-                    n = atok.getNextToken();
-                    if (((n!=null) && ((atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
-                        ((n==null) && (atok.token()!=BalancingStreamTokenizer.Token.END))) {
-                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
-                    }
-                    // LOG.log("\t\tread ';' or EOF");
-                    // processed correctly
-                    // LOG.log("\t\treplacing variables in '"+value+"'...");
-                    String replacedValue = replaceVariables(value, props, getter);
-                    // LOG.log("\t\treplaced value is '"+replacedValue+"'");
-                    
-                    p.setAttribute(name, replacedValue);
-                    
-                    if (n==null) { break; }
+          DrJavaProperty p = props.getProperty(key);
+          if (p!=null) {
+            // found property name
+            p.resetAttributes();
+            
+            // if we have a list of attributes
+            try {
+              if (attrList.length()>0) {
+                BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
+                atok.wordRange(0,255);
+                atok.whitespaceRange(0,32); 
+                atok.addQuotes("\"", "\"");
+                atok.addQuotes("${", "}");
+                atok.addKeyword(";");
+                atok.addKeyword("=");
+                // LOG.log("\tProcessing AttrList");
+                String n = null;
+                HashMap<String,String> attrs = new HashMap<String,String>();
+                while((n=atok.getNextToken())!=null) {
+                  if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
+                      n.equals(";") || n.equals("=") || n.startsWith("\"")) {
+                    throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected name, but was "+n);
                   }
+                  String name = n;
+                  // LOG.log("\t\tname = '"+name+"'");
+                  n = atok.getNextToken();
+                  if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
+                    throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected =, but was "+n);
+                  }
+                  // LOG.log("\t\tread '='");
+                  n = atok.getNextToken();
+                  if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
+                    throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected \", but was "+n);
+                  }
+                  String value = "";
+                  if (n.length()>1) {
+                    value = n.substring(1,n.length()-1);
+                    // LOG.log("\t\tvalue = '"+value+"'");
+                  }
+                  n = atok.getNextToken();
+                  if (((n!=null) && ((atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
+                      ((n==null) && (atok.token()!=BalancingStreamTokenizer.Token.END))) {
+                    throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                  }
+                  // LOG.log("\t\tread ';' or EOF");
+                  // processed correctly
+                  // LOG.log("\t\treplacing variables in '"+value+"'...");
+                  // String replacedValue = replaceVariables(value, props, getter);
+                  // LOG.log("\t\treplaced value is '"+replacedValue+"'");
+                  attrs.put(name,value);
+                  // p.setAttribute(name, replacedValue);
+                  
+                  if (n==null) { break; }
                 }
-                // append the value of the property, e.g. /home/user instead of "${property.name}"
-                String finalValue = getter.apply(p);
-                // LOG.log("\tfinal value: '"+finalValue+"'");
-                found = true;
-                sb.append(finalValue);
-              }              
-              catch(IllegalArgumentException e) {
-                sb.append("<-- Error: "+e.getMessage()+" -->");
+                p.setAttributes(attrs, new Lambda<String,String>() {
+                  public String apply(String param) {
+                    return replaceVariables(param, props, getter);
+                  }
+                });
               }
-              if (found) { break; }
-              continue;
+              // append the value of the property, e.g. /home/user instead of "${property.name}"
+              String finalValue = getter.apply(p);
+              // LOG.log("\tfinal value: '"+finalValue+"'");
+              sb.append(finalValue);
+            }              
+            catch(IllegalArgumentException e) {
+              sb.append("<-- Error: "+e.getMessage()+" -->");
             }
-            if (found) { break; }
           }
-          if (!found) {
+          else {
             // unknown property
             sb.append(next);
           }

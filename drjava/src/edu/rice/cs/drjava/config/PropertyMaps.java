@@ -72,11 +72,33 @@ public class PropertyMaps {
   public PropertyMaps() { }
 
   /** Return the property requested, or null if not found.
+    * @param category name of the category
+    * @param name name of the property
+    * @return property, or null if not found
     * @throws IllegalArgumentException if category is not known. */
   public DrJavaProperty getProperty(String category, String name) {
     Map<String,DrJavaProperty> m = _props.get(category);
     if (m==null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
     return m.get(name);
+  }
+  
+  /** Search through all categories and return the property requested, or null if not found.
+    * @param key key of the property
+    * @return property, or null if not found */
+  public DrJavaProperty getProperty(String key) {
+    for(String category: _props.keySet()) {
+      DrJavaProperty p = getProperty(category, key);
+      if (p!=null) { return p; }
+    }
+    return null;
+  }
+  
+  /** Remove the specified property.
+    * @param p property to remove */
+  public void removeProperty(DrJavaProperty p) {
+    for(String category: _props.keySet()) {
+      _props.get(category).remove(p);
+    }
   }
   
   /** Add a property. */
@@ -85,6 +107,11 @@ public class PropertyMaps {
     if (m==null) { m = new HashMap<String,DrJavaProperty>(); _props.put(category,m); }
     m.put(p.getName(), p);
     return p;
+  }
+  
+  /** Clear the specified category. */
+  public void clearCategory(String category) {
+    _props.remove(category);
   }
   
   /** Return the set of categories. */
@@ -105,6 +132,69 @@ public class PropertyMaps {
   
   /** A lambda to use the getCurrent() method, which forces an update. */
   public static final Lambda<String,DrJavaProperty> GET_CURRENT = new Lambda<String,DrJavaProperty>() {
-    public String apply(DrJavaProperty p) { return p.getCurrent(); /* might be stale */ }
+    public String apply(DrJavaProperty p) { return p.getCurrent(); }
   };
+  
+  protected HashMap<String,Stack<VariableProperty>> _variables = new HashMap<String,Stack<VariableProperty>>();
+  
+  // name of the category for variables
+  protected static final String VARIABLES_CATEGORY = "$Variables$";
+  
+  /** Clear all user-defined variables. */
+  public void clearVariables() {
+    _props.remove(VARIABLES_CATEGORY);
+  }
+  
+  /** Add a variable with the specified name and value, shadowing previous definitions of the variable.
+    * @param name name of the variable
+    * @param value value of the variable
+    * @throws IllegalArgumentException if the name is already used for a built-in property */
+  public void addVariable(String name, String value) {
+    for(String category: _props.keySet()) {
+      if (category.equals(VARIABLES_CATEGORY)) continue;
+      if (getProperty(category, name)!=null) {
+        throw new IllegalArgumentException("Variable "+name+" already used for a built-in property");
+      }
+    }
+    // name not used by built-in
+    VariableProperty p = new VariableProperty(name, value);
+    setProperty(VARIABLES_CATEGORY, p);
+    Stack<VariableProperty> varStack = _variables.get(name);
+    if (varStack==null) { varStack = new Stack<VariableProperty>(); _variables.put(name,varStack); }
+    varStack.push(p);
+  }
+  
+  /** Mutate the value of a variable with the specified name.
+    * @param name name of the variable
+    * @param value new value of the variable
+    * @throws IllegalArgumentException if a variable with name does not exist */
+  public void setVariable(String name, String value) {
+    Stack<VariableProperty> varStack = _variables.get(name);
+    if ((varStack==null) ||
+        (varStack.empty())) { throw new IllegalArgumentException("Variable "+name+" does not exist."); }
+    VariableProperty p = varStack.peek();
+    p.setValue(value);
+  }
+  
+  /** Remove the variable with the specified name, unshadowing previous definitions of the variable.
+    * @param name of the variable
+    * @throws IllegalArgumentException if no variable with that name exists */
+  public void removeVariable(String name) {
+    Stack<VariableProperty> varStack = _variables.get(name);
+    if ((varStack==null) ||
+        (varStack.empty())) { throw new IllegalArgumentException("Variable "+name+" does not exist."); }
+    VariableProperty p = varStack.pop();
+    if (varStack.empty()) {
+      // no shadowed variables
+      // remove the stack from the hash map of variables
+      _variables.remove(varStack);
+      // remove the property
+      removeProperty(p);
+    }
+    else {
+      // previously shadowed variable(s) exist
+      // set unshadowed variable as new value of property
+      setProperty(VARIABLES_CATEGORY, varStack.peek());
+    }
+  }
 } 

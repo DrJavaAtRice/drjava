@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.io.*;
 import java.util.regex.Pattern;
 import edu.rice.cs.util.StringOps;
@@ -71,11 +72,24 @@ public class RecursiveFileListProperty extends LazyFileListProperty {
     }
   }
   public static class FileMaskFilter extends RegexFilter {
+    private HashSet<File> _include = new HashSet<File>();
+    private HashSet<File> _exclude = new HashSet<File>();
     public FileMaskFilter(String mask) {
       super(TextUtil.regexEscape(mask)
               .replaceAll("\\\\\\*",".*") // turn \* into .*
               .replaceAll("\\\\\\?",".")); // turn \? into .
     }
+    public boolean accept(File pathname) {
+      if (_include.contains(pathname)) { return true; }
+      if (_exclude.contains(pathname)) { return false; }
+      return super.accept(pathname);
+    }
+    public void addIncludedFile(File f) { _include.add(f); }
+    public void removeIncludedFile(File f) { _include.remove(f); }
+    public void clearIncludedFile() { _include.clear(); }
+    public void addExcludedFile(File f) { _exclude.add(f); }
+    public void removeExcludedFile(File f) { _exclude.remove(f); }
+    public void clearExcludedFile() { _exclude.clear(); }
   }
   
   /** Abstract factory method specifying the list. */
@@ -84,7 +98,10 @@ public class RecursiveFileListProperty extends LazyFileListProperty {
     FileMaskFilter fDirFilter = new FileMaskFilter(_attributes.get("dirfilter"));
     String start = StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
     start = StringOps.unescapeSpacesWith1bHex(start);
-    Iterable<File> it = edu.rice.cs.plt.io.IOUtil.listFilesRecursively(new File(start), fFilter, fDirFilter);
+    File fStart = new File(start);
+    // if the specified starting point is a directory, allow that directory
+    if (fStart.isDirectory()) { fDirFilter.addIncludedFile(fStart); }
+    Iterable<File> it = edu.rice.cs.plt.io.IOUtil.listFilesRecursively(fStart, fFilter, fDirFilter);
     StringBuilder sb = new StringBuilder();
     ArrayList<File> l = new ArrayList<File>();
     for(File f: it) {
