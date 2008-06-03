@@ -47,7 +47,7 @@ public class ConstantProperty extends DrJavaProperty {
   /** Create a constant property. */
   public ConstantProperty(String name, String value, String help) {
     super(name, help);
-    if (value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
     _value = value;
     _isCurrent = true;
     resetAttributes();
@@ -58,14 +58,10 @@ public class ConstantProperty extends DrJavaProperty {
 
   
   /** Return the value of the property. If it is not current, update first. */
-  public String getCurrent() {
-    return _value;
-  }
+  public String getCurrent() { return _value; }
 
   /** Return the value. */
-  public String toString() {
-    return getCurrent();
-  }
+  public String toString() { return getCurrent(); }
   
   /** Return true if the value is current. */
   public boolean isCurrent() { return true; }
@@ -74,21 +70,5 @@ public class ConstantProperty extends DrJavaProperty {
   public void invalidate() {
     // nothing to do, but tell those who are listening
     invalidateOthers(new HashSet<DrJavaProperty>());
-  }
-  
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    ConstantProperty o = (ConstantProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
   }
 } 

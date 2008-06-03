@@ -180,7 +180,7 @@ public abstract class StringOps {
     if (offset + length > fullString.length()) {
       throw new IllegalArgumentException("Given positions beyond the end of the string");
     }
-    return new Pair<Integer,Integer>(new Integer(offset), new Integer(length));
+    return new Pair<Integer,Integer>(Integer.valueOf(offset), Integer.valueOf(length));
   }
 
   /** Gets the stack trace of the given Throwable as a String.
@@ -483,15 +483,15 @@ public abstract class StringOps {
     String[] sizes = new String[] { "byte", "kilobyte", "megabyte", "gigabyte" };
     double d = l;
     int i = 0;
-    while((d >= 1024) && (i<sizes.length)) {
+    while((d >= 1024) && (i < sizes.length)) {
       ++i;
       d /= 1024;
     }
-    if (i>=sizes.length) { i = sizes.length-1; }
+    if (i >= sizes.length) { i = sizes.length - 1; }
     StringBuilder sb = new StringBuilder();
     long whole = (long)d;
-    if (whole==d) {
-      if (whole==1) {
+    if (whole == d) {
+      if (whole == 1) {
         sb.append(whole);
         sb.append(' ');
         sb.append(sizes[i]);

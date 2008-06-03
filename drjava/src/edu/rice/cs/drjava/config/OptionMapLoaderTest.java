@@ -60,7 +60,7 @@ public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionC
     "extra.classpath = bam\n\n";
   
   public void testProperConfigSet() throws IOException {
-    checkSet(OPTION_DOC,new Integer(1), new File("foo"), 1);
+    checkSet(OPTION_DOC, Integer.valueOf(1), new File("foo"), 1);
   }
   
   private void checkSet(String set, Integer indent, File javac, int size) throws IOException {
@@ -70,8 +70,8 @@ public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionC
     loader.loadInto(map);
     assertEquals("indent (integer) option",  map.getOption(INDENT_LEVEL),indent);
     assertEquals("JAVAC", map.getOption(JAVAC_LOCATION),javac.getAbsoluteFile());
-    assertEquals("size of extra-classpath vector", new Integer(size), 
-                 new Integer(map.getOption(EXTRA_CLASSPATH).size()));
+    assertEquals("size of extra-classpath vector", Integer.valueOf(size), 
+                 Integer.valueOf(map.getOption(EXTRA_CLASSPATH).size()));
   }
   
   public void testEmptyConfigSet() throws IOException {

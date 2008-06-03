@@ -101,7 +101,7 @@ public final class DebugWatchDataTest extends DrJavaTestCase {
     DebugWatchData data = new DebugWatchData("foo");
 
     // Set value and type
-    data.setValue(new Integer(7));
+    data.setValue(Integer.valueOf(7));
     data.setType("java.lang.Integer");
     assertEquals("should have a value", "7", data.getValue());
     assertEquals("should have a type", "java.lang.Integer", data.getType());
@@ -116,12 +116,12 @@ public final class DebugWatchDataTest extends DrJavaTestCase {
     assertTrue("should not be changed after hide", !data.isChanged());
     
     // Make sure using same value doesn't indicate a change
-    data.setValue(new Integer(7));
+    data.setValue(Integer.valueOf(7));
     assertTrue("should not be changed after setting same value",
                !data.isChanged());
     
     // Make sure using a new value indicates a change
-    data.setValue(new Integer(8));
+    data.setValue(Integer.valueOf(8));
     assertTrue("should be changed after setting different value",
                data.isChanged());
   }

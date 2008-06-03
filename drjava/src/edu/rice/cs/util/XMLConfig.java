@@ -189,7 +189,7 @@ public class XMLConfig {
     // Write the DOM document to the file
     try {
       TransformerFactory tf = TransformerFactory.newInstance();
-      tf.setAttribute("indent-number", new Integer(2));
+      tf.setAttribute("indent-number", Integer.valueOf(2));
       Transformer t = tf.newTransformer();
       t.setOutputProperty(OutputKeys.INDENT, "yes");
       t.transform(source, new StreamResult(new OutputStreamWriter(os, "utf-8")));
@@ -290,7 +290,7 @@ public class XMLConfig {
     List<String> r = getMultiple(path);
     if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
     try {
-      return new Integer(r.get(0));
+      return Integer.valueOf(r.get(0));
     }
     catch(NumberFormatException nfe) { throw new IllegalArgumentException("Not an integer value.", nfe); }
   }
@@ -305,7 +305,7 @@ public class XMLConfig {
     List<String> r = getMultiple(path, root);
     if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
     try {
-      return new Integer(r.get(0));
+      return Integer.valueOf(r.get(0));
     }
     catch(NumberFormatException nfe) { throw new IllegalArgumentException("Not an integer value.", nfe); }
   }
@@ -508,7 +508,7 @@ public class XMLConfig {
           dotRead = true;
         }
         else {
-          path = nodeName = path.substring(1);
+          path = path.substring(1);
           getMultipleAddAttributesHelper(path, n, accum);
           return;
         }

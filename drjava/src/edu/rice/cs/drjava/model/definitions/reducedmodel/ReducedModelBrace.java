@@ -245,7 +245,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     
     assert curToken instanceof Brace; // In fact, it is a significant matchable open brace.
     
-    int openBraceDistance = - curToken.getSize();
+//    int openBraceDistance = - curToken.getSize();
   
 //    moveWalkerGetState(openBraceDistance);
     braceStack.push((Brace) curToken);

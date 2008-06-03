@@ -111,24 +111,13 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
     UnaryOpProperty o = (UnaryOpProperty)other;
-    return _name.equals(o._name)
-      && (_isCurrent == o._isCurrent)
-      && _op.equals(o._op)
-      && _parse.equals(o._parse)
-      && _format.equals(o._format)
-      && _value.equals(o._value);
+    return _name.equals(o._name) && _value.equals(o._value) && (_isCurrent == o._isCurrent) && _op.equals(o._op)
+      && _parse.equals(o._parse) && _format.equals(o._format);
   }
   
   /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_op.hashCode());
-    result = 31 * result + (_parse.hashCode());
-    result = 31 * result + (_format.hashCode());
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
+  public int hashCode() { return _name.hashCode() ^ _value.hashCode() ^ _op.hashCode() ^ _parse.hashCode() ^ 
+    _format.hashCode() ^ (_isCurrent ? 1 : 0);
   }
 
   /** Lambda to parse a String into a Double. */

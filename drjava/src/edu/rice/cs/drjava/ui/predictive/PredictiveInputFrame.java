@@ -270,8 +270,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     else {
       Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
       //int xs = (int)parentDim.getWidth()/3;
-      int ys = (int)parentDim.getHeight()/4;
-      setSize(new Dimension((int)getSize().getWidth(), (int)Math.min(_owner.getSize().getHeight(), Math.max(ys, 300))));
+      int ys = (int) parentDim.getHeight()/4;
+      // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
+      setSize(new Dimension((int)getSize().getWidth(), (int) Math.min(parentDim.getHeight(), Math.max(ys, 300))));
       setLocationRelativeTo(_owner);
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
@@ -618,10 +619,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     contentPane.add(buttonPanel, c);
 
     pack();
-    Dimension parentDim = (_owner !=null) ? _owner.getSize() : getToolkit().getScreenSize();
-    //int xs = (int)parentDim.getWidth()/3;
-    int ys = (int)parentDim.getHeight()/4;
-    setSize(new Dimension((int)getSize().getWidth(), (int)Math.min(_owner.getSize().getHeight(), Math.max(ys, 300))));
+    Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
+    //int xs = (int) parentDim.getWidth()/3;
+    int ys = (int) parentDim.getHeight()/4;
+    // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
+    setSize(new Dimension((int) getSize().getWidth(), (int)Math.min(parentDim.getHeight(), Math.max(ys, 300)))); 
     setLocationRelativeTo(_owner);
 
     removeListener();

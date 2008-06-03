@@ -49,9 +49,9 @@ public class OrderedHashSetTest extends DrJavaTestCase {
   
   public void testSearch() {
 
-    Integer int1 = new Integer(1);
-    Integer int2 = new Integer(2);
-    Integer int3 = new Integer(3);
+    Integer int1 = Integer.valueOf(1);
+    Integer int2 = Integer.valueOf(2);
+    Integer int3 = Integer.valueOf(3);
     
     Integer[] ints = new Integer[]{int1, int2, int3};
      
@@ -124,9 +124,9 @@ public class OrderedHashSetTest extends DrJavaTestCase {
   
   public void testRemove() {
  
-    Integer int1 = new Integer(1);
-    Integer int2 = new Integer(2);
-    Integer int3 = new Integer(3);
+    Integer int1 = Integer.valueOf(1);
+    Integer int2 = Integer.valueOf(2);
+    Integer int3 = Integer.valueOf(3);
     
     OrderedHashSet<Integer> dToi = new OrderedHashSet<Integer>();
 

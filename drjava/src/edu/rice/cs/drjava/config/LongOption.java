@@ -54,7 +54,7 @@ public class LongOption extends Option<Long> {
     *            by the method Integer.toString() are supported.
     */
   public Long parse(String s) {
-    try { return new Long(Long.parseLong(s)); }
+    try { return Long.valueOf(Long.parseLong(s)); }
     catch (NumberFormatException e) {
       throw new OptionParseException(name, s, "Must be a valid long (integer) value.");
     }

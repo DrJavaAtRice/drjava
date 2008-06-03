@@ -128,7 +128,7 @@ public class Indenter {
       rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),
 
       rule03 = new QuestionCurrLineEmptyOrEnterPress(rule45, rule48),
-      rule42 = new QuestionFollowedByStar(rule04, rule41),
+//      rule42 = new QuestionFollowedByStar(rule04, rule41),
 //      rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] {"  */" }, 0, 4, 0, 4), 
 //      rule50 = new QuestionFollowedByStar(rule46, rule49),
 //      rule51 = new QuestionPrevLineStartsJavaDocWithText(rule50, rule42),

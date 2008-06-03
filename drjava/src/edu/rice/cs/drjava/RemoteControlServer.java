@@ -45,34 +45,30 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-/**
- * This class contains a server that monitors incoming datagrams on port 4444
- * (default; can be changed in OptionConstants.REMOTE_CONTROL_PORT).
- * These datagrams can contain commands to open additional files.
- * 
- * A client can query whether a server is running by sending QUERY_PREFIX.
- * If a server is running, it will respond with RESPONSE_PREFIX.
- * 
- * A client can tell a server to open a file by sending QUERY_PREFIX+" "+absoluteFileName.
- * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX+" "+error if an error occurred.
- * 
- * A client can tell a server to open a file and jump to a certain line number by sending
- * QUERY_PREFIX+" "+absoluteFileName+File.pathSeparator+lineNumber.
- * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX+" "+error if an error occurred.
- * 
- * This class cannot be robustly subclassed because the constructor starts a thread.
- */
-public class RemoteControlServer {
-  /** Prefix of a legitimate query by a client.
-   */
+/** This class contains a server that monitors incoming datagrams on port 4444
+  * (default; can be changed in OptionConstants.REMOTE_CONTROL_PORT).
+  * These datagrams can contain commands to open additional files.
+  * 
+  * A client can query whether a server is running by sending QUERY_PREFIX.
+  * If a server is running, it will respond with RESPONSE_PREFIX.
+  * 
+  * A client can tell a server to open a file by sending QUERY_PREFIX + " " + absoluteFileName.
+  * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX + " " + error if an error occurred.
+  * 
+  * A client can tell a server to open a file and jump to a certain line number by sending QUERY_PREFIX + " " + 
+  * absoluteFileName + File.pathSeparator + lineNumber.
+  * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX+" "+error if an error occurred.
+  * 
+  * This class is declared final because it cannot be robustly subclassed because the constructor starts a thread.
+  */
+public final class RemoteControlServer {
+  /** Prefix of a legitimate query by a client. */
   public static final String QUERY_PREFIX = "DrJava Remote Control?";
 
-  /** Prefix of a legitimate response by this server.
-   */
+  /** Prefix of a legitimate response by this server. */
   public static final String RESPONSE_PREFIX = "DrJava Remote Control ";
 
-  /** Prefix of a legitimate response by this server, including the user name.
-   */
+  /** Prefix of a legitimate response by this server, including the user name. */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name")+"!";
 
   /** Create a new remote control server, running in its own daemon thread.
@@ -84,23 +80,17 @@ public class RemoteControlServer {
     rcsThread.start();
   }
   
-  /** Thread class for the server.
-   */
+  /** Thread class for the server. */
   public static class RCServerThread extends Thread {
-    /**
-     * Main frame access so the server can open files, etc.
-     */
+    /** Main frame access so the server can open files, etc. */
     protected MainFrame _frame;
     
-    /**
-     * Socket used.
-     */
+    /** Socket used. */
     protected DatagramSocket socket = null;
     
-    /**
-     * Create a new server thread.
-     * @param frame main frame
-     */
+    /** Create a new server thread.
+      * @param frame main frame
+      */
     public RCServerThread(MainFrame frame) throws IOException {
       this("RCServerThread", frame);
     }
@@ -146,7 +136,7 @@ public class RemoteControlServer {
               int pathSepIndex = request.indexOf(File.pathSeparatorChar);
               if (pathSepIndex>=0) {
                 try {
-                  lineNo = new Integer(request.substring(pathSepIndex+1));
+                  lineNo = Integer.valueOf(request.substring(pathSepIndex+1));
                 }
                 catch(NumberFormatException nfe) {
                   lineNo = -1;

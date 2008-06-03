@@ -114,20 +114,4 @@ public abstract class EagerFileListProperty extends EagerProperty {
     _attributes.put("sep", _sep);
     _attributes.put("rel", _dir);
   }
-
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    EagerFileListProperty o = (EagerFileListProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
-  }
 } 

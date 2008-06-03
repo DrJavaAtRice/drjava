@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /** Class representing binary operations that can be inserted as variables in external processes.
+  * TO DO: does not override compareTo!
   * @version $Id$
   */
 public class BinaryOpProperty<P,Q,R> extends EagerProperty {
@@ -139,26 +140,18 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
-    BinaryOpProperty o = (BinaryOpProperty)other;
+    BinaryOpProperty o = (BinaryOpProperty) other;
     return _name.equals(o._name)
+      && _value.equals(o._value)
       && (_isCurrent == o._isCurrent)
       && _op.equals(o._op)
       && _parse1.equals(o._parse1)
       && _parse2.equals(o._parse2)
-      && _format.equals(o._format)
-      && _value.equals(o._value);
+      && _format.equals(o._format); 
   }
   
   /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_op.hashCode());
-    result = 31 * result + (_parse1.hashCode());
-    result = 31 * result + (_parse2.hashCode());
-    result = 31 * result + (_format.hashCode());
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
+  public int hashCode() { return _name.hashCode() ^ _value.hashCode() ^ _op.hashCode() ^ _parse1.hashCode() ^ _parse2.hashCode() ^ 
+    _format.hashCode() ^ (_isCurrent ? 1 : 0);
   }
 } 

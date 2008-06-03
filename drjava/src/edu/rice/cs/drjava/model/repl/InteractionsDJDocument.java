@@ -115,7 +115,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
       }
       if (style != null)
         _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
-                        (new Pair<Integer,Integer>(new Integer(start),new Integer(end)), style));
+                        (new Pair<Integer,Integer>(Integer.valueOf(start),Integer.valueOf(end)), style));
     }
   }
   

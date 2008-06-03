@@ -1455,8 +1455,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return false;
   }
   
-  /** Determines if _currentLocation is the start of a comment. */
-  private boolean _isStartOfComment(int pos) { return _isStartOfComment(getText(), pos); }
+  // Never used
+//  /** Determines if _currentLocation is the start of a comment. */
+//  private boolean _isStartOfComment(int pos) { return _isStartOfComment(getText(), pos); }
   
 //  /** Helper method for findPrevNonWSCharPos. Determines whether the current character is the start of a comment
 //    * encountered from the end: '/' or '*' preceded by a '/'.

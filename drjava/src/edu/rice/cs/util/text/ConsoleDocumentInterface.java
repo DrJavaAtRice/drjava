@@ -38,7 +38,7 @@ package edu.rice.cs.util.text;
 
 import java.awt.print.Pageable;
 import java.awt.print.PrinterException;
-import java.io.Serializable;
+//import java.io.Serializable;
 
 /** A GUI-toolkit agnostic extension of EditDocumentInterface that adds a console input state property.
   * @version $Id: ConsoleDocumentInterface.java 4157 2007-02-14 21:39:26Z rcartwright $

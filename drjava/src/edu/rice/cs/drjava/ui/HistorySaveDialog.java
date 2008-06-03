@@ -39,13 +39,13 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.io.Serializable;
+//import java.io.Serializable;
 
 /** Displayed when the user chooses to save the interactions history. It will show the current history and allow the
   * user to edit or save it to a file.
   * $Id$
   */
-public class HistorySaveDialog extends DrJavaScrollableDialog implements Serializable {
+public class HistorySaveDialog extends DrJavaScrollableDialog /* implements Serializable */ {
   
   /** Reference to the history text being edited. */
   private String _history;

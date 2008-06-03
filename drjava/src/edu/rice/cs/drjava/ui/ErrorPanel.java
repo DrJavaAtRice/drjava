@@ -69,7 +69,7 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 /** This class contains common code and interfaces from CompilerErrorPanel, JUnitPanel, and JavadocErrorPanel.
- *  TODO: parameterize the types of CompilerErrors used here
+ *  TODO: parameterize the types of CompilerErrors (which should be called DJErrors) used here
  *  @version $Id$
  */
 public abstract class ErrorPanel extends TabbedPanel implements OptionConstants {

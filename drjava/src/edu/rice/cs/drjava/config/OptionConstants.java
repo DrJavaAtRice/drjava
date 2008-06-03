@@ -259,10 +259,10 @@ public interface OptionConstants {
             LookAndFeel currLAF = (LookAndFeel) Class.forName(currName).newInstance();
             if (currLAF.isSupportedLookAndFeel()) lookAndFeels.add(currName);
           }
-          catch (Exception ex) {
-            // failed to load/instantiate class, or it is not supported.
-            // It is not a valid choice.
-          }
+          // failed to load/instantiate class, or it is not supported; it is not a valid choice.
+          catch (ClassNotFoundException e) { /* do nothing */ }
+          catch (InstantiationException e) { /* do nothing */ }
+          catch (IllegalAccessException e) { /* do nothing */ }
         }
       }
       return lookAndFeels;
@@ -946,15 +946,15 @@ public interface OptionConstants {
   
   /** How many spaces to use for indenting. */
   public static final NonNegativeIntegerOption INDENT_LEVEL = 
-    new NonNegativeIntegerOption("indent.level",new Integer(2));
+    new NonNegativeIntegerOption("indent.level", Integer.valueOf(2));
   
   /** Number of lines to remember in the Interactions History */
   public static final NonNegativeIntegerOption HISTORY_MAX_SIZE =
-    new NonNegativeIntegerOption("history.max.size", new Integer(500));
+    new NonNegativeIntegerOption("history.max.size", Integer.valueOf(500));
   
   /** Number of files to list in the recent file list */
   public static final NonNegativeIntegerOption RECENT_FILES_MAX_SIZE =
-    new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
+    new NonNegativeIntegerOption("recent.files.max.size", Integer.valueOf(5));
   
   /** Whether to automatically close comments. */
   public static final BooleanOption AUTO_CLOSE_COMMENTS =
@@ -981,7 +981,7 @@ public interface OptionConstants {
   public static final BooleanOption REMOTE_CONTROL_ENABLED = new BooleanOption("remote.control.enabled", Boolean.TRUE);
   
   /** The port where DrJava will listen for remote control requests. */
-  public static final IntegerOption REMOTE_CONTROL_PORT = new IntegerOption("remote.control.port", new Integer(4444));
+  public static final IntegerOption REMOTE_CONTROL_PORT = new IntegerOption("remote.control.port", Integer.valueOf(4444));
   
   /* ---------- COMPILER OPTIONS ------------- */
   
@@ -1011,7 +1011,7 @@ public interface OptionConstants {
   /* ---------- UNDISPLAYED OPTIONS ---------- */
   
   /** The language level to use when starting DrJava.  Stores the most recently used one.  Defaults to full java. */
-  public static final IntegerOption LANGUAGE_LEVEL = new IntegerOption("language.level", new Integer(0));
+  public static final IntegerOption LANGUAGE_LEVEL = new IntegerOption("language.level", Integer.valueOf(0));
   
   /** A vector containing the most recently used files. */
   public static final VectorOption<File> RECENT_FILES =
@@ -1026,43 +1026,43 @@ public interface OptionConstants {
   
   /** Height of MainFrame at startUp.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_HEIGHT =
-    new NonNegativeIntegerOption("window.height",new Integer(700));
+    new NonNegativeIntegerOption("window.height", Integer.valueOf(700));
   
   /** Width of MainFrame at startUp.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_WIDTH =
-    new NonNegativeIntegerOption("window.width",new Integer(800));
+    new NonNegativeIntegerOption("window.width", Integer.valueOf(800));
   
   /** X position of MainFrame at startUp.  Can be overridden if out of bounds. This value can legally be negative in a
     * multi-screen setup.
     */
-  public static final IntegerOption WINDOW_X = new IntegerOption("window.x", new Integer(Integer.MAX_VALUE));
+  public static final IntegerOption WINDOW_X = new IntegerOption("window.x",  Integer.valueOf(Integer.MAX_VALUE));
   
   /** Y position of MainFrame at startUp.  Can be overridden if out of bounds. This value can legally be negative in a
     * multi-screen setup.
     */
-  public static final IntegerOption WINDOW_Y = new IntegerOption("window.y", new Integer(Integer.MAX_VALUE));
+  public static final IntegerOption WINDOW_Y = new IntegerOption("window.y", Integer.valueOf(Integer.MAX_VALUE));
   
   /** The window state (maxamized or normal). The current window state
     * is saved on shutdown.
     */
   public static final IntegerOption WINDOW_STATE =
-    new IntegerOption("window.state", new Integer(Frame.NORMAL));
+    new IntegerOption("window.state", Integer.valueOf(Frame.NORMAL));
   
   /** Width of DocList at startUp.  Must be less than WINDOW_WIDTH. Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption DOC_LIST_WIDTH =
-    new NonNegativeIntegerOption("doc.list.width",new Integer(150));
+    new NonNegativeIntegerOption("doc.list.width", Integer.valueOf(150));
   
   /** Height of tabbed panel at startUp.  Must be less than WINDOW_HEIGHT + DEBUG_PANEL_HEIGHT.  Can be overridden if 
     * out of bounds.
     */
   public static final NonNegativeIntegerOption TABS_HEIGHT =
-    new NonNegativeIntegerOption("tabs.height",new Integer(120));
+    new NonNegativeIntegerOption("tabs.height", Integer.valueOf(120));
   
   /** Height of debugger panel at startUp.  Must be less than WINDOW_HEIGHT + TABS_HEIGHT.  Can be overridden if out of
     * bounds.
     */
   public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
-    new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
+    new NonNegativeIntegerOption("debug.panel.height", Integer.valueOf(0));
   
   /** The directory in use by the file choosers upon the previous quit. */
   public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOps.NULL_FILE);
@@ -1145,7 +1145,7 @@ public interface OptionConstants {
   
   /** Number of entries in the browser history (0 for unlimited). */
   public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
-    new NonNegativeIntegerOption("browser.history.max.size", new Integer(50));
+    new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(50));
   
   /** Whether to also list files with fully qualified paths.
    */
@@ -1174,7 +1174,7 @@ public interface OptionConstants {
   
   /** Delay for light-weight parsing. */
   public static final NonNegativeIntegerOption DIALOG_LIGHTWEIGHT_PARSING_DELAY =
-    new NonNegativeIntegerOption("lightweight.parsing.delay", new Integer(500));
+    new NonNegativeIntegerOption("lightweight.parsing.delay", Integer.valueOf(500));
   
   /** The last state of the "Create Jar from Project " dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");
@@ -1220,18 +1220,18 @@ public interface OptionConstants {
   
   /** Delay for following files. */
   public static final NonNegativeIntegerOption FOLLOW_FILE_DELAY =
-    new NonNegativeIntegerOption("follow.file.delay", new Integer(300));
+    new NonNegativeIntegerOption("follow.file.delay", Integer.valueOf(300));
   
   /** Maximum lines to keep when following files, or 0 for unlimited. */
   public static final NonNegativeIntegerOption FOLLOW_FILE_LINES =
-    new NonNegativeIntegerOption("follow.file.lines", new Integer(1000));
+    new NonNegativeIntegerOption("follow.file.lines", Integer.valueOf(1000));
   
   /** Prefix for the "external saved" settings. */
   public static final String EXTERNAL_SAVED_PREFIX = "external.saved.";
   
   /** The number of saved external processes. */
   public static final NonNegativeIntegerOption EXTERNAL_SAVED_COUNT =
-    new NonNegativeIntegerOption(EXTERNAL_SAVED_PREFIX+"count", new Integer(0));
+    new NonNegativeIntegerOption(EXTERNAL_SAVED_PREFIX+"count", Integer.valueOf(0));
   
   /** The names of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_NAMES =

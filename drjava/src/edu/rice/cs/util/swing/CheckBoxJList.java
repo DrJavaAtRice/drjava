@@ -100,7 +100,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
     }
   }
     
-  class CheckBoxListCellRenderer extends JComponent implements ListCellRenderer {
+  private static class CheckBoxListCellRenderer extends JComponent implements ListCellRenderer {
     DefaultListCellRenderer defaultComp;
     JCheckBox checkbox;
     public CheckBoxListCellRenderer() {

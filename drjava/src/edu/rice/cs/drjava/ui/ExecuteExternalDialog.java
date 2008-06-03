@@ -588,15 +588,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
-          StringBuilder sb = new StringBuilder();
+//          StringBuilder sb = new StringBuilder();
           String text = StringOps.replaceVariables(_commandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           /* List<String> cmds = StringOps.commandLineToList(text);
            for(String s: cmds) {
            sb.append(s);
            sb.append(' ');
            } */
-          _commandLineDoc.insertString(_commandLineDoc.getLength(),
-                                       StringOps.unescapeSpacesWith1bHex(text), null);
+          _commandLineDoc.insertString(_commandLineDoc.getLength(), StringOps.unescapeSpacesWith1bHex(text), null);
           
           // command line
           colorVariables(_commandLine,
@@ -1161,36 +1160,24 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                           break;
                         }
                         if (n!=null) { added += n.length(); }
-                        try {
-                          p.getAttribute(name);
-                        }
-                        catch(IllegalArgumentException e) {
-                          doc.setCharacterAttributes(subpos,subpos+added,error,true);
-                        }
+                        try { p.getAttribute(name); }
+                        catch(IllegalArgumentException e) { doc.setCharacterAttributes(subpos,subpos+added,error,true); }
                         subpos += added;
                       }
                     }
                   }
-                  if (found) { break; }
+                  if (found) break;
                 }
-                if (!found) {
-                  doc.setCharacterAttributes(pos,pos+next.length(),error,true);
-                }
+                if (!found) doc.setCharacterAttributes(pos,pos+next.length(),error,true);
               }
-              else {
-                doc.setCharacterAttributes(pos,pos+next.length(),error,true);
-              }
+              else doc.setCharacterAttributes(pos,pos+next.length(),error,true);
             }
-            else {
-              doc.setCharacterAttributes(pos,pos+next.length(),normal,true);
-            }
+            else doc.setCharacterAttributes(pos,pos+next.length(),normal,true);
             pos += next.length();
           }
         }
-        catch(Exception e) { /* ignore  */ }
-        finally {
-          doc.addDocumentListener(dl);
-        }
+        catch(IOException e) { /* ignore  */ }
+        finally { doc.addDocumentListener(dl); }
       }
     });
   }

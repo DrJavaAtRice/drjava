@@ -88,7 +88,7 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   public final boolean equals(Object o) {
     if (o == null || ! (o instanceof IDocumentRegion)) return false;
     IDocumentRegion r = (IDocumentRegion) o;
-    return getDocument() == r.getDocument() & getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
+    return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
   }
   
    /** Totally orders regions lexicographically based on (_doc, startOffset, endOffset). This method is typically applied

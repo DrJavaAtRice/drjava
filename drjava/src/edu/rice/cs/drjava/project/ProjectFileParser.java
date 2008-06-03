@@ -258,7 +258,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       }
       
       public List<Integer> forNumberAtom(NumberAtom n) {
-        intList.add(new Integer(n.intValue()));
+        intList.add(Integer.valueOf(n.intValue()));
         return intList;
       }
       
@@ -298,8 +298,8 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   /** Traverses the list of expressions found after "file" tag and returns the DocFile described by those properties. */
   private static class DocFilePropertyVisitor implements SEListVisitor<DocFile> {
     private String fname = "";
-    private Pair<Integer,Integer> select = new Pair<Integer,Integer>(new Integer(0),new Integer(0));
-    private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(new Integer(0),new Integer(0));
+    private Pair<Integer,Integer> select = new Pair<Integer,Integer>(Integer.valueOf(0), Integer.valueOf(0));
+    private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(Integer.valueOf(0), Integer.valueOf(0));
     private boolean active = false;
     private String pack = "";
     private Date modDate = null;
@@ -457,7 +457,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   /** Traverses the list of expressions found after "breakpoint" tag and returns the Breakpoint described by those properties. */
   private static class BreakpointPropertyVisitor implements SEListVisitor<DebugBreakpointData> {
     private String fname = null;
-    private Integer offset = null;
+//    private Integer offset = null;  // Not used.
     private Integer lineNumber = null;
     private boolean isEnabled = false;
     
@@ -467,7 +467,8 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     public DebugBreakpointData forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 
       if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
-      else if (name.compareToIgnoreCase("offset") == 0) { offset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
+      // The offset field is not used.
+//      else if (name.compareToIgnoreCase("offset") == 0) { offset = ProjectFileParser.ONLY.parseInt(c.getFirst()); } 
       else if (name.compareToIgnoreCase("line") == 0) { lineNumber = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
       else if (name.compareToIgnoreCase("enabled") == 0) { isEnabled = true; }
         

@@ -882,16 +882,14 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
     // We use a raw type here because depthFirstEnumeration() has a raw type signature
     Enumeration nodes = rootNode.depthFirstEnumeration();
-    ArrayList<String> list = new ArrayList<String>();
+//    ArrayList<String> list = new ArrayList<String>();
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
       if (tn instanceof InnerNode) {
         TreePath tp = new TreePath(tn.getPath());
         String s = generatePathString(tp);
         boolean shouldCollapse = paths.contains(s);
-        if (shouldCollapse) { 
-          collapsePath(tp);
-        }
+        if (shouldCollapse) { collapsePath(tp); }
       }
     }
   }

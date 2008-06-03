@@ -312,9 +312,8 @@ public class ReaderWriterLock {
     public boolean isWriter() { return true; }
   }
   
-  /** Class representing a reader-writer deadlock that would have occurred if the acquire operation
-    * had been executed. */
-  public class DeadlockException extends IllegalStateException {
+  /** Class representing a deadlock that would have occurred if the acquire operation had been executed. */
+  public static class DeadlockException extends IllegalStateException {
     public DeadlockException() { }
     public DeadlockException(String s) { super(s); }
     public DeadlockException(String s, Throwable t) { super(s,t); }

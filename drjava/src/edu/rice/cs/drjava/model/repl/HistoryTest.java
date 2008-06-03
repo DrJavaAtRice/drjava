@@ -115,7 +115,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    */
   public void testHistoryIsBounded() {
     int maxLength = 500;
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(maxLength));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength));
 
     int i;
     for (i = 0; i < maxLength + 100; i++) {
@@ -133,7 +133,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    */
   public void testLiveUpdateOfHistoryMaxSize() {
     int maxLength = 20;
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
     
     Utilities.clearEventQueue();
 
@@ -143,7 +143,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
     assertEquals("History size should be 20", 20, _history.size());
 
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(10));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(10));
    
     Utilities.clearEventQueue();
     assertEquals("History size should be 10", 10, _history.size());
@@ -154,7 +154,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.setMaxSize(0);
     assertEquals("History size should be 0", 0, _history.size());
 
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(-1));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(-1));
 
     Utilities.clearEventQueue();
     assertEquals("History size should still be 0", 0, _history.size());
@@ -163,7 +163,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   /** Tests the getHistoryAsString() method
    */
   public void testGetHistoryAsString() {
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
 
     Utilities.clearEventQueue();
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());

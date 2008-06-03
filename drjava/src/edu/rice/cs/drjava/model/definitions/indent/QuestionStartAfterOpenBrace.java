@@ -58,8 +58,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason)  {
     
-    int origin = doc.getCurrentLocation();
-    //int origin = doc.getReduced().absOffset();
+//    int origin = doc.getCurrentLocation();
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
     
     // Get brace for start of line
@@ -78,10 +77,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     // Get position of next non-WS char (not in comments)
     int nextNonWS = -1;
     try { nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos); }
-    catch (BadLocationException e) {
-      // This shouldn't happen
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
     
     if (nextNonWS == -1) return true;
     

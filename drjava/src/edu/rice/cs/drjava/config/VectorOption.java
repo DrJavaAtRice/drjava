@@ -109,7 +109,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
       return res;
     }
     
-    String d = String.valueOf(delim);
+//    String d = String.valueOf(delim);
 
     StreamTokenizer st = new StreamTokenizer(new StringReader(s));
     st.resetSyntax();
@@ -179,7 +179,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
   public String format(Vector<T> v) {
     if (v.size()==0) { return ""; }
     
-    String d = String.valueOf(delim);
+//    String d = String.valueOf(delim);
     final StringBuilder res = new StringBuilder(header);
 
     int size = v.size();

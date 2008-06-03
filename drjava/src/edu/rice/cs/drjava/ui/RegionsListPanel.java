@@ -283,9 +283,9 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //        edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("RegionsListPanel.addRegion: in list were...");
 //        for(int i=0;i<_listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
         
-        String name = "";
-        try { name = r.getDocument().getQualifiedClassName(); }
-        catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
+//        String name = "";
+//        try { name = r.getDocument().getQualifiedClassName(); }
+//        catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
         
         RegionListUserObj<R> userObj = makeRegionListUserObj(r);
         _listModel.add(index, userObj);
@@ -304,15 +304,15 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
-        String name = "";
-        try {
-          name = r.getDocument().getQualifiedClassName();
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          name = r.getDocument().toString();
-        }
+//        String name = "";
+//        try {
+//          name = r.getDocument().getQualifiedClassName();
+//        }
+//        catch (ClassNameNotFoundException cnnfe) {
+//          name = r.getDocument().toString();
+//        }
         
-        for(int i=0; i<_listModel.size(); ++i) {
+        for (int i = 0; i < _listModel.size(); ++i) {
           @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
           if (userObj.region() == r) {
             _listModel.removeElementAt(i);
@@ -331,11 +331,11 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
-        String name = "";
-        try { name = odd.getQualifiedClassName(); }
-        catch (ClassNameNotFoundException cnnfe) { name = odd.toString(); }
+//        String name = "";
+//        try { name = odd.getQualifiedClassName(); }
+//        catch (ClassNameNotFoundException cnnfe) { name = odd.toString(); }
         
-        for(int i=0; i<_listModel.size(); ++i) {
+        for (int i = 0; i < _listModel.size(); ++i) {
           @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
           
           if (userObj.region().getDocument().equals(odd)) {

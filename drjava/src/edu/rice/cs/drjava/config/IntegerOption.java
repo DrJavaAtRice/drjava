@@ -54,7 +54,7 @@ public class IntegerOption extends Option<Integer> {
     *            by the method Integer.toString() are supported.
     */
   public Integer parse(String s) {
-    try { return new Integer(Integer.parseInt(s)); }
+    try { return Integer.valueOf(Integer.parseInt(s)); }
     catch (NumberFormatException e) {
       throw new OptionParseException(name, s, "Must be a valid integer value.");
     }

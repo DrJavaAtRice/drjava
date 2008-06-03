@@ -188,38 +188,41 @@ public class NewVersionPopup extends JDialog {
     final String DRJAVA_FILES_PAGE = "http://sourceforge.net/project/showfiles.php?group_id=44253";
     final String LINK_PREFIX = "<a href=\"/project/showfiles.php?group_id=44253";
     final String LINK_SUFFIX = "\">";
+    BufferedReader br = null;
     try {
       URL url = new URL(DRJAVA_FILES_PAGE);
       InputStream urls = url.openStream();
-      InputStreamReader is = null;
-      BufferedReader br = null;
-      is = new InputStreamReader(urls);
+      InputStreamReader is = new InputStreamReader(urls);
       br = new BufferedReader(is);
       String line;
       int pos;
       // search for the link to the version
-      while((line=br.readLine())!=null) {
-        if((pos=line.indexOf(_newestVersionString))>=0) {
+      while((line = br.readLine()) != null) {
+        if ((pos = line.indexOf(_newestVersionString)) >= 0) {
           int prePos = line.indexOf(LINK_PREFIX);
-          if ((prePos>=0) && (prePos<pos)) {
+          if ((prePos >= 0) && (prePos < pos)) {
             int suffixPos = line.indexOf(LINK_SUFFIX, prePos);
-            if ((suffixPos>=0) && (suffixPos+LINK_SUFFIX.length()==pos)) {
+            if ((suffixPos >= 0) && (suffixPos + LINK_SUFFIX.length() == pos)) {
               String versionLink = 
-                edu.rice.cs.plt.text.TextUtil.xmlUnescape(line.substring(prePos+LINK_PREFIX.length(),suffixPos));
-              PlatformFactory.ONLY.openURL(new URL(DRJAVA_FILES_PAGE+versionLink));
+                edu.rice.cs.plt.text.TextUtil.xmlUnescape(line.substring(prePos + LINK_PREFIX.length(), suffixPos));
+              PlatformFactory.ONLY.openURL(new URL(DRJAVA_FILES_PAGE + versionLink));
               return;
             }
           }
         }
       };
     }
-    catch(Exception e) {
-      try {
-        // something went wrong, open the general file download page
-        PlatformFactory.ONLY.openURL(new URL(DRJAVA_FILES_PAGE));
-      }
-      catch(Exception ex) { /* ignore */ }
+    catch(IOException e) { _openFileDownloadPage(DRJAVA_FILES_PAGE); }
+    finally { // close open input stream
+      try { br.close(); }
+      catch(IOException e) { /* ignore */ }
     }
+  }
+  
+  /** Opens the specified page. */
+  private void _openFileDownloadPage(String page) {
+    try { PlatformFactory.ONLY.openURL(new URL(page)); }
+    catch(Exception ex) { /* ignore */ }
   }
   
   /** Returns true if there is a new version available that matches the users criterion. */

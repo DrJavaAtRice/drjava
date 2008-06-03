@@ -2112,7 +2112,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
 //      if (_aboutDialog == null) _aboutDialog = new AboutDialog(MainFrame.this);
-      Point p = MainFrame.this.getLocation();
+//      Point p = MainFrame.this.getLocation();
       _aboutDialog.setVisible(true);
 //      _aboutDialog.setLocation(p.x+(MainFrame.this.getWidth() - _aboutDialog.getWidth())/2, 
 //      p.y+(MainFrame.this.getHeight()-_aboutDialog.getHeight())/2);
@@ -3379,8 +3379,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
           .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3))) {
       int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
-      java.util.Date nextCheck = new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
-                                                      + days * 24 * 60 * 60 * 1000); // x days after last check
+      java.util.Date nextCheck = 
+        new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
+                             + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
       if (new java.util.Date().after(nextCheck)) {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
@@ -3547,11 +3548,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                                "Evaluates to true if the project has been "+
                                                                "changed since the last save.") {  //TODO: factor out repeated code!
       public void update() {
-        long millis = System.currentTimeMillis();
+//        long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
         Boolean b = _model.isProjectChanged();
         if (f.equals("int")) _value = b ? "1" : "0";
-        else if (f.equals("yes")) _value = b ? "yes":"no";
+        else if (f.equals("yes")) _value = b ? "yes" : "no";
         else  _value = b.toString();
       }
       
@@ -3689,7 +3690,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           int lineNo = -1;
           if (_attributes.get("line")!=null) {
             try {
-              lineNo = new Integer(_attributes.get("line"));
+              lineNo = Integer.valueOf(_attributes.get("line"));
             }
             catch(NumberFormatException nfe) {
               lineNo = -1;
@@ -4692,7 +4693,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return _saveAs();
         }
         boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
-        /** Delete the old file if save was successful */
+        /** Delete the old file if save was successful.  TODO: what if delete() fails? */
         if (toReturn && !_model.getActiveDocument().getFile().equals(fileToDelete)) fileToDelete.delete();
         /** this highlights the document in the navigator */
         _model.setActiveDocument(_model.getActiveDocument());
@@ -4863,15 +4864,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     final DefinitionsPane pane = (DefinitionsPane)scroller.getViewport().getView();
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() {
-        Integer selStart = new Integer(pane.getSelectionStart());
-        Integer selEnd = new Integer(pane.getSelectionEnd());
+        Integer selStart = Integer.valueOf(pane.getSelectionStart());
+        Integer selEnd = Integer.valueOf(pane.getSelectionEnd());
         if ((selStart==0)&&(selEnd==0)) return new Pair<Integer,Integer>(pane.getCaretPosition(),pane.getCaretPosition());
         if (pane.getCaretPosition() == selStart) return new Pair<Integer,Integer>(selEnd,selStart);
         return new Pair<Integer,Integer>(selStart,selEnd);
       }
       public Pair<Integer,Integer> getScroll() {
-        Integer scrollv = new Integer(pane.getVerticalScroll());
-        Integer scrollh = new Integer(pane.getHorizontalScroll());
+        Integer scrollv = Integer.valueOf(pane.getVerticalScroll());
+        Integer scrollh = Integer.valueOf(pane.getHorizontalScroll());
         return new Pair<Integer,Integer>(scrollv,scrollh); 
       }
       public File getFile() { return doc.getRawFile(); }
@@ -4959,11 +4960,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // Window bounds.
     if (config.getSetting(WINDOW_STORE_POSITION).booleanValue()) {
       Rectangle bounds = getBounds();
-      config.setSetting(WINDOW_HEIGHT, new Integer(bounds.height));
-      config.setSetting(WINDOW_WIDTH, new Integer(bounds.width));
-      config.setSetting(WINDOW_X, new Integer(bounds.x));
-      config.setSetting(WINDOW_Y, new Integer(bounds.y));
-      config.setSetting(WINDOW_STATE, new Integer(getExtendedState()));
+      config.setSetting(WINDOW_HEIGHT, Integer.valueOf(bounds.height));
+      config.setSetting(WINDOW_WIDTH, Integer.valueOf(bounds.width));
+      config.setSetting(WINDOW_X, Integer.valueOf(bounds.x));
+      config.setSetting(WINDOW_Y, Integer.valueOf(bounds.y));
+      config.setSetting(WINDOW_STATE, Integer.valueOf(getExtendedState()));
     }
     else {
       // Reset to defaults to restore pristine behavior.
@@ -5015,10 +5016,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     // Panel heights.
-    if (_showDebugger) config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
+    if (_showDebugger) config.setSetting(DEBUG_PANEL_HEIGHT, Integer.valueOf(_debugPanel.getHeight()));
     
     // Doc list width.
-    config.setSetting(DOC_LIST_WIDTH, new Integer(_docSplitPane.getDividerLocation()));
+    config.setSetting(DOC_LIST_WIDTH, Integer.valueOf(_docSplitPane.getDividerLocation()));
   }
   
   private void _cleanUpForCompile() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
@@ -5344,7 +5345,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile DecoratedAction _junit_runDecoratedAction;
   
   /** An AbstractAction that prevents changes to the decoree's enabled flag. */
-  private class DecoratedAction extends AbstractAction {
+  private static class DecoratedAction extends AbstractAction {
     /** The AbstractAction that is being decorated. */
     AbstractAction _decoree;
     /** The "shallow" enabled flag. */
@@ -6376,7 +6377,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates a toolbar button for undo and redo, which behave differently. */
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
-    
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     
     // Check whether icons should be shown
@@ -6394,7 +6394,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     ret.addActionListener(a);
     ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
     ret.setFont(buttonFont);
-    Boolean test = a instanceof DelegatingAction;
+//    Boolean test = a instanceof DelegatingAction;
     a.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
         if ("enabled".equals(evt.getPropertyName())) {
@@ -7300,7 +7300,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   private void _setUpPanes() {
     // DefinitionsPane
-    JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
+//    JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
     
     // Try to create debug panel (see if JSwat is around)
     if (_showDebugger) {
@@ -8633,7 +8633,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // Only change GUI from event-dispatching thread
       Runnable command = new Runnable() {
         public void run() {
-          Debugger dm = _model.getDebugger();
+//          Debugger dm = _model.getDebugger();
 //          if (dm.isAvailable() && dm.isReady()) dm.shutdown();
 //          _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);

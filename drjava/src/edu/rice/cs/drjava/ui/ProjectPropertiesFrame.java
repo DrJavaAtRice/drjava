@@ -223,12 +223,12 @@ public class ProjectPropertiesFrame extends JFrame {
     boolean projRootChanged = false;
 
     File pr = _projRootSelector.getFileFromField();
-    if (_projRootSelector.getFileField().getText().equals("")) { pr = FileOps.NULL_FILE; } else {      
-      if (!pr.equals(_model.getProjectRoot())) {
-        _model.setProjectRoot(pr);
-        projRootChanged = true;
-      }
+//    if (_projRootSelector.getFileField().getText().equals("")) { pr = FileOps.NULL_FILE; } else {      
+    if (!pr.equals(_model.getProjectRoot())) {
+      _model.setProjectRoot(pr);
+      projRootChanged = true;
     }
+//    }
 
     File bd = _buildDirSelector.getFileFromField();
     if (_buildDirSelector.getFileField().getText().equals("")) bd = FileOps.NULL_FILE;

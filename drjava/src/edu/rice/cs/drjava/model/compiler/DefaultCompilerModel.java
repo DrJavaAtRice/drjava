@@ -65,7 +65,8 @@ import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
-  * (as opposed to testing DrJava).
+  * (as opposed to testing DrJava).  TO DO: convert edu.rice.cs.util.Pair to edu.rice.cs.plt.tuple.Pair; requires 
+  * making the same conversion in javalanglevels.
   * @version $Id$
   */
 public class DefaultCompilerModel implements CompilerModel {

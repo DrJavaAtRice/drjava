@@ -527,7 +527,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           _document.addToHistory(_toAddToHistory);
           _document.setInProgress(false);
           _document.insertPrompt();
-          int len = _document.getPromptLength();
+//          int len = _document.getPromptLength();
 //          advanceCaret(len); 
         }
         finally { _document.releaseWriteLock(); }

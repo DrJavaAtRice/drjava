@@ -241,13 +241,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** The OptionListener for FIND_RESULTS_COLOR. */
-  private class FindResultsColorOptionListener implements OptionListener<Color> {
+  private static class FindResultsColorOptionListener implements OptionListener<Color> {
     private int _index;
     public FindResultsColorOptionListener(int i) { _index = i; }
     public void optionChanged(OptionEvent<Color> oce) {
       synchronized (FIND_RESULTS_PAINTERS) {
-        FIND_RESULTS_PAINTERS[_index] =
-          new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, 2);
+        FIND_RESULTS_PAINTERS[_index] = new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, 2);
       }
     }
   }
@@ -598,7 +597,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           // We're breaking up compound edits at the granularity of "enter"'s.
           if (e.getKeyCode() == KeyEvent.VK_ENTER) endCompoundEdit();
           
-          CompoundUndoManager undoMan = _doc.getUndoManager();
+//          CompoundUndoManager undoMan = _doc.getUndoManager();
 //          int key = undoMan.startCompoundEdit();
 //          System.out.println("supering 1 " + isAltF4);
           
@@ -1042,9 +1041,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       if (startRect != null) {
         int startRectX = (int) startRect.getX();
         int startRectY = (int) startRect.getY();
-        startRect.setLocation(startRectX - (int)(viewWidth/2), startRectY - (int)(viewHeight/2));
-        Point endPoint = new Point(startRectX+(int)(viewWidth/2),
-                                   startRectY+(int)(viewHeight/2 + metrics.getHeight()/2));
+        startRect.setLocation(startRectX - (int)(viewWidth*.5), startRectY - (int)(viewHeight*.5));
+        Point endPoint = new Point(startRectX + (int)(viewWidth*.5),
+                                   startRectY + (int)(viewHeight*.5) + metrics.getHeight()/2);
 
         // Add the end rect onto the start rect to make a rectangle
         // that encompasses the entire selection

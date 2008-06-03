@@ -47,7 +47,7 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public SlaveJVMArgsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
-      final OptionListener<String> slaveJvmArgsListener = this;
+//      final OptionListener<String> slaveJvmArgsListener = this;
       if (!oe.value.equals("")) {
         int result = JOptionPane.
           showConfirmDialog(_parent,
@@ -234,7 +234,7 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public MasterJVMArgsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
-      final OptionListener<String> masterJvmArgsListener = this;
+//      final OptionListener<String> masterJvmArgsListener = this;
       if (!oe.value.equals("")) {
         int result = JOptionPane.
           showConfirmDialog(_parent,
@@ -268,44 +268,27 @@ public class ConfigOptionListeners implements OptionConstants {
       long factor = 1;
       long heapSize;
       switch(size.toLowerCase().charAt(size.length()-1)) {
-        case 'g': {
-          factor *= 1024; // fall-through intended
-        }
-        case 'm': {
-          factor *= 1024; // fall-through intended
-        }
+        case 'g': { factor *= 1024; /* fall-through intended */ }
+        case 'm': { factor *= 1024; /* fall-through intended */ }
         case 'k': {
-          factor *= 1024; // fall-through intended
+          factor *= 1024; /* fall-through intended */
           break;
         }
-        default: {
-          if (!Character.isDigit(size.toLowerCase().charAt(size.length()-1))) {
-            factor = 0;
-          }
-        }
+        default: { if (!Character.isDigit(size.toLowerCase().charAt(size.length()-1)))  factor = 0; }
       }
       try {
-        if (factor==1) {
-          heapSize = new Long(size);
-        }
-        else if (factor>1) {
-          heapSize = new Long(size.substring(0,size.length()-1)) * factor;
-        }
-        else {
-          heapSize = -1;
-        }
+        if (factor==1)  heapSize = new Long(size);
+        else if (factor>1)  heapSize = new Long(size.substring(0,size.length()-1)) * factor;
+        else  heapSize = -1;
       }
-      catch(NumberFormatException nfe) {
-        heapSize = -1; // invalid
-      }
+      catch(NumberFormatException nfe) { heapSize = -1; /* invalid */ }
       long heapSizeMB = (heapSize / 1024) / 1024;
+      
       // find the next bigger of the choices
       String newSetting = getNextBiggerHeapSize(heapSizeMB);
       int result;
       if (heapSize>=0) {
-        String[] options = new String[] { "Copy to \"Maximum Heap\" Setting",
-          "Clean \"Master JVM Args\"",
-          "Ignore" };
+        String[] options = new String[] { "Copy to \"Maximum Heap\" Setting", "Clean \"Master JVM Args\"", "Ignore" };
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
@@ -321,8 +304,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            options[0]);
       }
       else {
-        String[] options = new String[] { "Clean \"Main JVM Args\"",
-          "Ignore" };
+        String[] options = new String[] { "Clean \"Main JVM Args\"", "Ignore" };
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
@@ -341,31 +323,21 @@ public class ConfigOptionListeners implements OptionConstants {
       }
       if (result!=2) {
         // clean up
-        while((endpos<value.length()) &&
-              (Character.isWhitespace(value.charAt(endpos)))) {
-          ++endpos;
-        }
+        while(endpos<value.length() && Character.isWhitespace(value.charAt(endpos))) ++endpos;
+
         String newValue = value.substring(0,pos) + value.substring(endpos);
         DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, l);
         DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, new OptionListener<String>() {
           public void optionChanged(OptionEvent<String> oe) {
             DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
             SwingUtilities.invokeLater(new Runnable() { 
-              public void run() {
-                DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, l);
-              }
+              public void run() { DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, l); }
             });
           }
         });
         DrJava.getConfig().setSetting(MASTER_JVM_ARGS, newValue);
-        if (result==0) {
-          // copy
-          DrJava.getConfig().setSetting(MASTER_JVM_XMX, newSetting);
-        }
-        else {
-          JOptionPane.showMessageDialog(parent,
-                                        "You will have to restart DrJava before the change takes effect.");
-        }
+        if (result == 0) DrJava.getConfig().setSetting(MASTER_JVM_XMX, newSetting);   // copy
+        else JOptionPane.showMessageDialog(parent, "You will have to restart DrJava before the change takes effect.");
       }
     }
   }
@@ -375,8 +347,7 @@ public class ConfigOptionListeners implements OptionConstants {
     public MasterJVMXMXListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
       sanitizeMasterJVMXMX(_parent, oe.value);
-      JOptionPane.showMessageDialog(_parent,
-                                    "You will have to restart DrJava before the change takes effect.");
+      JOptionPane.showMessageDialog(_parent, "You will have to restart DrJava before the change takes effect.");
     }
   }
   

@@ -57,7 +57,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
 
   public void testCancelDoesNotChangeConfig() {
 
-    Integer testInteger = new Integer(0);
+    Integer testInteger = Integer.valueOf(0);
 
     _option.setValue(testInteger);
     Utilities.clearEventQueue();
@@ -73,7 +73,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
   }
 
   public void testApplyDoesChangeConfig() {
-    Integer testInteger = new Integer(10);
+    Integer testInteger = Integer.valueOf(10);
 
     _option.setValue(testInteger);
     Utilities.clearEventQueue();
@@ -86,7 +86,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
   }
 
   public void testApplyThenResetDefault() {
-    Integer testInteger = new Integer(10);
+    Integer testInteger = Integer.valueOf(10);
 
     _option.setValue(testInteger);
     Utilities.clearEventQueue();

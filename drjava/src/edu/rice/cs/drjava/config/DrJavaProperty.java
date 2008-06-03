@@ -42,14 +42,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /** Class representing values that can be inserted as variables in external processes.
- *
  *  @version $Id$
  */
 public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   /** Whether the invalidation listening mechanism has been deactivated due to an error. */
   public volatile boolean DEACTIVATED_DUE_TO_ERROR = false;
   
-  /** Name of the property. Must be unique. */
+  /** Name of the property. Must be unique. TO DO: get rid of mutable properties; they are an abomination. */
   protected String _name;
   /** Value of the property. */
   protected String _value = "--uninitialized--";
@@ -65,9 +64,9 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   
   /** Create a property. */
   public DrJavaProperty(String name, String help) {
-    if (name==null) { throw new IllegalArgumentException("DrJavaProperty name is null"); }
+    if (name == null) { throw new IllegalArgumentException("DrJavaProperty name is null"); }
     _name = name;
-    if (help!=null) { _help = help; } 
+    if (help != null) { _help = help; } 
     resetAttributes();
   }
 
@@ -87,7 +86,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   public String getCurrent() {
     if (!isCurrent()) {
       update();
-      if (_value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+      if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
       _isCurrent = true;
     }
     return _value;
@@ -97,9 +96,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   public abstract void update();
   
   /** Reset attributes to their defaults. Should be overridden by properties that use attributes. */
-  public void resetAttributes() {
-    _attributes.clear();
-  }
+  public void resetAttributes() { _attributes.clear(); }
   
   /** Set an attribute's value. The attribute must already exist in the table.
     * @param key name of the attribute
@@ -137,15 +134,11 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
     return _attributes.get(key);
   }
   
-  /** Return the value, which might be stale. */
-  public String toString() {
-    return _value;
-  }
+  /** Return the value, which might be stale or null. */
+  public String toString() { return _value; }
   
   /** Return the value, which might be stale. */
-  public String getHelp() {
-    return _help;
-  }
+  public String getHelp() { return _help; }
 
   /** Return true if the value is current. */
   public boolean isCurrent() { return _isCurrent; }
@@ -160,7 +153,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   protected void _invalidate() { _isCurrent = false; }
   
   public DrJavaProperty listenToInvalidatesOf(DrJavaProperty other) {
-    if (other==this) {
+    if (other == this) {
       DEACTIVATED_DUE_TO_ERROR = true;
       RuntimeException e = new IllegalArgumentException("Property cannot listen for invalidation of itself. "+
                                                         "Variables for external processes will not function correctly anymore. "+
@@ -172,26 +165,26 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
     return this;
   }
   
-  /** Compare two properties. */
-  public int compareTo(DrJavaProperty o) {
-    return _name.compareTo(o._name);
+  /** Compare two properties lexicographically as tuples (_name, _value, _isCurrent). */
+  public int compareTo(DrJavaProperty o) { 
+    int nameDif = _name.compareTo(o._name);
+    if (nameDif != 0) return nameDif;
+    int valDif = _value.compareTo(o._value);
+    if (valDif != 0) return valDif;
+    return (_isCurrent == o._isCurrent) ? 0 : (_isCurrent ? 1 : -1);  // false < true in this ascending ordering
   }
   
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
-    DrJavaProperty o = (DrJavaProperty)other;
-    return _name.equals(o._name) && (isCurrent() == o.isCurrent()) && _value.equals(o._value);
+
+    DrJavaProperty o = (DrJavaProperty) other;
+    return _name.equals(o._name) && _value.equals(o._value) && (_isCurrent == o._isCurrent);
+
   }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
-  }
+
+  /** @return the hash code.  Hashing fails if keys are mutated! */
+  public int hashCode() { return _name.hashCode() ^ _value.hashCode() ^ (_isCurrent ? 1 : 0); }
   
   /** Invalidate those properties that are listening to this property.
     * @param alreadyVisited set of properties already visited, to avoid cycles. */
@@ -203,7 +196,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
       sb.append(getName());
       sb.append(" after already having invalidated ");
       boolean first = true;
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         if (first) { first = false; } 
         else { sb.append(", "); }
         sb.append(it.next().getName());

@@ -45,6 +45,7 @@ import java.awt.*;
 import java.awt.print.*;
 import java.awt.image.*;
 import java.net.*;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import edu.rice.cs.drjava.model.*;
 
@@ -87,7 +88,7 @@ public abstract class PreviewFrame extends JFrame {
       setValueMethod = spinnerClass.getMethod("setValue", Object.class);
     }
     void update(int pageNumber) throws Exception {
-      args[0] = new Integer(pageNumber);
+      args[0] = Integer.valueOf(pageNumber);
       setValueMethod.invoke(spinner, args);
     }
     JComponent getComponent() { return spinner; }
@@ -254,9 +255,9 @@ public abstract class PreviewFrame extends JFrame {
       Object model = callMethod(spinner, spinnerClass, "getModel",null,null);
       Class<?> modelClass = model.getClass();
       Class<?>[] ca = new Class<?>[] {Comparable.class};
-      Object[] aa = new Object[] {new Integer(1)};
+      Object[] aa = new Object[] {Integer.valueOf(1)};
       callMethod(model,modelClass,"setMinimum",ca,aa);
-      aa[0] = new Integer(_print.getNumberOfPages());
+      aa[0] = Integer.valueOf(_print.getNumberOfPages());
       callMethod(model,modelClass,"setMaximum",ca,aa);
       ca[0] = ChangeListener.class;
       aa[0] = new ChangeListener() {
@@ -267,7 +268,8 @@ public abstract class PreviewFrame extends JFrame {
             if ((num >= 0) && (num < _print.getNumberOfPages())) _goToPage(num);
             else _updateActions();
           }
-          catch(Exception ex) { _updateActions(); }
+          catch(IllegalAccessException ex) { _updateActions(); }
+          catch(InvocationTargetException ex) { _updateActions(); }
         }
       };
       callMethod(spinner, spinnerClass,"addChangeListener",ca,aa);

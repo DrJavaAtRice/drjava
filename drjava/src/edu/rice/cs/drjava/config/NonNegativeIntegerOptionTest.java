@@ -56,7 +56,7 @@ public final class NonNegativeIntegerOptionTest extends DrJavaTestCase {
   public void testParse() {
     NonNegativeIntegerOption io = new NonNegativeIntegerOption("max_files",null);
     
-    assertEquals(new Integer(3), io.parse("3"));
+    assertEquals(Integer.valueOf(3), io.parse("3"));
     try { io.parse("-3"); fail(); }
     catch (OptionParseException e) { }
     
@@ -71,9 +71,9 @@ public final class NonNegativeIntegerOptionTest extends DrJavaTestCase {
     NonNegativeIntegerOption io1 = new NonNegativeIntegerOption("max_files",null);
     NonNegativeIntegerOption io2 = new NonNegativeIntegerOption("indent_size",null);
     
-    assertEquals("33",  io1.format(new Integer(33)));
-    assertEquals("33",  io2.format(new Integer(33)));
-    assertEquals("-11", io1.format(new Integer(-11)));
-    assertEquals("-11", io2.format(new Integer(-11)));
+    assertEquals("33",  io1.format(Integer.valueOf(33)));
+    assertEquals("33",  io2.format(Integer.valueOf(33)));
+    assertEquals("-11", io1.format(Integer.valueOf(-11)));
+    assertEquals("-11", io2.format(Integer.valueOf(-11)));
   }
 }

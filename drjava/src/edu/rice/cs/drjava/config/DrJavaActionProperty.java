@@ -59,9 +59,4 @@ public abstract class DrJavaActionProperty extends DrJavaProperty {
     _value = "";
     return super.getCurrent();
   }
-
-  /** Reset attributes to their defaults. Should be overridden by properties that use attributes. */
-  public void resetAttributes() {
-    _attributes.clear();
-  }
 } 

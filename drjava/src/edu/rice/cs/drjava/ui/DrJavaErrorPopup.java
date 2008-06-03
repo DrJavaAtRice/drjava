@@ -67,14 +67,14 @@ public class DrJavaErrorPopup extends JDialog {
   private JButton _moreButton;
   /** the error */
   private Throwable _error;
-  /** the parent frame */
-  private static JFrame _parentFrame = new JFrame();
+//  /** the parent frame */
+//  private JFrame _parentFrame = new JFrame();
   
   /** Creates a window to graphically display the current error that has occurred in the code of DrJava. */
   public DrJavaErrorPopup(JFrame parent, Throwable error) {
     super(parent, "DrJava Error");
     
-    _parentFrame = parent;
+//    _parentFrame = parent;
     _error = error;
 
     this.setSize(500,150);

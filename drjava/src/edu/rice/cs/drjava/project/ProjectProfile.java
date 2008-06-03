@@ -423,7 +423,8 @@ public class ProjectProfile implements ProjectFileIR {
     catch(IOException e) { return e.toString(); }
   }
   
-  public void writeOld(Writer fw) throws IOException {    
+  public void writeOld(Writer fw) throws IOException { 
+    assert (_projectRoot != null);
     // write opening comment line
     fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString() + ", revision " + Version.getRevisionNumber());
     fw.write("\n;; files in the source tree are relative to: " + _projectRoot.getCanonicalPath());
@@ -432,7 +433,6 @@ public class ProjectProfile implements ProjectFileIR {
     // write the project root
     /* In the new project file form, this property has been renamed "proj-root-and-base" (instead of "proj-root") to
      * indicate that the project root now serves as the base for source file path names. */
-    assert (_projectRoot != null);
 
     fw.write("\n(proj-root-and-base");
 //      Utilities.show("Writing project root = " + _projRoot);
@@ -578,10 +578,11 @@ public class ProjectProfile implements ProjectFileIR {
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
 
-  /** This encodes a normal file relative to _projectRoot.  None of the special tags are added. */
-  private String encodeFileRelative(File f, String prefix) throws IOException { 
-    return encodeFileRelative(f, prefix, _projectRoot); 
-  }
+  // Not currently used.
+//  /** This encodes a normal file relative to _projectRoot.  None of the special tags are added. */
+//  private String encodeFileRelative(File f, String prefix) throws IOException { 
+//    return encodeFileRelative(f, prefix, _projectRoot); 
+//  }
     
   /** This encodes a normal file with its canonical path.  None of the special tags are added.
    *  @param f the file to encode

@@ -233,7 +233,7 @@ public class DrJavaRoot {
       int pathSepIndex = currFileName.indexOf(File.pathSeparatorChar);
       if (pathSepIndex>=0) {
         try {
-          lineNo = new Integer(currFileName.substring(pathSepIndex+1));
+          lineNo = Integer.valueOf(currFileName.substring(pathSepIndex+1));
           anyLineNumbersSpecified = true;
         }
         catch(NumberFormatException nfe) {

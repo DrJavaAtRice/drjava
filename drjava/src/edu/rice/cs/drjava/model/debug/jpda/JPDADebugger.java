@@ -1040,21 +1040,22 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** Takes the location of event e, opens the document corresponding to its class and centers the definition pane's
-    * view on the appropriate line number.  Assumes lock on this is already held.
-    * @param e LocatableEvent containing location to display
-    */
-  private void scrollToSource(LocatableEvent e) {
-    Location location = e.location();
-    
-    // First see if doc is stored
-    EventRequest request = e.request();
-    Object docProp = request.getProperty("document");
-    if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {
-      openAndScroll((OpenDefinitionsDocument) docProp, location, true);
-    }
-    else  scrollToSource(location);
-  }
+  // Not currently used
+//  /** Takes the location of event e, opens the document corresponding to its class and centers the definition pane's
+//    * view on the appropriate line number.  Assumes lock on this is already held.
+//    * @param e LocatableEvent containing location to display
+//    */
+//  private void scrollToSource(LocatableEvent e) {
+//    Location location = e.location();
+//    
+//    // First see if doc is stored
+//    EventRequest request = e.request();
+//    Object docProp = request.getProperty("document");
+//    if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {
+//      openAndScroll((OpenDefinitionsDocument) docProp, location, true);
+//    }
+//    else  scrollToSource(location);
+//  }
   
   /** Scroll to the location specified by location  Assumes lock on this is already held */
   private void scrollToSource(Location location) {

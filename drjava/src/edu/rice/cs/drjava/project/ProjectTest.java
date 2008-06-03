@@ -532,10 +532,10 @@ public class ProjectTest extends DrJavaTestCase {
                                         final boolean active, final boolean isUntitled, final File pf) {
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() { 
-        return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); 
+        return new Pair<Integer,Integer>(Integer.valueOf(sel1),Integer.valueOf(sel2)); 
       }
       public Pair<Integer,Integer> getScroll() { 
-        return new Pair<Integer,Integer>(new Integer(scrollv),new Integer(scrollh)); 
+        return new Pair<Integer,Integer>(Integer.valueOf(scrollv),Integer.valueOf(scrollh)); 
       }
       public File getFile() {
         if (pf == null) return new File(fname);

@@ -286,7 +286,7 @@ public class DocumentCache {
     
     /** Removes this DocManager from the queue and sets status to NOT_IN_QUEUE.  Assumes _cacheLock is already held. */
     private void remove() { 
-      boolean removed = _residentQueue.remove(this);
+      _residentQueue.remove(this);
       kickOut();
     }
     

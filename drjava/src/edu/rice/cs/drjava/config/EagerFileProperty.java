@@ -44,10 +44,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.io.*;
 
-/** Class representing files that are always up-to-date and that
-  * can be inserted as variables in external processes.
-  *
-  *  @version $Id$
+/** Class representing files that are always up-to-date and that can be inserted as variables in external processes.
+  * @version $Id$
   */
 public class EagerFileProperty extends DrJavaProperty {
   protected Lambda<File,Void> _getFile;
@@ -61,15 +59,13 @@ public class EagerFileProperty extends DrJavaProperty {
   /** Return the value of the property. If it is not current, update first. */
   public String getCurrent() {
     update();
-    if (_value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
     _isCurrent = true;
     return _value;
   }
 
   /** Return the value. */
-  public String toString() {
-    return getCurrent();
-  }
+  public String toString() { return getCurrent(); }
   
   /** Return true if the value is current. */
   public boolean isCurrent() { return true; }
@@ -80,40 +76,24 @@ public class EagerFileProperty extends DrJavaProperty {
     invalidateOthers(new HashSet<DrJavaProperty>());
   }
   
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    EagerProperty o = (EagerProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
-  }
-  
   public void update() {
     try {
       File f;
-      if ((_getFile==null)||((f = _getFile.apply(null))==null)) {
+      if (_getFile == null || (f = _getFile.apply(null)) == null) {
         _value = "(File error...)";
         return;
       }
       if (_attributes.get("rel").equals("/")) {
         f = f.getAbsoluteFile();
-        try {
-          f = f.getCanonicalFile();
-        }
+        try { f = f.getCanonicalFile(); }
         catch(IOException ioe) { }
         _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
       }
       else {
-        String s = FileOps.stringMakeRelativeTo(f,
-                                                new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+        File rf = new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), 
+                                                                                        PropertyMaps.ONLY, 
+                                                                                        PropertyMaps.GET_CURRENT)));
+        String s = FileOps.stringMakeRelativeTo(f,rf);                                     
         _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(s);
       }
     }

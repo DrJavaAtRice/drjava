@@ -365,7 +365,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       DebugStackData frame = _stackFrames.get(row);
       switch(col) {
         case 0: return frame.getMethod();
-        case 1: return new Integer(frame.getLine());
+        case 1: return Integer.valueOf(frame.getLine());
       }
       return null;
     }
@@ -742,22 +742,21 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
   
-  private class BPTree extends JTree {
-    public BPTree(DefaultTreeModel s) {
-      super(s);
-    }
-    
-    public void setForeground(Color c) {
-      super.setForeground(c);
-      
-      /* Line commented out because dctr could never be non-null. */
-//      if (dtcr != null) dtcr.setTextNonSelectionColor(c);
-    }
-    
-    /* The follwoing method is commented out because dctr was always null. */
-//    public void setBackground(Color c) {
-//      super.setBackground(c);
-//      if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
+  // Not used
+//  private class BPTree extends JTree {
+//    public BPTree(DefaultTreeModel s) { super(s); }
+//    
+//    public void setForeground(Color c) {
+//      super.setForeground(c);
+//      
+//      /* Line commented out because dctr could never be non-null. */
+////      if (dtcr != null) dtcr.setTextNonSelectionColor(c);
 //    }
-  }
+//    
+//    /* The follwoing method is commented out because dctr was always null. */
+////    public void setBackground(Color c) {
+////      super.setBackground(c);
+////      if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
+////    }
+//  }
 }

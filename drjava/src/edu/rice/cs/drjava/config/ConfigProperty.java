@@ -114,23 +114,12 @@ public class ConfigProperty extends EagerProperty {
           _isList = true;
           _attributes.put("sep", ",");
         }
-        else {
-          _isList = false;
-        }
+        else _isList = false;
         return;
       }
     }
   }
 
   /** Return the value. */
-  public String toString() {
-    return getCurrent();
-  }
-  
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    ConfigProperty o = (ConfigProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
+  public String toString() { return getCurrent(); }
 } 

@@ -55,7 +55,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** A Swing specific console controller class that includes both a Swing InteractionsDJDocument and a GUI agnostic
   * ConsoleDocument (wrapping the former).
   * @version $Id$ */
-public class ConsoleController extends AbstractConsoleController implements Serializable {
+public class ConsoleController extends AbstractConsoleController /* implements Serializable */ {
   
   /** GUI-neutral formulation of console document.  In this case, is a wrapper around _swingConsoleDocument. */
   protected volatile ConsoleDocument _consoleDoc;

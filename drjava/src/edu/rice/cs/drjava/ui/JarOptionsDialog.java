@@ -443,7 +443,7 @@ public class JarOptionsDialog extends JFrame {
             if (ok) return s;
             return "";
           }
-          catch(Exception e) { return ""; }
+          catch(IOException e) { return ""; }
         }
       }
     };
@@ -611,9 +611,7 @@ public class JarOptionsDialog extends JFrame {
       public Object construct() {
         try {
           File jarOut = _jarFileSelector.getFileFromField();
-          if (!jarOut.exists()) {
-            jarOut.createNewFile();
-          }
+          if (! jarOut.exists()) jarOut.createNewFile();  // TODO: what if createNewFile() fails?
           
           if (_jarClasses.isSelected() && _jarSources.isSelected()) {
             JarBuilder mainJar = null;
@@ -635,7 +633,7 @@ public class JarOptionsDialog extends JFrame {
             mainJar.addFile(sourceJarFile, "", "source.jar");
             
             mainJar.close();
-            sourceJarFile.delete();
+            sourceJarFile.delete();  // TODO: what if delete() fails?
           }
           else if (_jarClasses.isSelected()) {
             JarBuilder jb;

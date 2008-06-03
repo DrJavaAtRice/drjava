@@ -68,7 +68,7 @@ import edu.rice.cs.util.swing.AsyncTask;
   * @version $Id$
   */
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
-  implements GlobalModelListener, Serializable {
+  implements GlobalModelListener /*, Serializable */ {
   
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
     _lock.startRead();

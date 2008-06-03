@@ -125,16 +125,14 @@ public class DrJava {
       if (!_forceNewInstance &&
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size()>0)) {
-        try {
-          boolean ret = RemoteControlClient.openFile(null);
-          if (!RemoteControlClient.isServerRunning()) {
-            // server not running, display splash screen
-            new SplashScreen().flash();
-          }
+//        try {
+//          boolean ret = RemoteControlClient.openFile(null);
+        if (! RemoteControlClient.isServerRunning()) {
+          // server not running, display splash screen
+          new SplashScreen().flash();
         }
-        catch(IOException ioe) {
-          // ignore
-        }
+//        }
+//        catch(IOException ioe) { /* ignore */ }
       }
       else {
         // either forcing new instance or no files specified, display splash screen

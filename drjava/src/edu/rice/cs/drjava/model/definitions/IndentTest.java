@@ -63,7 +63,7 @@ public final class IndentTest extends DrJavaTestCase {
   static String OPEN_CURLY = IndentInfo.OPEN_CURLY;
   static String OPEN_PAREN = IndentInfo.OPEN_PAREN;
   static String OPEN_BRACKET = IndentInfo.OPEN_BRACKET;
-  private Integer indentLevel = new Integer(2);
+  private Integer indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
   
   /** Standard constructor for IdentTest
@@ -1116,7 +1116,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indentedBefore, doc);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, Integer.valueOf(8));
     
     Utilities.clearEventQueue();
     doc.indentLines(0, doc.getLength());

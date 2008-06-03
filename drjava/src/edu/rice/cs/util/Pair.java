@@ -39,7 +39,7 @@ import java.io.Serializable;
 /**
  * A pair.
  *
- * @version $Id$
+ * @version $Id: Pair.java 4314 2008-01-30 00:08:33Z mgricken $
  * @deprecated  Replaced by the class {@link edu.rice.cs.plt.tuple.Pair}.  Accessors
  *              in the new class are named {@code first()} and {@code second()}.
  */

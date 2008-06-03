@@ -403,22 +403,17 @@ public class ClipboardHistoryFrame extends JFrame {
     public ListItem(String s) {
       full = s;
       int index1 = s.indexOf('\n');
-      if (index1==-1) index1 = s.length();
+      if (index1 == -1) index1 = s.length();
       int index2 = s.indexOf(StringOps.EOL);
-      if (index2==-1) index2 = s.length();
+      if (index2 == -1) index2 = s.length();
       display = s.substring(0, Math.min(index1, index2));
     }
     public String getFull() { return full; }
     public String toString() { return display; }
     public boolean equals(Object o) {
-      if ((o == null) || !(o instanceof ListItem)) return false;
+      if (o == null || getClass() != o.getClass()) return false;
       return full.equals(((ListItem)o).full);
     }
-    public int hashCode() {
-      int result;
-      result = (full != null ? full.hashCode() : 0);
-      result = 31 * result + (display != null ? display.hashCode() : 0);
-      return result;
-    }
+    public int hashCode() { return  (full != null ? full.hashCode() : 0); }
   }
 }

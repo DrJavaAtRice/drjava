@@ -956,7 +956,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "}\n";
     
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
     _defModel.insertString(0,text,null);
     assertEquals("insertion",text, _defModel.getText()); 
     /* This is necessary here and other places where indenting or commenting takes place because the undoListener in DefinitionsPane 
@@ -997,7 +997,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "//}\n";
     
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
     _defModel.insertString(0,text,null);
     assertEquals("insertion",text, _defModel.getText());
     
@@ -1034,7 +1034,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     CompoundUndoManager undoManager = _defModel.getUndoManager();
     
     _defModel.addUndoableEditListener(undoManager);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
     
     // 1
     

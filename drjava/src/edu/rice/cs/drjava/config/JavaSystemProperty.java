@@ -49,13 +49,6 @@ public class JavaSystemProperty extends EagerProperty {
   /** Update the property so the value is current. */
   public void update() {
     _value = System.getProperty(_name);
-    if (_value==null) { _value = "--unknown--"; }
-  }
-  
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    JavaSystemProperty o = (JavaSystemProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
+    if (_value == null) { _value = "--unknown--"; }
   }
 } 

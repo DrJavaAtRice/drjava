@@ -177,7 +177,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
             _document.setPrompt(prompt);
             _document.insertNewline(_document.getLength());
             _document.insertPrompt();
-            int len = _document.getPromptLength();  
+//            int len = _document.getPromptLength();  
 //            advanceCaret(len);
             _document.setInProgress(inProgress);
           }

@@ -71,7 +71,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private static final int NO_COMMENT_OFFSET = 0;
   private static final int WING_COMMENT_OFFSET = 2;
   
-  private volatile List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
+  private final List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
   public void addDocumentClosedListener(DocumentClosedListener l) { 
     synchronized(_closedListeners) { _closedListeners.add(l); }
@@ -95,7 +95,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _removeIndenter();
     synchronized(_closedListeners) {
       for (DocumentClosedListener l: _closedListeners)  { l.close(); }
-      _closedListeners = new LinkedList<DocumentClosedListener>();
+      _closedListeners.clear();
     }
   }
   
@@ -940,7 +940,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
     int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outisde
 
-    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
+//    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
 
     final String className = getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
     final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name

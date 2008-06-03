@@ -47,10 +47,11 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
-/** Default light-weight parsing control.
+/** Default light-weight parsing control.  This class is declared final because it cannot be robustly subclassed because
+  * the constructor starts a thread.
   * @version $Id$
   */
-public class DefaultLightWeightParsingControl implements LightWeightParsingControl {
+public final class DefaultLightWeightParsingControl implements LightWeightParsingControl {
   /** The model. */
   private AbstractGlobalModel _model;
   
@@ -92,13 +93,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
       while(true) { // this is ok, it's a daemon thread and will die when all other threads have died
         while (!_running) {
           _log.log("Waiting...");
-          try {
-            synchronized(_restart) {
-              if (!_running) {
-                _restart.wait();
-              }
-            }
-          }
+          try { synchronized(_restart) { if (! _running)  _restart.wait(); } }
           catch(InterruptedException e) { }
         }
         long current = System.currentTimeMillis();
@@ -125,7 +120,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
     }
   });
   
-  /** Create the default light-weight parsing control.
+  /** Create the default light-weight parsing control.  Starts a new thread.
     * @param model the model */
   public DefaultLightWeightParsingControl(AbstractGlobalModel model) {
     _model = model;

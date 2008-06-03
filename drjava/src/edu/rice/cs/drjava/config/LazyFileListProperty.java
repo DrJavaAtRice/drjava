@@ -82,12 +82,13 @@ public abstract class LazyFileListProperty extends DrJavaProperty {
       sb.append(StringOps.replaceVariables(_attributes.get("sep"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
       try {
         String f = fil.toString();
-        if (_attributes.get("rel").equals("/")) {
-          f = fil.getAbsolutePath();
-        }
+        if (_attributes.get("rel").equals("/")) f = fil.getAbsolutePath();
         else {
-          f = FileOps.stringMakeRelativeTo(fil,
-                                           new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
+          File rf = new File(StringOps.
+                               unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("rel"), 
+                                                                                  PropertyMaps.ONLY, 
+                                                                                  PropertyMaps.GET_CURRENT)));
+          f = FileOps.stringMakeRelativeTo(fil, rf);
         }
         String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f);
         sb.append(s);
@@ -107,20 +108,4 @@ public abstract class LazyFileListProperty extends DrJavaProperty {
     _attributes.put("sep", _sep);
     _attributes.put("rel", _dir);
   }
-
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    LazyFileListProperty o = (LazyFileListProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
-  }
-} 
+}

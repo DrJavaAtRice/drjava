@@ -46,7 +46,7 @@ import edu.rice.cs.util.text.EditDocumentException;
 /** Manages the execution of a Interactions History as a script of individual commands.  Useful for presentations.
   * @version $Id$
   */
-public class InteractionsScriptModel implements Serializable {
+public class InteractionsScriptModel /* implements Serializable */ {
   /** The interactions model associated with the script. */
   private volatile InteractionsModel _model;
   /** The interactions document. */

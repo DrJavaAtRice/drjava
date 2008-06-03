@@ -124,7 +124,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       try {
         s = _xc.get("createjar.flags");
         LOG.log("createjar.flags = '"+s+"'");
-        int flags = new Integer(s);
+        int flags = Integer.valueOf(s);
         pfir.setCreateJarFlags(flags);
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
@@ -165,7 +165,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       
       try { // must all be present
         // read source files and included files
-        pfir.setSourceFiles(readSourceFiles("source", _srcFileBase.toString()));
+        pfir.setSourceFiles(readSourceFiles("source", _srcFileBase));
         pfir.setAuxiliaryFiles(readSourceFiles("included", ""));      
         
         // read excluded files

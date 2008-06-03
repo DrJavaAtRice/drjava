@@ -39,17 +39,17 @@ package edu.rice.cs.drjava.model;
 import javax.swing.text.Position;
 import java.io.File;
 
-/** Class for a simple document region.
+/** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
+  * required for OrderedDocumentRegions.
   * @version $Id$
   */
 public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
   private static volatile int _indexCounter = 0;  // sequence number counter for browser regions
-  
-  private final int _index;                       // unique sequence number for this region
+  private final int _index;                        // unique sequence number for this region
   protected final OpenDefinitionsDocument _doc;    // document for this region
   protected final File _file;                      // file for this region
-  protected final Position _startPosition;      // start position for this region
-  protected final Position _endPosition;        // final position for this region
+  protected final Position _startPosition;         // start position for this region
+  protected final Position _endPosition;           // final position for this region
   
   /** Create a new simple document region.
     * @param doc document that contains this region

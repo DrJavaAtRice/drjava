@@ -264,15 +264,16 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     _cursor.prev();
   }
   
-  /** Determines whether the char at index pos with text is the start of a comment:  "/*" or "//" */
-  public static boolean isStartOfComment(String text, int pos) {
-    char currChar = text.charAt(pos);
-    if (currChar == '/') {
-      try {
-        char afterCurrChar = text.charAt(pos + 1);
-        if ((afterCurrChar == '/') || (afterCurrChar == '*'))  return true;
-      } catch (StringIndexOutOfBoundsException e) { }
-    }
-    return false;
-  }
+  // Never used
+//  /** Determines whether the char at index pos with text is the start of a comment:  "/*" or "//" */
+//  public static boolean isStartOfComment(String text, int pos) {
+//    char currChar = text.charAt(pos);
+//    if (currChar == '/') {
+//      try {
+//        char afterCurrChar = text.charAt(pos + 1);
+//        if ((afterCurrChar == '/') || (afterCurrChar == '*'))  return true;
+//      } catch (StringIndexOutOfBoundsException e) { }
+//    }
+//    return false;
+//  }
 }

@@ -102,11 +102,9 @@ public class RecursiveFileListProperty extends LazyFileListProperty {
     // if the specified starting point is a directory, allow that directory
     if (fStart.isDirectory()) { fDirFilter.addIncludedFile(fStart); }
     Iterable<File> it = edu.rice.cs.plt.io.IOUtil.listFilesRecursively(fStart, fFilter, fDirFilter);
-    StringBuilder sb = new StringBuilder();
+//    StringBuilder sb = new StringBuilder();  // not used
     ArrayList<File> l = new ArrayList<File>();
-    for(File f: it) {
-      l.add(f);
-    }
+    for(File f: it) { l.add(f); }
     return l;
   }
   
@@ -118,21 +116,5 @@ public class RecursiveFileListProperty extends LazyFileListProperty {
     _attributes.put("dir", _start);
     _attributes.put("filter", "*");
     _attributes.put("dirfilter", "*");
-  }
-
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    RecursiveFileListProperty o = (RecursiveFileListProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
   }
 } 

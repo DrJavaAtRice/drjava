@@ -66,7 +66,7 @@ import edu.rice.cs.drjava.model.ClipboardHistoryModel;
   * TODO: move interactions specific functionality to InteractionsController by creating ConsoleDJDocument class
   * @version $Id$
   */
-public abstract class AbstractConsoleController implements Serializable {
+public abstract class AbstractConsoleController /* implements Serializable */ {
   
   /** Adapter for the Swing document used by the model.*/
   protected final InteractionsDJDocument _swingConsoleDocument;

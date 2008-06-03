@@ -344,12 +344,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean>  _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
       public Boolean itemCase(OpenDefinitionsDocument doc, Object... p) {
-        Boolean modelInitiated = (Boolean)p[0];
-//        if (!modelInitiated) {
-//          IDocumentNavigator.LOG.log("_gainVisitor; modelInitiated = false");
-//        }
-        OpenDefinitionsDocument oldDoc = AbstractGlobalModel.this.getActiveDocument();
-//        if (! modelInitiated) { addToBrowserHistory(); }
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
 //        addToBrowserHistory();
         
@@ -866,7 +860,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File dir = this.getBuildDirectory ();
       LinkedList<File> acc = new LinkedList<File>();
       getClassFilesHelper(dir, acc);
-      if (! dir.exists()) dir.mkdirs();
+      if (! dir.exists()) dir.mkdirs();  // TODO: what if mkdirs() fails
       return acc;
     }
     
@@ -1198,15 +1192,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument odd = _openFile(file);
 //    Utilities.showDebug("File " + file + " opened");
     // Make sure this is on the classpath
-    try {
-      File classPath = odd.getSourceRoot();
-      addDocToClassPath(odd);
-      setClassPathChanged(true);
-    }
-    catch (InvalidPackageException e) {
-      // Invalid package-- don't add it to classpath
-    }
-    
+    addDocToClassPath(odd);
+    setClassPathChanged(true);
     return odd;
   }
   
@@ -1471,8 +1458,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    Utilities.show("Fetched project root is " + projectRoot);
     
-    List<File> exCp = new LinkedList<File>();
-    
+//    List<File> exCp = new LinkedList<File>();  // not used
+     
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       
       File f = doc.getFile();
@@ -2419,9 +2406,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         try {
           startPos = doc.createPosition(doc.getCaretPosition());
           endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition()));
-          file = doc.getFile();
+//          file = doc.getFile();
         }
-        catch (FileMovedException fme) { /* ignore */ }
+//        catch (FileMovedException fme) { /* ignore */ }
         catch (BadLocationException ble) { throw new UnexpectedException(ble); }
         
 //        Utilities.show("Adding (" + doc + ", " + startPos + ", " + endPos + ") to browser history");
@@ -2443,6 +2430,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * The GlobalModel interacts with DefinitionsDocuments through this wrapper.<br>
     * This call was formerly called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more
     * descriptive/intuitive.
+    * Note that this class has a natural ordering that determines a coarser equivalence relation than equals.
     */
   class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
     
@@ -2774,13 +2762,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       //prompt the user to find it
       try {
         _notifier.documentNotFound(this, _file);
-        File f = getFile();
+//        File f = getFile();
         if (isUntitled()) return false;
         String path = fixPathForNavigator(getFile().getCanonicalPath());
         _documentNavigator.refreshDocument(this, path);
         return true;
       }
-      catch(Exception e) { return false; }
+      catch(FileMovedException e) { return false; }
+      catch(IOException e) { return false; }
 //      catch(DocumentFileClosed e) { /* not clear what to do here */ }
     }
     
@@ -2956,7 +2945,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
 //          System.err.println("Writing file " + file);
           
-          // Correct the case of the filename (in Windows)
+          // Correct the case of the filename (in Windows)  TODO: what if rename fails?
           if (! file.getCanonicalFile().getName().equals(file.getName())) file.renameTo(file);
           
           // Check for # in the path of the file because if there
@@ -2964,12 +2953,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
           
           // if file is read-only, ask if it should be made writable
-          if(file.exists() && !file.canWrite()) {
+          if(file.exists() && ! file.canWrite()) {
             File[] res = _notifier.filesReadOnly(new File[] {file});
             for(File roFile: res) {
               FileOps.makeWritable(roFile);
             }
-            if (res.length==0) { return false; /* read-only, do not overwrite */ }
+            if (res.length == 0) { return false; /* read-only, do not overwrite */ }
           }
           
           // have FileOps save the file
@@ -3306,8 +3295,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return Index into document of where it moved
       */
     public int gotoLine(int line) {
-      DefinitionsDocument dd = getDocument();
-      final int offset = getOffsetOfLine(line-1);
+//      DefinitionsDocument dd = getDocument();
+      final int offset = getOffsetOfLine(line - 1);
       setCurrentLocation(offset);
       return offset;
     }

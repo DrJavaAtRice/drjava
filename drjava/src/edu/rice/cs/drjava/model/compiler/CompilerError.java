@@ -42,7 +42,7 @@ import java.io.Serializable;
 import edu.rice.cs.util.FileOps;
 
 
-/** A class to represent compilerr errors and warnings.  Having this class allows DrJava
+/** A class to represent compiler errors and warnings.  Having this class allows DrJava
   * to make the errors as legible as possible.
   * @version $Id$
   */
@@ -166,7 +166,7 @@ public class CompilerError implements Comparable, Serializable {
     // "this" has no file
     if (other.file() != null) return -1; // Other has a file so "this" is smaller
     // Neither error has a file
-    boolean otherWarning = other.isWarning();
+//    boolean otherWarning = other.isWarning();
     return compareErrorWarning(other);
   }
   

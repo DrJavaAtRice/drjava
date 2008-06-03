@@ -152,7 +152,7 @@ public class History implements OptionConstants, Serializable {
 
   /** Returns item in history at current position; returns "" if no current item exists. */
   public String getCurrent() {
-    Integer cursor = new Integer(_cursor);
+    Integer cursor = Integer.valueOf(_cursor);
     if (_editedEntries.containsKey(cursor))  return _editedEntries.get(cursor);
 
     if (hasNext()) return _vector.get(_cursor);
@@ -260,7 +260,7 @@ public class History implements OptionConstants, Serializable {
     * @param entry the string to set
     */
   public void setEditedEntry(String entry) {
-    if (!entry.equals(getCurrent())) _editedEntries.put(new Integer(_cursor), entry);
+    if (!entry.equals(getCurrent())) _editedEntries.put(Integer.valueOf(_cursor), entry);
   }
 
   /** Reverse-searches the history for the previous matching string.

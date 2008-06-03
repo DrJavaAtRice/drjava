@@ -311,7 +311,7 @@ public class DrJavaErrorWindow extends JDialog {
     b.append(edu.rice.cs.drjava.Version.getRevisionNumber());
     b.append("\n\n");
     java.util.Properties props = System.getProperties();
-    int size = props.size();
+//    int size = props.size();
     java.util.Iterator entries = props.entrySet().iterator();
     while(entries.hasNext()) {
       java.util.Map.Entry entry = (java.util.Map.Entry)entries.next();

@@ -74,7 +74,7 @@ public final class DrJavaBookTest extends DrJavaTestCase {
   }
   
   public void testGetNumberOfPages() {
-    assertEquals("testGetNumberOfPages:", new Integer(1), new Integer(book.getNumberOfPages()));
+    assertEquals("testGetNumberOfPages:", Integer.valueOf(1), Integer.valueOf(book.getNumberOfPages()));
   }
   
   public void testGetPageFormat() {
@@ -85,8 +85,8 @@ public final class DrJavaBookTest extends DrJavaTestCase {
     Graphics g = (new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)).getGraphics();
     Printable p = book.getPrintable(0);
     try { 
-      assertEquals("testGetPrintable:", new Integer(Printable.PAGE_EXISTS), 
-                   new Integer(p.print(g, new PageFormat(), 0)));
+      assertEquals("testGetPrintable:", Integer.valueOf(Printable.PAGE_EXISTS), 
+                   Integer.valueOf(p.print(g, new PageFormat(), 0)));
     }
     catch(Exception e) { fail("testGetPrintable: Unexpected exception!\n" + e); }
     

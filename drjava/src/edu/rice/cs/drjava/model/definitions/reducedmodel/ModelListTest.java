@@ -61,27 +61,27 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#0.3", 0, fFull.length());
     assertTrue("#0.4", itEmpty.atStart());
     assertTrue("#0.5", itFull.atStart());
-    itFull.insert(new Integer(5));
+    itFull.insert(Integer.valueOf(5));
     assertTrue("#1.0", !itFull.atStart());
     assertEquals("#1.1", 1, fFull.length());
-    assertEquals("#1.2", new Integer(5), itFull.current());
+    assertEquals("#1.2", Integer.valueOf(5), itFull.current());
     assertTrue("#2.0", fEmpty.isEmpty());
     assertTrue("#2.1", !fFull.isEmpty());
-    itFull.insert(new Integer(4));
+    itFull.insert(Integer.valueOf(4));
     assertEquals("#2.2", 2, fFull.length());
-    assertEquals("#2.3", new Integer(4), itFull.current());
+    assertEquals("#2.3", Integer.valueOf(4), itFull.current());
     assertTrue("#2.4", !fFull.isEmpty());
   }
 
   public void testInsertFront() {
-    fFull.insertFront(new Integer(3));
-    fFull.insertFront(new Integer(2));
-    fFull.insertFront(new Integer(1));
-    fFull.insertFront(new Integer(0));
+    fFull.insertFront(Integer.valueOf(3));
+    fFull.insertFront(Integer.valueOf(2));
+    fFull.insertFront(Integer.valueOf(1));
+    fFull.insertFront(Integer.valueOf(0));
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     for (int i = 0; i < 4; i++) {
       itFull.next();
-      assertEquals(new Integer(i), itFull.current());
+      assertEquals(Integer.valueOf(i), itFull.current());
     }
   }
 
@@ -92,7 +92,7 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#0.1", 0, fEmpty.length());
     assertEquals("#0.2", 0, fFull.length());
 
-    itFull.insert(new Integer(5));
+    itFull.insert(Integer.valueOf(5));
     assertTrue("#2.0", !fFull.isEmpty());
     assertEquals("#2.1", 1, fFull.length());
     itFull.remove();
@@ -104,15 +104,15 @@ public final class ModelListTest extends DrJavaTestCase {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
 
-    itFull.insert(new Integer(6));
-    itFull.insert(new Integer(5));
-    itFull.insert(new Integer(4));
+    itFull.insert(Integer.valueOf(6));
+    itFull.insert(Integer.valueOf(5));
+    itFull.insert(Integer.valueOf(4));
     //now at start of list, after head.
-    assertEquals("#1.0", new Integer(4), itFull.current());
+    assertEquals("#1.0", Integer.valueOf(4), itFull.current());
     itFull.next();
-    assertEquals("#1.1", new Integer(5), itFull.current());
+    assertEquals("#1.1", Integer.valueOf(5), itFull.current());
     itFull.next();
-    assertEquals("#1.2", new Integer(6), itFull.current());
+    assertEquals("#1.2", Integer.valueOf(6), itFull.current());
     itFull.next();
   }
 
@@ -120,19 +120,19 @@ public final class ModelListTest extends DrJavaTestCase {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
 
-    itFull.insert(new Integer(6));
-    itFull.insert(new Integer(5));
-    itFull.insert(new Integer(4));
+    itFull.insert(Integer.valueOf(6));
+    itFull.insert(Integer.valueOf(5));
+    itFull.insert(Integer.valueOf(4));
     itFull.next();
     itFull.next();
     itFull.next();
 
     itFull.prev();
-    assertEquals("#1.1", new Integer(6), itFull.current());
+    assertEquals("#1.1", Integer.valueOf(6), itFull.current());
     itFull.prev();
-    assertEquals("#1.2", new Integer(5), itFull.current());
+    assertEquals("#1.2", Integer.valueOf(5), itFull.current());
     itFull.prev();
-    assertEquals("#1.3", new Integer(4), itFull.current());
+    assertEquals("#1.3", Integer.valueOf(4), itFull.current());
     itFull.prev();
   }
 
@@ -143,19 +143,19 @@ public final class ModelListTest extends DrJavaTestCase {
 
   public void testPrevItem() {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
-    itFull.insert(new Integer(0));
-    itFull.insert(new Integer(1));
+    itFull.insert(Integer.valueOf(0));
+    itFull.insert(Integer.valueOf(1));
     itFull.next();
-    assertEquals("#0.0", new Integer(1), itFull.prevItem());
+    assertEquals("#0.0", Integer.valueOf(1), itFull.prevItem());
   }
 
   public void testNextItem() {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
-    itFull.insert(new Integer(0));
-    assertEquals("#0.2", new Integer(0), itFull.current());
-    itFull.insert(new Integer(1));
-    assertEquals("#0.1", new Integer(1), itFull.current());
-    assertEquals("#0.0", new Integer(0), itFull.nextItem());
+    itFull.insert(Integer.valueOf(0));
+    assertEquals("#0.2", Integer.valueOf(0), itFull.current());
+    itFull.insert(Integer.valueOf(1));
+    assertEquals("#0.1", Integer.valueOf(1), itFull.current());
+    assertEquals("#0.0", Integer.valueOf(0), itFull.nextItem());
   }
   
   public void testCollapse() {
@@ -168,7 +168,7 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#0.0", 0, fEmpty.length());
     assertEquals("#0.2", 0, itFull.pos());
 
-    itFull.insert(new Integer(6));
+    itFull.insert(Integer.valueOf(6));
     assertEquals("#0.3", 1, itFull.pos());
     ModelList<Integer>.ModelIterator itFull2 = itFull.copy();
     assertEquals("#0.4", 1, itFull2.pos());
@@ -179,7 +179,7 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#1.2", 1, itFull2.pos());
     assertEquals("#1.3", 1, itFull.pos());
 
-    itFull.insert(new Integer(5));
+    itFull.insert(Integer.valueOf(5));
     assertEquals("#2.0", 2, fFull.length());
     assertEquals("#2.2", 1, itFull.pos());
     assertEquals("#2.3", 2, itFull2.pos());
@@ -187,55 +187,55 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#2.1", 2, fFull.length());
 
     //collapse to the right
-    itFull.insert(new Integer(4));
+    itFull.insert(Integer.valueOf(4));
     assertEquals("#3.0", 3, fFull.length());
-    assertEquals("#3.0b",new Integer(4),itFull.current());
-    assertEquals("#3.0a", new Integer(6), itFull2.current());
+    assertEquals("#3.0b",Integer.valueOf(4),itFull.current());
+    assertEquals("#3.0a", Integer.valueOf(6), itFull2.current());
     assertEquals("#3.0h", 3, itFull2.pos());
     itFull.collapse(itFull2);
-    assertEquals("3.0d", new Integer(6), itFull2.current());
+    assertEquals("3.0d", Integer.valueOf(6), itFull2.current());
     assertEquals("3.0e", 2, itFull2.pos());
-    assertEquals("3.0f", new Integer(4), itFull.current());
+    assertEquals("3.0f", Integer.valueOf(4), itFull.current());
     assertEquals("3.0g", 1, itFull.pos());
     itFull.next();
-    assertEquals("#3.0c",new Integer(6),itFull.current());
+    assertEquals("#3.0c",Integer.valueOf(6),itFull.current());
     assertEquals("#3.1", 2, fFull.length());
     itFull.prev();
-    assertEquals("#4.0", new Integer(4), itFull.current());
-    assertEquals("#4.1", new Integer(6), itFull2.current());
+    assertEquals("#4.0", Integer.valueOf(4), itFull.current());
+    assertEquals("#4.1", Integer.valueOf(6), itFull2.current());
     
     //collapse to the left
-    itFull.insert(new Integer(7));
+    itFull.insert(Integer.valueOf(7));
     assertEquals("#5.0a", 3, fFull.length());
-    assertEquals("#5.0b", new Integer(7), itFull.current());
-    assertEquals("#5.0c", new Integer(6), itFull2.current());
+    assertEquals("#5.0b", Integer.valueOf(7), itFull.current());
+    assertEquals("#5.0c", Integer.valueOf(6), itFull2.current());
     itFull2.collapse(itFull);
     assertEquals("#5.1a", 2, fFull.length());
-    assertEquals("#5.1b", new Integer(7), itFull.current());
-    assertEquals("#5.1c", new Integer(6), itFull2.current());
-    assertEquals("#5.2a", new Integer(6), itFull.nextItem());
-    assertEquals("#5.2b", new Integer(7), itFull2.prevItem());
+    assertEquals("#5.1b", Integer.valueOf(7), itFull.current());
+    assertEquals("#5.1c", Integer.valueOf(6), itFull2.current());
+    assertEquals("#5.2a", Integer.valueOf(6), itFull.nextItem());
+    assertEquals("#5.2b", Integer.valueOf(7), itFull2.prevItem());
   }
 
   public void testNotifyInsert() {
     ModelList<Integer>.ModelIterator itFull2 = fFull.getIterator();
 
-    itFull2.insert(new Integer(0));
+    itFull2.insert(Integer.valueOf(0));
     ModelList<Integer>.ModelIterator itFull = itFull2.copy();
-    itFull2.insert(new Integer(1));
-    assertEquals(new Integer(0), itFull.current());
+    itFull2.insert(Integer.valueOf(1));
+    assertEquals(Integer.valueOf(0), itFull.current());
   }
 
   public void testNotifyRemove() {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     ModelList<Integer>.ModelIterator itFull2 = fFull.getIterator();
 
-    itFull2.insert(new Integer(0));
-    itFull2.insert(new Integer(1));
+    itFull2.insert(Integer.valueOf(0));
+    itFull2.insert(Integer.valueOf(1));
     itFull.next();
-    assertEquals("#0.1", new Integer(1), itFull.current());
+    assertEquals("#0.1", Integer.valueOf(1), itFull.current());
     itFull2.remove();
-    assertEquals("#0.0", new Integer(0), itFull.current());
+    assertEquals("#0.0", Integer.valueOf(0), itFull.current());
   }
 
   public void testNotifyCollapse() {
@@ -243,11 +243,11 @@ public final class ModelListTest extends DrJavaTestCase {
     ModelList<Integer>.ModelIterator itFull2 = fFull.getIterator();
     ModelList<Integer>.ModelIterator itFull3 = fFull.getIterator();
 
-    itFull2.insert(new Integer(0));
-    itFull2.insert(new Integer(1));
-    itFull2.insert(new Integer(2));
-    itFull2.insert(new Integer(3));
-    itFull2.insert(new Integer(4));
+    itFull2.insert(Integer.valueOf(0));
+    itFull2.insert(Integer.valueOf(1));
+    itFull2.insert(Integer.valueOf(2));
+    itFull2.insert(Integer.valueOf(3));
+    itFull2.insert(Integer.valueOf(4));
 
     assertTrue("#0.0.0",itFull.atStart());
     // we have (4 3 2 1 0), itFull2 points at 4, itFull and itFull3
@@ -260,13 +260,13 @@ public final class ModelListTest extends DrJavaTestCase {
     for (int j = 0; j < 5; j++) {
       itFull3.next();
     }
-    assertEquals("#0.0", new Integer(2), itFull.current());
-    assertEquals("#0.1", new Integer(0), itFull3.current());
+    assertEquals("#0.0", Integer.valueOf(2), itFull.current());
+    assertEquals("#0.1", Integer.valueOf(0), itFull3.current());
     itFull2.collapse(itFull3);
 
-    assertEquals("#1.0", new Integer(4), itFull2.current());
-    assertEquals("#1.1", new Integer(0), itFull3.current());
-    assertEquals("#1.2", new Integer(0), itFull.current());
+    assertEquals("#1.0", Integer.valueOf(4), itFull2.current());
+    assertEquals("#1.1", Integer.valueOf(0), itFull3.current());
+    assertEquals("#1.2", Integer.valueOf(0), itFull.current());
   }
   
   public void testListenerCount() {

@@ -60,54 +60,13 @@ public class MovingDocumentRegion extends DocumentRegion {
 
   /** @return the file */
   public File getFile() { return _file; }
-
-// Commented out because getStartOffset and getEndOffset are better defined in SimpleDocumentRegion
-//  /** @return the start offset */
-//  public int getStartOffset() {
-//    return 
-//      (_doc == null || _doc.getLength() >= _startPosition.getOffset()) ? _startPosition.getOffset() : _doc.getLength();
-//  }
-//
-//  /** @return the end offset */
-//  public int getEndOffset() {
-//    return (_doc == null || _doc.getLength() >= _endPosition.getOffset()) ? _endPosition.getOffset() : _doc.getLength();
-//  }
   
   /** @return the string it was assigned */
-  public String getString() {
-    return _string;
-  }
+  public String getString() { return _string; }
   
   /** @return true if objects a and b are equal; null values are handled correctly. */
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);
   }
-  
-// Commented out because equals, hashcode, and toString are defined in SimpleDocumentRegion
-//  /** @return true if the specified region is equal to this one. */
-//  public boolean equals(Object other) {
-//    if (other == null || other.getClass() != this.getClass()) return false;
-//    MovingDocumentRegion o = (MovingDocumentRegion) other;
-//    return equals(_doc, o._doc) && equals(_file, o._file) &&
-//            _startPosition.getOffset() == o._startPosition.getOffset() &&
-//            _endPosition.getOffset() == o._endPosition.getOffset() &&
-//            _string.equals(o._string);
-//  }
-//  
-//  /** @return the hash code. */
-//  public int hashCode() {
-//    int result;
-//    result = (_doc != null ? _doc.hashCode() : 0);
-//    result = 31 * result + (_file != null ? _file.hashCode() : 0);
-//    result = 31 * result + (_startPosition != null ? _startPosition.hashCode() : 0);
-//    result = 31 * result + (_endPosition != null ? _endPosition.hashCode() : 0);
-//    result = 31 * result + (_string != null ? _string.hashCode() : 0);
-//    return result;
-//  }
-//  
-//  public String toString() {
-//    return 
-//      (_doc != null ? _doc.toString() : "null") + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
-//  }
 }

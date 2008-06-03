@@ -460,9 +460,7 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     
-    /**
-     * Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton.
-     */
+    /** Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton. */
     protected void _removeListHighlight() {
       super._removeListHighlight();
       _showStackTraceButton.setEnabled(false);

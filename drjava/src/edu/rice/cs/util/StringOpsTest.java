@@ -63,28 +63,28 @@ public class StringOpsTest extends DrJavaTestCase {
     // The offset is always one less than the first row/col
     // The length includes the start and end positions
     Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 9);
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.first());
-    assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.second());
+    assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(0), oAndL.first());
+    assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(9), oAndL.second());
     
     oAndL = StringOps.getOffsetAndLength(test, 1, 1, 2, 3);
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.first());
-    assertEquals("testGetOffsetAndLength- length:", new Integer(13), oAndL.second());
+    assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(0), oAndL.first());
+    assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(13), oAndL.second());
     
     oAndL = StringOps.getOffsetAndLength(test, 1, 5, 2, 3);
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(4), oAndL.first());
-    assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.second());
+    assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(4), oAndL.first());
+    assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(9), oAndL.second());
     
     oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 1);
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.first());
-    assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.second());
+    assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(0), oAndL.first());
+    assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(1), oAndL.second());
     
     oAndL = StringOps.getOffsetAndLength(test, 3, 5, 3, 5);
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(24), oAndL.first());
-    assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.second());
+    assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(24), oAndL.first());
+    assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(1), oAndL.second());
     
     oAndL = StringOps.getOffsetAndLength(test, 2, 3, 3, 6);
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(12), oAndL.first());
-    assertEquals("testGetOffsetAndLength- length:", new Integer(14), oAndL.second());
+    assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(12), oAndL.first());
+    assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(14), oAndL.second());
     
     try {
       StringOps.getOffsetAndLength(test, 3, 2, 2, 3);
@@ -408,7 +408,7 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("null", StringOps.toString(a));
     assertEquals("[]", StringOps.toString(new Object[] {}));
     assertEquals("[123]", StringOps.toString(new Object[] {"123"}));
-    assertEquals("[123, 123]", StringOps.toString(new Object[] {"123", new Integer(123)}));
+    assertEquals("[123, 123]", StringOps.toString(new Object[] {"123", Integer.valueOf(123)}));
   }
   
   public void testMemSizeToString() {

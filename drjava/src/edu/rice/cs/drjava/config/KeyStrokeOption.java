@@ -66,7 +66,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
         Field currfield = fields[i];
         String name = currfield.getName();
         if (name.startsWith("VK_")) {
-          keys.put(new Integer(currfield.getInt(null)), name.substring(3));
+          keys.put(Integer.valueOf(currfield.getInt(null)), name.substring(3));
         }
       }
     }
@@ -158,7 +158,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       if (k.isOnKeyRelease()) {
         buf.append("released ");
       }
-      String key = keys.get(new Integer(k.getKeyCode()));
+      String key = keys.get(Integer.valueOf(k.getKeyCode()));
       if (key == null) {
         throw new IllegalArgumentException("Invalid keystroke");
       }

@@ -38,15 +38,14 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.event.*;
 import javax.swing.*;
-import java.io.Serializable;
+//import java.io.Serializable;
 
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 
-/**
- * Controller for an interactions script.
- * @version $Id$
- */
-public class InteractionsScriptController implements Serializable {
+/** Controller for an interactions script.
+  * @version $Id$
+  */
+public class InteractionsScriptController /* implements Serializable */ {
   /** Associated model. */
   private InteractionsScriptModel _model;
   /** Associated view. */
@@ -55,9 +54,9 @@ public class InteractionsScriptController implements Serializable {
   private InteractionsPane _interactionsPane;
 
   /** Builds a new interactions script pane and links it to the given model.
-   * @param model the InteractionsScriptModel to use
-   * @param closeAction how to close this script.
-   */
+    * @param model the InteractionsScriptModel to use
+    * @param closeAction how to close this script.
+    */
   public InteractionsScriptController(InteractionsScriptModel model, Action closeAction,
                                       InteractionsPane interactionsPane) {
     _model = model;

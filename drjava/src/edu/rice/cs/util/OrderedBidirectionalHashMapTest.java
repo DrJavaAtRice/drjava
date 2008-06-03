@@ -54,9 +54,9 @@ public class OrderedBidirectionalHashMapTest extends DrJavaTestCase {
     
     Double[] dbls = new Double[]{dbl1, dbl2, dbl3};
 
-    Integer int1 = new Integer(1);
-    Integer int2 = new Integer(2);
-    Integer int3 = new Integer(3);
+    Integer int1 = Integer.valueOf(1);
+    Integer int2 = Integer.valueOf(2);
+    Integer int3 = Integer.valueOf(3);
     
     Integer[] ints = new Integer[]{int1, int2, int3};
      
@@ -136,9 +136,9 @@ public class OrderedBidirectionalHashMapTest extends DrJavaTestCase {
     Double dbl2 = new Double(.2);
     Double dbl3 = new Double(.3);
 
-    Integer int1 = new Integer(1);
-    Integer int2 = new Integer(2);
-    Integer int3 = new Integer(3);
+    Integer int1 = Integer.valueOf(1);
+    Integer int2 = Integer.valueOf(2);
+    Integer int3 = Integer.valueOf(3);
     BidirectionalHashMap<Double, Integer> dToi = new OrderedBidirectionalHashMap<Double, Integer>();
 
     assertEquals("Initial size of 0", dToi.size(), 0);
@@ -194,9 +194,9 @@ public class OrderedBidirectionalHashMapTest extends DrJavaTestCase {
     String two = "2";
     String three = "3";
     
-    Integer int1 = new Integer(1);
-    Integer int2 = new Integer(2);
-    Integer int3 = new Integer(3);
+    Integer int1 = Integer.valueOf(1);
+    Integer int2 = Integer.valueOf(2);
+    Integer int3 = Integer.valueOf(3);
     
     OrderedBidirectionalHashMap<String, Integer> myhash = new OrderedBidirectionalHashMap<String, Integer>();
     

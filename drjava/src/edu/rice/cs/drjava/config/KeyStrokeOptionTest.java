@@ -74,7 +74,7 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
                  io.parse("alt shift COMMA"));
     assertEquals(KeyStroke.getKeyStroke('%'),
                  io.parse("typed %"));
-    assertEquals(KeyStroke.getKeyStroke(new Character('%'), InputEvent.ALT_MASK | InputEvent.CTRL_MASK),
+    assertEquals(KeyStroke.getKeyStroke(Character.valueOf('%'), InputEvent.ALT_MASK | InputEvent.CTRL_MASK),
                  io.parse("ctrl alt typed %"));
     
     try { io.parse("true"); fail(); }
@@ -101,7 +101,7 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
     ks = KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN, InputEvent.ALT_MASK | InputEvent.CTRL_MASK);
     assertEquals(ks, io.parse(io.format(ks)));
     
-    ks = KeyStroke.getKeyStroke(new Character('!'), InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK);
+    ks = KeyStroke.getKeyStroke(Character.valueOf('!'), InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK);
     assertEquals(ks, io.parse(io.format(ks)));
     ks = KeyStroke.getKeyStroke('!');
     assertEquals(ks, io.parse(io.format(ks)));
