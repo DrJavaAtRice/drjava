@@ -43,6 +43,8 @@ import edu.rice.cs.util.Lambda;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 /** Class representing binary operations that can be inserted as variables in external processes.
   * TO DO: does not override compareTo!
   * @version $Id$
@@ -151,7 +153,8 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
   }
   
   /** @return the hash code. */
-  public int hashCode() { return _name.hashCode() ^ _value.hashCode() ^ _op.hashCode() ^ _parse1.hashCode() ^ _parse2.hashCode() ^ 
-    _format.hashCode() ^ (_isCurrent ? 1 : 0);
+  public int hashCode() { 
+    return hash(_name.hashCode(), _value.hashCode(), _op.hashCode(), _parse1.hashCode(), _parse2.hashCode(), 
+                _format.hashCode(), (_isCurrent ? 1 : 0));
   }
 } 

@@ -383,11 +383,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset());
     }
-    public int hashCode() {
-      int result;
-      result = (_region != null ? _region.hashCode() : 0);
-      return result;
-    }
+    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
   
   

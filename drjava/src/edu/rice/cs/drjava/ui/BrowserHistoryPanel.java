@@ -59,6 +59,8 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 /** Panel for displaying browser history.
   * Currently not used because of synchronization problems.
   * This class is a swing view class and hence should only be accessed from the event-handling thread.
@@ -74,9 +76,9 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
   protected volatile AbstractAction _forwardAction;
   
   /** Constructs a new browser history panel.
-   *  This is swing view class and hence should only be accessed from the event-handling thread.
-   *  @param frame the MainFrame
-   */
+    *  This is swing view class and hence should only be accessed from the event-handling thread.
+    *  @param frame the MainFrame
+    */
   public BrowserHistoryPanel(final MainFrame frame) {
     super(frame, "Browser History");  // initializes inherited field _frame
     final BrowserHistoryManager rm = _model.getBrowserHistoryManager();
@@ -161,21 +163,21 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
       }
     };
     _backButton = new JButton(_backAction);
-
+    
     _forwardAction = new AbstractAction("Forward") {
       public void actionPerformed(ActionEvent ae) {
         forwardRegion();
       }
     };
     _forwardButton = new JButton(_forwardAction);
-
+    
     Action goToAction = new AbstractAction("Go to") {
       public void actionPerformed(ActionEvent ae) {
         goToRegion();
       }
     };
     _goToButton = new JButton(goToAction);
-
+    
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
         for (BrowserDocumentRegion r: getSelectedRegions()) {
@@ -202,7 +204,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     
     return buts;
   }
-
+  
   /** Update button state and text. */
   protected void updateButtons() {
     ArrayList<BrowserDocumentRegion> regs = getSelectedRegions();
@@ -246,11 +248,11 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
   }
   
   /** Factory method to create user objects put in the tree.
-   *  If subclasses extend RegionListUserObj, they need to override this method. */
+    *  If subclasses extend RegionListUserObj, they need to override this method. */
   protected RegionListUserObj<BrowserDocumentRegion> makeRegionListUserObj(BrowserDocumentRegion r) {
     return new BrowserHistoryListUserObj(r);
   }
-
+  
   /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
   protected class BrowserHistoryListUserObj extends RegionListUserObj<BrowserDocumentRegion> {
     public BrowserHistoryListUserObj(BrowserDocumentRegion r) { super(r); }
@@ -277,18 +279,14 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
       } finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
-       public boolean equals(Object other) {
+    public boolean equals(Object other) {
       if (other == null || other.getClass() != this.getClass()) return false;
       @SuppressWarnings("unchecked") BrowserHistoryListUserObj o = (BrowserHistoryListUserObj)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset());
     }
-    public int hashCode() {
-      int result;
-      result = (_region != null ? _region.hashCode() : 0);
-      return result;
-    }
+    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
 }
 

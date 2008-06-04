@@ -364,11 +364,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
               (o.region().getEndOffset() == region().getEndOffset()) &&
               (o._lineNumber == this._lineNumber));
     }
-    public int hashCode() {
-      int result;
-      result = (_region != null ? _region.hashCode() : 0);
-      return result;
-    }
+    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
+    
     public String toString() {
       final StringBuilder sb = new StringBuilder();
       sb.append("<html>");

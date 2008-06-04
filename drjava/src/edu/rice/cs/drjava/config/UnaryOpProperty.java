@@ -42,6 +42,8 @@ import edu.rice.cs.util.Lambda;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 /** Class representing unary operations that can be inserted as variables in external processes.
   * @version $Id$
   */
@@ -116,8 +118,8 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   }
   
   /** @return the hash code. */
-  public int hashCode() { return _name.hashCode() ^ _value.hashCode() ^ _op.hashCode() ^ _parse.hashCode() ^ 
-    _format.hashCode() ^ (_isCurrent ? 1 : 0);
+  public int hashCode() { return hash(_name.hashCode(), _value.hashCode(), _op.hashCode(), _parse.hashCode(), 
+    _format.hashCode(), (_isCurrent ? 1 : 0));
   }
 
   /** Lambda to parse a String into a Double. */

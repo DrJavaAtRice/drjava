@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.model;
 
 import java.util.Arrays;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 public interface Query {
   
   abstract static class Pos implements Query {
@@ -51,7 +53,7 @@ public interface Query {
       return o._pos == this._pos;
     }
     
-    public int hashCode() { return getClass().hashCode() ^ _pos; }
+    public int hashCode() { return hash(getClass().hashCode(), _pos); }
   }
   
   public static class IndentInformation extends Pos {
@@ -75,7 +77,7 @@ public interface Query {
       return o._pos == this._pos && o._opening == this._opening && o._closing == this._closing;
     }
     
-    public int hashCode() { return getClass().hashCode() ^ _pos ^ _opening ^ _closing; }
+    public int hashCode() { return hash(getClass().hashCode(), _pos, _opening, _closing); }
   }
   
   public static class PrevEnclosingBrace extends AbstractEnclosingBrace {
@@ -104,7 +106,8 @@ public interface Query {
     }
     
     public int hashCode() { 
-      return getClass().hashCode() ^ _pos ^ _chars[0] ^ _chars[_chars.length-1] ^ (_flag ? 1 : 0); }
+      return hash(getClass().hashCode(), _pos, _chars[0], _chars[_chars.length-1], (_flag ? 1 : 0)); 
+    }
   }
   
   public static class PrevDelimiter extends CharArrayAndFlag {
@@ -127,7 +130,7 @@ public interface Query {
     }
     
     public int hashCode() { 
-      return getClass().hashCode() ^ _pos ^ _whitespace[0] ^ _whitespace[_whitespace.length-1]; 
+      return hash(getClass().hashCode(), _pos, _whitespace[0], _whitespace[_whitespace.length-1]); 
     }
   }
   
@@ -149,8 +152,8 @@ public interface Query {
     }
     
     public int hashCode() { 
-      return getClass().hashCode() ^ _pos ^_delims[0] ^ _delims[_delims.length-1] ^ _whitespace[0] ^ 
-        _whitespace[_whitespace.length-1]; 
+      return hash(getClass().hashCode(), _pos ^_delims[0], _delims[_delims.length-1], _whitespace[0], 
+        _whitespace[_whitespace.length-1]); 
     }
   }
   
@@ -169,7 +172,7 @@ public interface Query {
       return o._pos == _pos && o._findChar == _findChar;
     }
     
-    public int hashCode() { return getClass().hashCode() ^ _pos ^ _findChar; }
+    public int hashCode() { return hash(getClass().hashCode(), _pos, _findChar); }
   }
   
   public static class LineStartPos extends Pos {
@@ -223,7 +226,7 @@ public interface Query {
       return o._pos == _pos && o._openCurlyPos == _openCurlyPos;
     }
     
-    public int hashCode() { return getClass().hashCode() ^ _pos ^ _openCurlyPos; }
+    public int hashCode() { return hash(getClass().hashCode(), _pos, _openCurlyPos); }
   }
   
   public static class AnonymousInnerClassIndex extends Pos {
@@ -243,6 +246,6 @@ public interface Query {
       return o._pos == _pos && o._qual == _qual;
     }
     
-    public int hashCode() { return getClass().hashCode() ^ _pos ^ (_qual ? 1 : 0); }
+    public int hashCode() { return hash(getClass().hashCode(), _pos, (_qual ? 1 : 0)); }
   }
 }

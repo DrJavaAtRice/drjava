@@ -121,6 +121,8 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
   
@@ -1098,7 +1100,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       return ((getClassName().equals(o.getClassName())) &&
               (getFullPackage().equals(o.getFullPackage())));
     }
-    public int hashCode() { return getClassName().hashCode() * 31 + getFullPackage().hashCode(); }
+    public int hashCode() { return hash(getClassName().hashCode(), getFullPackage().hashCode()); }
   }
   
   /** Wrapper class for the "Go to File" and "Auto-Complete" dialog list entries.

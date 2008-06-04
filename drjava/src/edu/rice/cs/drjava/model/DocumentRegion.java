@@ -42,6 +42,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import java.io.File;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 /** Class for a simple document region that records positions rather than offsets.
   * @version $Id$
   */
@@ -116,7 +118,7 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   }
       
   /** This hash function is consistent with equality. */
-  public int hashCode() { return docHashCode() ^ getStartOffset() ^ getEndOffset(); }
+  public int hashCode() { return hash(docHashCode(), getStartOffset(), getEndOffset()); }
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }

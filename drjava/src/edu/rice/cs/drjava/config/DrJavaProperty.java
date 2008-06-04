@@ -41,6 +41,8 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import static edu.rice.cs.util.HashUtilities.hash;
+
 /** Class representing values that can be inserted as variables in external processes.
  *  @version $Id$
  */
@@ -184,7 +186,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   }
 
   /** @return the hash code.  Hashing fails if keys are mutated! */
-  public int hashCode() { return _name.hashCode() ^ _value.hashCode() ^ (_isCurrent ? 1 : 0); }
+  public int hashCode() { return hash(_name.hashCode(), _value.hashCode(), (_isCurrent ? 1 : 0)); }
   
   /** Invalidate those properties that are listening to this property.
     * @param alreadyVisited set of properties already visited, to avoid cycles. */

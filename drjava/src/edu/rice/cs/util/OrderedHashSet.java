@@ -38,8 +38,8 @@ package edu.rice.cs.util;
 import java.util.*;
 
 /** A set class patterned after HashSet except that the construction order for elements is scrupulously maintained
- *  for the sake of supporting obvious list operations based on construction order (addition to the set). */
-
+  * for the sake of supporting obvious list operations based on construction order (addition to the set). 
+  */
 public class OrderedHashSet<Type> implements Collection<Type> {
   private HashSet<Type> elements = new HashSet<Type>();
   private ArrayList<Type> order = new ArrayList<Type>();

@@ -666,7 +666,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     TreePath path = getPathForLocation(x, y);
     if (path == null) return false;
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return false; }
+    if (ps == null) { return false; }
     for(TreePath p: ps) {
       if (path.equals(p)) { return true; }
     }
@@ -674,14 +674,14 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** @return true if at least one group of INavigatorItems is selected.  Only runs in event thread. */
-  public boolean isGroupSelected() { return getGroupSelectedCount()!=0; }
+  public boolean isGroupSelected() { return getGroupSelectedCount() != 0; }
   
   /** @return the number of groups selected. Only runs in event thread. */
   public int getGroupSelectedCount() {
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     int count = 0;
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return 0; }
+    if (ps == null) { return 0; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof InnerNode) { ++count; }
@@ -694,7 +694,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     ArrayList<File> l = new ArrayList<File>();
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return l; }
+    if (ps == null) { return l; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof FileNode) {

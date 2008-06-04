@@ -615,11 +615,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset());
     }
-    public int hashCode() {
-      int result;
-      result = (_region != null ? _region.hashCode() : 0);
-      return result;
-    }
+    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
   
   /** State pattern for improving performance during rapid updates. */
