@@ -121,7 +121,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     
     /* Reset interactions and wait until it completes */
 
-    System.err.println("reset interactions test reached");
+//    System.err.println("reset interactions test reached");
     InteractionsListener restartCommand = new DummyInteractionsListener() {
       public void interpreterReady(File wd) {
         synchronized(_restartLock) {

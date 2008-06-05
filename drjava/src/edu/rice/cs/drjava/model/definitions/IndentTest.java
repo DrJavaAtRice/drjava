@@ -963,11 +963,11 @@ public final class IndentTest extends DrJavaTestCase {
     
     doc.insertString(0, text, null);
     _assertContents(text, doc);
-    System.err.println("Original text:\n" + text);
+//    System.err.println("Original text:\n" + text);
     
     doc.indentLines(0, doc.getLength());
-    System.err.println("Indented text:\n" + doc.getText());
-    System.err.println("Correct text:\n" + indented);
+//    System.err.println("Indented text:\n" + doc.getText());
+//    System.err.println("Correct text:\n" + indented);
     _assertContents(indented, doc);
 //    fail("Asserted failure");
   }
@@ -986,10 +986,10 @@ public final class IndentTest extends DrJavaTestCase {
       "group.add(rbMenuItem);\n";
     doc.insertString(0, text, null);
     _assertContents(text, doc);
-    System.err.println("Original text:\n" + text);
-    System.err.println("Indented text:\n" + indented);
+//    System.err.println("Original text:\n" + text);
+//    System.err.println("Indented text:\n" + indented);
     doc.indentLines(0, doc.getLength());
-    System.err.println("Computed result:\n" + doc.getText());
+//    System.err.println("Computed result:\n" + doc.getText());
 //    fail("Asserted failure");
     _assertContents(indented, doc);
   }
@@ -1457,8 +1457,8 @@ public final class IndentTest extends DrJavaTestCase {
     
     doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
     
-    System.err.println("Indented Text is:\n" + doc.getText());
-    System.err.println("Correct Text is:\n" + _aligned);
+//    System.err.println("Indented Text is:\n" + doc.getText());
+//    System.err.println("Correct Text is:\n" + _aligned);
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }

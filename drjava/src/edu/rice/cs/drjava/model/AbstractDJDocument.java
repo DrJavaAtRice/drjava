@@ -708,6 +708,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Searching backwards, finds position of first character that is a given delimiter, skipping over balanced braces
     * if so instructed.  Does not look for delimiters inside a brace phrase if skipBracePhrases is true.  Ignores comments.
+    * Assumes that _currentPosition = pos. (?)
     * @param pos Position to start from
     * @param delims array of characters to search for
     * @param skipBracePhrases whether to look for delimiters inside brace phrases
@@ -726,64 +727,74 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       return cached.intValue();
     }
     
-    
     int reducedPos = pos;
     int i;  // index for for loop below
     acquireReadLock();
     try {
-      String text = getText(0, pos);
+      int lineStartPos = getLineStartPos(pos);
+      if (lineStartPos < 0) lineStartPos = 0;
       
-      synchronized(_reduced) {
-        final int origPos = _currentLocation;
-        
-        // Walk backwards from specificed position
-        for (i = pos - 1; i >= 0; i--) {
-          /* Invariant: reduced model points to reducedPos, text[i+1:pos] contains no valid delims, 
-           * 0 <= i < reducedPos <= pos */
-          // Move reduced model to location pos
-          _setCurrentLocation(i);  // reduced model points to i
-          if (isShadowed() || isCommentOpen(text, i)) {
+      if (lineStartPos >= pos) i = lineStartPos - 1;  // the line containing pos is empty  
+      else { 
+        assert lineStartPos < pos;
+        String line = getText(lineStartPos, pos - lineStartPos);  // the line containing pos
+        synchronized(_reduced) {
+          final int origPos = _currentLocation;
+          
+          // Walk backwards from specificed position, scanning current line for a delimiter
+          for (i = pos - 1; i >= lineStartPos; i--) {
+            /* Invariant: reduced model points to reducedPos, text[i+1:pos] contains no valid delims, 
+             * 0 <= i < reducedPos <= pos */
+            // Move reduced model to location pos
+            int irel = i - lineStartPos;
+            _setCurrentLocation(i);  // reduced model points to i
+            if (isShadowed() || isCommentOpen(line, irel)) {
 //            System.err.println(text.charAt(i) + " at pos " + i + " is shadowed");
-            continue;
-          }
-          char ch = text.charAt(i);
-          
-          if (match(ch, delims) /* && ! isShadowed() && (! skipParenPhrases || ! posInParenPhrase())*/) {
-            reducedPos = i;    // record valid match                                                                              
-            break;
-          }
-          
-          if (skipBracePhrases && match(ch, CLOSING_BRACES) ) {  // note that delims have already been matched
-//            Utilities.show("closing bracket is '" + ch + "' at pos " + i);
-            _setCurrentLocation(i + 1); // move cursor immediately to right of ch (a brace)
-//            Utilities.show("_currentLocation = " + _currentLocation);
-            int dist = balanceBackward();
-            if (dist == -1) { // if braces do not balance, return failure
-              i = -1;
-//              Utilities.show("dist = " + dist + " No matching brace found");
+              continue;
+            }
+            char ch = line.charAt(irel);
+            
+            if (match(ch, delims) /* && ! isShadowed() && (! skipParenPhrases || ! posInParenPhrase())*/) {
+              reducedPos = i;    // record valid match                                                                              
               break;
             }
-            assert dist > 0;
+            
+            if (skipBracePhrases && match(ch, CLOSING_BRACES) ) {  // note that delims have already been matched
+//            Utilities.show("closing bracket is '" + ch + "' at pos " + i);
+              _setCurrentLocation(i + 1); // move cursor immediately to right of ch (a brace)
+//            Utilities.show("_currentLocation = " + _currentLocation);
+              int dist = balanceBackward();
+              if (dist == -1) { // if braces do not balance, return failure
+                i = -1;
+//              Utilities.show("dist = " + dist + " No matching brace found");
+                break;
+              }
+              assert dist > 0;
 //            Utilities.show("text = '" + getText(i + 1 - dist, dist) + "' dist = " + dist + " matching bracket is '" + text.charAt(i) + "' at pos " + i);
-            _setCurrentLocation(i + 1 - dist);  // skip over balanced brace text, decrementing _currentLocation
-            i = _currentLocation;
-            // Decrementing i skips over matching brace
-            continue;
-          }
-        }  // end for
-        
-        /* Invariant: same as for loop except that -1 <= i <= reducedPos <= pos && 0 <= reducedPos */
-        
-        _setCurrentLocation(origPos);    // Restore the state of the reduced model;
-      }  // end synchronized
+              _setCurrentLocation(i + 1 - dist);  // skip over balanced brace text, decrementing _currentLocation
+              i = _currentLocation;
+              // Decrementing i skips over matching brace; could skip back into text preceding current line
+              continue;
+            }
+          }  // end for
+          
+          _setCurrentLocation(origPos);    // Restore the state of the reduced model;
+        }  // end synchronized
+      } // end processing of text on same line as pos
       
-      if (i == -1) reducedPos = -1; // No matching char was found
+      /* Invariant: same as for loop except that lineStartPos-1 <= i <= reducedPos <= pos && 0 <= reducedPos */
+      
+      if (i < lineStartPos) {  // No matching char was found on line containing pos; must look at preceding text
+        if (i <= 0) reducedPos = -1;  // No preceding text left to search
+        else reducedPos = findPrevDelimiter(i, delims, skipBracePhrases); 
+      }
+  
       _storeInCache(key, reducedPos, pos - 1);
 //      Utilities.show("findPrevDelimiter returning " + reducedPos);
       
       // Return position of matching char or ERROR_INDEX (-1) 
       return reducedPos;  
-    }
+    } // end try
     finally { releaseReadLock(); }
   }
   

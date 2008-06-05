@@ -265,7 +265,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Window adapter for "pseudo-modal" dialogs, i.e. non-modal dialogs that insist on keeping the focus. */
   protected java.util.HashMap<Window,WindowAdapter> _modalWindowAdapters 
     = new java.util.HashMap<Window,WindowAdapter>();
-
+  
   /** The owner of the modal window listener has already been taken by another window. */
   protected volatile Window _modalWindowAdapterOwner = null;
   
@@ -614,7 +614,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
   };
-
+  
   private final Action _exportProjectInOldFormatAction = 
     new AbstractAction("Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format") {
     public void actionPerformed(ActionEvent ae) {
@@ -770,7 +770,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile AbstractAction _cleanAction = new AbstractAction("Clean Build Directory") {
     public void actionPerformed(ActionEvent ae) { _clean(); }
   };
-
+  
   /** auto-refresh the project and open new files */
   private volatile AbstractAction _autoRefreshAction = new AbstractAction("Auto-Refresh Project") {
     public void actionPerformed(ActionEvent ae) { _model.autoRefreshProject(); }
@@ -1329,7 +1329,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public void gotoFileMatchingMask(String mask) {        
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     if ((docs == null) || (docs.size() == 0)) return; // do nothing
-
+    
     GoToFileListEntry currentEntry = null;
     ArrayList<GoToFileListEntry> list;
     list = new ArrayList<GoToFileListEntry>(docs.size());
@@ -1338,7 +1338,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (d.equals(_model.getActiveDocument())) currentEntry = entry;
       list.add(entry);
     }
-
+    
     PredictiveInputModel<GoToFileListEntry> pim =
       new PredictiveInputModel<GoToFileListEntry>(true, new PrefixStrategy<GoToFileListEntry>(), list);
     pim.setMask(mask);
@@ -1352,7 +1352,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //        if (docChanged) { addToBrowserHistory(); }
         _model.setActiveDocument(pim.getCurrentItem().doc);
         if (docChanged) { // defer executing this code until after active document switch is complete
-            EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+          EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
         }
       }
     }
@@ -1366,7 +1366,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //          if (docChanged) { addToBrowserHistory(); }
           _model.setActiveDocument(pim.getCurrentItem().doc);
           if (docChanged) { // defer executing this code until after active document switch is complete
-              EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+            EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
           }
         }
       }
@@ -3404,9 +3404,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     * in external process command lines. */
   public void setUpDrJavaProperties() {
     final String DEF_DIR = "${drjava.working.dir}";
-
+    
     DrJavaPropertySetup.setup(); 
-
+    
     // Files
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.current.file", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getActiveDocument().getRawFile(); }
@@ -3441,7 +3441,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                                   "Returns the working directory of the DrJava master JVM.\n"+
                                                                   "Optional attributes:\n"+
                                                                   "\trel=\"<dir to which output should be relative\""));
-
+    
     // Files
     PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
                                                                       "Returns a list of all files open in DrJava.\n"+
@@ -3529,7 +3529,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("default", null);
       }
     });
-
+    
     // Project
     PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode",
                                                                "Evaluates to true if a project is loaded.") {
@@ -3569,7 +3569,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                                    "Returns the current project file in DrJava.\n"+
                                                                    "Optional attributes:\n"+
                                                                    "\trel=\"<dir to which the output should be relative\""));
-
+    
     PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.main.class", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMainClass(); }
     },
@@ -3646,7 +3646,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         return l;
       }
     });
-
+    
     // Actions
     PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
                                                                      "Execute a \"Save All\" action.") {
@@ -4330,7 +4330,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (! couldClose) return false;
       
       disableFindAgainOnClose(projDocs); // disable "Find Again" for documents that are closed
-
+      
       // project file has been saved and all files closed
       if (quitting) return true;
       _model.closeProject(quitting);
@@ -4525,7 +4525,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       updateStatusField("Closing " + fileName);
       _model.setProjectChanged(true);
     }
-
+    
     disableFindAgainOnClose(l); // disable "Find Again" for documents that are closed
     
     // Either this is an external file or user actually wants to close it
@@ -4718,7 +4718,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     catch (IOException ioe) { _showIOError(ioe); }
     finally { hourglassOff(); }
   }
-
+  
   void _saveAllOld() {
     hourglassOn();
     File file = _currentProjFile;
@@ -4821,7 +4821,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         int rc = 1;
         if (!Utilities.TEST_MODE) {
           rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Change Extension?", JOptionPane.YES_NO_OPTION,
-                                                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                                            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         }
         if (rc == 0) {
           fileName = fileName.substring(0,fileName.length() - OLD_PROJECT_FILE_EXTENSION.length()) + 
@@ -5654,12 +5654,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   /** Returns the Files selected by the JFileChooser.
-   * @param fc File chooser presented to the user
-   * @param choice return value from fc
-   * @return Selected Files - this array will be size 1 for single-selection dialogs.
-   * @throws OperationCanceledException if file choice canceled
-   * @throws RuntimeException if fc returns a bad file or choice
-   */
+    * @param fc File chooser presented to the user
+    * @param choice return value from fc
+    * @return Selected Files - this array will be size 1 for single-selection dialogs.
+    * @throws OperationCanceledException if file choice canceled
+    * @throws RuntimeException if fc returns a bad file or choice
+    */
   private File[] getChosenFiles(JFileChooser fc, int choice) throws OperationCanceledException {
     switch (choice) {
       case JFileChooser.CANCEL_OPTION:
@@ -6281,8 +6281,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Called every time the debug mode checkbox is toggled. The resume and step
-   * functions should always be disabled.
-   */
+    * functions should always be disabled.
+    */
   private void _setDebugMenuItemsEnabled(boolean isEnabled) {
     
     _debuggerEnabledMenuItem.setSelected(isEnabled);
@@ -8128,7 +8128,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         .addButton(new JButton("No"))
         .setSelectable(true)
         .build();
-
+      
       boolean overwrite = false;
       
       if (files.length == 1) {
@@ -9102,14 +9102,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Sets the location of the main divider.
-   * (not currently used)
-   private void _setDividerLocation() {
-   int divLocation = _mainSplit.getHeight() -
-   _mainSplit.getDividerSize() -
-   (int)_tabbedPane.getMinimumSize().getHeight();
-   if (_mainSplit.getDividerLocation() > divLocation)
-   _mainSplit.setDividerLocation(divLocation);
-   }*/
+    * (not currently used)
+    private void _setDividerLocation() {
+    int divLocation = _mainSplit.getHeight() -
+    _mainSplit.getDividerSize() -
+    (int)_tabbedPane.getMinimumSize().getHeight();
+    if (_mainSplit.getDividerLocation() > divLocation)
+    _mainSplit.setDividerLocation(divLocation);
+    }*/
   
   /** Warns the user that the current file is open and query them if they wish to save over the currently open file. */
   private boolean _warnFileOpen(File f) {
@@ -9128,8 +9128,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Confirms with the user that the file should be overwritten.
-   * @return <code>true</code> iff the user accepts overwriting.
-   */
+    * @return <code>true</code> iff the user accepts overwriting.
+    */
   private boolean _verifyOverwrite() {
     Object[] options = {"Yes","No"};
     int n = JOptionPane.showOptionDialog(MainFrame.this,
@@ -9473,7 +9473,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     catch(XMLConfigException xce) { /* ignore drop */ }
   }
-
+  
   /** Open external process file in a jar file. */
   public static void openExtProcessJarFile(File file) {
     try {
@@ -9820,7 +9820,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     // else nothing to do; modal adapter is already owned by another window
   }
-
+  
   /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
     * @param w window trying to get the modal window listener
     * @param toFrontAction action to be performed after the window has been moved to the front again

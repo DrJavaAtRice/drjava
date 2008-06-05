@@ -91,7 +91,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
 
   public void testApplyThenResetDefault() {
     Color testColor = Color.decode("#ABCDEF");
-    System.err.println("NORMAL_COLOR in config = " + DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+//    System.err.println("NORMAL_COLOR in config = " + DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     _option.setValue(testColor);
     Utilities.clearEventQueue();
     _option.updateConfig();
