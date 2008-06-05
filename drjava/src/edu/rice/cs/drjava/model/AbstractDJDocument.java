@@ -419,11 +419,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   protected abstract void _styleChanged(); 
   
-  /** Clears the memozing cache of queries with offset greater than specified value.  Should be called every time the 
+  /** Clears the memozing cache of queries with offset >= than specified value.  Should be called every time the 
     * document is modified. */
   protected void _clearCache(int offset) {
     synchronized(_reduced) {
-      if (offset < 0) {
+      if (offset <= 0) {
         _queryCache.clear();
         _offsetToQueries.clear();
         return;
@@ -442,7 +442,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Add a character to the underlying reduced model. ASSUMEs _reduced lock is already held!
     * @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
-    _clearCache(_currentLocation);
+//    _clearCache(_currentLocation);  // redundant; already done in insertUpdate
     _reduced.insertChar(curChar);
   }
   
@@ -526,15 +526,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     IndentInfo info;
     acquireReadLock();
     try {
-      final int loc = _currentLocation;
-      Query key = new Query.IndentInformation(loc);
+      final int pos = _currentLocation;
+      Query key = new Query.IndentInformation(pos);
       
       IndentInfo cached = (IndentInfo) _checkCache(key);
       if (cached != null) return cached; 
       synchronized(_reduced) { 
         info = _reduced.getIndentInformation(); 
       } 
-      _storeInCache(key, info, loc - 1);
+      _storeInCache(key, info, pos - 1);
       
       return info;
     }
@@ -1092,7 +1092,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param whitespace characters to skip when looking for beginning of next statement
     */
   public String getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
-//    Utilities.show("getIdentOfCurrentStmt(" + pos + ", " + Arrays.toString(delims) + ", " + Arrays.toString(whitespace) + ")");
+//    Utilities.show("getIdentOfCurrentStmt(" + pos + ", " + Arrays.toString(delims) + ", " + Arrays.toString(whitespace) +
+//      ")");
     
 //        final Query key = new Query.IndentOfCurrStmt(pos, delims, whitespace);
 //        final String cached = (String) _checkCache(key);
@@ -1254,7 +1255,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       }
       
       if (i == -1) matchIndex = -1;
-      _storeInCache(key, matchIndex, Math.max(pos, matchIndex));
+      _storeInCache(key, matchIndex, Math.max(pos - 1, matchIndex));
     }
     catch (Throwable t) { throw new UnexpectedException(t); }
     finally { releaseReadLock(); }
@@ -1314,7 +1315,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         _setCurrentLocation(oldPos);
       }
       newPos = pos + dist;
-      _storeInCache(key, newPos, newPos + 1);
+      assert newPos == getLength() || _getText(newPos, 1).charAt(0) == '\n';
+      _storeInCache(key, newPos, newPos);
       return newPos;
     }
     finally { releaseReadLock(); }
@@ -1349,7 +1351,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           break;
         }
       }
-      _storeInCache(key, nonWSPos, Math.max(pos, nonWSPos));
+      _storeInCache(key, nonWSPos, Math.max(pos - 1, nonWSPos));
       return nonWSPos;  // may equal lineEndPos
     }
     finally { releaseReadLock(); }
@@ -1394,55 +1396,62 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     acquireReadLock();
     try {
-      final int endPos = getLength();
+      final int docLen = getLength();
       final int origPos = _currentLocation;
+      final int endPos = getLineEndPos(pos);
       
       synchronized(_reduced) {
-        
-        String text = getText(pos, endPos - pos);   // Get text from pos to end of document
+        String line = getText(pos, endPos - pos);   // Get text from pos to end of line
         _setCurrentLocation(pos);  // Move reduced model to location pos
-        
-        int i = pos;
-        int reducedPos = pos;
-        // Walk forward from specificed position
-        while (i < endPos) {
-          
-          // Check if character is whitespace
-          if (match(text.charAt(i-pos), whitespace)) {
-            i++;
-            continue;
+        try {
+          int i = pos;
+          int reducedPos = pos;
+          // Walk forward from specificed position
+          while (i < endPos) {
+            
+            // Check if character is whitespace
+            if (match(line.charAt(i-pos), whitespace)) {
+              i++;
+              continue;
+            }
+            // Found a non whitespace character
+            // Move reduced model to walker's location for subsequent processing
+            _setCurrentLocation(i);  // reduced model points to location i
+            reducedPos = i;
+            
+            // Check if non-ws char is within comment and if we want to ignore them.
+            if (! acceptComments &&
+                ((_reduced.getStateAtCurrent().equals(INSIDE_LINE_COMMENT)) ||
+                 (_reduced.getStateAtCurrent().equals(INSIDE_BLOCK_COMMENT)))) {
+              i++;  // TODO: increment i to skip over entire comment
+              continue;
+            }
+            
+            // Check if non-ws char is part of comment opening bracket and if we want to ignore them
+            if (! acceptComments && _isStartOfComment(line, i - pos)) {
+              // ith char is first char in comment open market; skip past this marker and continue searching
+              i = i + 2;  // TODO: increment i to skip over entire comment
+              continue;
+            }
+            
+            // Return position of matching char
+            _storeInCache(key, reducedPos, reducedPos);  // Cached answer depends only on text(0:reducedPos]
+//          _setCurrentLocation(origPos);
+            return reducedPos;
           }
-          // Found a non whitespace character
-          // Move reduced model to walker's location for subsequent processing
-          _setCurrentLocation(i);  // reduced model points to location i
-          reducedPos = i;
           
-          // Check if non-ws char is within comment and if we want to ignore them.
-          if (! acceptComments &&
-              ((_reduced.getStateAtCurrent().equals(INSIDE_LINE_COMMENT)) ||
-               (_reduced.getStateAtCurrent().equals(INSIDE_BLOCK_COMMENT)))) {
-            i++;  // TODO: increment i to skip over entire comment
-            continue;
+          // No matching char found on this line
+          if (endPos + 1 >= docLen) { // No matching char found in doc
+            _storeInCache(key, -1, Integer.MAX_VALUE);  // Any change to the document invalidates this result!
+//          _setCurrentLocation(origPos);
+            return -1;
           }
-          
-          // Check if non-ws char is part of comment opening bracket and if we want to ignore them
-          if (! acceptComments && _isStartOfComment(text, i - pos)) {
-            // ith char is first char in comment open market; skip past this marker and continue searching
-            i = i + 2;  // TODO: increment i to skip over entire comment
-            continue;
-          }
-          
-          // Return position of matching char
-          _storeInCache(key, reducedPos, reducedPos);  // Cached answer depends only on text(0:reducedPos)
-          _setCurrentLocation(origPos);
-          return reducedPos;
         }
+        finally { _setCurrentLocation(origPos); }  // restore _currentLocation
         
-        // No matching char found
-        _storeInCache(key, -1, Integer.MAX_VALUE);  // Any change to the document invalidates this result!
-        _setCurrentLocation(origPos);
-        return -1;
-      }
+      }  // end sync
+      // Search through remaining lines of document; recursion depth is bounded by number of blank lines following pos
+      return getFirstNonWSCharPos(endPos + 1, whitespace, acceptComments);
     }
     finally { releaseReadLock(); }
   }
@@ -1814,6 +1823,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try { return getText(0, getLength()); }  // calls method defined in DefaultStyledDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
+ 
+  /** Raw version of getText(int, int) that converts BadLocationException to UnexpectedException. */
+  public String _getText(int pos, int len) { 
+    try { return getText(pos, len); }  // calls method defined in DefaultStyledDocument
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
+  }
   
   /** Returns the byte image (as written to a file) of this document. */
   public byte[] getBytes() { return getText().getBytes(); }
@@ -1846,7 +1861,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   protected abstract int startCompoundEdit();
   protected abstract void endCompoundEdit(int i);
   protected abstract void endLastCompoundEdit();
-  protected abstract void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand);
+  protected abstract void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, 
+                                      Runnable doCommand);
   
   //Checks if the document is closed, and then throws an error if it is.
   
@@ -1861,7 +1877,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       _text = text;
     }
     
-    /** Inserts chars in reduced model and move location to end of insert; cache has already been selectively cleared. */
+    /** Inserts chars in reduced model and moves location to end of insert; cache has already been cleared. */
     public void run() {
       
 //      acquireReadLock();  // Unnecessary! exclusive readLock should already be held!
