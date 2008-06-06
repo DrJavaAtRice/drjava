@@ -67,8 +67,9 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public static final int ESCAPED_SINGLE_QUOTE_TYPE = findBrace("\\'");
   public static final int ESCAPED_DOUBLE_QUOTE_TYPE = findBrace("\\\"");
 
-  /** the type of the brace */
-  private int _type;
+  
+  private volatile int _type;  /** the type of this brace, which is MUTABLE via flip and setType */
+  private volatile int _size;  /** the size of this brace */
 
   /** Virtual constructor.
     * @param type the brace text
@@ -89,6 +90,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   private Brace(int type, ReducedModelState state) {
     super(state);
     _type = type;
+    _size = getType().length();
   }
 
   /** Get the text of the brace.
@@ -97,7 +99,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public String getType() { return (_type == BRACES_LENGTH) ? "!" : braces[_type]; }
 
   /** @return the size of the brace and its preceding gap. */
-  public int getSize() { return getType().length(); }
+  public int getSize() { return _size; }
 
   /** Converts a Brace to a String.
     * Used for debugging.
@@ -114,7 +116,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
     return val.toString();
   }
 
-  /** Flips the orientation of the brace. Useful for updating quote information. */
+  /** Flips the orientation of the brace. Useful for updating quote information. Does not change _size. */
   public void flip() {
     if (isOpen()) _type += 1;
     else if (_type < braces.length - 1) _type -= 1;
@@ -143,7 +145,8 @@ class Brace extends ReducedToken implements ReducedModelStates {
     type = type.intern();
     int index = findBrace(type);
     if (index == braces.length) throw new BraceException("Invalid brace type \"" + type + "\"");
-    else { _type = index; }
+    _type = index;
+    _size = getType().length();
   }
 
   /** Determine the brace _type of the given String. The integer value returned is only used internally.

@@ -134,7 +134,7 @@ class ModelList<T> {
     }
   }
 
-  /** The uterator class for ModelList.  Package private instead of private so that it can be extended.  The methods of
+  /** The iterator class for ModelList.  Package private instead of private so that it can be extended.  The methods of
     * this class constitute the only public interface for traversing and modifying ModelList objects (other than 
     * insertFront).  These iterators support concurrent modification from within the same thread.  They are NOT thread 
     * safe.

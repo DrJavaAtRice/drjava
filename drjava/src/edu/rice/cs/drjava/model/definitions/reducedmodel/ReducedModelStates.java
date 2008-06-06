@@ -36,11 +36,10 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * This interface contains the various constants used by the reduced model to
- * represent the states of various blocks in the document.
- * @version $Id$
- */
+/** This interface contains the various constants used by the reduced model to represent the states of various blocks
+  * in the document.
+  * @version $Id$
+  */
 public interface ReducedModelStates {
   
   public static final Free FREE                               = Free.ONLY;

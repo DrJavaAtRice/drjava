@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
   * @version $Id$
   */
 public abstract class ReducedToken implements ReducedModelStates {
-  private ReducedModelState _state;
+  private volatile ReducedModelState _state;
   
   public ReducedToken(ReducedModelState state) {
     _state = state;
@@ -61,7 +61,7 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public abstract void setType(String type);
   
-  /** Flip between open and closed.  Valid only for braces. */
+  /** Return the opposite of this ReducedToken in the same state. Valid only for braces. */
   public abstract void flip();
   
   /** Determine if the given token is a open/close match with this.
@@ -100,6 +100,16 @@ public abstract class ReducedToken implements ReducedModelStates {
     * @param state
     */
   public void setState(ReducedModelState state) { _state = state; }
+  
+  /** Increases the size of the gap.
+    * @param delta
+    */
+  public abstract void grow(int delta);
+  
+  /** Decreases the size of the gap.
+    * @param delta
+    */
+  public abstract void shrink(int delta);
   
   /** Indicates whether this brace is shadowed. Shadowing occurs when a brace has been swallowed by a
     * comment or an open quote.
@@ -155,8 +165,8 @@ public abstract class ReducedToken implements ReducedModelStates {
   public abstract boolean isBlockCommentEnd();
   
   /** Determines whether the current location is a new line.
-   * @return boolean
-   */
+    * @return boolean
+    */
   public abstract boolean isNewline();
   
   /** Returns whether the current location is a slash
@@ -198,16 +208,6 @@ public abstract class ReducedToken implements ReducedModelStates {
     * @return boolean
     */
   public abstract boolean isEscapedDoubleQuote();
-  
-  /** Increases the size of the gap.
-    * @param delta
-    */
-  public abstract void grow(int delta);
-  
-  /** Decreases the size of the gap.
-    * @param delta
-    */
-  public abstract void shrink(int delta);
   
   /** Determines whether the current location is an opening parenthesis.
     * @return boolean

@@ -75,7 +75,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private static DefinitionsEditorKit EDITOR_KIT;
   
   /* Minimum number of characters to trigger indent warning prompt */
-  private static int INDENT_WARNING_THRESHOLD = 80000;
+  private static int INDENT_WARNING_THRESHOLD = 200000;
     
   /** Our parent window. */
   private final MainFrame _mainFrame;

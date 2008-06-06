@@ -1343,7 +1343,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return null if not in project mode
     */
   public File[] getNewFilesInProject() {
-
+    
     ArrayList<File> files = new ArrayList<File>();
     File projRoot = _state.getProjectRoot();
     if(projRoot == null)
@@ -1354,18 +1354,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     } catch(IOException e) { return null; }
     catch(OperationCanceledException e) { return null; }
     catch(AlreadyOpenException e) { return null; }
-
+    
     for(File f : allFiles) {
       if(!isAlreadyOpen(f) && !_state.isExcludedFile(f)) {
         files.add(f);
       }
     }
-
+    
     return files.toArray(new File[files.size()]);
   }
   
   /** Searches the source folder (recursively) for new files and opens them.
-   */
+    */
   public void openNewFilesInProject() {
     File[] newFiles = getNewFilesInProject();
     if (newFiles == null) return;
@@ -1389,7 +1389,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected void saveAllFilesHelper(FileSaveSelector com) throws IOException {
     boolean first = true;
     boolean isProjActive = isProjectActive();
-
+    
     List<OpenDefinitionsDocument> docsToWrite = getOpenDefinitionsDocuments();
     while(docsToWrite.size()>0) {
       ArrayList<OpenDefinitionsDocument> readOnlyDocs = new ArrayList<OpenDefinitionsDocument>();
@@ -1459,7 +1459,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.show("Fetched project root is " + projectRoot);
     
 //    List<File> exCp = new LinkedList<File>();  // not used
-     
+    
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       
       File f = doc.getFile();
@@ -1574,7 +1574,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       if (res.length==0) { return; /* read-only, do not overwrite */ }
     }
-
+    
     ProjectProfile builder = _makeProjectProfile(file, info);
     // write to disk
     builder.write();
@@ -1655,7 +1655,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File createJarFile  = ir.getCreateJarFile ();
     int createJarFlags = ir.getCreateJarFlags();
     final boolean autoRefresh = ir.getAutoRefreshStatus();
-
+    
     // clear browser, breakpoint, and bookmark histories
     getBrowserHistoryManager().clearBrowserRegions();
     getBreakpointManager().clearRegions();
@@ -1721,7 +1721,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         modifiedFiles.add(f);
         f.setSavedModDate (f.lastModified());
       }
-
+      
       if (f.isActive()) { active = f; }
       projFiles.add(f);
     }
@@ -1775,12 +1775,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
     }
-
+    
     //Set active document from project file
     if (active != null) {
       setActiveDocument(getDocumentForFile(active));
     }
-
+    
     
     // set watches
     try { getDebugger().removeAllWatches(); }
@@ -1791,7 +1791,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // set bookmarks
-
+    
     try {
       for (final Region bm: ir.getBookmarks()) {
         File f = bm.getFile();
@@ -1807,7 +1807,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (_documentNavigator instanceof JTreeSortNavigator) 
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths()); 
-
+    
     if (_state.getAutoRefreshStatus()) openNewFilesInProject(); 
   }  // end _loadProject
   
@@ -2392,7 +2392,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File f = new File(root + System.getProperty("file.separator") + fileName);
     return f.exists() ? f : FileOps.NULL_FILE;
   }
- 
+  
   /** Add the current location to the browser history.  Aborts if not run in event thread. */
   public void addToBrowserHistory() {
     final OpenDefinitionsDocument doc = getActiveDocument();
@@ -2699,7 +2699,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Getter for lexicographic name; used to sort documents into segemented lexicographic ordder */
     public String getLexiName() { return _lexiName; }
-  
+    
     /** Returns the Pageable object for printing.
       * @return A Pageable representing this document.
       */
@@ -2707,7 +2707,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Clears the pageable object used to hold the print job. */
     public void cleanUpPrintJob() { _book = null; }
-  
+    
     
     //--------------- Simple Predicates ---------------//
     
@@ -2876,7 +2876,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         public String toString() { return ConcreteOpenDefDoc.this.toString(); }
       };
     }
-   
+    
     /** Saves the document with a FileWriter.  If the file name is already set, the method will use
       * that name instead of whatever selector is passed in.
       * @param com a selector that picks the file name if the doc is untitled
@@ -3056,7 +3056,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Returns true if this document is resident in memory. _cacheAdapter should be non-null. */
     public boolean isReady() { return _cacheAdapter != null && _cacheAdapter.isReady(); }
-
+    
     /** Determines if the document has been modified since the last save.
       * @return true if the document has been modified
       */
@@ -3142,7 +3142,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return true;
       }
     }
-
+    
     /** Returns the class file for this source document by searching the source roots of open documents, the
       * system classpath, and the "extra.classpath ".  Returns NULL_FILE if the class file could not be found.
       */
@@ -3226,7 +3226,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       return false;
     }
-
+    
     /** Degenerate version of close; does not remove breakpoints in this document */
     public void close() {
       removeFromDebugger();
@@ -3235,7 +3235,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Reverts current ODD to file content on disk. */
     public void revertFile() throws IOException {
-
+      
       final OpenDefinitionsDocument doc = this;
       
       if (doc.isUntitled()) throw new UnexpectedException("Cannot revert an Untitled file!");
@@ -3246,7 +3246,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       getBookmarkManager().removeRegions(this);
       for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
       doc.clearBrowserRegions();
-
+      
       try {
         //this line precedes .remove() so that an invalid file is not cleared before this fact is discovered.
         File file = doc.getFile();
@@ -3663,7 +3663,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDefaultRootElement().getElement(line).getStartOffset();
     }
     
-     /** Add a region manager for find results to this document.
+    /** Add a region manager for find results to this document.
       * @param rm the global model's region manager */
     public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.add(rm); }
     

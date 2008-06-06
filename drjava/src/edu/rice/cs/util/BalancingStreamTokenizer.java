@@ -214,19 +214,13 @@ public class BalancingStreamTokenizer {
   /** Set the stream tokenizer the the state specified.
    * @param state state
    */
-  public void setState(State state) {
-    _state = state;
-  }
+  public void setState(State state) { _state = state; }
   
   /** Push the current state onto the stack. */
-  protected void pushState() {
-    _stateStack.push(_state);
-  }
+  protected void pushState() { _stateStack.push(_state); }
   
   /** Pops the top of the state stack and makes it the current state. */
-  protected void popState() {
-    setState(_stateStack.pop());
-  }
+  protected void popState() { setState(_stateStack.pop()); }
 
   /** Returns the type of the current token. */
   public Token token() { return _token; }
