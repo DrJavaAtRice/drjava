@@ -46,7 +46,6 @@ import java.util.Iterator;
 import static edu.rice.cs.util.HashUtilities.hash;
 
 /** Class representing binary operations that can be inserted as variables in external processes.
-  * TO DO: does not override compareTo!
   * @version $Id$
   */
 public class BinaryOpProperty<P,Q,R> extends EagerProperty {

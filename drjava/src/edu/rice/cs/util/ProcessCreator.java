@@ -48,58 +48,88 @@ import java.util.Properties;
 /**
  * This class abstracts out process creation, similar to ProcessCreator,
  * which is only available in Java 1.5.
+ * This ProcessCreator cannot deal with process sequences and chains.
+ * It can only create one processes.
  */
 
 public class ProcessCreator {
-  /** Separator used between processes. */
-  public static final String PROCESS_SEPARATOR = (File.pathSeparatorChar==':')?";":":";
-  
-  protected String _cmdline;
+  protected String _cmdline = null;
   protected String _workdir;
+  protected String[] _cmdarray; // command line, already split
   protected Map<String,String> _env;
-    
+  
+  /** Degenerate constructor, only for subclasses that completely override this class. */
+  protected ProcessCreator() { }
+  
   /** Constructor for a process creator with the given command line and map of properties.
-   * @param cmdline command line
-   * @param workdir working directory
-   */
+    * @param cmdline command line
+    * @param workdir working directory
+    */
   public ProcessCreator(String cmdline, String workdir) {
     _cmdline = cmdline;
     _workdir = workdir;
   }
+
+  /** Constructor for a process creator with the given command line already split up,
+    * and map of properties.
+    * @param cmdarray array of command line arguments
+    * @param workdir working directory
+    */
+  public ProcessCreator(String[] cmdarray, String workdir) {
+    _cmdarray = cmdarray;
+    _workdir = workdir;
+  }
+  
+  /** Cached copy of the reconstructed command line. */
+  protected String _cachedCmdLine = null;
   
   /** Get the command line.
-   * @return command line
-   */
+    * @return command line
+    */
   public String cmdline() {
-    return _cmdline;
+    if (_cmdline==null) {
+      if (_cachedCmdLine==null) {
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<_cmdarray.length; ++i) {
+          sb.append(" ");
+          sb.append(StringOps.unescapeSpacesWith1bHex(_cmdarray[i]));
+        }
+        _cachedCmdLine = sb.toString();
+        if (_cachedCmdLine.length()>0) {
+          _cachedCmdLine = _cachedCmdLine.substring(1);
+        }
+      }
+      return _cachedCmdLine;
+    }
+    else {
+      return _cmdline;
+    }
   }
   
   /** Returns a map of this process creator's environment.
-   * @return environment map
-   */
+    * @return environment map
+    */
   public Map<String,String> environment() {
     return _env;
   }
   
   /** Returns this process creator's working directory.
-   * @return working directory
-   */
+    * @return working directory
+    */
   public String workDir() {
     return _workdir;
   }
-
+  
   /** Starts a new process using the attributes of this process creator.
-   */
+    */
   public Process start() throws IOException {
-    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
-    String[] cmdarray = new String[cmds.size()];
-    for (int i=0; i<cmds.size(); ++i) {
-      cmdarray[i] = StringOps.unescapeSpacesWith1bHex(cmds.get(i));
-    }
+    // set up work directory
     String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
     workdir = StringOps.unescapeSpacesWith1bHex(workdir);
     File dir = null;
     if (!workdir.trim().equals("")) { dir = new File(workdir); }
+    
+    // set up environment
     String[] env = null;
     if ((_env!=null) && (_env.size()>0)) {
       env = new String[_env.size()];
@@ -110,10 +140,16 @@ public class ProcessCreator {
       }
     }
     
-    // edu.rice.cs.util.Log log = new edu.rice.cs.util.Log("process.txt", true);
-    // for(String c: cmdarray) { log.log(c); }
-    // log.log("workdir: "+dir);
+    // set up command line, if necessary
+    if (_cmdline!=null) {
+      String replacedCmdLine = StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
+      List<String> cmds = StringOps.commandLineToList(replacedCmdLine);
+      _cmdarray = new String[cmds.size()];
+      for (int i=0; i<cmds.size(); ++i) {
+        _cmdarray[i] = StringOps.unescapeSpacesWith1bHex(cmds.get(i));
+      }
+    }
     
-    return Runtime.getRuntime().exec(cmdarray,env,dir);
+    return Runtime.getRuntime().exec(_cmdarray,env,dir);
   }
 }

@@ -2924,6 +2924,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return true if the file was saved, false if the operation was canceled
       */
     public boolean saveFileAs(FileSaveSelector com) throws IOException {
+      File oldFile = getRawFile();
       // Update _packageName since modifiedSinceSaved flag will be set to false
       _packageName = getDocument().getPackageName();
       try {
@@ -2975,6 +2976,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             }
           });
           resetModification();
+          if (!oldFile.equals(file)) {
+            /* remove regions for this document */
+            removeFromDebugger();
+            getBreakpointManager().removeRegions(this);
+            getBookmarkManager().removeRegions(this);
+            for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
+            clearBrowserRegions();
+          }
           synchronized(_documentsRepos) {
             File f = getRawFile();
 //            OpenDefinitionsDocument d = _documentsRepos.get(f);
@@ -2983,7 +2992,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             _documentsRepos.remove(f);
             _documentsRepos.put(file, this);
           }
-          setFile(file);         
+          setFile(file);
           
           // this.getPackageName does not return "" if this is untitled and contains a legal package declaration     
 //          try {
@@ -3005,7 +3014,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
           
           /* set project changed flag */
-          setProjectChanged(true);
+          setProjectChanged(true);          
         }
         return true;
       }

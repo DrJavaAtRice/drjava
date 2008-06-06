@@ -260,6 +260,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     else if (_doc != null) { odd = _doc.get(); }
     if (odd != null) {
       _regionManager.clearRegions();
+      _regionRootNode.removeAllChildren();
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord,
                            _noComments, _noTestCases, odd, _regionManager, this);
     }

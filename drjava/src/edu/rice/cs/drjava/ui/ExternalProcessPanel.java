@@ -376,9 +376,22 @@ public class ExternalProcessPanel extends AbortablePanel {
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() {
-    _abortButton.setEnabled((_is!=null) || (_erris!=null));
-    _updateNowButton.setEnabled((_is!=null) || (_erris!=null));
-    _runAgainButton.setEnabled((_is==null) || (_erris==null));
+    boolean ended = true;
+    if (_p!=null) {
+      try {
+        // try to get exitValue() to see if process has terminated; exit value is not otherwise important
+        int ignored = _p.exitValue();
+        // if no exception is thrown, then the process has finished
+        ended = true;
+      }
+      catch(IllegalThreadStateException e) {
+        // process has NOT finished yet
+        ended = false;
+      }
+    }
+    _abortButton.setEnabled((_is!=null) && (_erris!=null) && (!ended));
+    _updateNowButton.setEnabled((_is!=null) && (_erris!=null) && (!ended));
+    _runAgainButton.setEnabled((_is==null) || (_erris==null) || (ended));
   }  
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
@@ -411,9 +424,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     * @param finish whether to read the entire rest */
   protected void readText(final boolean finish) {
     // MainFrame.LOG.log("readText");
-    if (((_is!=null) || (_erris!=null)) &&
-        (_updateNowButton.isEnabled())) {
-      _updateNowButton.setEnabled(false);
+    if (((_is!=null) || (_erris!=null))) {
       _changeCount = 0;
       // MainFrame.LOG.log("\tgot text");
       try {
@@ -470,7 +481,16 @@ public class ExternalProcessPanel extends AbortablePanel {
       catch(IOException ioe) {
         // MainFrame.LOG.log("\taborted");
         // stop polling
-        _sb.append("\n\nI/O Exception reading from process\n");
+        if (_p!=null) {
+          try {
+            _p.exitValue();
+            // if we get here, process has finished, and we don't display the I/O exception
+          }
+          catch(IllegalThreadStateException e) {
+            // process has NOT finished yet, display the I/O exception
+            _sb.append("\n\nI/O Exception reading from process\n");
+          }
+        }
         if (finish) { _changeCount = 1; } else { ++_changeCount; }
         abortActionPerformed(null);
       }
@@ -481,16 +501,23 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected void updateText() {
     // MainFrame.LOG.log("updateText");
     if (_updateNowButton.isEnabled()) {
-      try {
-        if ((_is!=null) && (_p!=null) &&
-            (_is.ready()) &&
-            (_p.getInputStream().available()>0)) { readText(false); }
-      }
-      catch(IOException ioe) {
-        _sb.append("\n\nI/O Exception reading from process\n");
-        abortActionPerformed(null);
-        ++_changeCount;
-      }
+//      try {
+//        if ((_is!=null) && (_p!=null) &&
+//            (_is.ready()) &&
+//            (_p.getInputStream().available()>0)) { readText(false); }
+//      }
+//      catch(IOException ioe) {
+//        try {
+//          _p.exitValue();
+//          // if we get here, process has finished, and we don't display the I/O exception
+//        }
+//        catch(IllegalThreadStateException e) {
+//          // process has NOT finished yet, display the I/O exception
+//          _sb.append("\n\nI/O Exception reading from process\n");
+//        }
+//        abortActionPerformed(null);
+//        ++_changeCount;
+//      }
       if (_changeCount>0) {
         _changeCount = 0;
         SwingUtilities.invokeLater(new Runnable() {

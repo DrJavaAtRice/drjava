@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.util.ProcessCreator;
+import edu.rice.cs.util.GeneralProcessCreator;
 import edu.rice.cs.util.JVMProcessCreator;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -1193,7 +1194,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Run a command and return an external process panel. */
   public ExternalProcessPanel runCommand(String name, String cmdline, String workdir) {
-    ProcessCreator pc = new ProcessCreator(cmdline, workdir.trim());
+    ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim());
     String label = "External";
     if (!name.equals("")) { label += ": "+name; }
     final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);

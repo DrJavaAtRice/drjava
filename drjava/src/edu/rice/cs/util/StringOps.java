@@ -619,6 +619,111 @@ public abstract class StringOps {
     }
     return cmds;
   }
+  
+  /** Convert a command line into a list of list of lists of individual
+    * arguments. The outermost list is a list of list of lists of arguments
+    * for processes separated by ProcessChain.PROCESS_SEPARATOR (either ';'
+    * or ':', depending on which is NOT File.pathSeparatorChar).
+    * The lists contained in the outermost list are lists of lists of
+    * arguments for processes in the same piping chain, i.e. processes
+    * separated by '|'.
+    * The innermost lists are lists of arguments for the individual
+    * processes.
+    * This method keeps quoted parts together using ", ' and `.
+    * It also keeps treats a '\u001b' followed by a space as non-breaking space.
+    * And a double '\u001b' becomes a single '\u001b'. 
+    * It does not allow escaping of the quote characters. */
+  public static List<List<List<String>>> commandLineToLists(String cmdline) {
+    BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(cmdline));
+    tok.wordRange(0,255);
+    tok.addQuotes("${", "}");
+    tok.addQuotes("\"", "\"");
+    tok.addQuotes("'", "'");
+    tok.addQuotes("`", "`");
+    tok.addKeyword(ProcessChain.PROCESS_SEPARATOR);
+    tok.addKeyword(ProcessChain.PIPE_SEPARATOR);
+    // add whitespace characters as keyword, as per Character.isWhitespace
+    tok.addKeyword(" ");
+    tok.addKeyword(new Character((char)0x09).toString()); // horizontal tab
+    tok.addKeyword(new Character((char)0x0A).toString()); // line feed
+    tok.addKeyword(new Character((char)0x0B).toString()); // vertical tab
+    tok.addKeyword(new Character((char)0x0C).toString()); // form feed / Character.SPACE_SEPARATOR
+    tok.addKeyword(new Character((char)0x0D).toString()); // carriage return / Character.LINE_SEPARATOR
+    tok.addKeyword(new Character((char)0x0E).toString()); // carriage return / Character.PARAGRAPH_SEPARATOR
+    tok.addKeyword(new Character((char)0x1C).toString()); // file separator
+    tok.addKeyword(new Character((char)0x1D).toString()); // group separator
+    tok.addKeyword(new Character((char)0x1E).toString()); // record separator
+    tok.addKeyword(new Character((char)0x1F).toString()); // unit separator
+    // read tokens; concatenate tokens until keyword is found
+    String n = null, p = null;
+    BalancingStreamTokenizer.Token pTok = BalancingStreamTokenizer.Token.NONE;
+    StringBuilder sb = new StringBuilder();
+    List<List<List<String>>> lll = new ArrayList<List<List<String>>>();
+    List<List<String>> ll = new ArrayList<List<String>>();
+    List<String> l = new ArrayList<String>();
+    try {
+      while((n=tok.getNextToken())!=null) {
+        if (tok.token()==BalancingStreamTokenizer.Token.KEYWORD) {
+          if (n.equals(ProcessChain.PROCESS_SEPARATOR)) {
+            // add the current string to the argument list and start a new argument
+            String arg = sb.toString();
+            sb.setLength(0);
+            if (arg.length()>0) { l.add(arg); }
+            
+            // add the current list of arguments to the list of list and start a new
+            // argument list
+            ll.add(l);
+            l = new ArrayList<String>();
+
+            // add the current list of list to the outermost list and start a new
+            // list of lists
+            lll.add(ll);
+            ll = new ArrayList<List<String>>();
+          }
+          else if (n.equals(ProcessChain.PIPE_SEPARATOR)) {
+            // add the current string to the argument list and start a new argument
+            String arg = sb.toString();
+            sb.setLength(0);
+            if (arg.length()>0) { l.add(arg); }
+            
+            // add the current list of arguments to the list of list and start a new
+            // argument list
+            ll.add(l);
+            l = new ArrayList<String>();
+          }
+          else { // must be whitespace
+            // add the current string to the argument list and start a new argument
+            String arg = sb.toString();
+            sb.setLength(0);
+            if (arg.length()>0) { l.add(arg); }
+          }
+        }
+        else {
+          sb.append(n);
+        }
+        p = n;
+      }
+    }
+    catch(IOException e) { /* ignore, return what we have */ }
+    
+    // add the current string to the argument list and start a new argument
+    String arg = sb.toString();
+    sb.setLength(0);
+    if (arg.length()>0) { l.add(arg); }
+    
+    // add the current list of arguments to the list of list and start a new
+    // argument list
+    ll.add(l);
+    l = new ArrayList<String>();
+    
+    // add the current list of list to the outermost list and start a new
+    // list of lists
+    lll.add(ll);
+    ll = new ArrayList<List<String>>();    
+
+    return lll;
+  }
+
     
   /** Replace variables of the form "${variable}" with the value associated with the string "variable" in the
    * provided hash table.

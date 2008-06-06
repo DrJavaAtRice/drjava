@@ -46,7 +46,7 @@ import static edu.rice.cs.util.HashUtilities.hash;
 /** Class representing values that can be inserted as variables in external processes.
  *  @version $Id$
  */
-public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
+public abstract class DrJavaProperty {
   /** Whether the invalidation listening mechanism has been deactivated due to an error. */
   public volatile boolean DEACTIVATED_DUE_TO_ERROR = false;
   
@@ -165,15 +165,6 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
     }
     other._listening.add(this);
     return this;
-  }
-  
-  /** Compare two properties lexicographically as tuples (_name, _value, _isCurrent). */
-  public int compareTo(DrJavaProperty o) { 
-    int nameDif = _name.compareTo(o._name);
-    if (nameDif != 0) return nameDif;
-    int valDif = _value.compareTo(o._value);
-    if (valDif != 0) return valDif;
-    return (_isCurrent == o._isCurrent) ? 0 : (_isCurrent ? 1 : -1);  // false < true in this ascending ordering
   }
   
   /** @return true if the specified property is equal to this one. */

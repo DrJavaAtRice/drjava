@@ -48,18 +48,65 @@ public class StreamRedirectThread extends Thread {
 
     /// Data buffer size
     private static final int BUFFER_SIZE = 2048;
+    
+    /// When stop flag is set to true, this thread should stop copying.
+    private volatile boolean stop = false;
+    
+    /// When stop flag is set to true, the streams are closed when copying has stopped.
+    private volatile boolean close = true;
 
+    /**
+     * Constructor
+     *
+     * @param name  thread name
+     * @param in    stream to copy from
+     * @param out   stream to copy to
+     */
+    public StreamRedirectThread(String name, InputStream in, OutputStream out) {
+        this(name,in,out,true);
+    }
+    
     /**
      * Constructor
      *
      * @param name thread name
      * @param in   stream to copy from
      * @param out  stream to copy to
+     * @param close true if the streams should be closed after copying has ended
      */
-    public StreamRedirectThread(String name, InputStream in, OutputStream out) {
+    public StreamRedirectThread(String name, InputStream in, OutputStream out, boolean close) {
         super(name);
-        this.in = new InputStreamReader(in);
-        this.out = new OutputStreamWriter(out);
+        this.close = close;
+        this.in = new BufferedReader(new InputStreamReader(in));
+        this.out = new BufferedWriter(new OutputStreamWriter(out));
+        setPriority(Thread.MAX_PRIORITY - 1);
+    }
+    
+    /**
+     * Constructor
+     *
+     * @param name  thread name
+     * @param in    stream to copy from
+     * @param out   stream to copy to
+     * @param tg    thread group for this thread
+     */
+    public StreamRedirectThread(String name, InputStream in, OutputStream out, ThreadGroup tg) {
+        this(name,in,out,true,tg);
+    }
+    /**
+     * Constructor
+     *
+     * @param name  thread name
+     * @param in    stream to copy from
+     * @param out   stream to copy to
+     * @param close true if the streams should be closed after copying has ended
+     * @param tg    thread group for this thread
+     */
+    public StreamRedirectThread(String name, InputStream in, OutputStream out, boolean close, ThreadGroup tg) {
+        super(tg,name);
+        this.close = close;
+        this.in = new BufferedReader(new InputStreamReader(in));
+        this.out = new BufferedWriter(new OutputStreamWriter(out));
         setPriority(Thread.MAX_PRIORITY - 1);
     }
 
@@ -70,14 +117,35 @@ public class StreamRedirectThread extends Thread {
         try {
             char[] cbuf = new char[BUFFER_SIZE];
             int count;
-            while ((count = in.read(cbuf, 0, BUFFER_SIZE)) >= 0) {
-                out.write(cbuf, 0, count);
-                out.flush();
+            while ((!stop) && ((count = in.read(cbuf, 0, BUFFER_SIZE)) >= 0)) {
+                try {
+                    out.write(cbuf, 0, count);
+                    out.flush();
+                }
+                catch (IOException exc) {
+                    GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" had IOException while writing: "+exc);
+                    throw new StreamRedirectException("An error occurred during stream redirection, while piping data into a process.",
+                                                      exc);
+                }
             }
+            GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" finished copying");
             out.flush();
+            if (close) {
+              out.close();
+              in.close();
+            }
         }
         catch (IOException exc) {
-          // ignore
+          GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" had IOException: "+exc);
+          throw new StreamRedirectException("An error occurred during stream redirection, while piping data out of a process.",
+                                            exc);
         }
+    }
+    
+    /**
+     * Tell the thread to stop copying.
+     */
+    public void setStopFlag() {
+        stop = true;
     }
 }

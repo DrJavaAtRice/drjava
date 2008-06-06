@@ -1137,7 +1137,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                              "(if not defined, ${path.separator}, which is "+File.pathSeparator+
                                                              "\toutsep=\"<separator between elements in the output>\"\n"+
                                                              "(if not defined, ${process.separator}, which is "+
-                                                             edu.rice.cs.util.ProcessCreator.PROCESS_SEPARATOR+
+                                                             edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR+
                                                              " on this machine, will be used)\n"+
                                                              "\teach=\"<number of elements to process as one piece>\"\n"+
                                                              "(if not defined, 1 is used)") {
@@ -1209,7 +1209,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.put("var", null);
         _attributes.put("cmd", null);
         _attributes.put("sep", File.pathSeparator);
-        _attributes.put("outsep", edu.rice.cs.util.ProcessCreator.PROCESS_SEPARATOR);
+        _attributes.put("outsep", edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR);
         _attributes.put("each", "1");
       }
       public String toString() { return "--uninitialized--"; }
@@ -1229,7 +1229,7 @@ public class DrJavaPropertySetup implements OptionConstants {
     });
     
     PropertyMaps.ONLY.setProperty("Config", new ConstantProperty("process.separator",
-                                                                 edu.rice.cs.util.ProcessCreator.PROCESS_SEPARATOR,
+                                                                 edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR,
                                                                  "This property contains the separator used between "+
                                                                  "processes."));
   }
