@@ -85,7 +85,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     // Delimiter must be at the end of its line (ignoring whitespace & comments)
     int firstNonWSAfterDelimiter;
     try {
-      firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos+1);
+      firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos + 1);
       // will return ERROR_INDEX (-1) if we hit the end of the document
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }

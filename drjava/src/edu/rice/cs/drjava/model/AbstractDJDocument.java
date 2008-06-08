@@ -657,7 +657,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         _setCurrentLocation(pos);  // reduced model points to pos == reducedPos
         
         // Walk forward from specificed position
-        for (i = pos+1; i < text.length(); i++) {
+        for (i = pos + 1; i < text.length(); i++) {
           /* Invariant: reduced model points to reducedPos, text[pos:i-1] contains no valid delims, 
            * pos <= reducedPos < i <= text.length() */
           
@@ -670,9 +670,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
             if (isShadowed()) continue;  // ignore matching char 
             else {
               // found valid matching char
-              if (text.charAt(i) == opening) {
-                ++braceBalance;
-              }
+              if (text.charAt(i) == opening) ++braceBalance;
               else {
                 if (braceBalance == 0) break; // found our closing brace
                 --braceBalance;
@@ -707,8 +705,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Searching backwards, finds position of first character that is a given delimiter, skipping over balanced braces
-    * if so instructed.  Does not look for delimiters inside a brace phrase if skipBracePhrases is true.  Ignores comments.
-    * Assumes that _currentPosition = pos. (?)
+    * if so instructed.  Does not look for delimiters inside a brace phrase if skipBracePhrases is true.  Ignores
+    * comments.
     * @param pos Position to start from
     * @param delims array of characters to search for
     * @param skipBracePhrases whether to look for delimiters inside brace phrases

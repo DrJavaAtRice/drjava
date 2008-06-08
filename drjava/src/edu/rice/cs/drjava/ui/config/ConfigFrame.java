@@ -55,8 +55,10 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
-import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.DirectoryChooser;
+
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$
@@ -142,16 +144,15 @@ public class ConfigFrame extends JFrame {
     };
     _cancelButton = new JButton(cancelAction);
 
-
     File workDir = _getWorkDir();
+    /* Following line was inserted becuase the statement below it would occasionally cause swing to throw a
+    NullPointerException. workDir == null is supposed to be impossible. */
+    if (workDir == null || workDir == FileOps.NULL_FILE) workDir = new File(System.getProperty("user.dir"));
     _fileOptionChooser = new JFileChooser(workDir);
 
     _browserChooser = new JFileChooser(workDir);
-    
-
     _dirChooser = new DirectoryChooser(this);
   
-    
     /* Create tree and initialize tree. */
     _rootNode = new PanelTreeNode("Preferences");
     _treeModel = new DefaultTreeModel(_rootNode);
@@ -247,6 +248,7 @@ public class ConfigFrame extends JFrame {
    */
   private File _getWorkDir() {
     File workDir = _mainFrame.getModel().getMasterWorkingDirectory();  // cannot be null
+    assert workDir != null;
     if (workDir.isDirectory()) return workDir;
     
     if (workDir.getParent() != null) workDir = workDir.getParentFile();

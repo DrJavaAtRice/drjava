@@ -626,7 +626,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     }
     while (ct < 10 && (_finalDocCt != 6 || _finalPaneCt != 6));
     
-    if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6-_finalPaneCt) + "; docs left = " + 
+    if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
                        (6 - _finalDocCt));
     
     if (ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
