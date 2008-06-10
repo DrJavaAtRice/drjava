@@ -57,7 +57,9 @@ public class ScrollableDialog /* implements Serializable */ {
   protected JTextArea _textArea;
   /** Panel of buttons at the bottom of this dialog. */
   protected JPanel _buttonPanel;
-  
+  /** ScrollPane that contains the text area. */
+  protected JScrollPane _textScroll;
+
   /** Creates a new ScrollableDialog with the default width and height.
    * @param parent Parent frame for this dialog
    * @param title Title for this dialog
@@ -65,7 +67,7 @@ public class ScrollableDialog /* implements Serializable */ {
    * @param text Text to insert into the scrollable JTextArea
    */
   public ScrollableDialog(JFrame parent, String title, String header, String text) {
-    this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT, false);
   }
   
   /** Creates a new ScrollableDialog.
@@ -76,8 +78,31 @@ public class ScrollableDialog /* implements Serializable */ {
    * @param width Width for this dialog
    * @param height Height for this dialog
    */
-  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height)
-  {
+  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height) {
+    this(parent, title, header, text, width, height, false);
+  }
+  
+  /** Creates a new ScrollableDialog with the default width and height.
+   * @param parent Parent frame for this dialog
+   * @param title Title for this dialog
+   * @param header Message to display at the top of this dialog
+   * @param text Text to insert into the scrollable JTextArea
+   * @param wrap whether to wrap long lines
+   */
+  public ScrollableDialog(JFrame parent, String title, String header, String text, boolean wrap) {
+    this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT, wrap);
+  }
+  
+  /** Creates a new ScrollableDialog.
+   * @param parent Parent frame for this dialog
+   * @param title Title for this dialog
+   * @param header Message to display at the top of this dialog
+   * @param text Text to insert into the scrollable JTextArea
+   * @param width Width for this dialog
+   * @param height Height for this dialog
+   * @param wrap whether to wrap long lines
+   */
+  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height, boolean wrap) {
     _dialog = new JDialog(parent, title, true);    
     Container content = _dialog.getContentPane();
 
@@ -87,18 +112,20 @@ public class ScrollableDialog /* implements Serializable */ {
     _textArea = new JTextArea();
     _textArea.setEditable(false);
     _textArea.setText(text);
+    _textArea.setLineWrap(wrap);
+    _textArea.setWrapStyleWord(true);
     
     // Arrange the dialog
     _dialog.setSize(width, height);
     
     // Add components
-    JScrollPane textScroll = 
-      new BorderlessScrollPane(_textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _textScroll = new BorderlessScrollPane(_textArea,
+                                           JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                           wrap?JScrollPane.HORIZONTAL_SCROLLBAR_NEVER:JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
     scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));
     scrollWrapper.add(new JLabel(header),BorderLayout.NORTH);
-    scrollWrapper.add(textScroll,BorderLayout.CENTER);
+    scrollWrapper.add(_textScroll,BorderLayout.CENTER);
     JPanel bottomPanel = new JPanel(new BorderLayout());
     _buttonPanel = new JPanel(new GridLayout(1,0,5,5));
     bottomPanel.add(_buttonPanel,BorderLayout.EAST);
@@ -138,6 +165,9 @@ public class ScrollableDialog /* implements Serializable */ {
   /** Shows this dialog. */
   public void show() {
     MainFrame.setPopupLoc(_dialog, _dialog.getOwner());
+    _textArea.setCaretPosition(0);
+    _textScroll.getHorizontalScrollBar().setValue(_textScroll.getHorizontalScrollBar().getMinimum());
+    _textScroll.getVerticalScrollBar().setValue(_textScroll.getVerticalScrollBar().getMinimum());
     _dialog.setVisible(true);
   }
 }

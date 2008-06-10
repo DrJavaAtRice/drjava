@@ -3938,8 +3938,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   private void _setActiveDoc(INavigatorItem idoc) {
-    try { idoc.checkIfClassFileInSync(); } 
-    catch(DocumentClosedException dce) { /* do nothing */ }
+    // try { idoc.checkIfClassFileInSync(); } 
+    // catch(DocumentClosedException dce) { /* do nothing */ }
     _activeDocument = (OpenDefinitionsDocument) idoc;
     installActiveDocument();    // notify single display model listeners   
   }

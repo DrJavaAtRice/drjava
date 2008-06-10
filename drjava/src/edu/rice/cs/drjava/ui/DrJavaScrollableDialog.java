@@ -55,7 +55,7 @@ public class DrJavaScrollableDialog extends ScrollableDialog {
    *  @param text Text to insert into the scrollable JTextArea
    */
   public DrJavaScrollableDialog(JFrame parent, String title, String header, String text) {
-    this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT, false);
   }
 
   /** Creates a new DrJavaScrollableDialog.
@@ -67,9 +67,33 @@ public class DrJavaScrollableDialog extends ScrollableDialog {
    * @param height Height for this dialog
    */
   public DrJavaScrollableDialog(JFrame parent, String title, String header,
-                                String text, int width, int height)
-  {
-    super(parent, title, header, text, width, height);
+                                String text, int width, int height) {
+    this(parent, title, header, text, width, height, false);
+  }
+  
+  /** Creates a new DrJavaScrollableDialog with the default width and height.
+   *  @param parent Parent frame for this dialog
+   *  @param title Title for this dialog
+   *  @param header Message to display at the top of this dialog
+   *  @param text Text to insert into the scrollable JTextArea
+   *  @param wrap whether to wrap long lines
+   */
+  public DrJavaScrollableDialog(JFrame parent, String title, String header, String text, boolean wrap) {
+    this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT, wrap);
+  }
+
+  /** Creates a new DrJavaScrollableDialog.
+   * @param parent Parent frame for this dialog
+   * @param title Title for this dialog
+   * @param header Message to display at the top of this dialog
+   * @param text Text to insert into the scrollable JTextArea
+   * @param width Width for this dialog
+   * @param height Height for this dialog
+   * @param wrap whether to wrap long lines
+   */
+  public DrJavaScrollableDialog(JFrame parent, String title, String header,
+                                String text, int width, int height, boolean wrap) {
+    super(parent, title, header, text, width, height, wrap);
     setTextFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
   }
 }

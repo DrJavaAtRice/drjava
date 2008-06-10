@@ -158,15 +158,15 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     /* Find first match in revHead */
     Iterator<R> it = revHead.iterator();  // In Java 6.0, it is computable in constant time from headSet using reverseIterator
     
+    R next;
     while (it.hasNext()) {
-      match = it.next();
-      if (match.getEndOffset() >= endOffset) break;
+      next = it.next();
+      if (next.getEndOffset() >= endOffset) { match = next; break; }
     }
     
     if (match == null) return null; // no match found
    
     /* Try to improve the match by narrowing endOffset. */
-    R next;
     while (it.hasNext()) { 
       next = it.next();
       if (next.getStartOffset() < match.getStartOffset()) return match;  // no more improvement possible
@@ -191,7 +191,8 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     }
     
     // Check for duplicate region
-    if (! docRegions.contains(region)) { // region does not already exist in manager
+    final boolean alreadyContained = docRegions.contains(region);
+    if (!alreadyContained) { // region does not already exist in manager
       docRegions.add(region);  // modifies docRegions, which is part of _regions
 //        Utilities.show("Region manager " + this + " added region " + region);
 //        Utilities.show("docRegions for document " + odd + " = " + _regions.get(odd));
@@ -203,13 +204,16 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     
     assert _documents.contains(odd);
     
-    // notify.  invokeLater unnecessary if it only runs in the event thread
-    Utilities.invokeLater(new Runnable() { public void run() {
-      _lock.startRead();
-      try {
-        for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
-      } finally { _lock.endRead(); }
-    } });
+    // only notify if the region was actually added
+    if (!alreadyContained) {
+      // notify.  invokeLater unnecessary if it only runs in the event thread
+      Utilities.invokeLater(new Runnable() { public void run() {
+        _lock.startRead();
+        try {
+          for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
+        } finally { _lock.endRead(); }
+      } });
+    }
   }
   
   /** Remove the given IDocumentRegion from the manager.  If any document's regions are emptied, remove the document
@@ -225,18 +229,21 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     OpenDefinitionsDocument doc = region.getDocument();
     SortedSet<R> docRegions = _regions.get(doc);
     if (docRegions == null) return;  // since region is not stored in this region manager, exit!
-    docRegions.remove(region);  // remove the region from the manager
+    final boolean wasRemoved = docRegions.remove(region);  // remove the region from the manager
     if (docRegions.isEmpty()) {
       _documents.remove(doc);
       _regions.remove(doc);
     }
     
-    // notify
-    Utilities.invokeLater(new Runnable() { public void run() {
-      _lock.startRead();
-      try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-      finally { _lock.endRead(); }
-    } });
+    // only notify if the region was actually added
+    if (wasRemoved) {
+      // notify
+      Utilities.invokeLater(new Runnable() { public void run() {
+        _lock.startRead();
+        try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
+        finally { _lock.endRead(); }
+      } });
+    }
   }
   
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */

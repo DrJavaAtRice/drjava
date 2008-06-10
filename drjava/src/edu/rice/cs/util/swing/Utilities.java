@@ -84,7 +84,12 @@ public class Utilities {
     * @param msg string to display
     */
   public static void show(final String msg) { 
-    Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+    Utilities.invokeAndWait(new Runnable() { public void run() {
+      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null,
+                                                       "Debug Message",
+                                                       "Debug Message from Utilities.show():",
+                                                       msg,
+                                                       false).show(); } } );
   }
   
   /** Show a modal debug message box containing a backtrace for the Throwable t.
@@ -103,75 +108,26 @@ public class Utilities {
     * @param msg string to display
     */
   public static void showMessageBox(final String msg, final String title) {
-    //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
-    Utilities.invokeAndWait(new Runnable() { public void run() {
-      Utilities.TextAreaMessageDialog.showDialog(null, title, msg); 
-    } } );
+    if (TEST_MODE) System.out.println(title + ": " + msg); else {
+      //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+      Utilities.invokeAndWait(new Runnable() { public void run() {
+        new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null,
+                                                         title,
+                                                         "Message:",
+                                                         msg,
+                                                         false).show();
+      } } );
+    }
   }
   
   public static void showStackTrace(final Throwable t) {
     Utilities.invokeAndWait(new Runnable() { public void run() { 
-      JOptionPane.showMessageDialog(null, StringOps.getStackTrace(t));
+      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null,
+                                                       "Stack Trace",
+                                                       "Stack Trace:",
+                                                       StringOps.getStackTrace(t),
+                                                       false).show();
     } } );
-  }
-  
-  
-  /** Message dialog with a word-wrapping text area that allows copy & paste. */
-  public static class TextAreaMessageDialog extends JDialog {
-    
-    /** Shows the initialized dialog.
-      * @param comp parent component, or null
-      * @param title dialog title
-      * @param message message for the text area
-      */
-    public static void showDialog(Component comp, String title, String message) {
-      if (TEST_MODE) System.out.println(title + ": " + message);
-      else {
-        Frame frame = JOptionPane.getFrameForComponent(comp);
-        TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);
-        MainFrame.setPopupLoc(dialog, frame);
-        dialog.setVisible(true);
-      }
-    }
-    
-    /** Private constructor for this dialog. Only gets used in the static showDialog method.
-      * @param frame owner frame
-      * @param comp parent component
-      * @param title dialog title
-      * @param message message for the text area
-      */
-    private TextAreaMessageDialog(Frame frame, Component comp, String title, String message) {
-      super(frame, title, true);
-      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-      
-      //buttons
-      JButton okButton = new JButton("OK");
-      okButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          TextAreaMessageDialog.this.dispose();
-        }
-      });
-      getRootPane().setDefaultButton(okButton);
-      
-      JTextArea textArea = new JTextArea(message);
-      textArea.setEditable(false);
-      textArea.setLineWrap(true);
-      textArea.setWrapStyleWord(false);
-      textArea.setBackground(SystemColor.window);
-      
-      Border emptyBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-      textArea.setBorder(emptyBorder);
-      
-      Container contentPane = getContentPane();
-      contentPane.add(textArea, BorderLayout.CENTER);
-      contentPane.add(okButton, BorderLayout.SOUTH);
-      
-      Dimension parentDim = (comp != null)?(comp.getSize()):getToolkit().getScreenSize();
-      int xs = (int)parentDim.getWidth()/4;
-      int ys = (int)parentDim.getHeight()/5;
-      setSize(Math.max(xs,350), Math.max(ys, 250));
-      setLocationRelativeTo(comp);
-    }
   }
   
   /** @return a string with the current clipboard selection, or null if not available. */
