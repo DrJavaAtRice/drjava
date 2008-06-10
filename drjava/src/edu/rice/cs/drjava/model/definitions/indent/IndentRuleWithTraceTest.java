@@ -49,7 +49,7 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
   public void testTrace() throws BadLocationException{
     IndentRuleWithTrace.setRuleTraceEnabled(true);
     IndentRule
-      rule4 = new ActionBracePlus("  "),
+      rule4 = new ActionBracePlus(2),
       rule3 = new QuestionBraceIsCurly(rule4, rule4),
       rule2 = new QuestionBraceIsParenOrBracket(rule3, rule3);
     IndentRuleQuestion

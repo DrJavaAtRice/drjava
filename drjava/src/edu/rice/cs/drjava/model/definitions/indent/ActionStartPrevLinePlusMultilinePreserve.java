@@ -80,8 +80,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];
-      for(int i = 0; i < _suffices.length; i++)
-        suffices[i] = _suffices[i];
+      for(int i = 0; i < _suffices.length; i++) suffices[i] = _suffices[i];
       
       // get the absolute boundaries of the text on this line
       int here = doc.getCurrentLocation();

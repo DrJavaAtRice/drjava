@@ -48,8 +48,8 @@ import javax.swing.text.BadLocationException;
 public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   
   public void testNoPrevStmt() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);
-    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
+    IndentRuleAction rule1 = new ActionStartPrevStmtPlus(0, true);
+    IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
 
     _setDocText("foo();\n");
     rule1.indentLine(_doc, 2, Indenter.IndentReason.OTHER);
@@ -65,8 +65,8 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
   
   public void testPrevStmtPrevLine() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);
-    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
+    IndentRuleAction rule1 = new ActionStartPrevStmtPlus(0, true);
+    IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
 
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
     rule1.indentLine(_doc, 44, Indenter.IndentReason.OTHER);
@@ -82,8 +82,8 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
 
   public void testPrevStmtSeveralLinesBeforeCurrLocation() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);
-    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
+    IndentRuleAction rule1 = new ActionStartPrevStmtPlus(0, true);
+    IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
     rule1.indentLine(_doc, 56, Indenter.IndentReason.OTHER);
@@ -99,7 +99,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
   
   public void testColonNotDelim() throws BadLocationException {
-    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
     
     _setDocText("test2 = x ? y :\n" +     // ? and : on one line
                 "  z;\n" +     // unfinished ternary
@@ -114,7 +114,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
 
 
   public void testAfterArrayAssign() throws BadLocationException {
-    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
     
     _setDocText("a = {\n" +
                 "  b,c,d\n" + 
@@ -130,7 +130,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  _doc.getText());
   }
   public void testAfterArrayAssignMultiSemi() throws BadLocationException {
-    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
     
     _setDocText("a = {\n" +
                 "  b,c,d\n" + 
@@ -147,7 +147,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
   
   public void testAnonymousInnerClassAssign() throws BadLocationException {
-    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
     
     _setDocText("Runnable command = new Runnable() {\n" + 
                 "  public void run() { ... }\n" +
@@ -163,7 +163,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
   
   public void testAnonymousInnerClassArg() throws BadLocationException {
-    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
     
     _setDocText("setCommand(new Runnable() {\n" + 
                 "  public void run() { ... }\n" +

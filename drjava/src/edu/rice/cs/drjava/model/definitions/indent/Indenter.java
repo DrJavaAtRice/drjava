@@ -77,16 +77,16 @@ public class Indenter {
     IndentRule
       // Main tree
       rule60 = new ActionStartPrevLinePlus(""),
-      rule37 = new ActionStartCurrStmtPlus(oneLevel),
-      rule36 = new ActionStartStmtOfBracePlus(oneLevel),
+      rule37 = new ActionStartCurrStmtPlus(indentLevel),
+      rule36 = new ActionStartStmtOfBracePlus(indentLevel),
       rule35 = rule37,
       rule34 = new QuestionExistsCharInStmt('?', ':', rule35, rule36),
       rule33 = new QuestionLineContains(':', rule34, rule37),
-      rule32 = new ActionStartCurrStmtPlus(""),
+      rule32 = new ActionStartCurrStmtPlus(0),
       rule31 = new QuestionCurrLineStartsWithSkipComments("{", rule32, rule33),
-      rule39 = new ActionStartPrevStmtPlus("", true),  // Indent line that starts new statement
+      rule39 = new ActionStartPrevStmtPlus(0, true),  // Indent line that starts new statement
       rule29 = rule36,
-      rule28 = new ActionStartPrevStmtPlus("", false),
+      rule28 = new ActionStartPrevStmtPlus(0, false),
       rule40 = rule28,
       rule30 = new QuestionExistsCharInPrevStmt('?', rule40, rule39),
       rule27 = new QuestionExistsCharInStmt('?', ':', rule28, rule29),
@@ -95,14 +95,14 @@ public class Indenter {
       rule24 = new QuestionPrevLineStartsWith("@", rule60, rule25),  // Does this line follow an annotation?  ??
       rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'}, rule36, rule24),  // Is this line an element of an array initializer?
       rule20 = new QuestionStartAfterOpenBrace(rule36, rule22),  // does the preceding line end with an open curly brace?
-      rule19 = new ActionStartStmtOfBracePlus(""),  // indents the line to match whitespace preceding the line enclosing brace
+      rule19 = new ActionStartStmtOfBracePlus(0),  // indents the line to match whitespace preceding the line enclosing brace
       // ANONYMOUS inner class formatting breaks here?
-      rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // Does current line begin with '}' ignoring comment text
+      rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // Does current line begin with '}' ignoring comment text, WS
       rule17 = new QuestionBraceIsCurly(rule18, rule24),  // is brace enclosing this line '{' (as opposed to quotes, etc.); '(', '[' already excluded
-      rule16 = new ActionBracePlus(" " + oneLevel),
-      rule15 = new ActionBracePlus(" "),
+      rule16 = new ActionBracePlus(1 + indentLevel),
+      rule15 = new ActionBracePlus(1),
      
-      rule38 = new ActionBracePlus(""),
+      rule38 = new ActionBracePlus(0),
       rule14 = new QuestionNewParenPhrase(rule15, rule16),  // is current non ) line a new phrase after open paren?
       rule23 = new QuestionNewParenPhrase(rule30, rule38),  // is current ) line a new phrase after open paren?
       rule21 = new QuestionCurrLineStartsWith(")", rule23, rule14), // does current line start with ')'?

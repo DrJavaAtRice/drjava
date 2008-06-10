@@ -44,11 +44,11 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
   * @version $Id$
   */
 public class ActionBracePlus extends IndentRuleAction {
-  /** String holding the additional whitespaces to be inserted. */
-  private String _suffix;
+  /** int holding the number of additional blanks to be inserted. */
+  private int _suffixCt;
 
   /** @param suffix The additional whitespaces to be inserted. */
-  public ActionBracePlus(String suffix) { _suffix = suffix; }
+  public ActionBracePlus(int ct) { _suffixCt = ct; }
 
   /** Properly indents the line that the caret is currently on.  Replaces all whitespace characters at the beginning of
     * the line with the appropriate spacing or characters.<p>
@@ -62,34 +62,30 @@ public class ActionBracePlus extends IndentRuleAction {
     int startLine = doc.getLineStartPos(here);
     doc.setCurrentLocation(startLine);
     IndentInfo info = doc.getIndentInformation();
+    int dist = info.distToLineEnclosingBrace();
 
     // Check preconditions
-    if (info.lineEnclosingBraceType().equals("") || info.distToLineEnclosingBrace() < 0) {
+    if (info.lineEnclosingBraceType().equals("") || dist < 0) {  // Should use interned Strings here
       // Can't find brace, so do nothing.
       return supResult;
     }
 
     // Find length to brace
-    int bracePos = startLine - info.distToLineEnclosingBrace();
+    int bracePos = startLine - dist;
     int braceNewline = 0;
-    if (info.distToEnclosingBraceStart() >= 0) {
-      braceNewline = startLine - info.distToEnclosingBraceStart();
-    }
+    int distStart = info.distToEnclosingBraceStart();
+    if (distStart > 0) braceNewline = startLine - distStart;
     int braceLen = bracePos - braceNewline;
 
     // Create tab string
-    final StringBuilder tab = new StringBuilder(_suffix.length() + braceLen);
-    for (int i=0; i < braceLen; i++) {
-      tab.append(" ");
-    }
-    tab.append(_suffix);
+    final int tab = _suffixCt + braceLen;
 
     if (here > doc.getLength()) {
       here = doc.getLength() - 1;
     }
     doc.setCurrentLocation(here);
 
-    doc.setTab(tab.toString(), here);
+    doc.setTab(tab, here);
     
     return supResult;
   }

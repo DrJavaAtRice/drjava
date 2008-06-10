@@ -1845,6 +1845,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       actions.add(okAction);
       actions.add(fullAction);
       actions.add(cancelAction);
+      GoToFileListEntry entry = new GoToFileListEntry(new DummyOpenDefDoc() {
+        public String getPackageNameFromDocument() { return ""; }
+      }, "dummyComplete");
       _completeWordDialog = 
         new PredictiveInputFrame<ClassNameAndPackageEntry>(MainFrame.this,
                                                            "Auto-Complete Word",
@@ -1853,9 +1856,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                            info,
                                                            strategies,
                                                            actions, 2, // cancel is action 23
-                                                           new GoToFileListEntry(new DummyOpenDefDoc() {
-        public String getPackageNameFromDocument() { return ""; }
-      }, "dummyComplete")) {
+                                                           entry) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }

@@ -52,7 +52,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   private IndentRuleAction _action;
   
   public void testNoSuffix() throws BadLocationException {
-    _action = new ActionBracePlus("");
+    _action = new ActionBracePlus(0);
     
     // (1) 
     
@@ -77,7 +77,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
 
   public void testSpaceSuffix() throws BadLocationException
   {
-    _action = new ActionBracePlus(" ");
+    _action = new ActionBracePlus(1);
     
     // (2) 
     
@@ -166,7 +166,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   
   public void testLargeSuffix() throws BadLocationException
   {
-    _action = new ActionBracePlus(" " + "  ");
+    _action = new ActionBracePlus(3);
     
     // (6) 
     
@@ -190,7 +190,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   
   public void testComment() throws BadLocationException
   {
-    _action = new ActionBracePlus(" " + "  ");
+    _action = new ActionBracePlus(3);
     
     // (7) 
     

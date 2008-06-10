@@ -47,14 +47,14 @@ import javax.swing.text.BadLocationException;
   * @version $Id$
   */
 public class ActionStartPrevStmtPlus extends IndentRuleAction {
-  private String _suffix;
+  private int _suffix;  // number of blanks in suffix
   private boolean _useColon;
 
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     * @param colonIsDelim whether to include colons as statement delimiters
     */
-  public ActionStartPrevStmtPlus(String suffix, boolean colonIsDelim) {
+  public ActionStartPrevStmtPlus(int suffix, boolean colonIsDelim) {
     super();
     _suffix = suffix;
     _useColon = colonIsDelim;
@@ -68,7 +68,6 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
-    String indent = "";
     int here = doc.getCurrentLocation();
     
     // Find end of previous statement, immediately enclosing brace, or end of case statement
@@ -129,7 +128,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     if (_useColon) indentDelims = indentDelimsWithColon;
     else indentDelims = indentDelimsWithoutColon;
     
-    indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
+    int indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
     
     indent = indent + _suffix;
     doc.setTab(indent, here);

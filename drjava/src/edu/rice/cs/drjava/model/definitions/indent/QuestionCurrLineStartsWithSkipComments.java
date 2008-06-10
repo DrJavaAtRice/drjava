@@ -45,7 +45,8 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** Determines whether the current line in the document starts with a specific character sequence, skipping over any 
-  * comments on that line. The character sequence is passed to the constructor of the class as a String argument.
+  * comments and leading whitespace on that line. The character sequence is passed to the constructor of the class as
+  * a String argument.
   * @version $Id$
   */
 public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
@@ -61,8 +62,9 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
   }
   
   /** Determines whether or not the current line in the document starts with the character sequence specified by the
-    * String field _prefix, skipping over any comments on that line.  Assumes that write lock and reduced lock are
-    * already held.
+    * String field _prefix, skipping over any comments and leading whitespace on that line.  Will not match prefixes
+    * that begin with "//" or "/*" or whitespace.  Will not match empty string unless line has some uncommented nonWS
+    * text.  Assumes that write lock and reduced lock are already held.
     * @param doc The AbstractDJDocument containing the current line.
     * @return True iff the current line in the document starts with the
     * character sequence specified by the String field _prefix.
@@ -71,51 +73,55 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
     try {
       // Find the first non-whitespace character on the current line.
       
-      int currentPos = doc.getCurrentLocation(),
-        startPos   = doc.getLineFirstCharPos(currentPos),
-        endPos     = doc.getLineEndPos(currentPos),
-        lineLength = endPos - startPos;
+      int origPos = doc.getCurrentLocation();
+      int startPos   = doc.getLineFirstCharPos(origPos);
+      int endPos     = doc.getLineEndPos(origPos);
+      int lineLength = endPos - startPos;
+      int prefixLen = _prefix.length();
       
-      char currentChar, previousChar = '\0';
+      char prevChar = '\0';
       String text = doc.getText(startPos, lineLength);
       
-      for (int i = 0; i < lineLength; i++) {
-        // Get state for walker position.
-        
-        doc.move( startPos - currentPos + i);
-        ReducedModelState state = doc.getStateAtCurrent();
-        doc.move(-startPos + currentPos - i);
-        
-        
-        currentChar = text.charAt(i);
-        
-        if (state.equals(INSIDE_LINE_COMMENT)) return false;
-        if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
-          previousChar = '\0'; 
-          continue;
-        }
-        if (state.equals(FREE)) { // Can prefix still fit on the current line?
-          if (_prefix.length() > lineLength - i) return false;
-          else if (text.substring(i, i+_prefix.length()).equals(_prefix) && previousChar != '/') {
-            // '/' is the only non-WS character that we consume without
-            // immediately returning false. When we try to match the prefix,
-            // we also need to reflect this implicit lookahead mechanism.
-            return true;
+//      System.err.println("line is: '" + text + "'");
+      
+      doc.setCurrentLocation(startPos);
+      try { 
+        for (int i = 0; i < lineLength; i++, doc.move(1)) {
+          
+          ReducedModelState state = doc.getStateAtCurrent();
+          
+          if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
+            assert prevChar == '\0'; 
+            continue;
           }
-          else if (currentChar == '/') {
-            if (previousChar == '/') return false;
+          char currentChar = text.charAt(i);
+//          System.err.println("Iteration " + i + ": ch = " + currentChar + " prevCh = " + prevChar);
+          
+          if (currentChar == '/') {
+            if (prevChar == '/') return false;  // opened a LINE_COMMENT
+            if (prevChar == '\0') {
+              prevChar = currentChar;
+              continue;     // leading char in line is '/'
+            }
           }
-          else if (currentChar == ' ' || currentChar == '\t') {  }
-          else if (!(currentChar == '*' && previousChar == '/')) return false;
+          else if (currentChar == '*' && prevChar == '/') { // opened a BLOCK_COMMENT, subsequent chars will be inside
+            prevChar = '\0';
+            continue;      
+          }
+          else if (currentChar == ' ' || currentChar == '\t') {  
+            if (prevChar == '\0') {
+              continue;  // consume opening whitespace
+            }
+          }
+          return text.startsWith(_prefix, i);   // special cases have already been eliminated
         }
-        if (previousChar == '/' && currentChar != '*') return false;
-        previousChar = currentChar;
       }
-      return false;
+      finally { doc.setCurrentLocation(origPos); }
     }
     catch (BadLocationException e) {
       // Control flow should never reach this point!
       throw new UnexpectedException(new RuntimeException("Bug in QuestionCurrLineStartsWithSkipComments"));
     }
+    return false;
   }
 }

@@ -49,12 +49,12 @@ import javax.swing.text.BadLocationException;
   * @version $Id$
   */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
-  private String _suffix;
+  private int _suffix;
   
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     */
-  public ActionStartStmtOfBracePlus(String suffix) {
+  public ActionStartStmtOfBracePlus(int suffix) {
     super();
     _suffix = suffix;
   }
@@ -81,7 +81,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
 
     // Get the absolute position of the (left edge of the) brace
     final int bracePos = pos - distToLineEnclosingBrace;
-    final String indent = doc.getIndentOfCurrStmt(bracePos) + _suffix;
+    final int indent = doc.getIndentOfCurrStmt(bracePos) + _suffix;
 
     doc.setTab(indent, pos);
     

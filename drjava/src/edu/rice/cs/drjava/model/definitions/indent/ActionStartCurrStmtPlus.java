@@ -46,12 +46,12 @@ import javax.swing.text.BadLocationException;
   * @version $Id$
   */
 public class ActionStartCurrStmtPlus extends IndentRuleAction {
-  private String _suffix;
+  private int _suffix;
 
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     */
-  public ActionStartCurrStmtPlus(String suffix) {
+  public ActionStartCurrStmtPlus(int suffix) {
     super();
     _suffix = suffix;
   }
@@ -70,7 +70,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
       * tests are provided for this class.
       */
 
-    String indent = "";
+    int indent = 0;
 
 
     indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation(), new char[] {';','{','}'}, new char[] {' ', '\t','\n'});

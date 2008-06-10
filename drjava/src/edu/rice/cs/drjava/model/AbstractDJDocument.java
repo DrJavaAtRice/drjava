@@ -399,7 +399,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Returns whether the given text only has spaces. */
-  private boolean _hasOnlySpaces(String text) { return (text.trim().length() == 0); }
+  public static boolean hasOnlySpaces(String text) { return (text.trim().length() == 0); }
   
   /** Fire event that styles changed from current location to the end.
     * Right now we do this every time there is an insertion or removal.
@@ -488,10 +488,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int newLocation = _currentLocation + dist;
     if (0 <= newLocation && newLocation <= getLength()) {
       _reduced.move(dist);
-      _currentLocation = _currentLocation + dist;
+      _currentLocation = newLocation;
     }
-    else throw new IllegalArgumentException("AbstractDJDocument.move(" + dist + 
-                                            ") places the cursor at " + newLocation + " which is out of range");
+    else throw new IllegalArgumentException("AbstractDJDocument.move(" + dist + ") places the cursor at " + 
+                                            newLocation + " which is out of range");
   } 
   
   /** Finds the match for the closing brace immediately to the left, assuming there is such a brace. On failure, 
@@ -1065,37 +1065,35 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return firstChar;
   }
   
-  /** Returns the indent prefix for the start of the statement identified by pos.  Uses a default 
-    * set of delimiters. (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',')
+  /** Returns the number of blanks in the indent prefix for the start of the statement identified by pos.  Uses a 
+    * default set of delimiters. (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',')
     * @param pos Cursor position
     */
-  public String getIndentOfCurrStmt(int pos) {
+  public int getIndentOfCurrStmt(int pos) {
     char[] delims = {';', '{', '}'};
     char[] whitespace = {' ', '\t', '\n', ','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /** Returns the indent prefix of the start of the statement identified by pos.  Uses a default
-    * set of whitespace characters: {' ', '\t', '\n', ','}
+  /** Returns the number of blanks in the indent prefix of the start of the statement identified by pos.  Uses a 
+    * default set of whitespace characters: {' ', '\t', '\n', ','}
     * @param pos Cursor position
     */
-  public String getIndentOfCurrStmt(int pos, char[] delims) {
+  public int getIndentOfCurrStmt(int pos, char[] delims) {
     char[] whitespace = {' ', '\t', '\n',','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /** Returns the indent prefix of the start of the statement identified by pos
+  /** Returns the number of blanks in the indent prefix of the start of the statement identified by pos
     * @param pos  the position identifying the current statement
     * @param delims Delimiter characters denoting end of statement
     * @param whitespace characters to skip when looking for beginning of next statement
     */
-  public String getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
+  public int getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
+
 //    Utilities.show("getIdentOfCurrentStmt(" + pos + ", " + Arrays.toString(delims) + ", " + Arrays.toString(whitespace) +
 //      ")");
-    
-//        final Query key = new Query.IndentOfCurrStmt(pos, delims, whitespace);
-//        final String cached = (String) _checkCache(key);
-//        if (cached != null) return cached;
+
     
     acquireReadLock();
     try {
@@ -1104,8 +1102,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         int lineStart = getLineStartPos(pos);  // returns 0 for initial line
         
         final Query key = new Query.IndentOfCurrStmt(lineStart, delims, whitespace);
-        final String cached = (String) _checkCache(key);
-        if (cached != null) return cached;
+        final Integer cached = (Integer) _checkCache(key);
+        if (cached != null) return cached;  // relying on auto-unboxing
         
         // Find the previous delimiter (typically an enclosing brace or closing symbol) skipping over balanced braces
         // that are not delims
@@ -1130,8 +1128,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         
         // Get the position of the first non-ws character on this line (or end of line if no such char
         int firstNonWS = getLineFirstCharPos(newLineStart);
-        String wSPrefix = getBlankString(firstNonWS - newLineStart);  // ensure that the wsPrefix only contains blanks
-        _storeInCache(key, wSPrefix, firstNonWS);
+        int wSPrefix = firstNonWS - newLineStart;
+        _storeInCache(key, wSPrefix, firstNonWS);  // relying on autoboxing
         return wSPrefix;
       }
     }
@@ -1526,7 +1524,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int origPos = _currentLocation;
     // Check cache
     final int lineStart = getLineStartPos(_currentLocation);
-    final int keyPos = (lineStart < 0) ? origPos : lineStart;
+    if (lineStart < 0) return BraceInfo.NULL;
+    final int keyPos = lineStart;
     final Query key = new Query.LineEnclosingBrace(keyPos);
     final BraceInfo cached = (BraceInfo) _checkCache(key);
     if (cached != null) return cached;
@@ -1534,7 +1533,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    BraceInfo b = _reduced.getLineEnclosingBrace(lineStart);  // optimized version to be developed
     BraceInfo b = _reduced.getLineEnclosingBrace();
     
-    _storeInCache(key, b, origPos - 1);
+    _storeInCache(key, b, keyPos - 1);
     return b;
   }
   
@@ -1683,6 +1682,31 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return (pos < 0); 
   }
   
+  /** Inserts the number of blanks specified as the whitespace prefix for the line identified by pos.
+    * The prefix replaces the prefix is already there.  Assumes that the prefix consists of blanks.
+    * @param tab  The string to be placed between previous newline and first non-whitespace character
+    */
+  public void setTab(int tab, int pos) {
+    try {
+      int startPos = getLineStartPos(pos);
+      int firstNonWSPos = getLineFirstCharPos(pos);
+      int len = firstNonWSPos - startPos;
+      
+      // Adjust prefix
+      if (len != tab) {
+        // Only add or remove the difference
+        int diff = tab - len;
+        if (diff > 0) insertString(firstNonWSPos, getBlankString(diff), null);
+        else remove(firstNonWSPos + diff, -diff);
+      }
+      /* else do nothing */ 
+    }
+    catch (BadLocationException e) {
+      // Should never see a bad location
+      throw new UnexpectedException(e);
+    }
+  }
+  
   /** Inserts the string specified by tab at the beginning of the line identified by pos.
     * @param tab  The string to be placed between previous newline and first non-whitespace character
     */
@@ -1692,28 +1716,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       int firstNonWSPos = getLineFirstCharPos(pos);
       int len = firstNonWSPos - startPos;
       
-      // Adjust prefix
-      boolean onlySpaces = _hasOnlySpaces(tab);
-      if (! onlySpaces || len != tab.length()) {
-        
-        if (onlySpaces) {
-          // Only add or remove the difference
-          int diff = tab.length() - len;
-          if (diff > 0) insertString(firstNonWSPos, tab.substring(0, diff), null);
-          else remove(firstNonWSPos + diff, -diff);
-        }
-        else {
-          // Remove the whole prefix, then add the new one
-          remove(startPos, len);
-          insertString(startPos, tab, null);
-        }
-      }
+      // Remove the whole prefix, then add the new one
+      remove(startPos, len);
+      insertString(startPos, tab, null);
     }
     catch (BadLocationException e) {
       // Should never see a bad location
       throw new UnexpectedException(e);
     }
   }
+  
   
   /** Updates document structure as a result of text insertion. This happens after the text has actually been inserted.
     * Here we update the reduced model (using an {@link AbstractDJDocument.InsertCommand InsertCommand}) and store 
@@ -1734,7 +1746,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       final int length = chng.getLength();
       final String str = getText(offset, length);
       
-      _clearCache(offset);    // Selectively clear the query cache
+      if (length > 0) _clearCache(offset);    // Selectively clear the query cache
       
       InsertCommand doCommand = new InsertCommand(offset, str);
       RemoveCommand undoCommand = new RemoveCommand(offset, length);
@@ -1765,7 +1777,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       final String removedText = getText(offset, length);
       super.removeUpdate(chng);
       
-      _clearCache(offset);  // Selectively clear the query cache
+      if (length > 0) _clearCache(offset);  // Selectively clear the query cache
       
       Runnable doCommand = new RemoveCommand(offset, length);
       Runnable undoCommand = new InsertCommand(offset, removedText);

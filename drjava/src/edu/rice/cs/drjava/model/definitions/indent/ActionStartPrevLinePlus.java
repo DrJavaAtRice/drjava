@@ -63,23 +63,22 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
       // Find start of line
       int here = doc.getCurrentLocation();
       int startLine = doc.getLineStartPos(here);
-
+      String prefix;
+      
       if (startLine > 0) {
         // Find prefix of previous line
         int startPrevLine = doc.getLineStartPos(startLine - 1);
         int firstChar = doc.getLineFirstCharPos(startPrevLine);
-        String prefix = doc.getText(startPrevLine, firstChar - startPrevLine);
-        doc.setTab(prefix + _suffix, here);
+        String prevPrefix = doc.getText(startPrevLine, firstChar - startPrevLine);
+        prefix = prevPrefix + _suffix;
       }
-      else {
-        // On first line
-        doc.setTab(_suffix, here);
-      }
+      else prefix = _suffix;  // On first line
+      
+      if (AbstractDJDocument.hasOnlySpaces(prefix)) doc.setTab(prefix.length(), here);
+      else doc.setTab(prefix, here);
+      
       return supResult;
     }
-    catch (BadLocationException e) {
-      // Shouldn't happen
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
   }
 }

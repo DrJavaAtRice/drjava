@@ -334,7 +334,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   //---------- DJDocument Methods ----------//
   
-  public void setTab(String tab, int pos) { throw new UnsupportedOperationException("Dummy method"); }
+//  public void setTab(int tab, int pos) { throw new UnsupportedOperationException("Dummy method"); }
 //  public int getWhiteSpace() { throw new UnsupportedOperationException("Dummy method"); }
   public boolean inParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
   public boolean inParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
@@ -369,15 +369,15 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public int findCharOnLine(int pos, char findChar) { throw new UnsupportedOperationException("Dummy method"); }
   
-  public String getIndentOfCurrStmt(int pos) throws BadLocationException {
+  public int getIndentOfCurrStmt(int pos) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+  public int getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
+  public int getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   

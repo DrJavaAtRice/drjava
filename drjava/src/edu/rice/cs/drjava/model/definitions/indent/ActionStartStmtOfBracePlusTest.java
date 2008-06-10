@@ -49,8 +49,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting with a single line contract
    */
   public void testSingleLineContract() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   "); // 3 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
     
     String text = "public void foo() {\nbar();";
     String aligned1 = text;
@@ -70,8 +70,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting with an indented single line contract
    */
   public void testIndentedSingleLineContract() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   "); // 3 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
     
     String text = "  y = new Foo() {\nbar();";
     String aligned1 = "  y = new Foo() {\n  bar();";
@@ -91,8 +91,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting with a multiple line contract
    */
   public void testMultiLineContract() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
     
     String text = "    foobar();\n" +
                   "    int foo(int x,\n" +
@@ -121,8 +121,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting a for statement (odd semicolons)
    */
   public void testForStatement() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   "); // 3 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
     
     String text = "  for (int i=0; i<j; i++) {\nbar();";
     String aligned1 = "  for (int i=0; i<j; i++) {\n  bar();";
@@ -142,8 +142,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting a multiple line for statement (odd semicolons)
    */
   public void testMultiLineForStatement() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
     
     String text = "  for (int i=0;\n" +
                   "       i<j;\n" +
@@ -207,8 +207,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting with commented delimiters
    */
   public void testCommentedBrace() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
     
     String text = "  void foo()\n" +
                   "  {\n" +
@@ -269,8 +269,8 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
   /** Tests indenting without an enclosing brace
    */
   public void testNoBrace() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
-    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
     
     String text = "package foo;\n" +
                   "import bar.*;\n";

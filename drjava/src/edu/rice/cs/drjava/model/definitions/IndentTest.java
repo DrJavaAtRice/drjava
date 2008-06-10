@@ -1440,7 +1440,7 @@ public final class IndentTest extends DrJavaTestCase {
   
   
   public void testNoParameters() throws BadLocationException {
-    IndentRuleAction _action = new ActionBracePlus("");
+    IndentRuleAction _action = new ActionBracePlus(0);
     
     String _text =
       "method(\n"+

@@ -3496,7 +3496,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     //--------- DJDocument methods ----------
     
-    public void setTab(String tab, int pos) { getDocument().setTab(tab,pos); }
+//    public void setTab(int tab, int pos) { getDocument().setTab(tab, pos); }
     
 //    public int getWhiteSpace() { return getDocument().getWhiteSpace(); }
     
@@ -3541,15 +3541,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().findCharOnLine(pos, findChar);
     }
     
-    public String getIndentOfCurrStmt(int pos) throws BadLocationException {
+    public int getIndentOfCurrStmt(int pos) throws BadLocationException {
       return getDocument().getIndentOfCurrStmt(pos);
     }
     
-    public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+    public int getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
       return getDocument().getIndentOfCurrStmt(pos, delims);
     }
     
-    public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
+    public int getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
       return getDocument().getIndentOfCurrStmt(pos, delims, whitespace);
     }
     

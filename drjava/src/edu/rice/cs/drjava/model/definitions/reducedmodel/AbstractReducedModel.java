@@ -198,23 +198,19 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   protected abstract void insertGapBetweenMultiCharBrace(int length);
   
-  /** Make a copy of the token list's iterator.
-   */
-  public TokenList.Iterator makeCopyCursor() {
-    return _cursor.copy();
-  }
+  /** Make a copy of the token list's iterator. */
+  public TokenList.Iterator makeCopyCursor() { return _cursor.copy(); }
   
   /** Determines if there is a Gap immediately to the right of the cursor. */
   protected boolean _gapToRight() {
     // Before using, make sure not at last, or tail.
-    return (!_tokens.isEmpty() && !_cursor.atEnd() &&
-            !_cursor.atLastItem() && _cursor.nextItem().isGap());
+    return (! _tokens.isEmpty() && ! _cursor.atEnd() && ! _cursor.atLastItem() && _cursor.nextItem().isGap());
   }
   
   /** Determines if there is a gap immediately to the left of the cursor. */
   protected boolean _gapToLeft() {
     // Before using, make sure not at first or head.
-    return (!_tokens.isEmpty() && !_cursor.atStart() && !_cursor.atFirstItem() &&_cursor.prevItem().isGap());
+    return (! _tokens.isEmpty() && ! _cursor.atStart() && ! _cursor.atFirstItem() && _cursor.prevItem().isGap());
   }
   
   /** Assuming there is a gap to the left, this function increases the size of that gap.

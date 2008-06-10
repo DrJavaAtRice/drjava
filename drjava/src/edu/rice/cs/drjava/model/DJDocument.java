@@ -189,13 +189,13 @@ public interface DJDocument extends SwingDocumentInterface {
     * (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',').
     * @param pos Cursor position
     */
-  public String getIndentOfCurrStmt(int pos) throws BadLocationException;
+  public int getIndentOfCurrStmt(int pos) throws BadLocationException;
   
   /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default set of whitespace
     * characters (' ', '\t', '\n', ',').
     * @param pos Cursor position
     */
-  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
+  public int getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
   
   /** Returns the indent level of the start of the statement
    * that the cursor is on.
@@ -203,7 +203,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param delims Delimiter characters denoting end of statement
    * @param whitespace characters to skip when looking for beginning of next statement
    */
-  public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
+  public int getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
     throws BadLocationException;
   
   /** Determines if the given character exists on the line where
@@ -287,10 +287,16 @@ public interface DJDocument extends SwingDocumentInterface {
 //    */
 //  public int getWhiteSpace();
   
-  /** Sets text between previous newline and first non-whitespace character of the line containing pos to tab.
-    * @param tab String to be placed between previous newline and first non-whitespace character
-    */
-  public void setTab(String tab, int pos);
+//  /** Sets text between previous newline and first non-whitespace character of the line containing pos to tab.
+//    * @param tab String to be placed between previous newline and first non-whitespace character
+//    */
+//  public void setTab(String tab, int pos);
+//  
+//  /** Sets text between previous newline and first non-whitespace character of the line containing pos to a prefix
+//    * consisting of tab spaces.
+//    * @param tab String to be placed between previous newline and first non-whitespace character
+//    */
+//  public void setTab(int tab, int pos);
   
   /** Inserts a string of text into the document. It turns out that this is not where we should do custom processing
     * of the insert; that is done in {@link AbstractDJDocument#insertUpdate}.
