@@ -103,8 +103,8 @@ public class ExternalProcessPanel extends AbortablePanel {
     _sb.append(pc.cmdline());
     _sb.append('\n');
     _header = _sb.toString();
-    initThread(pc);
     _textArea.setText(_header);
+    initThread(pc);
     _textArea.addMouseListener(new MouseListener() {
       public void mouseClicked(MouseEvent e) {
         if ((SwingUtilities.isLeftMouseButton(e)) &&
@@ -185,6 +185,9 @@ public class ExternalProcessPanel extends AbortablePanel {
       // MainFrame.LOG.log("\tUpdate thread started");
     }
     catch(Exception e) {
+      _sb.append("\n\nException from process:\n"+e.toString());
+      _textArea.setText(_sb.toString());
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log(_sb.toString());
       abortActionPerformed(null);
     }
   }
@@ -488,7 +491,9 @@ public class ExternalProcessPanel extends AbortablePanel {
           }
           catch(IllegalThreadStateException e) {
             // process has NOT finished yet, display the I/O exception
-            _sb.append("\n\nI/O Exception reading from process\n");
+            _sb.append("\n\nI/O Exception reading from process:\n"+ioe.toString());
+            edu.rice.cs.util.GeneralProcessCreator.LOG.log("\n\nI/O Exception reading from process:");
+            edu.rice.cs.util.GeneralProcessCreator.LOG.log(ioe.toString(),ioe);
           }
         }
         if (finish) { _changeCount = 1; } else { ++_changeCount; }

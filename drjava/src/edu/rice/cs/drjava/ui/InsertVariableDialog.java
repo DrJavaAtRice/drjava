@@ -139,6 +139,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         DrJavaProperty value = properties.get(key);
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
+        _helpPane.setCaretPosition(0);
         _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
       }
     });
@@ -166,8 +167,8 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
     c.insets = insets;
-    gridbag.setConstraints(_helpPane, c);
-    top.add(_helpPane);
+    gridbag.setConstraints(helpPaneSP, c);
+    top.add(helpPaneSP);
     main.add(top, BorderLayout.CENTER);
     
     //The following line enables to use scrolling tabs.
@@ -226,6 +227,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
+        _helpPane.setCaretPosition(0);
       }
     });
     _varTable.get(category).setSelectionModel(lsm);
@@ -292,6 +294,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
           }
           _varValueField.setText(sel.second().toString());
           _helpPane.setText(sel.second().getHelp());
+          _helpPane.setCaretPosition(0);
           _selected = sel;
         }
       }
@@ -305,6 +308,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
       DrJavaProperty value = properties.get(key);
       _varValueField.setText(value.toString());
       _helpPane.setText(value.getHelp());
+      _helpPane.setCaretPosition(0);
       _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
     }
   }

@@ -62,9 +62,13 @@ public class ProcessSequence extends Process {
   /** True if the execution was aborted. */
   protected volatile boolean _aborted = false;
   
-  /** The redirector threads that move output (both stdout and stderr) from one process
+  /** The redirector thread that moves stdout output from one process
     * to the input of the next process. */
-  protected Set<StreamRedirectThread> _redirectors = new HashSet<StreamRedirectThread>();
+  protected StreamRedirectThread _stdOutRedirector;
+
+  /** The redirector thread that moves stderr output from one process
+    * to the input of the next process. */
+  protected StreamRedirectThread _stdErrRedirector;
 
   /** The combined input stream of all processes. */
   protected PipedInputStream _combinedInputStream;
@@ -130,12 +134,16 @@ public class ProcessSequence extends Process {
             }
             catch(IOException e) {
               // could not start the process, record error but continue
-              DrJavaErrorHandler.record(e);
+              // TODO: find a way to record the error in the ExternalProcessPanel
+//              DrJavaErrorHandler.record(e);
+              _processes[_index] = DUMMY_PROCESS;
             }
           }
           else {
             ++_index;
+            GeneralProcessCreator.LOG.log("Closing StdOut and StdErr streams.");
             try {
+              stopAllRedirectors();
               _combinedStdOutStream.flush();
               _combinedStdOutStream.close();
               _combinedStdErrStream.flush();
@@ -151,10 +159,10 @@ public class ProcessSequence extends Process {
       _processes[_index] = _creators[_index].start();
     }
     catch(IOException e) {
-      // could not start the process, abort
-      _aborted = true;
-      destroy();
-      return;
+      // could not start the process, record error but continue
+      // TODO: find a way to record the error in the ExternalProcessPanel
+      _processes[_index] = DUMMY_PROCESS;
+//      DrJavaErrorHandler.record(e);
     }
     connectProcess(_processes[_index]);
     _deathThread.start();
@@ -266,11 +274,8 @@ public class ProcessSequence extends Process {
   
   /** Set the stop flags for all redirector threads. */
   protected void stopAllRedirectors() {
-    while(!_redirectors.isEmpty()) {
-      StreamRedirectThread r = _redirectors.iterator().next();
-      r.setStopFlag();
-      _redirectors.remove(r);
-    }
+    _stdOutRedirector.setStopFlag();
+    _stdErrRedirector.setStopFlag();
   }
   
   /** Connect the streams of the specified process. */
@@ -278,27 +283,65 @@ public class ProcessSequence extends Process {
     // redirect all stdout from all the processes into a combined output stream
     // that pipes all the data into a combined input stream that serves as this
     // process sequence's input stream
-    StreamRedirectThread r = new StreamRedirectThread("stdout Redirector "+_index,
-                                                      p.getInputStream(),
-                                                      _combinedStdOutStream,
-                                                      false,
-                                                      PROCESS_SEQUENCE_THREAD_GROUP);
-    _redirectors.add(r);
-    r.start();
-    r = new StreamRedirectThread("stderr Redirector "+_index,
-                                 p.getErrorStream(),
-                                 _combinedStdErrStream,
-                                 false,
-                                 PROCESS_SEQUENCE_THREAD_GROUP);
-    _redirectors.add(r);
-    r.start();
+    if (_stdOutRedirector==null) {
+      _stdOutRedirector = new StreamRedirectThread("stdout Redirector "+_index,
+                                                   p.getInputStream(),
+                                                   _combinedStdOutStream,
+                                                   false/*close*/,
+                                                   new ProcessSequenceThreadGroup(_combinedStdErrStream),
+                                                   true/*keepRunning*/);
+      _stdOutRedirector.start();
+    }
+    else {
+      _stdOutRedirector.setInputStream(p.getInputStream());
+    }
+    if (_stdErrRedirector==null) {
+      _stdErrRedirector = new StreamRedirectThread("stderr Redirector "+_index,
+                                                   p.getErrorStream(),
+                                                   _combinedStdErrStream,
+                                                   false/*close*/,
+                                                   new ProcessSequenceThreadGroup(_combinedStdErrStream),
+                                                   true/*keepRunning*/);
+      _stdErrRedirector.start();
+    }
+    else {
+      _stdErrRedirector.setInputStream(p.getErrorStream());
+    }
     _combinedOutputStream = p.getOutputStream();
   }
 
   /** Thread group for all threads that deal with this process sequence. */
-  protected static final ThreadGroup PROCESS_SEQUENCE_THREAD_GROUP = new ThreadGroup("Process Sequence Thread Group") {
-    public void uncaughtException(Thread t, Throwable e) {
-      DrJavaErrorHandler.record(e);
+  protected class ProcessSequenceThreadGroup extends ThreadGroup {
+    private PrintWriter _errOut;
+    public ProcessSequenceThreadGroup(OutputStream errOut) {
+      super("Process Sequence Thread Group");
+      _errOut = new PrintWriter(new OutputStreamWriter(errOut));
     }
+    public void uncaughtException(Thread t, Throwable e) {
+      if ((e instanceof StreamRedirectException) &&
+          (e.getCause() instanceof java.io.IOException)) {
+        _errOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
+                        e.toString()+"\n\n");
+      }
+      else {
+        DrJavaErrorHandler.record(e);
+      }
+    }
+  }
+
+  /** A process that does nothing. */
+  protected static final Process DUMMY_PROCESS = new Process() {
+    public void destroy() {}
+    public int exitValue() { return -1; }
+    public InputStream getErrorStream() { return new InputStream() {
+      public int read() { return -1; }
+    }; }
+    public InputStream getInputStream() { return new InputStream() {
+      public int read() { return -1; }
+    }; }
+    public OutputStream  getOutputStream() { return new OutputStream() {
+      public void write(int b) { }
+    }; }
+    public int waitFor() { return -1; }
   };
 }

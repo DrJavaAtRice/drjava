@@ -213,7 +213,12 @@ public class GeneralProcessCreator extends ProcessCreator {
       // more than one process, create a process chain
       ProcessCreator[] creators = new ProcessCreator[pipe.size()];
       for (int i=0; i<pipe.size(); ++i) {
-        creators[i] = new ProcessCreator(pipe.get(i).toArray(new String[0]), _workdir);
+        List<String> cmds = pipe.get(i);
+        String[] cmdarray = new String[cmds.size()];
+        for (int j=0; j<cmds.size(); ++j) {
+          cmdarray[j] = StringOps.unescapeSpacesWith1bHex(cmds.get(j));
+        }
+        creators[i] = new ProcessCreator(cmdarray, _workdir);
       }
       return new ProcessChain(creators);
     }

@@ -37,7 +37,8 @@
 package edu.rice.cs.util;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
@@ -65,14 +66,22 @@ public class ProcessChain extends Process {
   /** True when execution of this chain has been aborted. */
   protected boolean _aborted = false;
   
-  /** The redirector threads that move stdout from one process
+  /** The redirector threads that move output (both stdout and stderr) from one process
     * to the input of the next process. */
-  protected ArrayList<StreamRedirectThread> _stdOutRedirectors = new ArrayList<StreamRedirectThread>();
+  protected Set<StreamRedirectThread> _redirectors = new HashSet<StreamRedirectThread>();
 
-  /** The redirector threads that move stderr from one process
-    * to the input of the next process. */
-  protected ArrayList<StreamRedirectThread> _stdErrRedirectors = new ArrayList<StreamRedirectThread>();
+  /** The combined input stream of all processes. */
+  protected PipedInputStream _combinedInputStream;
   
+  /** The stream into which all outputs to stdout are written. */
+  protected PipedOutputStream _combinedStdOutStream;
+
+  /** The combined error stream of all processes. */
+  protected PipedInputStream _combinedErrorStream;
+  
+  /** The stream into which all outputs to stderr are written. */
+  protected PipedOutputStream _combinedStdErrStream;
+
   /** Threads that wait for the subprocesses to terminate. */
   // protected Thread[] _deathThreads;
   
@@ -81,6 +90,20 @@ public class ProcessChain extends Process {
   public ProcessChain(ProcessCreator[] pcs) {
     _creators = pcs;
     _processes = new Process[_creators.length];
+
+    _combinedInputStream = new PipedInputStream();
+    try {
+      _combinedStdOutStream = new PipedOutputStream(_combinedInputStream);
+      _combinedInputStream.connect(_combinedStdOutStream);
+    }
+    catch(IOException e) { /* ignore, no output if this goes wrong */ }
+    _combinedErrorStream = new PipedInputStream();
+    try {
+      _combinedStdErrStream = new PipedOutputStream(_combinedErrorStream);
+      _combinedErrorStream.connect(_combinedStdErrStream);
+    }
+    catch(IOException e) { /* ignore, no output if this goes wrong */ }
+
     // _deathThreads = new Thread[_creators.length];
     for(int i=0; i<_processes.length; ++i) {
       final int index = i;
@@ -114,23 +137,81 @@ public class ProcessChain extends Process {
       StreamRedirectThread r = new StreamRedirectThread("stdout Redirector "+i,
                                                         _processes[i].getInputStream(),
                                                         _processes[i+1].getOutputStream(),
-                                                        PROCESS_CHAIN_THREAD_GROUP);
-      _stdOutRedirectors.add(r);
+                                                        new ProcessChainThreadGroup(this));
+      _redirectors.add(r);
       r.start();
       r = new StreamRedirectThread("stderr Redirector "+i,
                                    _processes[i].getErrorStream(),
                                    _processes[i+1].getOutputStream(),
-                                   PROCESS_CHAIN_THREAD_GROUP);
-      _stdErrRedirectors.add(r);
+                                   new ProcessChainThreadGroup(this));
+      _redirectors.add(r);
       r.start();
     }
+    // now pipe output from the last process into our output streams
+    StreamRedirectThread r = new StreamRedirectThread("stdout Redirector "+(_processes.length-1),
+                                                      _processes[_processes.length-1].getInputStream(),
+                                                      _combinedStdOutStream,
+                                                      new ProcessChainThreadGroup(this));
+    _redirectors.add(r);
+    r.start();
+    r = new StreamRedirectThread("stderr Redirector "+(_processes.length-1),
+                                 _processes[_processes.length-1].getErrorStream(),
+                                 _combinedStdErrStream,
+                                 new ProcessChainThreadGroup(this));
+    _redirectors.add(r);
+    r.start();
   }
   
+//  /**
+//   * Gets the output stream of the process chain, i.e. the output
+//   * stream of the first process in the chain.
+//   *
+//   * @return  the output stream of the process chain.
+//   */
+//  public OutputStream getOutputStream() {
+//    if (_aborted) {
+//      return new OutputStream() {
+//        public void write(int b) throws IOException { }
+//      };
+//    }
+//    return _processes[0].getOutputStream();
+//  }
+//  
+//  /**
+//   * Gets the error stream of the process chain, i.e. the error
+//   * stream of the last process in the chain.
+//   *
+//   * @return  the error stream of the process chain.
+//   */
+//  public InputStream getErrorStream() {
+//    if (_aborted) {
+//      return new InputStream() {
+//        public int read() throws IOException { return -1; }
+//      };
+//    }
+//    return _processes[_processes.length-1].getErrorStream();
+//  }
+//  
+//  /**
+//   * Gets the input stream of the process chain, i.e. the input
+//   * stream of the first process in the chain.
+//   *
+//   * @return  the input stream of the process chain
+//   */
+//  public InputStream getInputStream() {
+//    if (_aborted) {
+//      return new InputStream() {
+//        public int read() throws IOException { return -1; }
+//      };
+//    }
+//    return _processes[_processes.length-1].getInputStream();
+//  }
+  
   /**
-   * Gets the output stream of the process chain, i.e. the output
-   * stream of the first process in the chain.
+   * Gets the output stream of the process sequence, i.e. the combined
+   * output stream of all the processes in the sequence.
    *
-   * @return  the output stream of the process chain.
+   * @return  the output stream of the process sequence.
    */
   public OutputStream getOutputStream() {
     if (_aborted) {
@@ -138,37 +219,29 @@ public class ProcessChain extends Process {
         public void write(int b) throws IOException { }
       };
     }
-    return _processes[0].getOutputStream();
+    else {
+      return new BufferedOutputStream(_processes[0].getOutputStream());
+    }
   }
   
   /**
-   * Gets the error stream of the process chain, i.e. the error
-   * stream of the last process in the chain.
+   * Gets the error stream of the process sequence, i.e. the combined
+   * error stream of all the processes in the sequence.
    *
-   * @return  the error stream of the process chain.
+   * @return  the error stream of the process sequence.
    */
   public InputStream getErrorStream() {
-    if (_aborted) {
-      return new InputStream() {
-        public int read() throws IOException { return -1; }
-      };
-    }
-    return _processes[_processes.length-1].getErrorStream();
+    return _combinedErrorStream;
   }
   
   /**
-   * Gets the input stream of the process chain, i.e. the input
-   * stream of the first process in the chain.
+   * Gets the input stream of the process sequence,  i.e. the combined
+   * input stream of all the processes in the sequence.
    *
    * @return  the input stream of the process chain
    */
   public InputStream getInputStream() {
-    if (_aborted) {
-      return new InputStream() {
-        public int read() throws IOException { return -1; }
-      };
-    }
-    return _processes[_processes.length-1].getInputStream();
+    return _combinedInputStream;
   }
   
   /**
@@ -244,20 +317,29 @@ public class ProcessChain extends Process {
   
   /** Set the stop flags for all redirector threads. */
   protected void stopAllRedirectors() {
-    for(StreamRedirectThread r: _stdOutRedirectors) {
-      // r.setStopFlag();
-    }
-    _stdOutRedirectors.clear();
-    for(StreamRedirectThread r: _stdErrRedirectors) {
-      // r.setStopFlag();
-    }
-    _stdErrRedirectors.clear();
+    for(StreamRedirectThread r: _redirectors) { r.setStopFlag(); }
+    _redirectors.clear();
   }
   
-  /** Thread group for all threads that deal with this process chain. */
-  protected static final ThreadGroup PROCESS_CHAIN_THREAD_GROUP = new ThreadGroup("Process Chain Thread Group") {
-    public void uncaughtException(Thread t, Throwable e) {
-      DrJavaErrorHandler.record(e);
+  /** Thread group for all threads that deal with this process sequence. */
+  protected class ProcessChainThreadGroup extends ThreadGroup {
+    private ProcessChain _chain;
+    private PrintWriter _errOut;
+    public ProcessChainThreadGroup(ProcessChain chain) {
+      super("Process Chain Thread Group");
+      _chain = chain;
+      _errOut = new PrintWriter(new OutputStreamWriter(_chain._combinedStdErrStream));
     }
-  };
+    public void uncaughtException(Thread t, Throwable e) {
+      destroy();
+      if ((e instanceof StreamRedirectException) &&
+          (e.getCause() instanceof java.io.IOException)) {
+        _errOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
+                        e.toString()+"\n\n");
+      }
+      else {
+        DrJavaErrorHandler.record(e);
+      }
+    }
+  }
 }

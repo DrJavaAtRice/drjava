@@ -423,15 +423,13 @@ public class DrJavaPropertySetup implements OptionConstants {
     });
 
     PropertyMaps.ONLY.setProperty("File", new DrJavaProperty("file.mkdir",
-                                                             "Make the directory with the provided name inside the specified "+
-                                                             "parent directory. Evaluates to the empty string \"\" if "+
-                                                             "successful.\n"+
+                                                             "Make the directory with the provided file name. "+
+                                                             "Evaluates to the empty string \"\" if successful.\n"+
                                                              "Required attributes:\n"+
-                                                             "\tname=\"<name for the new directory>\""+
-                                                             "\tfile=\"<parent directory>\"\n"+
-                                                             "Multiple names can be specified for the name attribute, each "+
+                                                             "\tfile=\"<directory to create>\"\n"+
+                                                             "Multiple files can be specified for the file attribute, each "+
                                                              "separated by ${path.separator}, which is "+File.pathSeparator+
-                                                             " on this machine. If multiple names are specified, then DrJava "+
+                                                             " on this machine. If multiple files are specified, then DrJava "+
                                                              "will attempt to make all those directories.") {
       public void update() {
         String s = _attributes.get("file");
@@ -439,16 +437,9 @@ public class DrJavaPropertySetup implements OptionConstants {
           _value = "(file.mkdir Error: file missing...)";
           return;
         }
-        s = StringOps.unescapeSpacesWith1bHex(s);
-        File f = new File(s);
-        s = _attributes.get("name");
-        if (s==null) {
-          _value = "(file.mkdir Error: name missing...)";
-          return;
-        }
         for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
           fs = StringOps.unescapeSpacesWith1bHex(fs);
-          File n = new File(f,fs);
+          File n = new File(fs);
           if (!n.mkdir()) {
             _value = "(file.mkdir I/O Error...)";
             return;
@@ -460,7 +451,6 @@ public class DrJavaPropertySetup implements OptionConstants {
       public void resetAttributes() {
         _attributes.clear();
         _attributes.put("file", null);
-        _attributes.put("name", null);
       }
     });
 
@@ -1135,6 +1125,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                              "Optional attributes:\n"+
                                                              "\tsep=\"<separator between elements>\"\n"+
                                                              "(if not defined, ${path.separator}, which is "+File.pathSeparator+
+                                                             " on this machine)\n"+
                                                              "\toutsep=\"<separator between elements in the output>\"\n"+
                                                              "(if not defined, ${process.separator}, which is "+
                                                              edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR+

@@ -654,6 +654,9 @@ public abstract class StringOps {
     tok.addKeyword(new Character((char)0x1D).toString()); // group separator
     tok.addKeyword(new Character((char)0x1E).toString()); // record separator
     tok.addKeyword(new Character((char)0x1F).toString()); // unit separator
+    // also add escaped space as keyword, but treat it differently
+    final String ESCAPED_SPACE = new Character((char)0x1B).toString()+" ";
+    tok.addKeyword(ESCAPED_SPACE); // escaped space
     // read tokens; concatenate tokens until keyword is found
     String n = null, p = null;
     BalancingStreamTokenizer.Token pTok = BalancingStreamTokenizer.Token.NONE;
@@ -690,6 +693,10 @@ public abstract class StringOps {
             // argument list
             ll.add(l);
             l = new ArrayList<String>();
+          }
+          else if (n.equals(ESCAPED_SPACE)) {
+            // escaped whitespace
+            sb.append(ESCAPED_SPACE);
           }
           else { // must be whitespace
             // add the current string to the argument list and start a new argument
