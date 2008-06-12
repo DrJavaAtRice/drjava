@@ -805,6 +805,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** Returns the model lock. */
   public Object getModelLock() { return _model; }
   
+  // This visitor is executed in getCurrent(). The case methods for files and strings return
+  // null, which caused DrJava to revert to the previous selection in requestSelectionUpdate().
+  // That code has now been commented out; this note is only for documentation purposes.
   private final NodeDataVisitor<ItemT, ItemT> _leafVisitor = new NodeDataVisitor<ItemT, ItemT>() {
     public ItemT fileCase(File f, Object... p){ return null; }
     public ItemT stringCase(String s, Object... p){ return null; }
@@ -943,9 +946,12 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** If the currently selected item is not an INavigatorItem, select the one given. Only runs in event thread. */
   public void requestSelectionUpdate(ItemT ini) {
 //    synchronized (_model) {
-    if (getCurrent() == null) { // the currently selected node is not a leaf
-      setActiveDoc(ini);
-    }
+    // This code checked if the selected node was a leaf, i.e. a Java source file,
+    // and if it wasn't, reverts the selection. The code was commented out to allow
+    // selection of file nodes (i.e. folders) and string nodes (i.e. [ Source Files ], etc.)
+//    if (getCurrent() == null) { // the currently selected node is not a leaf
+//      setActiveDoc(ini);
+//    }
 //    }
   }  
   

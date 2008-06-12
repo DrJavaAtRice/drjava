@@ -530,6 +530,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) { 
       _closeFolder();
       _findReplace.updateFirstDocInSearch();
+      // set the document currently visible in the definitions pane as active
+      // document in the document navigator
+      // this makes sure that something is selected in the navigator after the
+      // folder was closed
+      _model.getDocumentNavigator().setActiveDoc(_currentDefPane.getOpenDefDocument());
     }
   };
   
