@@ -153,16 +153,16 @@ public class DrJavaSurveyPopup extends JDialog {
   protected void yesAction() {
     noAction();
 
-    final String DRJAVA_SURVEY_PAGE = "http://drjava.concutest.org/cgi-bin/os-and-java-info.pl";
+    final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
     StringBuilder sb = new StringBuilder();
     sb.append(DRJAVA_SURVEY_PAGE);
-    sb.append('?');
-    sb.append("date=");
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-    sb.append(sdf.format(new Date()));
+//    sb.append("date=");
+//    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//    sb.append(sdf.format(new Date()));
+    boolean first = true;
     for(String k: DRJAVA_SURVEY_KEYS) {
-      sb.append('&');
+      if (first) { first = false; } else { sb.append('&'); }
       sb.append(k);
       sb.append('=');
       sb.append(System.getProperty(k));
