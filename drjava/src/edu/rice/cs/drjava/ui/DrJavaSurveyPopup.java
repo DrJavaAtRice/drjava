@@ -46,6 +46,7 @@ import java.io.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
@@ -156,9 +157,12 @@ public class DrJavaSurveyPopup extends JDialog {
     StringBuilder sb = new StringBuilder();
     sb.append(DRJAVA_SURVEY_PAGE);
     sb.append('?');
-    boolean first = true;
+    sb.append("date=");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+    sb.append(sdf.format(new Date()));
     for(String k: DRJAVA_SURVEY_KEYS) {
-      if (first) { first = false; } else { sb.append('&'); }
+      sb.append('&');
       sb.append(k);
       sb.append('=');
       sb.append(System.getProperty(k));
