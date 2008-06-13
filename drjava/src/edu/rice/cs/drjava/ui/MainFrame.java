@@ -3393,7 +3393,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // check for new version if desired by user
     if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
-          .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3))) {
+          .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
+        !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
       int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
       java.util.Date nextCheck = 
         new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
@@ -3409,7 +3410,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     // check for new version if desired by user
-    if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED)) {
+    if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
       int days = DrJava.getConfig().getSetting(DRJAVA_SURVEY_DAYS);
       java.util.Date nextCheck = 
         new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
