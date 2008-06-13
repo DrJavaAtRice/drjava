@@ -214,7 +214,7 @@ public class NewVersionPopup extends JDialog {
     }
     catch(IOException e) { _openFileDownloadPage(DRJAVA_FILES_PAGE); }
     finally { // close open input stream
-      try { br.close(); }
+      try { if (br!=null) br.close(); }
       catch(IOException e) { /* ignore */ }
     }
   }
@@ -382,7 +382,7 @@ public class NewVersionPopup extends JDialog {
     }
   }
   
-    /** Lambda doing nothing. */
+  /** Lambda doing nothing. */
   protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
     = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
     public Void apply(WindowEvent e) {

@@ -2135,6 +2135,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       popup.setVisible(true);
     }
   };
+
+  /** Asks whether DrJava may contact the DrJava developers and send system information. */
+  private final Action _drjavaSurveyAction = new AbstractAction("Send System Information") {
+    public void actionPerformed(ActionEvent ae) {
+      DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+      popup.setVisible(true);
+    }
+  };
   
   /** Pops up the DrJava errors dialog. */
   private final Action _errorsAction = new AbstractAction("DrJava Errors") {
@@ -3395,6 +3403,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           public void run() {
             NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
             if (popup.checkNewVersion()) { popup.setVisible(true); }
+          }
+        });
+      }
+    }
+    
+    // check for new version if desired by user
+    if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED)) {
+      int days = DrJava.getConfig().getSetting(DRJAVA_SURVEY_DAYS);
+      java.util.Date nextCheck = 
+        new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
+                             + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
+      if (new java.util.Date().after(nextCheck)) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+            popup.setVisible(true);
           }
         });
       }
@@ -5905,6 +5929,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
+    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", "Send anonymous system information to DrJava developers");
     _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
   }
@@ -6374,6 +6399,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
+    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRJAVA_SURVEY);
     _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION);
     _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS);
     helpMenu.addSeparator();

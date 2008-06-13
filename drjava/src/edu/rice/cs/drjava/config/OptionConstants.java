@@ -753,6 +753,10 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_CHECK_NEW_VERSION = 
     new KeyStrokeOption("key.check.new.version", KeyStrokeOption.NULL_KEYSTROKE);
   
+  /** The key binding for the DrJava survey dialog */
+  public static final KeyStrokeOption KEY_DRJAVA_SURVEY = 
+    new KeyStrokeOption("key.drjava.survey", KeyStrokeOption.NULL_KEYSTROKE);
+  
   /** The key binding for the "DrJava Errors" dialog */
   public static final KeyStrokeOption KEY_DRJAVA_ERRORS = 
     new KeyStrokeOption("key.drjava.errors", KeyStrokeOption.NULL_KEYSTROKE);
@@ -1204,6 +1208,10 @@ public interface OptionConstants {
   /** Whether to show a notification popup when the first DrJava error occurs. */
   public static final BooleanOption DIALOG_DRJAVA_ERROR_POPUP_ENABLED =
     new BooleanOption("dialog.drjava.error.popup.enabled", Boolean.TRUE);
+
+  /** Whether to ask the user if DrJava may send system information to the DrJava developers. */
+  public static final BooleanOption DIALOG_DRJAVA_SURVEY_ENABLED =
+    new BooleanOption("dialog.drjava.survey.enabled", Boolean.TRUE);
   
   /** Whether to show the "code preview" popups in the RegionTreePanels (bookmarks, breakpoints, find all). */
   public static final BooleanOption SHOW_CODE_PREVIEW_POPUPS =
@@ -1287,4 +1295,14 @@ public interface OptionConstants {
   /** The number of days that have to pass before we automatically check again. */
   public static final NonNegativeIntegerOption NEW_VERSION_NOTIFICATION_DAYS =
     new NonNegativeIntegerOption("new.version.notification.days", 7);  
+  
+  /** The number of days that have to pass before we ask and allow the user to participate in the DrJava survey again. */
+  public static final NonNegativeIntegerOption DRJAVA_SURVEY_DAYS =
+    new NonNegativeIntegerOption("drjava.survey.days", 91); // every three month  
+
+  /** The last time we asked the user to participate in the DrJava survey. */
+  public static final LongOption LAST_DRJAVA_SURVEY = new LongOption("drjava.survey.notification.last", (long)0);  
+
+  /** The request URL that the user generated the last time the DrJava survey was taken. */
+  public static final StringOption LAST_DRJAVA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
 }
