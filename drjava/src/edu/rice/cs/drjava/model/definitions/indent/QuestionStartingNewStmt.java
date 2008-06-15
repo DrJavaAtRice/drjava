@@ -70,11 +70,11 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     
     char[] delims = {';', '{', '}'};
-    int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
+    int lineStart = doc._getLineStartPos(doc.getCurrentLocation());
     int prevDelimiterPos;
     
     try {
-      prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims);
+      prevDelimiterPos = doc._findPrevDelimiter(lineStart, delims);
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
@@ -85,7 +85,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     // Delimiter must be at the end of its line (ignoring whitespace & comments)
     int firstNonWSAfterDelimiter;
     try {
-      firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos + 1);
+      firstNonWSAfterDelimiter = doc._getFirstNonWSCharPos(prevDelimiterPos + 1);
       // will return ERROR_INDEX (-1) if we hit the end of the document
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }

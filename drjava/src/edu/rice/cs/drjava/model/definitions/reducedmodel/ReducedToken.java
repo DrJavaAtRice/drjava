@@ -120,24 +120,22 @@ public abstract class ReducedToken implements ReducedModelStates {
   /** Indicates whether this brace is inside quotes.
     * @return true if the brace is inside quotes.
     */
-  public boolean isQuoted() {
-    return  _state == INSIDE_DOUBLE_QUOTE;
-  }
+  public boolean isQuoted() { return  _state == INSIDE_DOUBLE_QUOTE; }
   
-  /** Indicates whether this brace is commented out.
+  /** Indicates whether this brace is commented out.  Package visible for testing purposes.
     * @return true if the brace is hidden by comments.
     */
-  public boolean isCommented() { return  inBlockComment() || inLineComment(); }
+  boolean isCommented() { return  inBlockComment() || inLineComment(); }
   
   /** Determines whether the current location is inside a block comment.  (Excludes opening "brace"!)
     * @return true or false
     */
-  public boolean inBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
+  private boolean inBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
   
   /** Determines whether the current location is inside a line comment.  (Excludes opening "brace"!)
     * @return true or false
     */
-  public boolean inLineComment() { return  _state == INSIDE_LINE_COMMENT; }
+  private boolean inLineComment() { return  _state == INSIDE_LINE_COMMENT; }
   
   /** Determines whether the current location is part of a multiple char brace.
     * @return true or false

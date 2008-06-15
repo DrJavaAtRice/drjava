@@ -105,34 +105,34 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
   public void testDeleteBlockCommentMakesLineComment() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
-    assertEquals("#0.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.1", FREE, model1._getStateAtCurrent());
     model1.insertChar('*');
     assertEquals("#1.0", 2, model1.absOffset());
-    assertEquals("#1.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     insertGap(model1, 2);
     assertEquals("#2.0", 4, model1.absOffset());
-    assertEquals("#2.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#2.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('*');
     assertEquals("#3.0", 5, model1.absOffset());
-    assertEquals("#3.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('/');
     assertEquals("#4.0", 6, model1.absOffset());
-    assertEquals("#4.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.1", FREE, model1._getStateAtCurrent());
     insertGap(model1, 1);
     assertEquals("#5.0", 7, model1.absOffset());
-    assertEquals("#5.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#5.1", FREE, model1._getStateAtCurrent());
     //  /*__*/_#
     model1.move(-6);
     assertEquals("#6.0", 1, model1.absOffset());
     model1.delete(4);
     assertEquals("#7.0", 1, model1.absOffset());
     assertEquals("#7.1", "//", model1.currentToken().getType());
-    assertEquals("#7.3", FREE, model1.getStateAtCurrent());
+    assertEquals("#7.3", FREE, model1._getStateAtCurrent());
     model1.move(1);
     assertEquals("#7.0", 2, model1.absOffset());
     assertTrue("#7.1", model1.currentToken().isGap());
     assertEquals("#7.2", 1, model1.currentToken().getSize());
-    assertEquals("#7.3", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#7.3", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
   }
 
   public void testLineCommentStealsBlockCommentSlash() {
@@ -144,16 +144,16 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     assertEquals("#2.0", 4, model1.absOffset());
     model1.insertChar('*');
     assertEquals("#3.0", 5, model1.absOffset());
-    assertEquals("#3.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.move(-4);
     model1.delete(2);
     assertEquals("#4.0", 1, model1.absOffset());
     assertEquals("#4.1", "//", model1.currentToken().getType());
-    assertEquals("#4.2", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.2", FREE, model1._getStateAtCurrent());
     model1.move(1);
     assertEquals("#5.0", 2, model1.absOffset());
     assertEquals("#5.1", "*", model1.currentToken().getType());
-    assertEquals("#5.2", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#5.2", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("#5.3", INSIDE_LINE_COMMENT, model1.currentToken().getState());
   }
 
@@ -166,38 +166,38 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     assertEquals("#2.0", 4, model1.absOffset());
     model1.insertChar('/');
     assertEquals("#3.0", 5, model1.absOffset());
-    assertEquals("#3.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     model1.move(-4);
     model1.delete(2);
     assertEquals("#4.0", 1, model1.absOffset());
     assertEquals("#4.1", "//", model1.currentToken().getType());
-    assertEquals("#4.2", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.2", FREE, model1._getStateAtCurrent());
     model1.move(1);
     assertEquals("#5.0", 2, model1.absOffset());
     assertEquals("#5.1", "/", model1.currentToken().getType());
-    assertEquals("#5.2", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#5.2", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("#5.3", INSIDE_LINE_COMMENT, model1.currentToken().getState());
   }
 
   public void testDeleteNewlineAndShadowBlockCommentStart() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
-    assertEquals("#0.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.1", FREE, model1._getStateAtCurrent());
     model1.insertChar('/');
     assertEquals("#1.0", 2, model1.absOffset());
-    assertEquals("#1.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('*');
     assertEquals("#2.0", 3, model1.absOffset());
-    assertEquals("#2.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#2.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('\n');
     assertEquals("#3.0", 4, model1.absOffset());
-    assertEquals("#3.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#3.1", FREE, model1._getStateAtCurrent());
     model1.insertChar('/');
     assertEquals("#4.0", 5, model1.absOffset());
-    assertEquals("#4.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.1", FREE, model1._getStateAtCurrent());
     model1.insertChar('*');
     assertEquals("#5.0", 6, model1.absOffset());
-    assertEquals("#5.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#5.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.move(-3);
     assertEquals("#6.0", 3, model1.absOffset());
     model1.delete(1);
@@ -217,34 +217,34 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
   public void testBlockCommentStartEatsEnd() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
-    assertEquals("#0.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.1", FREE, model1._getStateAtCurrent());
     model1.insertChar('*');
     assertEquals("#1.0", 2, model1.absOffset());
-    assertEquals("#1.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     insertGap(model1, 2);
     assertEquals("#2.0", 4, model1.absOffset());
-    assertEquals("#2.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#2.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('*');
     assertEquals("#3.0", 5, model1.absOffset());
-    assertEquals("#3.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('/');
     assertEquals("#4.0", 6, model1.absOffset());
-    assertEquals("#4.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.1", FREE, model1._getStateAtCurrent());
     model1.move(-5);
     assertEquals("#4.0", 1, model1.absOffset());
     assertEquals("#4.1", "/*", model1.currentToken().getType());
-    assertEquals("#4.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.1", FREE, model1._getStateAtCurrent());
     model1.delete(3);
     assertEquals("#5.0", 1, model1.absOffset());
     assertEquals("#5.1", "/*", model1.currentToken().getType());
     model1.move(1);
     assertEquals("#6.0", 2, model1.absOffset());
     assertEquals("#6.1", "/", model1.currentToken().getType());
-    assertEquals("#6.2", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#6.2", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("#6.3", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
     model1.move(1);
     assertEquals("#7.0", 3, model1.absOffset());
-    assertEquals("#7.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#7.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
   }
 
   public void deleteLineCommentSlashOpensBlockComment() {
@@ -257,43 +257,43 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     model1.insertChar('*');
     model1.insertChar('/');
     assertEquals("#0.0", 9, model1.absOffset());
-    assertEquals("#0.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.1", FREE, model1._getStateAtCurrent());
     model1.move(-1);
     assertEquals("#1.0", 8, model1.absOffset());
-    assertEquals("#1.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#1.1", FREE, model1._getStateAtCurrent());
     assertEquals("#1.2", "/", model1.currentToken().getType());
     model1.move(-1);
     assertEquals("#2.0", 7, model1.absOffset());
-    assertEquals("#2.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#2.1", FREE, model1._getStateAtCurrent());
     assertEquals("#2.2", "*", model1.currentToken().getType());
     model1.move(-1);
     assertEquals("#3.0", 6, model1.absOffset());
-    assertEquals("#3.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#3.1", FREE, model1._getStateAtCurrent());
     assertEquals("#3.2", "(", model1.currentToken().getType());
     model1.move(-2);
     assertEquals("#4.0", 4, model1.absOffset());
-    assertEquals("#4.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#4.1", FREE, model1._getStateAtCurrent());
     assertTrue("#4.2", model1.currentToken().isGap());
     assertEquals("#4.3", 2, model1.currentToken().getSize());
     model1.move(-1);
     assertEquals("#5.0", 3, model1.absOffset());
-    assertEquals("#5.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#5.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("#5.2", "\n", model1.currentToken().getType());
     model1.move(-1);
     assertEquals("#6.0", 2, model1.absOffset());
-    assertEquals("#6.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#6.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("#6.2", "*", model1.currentToken().getType());
     model1.move(-1);
     assertEquals("#7.0", 1, model1.absOffset());
-    assertEquals("#7.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#7.1", FREE, model1._getStateAtCurrent());
     assertEquals("#7.2", "//", model1.currentToken().getType());
     model1.delete(-1);
     assertEquals("#8.0", 0, model1.absOffset());
-    assertEquals("#8.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#8.1", FREE, model1._getStateAtCurrent());
     assertEquals("#8.2", "/*", model1.currentToken().getType());
     model1.move(7);
     assertEquals("#8.0", 7, model1.absOffset());
-    assertEquals("#8.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#8.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("#8.2", "*/", model1.currentToken().getType());
   }
 
@@ -307,11 +307,11 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     model1.delete(2);
     assertEquals("#0.0", 2, model1.absOffset());
     assertEquals("#0.1", "*/", model1.currentToken().getType());
-    assertEquals("#0.2", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.2", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.move(-2);
     assertEquals("#1.0", 0, model1.absOffset());
     assertEquals("#1.1", "/*", model1.currentToken().getType());
-    assertEquals("#1.2", FREE, model1.getStateAtCurrent());
+    assertEquals("#1.2", FREE, model1._getStateAtCurrent());
   }
 
   public void testDeleteFreesBlockCommentEnd() {
@@ -333,13 +333,13 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     assertEquals("#0.4", 0, model1.absOffset());
     assertEquals("#0.5", "*", model1.currentToken().getType());
     assertEquals("#0.6", FREE, model1.currentToken().getState());
-    assertEquals("#0.7", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.7", FREE, model1._getStateAtCurrent());
 
     model1.move(1);
     assertEquals("#1.0", 1, model1.absOffset());
     assertEquals("#1.1", "/", model1.currentToken().getType());
     assertEquals("#1.2", FREE, model1.currentToken().getState());
-    assertEquals("#1.3", FREE, model1.getStateAtCurrent());
+    assertEquals("#1.3", FREE, model1._getStateAtCurrent());
   }
 
   public void testUnmaskBlockCommentedLineComment() {
@@ -352,21 +352,21 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     assertEquals("#0.0", 5, model1.absOffset());
     assertEquals("#0.1", "/", model1.currentToken().getType());
     assertEquals("#0.2", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
-    assertEquals("#0.3", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.3", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.move(-1);
     assertEquals("#0.0", 4, model1.absOffset());
     assertEquals("#0.1", "/", model1.currentToken().getType());
     assertEquals("#0.2", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
-    assertEquals("#0.3", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.3", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.move(-4);
     model1.delete(4);
     assertEquals("#2.0", 0, model1.absOffset());
     assertEquals("#2.1", "//", model1.currentToken().getType());
     assertEquals("#2.2", FREE, model1.currentToken().getState());
-    assertEquals("#2.3", FREE, model1.getStateAtCurrent());
+    assertEquals("#2.3", FREE, model1._getStateAtCurrent());
     model1.move(2);
     assertEquals("#3.0", 2, model1.absOffset());
-    assertEquals("#3.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
   }
 
   public void testCrazyDelete() {
@@ -378,10 +378,10 @@ public final class ReducedModelDeleteTest extends BraceReductionTestCase
     model1.insertChar('/');
     model1.insertChar('/');
     assertEquals("#0.0", 8, model1.absOffset());
-    assertEquals("#0.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     model1.move(-2);
     assertEquals("#1.0", 6, model1.absOffset());
-    assertEquals("#1.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#1.1", FREE, model1._getStateAtCurrent());
     assertEquals("#1.2", "//", model1.currentToken().getType());
     assertEquals("#1.3", FREE, model1.currentToken().getState());
     model1.move(-4);

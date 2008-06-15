@@ -52,13 +52,13 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
 
     _setDocText("foo();\n");
-    rule1.indentLine(_doc, 2, Indenter.IndentReason.OTHER);
+    rule1.testIndentLine(_doc, 2, Indenter.IndentReason.OTHER);
     assertEquals("no prev stmt, no suffix",
                  "foo();\n",
                  _doc.getText());
     
     _setDocText("foo();\n");
-    rule2.indentLine(_doc, 2, Indenter.IndentReason.OTHER);
+    rule2.testIndentLine(_doc, 2, Indenter.IndentReason.OTHER);
     assertEquals("no prev stmt, suffix two spaces",
                  "  foo();\n",
                  _doc.getText());
@@ -69,13 +69,13 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
 
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
-    rule1.indentLine(_doc, 44, Indenter.IndentReason.OTHER);
+    rule1.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
     assertEquals("prev stmt on prev line, no suffix",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
                  _doc.getText());
     
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
-    rule2.indentLine(_doc, 44, Indenter.IndentReason.OTHER);
+    rule2.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
     assertEquals("prev stmt on prev line, suffix two spaces",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
                  _doc.getText());
@@ -86,13 +86,13 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
-    rule1.indentLine(_doc, 56, Indenter.IndentReason.OTHER);
+    rule1.testIndentLine(_doc, 56, Indenter.IndentReason.OTHER);
     assertEquals("prev stmt serveral lines before, no suffix",
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
                  _doc.getText());
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
-    rule2.indentLine(_doc, 56, Indenter.IndentReason.OTHER);
+    rule2.testIndentLine(_doc, 56, Indenter.IndentReason.OTHER);
     assertEquals("prev stmt serveral lines before, suffix two spaces", 
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
                  _doc.getText());
@@ -104,7 +104,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     _setDocText("test2 = x ? y :\n" +     // ? and : on one line
                 "  z;\n" +     // unfinished ternary
                 "foo();\n");     // new stmt
-    rule.indentLine(_doc, 21, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 21, Indenter.IndentReason.OTHER);
     assertEquals("Colon is not a delimiter",
                  "test2 = x ? y :\n" +     // ? and : on one line
                  "  z;\n" +     // unfinished ternary
@@ -121,7 +121,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                 "};\n" +
                 "   a;");     // new stmt
     //rule.indentLine(_doc, 8);
-    rule.indentLine(_doc, 17, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 17, Indenter.IndentReason.OTHER);
     assertEquals("After array assignment",
                  "a = {\n" + 
                  "  b,c,d\n" +
@@ -137,7 +137,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                 "};;;\n" +
                 "   a;");     // new stmt
     //rule.indentLine(_doc, 8);
-    rule.indentLine(_doc, 19, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 19, Indenter.IndentReason.OTHER);
     assertEquals("After array assignment multi semi colons",
                  "a = {\n" + 
                  "  b,c,d\n" +
@@ -153,7 +153,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                 "  public void run() { ... }\n" +
                 "};\n" +
                 "   command.run();");  // new stmt
-    rule.indentLine(_doc, 67, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 67, Indenter.IndentReason.OTHER);
     assertEquals("After anonymous inner class assignment",
                  "Runnable command = new Runnable() {\n" + 
                 "  public void run() { ... }\n" +
@@ -169,7 +169,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                 "  public void run() { ... }\n" +
                 "});\n" +
                 "   command.run();");  // new stmt
-    rule.indentLine(_doc, 60, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 60, Indenter.IndentReason.OTHER);
     assertEquals("After method call with anonymous inner class argument",
                  "setCommand(new Runnable() {\n" + 
                  "  public void run() { ... }\n" +

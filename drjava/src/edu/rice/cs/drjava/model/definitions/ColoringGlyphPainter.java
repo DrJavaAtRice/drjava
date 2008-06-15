@@ -118,7 +118,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     
     text = v.getText(start, end);
     
-    Vector<HighlightStatus> stats = djdoc.getHighlightStatus(start, end);
+    Vector<HighlightStatus> stats = djdoc._getHighlightStatus(start, end);
     if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
     try {
       for (int i = 0; i < stats.size(); i++) {

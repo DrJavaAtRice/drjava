@@ -59,9 +59,9 @@ public class ActionBracePlus extends IndentRuleAction {
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
-    int startLine = doc.getLineStartPos(here);
+    int startLine = doc._getLineStartPos(here);
     doc.setCurrentLocation(startLine);
-    IndentInfo info = doc.getIndentInformation();
+    IndentInfo info = doc._getIndentInformation();
     int dist = info.distToLineEnclosingBrace();
 
     // Check preconditions

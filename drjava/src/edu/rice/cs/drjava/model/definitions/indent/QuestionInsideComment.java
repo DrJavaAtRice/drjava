@@ -51,6 +51,6 @@ class QuestionInsideComment extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { 
-    return doc.inBlockComment(doc.getCurrentLocation()); 
+    return doc._inBlockComment(doc.getCurrentLocation()); 
   }
 }

@@ -40,6 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
@@ -61,7 +62,7 @@ public final class IndentInfoTest extends DrJavaTestCase {
     super.setUp();
     //_notifier = new GlobalEventNotifier();
     // _document = new DefinitionsDocument(_notifier);
-    _document = new AbstractDJDocument() {
+    _document = new AbstractDJDocument(IndentRulesTestCase.TEST_INDENT_LEVEL) {
       protected int startCompoundEdit() {
         //Do nothing
         return 0;

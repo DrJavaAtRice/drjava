@@ -99,7 +99,7 @@ public interface DJDocument extends SwingDocumentInterface {
   
 //  public ReducedModelState stateAtRelLocation(int dist);
   
-  public ReducedModelState getStateAtCurrent();
+  public ReducedModelState _getStateAtCurrent();
   
 //  public void resetReducedModelLocation();
   
@@ -110,7 +110,7 @@ public interface DJDocument extends SwingDocumentInterface {
     * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
-  public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
+  public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /** Searching forwards, finds the position of the enclosing brace.
    * NB: ignores comments.
@@ -132,7 +132,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
    * of document is reached.
    */
-  public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
+  public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
   
   /** Searching backwards, finds the position of the first character that is one
    * of the given delimiters.  Will not look for delimiters inside a paren
@@ -145,7 +145,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
    * of document is reached.
    */
-  public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
+  public int _findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
   /** This function finds the given character in the same statement as the given
    * position, and before the given position.  It is used by QuestionExistsCharInStmt and
@@ -189,13 +189,13 @@ public interface DJDocument extends SwingDocumentInterface {
     * (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',').
     * @param pos Cursor position
     */
-  public int getIndentOfCurrStmt(int pos) throws BadLocationException;
+  public int _getIndentOfCurrStmt(int pos) throws BadLocationException;
   
   /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default set of whitespace
     * characters (' ', '\t', '\n', ',').
     * @param pos Cursor position
     */
-  public int getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
+  public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
   
   /** Returns the indent level of the start of the statement
    * that the cursor is on.
@@ -203,7 +203,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param delims Delimiter characters denoting end of statement
    * @param whitespace characters to skip when looking for beginning of next statement
    */
-  public int getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
+  public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
     throws BadLocationException;
   
   /** Determines if the given character exists on the line where
@@ -222,14 +222,14 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param pos Any position on the current line
    * @return position of the beginning of this line
    */
-  public int getLineStartPos(int pos);
+  public int _getLineStartPos(int pos);
   
   /** Returns the absolute position of the end of the current
    * line.  (At the next newline, or the end of the document.)
    * @param pos Any position on the current line
    * @return position of the end of this line
    */
-  public int getLineEndPos(int pos);
+  public int _getLineEndPos(int pos);
   
   /** Returns the absolute position of the first non-whitespace character
    * on the current line.
@@ -238,7 +238,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character on this line, or the end
    * of the line if no non-whitespace character is found.
    */
-  public int getLineFirstCharPos(int pos) throws BadLocationException;
+  public int _getLineFirstCharPos(int pos) throws BadLocationException;
   
   /** Finds the position of the first non-whitespace character after pos.
    * NB: Skips comments and all whitespace, including newlines
@@ -246,7 +246,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX (-1) if end of document is reached
    */
-  public int getFirstNonWSCharPos(int pos) throws BadLocationException;
+  public int _getFirstNonWSCharPos(int pos) throws BadLocationException;
   
   /** Similar to the single-argument version, but allows including comments.
    * @param pos Position to start from
@@ -254,7 +254,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX (-1) if end of document is reached
    */
-  public int getFirstNonWSCharPos(int pos, boolean acceptComments) 
+  public int _getFirstNonWSCharPos(int pos, boolean acceptComments) 
     throws BadLocationException;
   
   /** Finds the position of the first non-whitespace character after pos.
@@ -265,7 +265,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX (-1) if end of document is reached
    */
-  public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
+  public int _getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
     throws BadLocationException;
   
   public int findPrevNonWSCharPos(int pos) throws BadLocationException;
@@ -301,8 +301,7 @@ public interface DJDocument extends SwingDocumentInterface {
   /** Inserts a string of text into the document. It turns out that this is not where we should do custom processing
     * of the insert; that is done in {@link AbstractDJDocument#insertUpdate}.
     */
-  public void insertString(int offset, String str, AttributeSet a)
-    throws BadLocationException;
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException;
   
   /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
     * in {@link AbstractDJDocument#removeUpdate}.

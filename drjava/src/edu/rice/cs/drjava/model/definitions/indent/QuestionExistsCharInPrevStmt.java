@@ -57,7 +57,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     //Find the end of the previous line
     int endPreviousStatement;
-    try { endPreviousStatement = doc.findPrevDelimiter(doc.getCurrentLocation(), new char[] {';','}','{'}); } 
+    try { endPreviousStatement = doc._findPrevDelimiter(doc.getCurrentLocation(), new char[] {';','}','{'}); } 
     catch (BadLocationException ble) {
       //default to reporting the char was not found in the case of a BadLocationeEception
       return false;

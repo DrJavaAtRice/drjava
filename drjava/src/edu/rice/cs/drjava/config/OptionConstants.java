@@ -961,16 +961,13 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("recent.files.max.size", Integer.valueOf(5));
   
   /** Whether to automatically close comments. */
-  public static final BooleanOption AUTO_CLOSE_COMMENTS =
-    new BooleanOption("auto.close.comments", Boolean.FALSE);
+  public static final BooleanOption AUTO_CLOSE_COMMENTS = new BooleanOption("auto.close.comments", Boolean.FALSE);
   
   /** Whether to clear the console when manually resetting the interactions pane. */
-  public static final BooleanOption RESET_CLEAR_CONSOLE =
-    new BooleanOption("reset.clear.console", Boolean.TRUE);
+  public static final BooleanOption RESET_CLEAR_CONSOLE = new BooleanOption("reset.clear.console", Boolean.TRUE);
   
   /** Whether to run assert statements in the interactions pane. */
-  public static final BooleanOption RUN_WITH_ASSERT =
-    new BooleanOption("run.with.assert", Boolean.TRUE);
+  public static final BooleanOption RUN_WITH_ASSERT = new BooleanOption("run.with.assert", Boolean.TRUE);
   
   /** Whether to make emacs-style backup files. */
   public static final BooleanOption BACKUP_FILES = new BooleanOption("files.backup", Boolean.TRUE);

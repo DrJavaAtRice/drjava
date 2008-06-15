@@ -80,15 +80,13 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     }
   }
 
-  /** Test the getType function for Braces.
-   */
+  /** Test the getType function for Braces. */
   public void testGetType() {
     assertEquals("(", lparen.getType());
     assertEquals(")", rparen.getType());
   }
 
-  /** Test the isShadowed() function.
-   */
+  /** Test the isShadowed() function. */
   public void testIsShadowed() {
     assertTrue("#0.0", !lparen.isShadowed());
     lparen.setState(INSIDE_DOUBLE_QUOTE);

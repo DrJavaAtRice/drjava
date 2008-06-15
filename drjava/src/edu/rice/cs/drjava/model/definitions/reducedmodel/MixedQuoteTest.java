@@ -79,22 +79,22 @@ public final class MixedQuoteTest extends BraceReductionTestCase
    */
   public void testSingleEclipsesDouble() {
     _model.insertChar('\"');
-    assertEquals("#0.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#0.0", INSIDE_DOUBLE_QUOTE, _model._getStateAtCurrent());
     _model.move(-1);
     assertEquals("#0.1", FREE, stateOfCurrentToken(_model));
     _model.move(1);
     _model.insertChar('A');
     _model.move(-1);
-    assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, _model._getStateAtCurrent());
     assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(_model));
     assertTrue("#1.2", _model.currentToken().isGap());
     _model.move(-1);
     _model.insertChar('\'');
-    assertEquals("#2.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#2.0", INSIDE_SINGLE_QUOTE, _model._getStateAtCurrent());
     assertEquals("#2.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(_model));
     assertEquals("#2.2", "\"", _model.currentToken().getType());
     _model.move(1);
-    assertEquals("#3.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#3.0", INSIDE_SINGLE_QUOTE, _model._getStateAtCurrent());
     assertEquals("#3.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(_model));
     assertTrue("#3.2", _model.currentToken().isGap());
   }
@@ -104,22 +104,22 @@ public final class MixedQuoteTest extends BraceReductionTestCase
    */
   public void testDoubleEclipsesSingle() {
     _model.insertChar('\'');
-    assertEquals("#0.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#0.0", INSIDE_SINGLE_QUOTE, _model._getStateAtCurrent());
     _model.move(-1);
     assertEquals("#0.1", FREE, stateOfCurrentToken(_model));
     _model.move(1);
     _model.insertChar('A');
     _model.move(-1);
-    assertEquals("#1.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#1.0", INSIDE_SINGLE_QUOTE, _model._getStateAtCurrent());
     assertEquals("#1.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(_model));
     assertTrue("#1.2", _model.currentToken().isGap());
     _model.move(-1);
     _model.insertChar('\"');
-    assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, _model._getStateAtCurrent());
     assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(_model));
     assertEquals("#2.2", "\'", _model.currentToken().getType());
     _model.move(1);
-    assertEquals("#3.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#3.0", INSIDE_DOUBLE_QUOTE, _model._getStateAtCurrent());
     assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(_model));
     assertTrue("#3.2", _model.currentToken().isGap());
   }

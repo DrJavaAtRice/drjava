@@ -52,7 +52,7 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
     String text = "";
     
     _setDocText(text);
-    rule.indentLine(_doc, 0, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER);
     _assertContents(text);
   }
   
@@ -64,11 +64,11 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
     
     // First line
     _setDocText(text);
-    rule.indentLine(_doc, 0, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER);
     _assertContents(text);
     
     // Second line
-    rule.indentLine(_doc, 9, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 9, Indenter.IndentReason.OTHER);
     _assertContents(text);
   }
 
@@ -80,11 +80,11 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
     
     // First line
     _setDocText(text);
-    rule.indentLine(_doc, 0, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER);
     _assertContents(text);
     
     // Second line
-    rule.indentLine(_doc, 10, Indenter.IndentReason.OTHER);
+    rule.testIndentLine(_doc, 10, Indenter.IndentReason.OTHER);
     _assertContents(text);
   }
 

@@ -62,10 +62,10 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     
     int origin = doc.getCurrentLocation();
-    int lineStart = doc.getLineStartPos(origin);
+    int lineStart = doc._getLineStartPos(origin);
     
     // Get brace for start of line  
-    BraceInfo info = doc.getLineEnclosingBrace();   
+    BraceInfo info = doc._getLineEnclosingBrace();   
     
     int dist = info.distance();
     

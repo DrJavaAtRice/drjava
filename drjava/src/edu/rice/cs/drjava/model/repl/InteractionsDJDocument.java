@@ -218,14 +218,14 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Returns true iff the end of the current interaction is an open comment block
     * @return true iff the end of the current interaction is an open comment block
     */
-  public boolean inBlockComment() {
+  public boolean _inBlockComment() {
     acquireReadLock();
     try {
       synchronized(_reduced) {
 //        resetReducedModelLocation();
 //        ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
 //        boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
-        boolean toReturn = inBlockComment(getLength());
+        boolean toReturn = _inBlockComment(getLength());
         return toReturn;
       }
     }

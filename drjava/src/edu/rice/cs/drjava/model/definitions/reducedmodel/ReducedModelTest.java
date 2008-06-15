@@ -225,7 +225,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.insertChar('{');
     model1.move(-1);
     // /*#{
-    assertEquals("#0.0", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.0", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     model1.move(-2);
     assertEquals("#0.1", FREE, model1.currentToken().getState());
     model1.move(3);
@@ -304,7 +304,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     // /*____#*//
     assertEquals("#2.2", "*/", model1.currentToken().getType());
     assertEquals("#2.3", FREE, model1.currentToken().getState());
-    assertEquals("#2.4", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#2.4", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     // /*____#*//
   }
 
@@ -318,7 +318,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-3);
     //check that double slash works.
     assertEquals("#0.0", 2, model1.currentToken().getSize());
-    assertEquals("#0.3", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.3", FREE, model1._getStateAtCurrent());
     model1.move(2);
     assertEquals("#0.2", 1, model1.currentToken().getSize());
     assertEquals("#0.1", "/", model1.currentToken().getType());
@@ -329,7 +329,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.3", FREE, model1.currentToken().getState());
     model1.move(2);
     // //#__/__
-    assertEquals("#1.2", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#1.2", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("1.4", INSIDE_LINE_COMMENT, model1.currentToken().getState());
     model1.move(2);
     assertEquals("1.5", INSIDE_LINE_COMMENT, model1.currentToken().getState());
@@ -355,7 +355,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#2.3", FREE, model1.currentToken().getState());
     model1.move(2);
     assertEquals("#2.1", "/", model1.currentToken().getType());
-    assertEquals("#2.2", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#2.2", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("2.4", INSIDE_LINE_COMMENT, model1.currentToken().getState());
     model1.move(1);
     assertEquals("2.5", INSIDE_LINE_COMMENT, model1.currentToken().getState());
@@ -369,7 +369,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#3.3", FREE, model1.currentToken().getState());
     model1.move(2);
     assertEquals("#3.1", "/", model1.currentToken().getType());
-    assertEquals("#3.3", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.3", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("3.4", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
     model1.move(1);
     assertEquals("#3.2", "/", model1.currentToken().getType());
@@ -396,7 +396,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#4.3", FREE, model1.currentToken().getState());
     model1.move(2);
     assertEquals("#4.1", "*/", model1.currentToken().getType());
-    assertEquals("#4.3", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#4.3", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("4.4", FREE, model1.currentToken().getState());
     model1.move(2);
     assertEquals("#4.2", "/", model1.currentToken().getType());
@@ -421,7 +421,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#5.0", true, model1.currentToken().isGap());
     assertEquals("#5.4", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
     model1.move(3);
-    assertEquals("#5.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#5.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("#5.2", "/", model1.currentToken().getType());
     assertEquals("5.5", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
     model1.move(1);
@@ -484,8 +484,8 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
   /** put your documentation comment here
    */
   public void testGetStateAtCurrent() {
-    assertEquals("#0.0", FREE, model1.getStateAtCurrent());
-    assertEquals("#0.1", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.0", FREE, model1._getStateAtCurrent());
+    assertEquals("#0.1", FREE, model1._getStateAtCurrent());
     model1.insertChar('(');
     model1.move(-1);
     assertEquals("#1.0", FREE, model1.currentToken().getState());
@@ -495,7 +495,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-2);
     assertEquals("#2.0", FREE, model1.currentToken().getState());
     model1.move(2);
-    assertEquals("#2.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#2.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     // {//#
     model1.move(-3);
     model1.insertChar('/');
@@ -504,7 +504,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-2);
     assertEquals("#3.0", FREE, model1.currentToken().getState());
     model1.move(2);
-    assertEquals("#3.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("#3.2", INSIDE_LINE_COMMENT, model1.currentToken().getState());
     model1.move(1);
     assertEquals("#3.3", INSIDE_LINE_COMMENT, model1.currentToken().getState());
@@ -525,7 +525,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(1);
     assertEquals("#0.1", "\"", model1.currentToken().getType());
     assertEquals("#0.2", FREE, model1.currentToken().getState());
-    assertEquals("#0.4", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#0.4", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
   }
 
   /** put your documentation comment here
@@ -539,7 +539,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(1);
     assertEquals("#0.0", "\"", model1.currentToken().getType());
     assertEquals("#0.2", FREE, model1.currentToken().getState());
-    assertEquals("#0.4", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#0.4", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     insertGap(model1, 4);
     // "____#"
     model1.move(-4);
@@ -548,7 +548,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(4);
     assertEquals("#1.0", "\"", model1.currentToken().getType());
     assertEquals("#1.2", FREE, model1.currentToken().getState());
-    assertEquals("#1.4", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#1.4", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     model1.move(-2);
     model1.insertChar('/');
     // "__/__"
@@ -557,7 +557,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(1);
     assertEquals("#2.0", true, model1.currentToken().isGap());
     assertEquals("#2.4", INSIDE_DOUBLE_QUOTE, model1.currentToken().getState());
-    assertEquals("#2.6", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#2.6", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     model1.move(2);
     assertEquals("#2.2", "\"", model1.currentToken().getType());
     assertEquals("#2.3", FREE, model1.currentToken().getState());
@@ -580,7 +580,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(1);
     assertEquals("#3.0", true, model1.currentToken().isGap());
     assertEquals("#3.4", FREE, model1.currentToken().getState());
-    assertEquals("#3.6", FREE, model1.getStateAtCurrent());
+    assertEquals("#3.6", FREE, model1._getStateAtCurrent());
     model1.move(2);
     assertEquals("#3.2", "\"", model1.currentToken().getType());
     assertEquals("#3.3", FREE, model1.currentToken().getState());
@@ -591,7 +591,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(2);
     assertEquals("#4.0", "/", model1.currentToken().getType());
     assertEquals("#4.4", INSIDE_DOUBLE_QUOTE, model1.currentToken().getState());
-    assertEquals("#4.6", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#4.6", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     model1.move(1);
     assertEquals("#4.2", "\"", model1.currentToken().getType());
     assertEquals("#4.3", FREE, model1.currentToken().getState());
@@ -604,7 +604,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#5.5", FREE, model1.currentToken().getState());
     model1.move(1);
     assertEquals("#5.4", FREE, model1.currentToken().getState());
-    assertEquals("#5.6", FREE, model1.getStateAtCurrent());
+    assertEquals("#5.6", FREE, model1._getStateAtCurrent());
     model1.move(1);
     assertEquals("#5.3", FREE, model1.currentToken().getState());
     model1.move(1);
@@ -626,7 +626,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-2);
     assertEquals("#1.1", FREE, model1.currentToken().getState());
     model1.move(2);
-    assertEquals("#1.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("#1.2", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
     model1.move(1);
     assertEquals("#1.2", FREE, model1.currentToken().getState());
@@ -636,7 +636,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-1);
     assertEquals("#2.2", FREE, model1.currentToken().getState());
     model1.move(1);
-    assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, model1.currentToken().getState());
     assertEquals("#2.3", "/", model1.currentToken().getType());
     model1.move(1);
@@ -644,7 +644,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     // "/#*"*/
     model1.move(2);
     // "/*"#*/
-    assertEquals("#5.0", FREE, model1.getStateAtCurrent());
+    assertEquals("#5.0", FREE, model1._getStateAtCurrent());
     assertEquals("#5.1", FREE, model1.currentToken().getState());
     assertEquals("#5.3", "*", model1.currentToken().getType());
     model1.move(1);
@@ -670,7 +670,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.0", FREE, model1.currentToken().getState());
     assertEquals("#1.4", "\"", model1.currentToken().getType());
     model1.move(1);
-    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     assertEquals("#1.4", "/", model1.currentToken().getType());
     assertEquals("#1.2", INSIDE_DOUBLE_QUOTE, model1.currentToken().getState());
     model1.move(1);
@@ -691,7 +691,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.2", "\n", model1.currentToken().getType());
     assertEquals("#0.4", FREE, model1.currentToken().getState());
     model1.move(1);
-    assertEquals("#0.0", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.0", FREE, model1._getStateAtCurrent());
     assertTrue("#0.1", model1.currentToken().isGap());
     assertEquals("#0.3", 2, model1.currentToken().getSize());
     assertEquals("#0.5", FREE, model1.currentToken().getState());
@@ -709,7 +709,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.4", FREE, model1.currentToken().getState());
     assertEquals("#0.2", "\n", model1.currentToken().getType());
     model1.move(1);
-    assertEquals("#0.0", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.0", FREE, model1._getStateAtCurrent());
     assertTrue("#0.1", model1.currentToken().isGap());
     assertEquals("#0.3", 2, model1.currentToken().getSize());
     assertEquals("#0.5", FREE, model1.currentToken().getState());
@@ -729,7 +729,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.2", "/", model1.currentToken().getType());
     assertEquals("#0.3", INSIDE_LINE_COMMENT, model1.currentToken().getState());
     model1.move(1);
-    assertEquals("#0.0", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.0", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     assertEquals("#0.1", "*", model1.currentToken().getType());
     assertEquals("#0.4", INSIDE_LINE_COMMENT, model1.currentToken().getState());
     model1.move(1);
@@ -740,7 +740,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-1);
     // ///*
     // "*#/
-    assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     assertEquals("#1.1", "/", model1.currentToken().getType());
     assertEquals("#1.4", INSIDE_DOUBLE_QUOTE, model1.currentToken().getState());
     model1.move(-5);
@@ -749,7 +749,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     // //
     // #/*
     // "*/
-    assertEquals("#3.0", FREE, model1.getStateAtCurrent());
+    assertEquals("#3.0", FREE, model1._getStateAtCurrent());
     assertEquals("#3.4", FREE, model1.currentToken().getState());
     model1.move(1);
     assertEquals("#3.1", "/*", model1.currentToken().getType());
@@ -757,7 +757,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     // /*
     // #"*/
     model1.move(2);
-    assertEquals("#4.0", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#4.0", INSIDE_BLOCK_COMMENT, model1._getStateAtCurrent());
     assertEquals("#4.1", "\"", model1.currentToken().getType());
     assertEquals("#4.4", INSIDE_BLOCK_COMMENT, model1.currentToken().getState());
     model1.move(1);
@@ -821,33 +821,33 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
 
   /** tests the function to test if something is inside comments */
   public void testInsideComment() {
-    assertEquals("#0.0", FREE, model0.getStateAtCurrent());
+    assertEquals("#0.0", FREE, model0._getStateAtCurrent());
     model0.insertChar('/');
     model0.insertChar('*');
-    assertEquals("#0.1", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#0.1", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     model1.insertChar('/');
     model1.insertChar('/');
-    assertEquals("#0.2", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.2", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('(');
-    assertEquals("#0.3", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
+    assertEquals("#0.3", INSIDE_LINE_COMMENT, model1._getStateAtCurrent());
     model1.insertChar('\n');
-    assertEquals("#0.4", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.4", FREE, model1._getStateAtCurrent());
     model0.insertChar('*');
     model0.insertChar('/');
-    assertEquals("#0.4", FREE, model0.getStateAtCurrent());
+    assertEquals("#0.4", FREE, model0._getStateAtCurrent());
   }
 
   /** tests the function to test if something is inside quotes */
   public void testInsideString() {
-    assertEquals("#0.0", FREE, model0.getStateAtCurrent());
+    assertEquals("#0.0", FREE, model0._getStateAtCurrent());
     model0.insertChar('\"');
-    assertEquals("#0.1", INSIDE_DOUBLE_QUOTE, model0.getStateAtCurrent());
+    assertEquals("#0.1", INSIDE_DOUBLE_QUOTE, model0._getStateAtCurrent());
     model1.insertChar('\"');
-    assertEquals("#0.2", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#0.2", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     model1.insertChar('(');
-    assertEquals("#0.3", INSIDE_DOUBLE_QUOTE, model1.getStateAtCurrent());
+    assertEquals("#0.3", INSIDE_DOUBLE_QUOTE, model1._getStateAtCurrent());
     model1.insertChar('\"');
-    assertEquals("#0.4", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.4", FREE, model1._getStateAtCurrent());
   }
 
   /** tests inserting braces */
@@ -855,48 +855,48 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.0", 0, model0.absOffset());
     model0.insertChar('/');
     // /#
-    assertEquals("#1.0", FREE, model0.getStateAtCurrent());
+    assertEquals("#1.0", FREE, model0._getStateAtCurrent());
     model0.insertChar('*');
     // /*#
-    assertEquals("#2.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#2.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     assertEquals("#2.1", 2, model0.absOffset());
     model0.move(-1);
     // /#*
     assertEquals("#3.0", 1, model0.absOffset());
     model0.insertChar('(');
     // /(#*
-    assertEquals("#4.0", FREE, model0.getStateAtCurrent());
+    assertEquals("#4.0", FREE, model0._getStateAtCurrent());
     model0.move(-1);
     // /#(*
     model0.delete(1);
     // /#*
     model0.move(1);
     // /*#
-    assertEquals("#5.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#5.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     model0.insertChar('*');
     // /**#
-    assertEquals("#6.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#6.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     model0.insertChar('/');
     // /**/#
     assertEquals("#7.0", 4, model0.absOffset());
-    assertEquals("#7.1", FREE, model0.getStateAtCurrent());
+    assertEquals("#7.1", FREE, model0._getStateAtCurrent());
     model0.move(-2);
     // /*#*/
-    assertEquals("#8.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#8.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     assertEquals("#8.1", 2, model0.absOffset());
     model0.insertChar('(');
-    assertEquals("#9.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#9.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     // /*(#*/
     model0.move(1);
     // /*(*#/
-    assertEquals("#10.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#10.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     model0.move(-2);
     // /*#(*/
-    assertEquals("#11.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#11.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     model0.move(1);
     // /*(#*/
     // /*(#*/
-    assertEquals("#12.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#12.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
     assertEquals("#12.1", 3, model0.absOffset());
     insertGap(model0, 4);
     // /*(____#*/
@@ -909,7 +909,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     // move to the closed paren
     model0.move(-1);
     // /*(__#)__*/
-    assertEquals("#12.0", INSIDE_BLOCK_COMMENT, model0.getStateAtCurrent());
+    assertEquals("#12.0", INSIDE_BLOCK_COMMENT, model0._getStateAtCurrent());
   }
 
   /** tests inserting gaps */

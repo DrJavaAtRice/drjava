@@ -462,14 +462,14 @@ public class ReducedModelBrace extends AbstractReducedModel {
   
   /** Determines the brace (type and distance) enclosing the beginning of the current line (except the first line). The
     * matching brace obviously must appear on the preceding line or before.  To find the enclosing brace one must first 
-    * move past this newline. The distance computed to the newline does not include the newline char.  If there is not
-    * line enclosing brace, returns BraceInfo.NULL.  Usually called when distToStart() = 0.
+    * move past this newline. If there is not a line enclosing brace, returns BraceInfo.NULL.  Usually called when 
+    * distToStart() = 0.
     */
-  public BraceInfo getLineEnclosingBrace() {
+  public BraceInfo _getLineEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();  // Why not use _parent._rmc._cursor instead of _parent._rmc._walker?
-    // this is the distance to in front of the previous newline.
+    // this is the distance to front edge of the preceding newline.
     final int distToStart = _parent.getDistToStart();
 
     if (distToStart == -1) {
@@ -477,7 +477,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
       return BraceInfo.NULL;
     }
     
-    int relDistance = distToStart + 1;
+    int relDistance = distToStart + 1;  // distance to start of current line (right edge of preceding newline)
     int distance = relDistance;
     
     // move to the proper location, then add the rest of the block and go to the previous.
@@ -686,7 +686,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
   
   /** Determines the brace enclosing the current location. */
-  protected BraceInfo getEnclosingBrace() {
+  protected BraceInfo _getEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();

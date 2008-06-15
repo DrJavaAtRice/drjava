@@ -443,9 +443,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   private final Action _jarProjectAction = new AbstractAction("Create Jar File from Project...") {
-    public void actionPerformed(ActionEvent ae) {
-      _jarOptionsDialog.setVisible(true);
-    }
+    public void actionPerformed(ActionEvent ae) { _jarOptionsDialog.setVisible(true); }
   };
   
   
@@ -1030,6 +1028,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) { _selectAll(); }
   };
   
+  /** Shows the find/replace tab in the interactions pane.  Only executes in the event thread. */
   private void _showFindReplaceTab() {
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
@@ -1041,7 +1040,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _tabbedPane.setSelectedComponent(_findReplace);
   }
   
-  /** Shows the find/replace tab. */
+  /** Action that shows the find/replace tab.  Only executes in the event thread. */
   private final Action _findReplaceAction = new AbstractAction("Find/Replace") {
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab();
@@ -1253,7 +1252,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** The "Go to File" dialog instance. */
   volatile PredictiveInputFrame<GoToFileListEntry> _gotoFileDialog = null;
   
-  /** Asks the user for a file name and goes there. */
+  /** Action implementing "Go to file" command, which asks the user for a file name and goes there. */
   private final Action _gotoFileAction = new AbstractAction("Go to File...") {
     public void actionPerformed(ActionEvent ae) {
       initGotoFileDialog();
@@ -1271,9 +1270,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       for(OpenDefinitionsDocument d: docs) {
         GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
-        if (d.equals(_model.getActiveDocument())) {
-          currentEntry = entry;
-        }
+        if (d.equals(_model.getActiveDocument())) currentEntry = entry;
         list.add(entry);
         if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
           try {
@@ -1291,7 +1288,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       _gotoFileDialog.setItems(true, list); // ignore case
       if (currentEntry != null) _gotoFileDialog.setCurrentItem(currentEntry);
-      hourglassOn();
+      hourglassOn();   // Where is the corresponding hourglassOff()?
       /* if (!  Utilities.TEST_MODE) */ 
       _gotoFileDialog.setVisible(true);
     }
@@ -1587,7 +1584,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** The list of Java API classes. */
   List<JavaAPIListEntry> _javaAPIList = null;
   
-  /** Asks the user for a file name and goes there. */
+  /** Action that asks the user for a file name and goes there.  Only executes in the event thread. */
   private Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
     public void actionPerformed(ActionEvent ae) {
       initOpenJavadocDialog();     
@@ -1597,8 +1594,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Opens the Javadoc specified by the word the cursor is on. */
-  void _openJavadocUnderCursor() {
+  /** Opens the Javadoc specified by the word the cursor is on.  Only executes in the event thread. */
+  private void _openJavadocUnderCursor() {
     generateJavaAPIList();
     if (_javaAPIList == null) {
 //      Utilities.show("Cannot load Java API class list. No network connectivity?");
@@ -1895,8 +1892,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   volatile PredictiveInputFrame<ClassNameAndPackageEntry> _completeWordDialog = null;
   JCheckBox _completeJavaAPICheckbox = new JCheckBox("Java API");
   
-  /** Complete the word the cursor is on. */
-  void _completeWordUnderCursor() {
+  /** Complete the word the cursor is on.  Only executes in the event thread. */
+  private void _completeWordUnderCursor() {
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     if ((docs == null) || (docs.size() == 0)) return; // do nothing
     
@@ -1991,9 +1988,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-    finally { 
-      if (uniqueMatch) { odd.releaseWriteLock(); }
-    }
+    finally { if (uniqueMatch) odd.releaseWriteLock(); }
   }
   
   /** Auto-completes word the cursor is on. */
@@ -2093,7 +2088,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     new DrJavaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", cp).show();
   }
   
-  /** Shows the user documentation. */
+  /** Action that shows what help documentation is available.  Only executes in the event thread. */
   private final Action _helpAction = new AbstractAction("Help") {
     public void actionPerformed(ActionEvent ae) {
       // Create frame if we haven't yet
@@ -2104,7 +2099,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Shows the quick start documentation. */
+  /** Action that shows the quick start documentation.  Only executes in the event thread. */
   private final Action _quickStartAction = new AbstractAction("QuickStart") {
     public void actionPerformed(ActionEvent ae) {
       // Create frame if we haven't yet
@@ -2115,7 +2110,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Pops up an info dialog. */
+  /** Action that pops up an info dialog.  Only runs in the event thread. */
   private final Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
@@ -2128,14 +2123,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Pops up a dialog that checks for a new version. */
+  /** Action that pops up a dialog that checks for a new version.  Only runs in the event thread. */
   private final Action _checkNewVersionAction = new AbstractAction("Check for New Version") {
     public void actionPerformed(ActionEvent ae) {
       NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
       popup.setVisible(true);
     }
   };
-
+  
   /** Asks whether DrJava may contact the DrJava developers and send system information. */
   private final Action _drjavaSurveyAction = new AbstractAction("Send System Information") {
     public void actionPerformed(ActionEvent ae) {
@@ -2144,7 +2139,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Pops up the DrJava errors dialog. */
+  /** Action that pops up the DrJava errors dialog.  Only runs in the event thread. */
   private final Action _errorsAction = new AbstractAction("DrJava Errors") {
     public void actionPerformed(ActionEvent ae) {
       setPopupLoc(DrJavaErrorWindow.singleton());
@@ -2152,7 +2147,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Switches to next document. */
+  /** Action that switches to next document.  Only runs in the event thread. */
   private final Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
       this.setEnabled(false);
@@ -2261,17 +2256,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Go to the opening brace.  ReadLock omitted because it only runs on definitions documents in the event thread. */
+  /** Go to the opening brace. */
   private final Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//        odd.acquireReadLock();
+      odd.acquireReadLock();
       try {
-        int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
+        int pos = odd._findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-//        finally { odd.releaseReadLock(); }
+      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2297,10 +2292,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     else _switchToPane(_tabbedPane.getComponentAt((numTabs + _tabbedPane.getSelectedIndex() - 1) % numTabs));
   }
   
-  /** Calls the ConfigFrame to edit preferences */
-  
+  /** Action that calls the ConfigFrame to edit preferences.  Only runs in the event thread. */
   private final Action _editPreferencesAction = new AbstractAction("Preferences ...") {
-    
     public void actionPerformed(ActionEvent ae) {
       // Create frame if we haven't yet
 //      if (_configFrame == null) {
@@ -2317,7 +2310,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) { _editProject(); }
   };
   
-  /** Enables the debugger */
+  /** Action that enables the debugger.  Only runs in the event thread. */
   private final Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
     public void actionPerformed(ActionEvent ae) { 
       this.setEnabled(false);
@@ -2326,7 +2319,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Resumes debugging */
+  /** Action that resumes debugging.  Only runs in the event thread. */
   private final Action _resumeDebugAction = new AbstractAction("Resume Debugger") {
     public void actionPerformed(ActionEvent ae) {
       try { debuggerResume(); }
@@ -2334,17 +2327,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Steps into the next method call */
+  /** Action that steps into the next method call.  Only runs in the event thread. */
   private final Action _stepIntoDebugAction = new AbstractAction("Step Into") {
     public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_INTO); }
   };
   
-  /** Runs the next line, without stepping into methods */
+  /** Action that executes the next line, without stepping into methods.  Only runs in the event thread. */
   private final Action _stepOverDebugAction = new AbstractAction("Step Over") {
     public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_OVER); }
   };
   
-  /** Steps out of the next method call */
+  /** Action that steps out of the next method call.  Only runs in the event thread. */
   private final Action _stepOutDebugAction = new AbstractAction("Step Out") {
     public void actionPerformed(ActionEvent ae) {
       debuggerStep(Debugger.StepType.STEP_OUT);
@@ -2370,7 +2363,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) { debuggerClearAllBreakpoints(); }
   };
   
-  /** Shows the breakpoints tab. */
+  /** Action that shows the breakpoints tab.  Only runs in the event thread. */
   private final Action _breakpointsPanelAction = new AbstractAction("Breakpoints") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
@@ -2385,7 +2378,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Shows the bookmarks tab. */
+  /** Action that shows the bookmarks tab.  Only runs in the event thread. */
   private final Action _bookmarksPanelAction = new AbstractAction("Bookmarks") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
@@ -2420,7 +2413,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    Utilities.show("MainFrame.toggleBookmark called");
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
-    _model.toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd());
+    OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+    odd.acquireReadLock();
+    try { _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); }
+    finally { odd.releaseReadLock(); }
   }
   
   /** Add the current location to the browser history. */
@@ -2491,7 +2487,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   
-  /** Shows a find results tab. Only runs in event thread. */
+  /** Action that shows a find results tab. Only runs in event thread. */
   public void showFindResultsPanel(final FindResultsPanel panel) {
     assert EventQueue.isDispatchThread();
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
@@ -2866,9 +2862,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void focusGained(FocusEvent e) { }
   };
   
-  
-  
-  
   public static DJFileDisplayManager getFileDisplayManager20() { return _djFileDisplayManager20; }
   public static DJFileDisplayManager getFileDisplayManager30() { return _djFileDisplayManager30; }
   public static OddDisplayManager getOddDisplayManager20() { return _oddDisplayManager20; }
@@ -2881,8 +2874,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public MainFrame() {
     
     // Cache the config object, since we use it many, many times.
-    final Configuration config = DrJava.getConfig();
-    
+    final Configuration config = DrJava.getConfig(); 
     
 //    Utilities.show("MainFrame starting");
     
@@ -3392,7 +3384,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJavaErrorHandler.setButton(_errorsButton);
     
     // check for new version if desired by user
-    if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
+    if (! DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
           .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
         !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
       int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
@@ -4772,7 +4764,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _saveProjectHelper(_currentProjFile);
   }
   
-  /** Edit project frame.  */  
+  /** Edits project frame.  Only runs in the event thread. */  
   private void _editProject() {
     ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(this);
     ppf.setVisible(true);
@@ -4986,7 +4978,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   private void _forceQuit() { _model.forceQuit(); }
   
-  /** Stores the current position and size info for window and panes to the config framework. */
+  /** Stores the current position and size info for window and panes to the config framework. Only runs in the event 
+    * thread. 
+    */
   private void _storePositionInfo() {
     Configuration config = DrJava.getConfig();
     
@@ -6456,7 +6450,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     return result;
   }
   
-  /** Removes the button b from the toolbar and creates new button in its place. */
+  /** Removes the button b from the toolbar and creates new button in its place.  Only runs in the event thread. */
   public JButton _updateToolbarButton(JButton b, Action a) {
     final JButton result = _createToolbarButton(a);
     
@@ -6539,7 +6533,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    _updateToolBarVisible();  // created a visible GUI component during  initialization!
   }
   
-  /** Sets the toolbar as either visible or invisible based on the config option. */
+  /** Sets the toolbar as either visible or invisible based on the config option.  Only runs in the event thread. */
   private void _updateToolBarVisible() {
     _toolBar.setVisible(DrJava.getConfig().getSetting(TOOLBAR_ENABLED));
   }  
@@ -6795,6 +6789,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
     
     _tabbedPane.addChangeListener(new ChangeListener () {
+      /* Only runs in the event thread. */
       public void stateChanged(ChangeEvent e) {
 //        System.err.println("_tabbedPane.stateChanged called with event " + e);
         clearStatusMessage();
@@ -6877,7 +6872,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
   }
   
-  /** Realizes this MainFrame by setting it visibile and configures the tabbed Pane. */
+  /** Realizes this MainFrame by setting it visibile and configures the tabbed Pane. Only runs in the event thread. */
   public void start() {
     
     // Make the MainFrame visible and show the compiler tab
@@ -7854,7 +7849,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _removeThreadLocationHighlight();
           int startOffset = doc.getOffset(lineNumber);  // Much faster to directly search back from offset!
           if (startOffset > -1) {
-            int endOffset = doc.getLineEndPos(startOffset);
+            int endOffset = doc._getLineEndPos(startOffset);
             if (endOffset > -1) {
               _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
                 addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
@@ -9729,7 +9724,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("less.txt", true);
   
-  /** Open a file for following (like using "less" and F). */
+  /** Open a file for following (like using "less" and F).  Only runs in the event thread. */
   private void _followFile() {
     updateStatusField("Opening File for Following");
     // LOG.log("_followFile");
@@ -9809,7 +9804,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   
-  /** Edit saved processes. */
+  /** Action that edits saved processes.  Only runs in the event thread. */
   private final Action _editExternalProcessesAction = new AbstractAction("Edit...") {
     public void actionPerformed(ActionEvent ae) {
       _editExternalDialog.setVisible(true);
@@ -9913,7 +9908,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     w.addWindowFocusListener(wa);
   }
   
-  /** Removethe modal window adapter.
+  /** Remove the modal window adapter.
     * @param w window releasing the modal window adapter */
   public synchronized void removeModalWindowAdapter(Window w) {
 //    MODAL_LOG.log("removeModalWindowListener, window = "+System.identityHashCode(w));

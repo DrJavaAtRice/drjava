@@ -84,8 +84,8 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
       
       // get the absolute boundaries of the text on this line
       int here = doc.getCurrentLocation();
-      int lineStart = doc.getLineStartPos(here);
-      int lineEnd = doc.getLineEndPos(here);
+      int lineStart = doc._getLineStartPos(here);
+      int lineEnd = doc._getLineEndPos(here);
 
       // cut the original text out of the current line
       int lineLength = lineEnd-lineStart;

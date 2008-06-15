@@ -72,9 +72,9 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     
     // Find end of previous statement, immediately enclosing brace, or end of case statement
     char[] delims = {';', '{', '}'};
-    int lineStart = doc.getLineStartPos(here);  // find start of current line
+    int lineStart = doc._getLineStartPos(here);  // find start of current line
     int prevDelimiterPos;
-    try { prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims); }  // find pos of delimiter preceding line start
+    try { prevDelimiterPos = doc._findPrevDelimiter(lineStart, delims); }  // find pos of delimiter preceding line start
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     // If no preceding delimiter found, align to left margin
@@ -87,7 +87,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);    // get delimiter char
       char[] ws = {' ', '\t', '\n', ';'};
       if (delim == ';') {
-        int testPos = doc.findPrevCharPos(prevDelimiterPos, ws);  // find char preceding ';' delimiter
+        int testPos = doc._findPrevCharPos(prevDelimiterPos, ws);  // find char preceding ';' delimiter
         char testDelim = doc.getText(testPos,1).charAt(0);
         if ( testDelim == '}' || testDelim == ')') {
           prevDelimiterPos = testPos;                             // if this char is '}' or ')', use it as delimiter
@@ -109,9 +109,9 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
         int dist = prevDelimiterPos - here + 1;
         
         assert doc.getCurrentLocation() == here;
-        doc.setCurrentLocation(prevDelimiterPos + 1);   // move cursor to right of '}' or ')' delim
-        prevDelimiterPos -= doc.balanceBackward() - 1;  // use matching '{' or '(' as delim
-        doc.setCurrentLocation(here);
+        doc._setCurrentLocation(prevDelimiterPos + 1);   // move cursor to right of '}' or ')' delim
+        prevDelimiterPos -= doc._balanceBackward() - 1;  // use matching '{' or '(' as delim
+        doc._setCurrentLocation(here);
         
         assert doc.getText(prevDelimiterPos, 1).charAt(0) == '{' || 
           doc.getText(prevDelimiterPos, 1).charAt(0) == '(';
@@ -128,7 +128,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     if (_useColon) indentDelims = indentDelimsWithColon;
     else indentDelims = indentDelimsWithoutColon;
     
-    int indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
+    int indent = doc._getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
     
     indent = indent + _suffix;
     doc.setTab(indent, here);

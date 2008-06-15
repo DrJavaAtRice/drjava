@@ -61,7 +61,8 @@ public abstract class IndentRuleWithTrace implements IndentRule {
   public static void printLastIndentTrace(PrintStream ps) {
     if (trace == null) {
       ps.println("No trace to print");
-    } else {
+    } 
+    else {
       for (int x = 0; x < trace.size(); x++) {
         ps.println(trace.get(x));
       }
@@ -93,10 +94,10 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     */
   public boolean indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
-    doc.setCurrentLocation(pos);
+    doc._setCurrentLocation(pos);
     indentLine(doc, reason);
     if (oldPos > doc.getLength()) oldPos = doc.getLength();
-    doc.setCurrentLocation(oldPos);
+    doc._setCurrentLocation(oldPos);
     return false;
   }
 
@@ -108,6 +109,20 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     //printLastIndentTrace(System.out);
     return true;
   }
+  
+  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
+  public boolean testIndentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
+    doc.acquireWriteLock();
+    try { return indentLine(doc, pos, reason); }
+    finally { doc.releaseWriteLock(); }
+  }
+  
+  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
+   public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+     doc.acquireWriteLock();
+     try { return indentLine(doc, reason); }
+     finally { doc.releaseWriteLock(); }
+   }
 
   /** The rule name to report to _addToIndentTrace */
   public String getRuleName() { return this.getClass().getName(); }

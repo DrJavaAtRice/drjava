@@ -63,7 +63,7 @@ public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
       // Find the first non-whitespace character on the current line.
       
       int currentPos = doc.getCurrentLocation();
-      int startPos   = doc.getLineStartPos(currentPos);
+      int startPos   = doc._getLineStartPos(currentPos);
       int maxPos     = doc.getLength();
       int diff       = maxPos - startPos;
       

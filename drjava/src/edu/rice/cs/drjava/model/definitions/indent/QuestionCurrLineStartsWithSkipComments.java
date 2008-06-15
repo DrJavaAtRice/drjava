@@ -74,8 +74,8 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
       // Find the first non-whitespace character on the current line.
       
       int origPos = doc.getCurrentLocation();
-      int startPos   = doc.getLineFirstCharPos(origPos);
-      int endPos     = doc.getLineEndPos(origPos);
+      int startPos   = doc._getLineFirstCharPos(origPos);
+      int endPos     = doc._getLineEndPos(origPos);
       int lineLength = endPos - startPos;
       int prefixLen = _prefix.length();
       
@@ -84,11 +84,11 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
       
 //      System.err.println("line is: '" + text + "'");
       
-      doc.setCurrentLocation(startPos);
+      doc._setCurrentLocation(startPos);
       try { 
-        for (int i = 0; i < lineLength; i++, doc.move(1)) {
+        for (int i = 0; i < lineLength; i++, doc._move(1)) {
           
-          ReducedModelState state = doc.getStateAtCurrent();
+          ReducedModelState state = doc._getStateAtCurrent();
           
           if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
             assert prevChar == '\0'; 
@@ -116,7 +116,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
           return text.startsWith(_prefix, i);   // special cases have already been eliminated
         }
       }
-      finally { doc.setCurrentLocation(origPos); }
+      finally { doc._setCurrentLocation(origPos); }
     }
     catch (BadLocationException e) {
       // Control flow should never reach this point!

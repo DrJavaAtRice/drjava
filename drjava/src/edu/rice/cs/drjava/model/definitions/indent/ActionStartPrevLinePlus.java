@@ -62,13 +62,13 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
-      int startLine = doc.getLineStartPos(here);
+      int startLine = doc._getLineStartPos(here);
       String prefix;
       
       if (startLine > 0) {
         // Find prefix of previous line
-        int startPrevLine = doc.getLineStartPos(startLine - 1);
-        int firstChar = doc.getLineFirstCharPos(startPrevLine);
+        int startPrevLine = doc._getLineStartPos(startLine - 1);
+        int firstChar = doc._getLineFirstCharPos(startPrevLine);
         String prevPrefix = doc.getText(startPrevLine, firstChar - startPrevLine);
         prefix = prevPrefix + _suffix;
       }

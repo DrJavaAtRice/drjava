@@ -137,7 +137,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   public R getRegionContaining(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
     
     /* First try finding the rightmost region on the same line containing the selection. Unnecessary in Java 6.0. */
-    int lineStart = odd.getLineStartPos(startOffset);
+    int lineStart = odd._getLineStartPos(startOffset);
     
     @SuppressWarnings("unchecked")
     SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, lineStart, endOffset));

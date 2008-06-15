@@ -62,19 +62,19 @@ public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
-      int startLine = doc.getLineStartPos(here);
+      int startLine = doc._getLineStartPos(here);
       
       if (startLine <= 0) return false;  // on first line
       
       // Find start of previous line
       int endPrevLine = startLine - 1;
-      int startPrevLine = doc.getLineStartPos(endPrevLine);
-      int firstChar = doc.getLineFirstCharPos(startPrevLine);
+      int startPrevLine = doc._getLineStartPos(endPrevLine);
+      int firstChar = doc._getLineFirstCharPos(startPrevLine);
       
       // Compare prefix
       String actualPrefix = doc.getText(firstChar, 3);
       if (! actualPrefix.equals("/**")) return false;
-      int nextNonWSChar = doc.getFirstNonWSCharPos(firstChar + 3, true);
+      int nextNonWSChar = doc._getFirstNonWSCharPos(firstChar + 3, true);
       return nextNonWSChar != -1 && nextNonWSChar <= endPrevLine;     
     }
     catch (BadLocationException e) {

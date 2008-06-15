@@ -420,5 +420,11 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Swing-style writeUnlock(). */
   public void releaseWriteLock() { _document.releaseWriteLock(); }
   
+  /** Returns true iff this thread holds a read lock or write lock. */
+  public boolean isReadLocked() { return _document.isReadLocked(); }
+  
+  /** Returns true iff this thread holds a write lock. */
+  public boolean isWriteLocked() { return _document.isWriteLocked(); }
+  
 //  public int getLockState() { return _document.getLockState(); }
 }

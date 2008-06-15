@@ -160,7 +160,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     _doc.acquireReadLock();
     try {
       
-      Vector<HighlightStatus> stats = _doc.getHighlightStatus(start, end);
+      Vector<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
       if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
       
       for (int i = 0; i < stats.size(); i++) {

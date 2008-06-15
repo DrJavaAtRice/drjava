@@ -67,8 +67,8 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
-      int firstCharPos = doc.getLineFirstCharPos(here);
-      int lineEndPos = doc.getLineEndPos(here);
+      int firstCharPos = doc._getLineFirstCharPos(here);
+      int lineEndPos = doc._getLineEndPos(here);
       
       // If prefix would run off the end of the line, the answer is obvious.
       if (firstCharPos + _prefix.length() > lineEndPos) {
@@ -79,9 +79,6 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       String actualPrefix = doc.getText(firstCharPos, _prefix.length());
       return _prefix.equals(actualPrefix);
     }
-    catch (BadLocationException e) {
-      // Shouldn't happen
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // Shouldn't happen
   }
 }

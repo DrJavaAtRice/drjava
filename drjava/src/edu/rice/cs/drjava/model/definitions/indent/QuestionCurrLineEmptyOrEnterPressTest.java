@@ -88,7 +88,7 @@ public final class QuestionCurrLineEmptyOrEnterPressTest extends IndentRulesTest
     // */
     _setDocText("/*\n\n*/");
     //               .
-    assertTrue("nothing on line", _rule.applyRule(_doc, 3, Indenter.IndentReason.OTHER));
+    assertTrue("nothing on line", _rule.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
   }
   public void testSpaces() throws javax.swing.text.BadLocationException {
     // /*
@@ -96,7 +96,7 @@ public final class QuestionCurrLineEmptyOrEnterPressTest extends IndentRulesTest
     // */
     _setDocText("/*\n        \n*/");
     //                  .
-    assertTrue("only spaces", _rule.applyRule(_doc, 6, Indenter.IndentReason.OTHER));
+    assertTrue("only spaces", _rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
   }
   
   static String stuffExample = "/*\n   foo   \n*/";
@@ -107,15 +107,15 @@ public final class QuestionCurrLineEmptyOrEnterPressTest extends IndentRulesTest
   
   public void testStuffBefore() throws javax.swing.text.BadLocationException {
     _setDocText(stuffExample);
-    assertTrue("text before the cursor", !_rule.applyRule(_doc, 3, Indenter.IndentReason.OTHER));
+    assertTrue("text before the cursor", !_rule.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
   }
   public void testStuffAfter() throws javax.swing.text.BadLocationException {
     _setDocText(stuffExample);
-    assertTrue("text after the cursor", !_rule.applyRule(_doc, 11, Indenter.IndentReason.OTHER));
+    assertTrue("text after the cursor", !_rule.testApplyRule(_doc, 11, Indenter.IndentReason.OTHER));
   }
   
   public void testLineWithStar() throws javax.swing.text.BadLocationException {
     _setDocText("/*\n * foo\n */");
-    assertTrue("line with a star", !_rule.applyRule(_doc, 5, Indenter.IndentReason.OTHER));
+    assertTrue("line with a star", !_rule.testApplyRule(_doc, 5, Indenter.IndentReason.OTHER));
   }
 }

@@ -73,8 +73,8 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     _isEnabled = isEnabled;
     
     try {
-      _startPos = doc.createPosition(doc.getLineStartPos(offset));
-      _endPos = doc.createPosition(doc.getLineEndPos(offset));
+      _startPos = doc.createPosition(doc._getLineStartPos(offset));
+      _endPos = doc.createPosition(doc._getLineEndPos(offset));
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);

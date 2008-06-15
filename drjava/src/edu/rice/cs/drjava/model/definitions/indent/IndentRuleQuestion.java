@@ -74,10 +74,10 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     */
   boolean applyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
-    doc.setCurrentLocation(pos);
+    doc._setCurrentLocation(pos);
     boolean result = applyRule(doc, reason);
     if (oldPos > doc.getLength()) oldPos = doc.getLength();
-    doc.setCurrentLocation(oldPos);
+    doc._setCurrentLocation(oldPos);
     return result;
   }
   
@@ -95,6 +95,27 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
       _addToIndentTrace(getRuleName(), NO, false);
       return _noRule.indentLine(doc, reason);
     }
+  }
+  
+  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
+  boolean testApplyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    doc.acquireReadLock();
+    try { return applyRule(doc, reason); }
+    finally { doc.releaseReadLock(); }
+  }
+  
+  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
+  boolean testApplyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
+    doc.acquireReadLock();
+    try { return applyRule(doc, pos, reason); }
+    finally { doc.releaseReadLock(); }
+  }
+  
+  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
+  public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    doc.acquireWriteLock();
+    try { return indentLine(doc, reason); }
+    finally { doc.releaseWriteLock(); }
   }
 }
 

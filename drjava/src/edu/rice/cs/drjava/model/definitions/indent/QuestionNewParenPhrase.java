@@ -67,18 +67,18 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
-      int startLine = doc.getLineStartPos(here);
+      int startLine = doc._getLineStartPos(here);
       
       if (startLine > 0) {
         // Find previous delimiter (looking in paren phrases)
         char[] delims = {';', ',', '(', '[', '&', '|', '+', '-', '*', '/', '%', '=', '<', '>', '}'};
-        int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
+        int prevDelim = doc._findPrevDelimiter(startLine, delims, false);
         if (prevDelim == -1) {
           return false;
         }
         
         // Make sure the delim is the previous non-WS char
-        int nextNonWS = doc.getFirstNonWSCharPos(prevDelim + 1);
+        int nextNonWS = doc._getFirstNonWSCharPos(prevDelim + 1);
         if (nextNonWS == -1) {
           nextNonWS = startLine;
         }

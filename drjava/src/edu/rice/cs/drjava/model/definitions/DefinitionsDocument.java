@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       _closedListeners.clear();
     }
   }
-  
   // end debug code
   
   /** Cached document image as updated on last modification. */
@@ -169,7 +169,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _init();
   }
   
-  
 //  public void setUndoManager(CompoundUndoManager undoManager) {
 //    if (undoManager != null)
 //      _undoManager = undoManager;
@@ -213,39 +212,28 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseWriteLock(); }
   } 
    
-  /** Returns whether this document is currently untitled
-   * (indicating whether it has a file yet or not).
-   * @return true if the document is untitled and has no file
-   */
-//  public boolean isUntitled() {
-//    return (_file == null);
-//  }
+//  /** Returns whether this document is currently untitled
+//    * (indicating whether it has a file yet or not).
+//    * @return true if the document is untitled and has no file
+//    */
+//  public boolean isUntitled() { return (_file == null); }
   
-  /** Returns the file for this document.  If the document
-   * is untitled and has no file, it throws an IllegalStateException.
-   * @return the file for this document
-   * @throws IllegalStateException if file has not been set
-   * @throws FileMovedException if file has been moved or deleted from its previous location
-   */
-//  public File getFilex()
-//    throws IllegalStateException , FileMovedException {
+//  /** Returns the file for this document.  If the document
+//   * is untitled and has no file, it throws an IllegalStateException.
+//   * @return the file for this document
+//   * @throws IllegalStateException if file has not been set
+//   * @throws FileMovedException if file has been moved or deleted from its previous location
+//   */
+//  public File getFilex() throws IllegalStateException , FileMovedException {
 //    if (_file == null) {
-//      throw new IllegalStateException(
-//        "This document does not yet have a file.");
+//      throw new IllegalStateException("This document does not yet have a file.");
 //    }
 //    //does the file actually exist?
-//    if (_file.exists()) {
-//      return _file;
-//    }
-//    else {
-//      throw new FileMovedException(_file,
-//        "This document's file has been moved or deleted.");
-//    }
+//    if (_file.exists()) return _file;
+//    else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
 //  }
 //
-//  /**
-//   * Returns the name of this file, or "(untitled)" if no file.
-//   */
+//  /** Returns the name of this file, or "(untitled)" if no file. */
 //  public String getFilenamex() {
 //    String filename = "(Untitled)";
 //    try {
@@ -282,43 +270,43 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @return the qualified main class/interface name
     */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
-    return _getPackageQualifier() + getMainClassName();
+    return getPackageQualifier() + getMainClassName();
   }
   
   /** Gets fully qualified class name of the top level class enclosing the given position. */
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
-    return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
+    return getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
   
   /** Gets an appropriate prefix to fully qualify a class name. Returns this class's package followed by a dot, or the
     * empty string if no package name is found.
     */
-  protected String _getPackageQualifier() {
+  private String getPackageQualifier() {
     String packageName = getPackageName();
     if ((packageName != null) && (! packageName.equals(""))) { packageName = packageName + "."; }
     return packageName;
   }
   
   /** Inserts a string of text into the document.  This is not where we do custom processing of the insert; that is
-    * done in {@link #insertUpdate}.
+    * done in {@link #insertUpdate}.  If _removeTabs is set to true, remove all tabs from str. It is a current invariant
+    * of the tabification functionality that the document contains no tabs, but we want to allow the user to override 
+    * this functionality.
     */
-  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-    
-    // If _removeTabs is set to true, remove all tabs from str.
-    // It is a current invariant of the tabification functionality that
-    // the document contains no tabs, but we want to allow the user
-    // to override this functionality.
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException { 
     
     acquireWriteLock();
-    try {
-      if (_tabsRemoved) str = _removeTabs(str);
-      setModifiedSinceSave();
-      super.insertString(offset, str, a);
-    }
+    try { _insertString(offset, str, a); }
     finally { releaseWriteLock(); }
   }
   
-  
+  /** Raw version of insertString.  Assumes write lock is already held. */
+  public void _insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+    assert isWriteLocked();
+    if (_tabsRemoved) str = _removeTabs(str);
+    _setModifiedSinceSave();
+    super._insertString(offset, str, a);
+  }
+    
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
     * in {@link #removeUpdate}.
     */
@@ -328,7 +316,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     acquireWriteLock();
     try {
-      setModifiedSinceSave();
+      _setModifiedSinceSave();
       super.remove(offset, len);
     }
     finally { releaseWriteLock(); }
@@ -344,7 +332,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Resets the modification state of this document to be consistent with state of _undoManager.  Called whenever
     * an undo or redo is performed. */
   public void updateModifiedSinceSave() {
-    
     acquireWriteLock();
     try {
       _isModifiedSinceSave = _undoManager.isModified();
@@ -354,8 +341,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Sets the modification state of this document to true and updates the state of the associated _odd. 
-    * Assumes that write lock is already held. */
-  private void setModifiedSinceSave() {
+    * Assumes that write lock is already held. 
+    */
+  private void _setModifiedSinceSave() {
+    assert isWriteLocked();
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
       if (_odd != null) _odd.documentModified();  // null test required for some unit tests
@@ -376,13 +365,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Determines if the document has been modified since the last save.
     * @return true if the document has been modified
     */
-  public boolean isModifiedSinceSave() {
-//    acquireReadLock();  // unnecessary since _isModifiedSinceSave is volatile
-//    try { 
-      return  _isModifiedSinceSave; 
-//    }
-//    finally { releaseReadLock(); }
-  }
+  public boolean isModifiedSinceSave() { return  _isModifiedSinceSave; }
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
@@ -403,30 +386,38 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns the offset corresponding to the first character of the given line number, or -1 if the lineNum is not
-    * found.  Avoids locking the document by copying its text.  
+    * found.  Line number counting begins with 1 not 0.
     * @param lineNum the line number for which to calculate the offset.
     * @return the offset of the first character in the given line number
     */
   public int getOffset(int lineNum) {
-    if (lineNum < 0) return -1;
-    String defsText = getText();
-    int curLine = 1;
-    int offset = 0; // offset is number of chars from beginning of file
-    
-    // offset is always pointing to the first character in a line at the top of the loop
-    /* Isn't there a more efficient way to do this? */
-    while (offset < defsText.length()) {
-      
-      if (curLine == lineNum) return offset;
-      
-      int nextNewline = defsText.indexOf('\n', offset);
-      if (nextNewline == -1) return -1; // end of the document, and couldn't find the supplied lineNum
-      
-      curLine++;
-      offset = nextNewline + 1;
+    if (lineNum <= 0) return -1;
+    if (lineNum == 1) return 0;
+   
+
+    acquireReadLock();
+    synchronized(_reduced) {
+      final int origPos = getCurrentLocation();
+      try {
+        final int docLen = getLength();
+        
+        _setCurrentLocation(0); // _currentLocation is candidate offset to return
+        int i;
+        for (i = 1; (i < lineNum) && (_currentLocation < docLen); i++) {
+          int dist = _reduced.getDistToNextNewline();     // or end of doc
+          if (_currentLocation + dist < docLen) dist++;  // skip newline
+          _move(dist);  // updates _currentLocation to beginning of line # (i + 1)
+        }
+        if (i == lineNum) return _currentLocation;
+        else return -1;
+      }
+      finally {
+        _setCurrentLocation(origPos);
+        releaseReadLock(); 
+      }
     }
-    return -1;
   }
+
   
   /** Returns true iff tabs are to removed on text insertion. */
   public boolean tabsRemoved() { return _tabsRemoved; }
@@ -443,7 +434,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       acquireWriteLock(); 
       try {
         synchronized(_reduced) {
-          setCurrentLocation(getLineStartPos(selStart));
+          _setCurrentLocation(_getLineStartPos(selStart));
 //          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
           _commentLine();
           toReturn += WING_COMMENT_OFFSET;
@@ -451,7 +442,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       finally { releaseWriteLock(); }
     }
-    else toReturn = _commentBlock(selStart, selEnd);   
+    else toReturn = commentBlock(selStart, selEnd);   
     _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
     return toReturn;
   }
@@ -461,7 +452,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param start Position in document to start commenting from
     * @param end Position in document to end commenting at
     */
-  private int _commentBlock(final int start, final int end) {
+  private int commentBlock(final int start, final int end) {
     int afterCommentEnd = end;
     acquireWriteLock();
     try {
@@ -469,16 +460,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // indentLine calls.
       final Position endPos = this.createUnwrappedPosition(end);
       // Iterate, line by line, until we get to/past the end
-      int walker = getLineStartPos(start);
+      int walker = _getLineStartPos(start);
       synchronized(_reduced) {
         while (walker < endPos.getOffset()) {
-          setCurrentLocation(walker);  // Update cursor
+          _setCurrentLocation(walker);  // Update cursor
           
           _commentLine();              // Comment out current line; must be atomic
           afterCommentEnd += WING_COMMENT_OFFSET;
 
           walker = walker + 2;         // Skip over inserted slashes; getDistToNewline(walker) = 0 if not advanced
-          setCurrentLocation(walker);  // reset currentLocation to position past newline
+          _setCurrentLocation(walker);  // reset currentLocation to position past newline
 
           // Adding 1 makes us point to the first character AFTER the next newline.
           walker += _reduced.getDistToNextNewline() + 1;
@@ -511,7 +502,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       acquireWriteLock();
       try {
         synchronized(_reduced) {
-          setCurrentLocation(getLineStartPos(selStart));
+          _setCurrentLocation(_getLineStartPos(selStart));
           _uncommentLine();  // accesses _reduced
           toReturn -= WING_COMMENT_OFFSET;
         }
@@ -519,7 +510,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       catch (BadLocationException e) { throw new UnexpectedException(e); }
       finally { releaseWriteLock(); }
     }
-    else  toReturn = _uncommentBlock(selStart, selEnd);
+    else  toReturn = uncommentBlock(selStart, selEnd);
     //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
     _undoManager.endLastCompoundEdit();
     return toReturn;
@@ -529,7 +520,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param start Position in document to start commenting from
     * @param end Position in document to end commenting at
     */
-  private int _uncommentBlock(final int start, final int end) {
+  private int uncommentBlock(final int start, final int end) {
     int afterUncommentEnd = end;
     acquireWriteLock();
     try {
@@ -539,13 +530,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // Iterate, line by line, until we get to/past the end
       
 //      synchronized(_reduced) {  //unnecessary because write lock is exclusive
-      int walker = getLineStartPos(start);
+      int walker = _getLineStartPos(start);
 //      Utilities.show("Initial walker pos = " + walker);
       while (walker < endPos.getOffset()) {
-        setCurrentLocation(walker);           // Move cursor to walker position
+        _setCurrentLocation(walker);           // Move cursor to walker position
         int diff = _uncommentLine();          // Uncomment current line, accessing the reduced model
         afterUncommentEnd -= diff;            // Update afterUncommentEnd
-        walker = getLineEndPos(walker) + 1;   // Update walker pos to point to beginning of next line
+        walker = _getLineEndPos(walker) + 1;   // Update walker pos to point to beginning of next line
 //        Utilities.show("Updated value of walker = " + walker);
       }        
 //      }   
@@ -564,7 +555,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    Utilities.show("Preceding char = '" + getText().charAt(_currentLocation - 1) + "'");
 //    Utilities.show("Line = \n" + getText(_currentLocation, getLineEndPos(_currentLocation) - _currentLocation + 1));
     int pos1 = _getText().indexOf("//", _currentLocation);  // TODO: get text of current line instead of whole document
-    int pos2 = getFirstNonWSCharPos(_currentLocation, true);
+    int pos2 = _getFirstNonWSCharPos(_currentLocation, true);
 //    Utilities.show("Pos1 = " + pos1 + " Pos2 = " + pos2);
     if (pos1 != pos2) return NO_COMMENT_OFFSET;
     
@@ -577,23 +568,23 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     int dist;
     if (line < 0) return;
-    int actualLine =1;
+    int actualLine = 1;
     
     acquireReadLock();
     int len = getLength();
     try {
       synchronized(_reduced) {
-        setCurrentLocation(0);
+        _setCurrentLocation(0);
         for (int i = 1; (i < line) && (_currentLocation < len); i++) {
           dist = _reduced.getDistToNextNewline();
           if (_currentLocation + dist < len) dist++;
           actualLine++;
-          move(dist);
+          _move(dist);  // updates _currentLocation
         }
         _cachedLineNum = actualLine;
         _cachedLocation = _currentLocation;
-        _cachedPrevLineLoc = getLineStartPos(_currentLocation);
-        _cachedNextLineLoc = getLineEndPos(_currentLocation);
+        _cachedPrevLineLoc = _getLineStartPos(_currentLocation);
+        _cachedNextLineLoc = _getLineEndPos(_currentLocation);
       }
     }
     finally { releaseReadLock(); }
@@ -601,7 +592,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Assumes that read lock is already held. */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
-    // acquireReadLock assumed to be held,
+    
+    assert isReadLocked();
     int i;
     int reducedPos = pos;
     
@@ -618,7 +610,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         reducedPos = i;                 // reduced model points to reducedPos
         
         // Check if matching keyword should be ignored because it is within a comment, or quotes
-        ReducedModelState state = _reduced.getStateAtCurrent();
+        ReducedModelState state = _reduced._getStateAtCurrent();
         if (!state.equals(FREE) || _isStartOfComment(text, i)
               || ((i > 0) && _isStartOfComment(text, i - 1))) {
           i = text.indexOf('{', reducedPos+1);
@@ -671,15 +663,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         reducedPos = i;                 // reduced model points to reducedPos
         
         // Check if matching keyword should be ignored because it is within a comment, or quotes
-        ReducedModelState state = _reduced.getStateAtCurrent();
-        if (!state.equals(FREE) || _isStartOfComment(text, i)
-              || ((i > 0) && _isStartOfComment(text, i - 1))) {
+        ReducedModelState state = _reduced._getStateAtCurrent();
+        if (!state.equals(FREE) || _isStartOfComment(text, i) || ((i > 0) && _isStartOfComment(text, i - 1))) {
           i = text.lastIndexOf(kw, reducedPos-1);
           continue;  // ignore matching keyword 
         }
-        else {
-          break; // found our keyword
-        }        
+        else break; // found our keyword   
       }  // end synchronized/
       
       _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
@@ -697,9 +686,25 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param qual true to find the fully qualified class name
     * @return name of the enclosing named class or interface
     */
-  public String getEnclosingClassName(final int pos, final boolean qual) throws BadLocationException, 
+  public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, 
+    ClassNameNotFoundException {  
+    
+    acquireReadLock();
+    try { return _getEnclosingClassName(pos, qual); }
+    finally{ releaseReadLock(); }
+  }
+  
+  /** Searches backwards to find the name of the enclosing named class or interface. NB: ignores comments. Assumes that read
+    * lock is already held
+    * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
+    * @param pos Position to start from
+    * @param qual true to find the fully qualified class name
+    * @return name of the enclosing named class or interface
+    */
+  public String _getEnclosingClassName(final int pos, final boolean qual) throws BadLocationException, 
     ClassNameNotFoundException {    
-//    boolean oldLog = log; log = false;
+    
+    assert isReadLocked();
     
     // Check cache
     final Query key = new Query.EnclosingClassName(pos, qual);
@@ -709,103 +714,100 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
     String name = "";
     
-    acquireReadLock();
-    try {
-      
-      final String text = getText(0, pos);  
-      
-      int curPos = pos;
-      
-      do {
+    final String text = getText(0, pos);  
+    
+    int curPos = pos;
+    
+    do {
 //        if (text.charAt(curPos) != '{' || text.charAt(curPos) != '}') ++curPos;
-        
+      
 //        if (oldLog) System.out.println("curPos=" + curPos + " `" +
 //                                       text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
-        
-        curPos = findPrevEnclosingBrace(curPos, '{', '}');
-        if (curPos == -1) { break; }
-        int classPos = _findPrevKeyword(text, "class", curPos);
-        int interPos = _findPrevKeyword(text, "interface", curPos);
-        int otherPos = findPrevDelimiter(curPos, delims);
-        int newPos = -1;
-        // see if there's a ) closer by
-        int closeParenPos = findPrevNonWSCharPos(curPos);
-        if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
-          // yes, find the matching (
-          int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
-          if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
-            // this might be an inner class
-            newPos = _findPrevKeyword(text, "new", openParenPos);
+      
+      curPos = _findPrevEnclosingBrace(curPos, '{', '}');
+      if (curPos == -1) { break; }
+      int classPos = _findPrevKeyword(text, "class", curPos);
+      int interPos = _findPrevKeyword(text, "interface", curPos);
+      int otherPos = _findPrevDelimiter(curPos, delims);
+      int newPos = -1;
+      // see if there's a ) closer by
+      int closeParenPos = findPrevNonWSCharPos(curPos);
+      if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
+        // yes, find the matching (
+        int openParenPos = _findPrevEnclosingBrace(closeParenPos, '(', ')');
+        if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
+          // this might be an inner class
+          newPos = _findPrevKeyword(text, "new", openParenPos);
 //            if (oldLog) System.out.println("\tnew found at "+newPos+", openCurlyPos="+curPos);
-            if (! _isAnonymousInnerClass(newPos, curPos)) {
-              // not an anonymous inner class
-              newPos = -1;
-            }
+          if (! _isAnonymousInnerClass(newPos, curPos)) {
+            // not an anonymous inner class
+            newPos = -1;
           }
         }
+      }
 //        if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
 //        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+", new="+newPos+" `" +
 //          text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
-        while (classPos != -1 || interPos != -1 || newPos != -1) {
-          if (newPos != -1) {
+      while (classPos != -1 || interPos != -1 || newPos != -1) {
+        if (newPos != -1) {
 //            if (oldLog) System.out.println("\tanonymous inner class! newPos = "+newPos);
-            classPos = -1;
-            interPos = -1;
-            break;
-          }
-          else if (otherPos > classPos && otherPos > interPos) {
-            if (text.charAt(otherPos) != '{' || text.charAt(otherPos) != '}') ++otherPos;
-            curPos = findPrevEnclosingBrace(otherPos, '{', '}');
-            classPos = _findPrevKeyword(text, "class", curPos);
-            interPos = _findPrevKeyword(text, "interface", curPos);
-            otherPos = findPrevDelimiter(curPos, delims);
-            newPos = -1;
-            // see if there's a ) closer by
-            closeParenPos = findPrevNonWSCharPos(curPos);
+          classPos = -1;
+          interPos = -1;
+          break;
+        }
+        else if (otherPos > classPos && otherPos > interPos) {
+          if (text.charAt(otherPos) != '{' || text.charAt(otherPos) != '}') ++otherPos;
+          curPos = _findPrevEnclosingBrace(otherPos, '{', '}');
+          classPos = _findPrevKeyword(text, "class", curPos);
+          interPos = _findPrevKeyword(text, "interface", curPos);
+          otherPos = _findPrevDelimiter(curPos, delims);
+          newPos = -1;
+          // see if there's a ) closer by
+          closeParenPos = findPrevNonWSCharPos(curPos);
 //            if (closeParenPos!=ERROR_INDEX (-1)) if (oldLog) System.out.println("nonWS before curPos = " + closeParenPos + 
 //              " `"+text.charAt(closeParenPos)+"`");
-            if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
-              // yes, find the matching (
-              int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
-              if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
-                // this might be an inner class
-                newPos = _findPrevKeyword(text, "new", openParenPos);
+          if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
+            // yes, find the matching (
+            int openParenPos = _findPrevEnclosingBrace(closeParenPos, '(', ')');
+            if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
+              // this might be an inner class
+              newPos = _findPrevKeyword(text, "new", openParenPos);
 //                if (oldLog) System.out.println("\tnew found at " + newPos + ", openCurlyPos=" + curPos);
-                if (! _isAnonymousInnerClass(newPos, curPos)) newPos = -1;
-              }
+              if (! _isAnonymousInnerClass(newPos, curPos)) newPos = -1;
             }
+          }
 //            if (oldLog) System.out.println("curPos=" +curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
 //            if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+
 //              text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
-          }
-          else {
-            // either class or interface found first            
-            curPos = Math.max(classPos, Math.max(interPos, newPos));
-            break;
-          }
         }
+        else {
+          // either class or interface found first            
+          curPos = Math.max(classPos, Math.max(interPos, newPos));
+          break;
+        }
+      }
+      
+      if (classPos != -1 || interPos != -1) {
+        if (classPos > interPos) curPos += "class".length();  // class found first
+        else curPos += "interface".length();                  // interface found first
         
-        if (classPos != -1 || interPos != -1) {
-          if (classPos > interPos) curPos += "class".length();  // class found first
-          else curPos += "interface".length();                  // interface found first
-          
-          int nameStart = getFirstNonWSCharPos(curPos);
-          if (nameStart==-1) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
-          int nameEnd = nameStart + 1;
-          while (nameEnd < text.length()) {
-            if (! Character.isJavaIdentifierPart(text.charAt(nameEnd)) && text.charAt(nameEnd) != '.') break;
-            ++nameEnd;
-          }
-          name = text.substring(nameStart,nameEnd) + '$' + name;
+        int nameStart = _getFirstNonWSCharPos(curPos);
+        if (nameStart==-1) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
+        int nameEnd = nameStart + 1;
+        while (nameEnd < text.length()) {
+          if (! Character.isJavaIdentifierPart(text.charAt(nameEnd)) && text.charAt(nameEnd) != '.') break;
+          ++nameEnd;
         }
-        else if (newPos != -1) {
-          name = String.valueOf(_getAnonymousInnerClassIndex(curPos)) + "$" + name;
-          curPos = newPos;
-        }
-        else break; // neither class nor interface found (exiting loop if qual == true)
-      } while(qual);
-    }
-    finally { releaseReadLock(); }
+        name = text.substring(nameStart,nameEnd) + '$' + name;
+      }
+      else if (newPos != -1) {
+        name = String.valueOf(_getAnonymousInnerClassIndex(curPos)) + "$" + name;
+        curPos = newPos;
+      }
+      else break; // neither class nor interface found (exiting loop if qual == true)
+    } while(qual);
+//    }
+//    finally { releaseReadLock(); }
     
     // chop off '$' at the end.
     if (name.length() > 0) name = name.substring(0, name.length() - 1);
@@ -847,7 +849,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
       int origNewPos = newPos;
       newPos += "new".length();
-      int classStart = getFirstNonWSCharPos(newPos);
+      int classStart = _getFirstNonWSCharPos(newPos);
       if (classStart != -1) { 
         int classEnd = classStart + 1;
         while (classEnd < text.length()) {
@@ -860,7 +862,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
         /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
         // System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
-        int parenStart = getFirstNonWSCharPos(classEnd);
+        int parenStart = _getFirstNonWSCharPos(classEnd);
         if (parenStart != -1) {
           int origParenStart = parenStart;
           
@@ -871,7 +873,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
             if (closePointyBracket != -1) {
               if (text.charAt(closePointyBracket)=='>') {
-                parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+                parenStart = _getFirstNonWSCharPos(closePointyBracket+1);
               }
             }
           }
@@ -880,13 +882,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (parenStart != -1) {
           if (text.charAt(parenStart) == '(') {
             final int origLocation = _currentLocation;
-            _reduced.move(parenStart+1 - origLocation);  // reduced model points to pos == parenStart+1
-            int parenEnd = balanceForward();
-            _reduced.move(origLocation - (parenStart + 1));    // Restore the state of the reduced model;
+            _reduced.move(parenStart+1 - origLocation);   // reduced model points to pos == parenStart+1
+            int parenEnd = _balanceForward();
+            _reduced.move(origLocation - (parenStart + 1));   // Restore the state of the reduced model;
             if (parenEnd > -1) {
               parenEnd = parenEnd + parenStart + 1;
               // System.out.println("\tafter closing paren = "+parenEnd);
-              int afterParen = getFirstNonWSCharPos(parenEnd);
+              int afterParen = _getFirstNonWSCharPos(parenEnd);
               // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
               cached = (afterParen == openCurlyPos); 
             }
@@ -928,6 +930,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
 //    boolean oldLog = log; log = false;
     
+    assert isReadLocked();
+    
     // Check cache
     final Query key = new Query.AnonymousInnerClassIndex(pos);
     final Integer cached = (Integer) _checkCache(key);
@@ -942,7 +946,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
 //    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
 
-    final String className = getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
+    final String className = _getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
     final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
     int index = 1;
     
@@ -950,7 +954,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     while ((newPos = _findPrevKeyword(text, "new", newPos - 4)) != -1) { // excludes space + minimal class name + args
 //      if (oldLog) System.out.println("new found at "+newPos);
       int afterNewPos = newPos + "new".length();
-      int classStart = getFirstNonWSCharPos(afterNewPos);
+      int classStart = _getFirstNonWSCharPos(afterNewPos);
       if (classStart == -1) { continue; }
       int classEnd = classStart + 1;
       while (classEnd < text.length()) {
@@ -961,7 +965,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         ++classEnd;
       }
 //      if (oldLog) System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
-      int parenStart = getFirstNonWSCharPos(classEnd);
+      int parenStart = _getFirstNonWSCharPos(classEnd);
       if (parenStart == -1) { continue; }
       int origParenStart = parenStart;
       
@@ -972,7 +976,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
         if (closePointyBracket != -1) {
           if (text.charAt(closePointyBracket) == '>') {
-            parenStart = getFirstNonWSCharPos(closePointyBracket + 1);
+            parenStart = _getFirstNonWSCharPos(closePointyBracket + 1);
           }
         }
       }
@@ -986,11 +990,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenSquiggly+")");
       if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
 //        if (oldLog) System.out.println("is anonymous inner class");
-        String cn = getEnclosingClassName(newPos, true);
+        String cn = _getEnclosingClassName(newPos, true);
 //        if (oldLog) System.out.println("enclosing class = "+cn);
-        if (!cn.startsWith(className)) { break; }
-        else if (!cn.equals(className)) {
-          newPos = findPrevEnclosingBrace(newPos, '{', '}');
+        if (! cn.startsWith(className)) { break; }
+        else if (! cn.equals(className)) {
+          newPos = _findPrevEnclosingBrace(newPos, '{', '}');
           continue;
         }
         else ++index;
@@ -1010,8 +1014,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     synchronized(_reduced) {
       int oldPos = _currentLocation;
       try {
-        setCurrentLocation(pos);
-        BraceInfo info = getEnclosingBrace();
+        _setCurrentLocation(pos);
+        BraceInfo info = _getEnclosingBrace();
         
         // Find top level open brace
         int topLevelBracePos = -1;
@@ -1020,31 +1024,31 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (braceType.equals(BraceInfo.OPEN_CURLY)) {
             topLevelBracePos = _currentLocation - info.distance();
           }
-          move(-info.distance());
-          info = getEnclosingBrace();
+          _move(-info.distance());
+          info = _getEnclosingBrace();
           braceType = info.braceType();
         }
         if (topLevelBracePos == -1) {
           // No top level brace was found, so we can't find a top level class name
-          setCurrentLocation(oldPos);
+          _setCurrentLocation(oldPos);
           throw new ClassNameNotFoundException("no top level brace found");
         }
         
         char[] delims = {'{', '}', ';'};
-        int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
+        int prevDelimPos = _findPrevDelimiter(topLevelBracePos, delims);
         if (prevDelimPos == -1) {
           // Search from start of doc
           prevDelimPos = 0;
         }
         else prevDelimPos++;
-        setCurrentLocation(oldPos);
+        _setCurrentLocation(oldPos);
         
         // Parse out the class name
         return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally { 
-        setCurrentLocation(oldPos);
+        _setCurrentLocation(oldPos);
         releaseReadLock();
       }
     }
@@ -1070,7 +1074,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       final int oldPos = _currentLocation;
       
       try {
-        setCurrentLocation(0);
+        _setCurrentLocation(0);
         final String text = _getText();  // getText() is cheap if document is not resident
         
         final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
@@ -1085,7 +1089,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         // There is an explicit public declaration
         final int afterPublic = indexOfPublic + "public".length();
         final String subText = text.substring(afterPublic);
-        setCurrentLocation(afterPublic);
+        _setCurrentLocation(afterPublic);
 //        _log.log("After public text = '" + subText + "'");
         int indexOfPublicClass  = _findKeywordAtToplevel("class", subText, afterPublic);  // relative offset
         if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
@@ -1097,7 +1101,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
       }
       finally { 
-        setCurrentLocation(oldPos);
+        _setCurrentLocation(oldPos);
         releaseReadLock();
       }
     }
@@ -1119,7 +1123,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int oldPos = _currentLocation;
       
       try {
-        setCurrentLocation(startPos);
+        _setCurrentLocation(startPos);
         final int textLength = endPos - startPos;
         final String text = getText(startPos, textLength);
         
@@ -1154,7 +1158,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       catch (IllegalStateException e) { throw new ClassNameNotFoundException("No top level class name found"); }
       finally { 
-        setCurrentLocation(oldPos);
+        _setCurrentLocation(oldPos);
         releaseReadLock();
       }
     }
@@ -1173,7 +1177,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    int i;
     try {
       // first find index of first non whitespace (from the index in document)
-      int index = getFirstNonWSCharPos(startPos);
+      int index = _getFirstNonWSCharPos(startPos);
       if (index == -1) throw new IllegalStateException("No identifier found");
       
       String text = _getText();
@@ -1222,12 +1226,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (index == -1) break; // not found
           else {
             // found a match, check quality
-            setCurrentLocation(textOffset + index);
+            _setCurrentLocation(textOffset + index);
             
             // check that the keyword is not in a comment and is followed by whitespace
             int indexPastKeyword = index + keyword.length();
             if (indexPastKeyword < text.length()) {
-              if (! isShadowed() && Character.isWhitespace(text.charAt(indexPastKeyword))) {
+              if (! _isShadowed() && Character.isWhitespace(text.charAt(indexPastKeyword))) {
                 // found a match but may not be at top level
                 if (! notInBlock(index)) index = -1; //in a paren phrase, gone too far
                 break;
@@ -1240,7 +1244,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             }
           }
         }
-        setCurrentLocation(oldPos);
+        _setCurrentLocation(oldPos);
 //        _log.log("findKeyWord(" + keyword + ", ..., " + textOffset + ")");
         return index;
       }

@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
   * @version $Id$
   */
 public class Indenter {
-
+  
   public Indenter(int indentLevel) { buildTree(indentLevel); }
   
   /** Enumeration of reasons why indentation may be preformed. */
@@ -53,15 +53,15 @@ public class Indenter {
       * at the line start in multiline comments
       */
     ENTER_KEY_PRESS,
-    /** Indicates that indentation was started for some other reason.  This is important for some rules dealing with stars
-      * at the line start in multiline comments
-      */
-    OTHER
+      /** Indicates that indentation was started for some other reason.  This is important for some rules dealing with stars
+        * at the line start in multiline comments
+        */
+      OTHER
   }
-
+  
   /** Root of decision tree. */
   protected IndentRule _topRule;
-
+  
   /** Builds the decision tree for indentation.
     * For now, this method needs to be called every time the size of one indent level is being changed!
     */
@@ -94,21 +94,21 @@ public class Indenter {
       rule25 = new QuestionStartingNewStmt(rule26, rule31),  // Is this line the start of a new statement?
       rule24 = new QuestionPrevLineStartsWith("@", rule60, rule25),  // Does this line follow an annotation?  ??
       rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'}, rule36, rule24),  // Is this line an element of an array initializer?
-      rule20 = new QuestionStartAfterOpenBrace(rule36, rule22),  // does the preceding line end with an open curly brace?
+      rule20 = new QuestionStartAfterOpenBrace(rule36, rule22),  // Does the preceding line contain an open curly brace?
       rule19 = new ActionStartStmtOfBracePlus(0),  // indents the line to match whitespace preceding the line enclosing brace
       // ANONYMOUS inner class formatting breaks here?
       rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // Does current line begin with '}' ignoring comment text, WS
       rule17 = new QuestionBraceIsCurly(rule18, rule24),  // is brace enclosing this line '{' (as opposed to quotes, etc.); '(', '[' already excluded
       rule16 = new ActionBracePlus(1 + indentLevel),
       rule15 = new ActionBracePlus(1),
-     
+      
       rule38 = new ActionBracePlus(0),
       rule14 = new QuestionNewParenPhrase(rule15, rule16),  // is current non ) line a new phrase after open paren?
       rule23 = new QuestionNewParenPhrase(rule30, rule38),  // is current ) line a new phrase after open paren?
       rule21 = new QuestionCurrLineStartsWith(")", rule23, rule14), // does current line start with ')'?
-       // root of non-comment indent tree: is brace enclosing start of this line in { '(', '['}?  
+      // root of non-comment indent tree: is brace enclosing start of this line in { '(', '['}?  
       rule13 = new QuestionBraceIsParenOrBracket(rule21, rule17),   
-
+      
       // Comment tree
       rule12 = new ActionStartPrevLinePlus(""),
       rule11 = rule12,
@@ -126,7 +126,7 @@ public class Indenter {
       rule41 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { " * \n", " */" }, 0, 3, 0, 3),
       rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { "  * \n", "  */"}, 0, 4, 0, 4),
       rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),
-
+      
       rule03 = new QuestionCurrLineEmptyOrEnterPress(rule45, rule48),
 //      rule42 = new QuestionFollowedByStar(rule04, rule41),
 //      rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] {"  */" }, 0, 4, 0, 4), 
@@ -137,10 +137,10 @@ public class Indenter {
       rule43 = new ActionDoNothing(),
       rule44 = new QuestionCurrLineIsWingComment(rule43, rule13),
       rule01 = new QuestionInsideComment(rule02, rule44);
-
+    
     _topRule = rule01;
   }
-    
+  
   /** Indents the current line based on a decision tree which determines the indent based on context.
     * @param doc document containing line to be indented  Assumes that reduced lock is already held.
     * @return true if the condition tested by the top rule holds, false otherwise

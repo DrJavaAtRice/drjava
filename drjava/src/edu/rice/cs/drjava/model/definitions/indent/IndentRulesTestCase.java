@@ -49,6 +49,8 @@ import javax.swing.text.BadLocationException;
   * @version $Id$
   */
 public abstract class IndentRulesTestCase extends DrJavaTestCase {
+  
+  public static final int TEST_INDENT_LEVEL = 2;
 
   protected volatile AbstractDJDocument _doc;
 //  private String _indent;
@@ -59,18 +61,14 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     super.setUp();
     //_notifier = new GlobalEventNotifier();
     //_doc = new DefinitionsDocument(_notifier);
-    _doc = new AbstractDJDocument() {
-      protected int startCompoundEdit() {
-        //Do nothing
-        return 0;
-      }
+    _doc = new AbstractDJDocument(TEST_INDENT_LEVEL) {
+      protected int startCompoundEdit() { return 0; /* Do nothing. */ }
       protected void endCompoundEdit(int key) { /* Do nothing. */ }
       protected void endLastCompoundEdit() { /* Do nothing. */ }
       protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
         /* Do nothing. */ 
       }
       protected void _styleChanged() { /* Do nothing. */ }
-      protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
     };
   }
   
@@ -86,7 +84,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     _doc.acquireWriteLock();
     try {
       _doc.clear();
-      _doc.insertString(0, text, null);
+      _doc._insertString(0, text, null);
     }
     finally { _doc.releaseWriteLock(); }
     Utilities.clearEventQueue();  // make sure that all listener actions triggered by this document update have completed

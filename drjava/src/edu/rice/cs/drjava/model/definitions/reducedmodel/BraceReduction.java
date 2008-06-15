@@ -57,7 +57,7 @@ public interface BraceReduction {
   /** Get the state of the token at the current cursor position.
    * @return the current state
    */
-  ReducedModelState getStateAtCurrent();
+  ReducedModelState _getStateAtCurrent();
 
   /** Insert a character into the BraceReduction.
    * @param ch the character to be inserted

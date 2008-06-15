@@ -71,9 +71,8 @@ public class DocumentOutputStream extends OutputStream {
     * @param c the ASCII value of the character to write.
     */
   public void write(int c) {
-    try {
-      _doc.insertString(_doc.getLength(), String.valueOf((char)c), _attributes);
-    } catch (BadLocationException canNeverHappen) {
+    try { _doc.insertString(_doc.getLength(), String.valueOf((char)c), _attributes); } 
+    catch (BadLocationException canNeverHappen) {
       throw  new RuntimeException("Internal error: bad location in OutputWindowStream");
     }
   }

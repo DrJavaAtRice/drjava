@@ -467,13 +467,13 @@ public class JPDADebugger implements Debugger {
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
     // ensure that offset is at line start and falls within the document
-    offset = doc.getLineStartPos(offset);
+    offset = doc._getLineStartPos(offset);
     if (offset < 0 || offset > doc.getLength()) return;
     
     Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset);
     
     if (breakpoint == null) {
-      if (offset == doc.getLineEndPos(offset)) {
+      if (offset == doc._getLineEndPos(offset)) {
         Utilities.show("Cannot set a breakpoint on an empty line.");
       }
       else {

@@ -72,7 +72,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
       int cursor;
 
     // Move back to start of current line
-    cursor = doc.getLineStartPos(doc.getCurrentLocation());
+    cursor = doc._getLineStartPos(doc.getCurrentLocation());
     
     /* If the start of the current line is the start of the document, there was no previous line and so this line must 
      * have started the comment. */
@@ -82,7 +82,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     cursor = cursor - 1;
     
     // Move it to the start of the previous line
-    cursor = doc.getLineStartPos(cursor);
+    cursor = doc._getLineStartPos(cursor);
     
     // Return if the start of the previous line is in a comment.
 //    BraceReduction reduced = doc.getReduced();

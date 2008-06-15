@@ -62,8 +62,8 @@ class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
     try {
       // Determine if there are only whitespace chars by seeing if the first non-WS char is the endOfLine
       int here = doc.getCurrentLocation();
-      int endOfLine = doc.getLineEndPos(here);
-      int firstNonWS = doc.getLineFirstCharPos(here);
+      int endOfLine = doc._getLineEndPos(here);
+      int firstNonWS = doc._getLineFirstCharPos(here);
       return (endOfLine == firstNonWS);
     }
     catch (BadLocationException e) {

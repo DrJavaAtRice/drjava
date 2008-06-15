@@ -70,7 +70,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     int pos = doc.getCurrentLocation();
 //    Utilities.show("indentLine in ActionStartStmtOfBracePlus called on doc:\n" + doc.getText() + "'\nat location " + pos);
     // Get distance to brace
-    BraceInfo info = doc.getLineEnclosingBrace();
+    BraceInfo info = doc._getLineEnclosingBrace();
     int distToLineEnclosingBrace = info.distance();
 
     // If there is no brace, align to left margin; can't happen when called from rule 19
@@ -81,7 +81,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
 
     // Get the absolute position of the (left edge of the) brace
     final int bracePos = pos - distToLineEnclosingBrace;
-    final int indent = doc.getIndentOfCurrStmt(bracePos) + _suffix;
+    final int indent = doc._getIndentOfCurrStmt(bracePos) + _suffix;
 
     doc.setTab(indent, pos);
     

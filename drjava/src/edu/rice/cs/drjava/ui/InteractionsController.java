@@ -451,7 +451,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void actionPerformed(ActionEvent e) {
       _doc.acquireWriteLock();
       try {
-        if (! _swingConsoleDocument.inBlockComment()) {
+        if (! _swingConsoleDocument._inBlockComment()) {
           Thread command = new Thread("Evaluating Interaction") { 
             public void run() {  // not under a Write Lock!
               try { _model.interpretCurrentInteraction(); }

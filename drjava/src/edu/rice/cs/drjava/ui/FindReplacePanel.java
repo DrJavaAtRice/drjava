@@ -546,7 +546,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     if (wholeWord) { _machine.setMatchWholeWord(); }
     else { _machine.setFindAnyOccurrence(); }
     _machine.setIgnoreCommentsAndStrings(noComments);
-    _machine.setPosition(startDoc.getCaretPosition());
+    _machine.setPosition(startDoc.getCurrentLocation());
     _machine.setIgnoreTestCases(noTestCases);
 
     _machine.setFindWord(searchStr);
@@ -622,8 +622,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           
           // The following were commented out because they require doc to be loaded as a Definitions (Swing) Document,
           // but results processing presumes this access in many places
-          int excerptEndSel = doc.getLineEndPos(endSel);
-          int excerptStartSel = doc.getLineStartPos(startSel);
+          int excerptEndSel = doc._getLineEndPos(endSel);
+          int excerptStartSel = doc._getLineStartPos(startSel);
 // Text only alternative to preceding two statements commented out          
 //          String text = doc.getText();
 //          final int len = text.length();

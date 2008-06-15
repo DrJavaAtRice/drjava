@@ -242,7 +242,7 @@ public class FindReplaceMachine {
       _doc.remove(offset, _findWord.length());
       
 //      if (position == 0) atStart = true;
-      _doc.insertString(offset, _replaceWord, null);
+      _doc.insertString(offset, _replaceWord, null);  // could use _insertString if we had the DefinitionsDocument
       
       // update _current Position
       if (_isForward) setPosition(offset + _replaceWord.length());
@@ -687,6 +687,6 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     return (_matchWholeWord && ! wholeWordFoundAtCurrent(odd, foundOffset)) || 
-      (_ignoreCommentsAndStrings && odd.isShadowed(foundOffset));
+      (_ignoreCommentsAndStrings && odd._isShadowed(foundOffset));
   }
 }

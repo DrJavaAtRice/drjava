@@ -358,12 +358,12 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
     */
   public int getOffsetOfLine(int line);
   
-  /** @return the caret position as set by the view. */
-  public int getCaretPosition();
+//  /** @return the caret position as set by the view. */
+//  public int getCaretPosition();
   
   /** Creates a WrappedPosition in the document. */
   public Position createUnwrappedPosition(int offs) throws BadLocationException;
   
   /** Determines if pos in document is inside a comment or a string. */
-  public boolean isShadowed(int pos);
+  public boolean _isShadowed(int pos);
 }

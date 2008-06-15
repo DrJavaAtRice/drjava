@@ -134,7 +134,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
     try {
       _lastUpdates.put(doc, System.currentTimeMillis());
       final String old = _enclosingClassNames.get(doc);
-      final String updated = doc.getEnclosingClassName(doc.getCaretPosition(), true);
+      final String updated = doc.getEnclosingClassName(doc.getCurrentLocation(), true);
       if ((old == null) || (!old.equals(updated))) {
         _enclosingClassNames.put(doc, updated);
         Utilities.invokeLater(new Runnable() {

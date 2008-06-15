@@ -174,7 +174,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Returns the DJDocument held by the pane. */
   public DJDocument getDJDocument() { return _doc; }
   
-  /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list. */
+  /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list. ReadLock? */
   protected void matchUpdate(int offset) {
     if (! _doc.hasPrompt()) return;
     _doc.setCurrentLocation(offset); 

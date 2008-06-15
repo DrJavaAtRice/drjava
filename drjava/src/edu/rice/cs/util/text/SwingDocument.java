@@ -56,10 +56,14 @@ import java.util.Hashtable;
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
 //  /** The lock state.  See ReadersWritersLocking interface for documentation. */
-//  private volatile int _lockState = UNLOCKED;
+  protected volatile int _lockState = UNLOCKED;
   
   /** The modified state. */
   protected volatile boolean _isModifiedSinceSave = false;
+  
+  /** The visible locking state. */
+  protected volatile boolean _readLocked = false;
+  protected volatile boolean _writeLocked = false;
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -165,8 +169,13 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
     acquireWriteLock();  // locking is used to make the test and modification atomic
-    try { if (_condition.canInsertText(offs)) super.insertString(offs, str, set); }
+    try { _insertString(offs, str, set); }
     finally { releaseWriteLock(); }
+  }
+  
+  /** Raw version of insertString.  Assumes write lock is already held. */
+  public void _insertString(int offs, String str, AttributeSet set) throws BadLocationException {
+    if (_condition.canInsertText(offs)) super.insertString(offs, str, set);
   }
   
   /** Removes a portion of the document, if the edit condition allows it.
@@ -216,14 +225,24 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
   
-  /** Returns entire text of this document. */
+   /** Gets the document text; this method is threadsafe. */
   public String getText() {
     acquireReadLock();
-    try { return getText(0, getLength()); }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
+    try { return _getText(); }
     finally { releaseReadLock(); }
   }
   
+  /** Raw version of getText() that assumes the ReadLock is already held. */
+  public String _getText() { 
+    try { return getText(0, getLength()); }  // calls method defined in DefaultStyledDocument
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible if read lock is already held
+  }
+ 
+  /** Raw version of getText(int, int) that converts BadLocationException to UnexpectedException. */
+  public String _getText(int pos, int len) { 
+    try { return getText(pos, len); }  // calls method defined in DefaultStyledDocument
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
+  }
   /** Appends given string with specified attributes to end of this document. */
   public void append(String str, AttributeSet set) {
     acquireWriteLock();
@@ -233,7 +252,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /** Same as append above except that it assumes the Write Lock is already held. */
   public void _append(String str, AttributeSet set) {
-    try { insertString(getLength(), str, set); }
+    try { _insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
   }
   
@@ -257,32 +276,37 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /* Locking operations */
   
   /* Swing-style readLock(). Must be renamed because inherited writeLock is final. */
-  public /* synchronized */ void acquireReadLock() {
-//    _lockState++;
+  public synchronized void acquireReadLock() {
     readLock();
+    if (_lockState >= UNLOCKED) _lockState++;
+    // otherwise a write locked object is being recursively read locked; ignore
   }
   
   /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
-  public /* synchronized */ void releaseReadLock() {
+  public synchronized void releaseReadLock() {
     readUnlock();
-//    _lockState--;
+    if (_lockState > UNLOCKED) _lockState--;
   }
   
   /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
-  public /* synchronized */ void acquireWriteLock() { 
-//    _lockState = MODIFYLOCKED;
+  public synchronized void acquireWriteLock() {
     writeLock(); 
+    if (_lockState <= UNLOCKED) _lockState--; 
   }
   
   /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
-  public /* synchronized*/ void releaseWriteLock() { 
+  public synchronized void releaseWriteLock() { 
     writeUnlock();
-//   _lockState = UNLOCKED;
+    if (_lockState < UNLOCKED) _lockState++; 
   }
+  
+  /** Returns true iff this thread holds a read lock or write lock. */
+  public boolean isReadLocked() { return _lockState != UNLOCKED; }
+  
+  /** Returns true iff this thread holds a write lock. */
+  public boolean isWriteLocked() { return _lockState < 0; }
   
   /** Performs the default behavior for createPosition in DefaultStyledDocument. */
   public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }
-  
-//  public int getLockState() { return _lockState; }
 }
 

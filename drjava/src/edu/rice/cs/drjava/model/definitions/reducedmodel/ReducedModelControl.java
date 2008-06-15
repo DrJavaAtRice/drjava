@@ -161,19 +161,19 @@ public class ReducedModelControl implements BraceReduction {
     // check the reduced brace model for braces
     ReducedToken rmbToken = _rmb.current();
     if (! rmbToken.isGap()) {
-      rmbToken.setState(_rmc.getStateAtCurrent());
+      rmbToken.setState(_rmc._getStateAtCurrent());
       return rmbToken;
     }
     // otherwise, we have a gap.
     int size = getSize(rmbToken,rmcToken);
-    return new Gap(size, _rmc.getStateAtCurrent());
+    return new Gap(size, _rmc._getStateAtCurrent());
   }
   
   /** Gets the shadowing state at the current caret position.
     * @return FREE|INSIDE_LINE_COMMENT|INSIDE_BLOCK_COMMENT|
     * INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE
     */
-  public ReducedModelState getStateAtCurrent() { return _rmc.getStateAtCurrent(); }
+  public ReducedModelState _getStateAtCurrent() { return _rmc._getStateAtCurrent(); }
   
   /** Get a string representation of the current token's type.
     * @return "" if current is a Gap, otherwise, use ReducedToken.getType()
@@ -366,10 +366,10 @@ public class ReducedModelControl implements BraceReduction {
   public int getDistToEnclosingBraceStart() { return -1; }
   
   /** Gets info about the brace enclosing the beginning of this line. */
-  public BraceInfo getLineEnclosingBrace() { return _rmb.getLineEnclosingBrace(); }
+  public BraceInfo _getLineEnclosingBrace() { return _rmb._getLineEnclosingBrace(); }
   
   /** Gets info about the brace enclosing this location. */
-  public BraceInfo getEnclosingBrace() { return _rmb.getEnclosingBrace(); }
+  public BraceInfo _getEnclosingBrace() { return _rmb._getEnclosingBrace(); }
   /** Gets distance to the new newline character (not including the newline). */
   public int getDistToStart() { return _rmc.getDistToStart(); }
   /** Gets distance to previous newline character (not including the newline). */

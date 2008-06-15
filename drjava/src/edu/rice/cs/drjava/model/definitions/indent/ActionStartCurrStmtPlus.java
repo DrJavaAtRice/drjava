@@ -73,7 +73,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     int indent = 0;
 
 
-    indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation(), new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
+    indent = doc._getIndentOfCurrStmt(doc.getCurrentLocation(), new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
 
 
     indent = indent + _suffix;

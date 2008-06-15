@@ -100,7 +100,7 @@ public class IndentFiles {
     //System.out.println("Using Headless AWT: "+isHeadless());
     Indenter indenter = new Indenter(indentLevel);
     
-    if (!silent) System.out.println("DrJava - Indenting files:");
+    if (! silent) System.out.println("DrJava - Indenting files:");
     for (int i = 0; i < fileNames.size(); i++) {
       String fname = fileNames.get(i);
       File file = new File(fname);
@@ -111,10 +111,14 @@ public class IndentFiles {
       try {
         String fileContents = IOUtil.toString(file);
         DefinitionsDocument doc = new DefinitionsDocument(indenter, new GlobalEventNotifier());
-        doc.insertString(0, fileContents, null); // (no attributes)
-        int docLen = doc.getLength();
-        doc.indentLines(0, docLen);
-        fileContents = doc.getText();
+        doc.acquireWriteLock();
+        try {
+          doc._insertString(0, fileContents, null); // (no attributes)
+          int docLen = doc.getLength();
+          doc.indentLines(0, docLen);
+          fileContents = doc.getText();
+        }
+        finally { doc.releaseWriteLock(); }
         IOUtil.writeStringToFile(file, fileContents);
         if (!silent) System.out.println("done.");
       }

@@ -138,7 +138,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
   
-  /** Updates match highlights.  Only runs in the event thread except in some unit tests. */
+  /** Updates match highlights.  Only runs in the event thread except in some unit tests. Should it acquireReadLock? */
   protected void matchUpdate(int offset) { 
     _doc.setCurrentLocation(offset);  
     _removePreviousHighlight();
@@ -391,7 +391,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _doc.acquireWriteLock();  // reduced model lock unnecessary!
       try {
         _doc.setCurrentLocation(getCaretPosition());
-        ReducedModelState state = _doc.getStateAtCurrent();
+        ReducedModelState state = _doc._getStateAtCurrent();
         if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
       }
       finally { _doc.releaseWriteLock(); }
@@ -734,17 +734,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     toggleBookmarkItem.addActionListener ( new AbstractAction() {
       /** Toggle the selected line as a bookmark.  Only runs in event thread. */
       public void actionPerformed( ActionEvent ae) {
-        // The following text is commented out so that this menu command has the same effect as KEY_BOOKMARKS_TOGGLE
-//        if (getSelectionStart() == getSelectionEnd()) { // nothing selected
-//          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-//          // Omit locking since Definitions documents are not accessed from other threads (?)
-////          _doc.acquireReadLock();
-////          try { 
-//            setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
-            _mainFrame.toggleBookmark();
-//          }
-//          finally {_doc.releaseReadLock(); }
-//        }
+        // Same menu command has the same effect as KEY_BOOKMARKS_TOGGLE
+        _mainFrame.toggleBookmark();
       }
     });
     _popMenu.add(toggleBookmarkItem);
@@ -757,13 +748,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       breakpointItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          // Omit locking since Definitions documents are not accessed from other threads (?)
-//          _doc.acquireReadLock();
-//          try { 
           setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
           _mainFrame.debuggerToggleBreakpoint();
-//          }
-//          finally
         }
       });
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);

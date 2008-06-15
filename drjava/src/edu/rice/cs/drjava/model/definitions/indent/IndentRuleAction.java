@@ -42,6 +42,4 @@ package edu.rice.cs.drjava.model.definitions.indent;
  * by its position in the decision tree.
  * @version $Id$
  */
-public abstract class IndentRuleAction extends IndentRuleWithTrace {
-
-}
+public abstract class IndentRuleAction extends IndentRuleWithTrace { }

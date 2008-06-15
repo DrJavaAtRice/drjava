@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
  * also does some of the work, and any subclass may substitute its own version of getRuleName()
  * @version $Id$
  */
-public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
+public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
 
   public void testTrace() throws BadLocationException{
     IndentRuleWithTrace.setRuleTraceEnabled(true);
@@ -63,9 +63,14 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
       "}\n" +
       "}\n";
 
+    
     _setDocText(text);
-    rule1.indentLine(_doc, 23, Indenter.IndentReason.OTHER);
-    rule1.indentLine(_doc, 75, Indenter.IndentReason.OTHER);
+    _doc.acquireWriteLock();
+    try {
+      rule1.indentLine(_doc, 23, Indenter.IndentReason.OTHER);
+      rule1.indentLine(_doc, 75, Indenter.IndentReason.OTHER);
+    }
+    finally {_doc.releaseWriteLock(); }
 
     String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
     "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
