@@ -88,6 +88,6 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
     
     // Find the position of endChar on the current line
     int endCharPos = doc.findCharOnLine(doc.getCurrentLocation(), _endChar);
-    return doc.findCharInStmtBeforePos(_findChar, endCharPos);
+    return doc._findCharInStmtBeforePos(_findChar, endCharPos);
   }
 }

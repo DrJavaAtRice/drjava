@@ -2242,17 +2242,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Go to the closing brace.  ReadLock omitted because it only runs on definitions documents in the event thread. */
+  /** Go to the closing brace. */
   private final Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//        odd.acquireReadLock();
+      odd.acquireReadLock();
       try {
-        int pos = odd.findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
+        int pos = odd._findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-//        finally { odd.releaseReadLock(); }
+      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -7847,14 +7847,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         
         if (shouldHighlight) {
           _removeThreadLocationHighlight();
-          int startOffset = doc.getOffset(lineNumber);  // Much faster to directly search back from offset!
-          if (startOffset > -1) {
-            int endOffset = doc._getLineEndPos(startOffset);
-            if (endOffset > -1) {
-              _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
-                addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+          doc.acquireReadLock();
+          try {
+            int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
+            if (startOffset > -1) {
+              int endOffset = doc._getLineEndPos(startOffset);
+              if (endOffset > -1) {
+                _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
+                  addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+              }
             }
           }
+          finally { doc.releaseReadLock(); }
         }
         
         if (_showDebugger) {
@@ -7917,7 +7921,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       * @param shouldHighlight true iff the line should be highlighted.
       */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
-      scrollToDocumentAndOffset(doc, doc.getOffset(lineNumber), shouldHighlight);
+      doc.acquireReadLock();
+      try { scrollToDocumentAndOffset(doc, doc._getOffset(lineNumber), shouldHighlight); }
+      finally { doc.releaseReadLock(); }
     }
     
     /* Must be executed in event thread. */

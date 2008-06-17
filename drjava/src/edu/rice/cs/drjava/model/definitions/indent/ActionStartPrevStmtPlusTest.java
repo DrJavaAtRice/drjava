@@ -38,13 +38,11 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Test the action rules for code in the indentation decision tree.
- * The implementation relies heavily on functions which are fully
- * tested in IndentHelpersTest.
- *
- * @version $Id$
- */
+/** Test the action rules for code in the indentation decision tree.
+  * The implementation relies heavily on functions which are fully
+  * tested in IndentHelpersTest.
+  * @version $Id$
+  */
 public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   
   public void testNoPrevStmt() throws BadLocationException {
@@ -53,15 +51,11 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
 
     _setDocText("foo();\n");
     rule1.testIndentLine(_doc, 2, Indenter.IndentReason.OTHER);
-    assertEquals("no prev stmt, no suffix",
-                 "foo();\n",
-                 _doc.getText());
+    assertEquals("no prev stmt, no suffix", "foo();\n", _doc.getText());
     
     _setDocText("foo();\n");
     rule2.testIndentLine(_doc, 2, Indenter.IndentReason.OTHER);
-    assertEquals("no prev stmt, suffix two spaces",
-                 "  foo();\n",
-                 _doc.getText());
+    assertEquals("no prev stmt, suffix two spaces", "  foo();\n", _doc.getText());
   }
   
   public void testPrevStmtPrevLine() throws BadLocationException {
@@ -69,13 +63,17 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
 
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
+//    System.err.println("Raw Document text is: " + _doc.getText());
     rule1.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
+//    System.err.println("Indented Document text is: " + _doc.getText());
     assertEquals("prev stmt on prev line, no suffix",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
                  _doc.getText());
     
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
+//    System.err.println("Raw Document text is: " + _doc.getText());
     rule2.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
+//    System.err.println("Indented Document text is: " + _doc.getText());
     assertEquals("prev stmt on prev line, suffix two spaces",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
                  _doc.getText());

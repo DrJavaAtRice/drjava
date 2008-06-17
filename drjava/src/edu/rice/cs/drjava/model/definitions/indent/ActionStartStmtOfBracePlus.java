@@ -60,18 +60,22 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   }
 
   /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning of the
-    * line with the appropriate spacing or characters.
+    * line with the appropriate spacing or characters.   Assumes read lock is already held.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+
     boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     int pos = doc.getCurrentLocation();
 //    Utilities.show("indentLine in ActionStartStmtOfBracePlus called on doc:\n" + doc.getText() + "'\nat location " + pos);
     // Get distance to brace
+    int lineStart = doc._getLineStartPos(pos);
+    if (lineStart < 0) lineStart = 0;
     BraceInfo info = doc._getLineEnclosingBrace();
     int distToLineEnclosingBrace = info.distance();
+//    System.err.println("dist to brace = " + distToLineEnclosingBrace);
 
     // If there is no brace, align to left margin; can't happen when called from rule 19
     if (distToLineEnclosingBrace == -1) {
@@ -79,9 +83,11 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
       return supResult;
     }
 
-    // Get the absolute position of the (left edge of the) brace
-    final int bracePos = pos - distToLineEnclosingBrace;
+    // Get the absolute position of (the left edge of) the line enclosing brace
+    final int bracePos = lineStart - distToLineEnclosingBrace;
+//    System.err.println("bracePos = " + bracePos);
     final int indent = doc._getIndentOfCurrStmt(bracePos) + _suffix;
+//    System.err.println("indent = " + doc._getIndentOfCurrStmt(bracePos));
 
     doc.setTab(indent, pos);
     

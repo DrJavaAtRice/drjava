@@ -145,9 +145,9 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
         doc.acquireReadLock();
         try {
           int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
-          int startOffset = doc.getOffset(lnr - 3);
+          int startOffset = doc._getOffset(lnr - 3);
           if (startOffset<0) { startOffset = 0; }
-          int endOffset = doc.getOffset(lnr + 3);
+          int endOffset = doc._getOffset(lnr + 3);
           if (endOffset<0) { endOffset = doc.getLength()-1; }
           
           // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)

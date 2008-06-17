@@ -336,31 +336,31 @@ public class ReducedModelControl implements BraceReduction {
     return "\n********\n" + _rmb.simpleString() + "\n________\n" + _rmc.simpleString();
   }
   
-  /** Returns an IndentInfo containing the following information:
-    * - distance to the previous newline (start of this line)
-    * - distance to the brace enclosing the beginning of the current line
-    * - distance to the beginning of the line containing that brace
-    */
-  public IndentInfo getIndentInformation() {
-    IndentInfo info = new IndentInfo();
-    //get distance to the previous newline (in info.distToStart)
-//    System.err.println("Before calls, info = " + info);
-    _rmc.getDistToStart(info);
-//    System.err.println("After getDistToStart, info = " + info);
-    //get distance to the closing brace before that new line.
-    _rmb.getDistToLineEnclosingBrace(info);
-//    System.err.println("After getDistToLineEnclosingBrace, info = " + info);
-    //get distance to newline before the previous, just mentioned, brace.
-    _rmc.getDistToLineEnclosingBraceStart(info);
-//    System.err.println("After getDistToLineEnclosingBraceStart info = " + info);
-    // get distance to the brace enclosing the current location
-    _rmb.getDistToEnclosingBrace(info);
-//    System.err.println("After getDistToEnclosingBrace, info = " + info);
-    // get distance to the beginning of that brace's line
-    _rmc.getDistToEnclosingBraceStart(info);
-//    System.err.println("After getDistToEnclosingBraceStart, info = " + info);
-    return info;
-  }
+//  /** Returns an IndentInfo containing the following information:
+//    * - distance to the previous newline (start of this line)
+//    * - distance to the brace enclosing the beginning of the current line
+//    * - distance to the beginning of the line containing that brace
+//    */
+//  public IndentInfo getIndentInformation() {
+//    IndentInfo info = new IndentInfo();
+//    //get distance to the previous newline (in info.distToStart)
+////    System.err.println("Before calls, info = " + info);
+//    _rmc.getDistToStart(info);
+////    System.err.println("After getDistToStart, info = " + info);
+//    //get distance to the closing brace before that new line.
+//    _rmb.getDistToLineEnclosingBrace(info);
+////    System.err.println("After getDistToLineEnclosingBrace, info = " + info);
+//    //get distance to newline before the previous, just mentioned, brace.
+//    _rmc.getDistToLineEnclosingBraceStart(info);
+////    System.err.println("After getDistToLineEnclosingBraceStart info = " + info);
+//    // get distance to the brace enclosing the current location
+//    _rmb.getDistToEnclosingBrace(info);
+////    System.err.println("After getDistToEnclosingBrace, info = " + info);
+//    // get distance to the beginning of that brace's line
+//    _rmc.getDistToEnclosingBraceStart(info);
+////    System.err.println("After getDistToEnclosingBraceStart, info = " + info);
+//    return info;
+//  }
   
   public int getDistToIdentNewline() { return -1; }
   public int getDistToEnclosingBraceStart() { return -1; }

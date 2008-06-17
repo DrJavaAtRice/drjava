@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 
 /** Aligns indentation of the current line to the character that opened the enclosing block or expression list.  
   * Optional additional whitespaces can be passed through the constructor.
@@ -60,29 +60,26 @@ public class ActionBracePlus extends IndentRuleAction {
     boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     int startLine = doc._getLineStartPos(here);
-    doc.setCurrentLocation(startLine);
-    IndentInfo info = doc._getIndentInformation();
-    int dist = info.distToLineEnclosingBrace();
+    doc.setCurrentLocation(startLine);  // Is this necessary?  _getLineEnclosingBrace only depends on current LINE
+    BraceInfo info = doc._getLineEnclosingBrace();
+    int dist = info.distance();
 
     // Check preconditions
-    if (info.lineEnclosingBraceType().equals("") || dist < 0) {  // Should use interned Strings here
+    if (info.braceType().equals("") || dist < 0) {  // Should use interned Strings here
       // Can't find brace, so do nothing.
       return supResult;
     }
 
     // Find length to brace
     int bracePos = startLine - dist;
-    int braceNewline = 0;
-    int distStart = info.distToEnclosingBraceStart();
-    if (distStart > 0) braceNewline = startLine - distStart;
-    int braceLen = bracePos - braceNewline;
+    // Get distance to start of line from enclosing brace
+    int braceNewline = doc._getLineStartPos(bracePos);
+    int braceIndent = bracePos - braceNewline;
 
     // Create tab string
-    final int tab = _suffixCt + braceLen;
+    final int tab = _suffixCt + braceIndent;
 
-    if (here > doc.getLength()) {
-      here = doc.getLength() - 1;
-    }
+    if (here > doc.getLength()) here = doc.getLength() - 1;
     doc.setCurrentLocation(here);
 
     doc.setTab(tab, here);

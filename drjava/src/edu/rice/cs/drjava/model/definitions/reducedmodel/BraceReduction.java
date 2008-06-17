@@ -95,8 +95,8 @@ public interface BraceReduction {
    */
   public int balanceBackward();
 
-  /** Gets the distance to the enclosing brace. */
-  public IndentInfo getIndentInformation();
+//  /** Gets the distance to the enclosing brace. */
+//  public IndentInfo getIndentInformation();
 
   /** Gets distance to enclosing new line */
   public int getDistToStart(int relativeLoc);

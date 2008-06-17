@@ -71,7 +71,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public void setClassFileInSync(boolean val);
   public int getCurrentLine();
   public int getCurrentCol();
-  public int getOffset(int lineNum);
+  public int _getOffset(int lineNum);
   public String getQualifiedClassName() throws ClassNameNotFoundException;
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException;
   public String getLexiName();

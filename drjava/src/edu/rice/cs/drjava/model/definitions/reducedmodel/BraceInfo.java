@@ -43,8 +43,8 @@ public class BraceInfo {
   
   // TODO: convert String brace type to char brace type
   
-  public static final String NONE = "";      // char '\u0000';
-  public static final String OPEN_CURLY = "{"; // char '{';
+  public static final String NONE = "";             // char '\u0000';
+  public static final String OPEN_CURLY = "{";      // char '{';
   public static final String OPEN_PAREN    = "(";   // char '(';
   public static final String OPEN_BRACKET  = "[";   // char '[';
 
@@ -52,8 +52,9 @@ public class BraceInfo {
   
   private String _braceType;   // one of the four above options
 
-  //distance to the open brace preceding the current location
-  private int _distance;
+  /** distance to open brace preceding the anchor point (_currentLocation or beginning of line). Distance includes 
+    * brace so that (anchor - distance) gives offset of brace. */
+  private int _distance; 
 
   /** Creates an IndentInfo with default values. */
   public BraceInfo(String braceType, int distance) {
@@ -73,6 +74,8 @@ public class BraceInfo {
     if (this == NULL) return NULL;
     return new BraceInfo(_braceType, _distance + dist); 
   }
+  
+  public String toString() { return "BraceInfo(" + _distance + ", '" + _braceType + "')"; }
 }
 
 

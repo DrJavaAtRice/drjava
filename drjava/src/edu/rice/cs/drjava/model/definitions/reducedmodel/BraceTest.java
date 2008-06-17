@@ -118,15 +118,13 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertTrue("#0.2", !lparen.isCommented());
   }
 
-  /** Test the toString method.
-   */
+  /** Test the toString method. */
   public void testToString() {
-    assertEquals(" (", lparen.toString());
-    assertEquals(" )", rparen.toString());
+    assertEquals("Brace([40])", lparen.toString());
+    assertEquals("Brace([41])", rparen.toString());
   }
 
-  /** Test the flip() method.
-   */
+  /** Test the flip() method. */
   public void testFlip() {
     lparen.flip();
     rparen.flip();
@@ -134,8 +132,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertEquals(")", lparen.getType());
   }
 
-  /** Test isOpen() and isClosed().
-   */
+  /** Test isOpen() and isClosed(). */
   public void testOpenClosed() {
     assertTrue(lparen.isOpen());
     assertTrue(rparen.isClosed());

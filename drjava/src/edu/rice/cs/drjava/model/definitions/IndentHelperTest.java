@@ -52,9 +52,9 @@ public final class IndentHelperTest extends IndentRulesTestCase {
   }
   
   /** Convenience method that wraps _doc.inParenPhrase calls in a read lock. */
-  private boolean inParenPhrase(int pos) throws BadLocationException {
+  private boolean _inParenPhrase(int pos) throws BadLocationException {
     _doc.acquireReadLock();
-    try { return _doc.inParenPhrase(pos); }
+    try { return _doc._inParenPhrase(pos); }
     finally { _doc.releaseReadLock(); }
   }
   
@@ -181,12 +181,12 @@ public final class IndentHelperTest extends IndentRulesTestCase {
   public void testPosInParenPhrase() throws BadLocationException {
 
       _setDocText("(;)");
-      assertEquals("';' in parent phrase", true, inParenPhrase(1));
+      assertEquals("';' in parent phrase", true, _inParenPhrase(1));
       
       _setDocText("abcdefghijk");
       _doc.setCurrentLocation(3);
       int reducedModelPos = _doc.getReduced().absOffset();
-      inParenPhrase(8);
+      _inParenPhrase(8);
       assertEquals("Check that position in reduced model is unaffected after call to posInParenPhrase",
                    reducedModelPos,
                    _doc.getReduced().absOffset());   

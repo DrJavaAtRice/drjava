@@ -94,8 +94,8 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public int balanceForward();
   
-  /** Returns the indent information for the current location. */
-  public IndentInfo getIndentInformation();
+//  /** Returns the indent information for the current location. */
+//  public IndentInfo getIndentInformation();
   
 //  public ReducedModelState stateAtRelLocation(int dist);
   
@@ -113,25 +113,24 @@ public interface DJDocument extends SwingDocumentInterface {
   public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /** Searching forwards, finds the position of the enclosing brace.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param opening opening brace character
-   * @param closing closing brace character
-   * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
-   * of document is reached.
-   */
-  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
+    * NB: ignores comments.
+    * @param pos Position to start from
+    * @param opening opening brace character
+    * @param closing closing brace character
+    * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
+    * of document is reached.
+    */
+  public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
-  /** 
-   * Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.  Does not look for delimiters inside paren phrases.
-   * (eg. skips semicolons used inside for statements.)
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param delims array of characters to search for
-   * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
-   * of document is reached.
-   */
+  /** Searching backwards, finds the position of the first character that is one
+    * of the given delimiters.  Does not look for delimiters inside paren phrases.
+    * (eg. skips semicolons used inside for statements.)
+    * NB: ignores comments.
+    * @param pos Position to start from
+    * @param delims array of characters to search for
+    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
+    * of document is reached.
+    */
   public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
   
   /** Searching backwards, finds the position of the first character that is one
@@ -147,20 +146,20 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int _findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
-  /** This function finds the given character in the same statement as the given
-   * position, and before the given position.  It is used by QuestionExistsCharInStmt and
-   * QuestionExistsCharInPrevStmt
-   */
-  public boolean findCharInStmtBeforePos(char findChar, int position);
+//  /** This function finds the given character in the same statement as the given
+//   * position, and before the given position.  It is used by QuestionExistsCharInStmt and
+//   * QuestionExistsCharInPrevStmt
+//   */
+//  public boolean findCharInStmtBeforePos(char findChar, int position);
   
-  /** Finds the position of the first non-whitespace character before pos.
-   * NB: Skips comments and all whitespace, including newlines
-   * @param pos Position to start from
-   * @param whitespace chars considered as white space
-   * @return position of first non-whitespace character before pos,
-   * or ERROR_INDEX (-1) if begining of document is reached
-   */
-  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException;
+//  /** Finds the position of the first non-whitespace character before pos.
+//   * NB: Skips comments and all whitespace, including newlines
+//   * @param pos Position to start from
+//   * @param whitespace chars considered as white space
+//   * @return position of first non-whitespace character before pos,
+//   * or ERROR_INDEX (-1) if begining of document is reached
+//   */
+//  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException;
   
   /** Default indentation - uses OTHER flag and no progress indicator.
     * @param selStart the offset of the initial character of the region to indent
@@ -268,13 +267,13 @@ public interface DJDocument extends SwingDocumentInterface {
   public int _getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
     throws BadLocationException;
   
-  public int findPrevNonWSCharPos(int pos) throws BadLocationException;
+//  public int findPrevNonWSCharPos(int pos) throws BadLocationException;
   
-  /** Returns true if the given position is inside a paren phrase.
-   * @param pos the position we're looking at
-   * @return true if pos is immediately inside parentheses
-   */
-  public boolean inParenPhrase(int pos);
+//  /** Returns true if the given position is inside a paren phrase.
+//   * @param pos the position we're looking at
+//   * @return true if pos is immediately inside parentheses
+//   */
+//  public boolean inParenPhrase(int pos);
   
 //  /** Returns true if the reduced model's current position is inside a paren phrase.
 //    * @return true if pos is immediately inside parentheses

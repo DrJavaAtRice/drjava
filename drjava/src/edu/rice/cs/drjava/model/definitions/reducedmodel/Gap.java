@@ -86,10 +86,11 @@ class Gap extends ReducedToken {
     * @return the String representation of the Gap
     */
   public String toString() {
-    final StringBuilder val = new StringBuilder();
-    int i;
-    for (i = 0; i < _size; i++) val.append(" _");
-    return val.toString();
+//    final StringBuilder val = new StringBuilder();
+//    int i;
+//    for (i = 0; i < _size; i++) val.append(" _");
+//    return val.toString();
+    return "Gap<" + _size + ">";
   }
   
   /** Determines that this is not a multi-char brace.

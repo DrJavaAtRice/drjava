@@ -386,16 +386,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns the offset corresponding to the first character of the given line number, or -1 if the lineNum is not
-    * found.  Line number counting begins with 1 not 0.
+    * found.  Line number counting begins with 1 not 0.  Assumes read lock is already held.
     * @param lineNum the line number for which to calculate the offset.
     * @return the offset of the first character in the given line number
     */
-  public int getOffset(int lineNum) {
+  public int _getOffset(int lineNum) {
     if (lineNum <= 0) return -1;
     if (lineNum == 1) return 0;
-   
-
-    acquireReadLock();
+    
     synchronized(_reduced) {
       final int origPos = getCurrentLocation();
       try {
@@ -411,10 +409,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (i == lineNum) return _currentLocation;
         else return -1;
       }
-      finally {
-        _setCurrentLocation(origPos);
-        releaseReadLock(); 
-      }
+      finally { _setCurrentLocation(origPos); }
     }
   }
 
@@ -628,8 +623,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return reducedPos;  
   }
   
-  private int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
-    // acquireReadLock assumed to be held,
+  /** Assuming that text is a document prefix including offset pos, finds the index of the keyword kw
+    * searching back from pos.
+    */
+  public int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
+    
+    assert isReadLocked();
+    
     int i;
     int reducedPos = pos;
     
@@ -640,17 +640,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       // Walk backwards from specificed position
       i = text.lastIndexOf(kw, reducedPos);
-      while(i >- 1) {
+      while (i >- 1) {
         // Check that this is the beginning of a word
         if (i > 0) {
           if (Character.isJavaIdentifierPart(text.charAt(i-1))) {
             // not begining
-            i = text.lastIndexOf(kw, i-1);
+            i = text.lastIndexOf(kw, i - 1);
             continue;  // ignore matching keyword 
           }
         }
         // Check that this not just the beginning of a longer word
-        if (i+kw.length()<text.length()) {
+        if (i + kw.length() < text.length()) {
           if (Character.isJavaIdentifierPart(text.charAt(i+kw.length()))) {
             // not begining
             i = text.lastIndexOf(kw, i-1);
@@ -731,7 +731,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int otherPos = _findPrevDelimiter(curPos, delims);
       int newPos = -1;
       // see if there's a ) closer by
-      int closeParenPos = findPrevNonWSCharPos(curPos);
+      int closeParenPos = _findPrevNonWSCharPos(curPos);
       if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
         // yes, find the matching (
         int openParenPos = _findPrevEnclosingBrace(closeParenPos, '(', ')');
@@ -763,7 +763,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           otherPos = _findPrevDelimiter(curPos, delims);
           newPos = -1;
           // see if there's a ) closer by
-          closeParenPos = findPrevNonWSCharPos(curPos);
+          closeParenPos = _findPrevNonWSCharPos(curPos);
 //            if (closeParenPos!=ERROR_INDEX (-1)) if (oldLog) System.out.println("nonWS before curPos = " + closeParenPos + 
 //              " `"+text.charAt(closeParenPos)+"`");
           if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
@@ -829,7 +829,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @return true if anonymous inner class instantiation
     */
 
-  private boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
+  public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openSquigglyPos+1);
 //    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
 //    System.out.println("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+"): `"+
@@ -870,7 +870,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (text.charAt(origParenStart) == '<') {
             parenStart = -1;
             // might be a generic class
-            int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+            int closePointyBracket = _findNextEnclosingBrace(origParenStart, '<', '>');
             if (closePointyBracket != -1) {
               if (text.charAt(closePointyBracket)=='>') {
                 parenStart = _getFirstNonWSCharPos(closePointyBracket+1);
@@ -973,7 +973,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       if (text.charAt(origParenStart)=='<') {
         parenStart = -1;
         // might be a generic class
-        int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+        int closePointyBracket = _findNextEnclosingBrace(origParenStart, '<', '>');
         if (closePointyBracket != -1) {
           if (text.charAt(closePointyBracket) == '>') {
             parenStart = _getFirstNonWSCharPos(closePointyBracket + 1);
@@ -982,7 +982,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       if (parenStart == -1) { continue; }      
       if (text.charAt(parenStart) != '(') { continue; }
-      int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
+      int parenEnd = _findNextEnclosingBrace(parenStart, '(', ')');
       
       int nextOpenCurly = _findNextOpenCurly(text, parenEnd);
       if (nextOpenCurly == -1) { continue; }

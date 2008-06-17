@@ -85,9 +85,10 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _frame = new MainFrame();
     
     /* The following two lines were added in an attempt to avoid ConcurrentModificationExceptions during setup in some
-     * runs of the unit tests. The second is preferred (as long as it works) because it is lighter weight. */
-//    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.pack(); }});
-    _frame.pack();
+     * runs of the unit tests. The second is preferred (as long as it works) because it is lighter weight.  The first
+     * is currently installed because the second occasionally produced java.lang.InterruptedExceptions. */
+     Utilities.invokeAndWait(new Runnable() { public void run() { _frame.pack(); }});
+//    _frame.pack();
     
 //    super.setUp();
 //    Utilities.invokeAndWait(new Runnable() { 

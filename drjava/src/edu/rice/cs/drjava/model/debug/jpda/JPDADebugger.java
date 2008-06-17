@@ -236,7 +236,9 @@ public class JPDADebugger implements Debugger {
         Breakpoint bp = oldBreakpoints.get(i);
         int lnr = bp.getLineNumber();
         OpenDefinitionsDocument odd = bp.getDocument();
-        setBreakpoint(new JPDABreakpoint(odd, odd.getOffset(lnr), lnr, bp.isEnabled(), this));
+        odd.acquireReadLock();
+        try { setBreakpoint(new JPDABreakpoint(odd, odd._getOffset(lnr), lnr, bp.isEnabled(), this)); }
+        finally { odd.releaseReadLock(); }
       }
     }
     

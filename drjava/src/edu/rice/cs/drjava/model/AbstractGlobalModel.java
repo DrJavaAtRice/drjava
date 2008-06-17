@@ -109,7 +109,7 @@ import edu.rice.cs.drjava.model.definitions.DocumentUIListener ;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo ;
+//import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo ;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.print.DrJavaBook;
@@ -1781,17 +1781,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (! modifiedFiles.contains(f)) {
           int lnr = dbd.getLineNumber();
           OpenDefinitionsDocument odd = getDocumentForFile(f);
-          getDebugger().toggleBreakpoint(odd, odd.getOffset(lnr), lnr, dbd.isEnabled());
+          odd.acquireReadLock();
+          try { getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled()); }
+          finally { odd.releaseReadLock(); }
         }
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
     }
     
     //Set active document from project file
-    if (active != null) {
-      setActiveDocument(getDocumentForFile(active));
-    }
-    
+    if (active != null) setActiveDocument(getDocumentForFile(active));
     
     // set watches
     try { getDebugger().removeAllWatches(); }
@@ -3446,9 +3445,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void remove(int offs, int len) throws BadLocationException { getDocument().remove(offs, len); }
     
-    public void removeDocumentListener(DocumentListener listener) {
-      getDocument().removeDocumentListener(listener);
-    }
+    public void removeDocumentListener(DocumentListener listener) { getDocument().removeDocumentListener(listener); }
     
     public void render(Runnable r) { getDocument().render(r); }
     
@@ -3458,15 +3455,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return whether the undo manager can perform any undo's
       */
     public boolean undoManagerCanUndo() { return _cacheAdapter.isReady() && getUndoManager().canUndo(); }
-    /**
-     * If the undo manager is unavailable, no redos are available
-     * @return whether the undo manager can perform any redo's
-     */
+    /** If the undo manager is unavailable, no redos are available
+      * @return whether the undo manager can perform any redo's
+      */
     public boolean undoManagerCanRedo() { return _cacheAdapter.isReady() && getUndoManager().canRedo(); }
     
     /** Decorator pattern for the definitions document. */
     public CompoundUndoManager getUndoManager() { return getDocument().getUndoManager(); }
     
+    /** Assumes read lock is already held. */    
     public int _getLineStartPos(int pos) { 
       DefinitionsDocument doc = getDocument();
       doc.acquireReadLock();
@@ -3474,6 +3471,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       finally { doc.releaseReadLock(); }
     }
     
+    /** Assumes read lock is already held. */
     public int _getLineEndPos(int pos) { 
       DefinitionsDocument doc = getDocument();
       doc.acquireReadLock();
@@ -3510,7 +3508,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getIntelligentBeginLinePos(currPos);
     }
     
-    public int getOffset(int lineNum) { return getDocument().getOffset(lineNum); }
+    /** Assumes read lock is already held. */    
+    public int _getOffset(int lineNum) { return getDocument()._getOffset(lineNum); }
     
     public String getQualifiedClassName() throws ClassNameNotFoundException {
       return getDocument().getQualifiedClassName();
@@ -3535,7 +3534,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    public int getWhiteSpace() { return getDocument().getWhiteSpace(); }
     
-    public boolean inParenPhrase(int pos) { return getDocument().inParenPhrase(pos); }
+//    public boolean inParenPhrase(int pos) { return getDocument().inParenPhrase(pos); }
     
 //    public boolean posInParenPhrase() { return getDocument().posInParenPhrase(); }
     
@@ -3548,54 +3547,63 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument()._findPrevEnclosingBrace(pos, opening, closing);
     }
     
-    public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
-      return getDocument().findNextEnclosingBrace(pos, opening, closing);
+    /** Assumes read lock is already held. */   
+    public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+      return getDocument()._findNextEnclosingBrace(pos, opening, closing);
     }
     
-    public int findPrevNonWSCharPos(int pos) throws BadLocationException {
-      return getDocument().findPrevNonWSCharPos(pos);
-    }
+//    public int findPrevNonWSCharPos(int pos) throws BadLocationException {
+//      return getDocument().findPrevNonWSCharPos(pos);
+//    }
     
+    /** Assumes read lock is already held. */
     public int _getFirstNonWSCharPos(int pos) throws BadLocationException {
       return getDocument()._getFirstNonWSCharPos(pos);
     }
     
+    /** Assumes read lock is already held. */
     public int _getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
       return getDocument()._getFirstNonWSCharPos(pos, acceptComments);
     }
     
+    /** Assumes read lock is already held. */
     public int _getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
       throws BadLocationException {
       return getDocument()._getFirstNonWSCharPos(pos, whitespace, acceptComments);
     }
     
+    /** Assumes read lock is already held. */
     public int _getLineFirstCharPos(int pos) throws BadLocationException {
       return getDocument()._getLineFirstCharPos(pos);
     }
     
+    /** Assumes read lock is already held. */
     public int findCharOnLine(int pos, char findChar) {
       return getDocument().findCharOnLine(pos, findChar);
     }
     
+    /** Assumes read lock is already held. */
     public int _getIndentOfCurrStmt(int pos) throws BadLocationException {
       return getDocument()._getIndentOfCurrStmt(pos);
     }
     
+    /** Assumes read lock is already held. */
     public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
       return getDocument()._getIndentOfCurrStmt(pos, delims);
     }
     
+    /** Assumes read lock is already held. */
     public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
       return getDocument()._getIndentOfCurrStmt(pos, delims, whitespace);
     }
     
-    public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
-      return getDocument().findPrevCharPos(pos, whitespace);
-    }
+//    public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+//      return getDocument().findPrevCharPos(pos, whitespace);
+//    }
     
-    public boolean findCharInStmtBeforePos(char findChar, int position) {
-      return getDocument().findCharInStmtBeforePos(findChar, position);
-    }
+//    public boolean findCharInStmtBeforePos(char findChar, int position) {
+//      return getDocument().findCharInStmtBeforePos(findChar, position);
+//    }
     
     public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
       return getDocument()._findPrevDelimiter(pos, delims);
@@ -3609,7 +3617,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    public ReducedModelState stateAtRelLocation(int dist) { return getDocument().stateAtRelLocation(dist); }
     
-    public IndentInfo getIndentInformation() { return getDocument().getIndentInformation(); }
+//    public IndentInfo getIndentInformation() { return getDocument().getIndentInformation(); }
     
     public void move(int dist) { getDocument().move(dist); }
     

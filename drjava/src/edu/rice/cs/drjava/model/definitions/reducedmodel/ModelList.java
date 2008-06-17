@@ -188,7 +188,7 @@ class ModelList<T> {
 
     /** Return the item associated with the current node. */
     public T current() {
-      assert ! atStart() && ! atEnd();
+//      assert ! atStart() && ! atEnd();
       return _point._item;
     }
 

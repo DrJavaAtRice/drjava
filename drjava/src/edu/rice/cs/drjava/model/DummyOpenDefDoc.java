@@ -280,7 +280,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int getOffset(int lineNum) { throw new UnsupportedOperationException("Dummy method"); }
+  public int _getOffset(int lineNum) { throw new UnsupportedOperationException("Dummy method"); }
   
   public String getQualifiedClassName() throws ClassNameNotFoundException {
     throw new UnsupportedOperationException("Dummy method");
@@ -336,20 +336,20 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
 //  public void setTab(int tab, int pos) { throw new UnsupportedOperationException("Dummy method"); }
 //  public int getWhiteSpace() { throw new UnsupportedOperationException("Dummy method"); }
-  public boolean inParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
-  public boolean inParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
+//  public boolean inParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
+//  public boolean inParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+  public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int findPrevNonWSCharPos(int pos) throws BadLocationException {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+//  public int findPrevNonWSCharPos(int pos) throws BadLocationException {
+//    throw new UnsupportedOperationException("Dummy method");
+//  }
   
   public int _getFirstNonWSCharPos(int pos) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
@@ -385,13 +385,13 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+//  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+//    throw new UnsupportedOperationException("Dummy method");
+//  }
   
-  public boolean findCharInStmtBeforePos(char findChar, int position) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+//  public boolean findCharInStmtBeforePos(char findChar, int position) {
+//    throw new UnsupportedOperationException("Dummy method");
+//  }
   
   public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
@@ -403,7 +403,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
 //  public void resetReducedModelLocation() { throw new UnsupportedOperationException("Dummy method"); }
 //  public ReducedModelState stateAtRelLocation(int dist) { throw new UnsupportedOperationException("Dummy method"); }
-  public IndentInfo getIndentInformation() { throw new UnsupportedOperationException("Dummy method"); }
+//  public IndentInfo getIndentInformation() { throw new UnsupportedOperationException("Dummy method"); }
   public void move(int dist) { throw new UnsupportedOperationException("Dummy method"); }
 
   public Vector<HighlightStatus> getHighlightStatus(int start, int end) {

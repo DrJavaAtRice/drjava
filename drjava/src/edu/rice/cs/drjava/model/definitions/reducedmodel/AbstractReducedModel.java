@@ -126,7 +126,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
         val.append(PTR_CHAR).append(_cursor.getBlockOffset());
       }
       
-      val.append('|').append(tmp).append('|').append('\t');
+      val.append('|').append(tmp).append('|').append("    ");
       it.next();
     }
     

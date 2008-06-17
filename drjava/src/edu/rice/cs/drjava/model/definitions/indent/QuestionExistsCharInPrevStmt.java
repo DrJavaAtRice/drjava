@@ -67,6 +67,6 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
     if (endPreviousStatement == -1) return false;
     
       //Now find the if the character we want exists on that line
-    return doc.findCharInStmtBeforePos(_lookFor, endPreviousStatement);
+    return doc._findCharInStmtBeforePos(_lookFor, endPreviousStatement);
   }
 }

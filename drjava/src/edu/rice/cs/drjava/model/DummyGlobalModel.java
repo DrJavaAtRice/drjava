@@ -109,7 +109,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
+//import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;

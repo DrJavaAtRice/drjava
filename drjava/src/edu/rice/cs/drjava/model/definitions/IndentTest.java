@@ -47,11 +47,15 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
+
 //import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
+
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo.*;
 
 /** Class that tests the tab/enter/curly indenting functionality.
   * @version $Id$
@@ -59,10 +63,6 @@ import edu.rice.cs.util.swing.Utilities;
 public final class IndentTest extends DrJavaTestCase {
   protected DefinitionsDocument _doc;
   
-  static String NONE = IndentInfo.NONE;
-  static String OPEN_CURLY = IndentInfo.OPEN_CURLY;
-  static String OPEN_PAREN = IndentInfo.OPEN_PAREN;
-  static String OPEN_BRACKET = IndentInfo.OPEN_BRACKET;
   private Integer indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
   
@@ -395,37 +395,36 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** put your documentation comment here
+  /** Tests getLineEnclosingBrace, getEnclosingBrace
     * @exception BadLocationException
     */
   public void testIndentInfoCurly() throws BadLocationException {
     //empty document
-    BraceReduction _reduced = _doc.getReduced();
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, NONE, -1, -1, -1);
+    _assertLineBraceInfo(-1, NONE);
+    _assertBraceInfo(-1, NONE);
     //single newline
     _doc.insertString(0, "\n", null);
     _assertContents("\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, NONE, -1, -1, 0);
+    _assertLineBraceInfo(-1, NONE);
+    _assertBraceInfo(-1, NONE);
     //single layer brace
     _doc.insertString(0, "{\n\n", null);
     // {\n\n#\n
     _assertContents("{\n\n\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, -1, 3, 0);
+    _assertLineBraceInfo(3, OPEN_CURLY);
+    _assertBraceInfo(3, OPEN_CURLY);
     //another curly
     _doc.insertString(3, "{\n\n", null);
     // {\n\n{\n\n#\n
     _assertContents("{\n\n{\n\n\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, 3, 3, 0);
+    _assertLineBraceInfo(3, OPEN_CURLY);
+    _assertBraceInfo(3, OPEN_CURLY);
     //brace with whitespace
     _doc.insertString(6, "  {\n\n", null);
     // {\n\n{\n\n  {\n\n#\n
     _assertContents("{\n\n{\n\n  {\n\n\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, 5, 3, 0);
+    _assertLineBraceInfo(3, OPEN_CURLY);
+    _assertBraceInfo(3, OPEN_CURLY);
   }
   
   /** put your documentation comment here
@@ -433,25 +432,24 @@ public final class IndentTest extends DrJavaTestCase {
     */
   public void testIndentInfoParen() throws BadLocationException {
     // just paren
-    BraceReduction _reduced = _doc.getReduced();
     _doc.insertString(0, "\n(\n", null);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_PAREN, 2, 2, 0);
+    _assertLineBraceInfo(2, OPEN_PAREN);
+    _assertBraceInfo(2, OPEN_PAREN);
     // paren with stuff in front
     _doc.insertString(1, "  helo ", null);
     _doc.move(2);
     // \n  helo (\n#
     _assertContents("\n  helo (\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_PAREN, 9, 2, 0);
+    _assertLineBraceInfo(2, OPEN_PAREN);
+    _assertBraceInfo(2, OPEN_PAREN);
     //single layer brace
     _doc.move(-1);
     _doc.insertString(9, " (", null);
     _doc.move(1);
     // \n  helo ( (\n#
     _assertContents("\n  helo ( (\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_PAREN, 11, 2, 0);
+    _assertLineBraceInfo(2, OPEN_PAREN);
+    _assertBraceInfo(2, OPEN_PAREN);
   }
   
   /** put your documentation comment here
@@ -459,25 +457,24 @@ public final class IndentTest extends DrJavaTestCase {
     */
   public void testIndentInfoBracket() throws BadLocationException {
     // just bracket
-    BraceReduction _reduced = _doc.getReduced();
     _doc.insertString(0, "\n[\n", null);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_BRACKET, 2, 2, 0);
+    _assertLineBraceInfo(2, OPEN_BRACKET);
+    _assertBraceInfo(2, OPEN_BRACKET);
     // bracket with stuff in front
     _doc.insertString(1, "  helo ", null);
     _doc.move(2);
     // \n  helo (\n#
     _assertContents("\n  helo [\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_BRACKET, 9, 2, 0);
+    _assertLineBraceInfo(2, OPEN_BRACKET);
+    _assertBraceInfo(2, OPEN_BRACKET);
     //single layer brace
     _doc.move(-1);
     _doc.insertString(9, " [", null);
     _doc.move(1);
-    // \n  helo ( (\n#
+    // \n  helo [ [\n#
     _assertContents("\n  helo [ [\n", _doc);
-    info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_BRACKET, 11, 2, 0);
+    _assertLineBraceInfo(2, OPEN_BRACKET);
+    _assertBraceInfo(2, OPEN_BRACKET);
   }
   
   /** Put your documentation comment here
@@ -485,10 +482,13 @@ public final class IndentTest extends DrJavaTestCase {
     */
   public void testIndentInfoPrevNewline () throws BadLocationException {
     BraceReduction _reduced = _doc.getReduced();
+//    System.err.println("***** reduced before insert = " + _doc.getReduced().simpleString());
     _doc.insertString(0, "{\n  {\nhello", null);
+//    System.err.println("***** reduced after insert = " + _doc.getReduced().simpleString());
     // {\n  {\nhello#
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, 9, 7, 5);
+//    System.err.println("***** text = " + _doc.getText() + "loc = " + _doc.getCurrentLocation() + " length = " + _doc.getLength());
+    _assertLineBraceInfo(2, OPEN_CURLY);
+    _assertBraceInfo(7, OPEN_CURLY);
   }
   
   /** Tests block comment indenting.
@@ -536,96 +536,96 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  */ (\n      hello", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testIndentInfoBlockComments () throws BadLocationException {
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "(\n /*\n*\n", null);
-    // (\n/*\n*#\n
-    _reduced.move(-1);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_PAREN, -1, 7, 1);
-  }
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testIndentInfoBlockComments () throws BadLocationException {
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "(\n /*\n*\n", null);
+//    // (\n/*\n*#\n
+//    _reduced.move(-1);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_PAREN, -1, 7, 1);
+//  }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testIndentInfoBlockComments2 () throws BadLocationException {
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "\n(\n /*\n*\n", null);
-    // \n(\n/*\n*#\n
-    _reduced.move(-1);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_PAREN, 7, 7, 1);
-  }
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testIndentInfoBlockComments2 () throws BadLocationException {
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "\n(\n /*\n*\n", null);
+//    // \n(\n/*\n*#\n
+//    _reduced.move(-1);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_PAREN, 7, 7, 1);
+//  }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testIndentInfoBlockComments3 () throws BadLocationException {
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "{\n  /*\n*\n", null);
-    // (\n/*\n*#\n
-    _reduced.move(-1);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, -1, 8, 1);
-  }
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testIndentInfoBlockComments3 () throws BadLocationException {
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "{\n  /*\n*\n", null);
+//    // (\n/*\n*#\n
+//    _reduced.move(-1);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_CURLY, -1, 8, 1);
+//  }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testIndentInfoBlockComments4 () throws BadLocationException {
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "\n{\n  /*\n*\n", null);
-    // \n(\n/*\n*#\n
-    _reduced.move(-1);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, 8, 8, 1);
-  }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testSkippingBraces () throws BadLocationException {
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "\n{\n   { ()}\n}", null);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, 12, 12, 1);
-  }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testSkippingComments () throws BadLocationException {
-    // just paren
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "\n{\n   //{ ()\n}", null);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, 13, 13, 1);
-  }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testSkippingCommentsBraceAtBeginning () throws BadLocationException {
-    // just paren
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "{\n   //{ ()}{", null);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, OPEN_CURLY, -1, 13, 11);
-  }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testNothingToIndentOn () throws BadLocationException {
-    // just paren
-    BraceReduction _reduced = _doc.getReduced();
-    _doc.insertString(0, "   //{ ()}{", null);
-    IndentInfo info = _reduced.getIndentInformation();
-    _assertIndentInfo(info, NONE, -1, -1, -1);
-  }
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testIndentInfoBlockComments4 () throws BadLocationException {
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "\n{\n  /*\n*\n", null);
+//    // \n(\n/*\n*#\n
+//    _reduced.move(-1);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_CURLY, 8, 8, 1);
+//  }
+//  
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testSkippingBraces () throws BadLocationException {
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "\n{\n   { ()}\n}", null);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_CURLY, 12, 12, 1);
+//  }
+//  
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testSkippingComments () throws BadLocationException {
+//    // just paren
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "\n{\n   //{ ()\n}", null);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_CURLY, 13, 13, 1);
+//  }
+//  
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testSkippingCommentsBraceAtBeginning () throws BadLocationException {
+//    // just paren
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "{\n   //{ ()}{", null);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, OPEN_CURLY, -1, 13, 11);
+//  }
+//  
+//  /** put your documentation comment here
+//    * @exception BadLocationException
+//    */
+//  public void testNothingToIndentOn () throws BadLocationException {
+//    // just paren
+//    BraceReduction _reduced = _doc.getReduced();
+//    _doc.insertString(0, "   //{ ()}{", null);
+//    IndentInfo info = _reduced.getIndentInformation();
+//    _assertIndentInfo(info, NONE, -1, -1, -1);
+//  }
   
   /** put your documentation comment here
     * @exception BadLocationException
@@ -1388,14 +1388,26 @@ public final class IndentTest extends DrJavaTestCase {
     assertEquals("document contents", expected, document.getText());
   }
   
-  private void _assertIndentInfo(IndentInfo info, String lineEnclosingBraceType, int distToLineEnclosingBraceStart, 
-                                 int distToLineEnclosingBrace, int distToStart) {
-    assertEquals("indent info: brace type", lineEnclosingBraceType, info.lineEnclosingBraceType());
-    assertEquals("indent info: dist to start of line enclosing brace", distToLineEnclosingBraceStart, info.distToLineEnclosingBraceStart());
-    assertEquals("indent info: dist to line enclosing brace", distToLineEnclosingBrace, info.distToLineEnclosingBrace());
-    assertEquals("indent info: dist to start", distToStart, info.distToStart());
+  private void _assertLineBraceInfo(int distance, String braceType) {
+    _doc.acquireReadLock();
+    try {
+      BraceInfo info = _doc._getLineEnclosingBrace();
+//      System.err.println(info);
+      assertEquals("line brace info: brace distance", distance, info.distance());
+      assertEquals("line brace info: brace type", braceType, info.braceType());
+    }
+    finally { _doc.releaseReadLock(); }
   }
   
+  private void _assertBraceInfo(int distance, String braceType) {
+    _doc.acquireReadLock();
+    try {
+      BraceInfo info = _doc._getEnclosingBrace();
+      assertEquals("line brace info: brace distance", distance, info.distance());
+      assertEquals("line brace info: brace type", braceType, info.braceType());
+    }
+    finally { _doc.releaseReadLock(); }
+  }
 //  /** Copies fromFile to toFile, assuming both files exist. */
 //  private void _copyFile(File fromFile, File toFile) throws IOException {
 //    String text = FileOps.readFileAsString(fromFile);

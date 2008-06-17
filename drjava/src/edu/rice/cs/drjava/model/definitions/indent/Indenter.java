@@ -79,17 +79,18 @@ public class Indenter {
       rule60 = new ActionStartPrevLinePlus(""),
       rule37 = new ActionStartCurrStmtPlus(indentLevel),
       rule36 = new ActionStartStmtOfBracePlus(indentLevel),
-      rule35 = rule37,
-      rule34 = new QuestionExistsCharInStmt('?', ':', rule35, rule36),
+      // the following two rules should be inserted after the instantiated classed have been implemented
+//      rule40 = new ActionStartOfAnonInnerClass(indentLevel),
+//      rule35 = new QuestionAnonInnerClassPrefix(rule40, rule36);
+      rule34 = new QuestionExistsCharInStmt('?', ':', rule37, rule36),
       rule33 = new QuestionLineContains(':', rule34, rule37),
       rule32 = new ActionStartCurrStmtPlus(0),
       rule31 = new QuestionCurrLineStartsWithSkipComments("{", rule32, rule33),
       rule39 = new ActionStartPrevStmtPlus(0, true),  // Indent line that starts new statement
-      rule29 = rule36,
+//      rule29 = rule36,
       rule28 = new ActionStartPrevStmtPlus(0, false),
-      rule40 = rule28,
-      rule30 = new QuestionExistsCharInPrevStmt('?', rule40, rule39),
-      rule27 = new QuestionExistsCharInStmt('?', ':', rule28, rule29),
+      rule30 = new QuestionExistsCharInPrevStmt('?', rule28, rule39),
+      rule27 = new QuestionExistsCharInStmt('?', ':', rule28, rule36),
       rule26 = new QuestionLineContains(':', rule27, rule30),
       rule25 = new QuestionStartingNewStmt(rule26, rule31),  // Is this line the start of a new statement?
       rule24 = new QuestionPrevLineStartsWith("@", rule60, rule25),  // Does this line follow an annotation?  ??
@@ -111,11 +112,11 @@ public class Indenter {
       
       // Comment tree
       rule12 = new ActionStartPrevLinePlus(""),
-      rule11 = rule12,
+//      rule11 = rule12,
       rule10 = new ActionStartPrevLinePlus("* "),
-      rule09 = new QuestionCurrLineEmptyOrEnterPress(rule10, rule11),
-      rule08 = rule12,
-      rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
+      rule09 = new QuestionCurrLineEmptyOrEnterPress(rule10, rule12),
+//      rule08 = rule12,
+      rule07 = new QuestionCurrLineStartsWith("*", rule12, rule09),
       rule06 = new QuestionPrevLineStartsWith("*", rule07, rule12),
       rule05 = new ActionStartPrevLinePlus(" "),    // padding prefix for interior of ordinary block comment
       rule04 = new ActionStartPrevLinePlus(" * "),  // padding prefix for new line within ordinary block comment
