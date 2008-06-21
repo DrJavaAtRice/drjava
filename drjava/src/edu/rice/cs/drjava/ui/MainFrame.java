@@ -73,6 +73,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
@@ -4886,7 +4887,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       s = _createDefScrollPane(doc);
     }
     final JScrollPane scroller = s;
-    final DefinitionsPane pane = (DefinitionsPane)scroller.getViewport().getView();
+    final DefinitionsPane pane = _currentDefPane; // rhs was (DefinitionsPane)scroller.getViewport().getView();
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() {
         Integer selStart = Integer.valueOf(pane.getSelectionStart());
@@ -6690,24 +6691,31 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // The following method only runs in the event thread because it is called from DefinitionsPane
     public void caretUpdate(final CaretEvent ce) {
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
       int offset = ce.getDot();
-      try {
-        if (offset == _offset + 1 && doc.getText(_offset, 1).charAt(0) != '\n') {
-          _col += 1;
-          updateLocation(_line, _col); 
-          return;
-        }
+       
+      doc.acquireReadLock();
+      try { 
+        synchronized(doc.getReduced()) {
+          _currentDefPane.matchUpdate(offset);  // updates _currentLocation
+          if (offset == _offset + 1 && offset < doc.getLength() && doc.getText(_offset, 1).charAt(0) != '\n') {
+            _col += 1;
+            updateLocation(_line, _col); 
+          }
+          else {
+            Element root = doc.getDefaultRootElement();
+            int line = root.getElementIndex(offset); 
+            _line = line + 1;     // line numbers are 1-based
+            _col = offset - root.getElement(line).getStartOffset();
+            _offset = offset;
+            updateLocation(_line, _col);
+          }
+          
+        }  // end synchronized
       }
-      catch(BadLocationException e) { /* fall through */ }
-      
-      Element root = doc.getDefaultRootElement();
-      int line = root.getElementIndex(offset); 
-      _line = line + 1;     // line numbers are 1-based
-      _col = offset - root.getElement(line).getStartOffset();
-      updateLocation(_line, _col);  
+      catch(BadLocationException e) { /* do nothing */ }
+      finally { doc.releaseReadLock(); }
     }
-    
     
     // This method appears safe outside the event thread
     public void updateLocation() {
@@ -7462,8 +7470,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc) {
     JScrollPane scroll = _defScrollPanes.get(doc);
-    if (scroll == null) {
-      throw new UnexpectedException(new Exception("Region set in a closed document."));
+    if (scroll == null) { 
+      throw new UnexpectedException(new Exception("Attempted to get DefinitionsPane for a closed document")); 
     }
     
     DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
@@ -8304,7 +8312,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       Utilities.invokeLater(new Runnable() {  // invokeAndWait can create occasional deadlocks.
         public void run() {
           _recentDocFrame.pokeDocument(active);
-          _switchDefScrollPane();
+          _switchDefScrollPane();  // Updates _currentDefPane
           
           boolean isModified = active.isModifiedSinceSave();
           boolean canCompile = (! isModified && ! active.isUntitled());

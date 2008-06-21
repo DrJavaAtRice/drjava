@@ -85,7 +85,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test insertion. */
-  public void testInsertToDoc() throws BadLocationException {
+  public void textInsertToDoc() throws BadLocationException {
     _doc.insertString(0, "a/*bc */\"\\{}()", null);
     assertEquals("#0.0", _doc.getText(0, 8), "a/*bc */");
     assertEquals("#0.1", 14, _doc.getCurrentLocation());
@@ -138,7 +138,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test inserting a star between a star-slash combo.
    * @exception BadLocationException
    */
-  public void testInsertStarIntoStarSlash() throws BadLocationException {
+  public void textInsertStarIntoStarSlash() throws BadLocationException {
     BraceReduction _reduced = _doc.getReduced();
     _doc.insertString(0, "/**/", null);
     // Put new star between second star and second slash
@@ -157,7 +157,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test inserting a slash between a star-slash combo.
    * @exception BadLocationException
    */
-  public void testInsertSlashIntoStarSlash() throws BadLocationException {
+  public void textInsertSlashIntoStarSlash() throws BadLocationException {
     BraceReduction _reduced = _doc.getReduced();
     _doc.insertString(0, "/**/", null);
     // Put new slash between second star and second slash
@@ -176,7 +176,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test inserting a star between a slash-star combo.
     * @exception BadLocationException
     */
-  public void testInsertStarIntoSlashStar() throws BadLocationException {
+  public void textInsertStarIntoSlashStar() throws BadLocationException {
     BraceReduction _reduced = _doc.getReduced();
     _doc.insertString(0, "/**/", null);
     // Put new star between second star and second slash
@@ -193,7 +193,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test removal of text. */
-  public void testDeleteDoc() throws BadLocationException {
+  public void textDeleteDoc() throws BadLocationException {
     _doc.insertString(0, "a/*bc */", null);
     _doc.remove(3, 3);
     assertEquals("#0.0", "a/**/", _doc.getText(0, 5));
@@ -227,7 +227,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test that keywords are highlighted properly.
     * @exception BadLocationException
     */
-  public void testHighlightKeywords1() throws BadLocationException {
+  public void textHighlightKeywords1() throws BadLocationException {
     Vector<HighlightStatus> v;
     final String s = "public class Foo {\n" +
       "  private int _x = 0;\n" +
@@ -259,7 +259,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     * three chars selected.
     * @throws BadLocationException
     */
-  public void testHighlightKeywords2() throws BadLocationException {
+  public void textHighlightKeywords2() throws BadLocationException {
     Vector<HighlightStatus> v;
     final String s = "int y";
     _doc.insertString(_doc.getLength(), s, null);
@@ -282,7 +282,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to the second line in a two-line document.
     * @throws BadLocationException
     */
-  public void testGotoLine1() throws BadLocationException {
+  public void textGotoLine1() throws BadLocationException {
     final String s = "a\n";
     _doc.insertString(0, s, null);
     _doc.gotoLine(2);
@@ -292,7 +292,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to a specific line.
    * @exception BadLocationException
    */
-  public void testGotoLine2() throws BadLocationException {
+  public void textGotoLine2() throws BadLocationException {
     final String s = "abcd\n";
     _doc.insertString(0, s, null);
     _doc.gotoLine(2);
@@ -302,7 +302,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to the fourth line in a four line document.
    * @exception BadLocationException
    */
-  public void testGotoLine3() throws BadLocationException {
+  public void textGotoLine3() throws BadLocationException {
     final String s = "a\nb\nc\n";
     _doc.insertString(0, s, null);
     _doc.gotoLine(4);
@@ -313,7 +313,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * just goes to the end of the file.
    * @exception BadLocationException
    */
-  public void testGotoLine4() throws BadLocationException {
+  public void textGotoLine4() throws BadLocationException {
     final String s = "a\nb\nc\n";
     _doc.insertString(0, s, null);
     _doc.gotoLine(8);
@@ -324,7 +324,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * doesn't do anything funny.  It should stay in the same
    * location.
    */
-  public void testGotoLine5() {
+  public void textGotoLine5() {
     _doc.gotoLine(1);
     assertEquals("#0.0", 0, _doc.getCurrentLocation());
   }
@@ -332,7 +332,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to a line that is greater than the line count
    * of an empty document just keeps you in your current location.
    */
-  public void testGotoLine6() {
+  public void textGotoLine6() {
     _doc.gotoLine(4);
     assertEquals("#0.0", 0, _doc.getCurrentLocation());
   }
@@ -341,7 +341,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * sets the current position to the first character of the line.
    * @exception BadLocationException
    */
-  public void testGotoLine7() throws BadLocationException {
+  public void textGotoLine7() throws BadLocationException {
     final String s = "11111\n2222\n33333\n44444";
     _doc.insertString(0, s, null);
     _doc.gotoLine(3);
@@ -350,7 +350,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Tests returning the current column in the document.
    */
-  public void testGetColumn1() throws BadLocationException {
+  public void textGetColumn1() throws BadLocationException {
     final String s = "1234567890";
     assertEquals("#0.0", 0, _doc.getCurrentCol());
     _doc.insertString(0, s, null);
@@ -362,7 +362,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Tests returning the current column in the document.
    */
-  public void testGetColumn2() throws BadLocationException {
+  public void textGetColumn2() throws BadLocationException {
     final String s = "1234567890\n1234\n12345";
     _doc.insertString(0, s, null);
     assertEquals("#0.0", 5, _doc.getCurrentCol() );
@@ -371,7 +371,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test returning second line in a two-line document.
    * @exception BadLocationException
    */
-  public void testGetLine1() throws BadLocationException {
+  public void textGetLine1() throws BadLocationException {
     final String s = "a\n";
     _doc.insertString(0, s, null);
     _doc.setCurrentLocation(2);
@@ -381,7 +381,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to a specific line.
    * @exception BadLocationException
    */
-  public void testGetLine2() throws BadLocationException {
+  public void textGetLine2() throws BadLocationException {
     final String s = "abcd\n";
     _doc.insertString(0, s, null);
     _doc.setCurrentLocation(2);
@@ -393,7 +393,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to the fourth line in a four line document.
    * @exception BadLocationException
    */
-  public void testGetLine3() throws BadLocationException {
+  public void textGetLine3() throws BadLocationException {
     final String s = "a\nb\nc\n";
     _doc.insertString(0, s, null);
     _doc.setCurrentLocation(6);
@@ -404,7 +404,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * just goes to the end of the file.
    * @exception BadLocationException
    */
-  public void testGetLine4() throws BadLocationException {
+  public void textGetLine4() throws BadLocationException {
     final String s = "a\nb\nc\n";
     _doc.insertString(0, s, null);
     _doc.gotoLine(8);
@@ -415,7 +415,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * doesn't do anything funny.  It should stay in the same
    * location.
    */
-  public void testGetLine5() {
+  public void textGetLine5() {
     _doc.setCurrentLocation(0);
     assertEquals("#0.0", 1, _doc.getCurrentLine());
   }
@@ -423,7 +423,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test going to a line that is greater than the line count
    * of an empty document just keeps you in your current location.
    */
-  public void testGetLine6() {
+  public void textGetLine6() {
     _doc.gotoLine(4);
     assertEquals("#0.0", 1, _doc.getCurrentLine());
   }
@@ -432,7 +432,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * sets the current position to the first character of the line.
    * @exception BadLocationException
    */
-  public void testGetLine7() throws BadLocationException {
+  public void textGetLine7() throws BadLocationException {
     final String s = "12345\n7890\n2345\n789";
     _doc.insertString(0, s, null);
     _doc.setCurrentLocation(12);
@@ -445,7 +445,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Tests line numbering output after deletion of a block
    */
-  public void testGetLineDeleteText() throws BadLocationException{
+  public void textGetLineDeleteText() throws BadLocationException{
     final String s = "123456789\n123456789\n123456789\n123456789\n";
     _doc.insertString(0,s,null);
     _doc.setCurrentLocation(35);
@@ -457,7 +457,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Tests line numbering output after deletion of a block
    */
-  public void testGetLineDeleteText2() throws BadLocationException {
+  public void textGetLineDeleteText2() throws BadLocationException {
     final String s = "123456789\n123456789\n123456789\n123456789\n";
     _doc.insertString(0,s,null);
     _doc.setCurrentLocation(35);
@@ -468,7 +468,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Test whether removeTabs actually removes all tabs.
    */
-  public void testRemoveTabs1() {
+  public void textRemoveTabs1() {
     _doc.setIndent(1);
     String test = "\t this \t\tis a \t\t\t\t\ttest\t\t";
     String result = _doc._removeTabs(test);
@@ -479,7 +479,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * some of the text jumbled all around (bug #506630).
    * This test aims to replicate the problem.
    */
-  public void testRemoveTabs2() {
+  public void textRemoveTabs2() {
     String input =
       "\ttoken = nextToken(); // read trailing parenthesis\n" +
       "\tif (token != ')')\n" +
@@ -504,7 +504,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Test whether tabs are removed as appropriate on call to insertString.
    */
-  public void testTabRemovalOnInsertString2() throws BadLocationException {
+  public void textTabRemovalOnInsertString2() throws BadLocationException {
     String[] inputs = {
       "\ttoken = nextToken(); // read trailing parenthesis\n",
       "\tif (token != ')')\n",
@@ -524,7 +524,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test whether tabs are removed as appropriate on call to insertString. */
-  public void testTabRemovalOnInsertString() throws BadLocationException {
+  public void textTabRemovalOnInsertString() throws BadLocationException {
     _doc.setIndent(1);
     _doc.insertString(0, " \t yet \t\tanother\ttest\t", null);
     String result = _doc.getText();
@@ -538,12 +538,12 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test package-finding on empty document. */
-  public void testPackageNameEmpty() throws InvalidPackageException {
+  public void textPackageNameEmpty() throws InvalidPackageException {
     assertEquals("Package name for empty document", "", _doc.getPackageName());
   }
   
   /** Test package-finding on simple document, with no funny comments. */
-  public void testPackageNameSimple()
+  public void textPackageNameSimple()
     throws Exception
   {
     final String[] comments = {
@@ -567,7 +567,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test package-finding on document with a block comment between parts of package. */
-  public void testPackageNameWeird1() throws BadLocationException, InvalidPackageException {
+  public void textPackageNameWeird1() throws BadLocationException, InvalidPackageException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava;";
     String normal = "edu.rice.cs.drjava";
     _doc.insertString(0, weird, null);
@@ -576,7 +576,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test package-finding on document with a line comment between parts of package. */
-  public void testPackageNameWeird2() throws BadLocationException, InvalidPackageException {
+  public void textPackageNameWeird2() throws BadLocationException, InvalidPackageException {
     String weird = "package edu . rice //comment!\n.cs.drjava;";
     String normal = "edu.rice.cs.drjava";
     _doc.insertString(0, weird, null);
@@ -587,7 +587,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Puts an otherwise valid package statement after a valid import declaration. This should result in seeing no 
     * package statement (for the purposes of getSourceRoot), so the resulting package name should be "".
     */
-  public void testGetPackageNameWithPackageStatementAfterImport() throws BadLocationException, InvalidPackageException {
+  public void textGetPackageNameWithPackageStatementAfterImport() throws BadLocationException, InvalidPackageException {
     String text = "import java.util.*;\npackage junk;\nclass Foo {}";
     _doc.insertString(0, text, null);
     assertEquals("Package name for text with package statement after import", "", _doc.getPackageName());
@@ -596,7 +596,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   private String _getAllText() throws BadLocationException { return _doc.getText(); }
   
   /** Tests class name-finding on document. */
-  public void testTopLevelClassName() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelClassName() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; class MyClass<T> implements O{";
     String result = "MyClass";
     _doc.insertString(0, weird, null);
@@ -605,7 +605,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test interface name-finding on document */
-  public void testTopLevelInterfaceName() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelInterfaceName() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" + " interface thisInterface { \n" +
       " class MyClass {";
     String result = "thisInterface";
@@ -615,7 +615,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Test class name-finding on document */
-  public void testTopLevelClassNameWComments() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelClassNameWComments() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       "/* class Y */ \n" +
       " /* class Foo \n" +
@@ -632,7 +632,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests that a keyword with no space following it does not cause a StringOutOfBoundsException (bug 742226). */
-  public void testTopLevelClassNameNoSpace() throws BadLocationException {
+  public void textTopLevelClassNameNoSpace() throws BadLocationException {
     String c = "class";
     _doc.insertString(0, c, null);
     try {
@@ -647,7 +647,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Tests that the word class is not recognized if it is not followed
    * by whitespace.
    */
-  public void testTopLevelClassNameWithClassloaderImport()
+  public void textTopLevelClassNameWithClassloaderImport()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird = "import classloader.class; class MyClass {";
@@ -658,7 +658,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests class name-finding on document. */
-  public void testTopLevelClassNameMisleading() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelClassNameMisleading() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " {class X} \n" +
       " interface thisInterface { \n" +
@@ -672,7 +672,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests class name-finding on document */
-  public void testTopLevelInterfaceNameMisleading() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelInterfaceNameMisleading() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" + " {interface X} " + " \"class Foo\"" +
       " class MyClass {";
     String result = "MyClass";
@@ -682,7 +682,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests class name-finding on document */
-  public void testTopLevelInterfaceNameMisleading2() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelInterfaceNameMisleading2() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*interface comment!*/cs.drjava; \n" + " {interface X<T>} " +
       " \"class interface Foo\"" + " class MyClass extends Foo<T> {";
     String result = "MyClass";
@@ -692,7 +692,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests class name-finding on document. */
-  public void testTopLevelInterfaceNameBeforeClassName()
+  public void textTopLevelInterfaceNameBeforeClassName()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
@@ -709,7 +709,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests class name-finding on document. */
-  public void testTopLevelClassNameWithDelimiters() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelClassNameWithDelimiters() throws BadLocationException, ClassNameNotFoundException {
     String weird1 = "package edu . rice\n./*comment!*/cs.drjava; \n" + " class MyClass<T> {";
     String result1 = "MyClass";
     _doc.insertString(0, weird1, null);
@@ -724,7 +724,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests that the name of a top level enclosing class can be found. */
-  public void testTopLevelEnclosingClassName() throws BadLocationException, ClassNameNotFoundException {
+  public void textTopLevelEnclosingClassName() throws BadLocationException, ClassNameNotFoundException {
     String classes =
       "import foo;\n" +  // 12 (including newline)
       "class C1 {\n" +  // 23
@@ -803,7 +803,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests that the correct qualified class name is returned with a package. */
-  public void testQualifiedClassNameWithPackage() throws BadLocationException, ClassNameNotFoundException {
+  public void textQualifiedClassNameWithPackage() throws BadLocationException, ClassNameNotFoundException {
     String classes =
       "package foo;\n" +  // 13
       "class C1 {}\n" +  // 25
@@ -826,7 +826,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   }
   
   /** Tests that the correct qualified class name is returned without a package. */
-  public void testQualifiedClassNameWithoutPackage() throws BadLocationException, ClassNameNotFoundException {
+  public void textQualifiedClassNameWithoutPackage() throws BadLocationException, ClassNameNotFoundException {
     String classes =
       "class C1 {}\n" +  // 12
       "class C2 {}";  // 36
@@ -932,7 +932,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Verify that undoing a multiple-line indent will be a single undo action
     * @throws BadLocationException
     */
-  public void testUndoAndRedoAfterMultipleLineIndent() throws BadLocationException {  //this fails
+  public void textUndoAndRedoAfterMultipleLineIndent() throws BadLocationException {  //this fails
     String text =
       "public class stuff {\n" +
       "private int _int;\n" +
@@ -972,7 +972,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Verify that undoing a multiple-line indent will be a single undo action
     * @throws BadLocationException
     */
-  public void testUndoAndRedoAfterMultipleLineCommentAndUncomment()
+  public void textUndoAndRedoAfterMultipleLineCommentAndUncomment()
     throws BadLocationException {
     String text =
       "public class stuff {\n" +
@@ -1017,7 +1017,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Test method for CompoundUndoManager.  Tests that the nested compound edit functionality works correctly.
     * @throws BadLocationException
     */
-  public void testCompoundUndoManager() throws BadLocationException {
+  public void textCompoundUndoManager() throws BadLocationException {
     String text =
       "public class foo {\n" +
       "int bar;\n" +
@@ -1158,7 +1158,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Verifies that the undo manager correctly determines if the document has
    * been modified since the last save.
    */
-  public void testUndoOrRedoSetsUnmodifiedState() throws BadLocationException {
+  public void textUndoOrRedoSetsUnmodifiedState() throws BadLocationException {
     _doc.addUndoableEditListener(_doc.getUndoManager());
     _doc.insertString(0, "This is text", null);
     assertTrue("Document should be modified.", _doc.isModifiedSinceSave());

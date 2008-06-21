@@ -157,9 +157,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       
       ReducedModelState curState = _getStateAtCurrent();
       // Free if at the beginning
-      while (! atEnd()) {
-        curState = curState.update(this);
-      }
+      while (! atEnd()) { curState = curState.update(this); }
     }
     
     /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive
@@ -182,7 +180,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       
       //make copy of cursor and return new iterator?
       if (count > 0) return it._moveRight(count, currentOffset);
-      return it._moveLeft(Math.abs(count), currentOffset);  // count < 0
+      return it._moveLeft(- count, currentOffset);  // count < 0
     }
     
     /** Helper function that moves cursor ([iterator pos, count]) forward by count chars.  Assumes that count > 0 and
@@ -238,9 +236,10 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       
       // Standardize initial position, eliminating 0 offset
       if (atEnd()) {
+        assert currentOffset == 0;
         prev();
-        if (! atStart()) currentOffset = current().getSize(); // ! atStart() is precondition for calling current()
-        else throw new IllegalArgumentException("At Start");  // avoids duplicate atStart test
+        if (atStart()) throw new IllegalArgumentException("At Start");  
+        currentOffset = current().getSize(); // ! atStart() is precondition for calling current()
       }
       else if (atStart()) throw new IllegalArgumentException("At Start");
       
@@ -253,7 +252,6 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       }
       return currentOffset - count;  // Note: returned offset can be 0
     }
-    
     
     /** <P>Update the BraceReduction to reflect text deletion.</P>
       * @param count  A number specifying the size and direction of text deletion. Negative values delete text to the 

@@ -93,7 +93,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public void setCurrentLocation(int location) { throw new UnsupportedOperationException("Dummy method"); }
   
-  protected DefinitionsDocument getDocument() { throw new UnsupportedOperationException("Dummy method"); }
+  public DefinitionsDocument getDocument() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
   

@@ -94,7 +94,7 @@ public class TestDocGetter extends DummyGlobalModel {
     }
 
     /** This is the only method that we care about. */
-    protected DefinitionsDocument getDocument() { return _doc; }
+    public DefinitionsDocument getDocument() { return _doc; }
 
     /** Okay, I lied.  We need this one, too. */
     public File getFile() throws FileMovedException  { return _file; }

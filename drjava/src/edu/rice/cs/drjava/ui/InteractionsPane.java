@@ -39,6 +39,9 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
+
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import java.awt.event.KeyEvent;
 import java.awt.datatransfer.*;
 
@@ -73,6 +76,20 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
     public void run() { Toolkit.getDefaultToolkit().beep(); }
+  };
+  
+  //  /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
+  protected final CaretListener _matchListener = new CaretListener() {
+    
+    /** Checks caret position to see if it needs to set or remove a highlight from the document. Only modifies the 
+      * document--not any GUI classes.
+      * @param e the event fired by the caret position change
+      */
+    public void caretUpdate(CaretEvent e) { 
+      _doc.acquireReadLock();
+      try { synchronized(_doc.getReduced()) { matchUpdate(e.getDot()); } }
+      finally { _doc.releaseReadLock(); }
+    }
   };
   
   /** The OptionListener for TEXT_ANTIALIAS. */
@@ -111,6 +128,9 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     _highlightManager = new HighlightManager(this);
     
     _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    
+    // Add listener that checks if highlighting matching braces must be updated
+    addCaretListener(_matchListener);
     
     // Setup color listeners.
     
@@ -174,15 +194,16 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Returns the DJDocument held by the pane. */
   public DJDocument getDJDocument() { return _doc; }
   
-  /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list. ReadLock? */
-  protected void matchUpdate(int offset) {
+  /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list.  Assumes read
+    * lock and reduced locks on _doc are already held*/
+  public void matchUpdate(int offset) {
     if (! _doc.hasPrompt()) return;
     _doc.setCurrentLocation(offset); 
     _removePreviousHighlight();
     
 //    addToPromptList(getPromptPos()); // NOT USED
     int to = getCaretPosition();
-    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
+    int from = _doc._balanceBackward(); //_doc()._reduced.balanceBackward();
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
@@ -193,7 +214,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     else {
       // (getCaretPosition will be the start of the highlight)
       from = to;
-      to = getDJDocument().balanceForward();
+      to = _doc._balanceForward();
       
       if (to > -1) {
         to = to + from;

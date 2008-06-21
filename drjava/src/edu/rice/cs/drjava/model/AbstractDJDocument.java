@@ -509,12 +509,22 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int balanceBackward() {
     acquireReadLock();
-    try {  synchronized(_reduced) { return _reduced.balanceBackward(); } }
+    try { synchronized(_reduced) { return _balanceBackward(); } }
     finally { releaseReadLock(); }  
   }
   
   /** Raw version of balanceBackward.  Assumes that read lock and reduced locks are already held. */
-  public int _balanceBackward() { return _reduced.balanceBackward() ; }
+  public int _balanceBackward() {
+    int origPos = _currentLocation;
+    try {
+      if (_currentLocation < 2) return -1;
+      char prevChar = _getText(_currentLocation - 1, 1).charAt(0);
+//      Utilities.show("_currentLocation = " + _currentLocation + "; prevChar = '" + prevChar + "'");
+      if (prevChar != '}' && prevChar != ')' && prevChar != ']') return -1;
+      return _reduced.balanceBackward();
+    }
+    finally { _setCurrentLocation(origPos); }
+  }
     
   /** FindS the match for the open brace immediately to the right, assuming there is such a brace.  On failure, 
     * returns -1.
@@ -522,15 +532,26 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int balanceForward() {
     acquireReadLock();
-    try { synchronized(_reduced) { return _reduced.balanceForward(); } }
+    try { synchronized(_reduced) { return _balanceForward(); } }
     finally { releaseReadLock(); }  
   }
   
   /** Raw version of balanceForward.  Assumes that read lock and reduced locks are already held. */
-  public int _balanceForward() { return _reduced.balanceForward() ; }
-    
+  public int _balanceForward() { 
+    int origPos = _currentLocation;
+    try {
+      int docLen = getLength();
+      if (_currentLocation == 0) return -1;
+      char prevChar = _getText(_currentLocation - 1, 1).charAt(0);
+//      System.err.println("_currentLocation = " + _currentLocation + "; prevChar = '" + prevChar + "'");
+      if (prevChar != '{' && prevChar != '(' && prevChar != '[') return -1;
+//      System.err.println("Calling _reduced.balanceForward()");
+      return _reduced.balanceForward() ; 
+    }
+    finally { _setCurrentLocation(origPos); }
+  }
   
-  /** This method is used ONLY for testing.  This method is UNSAFE in any other context!
+  /** This method is used ONLY inside of document Read Lock.  This method is UNSAFE in any other context!
     * @return The reduced model of this document.
     */
   public BraceReduction getReduced() { return _reduced; }

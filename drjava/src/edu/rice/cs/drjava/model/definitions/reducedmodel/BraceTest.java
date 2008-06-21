@@ -120,8 +120,8 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
 
   /** Test the toString method. */
   public void testToString() {
-    assertEquals("Brace([40])", lparen.toString());
-    assertEquals("Brace([41])", rparen.toString());
+    assertEquals("Brace<(>", lparen.toString());
+    assertEquals("Brace<)>", rparen.toString());
   }
 
   /** Test the flip() method. */

@@ -107,18 +107,14 @@ class Brace extends ReducedToken implements ReducedModelStates {
     */
   public String toString() {
     //String val = "Brace(size: "+ getSize() +"): ";
-    final StringBuilder val = new StringBuilder("Brace(");
+    final StringBuilder val = new StringBuilder("Brace<");
     int i;
 //    for (i = 0; i < getSize(); i++) {
 //      val.append(getType().charAt(i));
 //    }
 //    val.append("' ");
-    for (i = 0; i < getSize(); i++) {
-      val.append('[');
-      val.append((int) getType().charAt(i));
-      val.append(']');
-    }
-    return val.append(')').toString();
+    val.append(getType());
+    return val.append('>').toString();
   }
 
   /** Flips the orientation of the brace. Useful for updating quote information. Does not change _size. */

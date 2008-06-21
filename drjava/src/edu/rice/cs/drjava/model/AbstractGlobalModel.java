@@ -2592,7 +2592,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Gets the definitions document being handled.
       * @return document being handled
       */
-    protected DefinitionsDocument getDocument() {
+    public DefinitionsDocument getDocument() {
       
 //      System.err.println("getDocument() called on " + this);
       try { return _cacheAdapter.getDocument(); }

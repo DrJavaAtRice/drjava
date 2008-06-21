@@ -256,9 +256,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   /** Move to the token immediately left. This function forwards its responsibilities to the TokenList iterator.  If the
     * cursor is at the start, it will throw an exception.
     */
-  protected void prev() {
-    _cursor.prev();
-  }
+  protected void prev() { _cursor.prev(); }
   
   // Never used
 //  /** Determines whether the char at index pos with text is the start of a comment:  "/*" or "//" */

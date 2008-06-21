@@ -46,7 +46,7 @@ import java.util.Set;
 class ModelList<T> {
   private Node<T> _head;
   private Node<T> _tail;
-  /** keep track of length for constant time length lookup */
+  /** length of this list; supports constant time length lookup */
   private int _length;
   /** a set of objects that can trigger and listen for updates to the list */
   private Set<ModelIterator> _listeners;

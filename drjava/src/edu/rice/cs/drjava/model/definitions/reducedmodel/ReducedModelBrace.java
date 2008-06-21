@@ -149,7 +149,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     resetWalkerLocationToCursor(); //reset the interface to the comment model
 
     TokenList.Iterator copyCursor = _cursor.copy();
-    if (!copyCursor.atStart()) copyCursor.prev();
+    if (! copyCursor.atStart()) copyCursor.prev();  // does not change blockOffset!
     
     if (copyCursor.atStart()) {
       copyCursor.dispose();
@@ -191,8 +191,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     resetWalkerLocationToCursor();
 
-    if ( copyCursor.atStart())
-      copyCursor.next();
+    if ( copyCursor.atStart()) copyCursor.next();  // does not change blockOffset!
     if (_cursor.getBlockOffset() > 0) {
       dist = copyCursor.current().getSize() - _cursor.getBlockOffset();
       relDistance = dist;
@@ -201,8 +200,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // there are no braces on the last brace element - it's empty
     while (!copyCursor.atEnd() ) {
       if (!copyCursor.current().isGap()) {
-        if (moveWalkerGetState(relDistance) ==
-            FREE) {
+        if (moveWalkerGetState(relDistance) == FREE) {
               copyCursor.dispose();
               return dist;
             }
@@ -216,7 +214,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return -1;
   }
 
-  /** If the current ReducedToken is an open significant brace and the offset is 0 (i.e., if we're immediately left of 
+  /** If the previous ReducedToken is an open significant brace and the offset is 0 (i.e., if we're immediately right of 
     * said brace), push the current Brace onto a Stack and iterate forwards, keeping track of the distance covered.
     * - For every closed significant Brace, if it matches the top of the Stack, pop the Stack.  Increase the distance 
     *   by the size of the Brace. If the Stack is Empty, we have a balance.  Return distance.  If the closed Brace does 
@@ -231,16 +229,15 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor.copy();
-
-    if (iter.atStart() || iter.atFirstItem() || ! openBraceImmediatelyLeft() || isShadowed()) {
-//      Utilities.show("openBraceImmediatelyLeft(): " + openBraceImmediatelyLeft());
+//    System.err.println("In balanceFor, current token = " + iter.current());
+    if (! openBraceImmediatelyLeft() || isShadowed()) {
+//      System.err.println("; isShadowed = " + isShadowed() + "; RETURNING -1");
       iter.dispose();
-//      System.out.println("! atStart, atFirstItem, or no closed brace");
-//      Utilities.show("balanceForward immediately aborted; returning -1");
       return -1;
     }
 
     iter.prev();
+    assert iter.current() instanceof Brace;
     ReducedToken curToken = iter.current();
     
     assert curToken instanceof Brace; // In fact, it is a significant matchable open brace.
@@ -260,40 +257,40 @@ public class ReducedModelBrace extends AbstractReducedModel {
      * (ii)  we reach the end of a file and haven't found a match and abort; or
      * (iii) we reach a close brace that doesn't have a match and abort.
      */
+//    System.err.println("Starting scan loop; " + " current token is: " + iter.current());
     while (! iter.atEnd() && ! braceStack.isEmpty()) {
       curToken = iter.current(); // a ReducedToken is either a Gap or a Brace
       if (! curToken.isGap()) {  // curToken is a Brace
         Brace curBrace = (Brace) curToken;
         ReducedModelState curBraceState = moveWalkerGetState(relDistance); // walker moves right
         relDistance = 0;
-//        Utilities.show("curBrace = " + curBrace + "curBraceState = " + curBraceState);
-//        Utilities.show("Walker is now at offset " + _parent.walkerOffset() + " distance = " + distance);
+//        System.err.println("curBrace = " + curBrace + "curBraceState = " + curBraceState);
+//        System.err.println("Walker is now at offset " + _parent.walkerOffset() + " distance = " + distance);
         if (curBraceState == FREE && ! curToken.isCommentStart()) {  // not shadowed
-//          Utilities.show(curBrace + " is not shadowed");
+//          System.err.println(curBrace + " is not shadowed");
           // check for closed brace
           if (curBrace.isClosedBrace()) {
-//            Utilities.show(curBrace + " is CLOSED at distance " + distance);
+//            System.err.println(curBrace + " is CLOSED at distance " + distance);
             Brace popped = braceStack.pop();
             if (! curBrace.isMatch(popped)) {
               iter.dispose();
-//              System.out.println("! encountered closed brace that didn't match");
-//              Utilities.show("! encountered closed brace " + curBrace + " that didn't match; returning -1");
+//              System.err.println("! encountered closed brace that didn't match, returning -1");
               return -1;
             }
           }
           // otherwise, this must be an open brace
           else {
             braceStack.push(curBrace);
-//            Utilities.show(curBrace + " pushed on stack");
+//            System.err.println(curBrace + " pushed on stack");
           }
         }
-//        else Utilities.show(curToken + " at distance " + distance + " is shadowed");
+//        else System.err.println(curToken + " at distance " + distance + " is shadowed");
       }
       // increment distances of size of current token
       int size = curToken.getSize();
       distance += size;     
       relDistance += size;
-//      Utilities.show("distance " + distance + " was incremented by " + size);
+//      System.err.println("distance " + distance + " was incremented by " + size);
 
       iter.next();
     }
@@ -301,21 +298,18 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // check if we exited because of failure
     if (! braceStack.isEmpty()) {
       iter.dispose();
-//      Utilities.show("Unmatched braces in stack: balancebackward returning -1");
-//      System.out.println("! ran to end of file. distance: " + distance);
+//      System.err.println("Hit end of file. distance: " + distance + ", returning -1");
       return -1;
     }
     // success
     else {
       iter.dispose();
-//      Utilities.show("balancebackward returning " + distance);
+//      System.err.println("balancebackward returning " + distance);
       return distance;
     }
   }
 
-//  /**
-//   * This is no longer used internally -- highlight is always started on left.
-//   */
+//  /** This is no longer used internally -- highlight is always started on left. */
 //  public boolean openBraceImmediatelyRight() {
 //    if (_cursor.atEnd()) {
 //      return false;
@@ -329,43 +323,35 @@ public class ReducedModelBrace extends AbstractReducedModel {
   public boolean openBraceImmediatelyLeft() {
     if (_cursor.atStart() || _cursor.atFirstItem()) return false;
     else {
-      _cursor.prev();
-      /*
-      System.out.println("+ closedBraceImmediatelyLeft() {");
-      System.out.println("  _cursor.getBlockOffset(): "+_cursor.getBlockOffset());
-      System.out.println("  _cursor.current().isClosed(): "+_cursor.current().isClosed());
-      System.out.println("  _isCurrentBraceMatchable(): "+_isCurrentBraceMatchable());
-      System.out.println("  }");
-      */
-      boolean isLeft = ((_cursor.getBlockOffset() == 0) && _cursor.current().isOpen() &&
-                        _isCurrentBraceMatchable());
-      //System.out.println("= token to left: " + _cursor);
+      int offset = _cursor.getBlockOffset();
+      _cursor.prev();  // does not affect blockOffset!      
+//      System.err.println("+ openBraceImmediatelyLeft() {");
+//      System.err.println("  offset " + offset);
+//      System.err.println("  _cursor.current().isClosed(): " + _cursor.current().isClosed());
+//      System.err.println("  _isCurrentBraceMatchable(): " + _isCurrentBraceMatchable());
+//      System.err.println("  }");
+
+      boolean isLeft = (offset == 0 && _cursor.current().isOpen() && _isCurrentBraceMatchable());
+//      System.err.println("In openBraceLeft, token to left: " + _cursor);
       _cursor.next();
-      //String output = (_cursor.atEnd()) ? "<end>": _cursor.toString();
-      //System.out.println("= current token: " + output);
       return isLeft;
     }
   }
 
   public boolean closedBraceImmediatelyLeft() {
-    if (_cursor.atStart() || _cursor.atFirstItem()) {
-      return false;
-    }
+    if (_cursor.atStart() || _cursor.atFirstItem()) return false;
     else {
-      _cursor.prev();
-      /*
-      System.out.println("+ closedBraceImmediatelyLeft() {");
-      System.out.println("  _cursor.getBlockOffset(): "+_cursor.getBlockOffset());
-      System.out.println("  _cursor.current().isClosed(): "+_cursor.current().isClosed());
-      System.out.println("  _isCurrentBraceMatchable(): "+_isCurrentBraceMatchable());
-      System.out.println("  }");
-      */
-      boolean isLeft = ((_cursor.getBlockOffset() == 0) && _cursor.current().isClosed() &&
-                        _isCurrentBraceMatchable());
-      //System.out.println("= token to left: " + _cursor);
-      _cursor.next();
-      //String output = (_cursor.atEnd()) ? "<end>": _cursor.toString();
-      //System.out.println("= current token: " + output);
+      int offset = _cursor.getBlockOffset();  // offset within current token
+      _cursor.prev();  // does not affect blockOffset!
+//      System.err.println("+ closedBraceImmediatelyLeft() {");
+//      System.err.println("  offset: " + offset);
+//      System.err.println("  _cursor.current().isClosed(): "+_cursor.current().isClosed());
+//      System.err.println("  _isCurrentBraceMatchable(): "+_isCurrentBraceMatchable());
+//      System.err.println("  }");
+      
+      boolean isLeft = ( offset == 0 &&  _cursor.current().isClosed() && _isCurrentBraceMatchable());
+      System.out.println("In closedBraceLeft, token to left: " + _cursor);
+      _cursor.next();  // restore current token
       return isLeft;
     }
   }
@@ -385,14 +371,13 @@ public class ReducedModelBrace extends AbstractReducedModel {
     TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();  // _walker aligned to _cursor
 //    Utilities.show("Balancing backward with iterator cursor at " + absOffset() + " and walker at " + _parent.walkerOffset());
- 
-    if (iter.atStart() || iter.atFirstItem() || ! closedBraceImmediatelyLeft() || isShadowed()) {
-      //System.out.println("closedBraceImmediatelyLeft(): "+closedBraceImmediatelyLeft());
+//    System.err.println("in balanceBack, current token = " + iter.current());
+    if (! closedBraceImmediatelyLeft() || isShadowed()) {
+//      System.err.println("; isShadowed = " + isShadowed() + "; RETURNING -1");
       iter.dispose();
-//      Utilities.show("balanceBackward immediately aborted; returning -1");
+//      System.err.println("balanceBackward immediately aborted; returning -1");
       return -1;
     }
-
     int relDistance = 0; // distance from iter position to walker position
     int distance = 0;    // distance from iter position to _cursor postion
     

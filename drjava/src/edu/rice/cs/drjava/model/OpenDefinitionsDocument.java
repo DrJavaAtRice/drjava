@@ -67,6 +67,8 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 //  public int id();
   public int commentLines(int selStart, int selEnd);
   public int uncommentLines(int selStart, int selEnd);
+  /** Gets the associated DefinitionsDocument which may force materializing it. */
+  public DefinitionsDocument getDocument();
   public boolean getClassFileInSync();
   public void setClassFileInSync(boolean val);
   public int getCurrentLine();

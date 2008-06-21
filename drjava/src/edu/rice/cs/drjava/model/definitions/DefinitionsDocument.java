@@ -830,10 +830,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
 
   public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
-//    String t = getText(0, openSquigglyPos+1);
-//    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
-//    System.out.println("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+"): `"+
-//                       t.substring(newPos, openSquigglyPos+1)+"`");
+//    String t = getText(0, openCurlyPos+1);
+//    System.out.print("_isAnonymousInnerClass("+pos+", "+openCurlyPos+")");
+//    System.out.println("_isAnonymousInnerClass("+pos+", "+openCurlyPos+"): `"+
+//                       t.substring(pos, openCurlyPos+1)+"`");
     
     // Check cache
     final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
@@ -861,12 +861,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         
         /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
-        // System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+//         System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
         int parenStart = _getFirstNonWSCharPos(classEnd);
         if (parenStart != -1) {
           int origParenStart = parenStart;
           
-          // System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+//           System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
           if (text.charAt(origParenStart) == '<') {
             parenStart = -1;
             // might be a generic class
@@ -882,14 +882,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (parenStart != -1) {
           if (text.charAt(parenStart) == '(') {
             final int origLocation = _currentLocation;
-            _reduced.move(parenStart+1 - origLocation);   // reduced model points to pos == parenStart+1
+            _setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
             int parenEnd = _balanceForward();
-            _reduced.move(origLocation - (parenStart + 1));   // Restore the state of the reduced model;
+//            _setCurrentLocation(parenStart + 1);   // Restore the state of the reduced model; unnecessary
             if (parenEnd > -1) {
               parenEnd = parenEnd + parenStart + 1;
-              // System.out.println("\tafter closing paren = "+parenEnd);
+//               System.out.println("\tafter closing paren = "+parenEnd);
               int afterParen = _getFirstNonWSCharPos(parenEnd);
-              // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
+//               System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
               cached = (afterParen == openCurlyPos); 
             }
           }
@@ -922,13 +922,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-  /** Returns the index of the anonymous inner class being instantiated at the specified position.
+  /** Returns the index of the anonymous inner class being instantiated at the specified position (where openining brace
+    * for anonymous inner class is pos).
     * ASSUMES readLock and _reduced lock are already held.
     * @param pos is position of the opening curly brace of the anonymous inner class
     * @return anonymous class index
     */
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
-//    boolean oldLog = log; log = false;
+//    boolean oldLog = true; // log; log = false;
     
     assert isReadLocked();
     
@@ -942,7 +943,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     // readLock assumed to be held
 
-    int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outisde
+    int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outside
 
 //    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
 
@@ -950,9 +951,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
     int index = 1;
     
-//    if (oldLog) System.out.println("anon before "+pos+" enclosed by "+className);
+//    if (oldLog) System.err.println("anon before "+pos+" enclosed by "+className);
     while ((newPos = _findPrevKeyword(text, "new", newPos - 4)) != -1) { // excludes space + minimal class name + args
-//      if (oldLog) System.out.println("new found at "+newPos);
+//      if (oldLog) System.err.println("new found at "+newPos);
       int afterNewPos = newPos + "new".length();
       int classStart = _getFirstNonWSCharPos(afterNewPos);
       if (classStart == -1) { continue; }
@@ -964,12 +965,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         ++classEnd;
       }
-//      if (oldLog) System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+//      if (oldLog) System.err.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
       int parenStart = _getFirstNonWSCharPos(classEnd);
       if (parenStart == -1) { continue; }
       int origParenStart = parenStart;
       
-//      if (oldLog) System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+//      if (oldLog) System.err.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
       if (text.charAt(origParenStart)=='<') {
         parenStart = -1;
         // might be a generic class
@@ -986,12 +987,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       int nextOpenCurly = _findNextOpenCurly(text, parenEnd);
       if (nextOpenCurly == -1) { continue; }
-//      if (oldLog) System.out.println("{ found at "+nextOpenSquiggly+": `"+text.substring(newPos, nextOpenSquiggly+1)+"`");
-//      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenSquiggly+")");
+//      if (oldLog) System.err.println("{ found at " + nextOpenCurly + ": `" + 
+//                                     text.substring(newPos, nextOpenCurly + 1) + "`");
+//      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenCurly+")");
       if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
-//        if (oldLog) System.out.println("is anonymous inner class");
+//        if (oldLog) System.err.println("is anonymous inner class");
         String cn = _getEnclosingClassName(newPos, true);
-//        if (oldLog) System.out.println("enclosing class = "+cn);
+//        if (oldLog) System.err.println("enclosing class = "+cn);
         if (! cn.startsWith(className)) { break; }
         else if (! cn.equals(className)) {
           newPos = _findPrevEnclosingBrace(newPos, '{', '}');
@@ -1000,7 +1002,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         else ++index;
       }
     }
-    _storeInCache(key, index, pos - 1);
+    _storeInCache(key, index, pos);
 //    oldLog = log;
     return index;
   }

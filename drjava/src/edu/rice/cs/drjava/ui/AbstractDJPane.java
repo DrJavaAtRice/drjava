@@ -76,15 +76,16 @@ public abstract class AbstractDJPane extends JTextPane
   
   protected volatile HighlightManager _highlightManager;
   
-  /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
-  protected final CaretListener _matchListener = new CaretListener() {
-    
-    /** Checks caret position to see if it needs to set or remove a highlight from the document. Only modifies the 
-      * document--not any GUI classes.
-      * @param e the event fired by the caret position change
-      */
-    public void caretUpdate(CaretEvent e) { matchUpdate(e.getDot()); }
-  };
+  // Now done in DefinitionsPane (set up in MainFrame) and InteractionsPane CaretListeners
+//  /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
+//  protected final CaretListener _matchListener = new CaretListener() {
+//    
+//    /** Checks caret position to see if it needs to set or remove a highlight from the document. Only modifies the 
+//      * document--not any GUI classes.
+//      * @param e the event fired by the caret position change
+//      */
+//    public void caretUpdate(CaretEvent e) { matchUpdate(e.getDot()); }
+//  };
   
   
   /** Our current paren/brace/bracket matching highlight. */
@@ -98,8 +99,8 @@ public abstract class AbstractDJPane extends JTextPane
     super(doc);
     setContentType("text/java");
     
-    // Add listener that checks if highlighting matching braces must be updated
-    addCaretListener(_matchListener);
+//    // Add listener that checks if highlighting matching braces must be updated
+//    addCaretListener(_matchListener);
   }
   
   //--------- METHODS -----------
@@ -119,7 +120,7 @@ public abstract class AbstractDJPane extends JTextPane
     * executed outside the event thread.
     * @param offset the new offset of the caret
     */
-  protected abstract void matchUpdate(int offset);
+  public abstract void matchUpdate(int offset);
 
   /** Removes the previous highlight so document is cleared when caret position changes.  Assumes ReadLock is already
     * held.  Can be executed from outside the event thread. */

@@ -51,9 +51,11 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
@@ -139,38 +141,48 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
   
   /** Updates match highlights.  Only runs in the event thread except in some unit tests. Should it acquireReadLock? */
-  protected void matchUpdate(int offset) { 
-    _doc.setCurrentLocation(offset);  
-    _removePreviousHighlight();
-    
-    // Update the highlight if there is any. Not necessarily executed in event thread
-    int to = getCaretPosition();
-    int from = _doc.balanceBackward();
-    if (from > -1) {
-      // Found a matching open brace to this close brace
-      from = to - from;
-      _addHighlight(from, to);
-      //     Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      
-      String matchText = _matchText(from);
-      
-      if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
-      else _mainFrame.updateStatusField();
-    }
-    
-    // if this wasn't a close brace, check for an open brace
-    else {
-      // (getCaretPosition will be the start of the highlight)
-      from = to;
-      
-      to = _doc.balanceForward();
-      if (to > -1) {
-        to = to + from;
-        _addHighlight(from - 1, to);
+  public void matchUpdate(int offset) { 
+    final DefinitionsDocument doc = _doc.getDocument();
+    doc.acquireReadLock();
+    try {
+      synchronized(doc.getReduced()) {
+        doc._setCurrentLocation(offset); 
+        _removePreviousHighlight();
+        
+        // Update the highlight if there is any. Not necessarily executed in event thread
+        int to = getCaretPosition();
+        
+        int from = doc._balanceBackward();
+//        Utilities.show("balanceBackward() returned " + from);
+        if (from >= 0) {
+          // Found a matching open brace to this close brace
+          from = to - from;
+          _addHighlight(from, to);
+          //     Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+          
+          String matchText = _matchText(from);
+          
+          if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
+          else _mainFrame.updateStatusField();
+        }
+        
+        // if this wasn't a closed brace, check for an open brace
+        else {
+          // (getCaretPosition will be the start of the highlight)
+          from = to;
+          to = doc._balanceForward();
+//          System.err.println("balanceForward() returned " + to + "; from = " + from);
+          if (to >= 0) {
+            to = to + from;
+            _addHighlight(from - 1, to);
+//            System.err.println("Added forward highlight");
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      }
-      _mainFrame.updateStatusField();         
-    }
+          }
+          _mainFrame.updateStatusField();         
+        }
+      } // end synchronized
+    }  // end try
+    finally { doc.releaseReadLock(); }
   }
   
   /* Returns the text of the line where a matching open brace exists whenever the cursor is at a closing brace */
