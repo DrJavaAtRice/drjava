@@ -36,28 +36,31 @@
 
 package edu.rice.cs.drjava.config;
 
-import java.util.Set;
+import edu.rice.cs.util.Lambda;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.io.*;
 
-/** Class representing actions that are executed as side effect of command line
-  * evaluation for variables in external processes.
- *
- *  @version $Id$
- */
-public abstract class DrJavaActionProperty extends EagerProperty {  
-  /** Create a property. */
-  public DrJavaActionProperty(String name, String help) { super(name,help); }
-
-  /** Create a property. */
-  public DrJavaActionProperty(String name, String value, String help) { super(name, value, help); }
-  
-  /** Return the value of the property. If it is not current, update first.
-    * @param pm PropertyMaps used for substitution when replacing variables */
-  public String getCurrent(PropertyMaps pm) {
-    invalidate();
+/** Property that evaluates to a file, can be mutated, and that can be inserted
+  * as variables in external processes.
+  * @version $Id$
+  */
+public class MutableFileProperty extends FileProperty {
+  protected File _fileValue = null;
+  /** Create an eager file property. */
+  public MutableFileProperty(String name, File initialFile, String help) {
+    super(name,new Lambda<File,Void>() { public File apply(Void v) { return null; } }, help);
+    // cannot access _fileValue before super constructor has been called, so assign it again after the call
+    _getFile = new Lambda<File,Void>() { public File apply(Void v) { return _fileValue; } };
+    _fileValue = initialFile;
     _value = "";
-    return super.getCurrent(pm);
+    resetAttributes();
   }
+  
+  /** Set the value of this property.
+    * @param f file */
+  public void setFile(File f) { _fileValue = f; }
 } 

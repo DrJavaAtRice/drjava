@@ -131,7 +131,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
         f.getPath().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava Externa Process Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
+      return "DrJava External Process Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
     }
   };
 
@@ -142,7 +142,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
         f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava Externa Process Files (*"+PROJECT_FILE_EXTENSION+")";
+      return "DrJava External Process Files (*"+PROJECT_FILE_EXTENSION+")";
     }
   };
 
@@ -363,22 +363,18 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     v.remove(selectedIndex);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
-    
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
-    v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,v);
 
     v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     v.remove(selectedIndex);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
-    v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,v);
-
     v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     v.remove(selectedIndex);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    v.remove(selectedIndex);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,v);
 
     --count;
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
@@ -401,25 +397,20 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     v.add(selectedIndex-1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
     
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
-    s = v.remove(selectedIndex);
-    v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,v);
-
     v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
-    s = v.remove(selectedIndex);
-    v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,v);
-
     v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex-1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,v);
 
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex-1));
@@ -441,25 +432,20 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     v.add(selectedIndex+1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
     
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
-    s = v.remove(selectedIndex);
-    v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,v);
-
     v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
-    s = v.remove(selectedIndex);
-    v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,v);
-
     v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex+1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,v);
 
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex+1));
@@ -486,9 +472,11 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
         if (chosen.length == 0) {
           File f = _importChooser.getSelectedFile();
           if (f.getName().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)) {
+            edu.rice.cs.util.GeneralProcessCreator.LOG.log("_import: MainFrame.openExtProcessJarFile("+f+")");
             MainFrame.openExtProcessJarFile(f);
           }
           else {
+            edu.rice.cs.util.GeneralProcessCreator.LOG.log("_import: MainFrame.openExtProcessFile("+f+")");
             MainFrame.openExtProcessFile(f);
           }
           updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);

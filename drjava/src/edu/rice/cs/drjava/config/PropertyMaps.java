@@ -38,22 +38,23 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda2;
 import java.util.*;
 
 /** Class representing all the variables that
   * can be inserted as variables in external processes.
   * @version $Id$
   */
-public class PropertyMaps {
+public class PropertyMaps implements Cloneable {
   /** Map of property sets. */
   protected Map<String,Map<String,DrJavaProperty>> _props = new TreeMap<String,Map<String,DrJavaProperty>>();
   
-  /** Singleton instance. */
-  public static final PropertyMaps ONLY = new PropertyMaps();
+  /** Template instance. */
+  public static final PropertyMaps TEMPLATE = new PropertyMaps();
   
   static {
     for(Map.Entry<Object,Object> es: System.getProperties().entrySet()) {
-      ONLY.setProperty("Java", new JavaSystemProperty(es.getKey().toString()));
+      TEMPLATE.setProperty("Java", new JavaSystemProperty(es.getKey().toString()));
     }
     
     OptionMap om = DrJava.getConfig().getOptionMap();
@@ -62,7 +63,7 @@ public class PropertyMaps {
       OptionParser<?> op = it.next();
       String key = "config."+op.getName();
       String value = om.getString(op);
-      ONLY.setProperty("Config", new ConfigProperty(key));
+      TEMPLATE.setProperty("Config", new ConfigProperty(key));
     }
   }
   
@@ -125,14 +126,14 @@ public class PropertyMaps {
     return m;
   }
   
-  /** A lambda to use the toString() method, which does not force an update and might be stale. */
-  public static final Lambda<String,DrJavaProperty> TO_STRING = new Lambda<String,DrJavaProperty>() {
-    public String apply(DrJavaProperty p) { return p.toString(); /* might be stale */ }
+  /** A lambda to use the getLazy() method, which does not force an update and might be stale. */
+  public static final Lambda2<DrJavaProperty,PropertyMaps,String> GET_LAZY = new Lambda2<DrJavaProperty,PropertyMaps,String>() {
+    public String value(DrJavaProperty p, PropertyMaps pm) { return p.getLazy(pm); /* might be stale */ }
   };
   
   /** A lambda to use the getCurrent() method, which forces an update. */
-  public static final Lambda<String,DrJavaProperty> GET_CURRENT = new Lambda<String,DrJavaProperty>() {
-    public String apply(DrJavaProperty p) { return p.getCurrent(); }
+  public static final Lambda2<DrJavaProperty,PropertyMaps,String> GET_CURRENT = new Lambda2<DrJavaProperty,PropertyMaps,String>() {
+    public String value(DrJavaProperty p, PropertyMaps pm) { return p.getCurrent(pm); }
   };
   
   protected HashMap<String,Stack<VariableProperty>> _variables = new HashMap<String,Stack<VariableProperty>>();
@@ -196,5 +197,26 @@ public class PropertyMaps {
       // set unshadowed variable as new value of property
       setProperty(VARIABLES_CATEGORY, varStack.peek());
     }
+  }
+  
+  /** Clone this PropertyMaps object.
+    * @return cloned object */
+  public PropertyMaps clone() throws CloneNotSupportedException {
+    PropertyMaps clone = new PropertyMaps();
+    clone._props.clear();
+    for(String category: _props.keySet()) {
+      for (String key: _props.get(category).keySet()) {
+        clone.setProperty(key, getProperty(key));
+      }
+    }
+    clone._variables.clear();
+    for(String name: _variables.keySet()) {
+      Stack<VariableProperty> stack = new Stack<VariableProperty>();
+      for (VariableProperty v: _variables.get(name)) {
+        stack.add(new VariableProperty(v.getName(),v.getCurrent(this)));
+      }
+      clone._variables.put(name, stack);
+    }
+    return clone;
   }
 } 

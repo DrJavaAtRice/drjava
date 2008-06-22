@@ -64,7 +64,7 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
       "        <scroll column=\"0\" row=\"0\"/>\n"+
       "      </file>\n"+
 
-      "      <file name=\"edu/rice/cs/drjava/config/EagerFileProperty.java\" package=\"edu.rice.cs.drjava.config\" timestamp=\"14-Mar-2008 14:18:43\">\n"+
+      "      <file name=\"edu/rice/cs/drjava/config/FileProperty.java\" package=\"edu.rice.cs.drjava.config\" timestamp=\"14-Mar-2008 14:18:43\">\n"+
       "        <select from=\"0\" to=\"0\"/>\n"+
       "        <scroll column=\"0\" row=\"0\"/>\n"+
       "      </file>\n"+

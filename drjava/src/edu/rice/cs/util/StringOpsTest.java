@@ -477,9 +477,9 @@ public class StringOpsTest extends DrJavaTestCase {
     props.setProperty("1", new ConstantProperty("var", "foo", ""));
     props.setProperty("1", new ConstantProperty("xxx", "bar", ""));
     
-    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
-    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.TO_STRING));
-    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props,PropertyMaps.GET_LAZY));
   }
   
   public void testReplaceVariables2() {
@@ -489,11 +489,11 @@ public class StringOpsTest extends DrJavaTestCase {
     props.setProperty("2", new ConstantProperty("yyy", "bam", ""));
     props.setProperty("2", new ConstantProperty("xxx", "new", ""));
     
-    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
-    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.TO_STRING));
-    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props,PropertyMaps.TO_STRING));
-    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props,PropertyMaps.TO_STRING));
-    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props,PropertyMaps.GET_LAZY));
   }
   
   public void testReplaceVariables3() {
@@ -501,16 +501,16 @@ public class StringOpsTest extends DrJavaTestCase {
     props.setProperty("1", new ConstantProperty("var", "foo", ""));
     props.setProperty("1", new ConstantProperty("xxx", "bar", ""));
     
-    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
-    assertEquals("fooxyz", StringOps.replaceVariables("${var}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("fooxyz", StringOps.replaceVariables("${var}xyz",props,PropertyMaps.GET_LAZY));
     String source = "abc $${xxx}xyz";
-    String actual = StringOps.replaceVariables(source,props,PropertyMaps.TO_STRING);
+    String actual = StringOps.replaceVariables(source,props,PropertyMaps.GET_LAZY);
     String expected = "abc ${xxx}xyz";
 //    System.err.println("source  : "+source);
 //    System.err.println("expected: "+expected);
 //    System.err.println("actual  : "+actual);
     assertEquals(expected, actual);
-    assertEquals("${xxx}xyz", StringOps.replaceVariables("$${xxx}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("${xxx}xyz", StringOps.replaceVariables("$${xxx}xyz",props,PropertyMaps.GET_LAZY));
   }
   
 }

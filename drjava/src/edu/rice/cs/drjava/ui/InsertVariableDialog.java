@@ -134,7 +134,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
       public void stateChanged(ChangeEvent e) {
         if (_tabbedPane.getSelectedIndex()<0) { return; }
         String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
-        Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
+        Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
         String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
         DrJavaProperty value = properties.get(key);
         _varValueField.setText(value.toString());
@@ -223,7 +223,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     lsm.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
         String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
-        DrJavaProperty value = PropertyMaps.ONLY.getProperty(category,key);
+        DrJavaProperty value = PropertyMaps.TEMPLATE.getProperty(category,key);
         _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
@@ -233,7 +233,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     _varTable.get(category).setSelectionModel(lsm);
     
     TreeSet<String> sorted = new TreeSet<String>();
-    for(DrJavaProperty p: PropertyMaps.ONLY.getProperties(category).values()) {
+    for(DrJavaProperty p: PropertyMaps.TEMPLATE.getProperties(category).values()) {
       sorted.add(p.getName());
     }
     
@@ -269,8 +269,8 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
       selCategory = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
     }
     _tabbedPane.removeAll();
-    for (String category: PropertyMaps.ONLY.getCategories()) {
-      _tabbedPane.addTab(category, createPane(category, PropertyMaps.ONLY.getProperties(category)));
+    for (String category: PropertyMaps.TEMPLATE.getCategories()) {
+      _tabbedPane.addTab(category, createPane(category, PropertyMaps.TEMPLATE.getProperties(category)));
     }
     if (sel!=null) {
       if (selCategory==null) { sel = null; } else {
@@ -279,7 +279,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
           if (_tabbedPane.getTitleAt(i).equals(selCategory)) { _tabbedPane.setSelectedIndex(i); break; }
         }
         if (i==_tabbedPane.getTabCount()) { sel = null; } else {
-          Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(selCategory);
+          Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(selCategory);
           DefaultTableModel tm = _varTableModel.get(selCategory);
           for (i=0; i<tm.getRowCount(); ++i) {
             String key = tm.getValueAt(i,0).toString();
@@ -302,7 +302,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     if (sel==null) {
       _tabbedPane.setSelectedIndex(0);
       String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
-      Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
+      Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
       _varTable.get(category).getSelectionModel().setSelectionInterval(0,0);
       String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
       DrJavaProperty value = properties.get(key);

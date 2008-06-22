@@ -46,8 +46,9 @@ public class JavaSystemProperty extends EagerProperty {
     resetAttributes();
   }
 
-  /** Update the property so the value is current. */
-  public void update() {
+  /** Update the property so the value is current.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public void update(PropertyMaps pm) {
     _value = System.getProperty(_name);
     if (_value == null) { _value = "--unknown--"; }
   }

@@ -52,10 +52,16 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 public class ProcessChain extends Process {
   /** Separator used between different process chains. */
-  public static final String PROCESS_SEPARATOR = (File.pathSeparatorChar==':')?";":":";
+  public static final char PROCESS_SEPARATOR_CHAR = (File.pathSeparatorChar==':')?';':':';
+
+  /** Separator used between different process chains. */
+  public static final String PROCESS_SEPARATOR = String.valueOf(PROCESS_SEPARATOR_CHAR);
 
   /** Separator used between processes inside the same process chain. */
-  public static final String PIPE_SEPARATOR = "|";
+  public static final char PIPE_SEPARATOR_CHAR = '|';
+  
+  /** Separator used between processes inside the same process chain. */
+  public static final String PIPE_SEPARATOR = String.valueOf(PIPE_SEPARATOR_CHAR);
   
   /** The process creators that create the processes in this process chain. */
   protected ProcessCreator[] _creators;

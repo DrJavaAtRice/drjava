@@ -412,7 +412,11 @@ public class DrJava {
                                     "Another process may be using the file.\n\n" + e,
                                     "Could Not Save Changes",
                                     JOptionPane.ERROR_MESSAGE);
-      // TODO: log this error
+      // log this error
+      DrJavaErrorHandler.record(new edu.rice.cs.util.UnexpectedException(e,
+                                                                         "Could not save the location of tools.jar in \n" +
+                                                                         "the '.drjava' file in your home directory. \n" +
+                                                                         "Another process may be using the file.\n\n"));
     }
   }
   

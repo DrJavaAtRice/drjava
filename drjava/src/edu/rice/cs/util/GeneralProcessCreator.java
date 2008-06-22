@@ -60,20 +60,24 @@ public class GeneralProcessCreator extends ProcessCreator {
   /** Constructor for a process creator with the given command line and the work directory.
     * @param cmdline command line
     * @param workdir working directory
+    * @param pm PropertyMaps object used for substitution
     */
-  public GeneralProcessCreator(String cmdline, String workdir) {
+  public GeneralProcessCreator(String cmdline, String workdir, PropertyMaps pm) {
     _cmdline = cmdline;
     _workdir = workdir;
+    _props = pm;
   }
 
   /** Constructor for a process creator with the given command line already split up, and
     * the work directory.
     * @param cmdline command line
     * @param workdir working directory
+    * @param pm PropertyMaps object used for substitution
     */
-  public GeneralProcessCreator(List<List<List<String>>> seqs, String workdir) {
+  public GeneralProcessCreator(List<List<List<String>>> seqs, String workdir, PropertyMaps pm) {
     _seqs = seqs;
     _workdir = workdir;
+    _props = pm;
   }
   
   /** Cached copy of the reconstructed command line. */
@@ -84,7 +88,7 @@ public class GeneralProcessCreator extends ProcessCreator {
     StringBuilder sb = new StringBuilder();
     for (int i=0; i<cmds.size(); ++i) {
       sb.append(" ");
-      sb.append(StringOps.unescapeSpacesWith1bHex(cmds.get(i)));
+      sb.append(StringOps.unescapeFileName(cmds.get(i)));
     }
     String s = sb.toString();
     if (s.length()>0) {
@@ -168,15 +172,15 @@ public class GeneralProcessCreator extends ProcessCreator {
     return _workdir;
   }
 
-  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt",false);
+  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt",true);
   
   /** Starts a new process using the attributes of this process creator. */
   public Process start() throws IOException {
     // set up work directory
-    String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
-    workdir = StringOps.unescapeSpacesWith1bHex(workdir);
+    _evaluatedWorkDir = StringOps.replaceVariables(_workdir, _props, PropertyMaps.GET_CURRENT);
+    _evaluatedWorkDir = StringOps.unescapeFileName(_evaluatedWorkDir);
     File dir = null;
-    if (!workdir.trim().equals("")) { dir = new File(workdir); }
+    if (!_evaluatedWorkDir.trim().equals("")) { dir = new File(_evaluatedWorkDir); }
 
     // set up environment
     String[] env = null;
@@ -191,8 +195,8 @@ public class GeneralProcessCreator extends ProcessCreator {
 
     // set up command line
     if (_cmdline!=null) {
-      String replacedCmdLine = StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
-      _seqs = StringOps.commandLineToLists(replacedCmdLine);
+      _evaluatedWorkDir = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
+      _seqs = StringOps.commandLineToLists(_evaluatedWorkDir);
     }
     LOG.log("\t"+edu.rice.cs.plt.iter.IterUtil.toString(_seqs));
     if (_seqs.size()<1) { throw new IOException("No process to start."); }
@@ -205,7 +209,7 @@ public class GeneralProcessCreator extends ProcessCreator {
         List<String> cmds = pipe.get(0);
         String[] cmdarray = new String[cmds.size()];
         for (int i=0; i<cmds.size(); ++i) {
-          cmdarray[i] = StringOps.unescapeSpacesWith1bHex(cmds.get(i));
+          cmdarray[i] = StringOps.unescapeFileName(cmds.get(i));
         }
         // creating a simple process
         return Runtime.getRuntime().exec(cmdarray,env,dir);
@@ -216,7 +220,7 @@ public class GeneralProcessCreator extends ProcessCreator {
         List<String> cmds = pipe.get(i);
         String[] cmdarray = new String[cmds.size()];
         for (int j=0; j<cmds.size(); ++j) {
-          cmdarray[j] = StringOps.unescapeSpacesWith1bHex(cmds.get(j));
+          cmdarray[j] = StringOps.unescapeFileName(cmds.get(j));
         }
         creators[i] = new ProcessCreator(cmdarray, _workdir);
       }
@@ -227,7 +231,7 @@ public class GeneralProcessCreator extends ProcessCreator {
     for (int i=0; i<_seqs.size(); ++i) {
       List<List<List<String>>> l = new ArrayList<List<List<String>>>();
       l.add(_seqs.get(i));
-      creators[i] = new GeneralProcessCreator(l, _workdir);
+      creators[i] = new GeneralProcessCreator(l, _workdir, _props);
     }
     return new ProcessSequence(creators);
   }

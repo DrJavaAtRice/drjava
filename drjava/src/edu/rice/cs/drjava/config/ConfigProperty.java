@@ -54,8 +54,9 @@ public class ConfigProperty extends EagerProperty {
     resetAttributes();
   }
 
-  /** Update the property so the value is current. */
-  public void update() {        
+  /** Update the property so the value is current.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public void update(PropertyMaps pm) {
     OptionMap om = DrJava.getConfig().getOptionMap();
     Iterator<OptionParser<?>> it = om.keys();
     while(it.hasNext()) {
@@ -121,5 +122,5 @@ public class ConfigProperty extends EagerProperty {
   }
 
   /** Return the value. */
-  public String toString() { return getCurrent(); }
+  public String toString() { return _value; }
 } 

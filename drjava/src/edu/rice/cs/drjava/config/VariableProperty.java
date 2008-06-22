@@ -54,11 +54,4 @@ public class VariableProperty extends ConstantProperty {
   public void setValue(String value) {
     _value = value;
   }
-
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    VariableProperty o = (VariableProperty)other;
-    return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
-  }
 } 

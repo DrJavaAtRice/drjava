@@ -99,8 +99,9 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
     this(name,help,op,"op1",null,parse1,"op2",null,parse2,format);
   }
   
-  /** Update the property so the value is current. */
-  public void update() {
+  /** Update the property so the value is current. 
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public void update(PropertyMaps pm) {
     P op1;
     if (_attributes.get(_op1Name)==null) {
       _value = "("+_name+" Error...)";
@@ -136,24 +137,5 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
     _attributes.clear();
     _attributes.put(_op1Name, _op1Default);
     _attributes.put(_op2Name, _op2Default);
-  }
-  
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    BinaryOpProperty o = (BinaryOpProperty) other;
-    return _name.equals(o._name)
-      && _value.equals(o._value)
-      && (_isCurrent == o._isCurrent)
-      && _op.equals(o._op)
-      && _parse1.equals(o._parse1)
-      && _parse2.equals(o._parse2)
-      && _format.equals(o._format); 
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() { 
-    return hash(_name.hashCode(), _value.hashCode(), _op.hashCode(), _parse1.hashCode(), _parse2.hashCode(), 
-                _format.hashCode(), (_isCurrent ? 1 : 0));
   }
 } 

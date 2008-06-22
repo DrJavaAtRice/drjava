@@ -37,6 +37,7 @@
 package edu.rice.cs.util;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.drjava.config.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -517,10 +518,14 @@ public abstract class StringOps {
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", true);
   
   /** Escapes spaces ' ' with the sequence "\u001b ", and a single '\u001b' with a double.
+    * It treats File.pathSeparatorChar (';' or ':'), ProcessChain.PROCESS_SEPARATOR_CHAR (':' or ';'),
+    * and ProcessChain.PIPE_SEPARATOR_CHAR the same way.
     * '\u001b' was picked because its ASCII meaning is 'escape', and it should be platform-independent.
+    * This method keeps file names with spaces, colons and semicolons together and prevents them
+    * from being split apart.
     * @param s string to encode
     * @return encoded string */
-  public static String escapeSpacesWith1bHex(String s) {
+  public static String escapeFileName(String s) {
     StringBuilder sb = new StringBuilder();
     for (int i=0; i<s.length(); ++i) {
       if (s.charAt(i)=='\u001b') {
@@ -529,8 +534,20 @@ public abstract class StringOps {
       else if (s.charAt(i)==' ') {
         sb.append("\u001b ");
       }
+      else if (s.charAt(i)==java.io.File.pathSeparatorChar) {
+        sb.append('\u001b');
+        sb.append(java.io.File.pathSeparatorChar);
+      }
+      else if (s.charAt(i)==ProcessChain.PROCESS_SEPARATOR_CHAR) {
+        sb.append('\u001b');
+        sb.append(ProcessChain.PROCESS_SEPARATOR_CHAR);
+      }
+      else if (s.charAt(i)==ProcessChain.PIPE_SEPARATOR_CHAR) {
+        sb.append('\u001b');
+        sb.append(ProcessChain.PIPE_SEPARATOR_CHAR);
+      }
       else {
-        sb.append(""+s.charAt(i));
+        sb.append(String.valueOf(s.charAt(i)));
       }
     }
     return sb.toString();
@@ -540,7 +557,7 @@ public abstract class StringOps {
     * '\u001b' was picked because its ASCII meaning is 'escape', and it should be platform-independent.
     * @param s string to encode
     * @return encoded string */
-  public static String unescapeSpacesWith1bHex(String s) {
+  public static String unescapeFileName(String s) {
     StringBuilder sb = new StringBuilder();
     for (int i=0; i<s.length(); ++i) {
       if (s.charAt(i)=='\u001b') {
@@ -548,9 +565,14 @@ public abstract class StringOps {
           char next = s.charAt(i+1);
           if (next=='\u001b') { sb.append("\u001b"); ++i; }
           else if (next==' ') { sb.append(" "); ++i; }
-          else { throw new IllegalArgumentException("1b hex followed by neither space nor another 1b hex"); }
+          else if (next==java.io.File.pathSeparatorChar) { sb.append(java.io.File.pathSeparatorChar); ++i; }
+          else if (next==ProcessChain.PROCESS_SEPARATOR_CHAR) { sb.append(ProcessChain.PROCESS_SEPARATOR_CHAR); ++i; }
+          else if (next==ProcessChain.PIPE_SEPARATOR_CHAR) { sb.append(ProcessChain.PIPE_SEPARATOR_CHAR); ++i; }
+          else { throw new IllegalArgumentException("1b hex followed by character other than space, "+
+                                                    "path separator, process separator, pipe or 1b hex"); }
         }
-        else { throw new IllegalArgumentException("1b hex followed by neither space nor another 1b hex"); }
+        else { throw new IllegalArgumentException("1b hex followed by character other than space, "+
+                                                    "path separator, process separator, pipe or 1b hex"); }
       }
       else {
         sb.append(""+s.charAt(i));
@@ -560,8 +582,9 @@ public abstract class StringOps {
   }
   
   /** Convert a command line into a list of individual arguments.
-    * This keeps quoted parts together using ", ' and `.
-    * It also keeps treats a '\u001b' followed by a space as non-breaking space.
+    * This keeps quoted parts together using " and '.
+    * It also keeps treats a '\u001b' followed by a space, colon, semicolon or pipe as
+    * non-breaking space, colon, semicolon or pipe.
     * And a double '\u001b' becomes a single '\u001b'. 
     * It does not allow escaping of the quote characters. */
   public static List<String> commandLineToList(String cmdline) {
@@ -570,7 +593,7 @@ public abstract class StringOps {
     tok.ordinaryChars(0,255);
     tok.quoteChar('\'');
     tok.quoteChar('"');
-    tok.quoteChar('`');
+    // tok.quoteChar('`'); // back tick not yet supported
     tok.slashSlashComments(false);
     tok.slashStarComments(false);
     ArrayList<String> cmds = new ArrayList<String>();
@@ -655,8 +678,18 @@ public abstract class StringOps {
     tok.addKeyword(new Character((char)0x1E).toString()); // record separator
     tok.addKeyword(new Character((char)0x1F).toString()); // unit separator
     // also add escaped space as keyword, but treat it differently
-    final String ESCAPED_SPACE = new Character((char)0x1B).toString()+" ";
+    final String ESCAPE = String.valueOf((char)0x1B);
+    final String ESCAPED_SPACE = ESCAPE+" ";
     tok.addKeyword(ESCAPED_SPACE); // escaped space
+    // also add escaped path separator (';' or ':') as keyword, but treat it differently
+    final String ESCAPED_PATH_SEPARATOR = ESCAPE+java.io.File.pathSeparator;
+    tok.addKeyword(ESCAPED_PATH_SEPARATOR); // escaped path separator
+    // also add escaped process separator (':' or ';') as keyword, but treat it differently
+    final String ESCAPED_PROCESS_SEPARATOR = ESCAPE+ProcessChain.PROCESS_SEPARATOR;
+    tok.addKeyword(ESCAPED_PROCESS_SEPARATOR); // escaped process separator
+    // also add escaped pipe ('|') as keyword, but treat it differently
+    final String ESCAPED_PIPE_SEPARATOR = ESCAPE+ProcessChain.PIPE_SEPARATOR;
+    tok.addKeyword(ESCAPED_PIPE_SEPARATOR); // escaped pipe
     // read tokens; concatenate tokens until keyword is found
     String n = null, p = null;
     BalancingStreamTokenizer.Token pTok = BalancingStreamTokenizer.Token.NONE;
@@ -694,9 +727,12 @@ public abstract class StringOps {
             ll.add(l);
             l = new ArrayList<String>();
           }
-          else if (n.equals(ESCAPED_SPACE)) {
-            // escaped whitespace
-            sb.append(ESCAPED_SPACE);
+          else if (n.equals(ESCAPED_SPACE) ||
+                   n.equals(ESCAPED_PATH_SEPARATOR) ||
+                   n.equals(ESCAPED_PROCESS_SEPARATOR) ||
+                   n.equals(ESCAPED_PIPE_SEPARATOR)) {
+            // escaped characters
+            sb.append(n);
           }
           else { // must be whitespace
             // add the current string to the argument list and start a new argument
@@ -741,7 +777,7 @@ public abstract class StringOps {
    * @param getter lambda from a DrJavaProperty to String
    * @return string with variables replaced by values
    */
-  public static String replaceVariables(String str, final PropertyMaps props, final Lambda<String,DrJavaProperty> getter) {
+  public static String replaceVariables(String str, final PropertyMaps props, final Lambda2<DrJavaProperty,PropertyMaps,String> getter) {
     BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
     tok.wordRange(0,255);
     tok.addQuotes("${", "}");
@@ -837,7 +873,7 @@ public abstract class StringOps {
                 });
               }
               // append the value of the property, e.g. /home/user instead of "${property.name}"
-              String finalValue = getter.apply(p);
+              String finalValue = getter.value(p,props);
               // LOG.log("\tfinal value: '"+finalValue+"'");
               sb.append(finalValue);
             }              

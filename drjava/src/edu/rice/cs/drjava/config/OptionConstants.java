@@ -1244,27 +1244,21 @@ public interface OptionConstants {
                              new StringOption("",""),
                              new Vector<String>());
   
-  /** The types of saved external processes. */
-  public static final VectorOption<String> EXTERNAL_SAVED_TYPES =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"types",
-                             new StringOption("",""),
-                             new Vector<String>());
-  
   /** The command lines of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_CMDLINES =
     new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"cmdlines",
                              new StringOption("",""),
                              new Vector<String>());
   
-  /** The JVM args of saved external processes (if applicable). */
-  public static final VectorOption<String> EXTERNAL_SAVED_JVMARGS =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"jvmargs",
-                             new StringOption("",""),
-                             new Vector<String>());
-  
   /** The work directories of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_WORKDIRS =
     new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"workdirs",
+                             new StringOption("",""),
+                             new Vector<String>());
+  
+  /** The script file (or "" if none) of saved external processes. */
+  public static final VectorOption<String> EXTERNAL_SAVED_DRJAVAJAR_FILES =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"drjavajarfiles",
                              new StringOption("",""),
                              new Vector<String>());
   

@@ -77,6 +77,6 @@ public class FindResult {
   /** Returns true if the search wrapped to the beginning (or end) of the document */
   public boolean getWrapped() { return _wrapped; }
   
-  /** Returns true if the search wrapped to the start document.  TODO: change method name to getAllWrapped. */
-  public boolean getAllDocsWrapped() { return _allWrapped; }
+  /** Returns true if the search wrapped to the start document. */
+  public boolean getAllWrapped() { return _allWrapped; }
 }

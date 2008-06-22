@@ -125,8 +125,8 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected void initThread(ProcessCreator pc) {
     // MainFrame.LOG.log("\tProcessPanel ctor");
     try {
-      PropertyMaps.ONLY.clearVariables();
       _pc = pc;
+      _pc.getPropertyMaps().clearVariables();
       _readThread = new Thread(new Runnable() {
         public void run() {
           while((_is!=null) || (_erris!=null)) {
@@ -147,6 +147,9 @@ public class ExternalProcessPanel extends AbortablePanel {
         }
       },"External Process Update Thread");
       _p = _pc.start();
+      _sb.append("Evaluated command line:");
+      _sb.append(_pc.evaluatedCommandLine());
+      _sb.append('\n');
       _is = new InputStreamReader(_p.getInputStream());
       _erris = new InputStreamReader(_p.getErrorStream());
       _readThread.start();

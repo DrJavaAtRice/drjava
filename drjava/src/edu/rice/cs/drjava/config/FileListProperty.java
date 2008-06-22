@@ -37,39 +37,77 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import edu.rice.cs.util.StringOps;
 
-/** Class representing values that are constant and that can be inserted as variables in external processes.
+/** Class representing file lists that are not evaluated until necessary.
   * @version $Id$
   */
-public class ConstantProperty extends EagerProperty {
-  /** Create a constant property. */
-  public ConstantProperty(String name, String value, String help) {
+public abstract class FileListProperty extends DrJavaProperty {
+  /** Separating string. */
+  protected String _sep;
+  /** Relative directory. */
+  protected String _dir;
+  /** Create an lazy file list property. */
+  public FileListProperty(String name, String sep, String dir, String help) {
     super(name, help);
-    if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
-    _value = value;
-    _isCurrent = true;
+    _sep = sep;
+    _dir = dir;
     resetAttributes();
   }
-      
-  /** Update the property so the value is current.
-    * @param pm PropertyMaps used for substitution when replacing variables */
-  public void update(PropertyMaps pm) { }
-  
-  /** Return the value of the property. If it is not current, update first. 
-    * @param pm PropertyMaps used for substitution when replacing variables*/
-  public String getCurrent(PropertyMaps pm) { return _value; }
-
-  /** Return the value. */
-  public String toString() { return _value; }
-  
-  /** Return true if the value is current. */
-  public boolean isCurrent() { return true; }
   
   /** Mark the value as stale. */
   public void invalidate() {
     // nothing to do, but tell those who are listening
     invalidateOthers(new HashSet<DrJavaProperty>());
   }
-} 
+  
+  /** Return true if the value is current. */
+  public boolean isCurrent() { return false; }
+
+  /** Abstract factory method specifying the list.PropertyMaps pm
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  protected abstract List<File> getList(PropertyMaps pm);
+  
+  /** Update the value by concatenating the list of documents.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public void update(PropertyMaps pm) {
+    List<File> l = getList(pm);
+    if (l.size()==0) { _value = ""; return; }
+    StringBuilder sb = new StringBuilder();
+    for(File fil: l) {
+      sb.append(StringOps.replaceVariables(_attributes.get("sep"), pm, PropertyMaps.GET_CURRENT));
+      try {
+        String f = fil.toString();
+        if (_attributes.get("rel").equals("/")) f = fil.getAbsolutePath();
+        else {
+          File rf = new File(StringOps.
+                               unescapeFileName(StringOps.replaceVariables(_attributes.get("rel"), 
+                                                                                  pm,
+                                                                                  PropertyMaps.GET_CURRENT)));
+          f = FileOps.stringMakeRelativeTo(fil, rf);
+        }
+        String s = edu.rice.cs.util.StringOps.escapeFileName(f);
+        sb.append(s);
+      }
+      catch(IOException e) { /* ignore */ }
+      catch(SecurityException e) { /* ignore */ }
+    }
+    _value = sb.toString();
+    if (_value.startsWith(_attributes.get("sep"))) {
+      _value= _value.substring(_attributes.get("sep").length());
+    }
+  }
+  
+  /** Reset the attributes. */
+  public void resetAttributes() {
+    _attributes.clear();
+    _attributes.put("sep", _sep);
+    _attributes.put("rel", _dir);
+  }
+}

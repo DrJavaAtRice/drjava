@@ -110,8 +110,9 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     this(name,help,op,"op1",null,parse1,"op2",null,parse2,"op3",null,parse3,format);
   }
   
-  /** Update the property so the value is current. */
-  public void update() {
+  /** Update the property so the value is current.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public void update(PropertyMaps pm) {
     O op1;
     if (_attributes.get(_op1Name)==null) {
       _value = "("+_name+" Error...)";
@@ -162,33 +163,5 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     _attributes.put(_op1Name, _op1Default);
     _attributes.put(_op2Name, _op2Default);
     _attributes.put(_op3Name, _op3Default);
-  }
-  
-  /** @return true if the specified property is equal to this one. */
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) return false;
-    TernaryOpProperty o = (TernaryOpProperty)other;
-    return _name.equals(o._name)
-      && (_isCurrent == o._isCurrent)
-      && _op.equals(o._op)
-      && _parse1.equals(o._parse1)
-      && _parse2.equals(o._parse2)
-      && _parse3.equals(o._parse3)
-      && _format.equals(o._format)
-      && _value.equals(o._value);
-  }
-  
-  /** @return the hash code. */
-  public int hashCode() {
-    int result;
-    result = _name.hashCode();
-    result = 31 * result + (_op.hashCode());
-    result = 31 * result + (_parse1.hashCode());
-    result = 31 * result + (_parse2.hashCode());
-    result = 31 * result + (_parse3.hashCode());
-    result = 31 * result + (_format.hashCode());
-    result = 31 * result + (_value.hashCode());
-    result = 31 * result + (_isCurrent?1:0);
-    return result;
   }
 } 

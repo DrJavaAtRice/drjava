@@ -52,7 +52,7 @@ import edu.rice.cs.plt.text.TextUtil;
 /** Class representing a lazy lists of files that are found recursively inside a start directory.
   * @version $Id$
   */
-public class RecursiveFileListProperty extends LazyFileListProperty {
+public class RecursiveFileListProperty extends FileListProperty {
   /** Start directory. */
   protected String _start;
   /** Create an recursive file list property. */
@@ -92,12 +92,13 @@ public class RecursiveFileListProperty extends LazyFileListProperty {
     public void clearExcludedFile() { _exclude.clear(); }
   }
   
-  /** Abstract factory method specifying the list. */
-  protected List<File> getList() {
+  /** Abstract factory method specifying the list.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  protected List<File> getList(PropertyMaps pm) {
     FileMaskFilter fFilter = new FileMaskFilter(_attributes.get("filter"));
     FileMaskFilter fDirFilter = new FileMaskFilter(_attributes.get("dirfilter"));
-    String start = StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
-    start = StringOps.unescapeSpacesWith1bHex(start);
+    String start = StringOps.replaceVariables(_attributes.get("dir"), pm, PropertyMaps.GET_CURRENT);
+    start = StringOps.unescapeFileName(start);
     File fStart = new File(start);
     // if the specified starting point is a directory, allow that directory
     if (fStart.isDirectory()) { fDirFilter.addIncludedFile(fStart); }

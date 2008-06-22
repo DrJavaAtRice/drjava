@@ -885,7 +885,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         else _frame.setStatusMessage("Search wrapped to end.");
       }
       
-      if (fr.getAllDocsWrapped() && searchAll) {
+      if (fr.getAllWrapped() && searchAll) {
         Toolkit.getDefaultToolkit().beep();
         _frame.setStatusMessage("Search wrapped around all documents.");
       }

@@ -36,28 +36,76 @@
 
 package edu.rice.cs.drjava.config;
 
-import java.util.Set;
+import edu.rice.cs.util.Lambda;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.io.*;
 
-/** Class representing actions that are executed as side effect of command line
-  * evaluation for variables in external processes.
- *
- *  @version $Id$
- */
-public abstract class DrJavaActionProperty extends EagerProperty {  
-  /** Create a property. */
-  public DrJavaActionProperty(String name, String help) { super(name,help); }
-
-  /** Create a property. */
-  public DrJavaActionProperty(String name, String value, String help) { super(name, value, help); }
+/** Property that evaluates to a file and that can be inserted as variables in external processes.
+  * @version $Id$
+  */
+public class FileProperty extends DrJavaProperty {
+  protected Lambda<File,Void> _getFile;
+  /** Create an eager file property. */
+  public FileProperty(String name, Lambda<File,Void> getFile, String help) {
+    super(name,help);
+    _getFile = getFile;
+    resetAttributes();
+  }
   
   /** Return the value of the property. If it is not current, update first.
     * @param pm PropertyMaps used for substitution when replacing variables */
   public String getCurrent(PropertyMaps pm) {
-    invalidate();
-    _value = "";
-    return super.getCurrent(pm);
+    update(pm);
+    if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    _isCurrent = true;
+    return _value;
+  }
+
+  /** Return the value. */
+  public String toString() { return _value; }
+  
+  /** Return true if the value is current. */
+  public boolean isCurrent() { return true; }
+  
+  /** Mark the value as stale. */
+  public void invalidate() {
+    // nothing to do, but tell those who are listening
+    invalidateOthers(new HashSet<DrJavaProperty>());
+  }
+  
+  /** Update the value of the property.
+    * @param pm PropertyMaps used for substitution */
+  public void update(PropertyMaps pm) {
+    try {
+      File f;
+      if (_getFile == null || (f = _getFile.apply(null)) == null) {
+        _value = "";
+        return;
+      }
+      if (_attributes.get("rel").equals("/")) {
+        f = f.getAbsoluteFile();
+        try { f = f.getCanonicalFile(); }
+        catch(IOException ioe) { }
+        _value = edu.rice.cs.util.StringOps.escapeFileName(f.toString());
+      }
+      else {
+        File rf = new File(StringOps.unescapeFileName(StringOps.replaceVariables(_attributes.get("rel"), 
+                                                                                        pm,
+                                                                                        PropertyMaps.GET_CURRENT)));
+        String s = FileOps.stringMakeRelativeTo(f,rf);                                     
+        _value = edu.rice.cs.util.StringOps.escapeFileName(s);
+      }
+    }
+    catch(IOException e) { _value = "(Error...)"; }
+    catch(SecurityException e) { _value = "(Error...)"; }
+  }    
+
+  public void resetAttributes() {
+    _attributes.clear();
+    _attributes.put("rel", "/");
   }
 } 

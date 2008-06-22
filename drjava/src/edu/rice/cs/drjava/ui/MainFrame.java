@@ -2873,7 +2873,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Creates the main window, and shows it. */ 
   public MainFrame() {
-    
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig(); 
     
@@ -2965,7 +2964,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                               new JScrollPane(_model.getDocumentNavigator().asContainer()), defScroll);
     _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
     _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
-    
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
 //    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
@@ -3318,7 +3316,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _showConfigException();
     
     KeyBindingManager.Singleton.setShouldCheckConflict(false);
-    
+        
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
     setUpKeys();    
@@ -3401,20 +3399,23 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         });
       }
     }
-    
-    // check for new version if desired by user
-    if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
-      int days = DrJava.getConfig().getSetting(DRJAVA_SURVEY_DAYS);
-      java.util.Date nextCheck = 
-        new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
-                             + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
-      if (new java.util.Date().after(nextCheck)) {
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
-            popup.setVisible(true);
-          }
-        });
+    else {
+      // check for new version if desired by user
+      // but only if we haven't just asked if the user wants to download a new version
+      // two dialogs on program start is too much clutter
+      if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
+        int days = DrJava.getConfig().getSetting(DRJAVA_SURVEY_DAYS);
+        java.util.Date nextCheck = 
+          new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
+                               + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
+        if (new java.util.Date().after(nextCheck)) {
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+              popup.setVisible(true);
+            }
+          });
+        }
       }
     }
   }   // End of MainFrame constructor
@@ -3432,108 +3433,120 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJavaPropertySetup.setup(); 
     
     // Files
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.current.file", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileProperty("drjava.current.file", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getActiveDocument().getRawFile(); }
     }, 
-                                                                  "Returns the current document in DrJava.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which the output should be relative\""));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.line", 
-                                                              "Returns the current line in the Definitions Pane.") {
-      public void update() {
+                                                                 "Returns the current document in DrJava.\n"+
+                                                                 "Optional attributes:\n"+
+                                                                 "\trel=\"<dir to which the output should be relative\"") {
+                                                                   public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                 });
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.line", 
+                                                                   "Returns the current line in the Definitions Pane.") {
+      public void update(PropertyMaps pm) {
         _value = String.valueOf(_posListener.lastLine());
       }
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.col", 
-                                                              "Returns the current column in the Definitions Pane.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.col",
+                                                                   "Returns the current column in the Definitions Pane.") {
+      public void update(PropertyMaps pm) {
 //        int line = _currentDefPane.getCurrentLine();
 //        int lineOffset = _currentDefPane.getLineStartOffset(line);
 //        int caretPos = _currentDefPane.getCaretPosition();
         _value = String.valueOf(_posListener.lastCol());
       }
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.working.dir", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileProperty("drjava.working.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getInteractionsModel().getWorkingDirectory(); }
     },
-                                                                  "Returns the current working directory of DrJava.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which output should be relative\""));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
+                                                                 "Returns the current working directory of DrJava.\n"+
+                                                                 "Optional attributes:\n"+
+                                                                 "\trel=\"<dir to which output should be relative\"") {
+                                                                   public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                 });
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMasterWorkingDirectory(); }
     },
-                                                                  "Returns the working directory of the DrJava master JVM.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which output should be relative\""));
+                                                                 "Returns the working directory of the DrJava master JVM.\n"+
+                                                                 "Optional attributes:\n"+
+                                                                 "\trel=\"<dir to which output should be relative\"") {
+                                                                   public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                 });
     
     // Files
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
-                                                                      "Returns a list of all files open in DrJava.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which output should be relative\"\n"+
-                                                                      "\tsep=\"<separator between files>\"") {
-      protected List<File> getList() {
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
+                                                                     "Returns a list of all files open in DrJava.\n"+
+                                                                     "Optional attributes:\n"+
+                                                                     "\trel=\"<dir to which output should be relative\"\n"+
+                                                                     "\tsep=\"<separator between files>\"") {
+      protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) {
           l.add(odd.getRawFile());
         }
         return l;
       }
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR,
-                                                                      "Returns a list of all files open in DrJava that belong "+
-                                                                      "to a project and are underneath the project root.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which output should be relative\"\n"+
-                                                                      "\tsep=\"<separator between files>\"") {
-      protected List<File> getList() {
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR,
+                                                                     "Returns a list of all files open in DrJava that belong "+
+                                                                     "to a project and are underneath the project root.\n"+
+                                                                     "Optional attributes:\n"+
+                                                                     "\trel=\"<dir to which output should be relative\"\n"+
+                                                                     "\tsep=\"<separator between files>\"") {
+      protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getProjectDocuments()) {
           l.add(odd.getRawFile());
         }
         return l;
       }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR,
-                                                                      "Returns a list of all files open in DrJava that are "+
-                                                                      "not underneath the project root but are included in "+
-                                                                      "the project.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which output should be relative\"\n"+
-                                                                      "\tsep=\"<separator between files>\"") {
-      protected List<File> getList() {
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR,
+                                                                     "Returns a list of all files open in DrJava that are "+
+                                                                     "not underneath the project root but are included in "+
+                                                                     "the project.\n"+
+                                                                     "Optional attributes:\n"+
+                                                                     "\trel=\"<dir to which output should be relative\"\n"+
+                                                                     "\tsep=\"<separator between files>\"") {
+      protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getAuxiliaryDocuments()) {
           l.add(odd.getRawFile());
         }
         return l;
       }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
-                                                                      "Returns a list of all files open in DrJava that are "+
-                                                                      "not underneath the project root and are not included in "+
-                                                                      "the project.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which output should be relative\"\n"+
-                                                                      "\tsep=\"<separator between files>\"") {
-      protected List<File> getList() {
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
+                                                                     "Returns a list of all files open in DrJava that are "+
+                                                                     "not underneath the project root and are not included in "+
+                                                                     "the project.\n"+
+                                                                     "Optional attributes:\n"+
+                                                                     "\trel=\"<dir to which output should be relative\"\n"+
+                                                                     "\tsep=\"<separator between files>\"") {
+      protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getNonProjectDocuments()) {
           l.add(odd.getRawFile());
         }
         return l;
       }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));    
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));    
     
-    PropertyMaps.ONLY.setProperty("Misc", new DrJavaProperty("input", "(User Input...)",
-                                                             "Get an input string from the user.\n"+
-                                                             "Optional attributes:\n"+
-                                                             "\tprompt=\"<prompt to display>\"\n"+
-                                                             "\tdefault=\"<suggestion to the user>\"") {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("input", "(User Input...)",
+                                                                 "Get an input string from the user.\n"+
+                                                                 "Optional attributes:\n"+
+                                                                 "\tprompt=\"<prompt to display>\"\n"+
+                                                                 "\tdefault=\"<suggestion to the user>\"") {
       public String toString() {
         return "(User Input...)";
       }
-      public void update() {
+      public void update(PropertyMaps pm) {
         String msg = _attributes.get("prompt");
         if (msg == null) msg = "Please enter text for the external process.";
         String input = _attributes.get("default");
@@ -3543,9 +3556,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (input == null) input = "";
         _value = input;
       }
-      public String getCurrent() {
+      public String getCurrent(PropertyMaps pm) {
         invalidate();
-        return super.getCurrent();
+        return super.getCurrent(pm);
       }
       public void resetAttributes() {
         _attributes.clear();
@@ -3555,25 +3568,25 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
     
     // Project
-    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.mode",
-                                                               "Evaluates to true if a project is loaded.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Project", new DrJavaProperty("project.mode",
+                                                                    "Evaluates to true if a project is loaded.") {
+      public void update(PropertyMaps pm) {
         Boolean b = _model.isProjectActive();
         String f = _attributes.get("fmt").toLowerCase();
         if (f.equals("int")) _value = b ? "1" : "0";
         else if (f.equals("yes")) _value = b ? "yes" : "no";
         else _value = b.toString();
       }
-      
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public void resetAttributes() {
         _attributes.clear();
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.changed",
-                                                               "Evaluates to true if the project has been "+
-                                                               "changed since the last save.") {  //TODO: factor out repeated code!
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Project", new DrJavaProperty("project.changed",
+                                                                    "Evaluates to true if the project has been "+
+                                                                    "changed since the last save.") {  //TODO: factor out repeated code!
+      public void update(PropertyMaps pm) {
 //        long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
         Boolean b = _model.isProjectChanged();
@@ -3581,37 +3594,45 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         else if (f.equals("yes")) _value = b ? "yes" : "no";
         else  _value = b.toString();
       }
-      
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public void resetAttributes() {
         _attributes.clear();
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.file", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.file", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getProjectFile(); }
     },
-                                                                   "Returns the current project file in DrJava.\n"+
-                                                                   "Optional attributes:\n"+
-                                                                   "\trel=\"<dir to which the output should be relative\""));
+                                                                  "Returns the current project file in DrJava.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which the output should be relative\"") {
+                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                  });
     
-    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.main.class", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.main.class", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMainClass(); }
     },
-                                                                   "Returns the current project file in DrJava.\n"+
-                                                                   "Optional attributes:\n"+
-                                                                   "\trel=\"<dir to which the output should be relative\""));
-    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.root", new Lambda<File,Void>() {
+                                                                  "Returns the current project file in DrJava.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which the output should be relative\"") {
+                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                  });
+    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.root", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getProjectRoot(); }
     },
-                                                                   "Returns the current project root in DrJava.\n"+
-                                                                   "Optional attributes:\n"+
-                                                                   "\trel=\"<dir to which the output should be relative\""));
-    PropertyMaps.ONLY.setProperty("Project", new EagerFileProperty("project.build.dir", new Lambda<File,Void>() {
+                                                                  "Returns the current project root in DrJava.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which the output should be relative\"") {
+                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                  });
+    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.build.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getBuildDirectory(); }
     },
-                                                                   "Returns the current build directory in DrJava.\n"+
-                                                                   "Optional attributes:\n"+
-                                                                   "\trel=\"<dir to which the output should be relative\""));
+                                                                  "Returns the current build directory in DrJava.\n"+
+                                                                  "Optional attributes:\n"+
+                                                                  "\trel=\"<dir to which the output should be relative\"") {
+                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                                  });
     RecursiveFileListProperty classFilesProperty = 
       new RecursiveFileListProperty("project.class.files", File.pathSeparator, DEF_DIR,
                                     _model.getBuildDirectory().getAbsolutePath(),
@@ -3626,85 +3647,87 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("dirfilter", "*");
       }
     };
-    PropertyMaps.ONLY.setProperty("Project", classFilesProperty);
-    PropertyMaps.ONLY.setProperty("Project", new EagerProperty("project.auto.refresh",
-                                                               "Evaluates to true if project auto-refresh is enabled.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Project", classFilesProperty);
+    PropertyMaps.TEMPLATE.setProperty("Project", new DrJavaProperty("project.auto.refresh",
+                                                                    "Evaluates to true if project auto-refresh is enabled.") {
+      public void update(PropertyMaps pm) {
         Boolean b = _model.getAutoRefreshStatus();
         String f = _attributes.get("fmt").toLowerCase();
         if (f.equals("int")) _value = b ? "1" : "0";
         else if (f.equals("yes")) _value = b ? "yes" : "no";
         else _value = b.toString();
       }
-      
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public void resetAttributes() {
         _attributes.clear();
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.ONLY.setProperty("Project", new EagerFileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
-                                                                       "Returns a list of files that are excluded from DrJava's "+
-                                                                       "project auto-refresh.\n"+
-                                                                       "Optional attributes:\n"+
-                                                                       "\trel=\"<dir to which output should be relative\"\n"+
-                                                                       "\tsep=\"<separator between files>\"") {
-      protected List<File> getList() {
+    PropertyMaps.TEMPLATE.setProperty("Project", new FileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
+                                                                           "Returns a list of files that are excluded from DrJava's "+
+                                                                           "project auto-refresh.\n"+
+                                                                           "Optional attributes:\n"+
+                                                                           "\trel=\"<dir to which output should be relative\"\n"+
+                                                                           "\tsep=\"<separator between files>\"") {
+      protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(File f: _model.getExcludedFiles()) {
           l.add(f);
         }
         return l;
       }
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.ONLY.setProperty("Project", new EagerFileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
-                                                                       "Returns a list of files in the project's extra "+
-                                                                       "class path.\n"+
-                                                                       "Optional attributes:\n"+
-                                                                       "\trel=\"<dir to which output should be relative\"\n"+
-                                                                       "\tsep=\"<separator between files>\"") {
-      protected List<File> getList() {
+    PropertyMaps.TEMPLATE.setProperty("Project", new FileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
+                                                                           "Returns a list of files in the project's extra "+
+                                                                           "class path.\n"+
+                                                                           "Optional attributes:\n"+
+                                                                           "\trel=\"<dir to which output should be relative\"\n"+
+                                                                           "\tsep=\"<separator between files>\"") {
+      protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(File f: _model.getExtraClassPath()) {
           l.add(f);
         }
         return l;
       }
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
     
     // Actions
-    PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
-                                                                     "Execute a \"Save All\" action.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
+                                                                         "Execute a \"Save All\" action.") {
+      public void update(PropertyMaps pm) {
         _saveAll();
       }
     });
-    PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.compile.all", "(Compile All...)",
-                                                                     "Execute a \"Compile All\" action.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.compile.all", "(Compile All...)",
+                                                                         "Execute a \"Compile All\" action.") {
+      public void update(PropertyMaps pm) {
         _compileAll();
       }
     });
-    PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.clean", "(Clean Build Directory...)",
-                                                                     "Execute a \"Clean Build Directory\" action.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.clean", "(Clean Build Directory...)",
+                                                                         "Execute a \"Clean Build Directory\" action.") {
+      public void update(PropertyMaps pm) {
         // could not use _clean(), since ProjectFileGroupingState.cleanBuildDirectory()
         // is implemented as an asynchronous task, and DrJava would not wait for its completion
         edu.rice.cs.plt.io.IOUtil.deleteRecursively(_model.getBuildDirectory());
       }
     });
-    PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.open.file", "(Open File...)",
-                                                                     "Execute an \"Open File\" action.\n"+
-                                                                     "Required attributes:\n"+
-                                                                     "\tfile=\"<file to open>\"\n"+
-                                                                     "Optional attributes:\n"+
-                                                                     "\tline=\"<line number to display>") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.open.file", "(Open File...)",
+                                                                         "Execute an \"Open File\" action.\n"+
+                                                                         "Required attributes:\n"+
+                                                                         "\tfile=\"<file to open>\"\n"+
+                                                                         "Optional attributes:\n"+
+                                                                         "\tline=\"<line number to display>") {
+      public void update(PropertyMaps pm) {
         if (_attributes.get("file")!=null) {
-          final String dir = StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(DEF_DIR,
-                                                                                          PropertyMaps.ONLY,
+          final String dir = StringOps.unescapeFileName(StringOps.replaceVariables(DEF_DIR,
+                                                                                          pm,
                                                                                           PropertyMaps.GET_CURRENT));
-          final String fil = StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("file"),
-                                                                                          PropertyMaps.ONLY,
+          final String fil = StringOps.unescapeFileName(StringOps.replaceVariables(_attributes.get("file"),
+                                                                                          pm,
                                                                                           PropertyMaps.GET_CURRENT));
           FileOpenSelector fs = new FileOpenSelector() {
             public File[] getFiles() {
@@ -3737,9 +3760,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("line", null);
       }
     });
-    PropertyMaps.ONLY.setProperty("Action", new DrJavaActionProperty("action.auto.refresh", "(Auto-Refresh...)",
-                                                                     "Execute an \"Auto-Refresh Project\" action.") {
-      public void update() {
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.auto.refresh", "(Auto-Refresh...)",
+                                                                         "Execute an \"Auto-Refresh Project\" action.") {
+      public void update(PropertyMaps pm) {
         _model.autoRefreshProject();
       }
     });
@@ -4122,9 +4145,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _model.addAuxiliaryFile(d);
           try{
             _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
           }
           catch(IOException e) { /* do nothing */ }
         }
@@ -4142,9 +4165,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _model.removeAuxiliaryFile(d);
           try {
             _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
           }
           catch(IOException e) { /* do nothing */ }
         }
@@ -4169,9 +4192,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
     }
-    PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
-    PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
-    PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
     Utilities.invokeLater(new Runnable() { 
       public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
     });
@@ -4194,9 +4217,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
     }
-    PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
-    PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
-    PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
     Utilities.invokeLater(new Runnable() { 
       public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
     });
@@ -6165,21 +6188,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     final int savedCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
-    final int typesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES).size();
     final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
-    final int jvmargsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS).size();
     final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
+    final int drJavaJarFileCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES).size();
     if ((savedCount!=namesCount) ||
-        (savedCount!=typesCount) ||
         (savedCount!=cmdlinesCount) ||
-        (savedCount!=jvmargsCount) ||
-        (savedCount!=workdirsCount)) {
+        (savedCount!=workdirsCount) ||
+        (savedCount!=drJavaJarFileCount)) {
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES, new Vector<String>());
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS, new Vector<String>());
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES, new Vector<String>());
     }
     
     OptionListener<Integer> externalSavedCountListener =
@@ -6193,27 +6213,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             for (int count=0; count<oce.value; ++count) {
               final int i = count;
               final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-              final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
               final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-              final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
               final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+              final Vector<String> drjavajarfiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
               
               extMenu.insert(new AbstractAction(names.get(i)) {
                 public void actionPerformed(ActionEvent ae) {
-                  if (types.get(i).equals("cmdline")) {
+                  try {
+                    PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+                    String s = drjavajarfiles.get(i).trim();
+                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): drjavajarfiles.get(i) = "+s);
+                    ((MutableFileProperty)pm.getProperty("drjavajar.file")).setFile(s.length()>0?new File(s):null);
+                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): ${drjavajar.file} = "+((MutableFileProperty)pm.getProperty("drjavajar.file")).getCurrent(pm));
                     // System.out.println(names.get(i)+": cmdline "+cmdlines.get(i)+" "+workdirs.get(i));
-                    _executeExternalDialog.runCommand(names.get(i),cmdlines.get(i),workdirs.get(i));
+                    _executeExternalDialog.runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),drjavajarfiles.get(i),pm);
                   }
-                  else if (types.get(i).equals("java")) {
-                    // System.out.println(names.get(i)+": java "+jvmargs.get(i)+" "+cmdlines.get(i)+" "+workdirs.get(i));
-                    _executeExternalDialog.runJava(names.get(i),jvmargs.get(i),cmdlines.get(i),workdirs.get(i));
-                  }
-                  else {
-                    JOptionPane.showMessageDialog(MainFrame.this,
-                                                  "Unknown process type '"+types.get(i)+"'.",
-                                                  "Invalid Command Line",
-                                                  JOptionPane.ERROR_MESSAGE);
-                  }
+                  catch(CloneNotSupportedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
                 }
               },i+2);
             }
@@ -6221,7 +6236,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               extMenu.addSeparator();
             }
             extMenu.add(_editExternalProcessesAction);
-            _editExternalProcessesAction.setEnabled(oce.value>0);
+            _editExternalProcessesAction.setEnabled(true); // always keep enabled, because it allows import
           }
         });
       }
@@ -8102,7 +8117,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void newFileCreated(final OpenDefinitionsDocument doc) {
       Utilities.invokeLater(new Runnable() { public void run() { 
         _createDefScrollPane(doc);
-        PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+        PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
       } });
     }
     
@@ -8111,7 +8126,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     private boolean resetFNFCount() { return _fnfCount == 0; }
     
     private boolean someFilesNotFound() {
-      PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
       return _fnfCount > 0;
     }
     
@@ -8142,7 +8157,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         
         setPopupLoc(dialog);
         dialog.showDialog();
-        PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+        PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
       }
     }
     
@@ -8214,7 +8229,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _revertAction.setEnabled(true);
           updateStatusField();
           _currentDefPane.requestFocusInWindow();
-          PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+          PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
           try {
             File f = doc.getFile();
             if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
@@ -8233,7 +8248,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void fileOpened(final OpenDefinitionsDocument doc) { 
       Utilities.invokeLater(new Runnable() { public void run() { 
         _fileOpened(doc);
-        PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+        PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
       } });  
     }
     
@@ -8242,7 +8257,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         File f = doc.getFile();
         if (! _model.inProject(f)) {
           _recentFileManager.updateOpenFiles(f);
-          PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+          PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
         }
       }
       catch (FileMovedException fme) {
@@ -8266,7 +8281,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         ((DefinitionsPane)jsp.getViewport().getView()).close();
         _defScrollPanes.remove(doc);
       }
-      PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
     }
     
     public void fileReverted(OpenDefinitionsDocument doc) {
@@ -8351,7 +8366,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             _lastFocusOwner = _currentDefPane;
 //            System.err.println("Requesting focus on new active document");
             _currentDefPane.requestFocusInWindow(); 
-            PropertyMaps.ONLY.getProperty("DrJava","drjava.current.file").invalidate();
+            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.current.file").invalidate();
           } });
         }
       });
@@ -9505,30 +9520,39 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Open stand-alone external process file. */
   public static void openExtProcessFile(File file) {
+    edu.rice.cs.util.GeneralProcessCreator.LOG.log("openExtProcessFile");
     try {
       XMLConfig xc = new XMLConfig(file);
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tXML file opened");
       ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
-                                      xc.get("drjava/extprocess/type"),
                                       xc.get("drjava/extprocess/cmdline"),
-                                      xc.get("drjava/extprocess/jvmline"),
-                                      xc.get("drjava/extprocess/workdir"));
+                                      xc.get("drjava/extprocess/workdir"),
+                                      "");
+      // we override the drjava/extprocess/drjavajarfile and set it to the empty string ""
+      // because this external process did not come from a JAR file (*.drjavajar).
     }
     catch(XMLConfigException xce) { /* ignore drop */ }
   }
   
   /** Open external process file in a jar file. */
   public static void openExtProcessJarFile(File file) {
+    edu.rice.cs.util.GeneralProcessCreator.LOG.log("openExtProcessJarFile");
     try {
-      System.out.println("openExtProcessJarFile(file="+file+")");
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log("openExtProcessJarFile(file="+file+")");
       JarFile jf = new JarFile(file);
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tJAR file opened");
       JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tJAR entry found for "+EXTPROCESS_FILE_NAME_INSIDE_JAR);
       InputStream is = jf.getInputStream(je);
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tGot InputStream");
       XMLConfig xc = new XMLConfig(is);
+      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tXML file opened");
       ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
-                                      xc.get("drjava/extprocess/type"),
                                       xc.get("drjava/extprocess/cmdline"),
-                                      xc.get("drjava/extprocess/jvmline"),
-                                      xc.get("drjava/extprocess/workdir"));
+                                      xc.get("drjava/extprocess/workdir"),
+                                      file.getAbsolutePath());
+      // we override the drjava/extprocess/drjavajarfile and set it to the file specified
+      // because this external process came from a JAR file (*.drjavajar).
       is.close();
       jf.close();
     }

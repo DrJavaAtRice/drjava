@@ -60,7 +60,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
 
 //  /** General information supplier that just uses toString(). */
-//  public static final InfoSupplier<Object> TO_STRING_SUPPLIER = new InfoSupplier<Object>() {
+//  public static final InfoSupplier<Object> GET_LAZY_SUPPLIER = new InfoSupplier<Object>() {
 //    public String apply(Object param) { return param.toString(); }
 //  };
   

@@ -38,13 +38,13 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.util.ProcessCreator;
 import edu.rice.cs.util.GeneralProcessCreator;
-import edu.rice.cs.util.JVMProcessCreator;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.util.BalancingStreamTokenizer;
@@ -118,7 +118,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private JLabel _commandLinePreviewLabel;
   /** Command line preview. */
   private JTextPane _commandLinePreview;
-  /** Java command line preview document. */
+  /** Command line preview document. */
   private StyledDocument _commandLineDoc;
   /** Entered command line working directory. */
   private JTextPane _commandWorkDirLine;
@@ -128,38 +128,17 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private StyledDocument _commandWorkDirLineDoc;
   /** Command working directory button. */
   private JButton _commandWorkDirBtn;
+  /** Entered command line .drjavajar file. */
+  private JTextPane _commandDrJavaJarFileLine;
+  /** Command line .drjavajar file preview. */
+  private JTextPane _commandDrJavaJarFileLinePreview;
+  /** Command line .drjavajar file preview document. */
+  private StyledDocument _commandDrJavaJarFileLineDoc;
+  /** Command .drjavajar file button. */
+  private JButton _commandDrJavaJarFileBtn;
   /** Last of the two text panes to have focus. */
-  private JTextPane _lastCommandFocus;
-  
-  /** Run Java button. */
-  private JButton _runJavaButton;
-  /** Save Java button. */
-  private JButton _saveJavaButton;
-  /** Insert Command button. */
-  private JButton _insertJavaButton;
-  /** Cancel Java button. */
-  private JButton _cancelJavaButton;
-  /** Entered JVM args line document. */
-  StyledDocument _jvmLineDoc;
-  /** Entered JVM args line. */
-  private JTextPane _jvmLine;
-  /** Entered command line. */
-  private JTextPane _javaCommandLine;
-  /** Java command line preview. */
-  private JTextPane _javaCommandLinePreview;
-  /** Last of the three text panes to have focus. */
-  private JTextPane _lastJavaFocus;
-  /** Java command line preview document. */
-  StyledDocument _javaCommandLineDoc;
-  /** Entered command line working directory. */
-  private JTextPane _javaCommandWorkDirLine;
-  /** Command line working directory preview. */
-  private JTextPane _javaCommandWorkDirLinePreview;
-  /** Java command line working directory preview document. */
-  private StyledDocument _javaCommandWorkDirLineDoc;
-  /** Java working directory button. */
-  private JButton _javaCommandWorkDirBtn;
-  
+  private JTextPane _lastCommandFocus;  
+
   /** Style for variable the executable part. */
   SimpleAttributeSet _varCommandLineCmdStyle;
   /** Style for erroneous variable the command args part. */
@@ -167,43 +146,19 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Style for normal text */
   SimpleAttributeSet _commandLineCmdAS;  
   
-  /** Style for the executable part. */
-  Style _javaCommandLineExecutableStyle;
-  /** Style for the JVM args part. */
-  Style _javaCommandLineJVMStyle;
-  
-  /** Style for normal text */
-  SimpleAttributeSet _javaCommandLineJVMAS;
-  /** Style for normal text */
-  SimpleAttributeSet _javaCommandLineCmdAS;
-  
-  /** Style for variable the executable part. */
-  SimpleAttributeSet _javaVarCommandLineCmdStyle;
-  /** Style for variable the JVM args part. */
-  SimpleAttributeSet _javaVarCommandLineJVMStyle;
-  
-  /** Style for erroneous variable the JVM args part. */
-  SimpleAttributeSet _javaVarErrorCommandLineJVMStyle;
-  /** Style for erroneous variable the command args part. */
-  SimpleAttributeSet _javaVarErrorCommandLineCmdStyle;
-  
-  /** Tab pane. */
-  JTabbedPane _tabbedPane;
   /** Command line panel. */
   JPanel _commandPanel;
-  /** Java panel. */
-  JPanel _javaPanel;
   /** Command line document listener. */
   DocumentListener _documentListener;
-  /** Java document listener. */
-  DocumentListener _javaDocumentListener;
   /** Command line work directory document listener. */
   DocumentListener _workDirDocumentListener;
-  /** Java work directory document listener. */
-  DocumentListener _javaWorkDirDocumentListener;
+  /** Command line .drjavajar file document listener. */
+  DocumentListener _drJavaJarFileDocumentListener;
   
-  /** File chooser to open when clicking the "..." button. */
+  /** Directory chooser to open when clicking the "..." button. */
   protected DirectoryChooser _dirChooser;
+  /** File chooser to open when clicking the "..." button. */
+  protected FileChooser _fileChooser;
   
   /** Dialog to insert variables. */
   protected InsertVariableDialog _insertVarDialog;
@@ -224,6 +179,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Index of the saved external process being edited if _editMode is true. */
   protected int _editIndex = -1;
+  
+  /** PropertyMaps used for substitution when replacing variables. */
+  protected PropertyMaps _props;
   
   public static final String STALE_TOOLTIP = "<html>Note: Values of variables might not be current for<br>"+
     "performance reasons. They will be current when executed.</html>";
@@ -263,6 +221,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     */
   public ExecuteExternalDialog(MainFrame mf, boolean editMode, int editIndex, CompletionMonitor cm) {
     super("Execute External Process");
+    try { _props = PropertyMaps.TEMPLATE.clone(); } catch(CloneNotSupportedException e) {
+      throw new edu.rice.cs.util.UnexpectedException(e);
+    }
     _mainFrame = mf;
     _editMode = editMode;
     _editIndex = editIndex;
@@ -272,24 +233,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       if (editIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) {
         throw new IllegalArgumentException("Trying to edit saved external process that does not exist");
       }
-      final String type = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES).get(editIndex);
       final String cmdline = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).get(editIndex);
-      final String jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS).get(editIndex);
       final String workdir = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).get(editIndex);
-      if (type.equals("cmdline")) {
-        _commandLine.setText(cmdline);
-        _commandWorkDirLine.setText(workdir);
-        _tabbedPane.remove(_javaPanel);
-      }
-      else if (type.equals("java")) {
-        _javaCommandLine.setText(cmdline);
-        _jvmLine.setText(jvmargs);
-        _javaCommandWorkDirLine.setText(workdir);
-        _tabbedPane.remove(_commandPanel);
-      }
-      else {
-        throw new IllegalArgumentException("Trying to edit saved external process of unknown type");
-      }
+      final String drJavaJarFile = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES).get(editIndex);
+      _commandLine.setText(cmdline);
+      _commandWorkDirLine.setText(workdir);
+      _commandDrJavaJarFileLine.setText(drJavaJarFile);
     }
   }
   
@@ -305,10 +254,11 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _dirChooser = new DirectoryChooser(this);
     _dirChooser.setDialogTitle("Select Work Directory");
     _dirChooser.setApproveButtonText("Select");
+    _fileChooser = new FileChooser(null);
+    _fileChooser.setDialogTitle("Select .drjavajar File");
+    _fileChooser.setApproveButtonText("Select");
     
     super.getContentPane().setLayout(new GridLayout(1,1));
-    
-    _tabbedPane = new JTabbedPane();
     
     if (_editMode) {
       Action saveCommandAction = new AbstractAction("Save") {
@@ -317,12 +267,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         }
       };
       _saveCommandButton = new JButton(saveCommandAction);
-      Action saveJavaAction = new AbstractAction("Save") {
-        public void actionPerformed(ActionEvent e) {
-          _saveJava();
-        }
-      };
-      _saveJavaButton = new JButton(saveJavaAction);
     }
     else {
       Action runCommandAction = new AbstractAction("Run Command Line") {
@@ -331,12 +275,19 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         }
       };
       _runCommandButton = new JButton(runCommandAction);
-      Action runJavaAction = new AbstractAction("Run Java Class") {
-        public void actionPerformed(ActionEvent e) {
-          _runJava();
+      _runCommandButton.addFocusListener(new FocusAdapter() {
+        @SuppressWarnings("unchecked")
+        public void focusGained(FocusEvent e) {
+          _insertCommandButton.setEnabled(false);
         }
-      };
-      _runJavaButton = new JButton(runJavaAction);
+        public void focusLost(FocusEvent e) {
+          if ((e.getOppositeComponent() == _commandLinePreview) || 
+              (e.getOppositeComponent() == _commandWorkDirLinePreview) ||
+              (e.getOppositeComponent() == _commandDrJavaJarFileLinePreview)) {
+            _runCommandButton.requestFocus();
+          }
+        }
+      });
       
       Action saveCommandAction = new AbstractAction("Save to Menu...") {
         public void actionPerformed(ActionEvent e) {
@@ -344,12 +295,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         }
       };
       _saveCommandButton = new JButton(saveCommandAction);
-      Action saveJavaAction = new AbstractAction("Save to Menu...") {
-        public void actionPerformed(ActionEvent e) {
-          _saveJava();
-        }
-      };
-      _saveJavaButton = new JButton(saveJavaAction);
     }
     
     _insertVarDialog = new InsertVariableDialog(_mainFrame, _insertVarDialogMonitor);
@@ -360,13 +305,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     };
     _insertCommandButton = new JButton(insertCommandAction);
     _insertCommandButton.setEnabled(false);
-    Action insertJavaAction = new AbstractAction("Insert Variable...") {
-      public void actionPerformed(ActionEvent e) {
-        _insertVariableJava();
-      }
-    };
-    _insertJavaButton = new JButton(insertJavaAction);
-    _insertJavaButton.setEnabled(false);
     
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) {
@@ -374,21 +312,11 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
     };
     _cancelCommandButton = new JButton(cancelAction);
-    _cancelJavaButton = new JButton(cancelAction);
     
     // set up "Command Line" panel
     _commandPanel = makeCommandPane();
-    _tabbedPane.addTab("Command Line", null, _commandPanel, "Execute command line process");
     
-    // set up "Java" panel
-    _javaPanel = makeJavaPane();
-    _tabbedPane.addTab("Java Class", null, _javaPanel, "Execute Java class");
-    _tabbedPane.setSelectedComponent(_commandPanel);
-    
-    //The following line enables to use scrolling tabs.
-    _tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-    
-    super.getContentPane().add(_tabbedPane);
+    super.getContentPane().add(_commandPanel);
     super.setResizable(false);
     
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -433,7 +361,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           e.consume();
           if (e.isShiftDown()) {
             _insertCommandButton.setEnabled(false);
-            _tabbedPane.requestFocus();
+            _cancelCommandButton.requestFocus();
           }
           else {
             _commandWorkDirLine.requestFocus();
@@ -486,7 +414,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     commandLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(commandLinePreviewSP, c);
     main.add(commandLinePreviewSP);
-    
+
+    // work directory
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = 1;
@@ -513,13 +442,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
             _commandLine.requestFocus();
           }
           else {
-            _insertCommandButton.setEnabled(false);
-            if (_editMode) {
-              _saveCommandButton.requestFocus();
-            }
-            else {
-              _runCommandButton.requestFocus();
-            }
+            _commandDrJavaJarFileLine.requestFocus();
           }
         }
       }
@@ -568,7 +491,91 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     commandWorkDirLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(commandWorkDirLinePreviewSP, c);
     main.add(commandWorkDirLinePreviewSP);
+
+    // .drjavajar file
+    c.weightx = 0.0;
+    c.weighty = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    JLabel drJavaJarFileLabel = new JLabel(".drjavajar file:");
+    gridbag.setConstraints(drJavaJarFileLabel, c);
+    main.add(drJavaJarFileLabel);
     
+    c.weightx = 1.0;
+    c.weighty = 8.0;
+    c.gridwidth = GridBagConstraints.RELATIVE;
+    c.insets = compInsets;
+    
+    _commandDrJavaJarFileLine = new JTextPane();
+    // do not allow a newline
+    _commandDrJavaJarFileLine.addKeyListener(new KeyListener() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          e.consume();
+        }
+        else if (e.getKeyCode() == KeyEvent.VK_TAB) {
+          e.consume();
+          if (e.isShiftDown()) {
+            _commandWorkDirLine.requestFocus();
+          }
+          else {
+            _insertCommandButton.setEnabled(false);
+            if (_editMode) {
+              _saveCommandButton.requestFocus();
+            }
+            else {
+              _runCommandButton.requestFocus();
+            }
+          }
+        }
+      }
+      public void  keyReleased(KeyEvent e) { }
+      public void  keyTyped(KeyEvent e) { }
+    });
+    JScrollPane commandDrJavaJarFileLineSP = new JScrollPane(_commandDrJavaJarFileLine);
+    commandDrJavaJarFileLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    gridbag.setConstraints(commandDrJavaJarFileLineSP, c);
+    main.add(commandDrJavaJarFileLineSP);
+    
+    c.weightx = 0.0;
+    c.weighty = 0.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    _commandDrJavaJarFileBtn = new JButton("...");
+    _commandDrJavaJarFileBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { chooseFile(_commandDrJavaJarFileLine); }
+    });
+    gridbag.setConstraints(_commandDrJavaJarFileBtn, c);
+    main.add(_commandDrJavaJarFileBtn);
+    
+    c.weightx = 0.0;
+    c.weighty = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    JLabel commandDrJavaJarFileLinePreviewLabel = new JLabel(".drjavajar file preview:");
+    commandDrJavaJarFileLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
+    gridbag.setConstraints(commandDrJavaJarFileLinePreviewLabel, c);
+    main.add(commandDrJavaJarFileLinePreviewLabel);
+    
+    c.weightx = 1.0;
+    c.weighty = 8.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    _commandDrJavaJarFileLinePreview = new JTextPane();
+    _commandDrJavaJarFileLinePreview.setToolTipText(STALE_TOOLTIP);
+    _commandDrJavaJarFileLineDoc = (StyledDocument)_commandDrJavaJarFileLinePreview.getDocument();
+    
+    _commandDrJavaJarFileLinePreview.setEditable(false);
+    _commandDrJavaJarFileLinePreview.setBackground(Color.LIGHT_GRAY);
+    _commandDrJavaJarFileLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
+    JScrollPane commandDrJavaJarFileLinePreviewSP = new JScrollPane(_commandDrJavaJarFileLinePreview);
+    commandDrJavaJarFileLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    gridbag.setConstraints(commandDrJavaJarFileLinePreviewSP, c);
+    main.add(commandDrJavaJarFileLinePreviewSP);
+    
+    // bottom panel
     panel.add(main, BorderLayout.CENTER);
     JPanel bottom = new JPanel();
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -590,17 +597,17 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
 //          StringBuilder sb = new StringBuilder();
-          String text = StringOps.replaceVariables(_commandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
+          String text = StringOps.replaceVariables(_commandLine.getText(), _props, PropertyMaps.GET_LAZY);
           /* List<String> cmds = StringOps.commandLineToList(text);
            for(String s: cmds) {
            sb.append(s);
            sb.append(' ');
            } */
-          _commandLineDoc.insertString(_commandLineDoc.getLength(), StringOps.unescapeSpacesWith1bHex(text), null);
+          _commandLineDoc.insertString(_commandLineDoc.getLength(), StringOps.unescapeFileName(text), null);
           
           // command line
           colorVariables(_commandLine,
-                         PropertyMaps.ONLY,
+                         _props,
                          this,
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
@@ -619,18 +626,18 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _commandLine.getDocument().addDocumentListener(_documentListener);
     _documentListener.changedUpdate(null);
     
-    // update the preview of the actual command line post substitution
+    // update the preview of the actual work directory post substitution
     _workDirDocumentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
         try {
           // preview
           _commandWorkDirLineDoc.remove(0,_commandWorkDirLineDoc.getLength());
-          String text = StringOps.replaceVariables(_commandWorkDirLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          _commandWorkDirLineDoc.insertString(0, StringOps.unescapeSpacesWith1bHex(text), null);
+          String text = StringOps.replaceVariables(_commandWorkDirLine.getText(), _props, PropertyMaps.GET_LAZY);
+          _commandWorkDirLineDoc.insertString(0, StringOps.unescapeFileName(text), null);
           
           // command line
           colorVariables(_commandWorkDirLine,
-                         PropertyMaps.ONLY,
+                         _props,
                          this,
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
@@ -648,20 +655,34 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _commandWorkDirLine.setText("${drjava.working.dir}");
     _workDirDocumentListener.changedUpdate(null);
     
-    DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oce) {
-        StyleConstants.setForeground(_javaCommandLineExecutableStyle, oce.value);
-        _documentListener.changedUpdate(null);
-        _workDirDocumentListener.changedUpdate(null);
+    // update the preview of the actual .drjavajar file post substitution
+    _drJavaJarFileDocumentListener = new DocumentListener() {
+      public void update(DocumentEvent e) {
+        try {
+          // preview
+          _commandDrJavaJarFileLineDoc.remove(0,_commandDrJavaJarFileLineDoc.getLength());
+          String text = StringOps.replaceVariables(_commandDrJavaJarFileLine.getText(), _props, PropertyMaps.GET_LAZY);
+          _commandDrJavaJarFileLineDoc.insertString(0, StringOps.unescapeFileName(text), null);
+          
+          // command line
+          colorVariables(_commandDrJavaJarFileLine,
+                         _props,
+                         this,
+                         _commandLineCmdAS,
+                         _varCommandLineCmdStyle,
+                         _varErrorCommandLineCmdStyle);
+        }
+        catch(BadLocationException ble) {
+          _commandLinePreview.setText("Error: "+ble);
+        }
       }
-    });
-    DrJava.getConfig().addOptionListener(DEFINITIONS_KEYWORD_COLOR, new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oce) {
-        StyleConstants.setForeground(_javaCommandLineJVMStyle, oce.value);
-        _documentListener.changedUpdate(null);
-        _workDirDocumentListener.changedUpdate(null);
-      }
-    });
+      public void changedUpdate(DocumentEvent e) { update(e); }
+      public void insertUpdate(DocumentEvent e) { update(e); }
+      public void removeUpdate(DocumentEvent e)  { update(e); }
+    };
+    _commandDrJavaJarFileLine.getDocument().addDocumentListener(_drJavaJarFileDocumentListener);
+    _commandDrJavaJarFileLine.setText("");
+    _drJavaJarFileDocumentListener.changedUpdate(null);
     
     _lastCommandFocus = _commandLine;
     // do not allow preview to have focus
@@ -688,388 +709,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if ((e.getOppositeComponent() == _commandLinePreview) || 
             (e.getOppositeComponent() == _commandWorkDirLinePreview)) {
           _commandWorkDirLine.requestFocus();
-        }
-      }
-    });
-    
-    return panel;
-  }
-  
-  private JPanel makeJavaPane() {
-    JPanel panel = new JPanel(new BorderLayout());
-    GridBagLayout gridbag = new GridBagLayout();
-    JPanel main = new JPanel(gridbag);
-    GridBagConstraints c = new GridBagConstraints();
-    main.setLayout(gridbag);
-    c.fill = GridBagConstraints.BOTH;
-    Insets labelInsets = new Insets(5, 10, 0, 0);
-    Insets compInsets  = new Insets(5, 5, 0, 10);
-    
-    c.weightx = 0.0;
-    c.weighty = 0.0;
-    c.gridwidth = 1;
-    c.insets = labelInsets;
-    JLabel jvmArgsLabel = new JLabel("JVM arguments:");
-    gridbag.setConstraints(jvmArgsLabel, c);
-    main.add(jvmArgsLabel);
-    
-    c.weightx = 1.0;
-    c.weighty = 32.0;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.insets = compInsets;
-    
-    _jvmLine = new JTextPane();
-    _jvmLineDoc = (StyledDocument)_jvmLine.getDocument();
-    // do not allow a newline
-    _jvmLine.addKeyListener(new KeyListener() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-          e.consume();
-          if (e.isShiftDown()) {
-            _insertJavaButton.setEnabled(false);
-            _tabbedPane.requestFocus();
-          }
-          else {
-            _javaCommandLine.requestFocus();
-          }
-        }
-      }
-      public void  keyReleased(KeyEvent e) { }
-      public void  keyTyped(KeyEvent e) { }
-    });
-    JScrollPane jvmLineSP = new JScrollPane(_jvmLine);
-    jvmLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(jvmLineSP, c);
-    main.add(jvmLineSP);
-    
-    c.weightx = 0.0;
-    c.weighty = 0.0;
-    c.gridwidth = 1;
-    c.insets = labelInsets;
-    JLabel javaCommandLineLabel = new JLabel("Java command line:");
-    gridbag.setConstraints(javaCommandLineLabel, c);
-    main.add(javaCommandLineLabel);
-    
-    c.weightx = 1.0;
-    c.weighty = 32.0;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.insets = compInsets;
-    
-    _javaCommandLine = new JTextPane();
-    // do not allow a newline
-    _javaCommandLine.addKeyListener(new KeyListener() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-          e.consume();
-          if (e.isShiftDown()) {
-            _jvmLine.requestFocus();
-          }
-          else {
-            _javaCommandWorkDirLine.requestFocus();
-          }
-        }
-      }
-      public void  keyReleased(KeyEvent e) { }
-      public void  keyTyped(KeyEvent e) { }
-    });
-    JScrollPane javaCommandLineSP = new JScrollPane(_javaCommandLine);
-    javaCommandLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(javaCommandLineSP, c);
-    main.add(javaCommandLineSP);
-    
-    c.weightx = 0.0;
-    c.weighty = 0.0;
-    c.gridwidth = 1;
-    c.insets = labelInsets;
-    JLabel javaCommandLinePreviewLabel = new JLabel("Command line preview:");
-    javaCommandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
-    gridbag.setConstraints(javaCommandLinePreviewLabel, c);
-    main.add(javaCommandLinePreviewLabel);
-    
-    c.weightx = 1.0;
-    c.weighty = 32.0;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.insets = compInsets;
-    
-    _javaCommandLinePreview = new JTextPane();
-    _javaCommandLinePreview.setToolTipText(STALE_TOOLTIP);
-    _javaCommandLineDoc = (StyledDocument)_javaCommandLinePreview.getDocument();
-    
-    // Create a style object and then set the style attributes
-    _javaCommandLineExecutableStyle = _javaCommandLineDoc.addStyle("ExecutableStyle", null);
-    StyleConstants.setItalic(_javaCommandLineExecutableStyle, true);
-    StyleConstants.setForeground(_javaCommandLineExecutableStyle, DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR));
-    _javaCommandLineJVMStyle = _javaCommandLineDoc.addStyle("JVMStyle", null);
-    StyleConstants.setForeground(_javaCommandLineJVMStyle, DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR));
-    _javaCommandLineJVMAS = new SimpleAttributeSet();
-    StyleConstants.setForeground(_javaCommandLineJVMAS, DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR));
-    
-    _javaVarCommandLineJVMStyle = new SimpleAttributeSet();
-    StyleConstants.setForeground(_javaVarCommandLineJVMStyle, DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR));
-    StyleConstants.setBackground(_javaVarCommandLineJVMStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
-    _javaVarErrorCommandLineJVMStyle = new SimpleAttributeSet();
-    StyleConstants.setForeground(_javaVarErrorCommandLineJVMStyle, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
-    StyleConstants.setBackground(_javaVarErrorCommandLineJVMStyle, DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
-    _javaVarCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_javaVarCommandLineJVMStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
-    
-    _javaCommandLineCmdAS = new SimpleAttributeSet();
-    StyleConstants.setForeground(_javaCommandLineCmdAS, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
-    _javaVarCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_javaVarCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
-    _javaVarErrorCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_javaVarErrorCommandLineCmdStyle, DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
-    _javaVarCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_javaVarCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
-    
-    _javaCommandLinePreview.setEditable(false);
-    _javaCommandLinePreview.setBackground(Color.LIGHT_GRAY);
-    _javaCommandLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
-    JScrollPane javaCommandLinePreviewSP = new JScrollPane(_javaCommandLinePreview);
-    javaCommandLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(javaCommandLinePreviewSP, c);
-    main.add(javaCommandLinePreviewSP);
-    
-    c.weightx = 0.0;
-    c.weighty = 0.0;
-    c.gridwidth = 1;
-    c.insets = labelInsets;
-    JLabel javaWorkDirLabel = new JLabel("Work directory:");
-    gridbag.setConstraints(javaWorkDirLabel, c);
-    main.add(javaWorkDirLabel);
-    
-    c.weightx = 1.0;
-    c.weighty = 12.0;
-    c.gridwidth = GridBagConstraints.RELATIVE;
-    c.insets = compInsets;
-    
-    _javaCommandWorkDirLine = new JTextPane();
-    // do not allow a newline
-    _javaCommandWorkDirLine.addKeyListener(new KeyListener() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-          e.consume();
-          if (e.isShiftDown()) {
-            _javaCommandLine.requestFocus();
-          }
-          else {
-            _insertJavaButton.setEnabled(false);
-            _runJavaButton.requestFocus();
-          }
-        }
-      }
-      public void  keyReleased(KeyEvent e) { }
-      public void  keyTyped(KeyEvent e) { }
-    });
-    JScrollPane javaCommandWorkDirLineSP = new JScrollPane(_javaCommandWorkDirLine);
-    javaCommandWorkDirLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(javaCommandWorkDirLineSP, c);
-    main.add(javaCommandWorkDirLineSP);
-    
-    c.weightx = 0.0;
-    c.weighty = 0.0;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.insets = compInsets;
-    
-    _javaCommandWorkDirBtn = new JButton("...");
-    _javaCommandWorkDirBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { chooseFile(_javaCommandWorkDirLine); }
-    });
-    gridbag.setConstraints(_javaCommandWorkDirBtn, c);
-    main.add(_javaCommandWorkDirBtn);
-    
-    c.weightx = 0.0;
-    c.weighty = 0.0;
-    c.gridwidth = 1;
-    c.insets = labelInsets;
-    JLabel javaCommandWorkDirLinePreviewLabel = new JLabel("Work directory preview:");
-    javaCommandWorkDirLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
-    gridbag.setConstraints(javaCommandWorkDirLinePreviewLabel, c);
-    main.add(javaCommandWorkDirLinePreviewLabel);
-    
-    c.weightx = 1.0;
-    c.weighty = 12.0;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.insets = compInsets;
-    
-    _javaCommandWorkDirLinePreview = new JTextPane();
-    _javaCommandWorkDirLinePreview.setToolTipText(STALE_TOOLTIP);
-    _javaCommandWorkDirLineDoc = (StyledDocument)_javaCommandWorkDirLinePreview.getDocument();
-    
-    _javaCommandWorkDirLinePreview.setEditable(false);
-    _javaCommandWorkDirLinePreview.setBackground(Color.LIGHT_GRAY);
-    _javaCommandWorkDirLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
-    JScrollPane javaCommandWorkDirLinePreviewSP = new JScrollPane(_javaCommandWorkDirLinePreview);
-    javaCommandWorkDirLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(javaCommandWorkDirLinePreviewSP, c);
-    main.add(javaCommandWorkDirLinePreviewSP);
-    
-    panel.add(main, BorderLayout.CENTER);
-    JPanel bottom = new JPanel();
-    bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
-    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
-    bottom.add(Box.createHorizontalGlue());
-    if (!_editMode) {
-      bottom.add(_runJavaButton);
-    }
-    bottom.add(_saveJavaButton);
-    bottom.add(_insertJavaButton);
-    bottom.add(_cancelJavaButton);
-    bottom.add(Box.createHorizontalGlue());
-    panel.add(bottom, BorderLayout.SOUTH);
-    
-    // update the preview of the actual command line post substitution
-    _javaDocumentListener = new DocumentListener() {
-      public void update(DocumentEvent e) {
-        try {
-          // preview
-          _javaCommandLineDoc.remove(0,_javaCommandLineDoc.getLength());
-          StringBuilder sb = new StringBuilder();
-          sb.append(edu.rice.cs.util.newjvm.ExecJVM.getExecutable());
-          sb.append(' ');
-          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineExecutableStyle);
-          
-          sb = new StringBuilder();
-          String text = StringOps.replaceVariables(_jvmLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          List<String> cmds = StringOps.commandLineToList(text);
-          for(String s: cmds) {
-            sb.append(s);
-            sb.append(' ');
-          }
-          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(),
-                                           StringOps.unescapeSpacesWith1bHex(sb.toString()),
-                                           _javaCommandLineJVMStyle);
-          
-          sb = new StringBuilder();
-          text = StringOps.replaceVariables(_javaCommandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          cmds = StringOps.commandLineToList(text);
-          for(String s: cmds) {
-            sb.append(s);
-            sb.append(' ');
-          }
-          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(),
-                                           StringOps.unescapeSpacesWith1bHex(sb.toString()),
-                                           null);
-          
-          // JVM line
-          colorVariables(_jvmLine,
-                         PropertyMaps.ONLY,
-                         this,
-                         _javaCommandLineJVMAS,
-                         _javaVarCommandLineJVMStyle,
-                         _javaVarErrorCommandLineJVMStyle);
-          
-          // Java Command line
-          colorVariables(_javaCommandLine,
-                         PropertyMaps.ONLY,
-                         this,
-                         _javaCommandLineCmdAS,
-                         _javaVarCommandLineCmdStyle,
-                         _javaVarErrorCommandLineCmdStyle);
-          
-        }
-        catch(BadLocationException ble) {
-          _javaCommandLinePreview.setText("Error.");
-        }
-      }
-      public void changedUpdate(DocumentEvent e) { update(e); }
-      public void insertUpdate(DocumentEvent e) { update(e); }
-      public void removeUpdate(DocumentEvent e)  { update(e); }
-    };
-    _javaCommandLine.getDocument().addDocumentListener(_javaDocumentListener);
-    _jvmLine.getDocument().addDocumentListener(_javaDocumentListener);
-    _javaDocumentListener.changedUpdate(null);
-    
-    // update the preview of the actual work dir post substitution
-    _javaWorkDirDocumentListener = new DocumentListener() {
-      public void update(DocumentEvent e) {
-        try {
-          // preview
-          _javaCommandWorkDirLineDoc.remove(0,_javaCommandWorkDirLineDoc.getLength());
-          String text = StringOps.replaceVariables(_javaCommandWorkDirLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          _javaCommandWorkDirLineDoc.insertString(0, StringOps.unescapeSpacesWith1bHex(text), null);
-          
-          // work dir
-          colorVariables(_javaCommandWorkDirLine,
-                         PropertyMaps.ONLY,
-                         this,
-                         _javaCommandLineCmdAS,
-                         _javaVarCommandLineCmdStyle,
-                         _javaVarErrorCommandLineCmdStyle);
-          
-        }
-        catch(BadLocationException ble) {
-          _javaCommandWorkDirLinePreview.setText("Error: "+ble);
-        }
-      }
-      public void changedUpdate(DocumentEvent e) { update(e); }
-      public void insertUpdate(DocumentEvent e) { update(e); }
-      public void removeUpdate(DocumentEvent e)  { update(e); }
-    };
-    _javaCommandWorkDirLine.getDocument().addDocumentListener(_javaWorkDirDocumentListener);
-    _javaCommandWorkDirLine.setText("${drjava.working.dir}");
-    _javaWorkDirDocumentListener.changedUpdate(null);
-    
-    DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oce) {
-        StyleConstants.setForeground(_javaCommandLineExecutableStyle, oce.value);
-        _javaDocumentListener.changedUpdate(null);
-      }
-    });
-    DrJava.getConfig().addOptionListener(DEFINITIONS_KEYWORD_COLOR, new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oce) {
-        StyleConstants.setForeground(_javaCommandLineJVMStyle, oce.value);
-        _javaDocumentListener.changedUpdate(null);
-      }
-    });
-    
-    _lastJavaFocus = _javaCommandLine;
-    // do not allow preview to have focus
-    _javaCommandLine.addFocusListener(new FocusAdapter() {
-      @SuppressWarnings("unchecked")
-      public void focusGained(FocusEvent e) {
-        _lastJavaFocus = (JTextPane)e.getComponent();
-        _insertJavaButton.setEnabled(true);
-      }
-      public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent() == _javaCommandLinePreview) ||
-            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview)) {
-          _javaCommandLine.requestFocus();
-        }
-      }
-    });
-    _jvmLine.addFocusListener(new FocusAdapter() {
-      @SuppressWarnings("unchecked")
-      public void focusGained(FocusEvent e) {
-        _lastJavaFocus = (JTextPane)e.getComponent();
-        _insertJavaButton.setEnabled(true);
-      }
-      public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent() == _javaCommandLinePreview) ||
-            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview)) {
-          _jvmLine.requestFocus();
-        }
-      }
-    });
-    _javaCommandWorkDirLine.addFocusListener(new FocusAdapter() {
-      @SuppressWarnings("unchecked")
-      public void focusGained(FocusEvent e) {
-        _lastJavaFocus = (JTextPane)e.getComponent();
-        _insertJavaButton.setEnabled(true);
-      }
-      public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent() == _javaCommandLinePreview) ||
-            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview)) {
-          _javaCommandWorkDirLine.requestFocus();
         }
       }
     });
@@ -1193,8 +832,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
   
   /** Run a command and return an external process panel. */
-  public ExternalProcessPanel runCommand(String name, String cmdline, String workdir) {
-    ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim());
+  public ExternalProcessPanel runCommand(String name, String cmdline, String workdir,
+                                         String drJavaJarFile, PropertyMaps pm) {
+    ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim(), pm);
     String label = "External";
     if (!name.equals("")) { label += ": "+name; }
     final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);
@@ -1205,37 +845,27 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     panel.setVisible(true);
     _mainFrame.showTab(panel);
     _mainFrame._tabbedPane.setSelectedComponent(panel);
-    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the panel has been selected
     EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
-    return panel;
-  }
-  
-  public ExternalProcessPanel runJava(String name, String jvmargs, String cmdline, String workdir) {
-    ProcessCreator pc = new JVMProcessCreator(jvmargs, cmdline, workdir);
-    
-    String label = "External Java";
-    if (!name.equals("")) { label += ": "+name; }
-    final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);
-    _mainFrame._tabs.addLast(panel);
-    panel.getMainPanel().addFocusListener(new FocusAdapter() {
-      public void focusGained(FocusEvent e) { _mainFrame._lastFocusOwner = panel; }
-    });
-    panel.setVisible(true);
-    _mainFrame.showTab(panel);
-    _mainFrame._tabbedPane.setSelectedComponent(panel);
-    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
-    EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
-    
     return panel;
   }
   
   /** Execute the command line. */
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
+    GeneralProcessCreator.LOG.log("_runCommand(): ${drjavajar.file} = "+_commandDrJavaJarFileLine.getText());
     
     _mainFrame.removeModalWindowAdapter(this);
     if (_commandLinePreview.getText().length()>0) {
-      runCommand("", _commandLine.getText(), _commandWorkDirLine.getText());
+      try { 
+        _props = PropertyMaps.TEMPLATE.clone();
+        PropertyMaps pm = _props.clone();
+        String s = _commandDrJavaJarFileLine.getText().trim();
+        ((MutableFileProperty)pm.getProperty("drjavajar.file")).setFile(s.length()>0?new File(s):null);
+        runCommand("", _commandLine.getText(), _commandWorkDirLine.getText(), _commandDrJavaJarFileLine.getText(), pm);
+      } catch(CloneNotSupportedException e) {
+        throw new edu.rice.cs.util.UnexpectedException(e);
+      }
     }
     
     // Always apply and save settings
@@ -1243,22 +873,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     this.setVisible(false);
     if (_cm!=null) { _cm.set(); }    
   }
-  
-  /** Execute the Java class. */
-  private void _runJava() {
-    _mainFrame.updateStatusField("Executing external Java class...");
-    
-    _mainFrame.removeModalWindowAdapter(this);
-    if (_javaCommandLinePreview.getText().length()>0) {
-      runJava("", _jvmLine.getText(), _javaCommandLine.getText(), _javaCommandWorkDirLine.getText());
-    }
-    
-    // Always apply and save settings
-    _saveSettings();
-    this.setVisible(false);
-    if (_cm!=null) { _cm.set(); }
-  }
-  
+
   /** Save the command line to the menu. */
   private void _saveCommand() {          
     if (_editMode) {
@@ -1273,7 +888,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      editInMenu(_editIndex, name, "cmdline", _commandLine.getText(), "", _commandWorkDirLine.getText());
+      editInMenu(_editIndex, name, "cmdline", _commandLine.getText(), "", _commandWorkDirLine.getText(),
+                 _commandDrJavaJarFileLine.getText());
     }
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
@@ -1287,84 +903,40 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      addToMenu(name, "cmdline", _commandLine.getText(), "", _commandWorkDirLine.getText());
+      addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandDrJavaJarFileLine.getText());
     }
     
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
     if (_cm!=null) { _cm.set(); }
-  }
-  
-  /** Save the Java class to the menu. */
-  private void _saveJava() {
-    if (_editMode) {
-      final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-      _mainFrame.removeModalWindowAdapter(this);
-      String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
-      if (name==null) {
-        // Always apply and save settings
-        _saveSettings();
-        this.setVisible(false);
-        if (_cm!=null) { _cm.set(); }
-        return;
-      }
-      editInMenu(_editIndex, name, "java", _javaCommandLine.getText(),
-                 _jvmLine.getText(), _javaCommandWorkDirLine.getText());
-    }
-    else {
-      int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
-      _mainFrame.removeModalWindowAdapter(this);
-      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
-      if (name==null) {
-        // Always apply and save settings
-        _saveSettings();
-        this.setVisible(false);
-        if (_cm!=null) { _cm.set(); }
-        return;
-      }
-      addToMenu(name, "java", _javaCommandLine.getText(),
-                _jvmLine.getText(), _javaCommandWorkDirLine.getText());
-    }
-    
-    // Always apply and save settings
-    _saveSettings();
-    this.setVisible(false);
-    if (_cm!=null) { _cm.set(); }
-  }
-  
+  }  
+
   /** Add new process to menu.
     * @param name process name
-    * @param type type of the process, "cmdline" or "java"
     * @param cmdline command line
-    * @param jvmarg arguments for the new JVM, if type is "java", else ""
     * @param workdir work directory
     * @return number of processes in the menu */
-  public static int addToMenu(String name, String type, String cmdline, String jvmarg, String workdir) {
+  public static int addToMenu(String name, String cmdline, String workdir, String drJavaJarFile) {
+    GeneralProcessCreator.LOG.log("addToMenu(): drJavaJarFile = "+drJavaJarFile);
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     ++count;
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final Vector<String> drJavaJarFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
     
     names.add(name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
     
-    types.add(type);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,types);
-    
     cmdlines.add(cmdline);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
     
-    jvmargs.add(jvmarg);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);
-    
     workdirs.add(workdir);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+    
+    drJavaJarFiles.add(drJavaJarFile);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,drJavaJarFiles);
     
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,count);
     
@@ -1378,27 +950,25 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     * @param cmdline command line
     * @param jvmarg arguments for the new JVM, if type is "java", else ""
     * @param workdir work directory */
-  public static void editInMenu(int editIndex, String name, String type, String cmdline, String jvmarg, String workdir) {
+  public static void editInMenu(int editIndex, String name, String type, String cmdline, String jvmarg,
+                                String workdir, String drJavaJarFile) {
+    GeneralProcessCreator.LOG.log("editInMenu(): drJavaJarFile = "+drJavaJarFile);
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final Vector<String> drJavaJarFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
     
     names.set(editIndex,name);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
-    
-    types.set(editIndex,type);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
     
     cmdlines.set(editIndex,cmdline);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
     
-    jvmargs.set(editIndex,jvmarg);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);      
-    
     workdirs.set(editIndex,workdir);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+    
+    drJavaJarFiles.set(editIndex,drJavaJarFile);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,drJavaJarFiles);
   }
   
   /** Save process to file.
@@ -1406,19 +976,17 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     * @param f file */
   public static void saveToFile(int index, File f) {
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final Vector<String> drJavaJarFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
     
     XMLConfig xc = new XMLConfig();
     System.out.println("saveToFile("+index+", "+f+")");
     System.out.println("\t"+names.get(index));
     xc.set("drjava/extprocess/name", names.get(index));
-    xc.set("drjava/extprocess/type", types.get(index));
     xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
-    xc.set("drjava/extprocess/jvmline", jvmargs.get(index));
     xc.set("drjava/extprocess/workdir", workdirs.get(index));
+    xc.set("drjava/extprocess/drjavajarfile", drJavaJarFiles.get(index));
     xc.save(f);
   }
   
@@ -1430,7 +998,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Insert a variable into the command line. */
   private void _insertVariableCommand() {
-    PropertyMaps.ONLY.clearVariables();
+    _props.clearVariables();
     _mainFrame.removeModalWindowAdapter(this);
     _insertVarDialogMonitor.reset();
     _insertVarDialog.setVisible(true);
@@ -1467,47 +1035,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         });
       }
     }).start();
-  }
-  
-  /** insert a variable Java class command line. */
-  private void _insertVariableJava() {
-    _mainFrame.removeModalWindowAdapter(this);
-    _insertVarDialogMonitor.reset();
-    _insertVarDialog.setVisible(true);
-    // start a new thread to wait for the dialog to finish
-    // this waiting cannot happen in the event thread, as that would block the other dialog
-    new Thread(new Runnable() {
-      public void run() {
-        _insertVarDialogMonitor.waitOne();
-        // dialog has finished, figure out the results in the event thread
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                ExecuteExternalDialog.this.toFront();
-              }
-            });
-            _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, NO_OP, CANCEL);
-
-            edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
-            if (selected!=null) {
-              String text = _lastJavaFocus.getText();
-              Caret caret = _lastJavaFocus.getCaret();
-              int min = Math.min(caret.getDot(), caret.getMark());
-              int max = Math.max(caret.getDot(), caret.getMark());
-              if (min != max) {
-                text = text.substring(0, min) + text.substring(max);
-              }
-              text = text.substring(0,min) + "${" + selected.first() + "}" + text.substring(min);
-              _lastJavaFocus.setText(text);
-              caret.setDot(min+selected.first().length()+2);
-              _lastJavaFocus.setCaret(caret);
-            }
-          }
-        });
-      }
-    }).start();
-  }
+  }  
   
   /** Lambda doing nothing. */
   protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
@@ -1531,12 +1059,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
+      try { _props = PropertyMaps.TEMPLATE.clone(); } catch(CloneNotSupportedException e) {
+        throw new edu.rice.cs.util.UnexpectedException(e);
+      }
       _mainFrame.hourglassOn();
       _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
       _documentListener.changedUpdate(null);
       _workDirDocumentListener.changedUpdate(null);
-      _javaDocumentListener.changedUpdate(null);
-      _javaWorkDirDocumentListener.changedUpdate(null);
       toFront();
     }
     else {
@@ -1547,10 +1076,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     super.setVisible(vis);
   }
   
-  /** Opens the file chooser to select a file, putting the result in the file field. */
-  protected void chooseFile(JTextPane pane) {
+  /** Opens the file chooser to select a directory, putting the result in the file field. */
+  protected void chooseDir(JTextPane pane) {
     // Get the file from the chooser
-    File wd = new File(StringOps.replaceVariables(pane.getText().trim(), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
+    File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props, PropertyMaps.GET_CURRENT));
     if ((pane.getText().equals("")) ||
         (!wd.exists()) &&
         (!wd.isDirectory())) {
@@ -1564,6 +1093,26 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     if (returnValue == DirectoryChooser.APPROVE_OPTION) {
       File chosen = _dirChooser.getSelectedDirectory();
       if (chosen != null) { pane.setText(chosen.toString()); };
+    }
+  }
+  
+  /** Opens the file chooser to select a file, putting the result in the file field. */
+  protected void chooseFile(JTextPane pane) {
+    // Get the file from the chooser
+    File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props, PropertyMaps.GET_CURRENT));
+    if ((pane.getText().equals("")) ||
+        (!wd.exists()) &&
+        (!wd.isFile())) {
+      wd = null;
+    }
+    
+    _fileChooser.setSelectedFile(wd);
+    _mainFrame.removeModalWindowAdapter(this);
+    int returnValue = _fileChooser.showOpenDialog(this);
+    _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);      
+    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+      File chosen = _fileChooser.getSelectedFile();
+      if (chosen != null) { pane.setText(chosen.toString()); } else { pane.setText(""); }
     }
   }
 }

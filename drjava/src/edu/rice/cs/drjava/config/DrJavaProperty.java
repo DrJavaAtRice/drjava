@@ -46,11 +46,11 @@ import static edu.rice.cs.util.HashUtilities.hash;
 /** Class representing values that can be inserted as variables in external processes.
  *  @version $Id$
  */
-public abstract class DrJavaProperty {
+public abstract class DrJavaProperty implements Cloneable {
   /** Whether the invalidation listening mechanism has been deactivated due to an error. */
   public volatile boolean DEACTIVATED_DUE_TO_ERROR = false;
   
-  /** Name of the property. Must be unique. TO DO: get rid of mutable properties; they are an abomination. */
+  /** Name of the property. Must be unique. */
   protected String _name;
   /** Value of the property. */
   protected String _value = "--uninitialized--";
@@ -84,18 +84,27 @@ public abstract class DrJavaProperty {
   /** Return the name of the property. */
   public String getName() { return _name; }
   
-  /** Return the value of the property. If it is not current, update first. */
-  public String getCurrent() {
+  /** Return the value of the property. If it is not current, update first.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public String getCurrent(PropertyMaps pm) {
     if (!isCurrent()) {
-      update();
+      update(pm);
       if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
       _isCurrent = true;
     }
     return _value;
   }
+
+  /** Return the value of the property lazily. The value may be stale.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public String getLazy(PropertyMaps pm) {
+    if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    return _value;
+  }
   
-  /** Update the property so the value is current. */
-  public abstract void update();
+  /** Update the property so the value is current. 
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public abstract void update(PropertyMaps pm);
   
   /** Reset attributes to their defaults. Should be overridden by properties that use attributes. */
   public void resetAttributes() { _attributes.clear(); }
@@ -172,12 +181,12 @@ public abstract class DrJavaProperty {
     if (other == null || other.getClass() != this.getClass()) return false;
 
     DrJavaProperty o = (DrJavaProperty) other;
-    return _name.equals(o._name) && _value.equals(o._value) && (_isCurrent == o._isCurrent);
+    return _name.equals(o._name);
 
   }
 
-  /** @return the hash code.  Hashing fails if keys are mutated! */
-  public int hashCode() { return hash(_name.hashCode(), _value.hashCode(), (_isCurrent ? 1 : 0)); }
+  /** @return the hash code. name is never mutated remains constant, so its hash code can be used. */
+  public int hashCode() { return _name.hashCode(); }
   
   /** Invalidate those properties that are listening to this property.
     * @param alreadyVisited set of properties already visited, to avoid cycles. */

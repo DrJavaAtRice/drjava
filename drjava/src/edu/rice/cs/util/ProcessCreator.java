@@ -54,9 +54,12 @@ import java.util.Properties;
 
 public class ProcessCreator {
   protected String _cmdline = null;
+  protected String _evaluatedCmdLine = null;
   protected String _workdir;
+  protected String _evaluatedWorkDir = null;
   protected String[] _cmdarray; // command line, already split
   protected Map<String,String> _env;
+  protected PropertyMaps _props = PropertyMaps.TEMPLATE;
   
   /** Degenerate constructor, only for subclasses that completely override this class. */
   protected ProcessCreator() { }
@@ -64,10 +67,12 @@ public class ProcessCreator {
   /** Constructor for a process creator with the given command line and map of properties.
     * @param cmdline command line
     * @param workdir working directory
+    * @param pm PropertyMaps used for substitution when replacing variables
     */
-  public ProcessCreator(String cmdline, String workdir) {
+  public ProcessCreator(String cmdline, String workdir, PropertyMaps pm) {
     _cmdline = cmdline;
     _workdir = workdir;
+    _props = pm;
   }
 
   /** Constructor for a process creator with the given command line already split up,
@@ -92,7 +97,7 @@ public class ProcessCreator {
         StringBuilder sb = new StringBuilder();
         for (int i=0; i<_cmdarray.length; ++i) {
           sb.append(" ");
-          sb.append(StringOps.unescapeSpacesWith1bHex(_cmdarray[i]));
+          sb.append(StringOps.unescapeFileName(_cmdarray[i]));
         }
         _cachedCmdLine = sb.toString();
         if (_cachedCmdLine.length()>0) {
@@ -120,14 +125,30 @@ public class ProcessCreator {
     return _workdir;
   }
   
+  /** Return the command line after evaluation, or null if it hasn't been replaced yet.
+    * @param command line after replacement, or null */
+  public String evaluatedCommandLine() {
+    return _evaluatedCmdLine;
+  }
+  
+  /** Return the work directory after evaluation, or null if it hasn't been replaced yet.
+    * @param command line after replacement, or null */
+  public String evaluatedWorkDir() {
+    return _evaluatedWorkDir;
+  }
+  
+  /** Return the PropertyMaps object used for substitution.
+    * @param PropertyMaps object */
+  public PropertyMaps getPropertyMaps() { return _props; }
+  
   /** Starts a new process using the attributes of this process creator.
     */
   public Process start() throws IOException {
     // set up work directory
-    String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
-    workdir = StringOps.unescapeSpacesWith1bHex(workdir);
+    _evaluatedWorkDir = StringOps.replaceVariables(_workdir, _props, PropertyMaps.GET_CURRENT);
+    _evaluatedWorkDir = StringOps.unescapeFileName(_evaluatedWorkDir);
     File dir = null;
-    if (!workdir.trim().equals("")) { dir = new File(workdir); }
+    if (!_evaluatedWorkDir.trim().equals("")) { dir = new File(_evaluatedWorkDir); }
     
     // set up environment
     String[] env = null;
@@ -142,11 +163,11 @@ public class ProcessCreator {
     
     // set up command line, if necessary
     if (_cmdline!=null) {
-      String replacedCmdLine = StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
-      List<String> cmds = StringOps.commandLineToList(replacedCmdLine);
+      _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
+      List<String> cmds = StringOps.commandLineToList(_evaluatedCmdLine);
       _cmdarray = new String[cmds.size()];
       for (int i=0; i<cmds.size(); ++i) {
-        _cmdarray[i] = StringOps.unescapeSpacesWith1bHex(cmds.get(i));
+        _cmdarray[i] = StringOps.unescapeFileName(cmds.get(i));
       }
     }
     
