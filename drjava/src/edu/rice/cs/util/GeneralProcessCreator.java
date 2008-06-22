@@ -172,7 +172,7 @@ public class GeneralProcessCreator extends ProcessCreator {
     return _workdir;
   }
 
-  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt",true);
+  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt",false);
   
   /** Starts a new process using the attributes of this process creator. */
   public Process start() throws IOException {
