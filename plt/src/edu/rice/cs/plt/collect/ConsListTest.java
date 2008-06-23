@@ -65,15 +65,15 @@ public class ConsListTest extends TestCase {
   }
   
   public void testIsEmpty() {
-    assertTrue(isEmpty(emptyStrings));
-    assertFalse(isEmpty(singletonStrings));
-    assertFalse(isEmpty(twoStrings));
-    assertFalse(isEmpty(threeStrings));
+    assertTrue(emptyStrings.isEmpty());
+    assertFalse(singletonStrings.isEmpty());
+    assertFalse(twoStrings.isEmpty());
+    assertFalse(threeStrings.isEmpty());
     
-    assertTrue(isEmpty(emptyNumbers));
-    assertFalse(isEmpty(singletonNumbers));
-    assertFalse(isEmpty(twoNumbers));
-    assertFalse(isEmpty(threeNumbers));
+    assertTrue(emptyNumbers.isEmpty());
+    assertFalse(singletonNumbers.isEmpty());
+    assertFalse(twoNumbers.isEmpty());
+    assertFalse(threeNumbers.isEmpty());
   }
   
   public void testReverse() {
@@ -105,10 +105,10 @@ public class ConsListTest extends TestCase {
    
   public void testFilter() {
     Predicate<String> p1 = new Predicate<String>() {
-      public Boolean value(String s) { return s.length() >= 3; }
+      public boolean contains(String s) { return s.length() >= 3; }
     };
     Predicate<String> p2 = new Predicate<String>() {
-      public Boolean value(String s) { return s.length() <= 3; }
+      public boolean contains(String s) { return s.length() <= 3; }
     };
     
     assertEquals(emptyStrings, filter(emptyStrings, p1));

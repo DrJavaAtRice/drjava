@@ -47,7 +47,8 @@ import java.io.Serializable;
  * comparison to other solutions.  For better performance or recursive list-decomposing 
  * algorithms, use a {@link edu.rice.cs.plt.collect.ConsList}.
  */
-public class SkipFirstIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
+public class SkipFirstIterable<T> extends AbstractIterable<T>
+                                  implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
   
   private final Iterable<T> _iterable;
   
@@ -59,11 +60,14 @@ public class SkipFirstIterable<T> extends AbstractIterable<T> implements SizedIt
     return result;
   }
   
+  public boolean isEmpty() { return IterUtil.sizeOf(_iterable, 2) < 2; }
+  
   public int size() {
-    // This can't be implemented correctly.  If the nestedSize is MAX_VALUE, that means the size
-    // of this iterable is >= MAX_VALUE-1.  If we return MAX_VALUE-1, we're asserting that it is
-    // *equal to* that size; if we return MAX_VALUE, we're asserting it's size is *greater than*
-    // that size.  There's no way to communicate the *greater than or equal* result.
+    // This can't be implemented in a strictly correct manner.  If the nestedSize is MAX_VALUE,
+    // that means the size of this iterable is >= MAX_VALUE-1.  If we return MAX_VALUE-1, we're
+    // asserting that it is *equal to* that size; if we return MAX_VALUE, we're asserting it's 
+    // size is *greater than* that size.  There's no way to communicate the *greater than or 
+    // equal* result.
     int nestedSize = IterUtil.sizeOf(_iterable);
     if (nestedSize == 0) { return 0; }
     else if (nestedSize == Integer.MAX_VALUE) { return Integer.MAX_VALUE; }
@@ -80,7 +84,15 @@ public class SkipFirstIterable<T> extends AbstractIterable<T> implements SizedIt
   
   public boolean isInfinite() { return IterUtil.isInfinite(_iterable); }
   
-  public boolean isFixed() { return IterUtil.isFixed(_iterable); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_iterable); }
+  
+  public boolean isStatic() { return IterUtil.isStatic(_iterable); }
+  
+  public T last() {
+    // assert that there is at least one element
+    IterUtil.first(this);
+    return IterUtil.last(_iterable);
+  }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> SkipFirstIterable<T> make(Iterable<T> iterable) {

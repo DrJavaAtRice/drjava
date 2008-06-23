@@ -60,6 +60,7 @@ import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.io.FilePredicate;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
@@ -463,7 +464,7 @@ public class SwingUtil {
   
   /**
    * Define a Swing file filter (for use with {@link javax.swing.JFileChooser}s) in terms if a 
-   * {@code FileFilter}
+   * {@code FileFilter}.
    */
   public static javax.swing.filechooser.FileFilter asSwingFileFilter(final java.io.FileFilter filter, 
                                                                      final String description) {
@@ -475,10 +476,18 @@ public class SwingUtil {
   
   /**
    * Define a Swing file filter (for use with {@link javax.swing.JFileChooser}s) in terms if a 
-   * {@code FileFilter}
+   * {@code FileFilter}.
    */
   public static javax.swing.filechooser.FileFilter asSwingFileFilter(Predicate<? super File> p, String description) {
-    return asSwingFileFilter(IOUtil.asFileFilter(p), description);
+    return asSwingFileFilter((java.io.FileFilter) IOUtil.asFilePredicate(p), description);
+  }
+  
+  /**
+   * Define a Swing file filter (for use with {@link javax.swing.JFileChooser}s) in terms if a 
+   * {@code FileFilter}.  (Defined to disambiguate, since both other declarations apply to FilePredicates.)
+   */
+  public static javax.swing.filechooser.FileFilter asSwingFileFilter(FilePredicate p, String description) {
+    return asSwingFileFilter((java.io.FileFilter) p, description);
   }
   
   /** Create an action to invoke {@link Window#dispose} on the given window */

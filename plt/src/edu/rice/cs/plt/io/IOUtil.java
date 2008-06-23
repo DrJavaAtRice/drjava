@@ -38,6 +38,7 @@ import java.io.*;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.lambda.Thunk;
@@ -258,7 +259,16 @@ public final class IOUtil {
    * to a {@code FileFilter}.
    */
   public static File[] attemptListFiles(File f, Predicate<? super File> filter) {
-    return attemptListFiles(f, asFileFilter(filter));
+    return attemptListFiles(f, (FileFilter) asFilePredicate(filter));
+  }
+  
+  /**
+   * Make a best attempt at invoking {@link File#listFiles(FileFilter)}.  In the event of a 
+   * {@link SecurityException}, the result is {@code null}.  (Defined to resolve method
+   * ambiguity when a FilePredicate is used.)
+   */
+  public static File[] attemptListFiles(File f, FilePredicate filter) {
+    return attemptListFiles(f, (FileFilter) filter);
   }
   
   /**
@@ -289,7 +299,17 @@ public final class IOUtil {
    * the result here is an empty iterable.  The given predicate is converted to a {@code FileFilter}.
    */
   public static Iterable<File> attemptListFilesAsIterable(File f, Predicate<? super File> filter) {
-    return attemptListFilesAsIterable(f, asFileFilter(filter));
+    return attemptListFilesAsIterable(f, (FileFilter) asFilePredicate(filter));
+  }
+  
+  /**
+   * Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
+   * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
+   * the result here is an empty iterable.  (Defined to resolve method ambiguity when called with
+   * a FilePredicate.)
+   */
+  public static Iterable<File> attemptListFilesAsIterable(File f, FilePredicate filter) {
+    return attemptListFilesAsIterable(f, (FileFilter) filter);
   }
   
   /**
@@ -497,7 +517,23 @@ public final class IOUtil {
    *                (but directories that do not match will still be traversed)
    */
   public static Iterable<File> listFilesRecursively(File f, Predicate<? super File> filter) {
-    return listFilesRecursively(f, asFileFilter(filter));
+    return listFilesRecursively(f, asFilePredicate(filter), ALWAYS_ACCEPT);
+  }
+  
+  /** 
+   * Produce a list of the recursive contents of a file.  The result is a list beginning with
+   * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
+   * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
+   * the presense of loops in the system.  If an error occurs in listing a directory, that
+   * directory will be skipped.  (Defined to resolve method ambiguity when a FilePredicate is
+   * used.)
+   * 
+   * @param f  A file (generally a directory) to be listed recursively
+   * @param filter  A filter for the list -- files that do not match will not be included
+   *                (but directories that do not match will still be traversed)
+   */
+  public static Iterable<File> listFilesRecursively(File f, FilePredicate filter) {
+    return listFilesRecursively(f, filter, ALWAYS_ACCEPT);
   }
   
   /** 
@@ -530,7 +566,25 @@ public final class IOUtil {
    */
   public static Iterable<File> listFilesRecursively(File f, Predicate<? super File> filter, 
                                                     Predicate<? super File> recursionFilter) {
-    return listFilesRecursively(f, asFileFilter(filter), asFileFilter(recursionFilter));
+    return listFilesRecursively(f, asFilePredicate(filter), asFilePredicate(recursionFilter),
+                                new RecursionStack<File>(Wrapper.<File>factory()));
+  }
+  
+  /** 
+   * Produce a list of the recursive contents of a file.  The result is a list beginning with
+   * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
+   * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
+   * the presense of loops in the system.  (Defined to resolve method ambiguity where two
+   * FilePredicates are used.)
+   * 
+   * @param f  A file (generally a directory) to be listed recursively
+   * @param filter  A filter for the list -- files that do not match will not be included
+   *                (but directories that do not match will still be traversed)
+   * @param recursionFilter  A filter controlling recursion -- directories that are rejected will
+   *                         not be traversed.
+   */
+  public static Iterable<File> listFilesRecursively(File f, FilePredicate filter, FilePredicate recursionFilter) {
+    return listFilesRecursively(f, filter, recursionFilter, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
   /** Helper method for {@code listFilesRecursively} */
@@ -794,8 +848,8 @@ public final class IOUtil {
   public static Iterable<File> parsePath(String path) {
     /* StringTokenizer documentation recommends using String.split() instead.
      * The problem with doing that is that the path separator might not translate into
-     * a regexp without escaping.  So we need a general way to translate a literal
-     * String into an escaped regexp String (better would be a way to compile a regexp
+     * a regex without escaping.  So we need a general way to translate a literal
+     * String into an escaped regex String (better would be a way to compile a regex
      * directly from a literal String).
      */
     StringTokenizer tokenizer = new StringTokenizer(path, File.pathSeparator);
@@ -1100,13 +1154,13 @@ public final class IOUtil {
     finally { out.close(); }
   }
   
-  /** If {@code r} is a {@code BufferedReader}, cast it as such; otherwise, wrap it in a {@code BufferedReader} */
+  /** If {@code r} is a {@code BufferedReader}, cast it as such; otherwise, wrap it in a {@code BufferedReader}. */
   public static BufferedReader asBuffered(Reader r) {
     if (r instanceof BufferedReader) { return (BufferedReader) r; }
     else { return new BufferedReader(r); }
   }
   
-  /** If {@code w} is a {@code BufferedWriter}, cast it as such; otherwise, wrap it in a {@code BufferedWriter} */
+  /** If {@code w} is a {@code BufferedWriter}, cast it as such; otherwise, wrap it in a {@code BufferedWriter}. */
   public static BufferedWriter asBuffered(Writer w) {
     if (w instanceof BufferedWriter) { return (BufferedWriter) w; }
     else { return new BufferedWriter(w); }
@@ -1114,7 +1168,7 @@ public final class IOUtil {
   
   /**
    * If {@code in} is a {@code BufferedInputStream}, cast it as such; otherwise, wrap it in a 
-   * {@code BufferedInputStream}
+   * {@code BufferedInputStream}.
    */
   public static BufferedInputStream asBuffered(InputStream in) {
     if (in instanceof BufferedInputStream) { return (BufferedInputStream) in; }
@@ -1123,7 +1177,7 @@ public final class IOUtil {
   
   /**
    * If {@code out} is a {@code BufferedOutputStream}, cast it as such; otherwise, wrap it in a 
-   * {@code BufferedOutputStream}
+   * {@code BufferedOutputStream}.
    */
   public static BufferedOutputStream asBuffered(OutputStream out) {
     if (out instanceof BufferedOutputStream) { return (BufferedOutputStream) out; }
@@ -1216,126 +1270,277 @@ public final class IOUtil {
   }
   
 
-  /** Define a {@code FileFilter} in terms of a {@code Predicate} */
-  public static FileFilter asFileFilter(final Predicate<? super File> p) {
-    return new FileFilter() {
-      public boolean accept(File f) { return p.value(f); }
-    };
+  /** Define a {@code FileFilter} in terms of a {@code Predicate}. */
+  public static FilePredicate asFilePredicate(Predicate<? super File> p) {
+    return new PredicateFilePredicate(p);
+  }
+  
+  private static final class PredicateFilePredicate implements FilePredicate, Serializable {
+    private final Predicate<? super File> _p;
+    public PredicateFilePredicate(Predicate<? super File> p) { _p = p; }
+    public boolean accept(File f) { return _p.contains(f); }
+    public boolean contains(File f) { return _p.contains(f); }
   }
   
   /**
-   * Define a {@code Predicate} in terms of a {@code FileFilter} (this provides access
-   * to predicate operations like {@code and} and {@code or})
+   * Define a {@code FilePredicate} in terms of a {@code FileFilter} (this provides access
+   * to predicate operations like {@code and} and {@code or}).
    */
-  public static Predicate<File> asPredicate(final FileFilter filter) {
-    return new Predicate<File>() {
-      public Boolean value(File f) { return filter.accept(f); }
-    };
+  public static FilePredicate asFilePredicate(FileFilter filter) {
+    return new FileFilterFilePredicate(filter);
+  }
+  
+  private static final class FileFilterFilePredicate implements FilePredicate, Serializable {
+    private final FileFilter _filter;
+    public FileFilterFilePredicate(FileFilter filter) { _filter = filter; }
+    public boolean accept(File f) { return _filter.accept(f); }
+    public boolean contains(File f) { return _filter.accept(f); }
   }
   
   /**
-   * Define a {@code FileFilter} that accepts files whose (simple) names match
+   * Define a {@code FilePredicate} that accepts files whose (simple) names match
    * a regular expression.
    */
-  public static FileFilter regexpFileFilter(String regexp) {
-    return asFileFilter(regexpFilePredicate(regexp));
+  public static FilePredicate regexFilePredicate(String regex) {
+    return new RegexFilePredicate(regex);
   }
-
+  
   /**
-    * Define a {@code Predicate} that accepts files whose (simple) names match
+   * Define a {@code FilePredicate} that accepts files whose (simple) names match
    * a regular expression.
    */
-  public static Predicate<File> regexpFilePredicate(final String regexp) {
-    return new Predicate<File>() {
-      public Boolean value(File f) { return f.getName().matches(regexp); }
-    };
+  public static FilePredicate regexFilePredicate(Pattern regex) {
+    return new RegexFilePredicate(regex);
+  }
+  
+  private static final class RegexFilePredicate implements FilePredicate, Serializable {
+    private final Pattern _regex;
+    public RegexFilePredicate(String regex) { _regex = Pattern.compile(regex); }
+    public RegexFilePredicate(Pattern regex) { _regex = regex; }
+    public boolean accept(File f) { return _regex.matcher(f.getName()).matches(); }
+    public boolean contains(File f) { return _regex.matcher(f.getName()).matches(); }
   }
   
   /**
-   * Define a {@code FileFilter} that accepts files whose (simple) names in the
+   * Define a {@code FilePredicate} that accepts files whose (simple) names in the
    * canonical case (see {@link #canonicalCase}) match a regular expression.
    */
-  public static FileFilter regexpCanonicalCaseFileFilter(String regexp) {
-    return asFileFilter(regexpCanonicalCaseFilePredicate(regexp));
+  public static FilePredicate regexCanonicalCaseFilePredicate(String regex) {
+    return new RegexCanonicalCaseFilePredicate(regex);
   }
-                                                    
-  /**
-    * Define a {@code Predicate} that accepts files whose (simple) names in the
-   * canonical case (see {@link #canonicalCase}) match a regular expression.
-   */
-  public static Predicate<File> regexpCanonicalCaseFilePredicate(final String regexp) {
-    return new Predicate<File>() {
-      public Boolean value(File f) { return canonicalCase(f).getName().matches(regexp); }
-    };
+  
+  private static final class RegexCanonicalCaseFilePredicate implements FilePredicate, Serializable {
+    private final Pattern _regex;
+    public RegexCanonicalCaseFilePredicate(String regex) { _regex = Pattern.compile(regex); }
+    public RegexCanonicalCaseFilePredicate(Pattern regex) { _regex = regex; }
+    public boolean accept(File f) { return _regex.matcher(canonicalCase(f).getName()).matches(); }
+    public boolean contains(File f) { return _regex.matcher(canonicalCase(f).getName()).matches(); }
   }
   
   /**
-   * Define a {@code FileFilter} that accepts file objects with the given extension (that is,
+   * Define a {@code FilePredicate} that accepts file objects with the given extension (that is,
    * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
-   * end in {@code .txt})
+   * end in {@code .txt}).
    */
-  public static FileFilter extensionFileFilter(String extension) {
-    return asFileFilter(extensionFilePredicate(extension, LambdaUtil.TRUE));
+  public static FilePredicate extensionFilePredicate(String extension) {
+    return new RegexCanonicalCaseFilePredicate("\\." + canonicalCase(new File(extension)).getName());
   }
   
   /**
-   * Define a {@code FileFilter} that accepts file objects with the given extension (that is,
-   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
-   * end in {@code .txt})
-   * @param extension  File extension
-   * @param also  Additional filter that must be satisfied (for example, {@link #ACCEPT_FILES})
+   * Define a {@code FilePredicate} that only accepts files with the given name (where both names
+   * are converted to the canonical case; see {@link #canonicalCase}).
    */
-  public static FileFilter extensionFileFilter(String extension, FileFilter also) {
-    return asFileFilter(extensionFilePredicate(extension, asPredicate(also)));
+  public static FilePredicate sameNameFilePredicate(String name) {
+    return new SamePathFilePredicate(new File(name));
   }
   
   /**
-   * Define a {@code Predicate} that accepts file objects with the given extension (that is,
-   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
-   * end in {@code .txt})
+   * Define a {@code FilePredicate} that only accepts files with the given path and name (where
+   * both paths are converted to the canonical case; see {@link #canonicalCase}).  If {@code path} is
+   * relative, any file with an absolute path that ends with {@code path} will be accepted.
+   * Otherwise, only a file with the exact same path is accepted.
    */
-  public static Predicate<File> extensionFilePredicate(String extension) {
-    return extensionFilePredicate(extension, LambdaUtil.TRUE);
+  public static FilePredicate samePathFilePredicate(File path) {
+    return new SamePathFilePredicate(path);
   }
-                 
+  
+  private static final class SamePathFilePredicate implements FilePredicate, Serializable {
+    private final File _f;
+    public SamePathFilePredicate(File f) { _f = canonicalCase(f); }
+    public boolean accept(File f) {
+      File candidate = canonicalCase(attemptAbsoluteFile(f));
+      for (File compareTo = _f; compareTo != null; compareTo = compareTo.getParentFile()) {
+        if (candidate == null || !compareTo.getName().equals(candidate.getName())) {
+          return false;
+        }
+        candidate = candidate.getParentFile();
+      }
+      return true;
+    }
+    public boolean contains(File f) { return accept(f); }
+  }
+  
   /**
-   * Define a {@code Predicate} that accepts file objects with the given extension (that is,
-   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
-   * end in {@code .txt})
-   * @param extension  File extension
-   * @param also  Additional predicate that must be satisfied (for example, {@link #IS_FILE})
+   * Define a {@code FilePredicate} that only accepts a file with the same attributes as 
+   * {@code f} (at creation time).  This is useful in detecting changes being made to a file.
+   * The files' modification dates, lengths, and read/write permissions are compared.
+   * @throws FileNotFoundException  If {@code f} is not a normal file, or if access to its attributes
+   *                                is not available.
    */
-  public static Predicate<File> extensionFilePredicate(String extension, final Predicate<? super File> also) {
-    // Ensure that the extension is in the canonical case
-    extension = canonicalCase(new File(extension)).getName();
-    final String suffix = "." + extension;
-    return new Predicate<File>() {
-      public Boolean value(File f) { return canonicalCase(f).getName().endsWith(suffix) && also.value(f); }
-    };
+  public static FilePredicate sameAttributesFilePredicate(File f) throws FileNotFoundException {
+    return new SameAttributesFilePredicate(f);
   }
   
-  /** A predicate that tests whether {@link #attemptIsFile} holds for a file */
-  public static final Predicate<File> IS_FILE = new Predicate<File>() {
-    public Boolean value(File f) { return attemptIsFile(f); }
-  };
+  private static final class SameAttributesFilePredicate implements FilePredicate, Serializable {
+    private final long _lastModified;
+    private final long _length;
+    private final boolean _canRead;
+    private final boolean _canWrite;
+    
+    public SameAttributesFilePredicate(File f) throws FileNotFoundException {
+      try {
+        if (!f.isFile()) { throw new FileNotFoundException(f + " is not a valid file"); }
+        _lastModified = f.lastModified();
+        if (_lastModified == 0l) {
+          throw new FileNotFoundException("Can't get valid modification date for " + f);
+        }
+        _length = f.length();
+        _canRead = f.canRead();
+        _canWrite = f.canWrite();
+      }
+      catch (SecurityException e) { throw new FileNotFoundException(e.getMessage()); }
+    }
+    
+    public boolean accept(File f) {
+      try {
+        return f.isFile() && f.lastModified() == _lastModified && f.length() == _length &&
+               f.canRead() == _canRead && f.canWrite() == _canWrite;
+      }
+      catch (SecurityException e) { return false; }
+    }
+    
+    public boolean contains(File f) { return accept(f); }
+  }
   
-  /** A predicate that tests whether {@link #attemptIsDirectory} holds for a file */
-  public static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
-    public Boolean value(File f) { return attemptIsDirectory(f); }
-  };
+  /**
+   * Define a {@code FilePredicate} that only accepts files with contents matching a CRC-32
+   * hash of {@code f} (at creation time).  This is useful in detecting changes being made to
+   * a file.
+   * @throws IOException  If {@code f} cannot be read.
+   */
+  public static FilePredicate sameContentsFilePredicate(File f) throws IOException {
+    return new SameContentsFilePredicate(f);
+  }
   
-  /** A {@code FileFilter} that always accepts */
-  public static final FileFilter ALWAYS_ACCEPT = asFileFilter(LambdaUtil.TRUE);
+  private static final class SameContentsFilePredicate implements FilePredicate, Serializable {
+    private final long _length;
+    private final int _hash;
+    public SameContentsFilePredicate(File f) throws IOException {
+      // as an optimization, try to check the length before using a hash, but
+      // don't let failures result in an exception, since it's only an optimization
+      _length = attemptLength(f);
+      _hash = crc32Hash(f);
+    }
+    public boolean accept(File f) {
+      long fLength = attemptLength(f);
+      if (fLength > 0l && _length > 0l && fLength != _length) { return false; }
+      try { return _hash == crc32Hash(f); }
+      catch (IOException e) { return false; }
+    }
+    public boolean contains(File f) { return accept(f); }
+  }
+  
+  /** A predicate that tests whether {@link #attemptIsFile} holds for a file. */
+  public static final FilePredicate IS_FILE = new IsFileFilePredicate();
+  
+  private static final class IsFileFilePredicate implements FilePredicate, Serializable {
+    public boolean accept(File f) { return attemptIsFile(f); }
+    public boolean contains(File f) { return attemptIsFile(f); }
+  }
+  
+  /** A predicate that tests whether {@link #attemptIsDirectory} holds for a file. */
+  public static final FilePredicate IS_DIRECTORY = new IsDirectoryFilePredicate();
+  
+  private static final class IsDirectoryFilePredicate implements FilePredicate, Serializable {
+    public boolean accept(File f) { return attemptIsDirectory(f); }
+    public boolean contains(File f) { return attemptIsDirectory(f); }
+  }
+  
+  /** A {@code FilePredicate} that always accepts. */
+  public static final FilePredicate ALWAYS_ACCEPT = asFilePredicate(LambdaUtil.TRUE);
 
-  /** A {@code FileFilter} that always rejects */
-  public static final FileFilter ALWAYS_REJECT = asFileFilter(LambdaUtil.FALSE);
+  /** A {@code FilePredicate} that always rejects. */
+  public static final FilePredicate ALWAYS_REJECT = asFilePredicate(LambdaUtil.FALSE);
 
-  /** A {@code FileFilter} that only accepts files for which {@link #attemptIsFile} holds */
-  public static final FileFilter ACCEPT_FILES = asFileFilter(IS_FILE);
-
-  /** A {@code FileFilter} that only accepts files for which {@link #attemptIsDirectory} holds */
-  public static final FileFilter ACCEPT_DIRECTORIES = asFileFilter(IS_DIRECTORY);
+  /** Produce a conjunction of the given FileFilters. */
+  public static FilePredicate and(FileFilter... filters) {
+    return new AndFilePredicate(IterUtil.asIterable(filters));
+  }
   
+  /** Produce a conjunction of the given FileFilters. */
+  public static FilePredicate and(Iterable<? extends FileFilter> filters) {
+    return new AndFilePredicate(filters);
+  }
+  
+  private static final class AndFilePredicate implements FilePredicate, Serializable {
+    private final Iterable<? extends FileFilter> _filters;
+    public AndFilePredicate(Iterable<? extends FileFilter> filters) { _filters = filters; }
+    public boolean accept(File f) {
+      for (FileFilter filter : _filters) {
+        if (!filter.accept(f)) { return false; }
+      }
+      return true;
+    }
+    public boolean contains(File f) { return accept(f); }
+  }
+  
+  /** Produce a disjunction of the given FileFilters. */
+  public static FilePredicate or(FileFilter... filters) {
+    return new OrFilePredicate(IterUtil.asIterable(filters));
+  }
+  
+  /** Produce a disjunction of the given FileFilters. */
+  public static FilePredicate or(Iterable<? extends FileFilter> filters) {
+    return new OrFilePredicate(filters);
+  }
+  
+  private static final class OrFilePredicate implements FilePredicate, Serializable {
+    private final Iterable<? extends FileFilter> _filters;
+    public OrFilePredicate(Iterable<? extends FileFilter> filters) { _filters = filters; }
+    public boolean accept(File f) {
+      for (FileFilter filter : _filters) {
+        if (filter.accept(f)) { return true; }
+      }
+      return false;
+    }
+    public boolean contains(File f) { return accept(f); }
+  }
+  
+  /** Produce the complement of the given FileFilter. */
+  public static FilePredicate negate(FileFilter filter) {
+    return new NegationFilePredicate(filter);
+  }
+  
+  private static final class NegationFilePredicate implements FilePredicate, Serializable {
+    private final FileFilter _filter;
+    public NegationFilePredicate(FileFilter filter) { _filter = filter; }
+    public boolean accept(File f) { return !_filter.accept(f); }
+    public boolean contains(File f) { return !_filter.accept(f); }
+  }
+  
+  /**
+   * Produce a {@code FilePredicate} that acts as a "key" representing the current state of
+   * the given file.  A file will match only if it has the same name, absolute path, attributes,
+   * and contents as {@code f}.  This is useful for detecting background changes to a file.
+   * @throws IOException  If the given file does not exist, is not a normal file, or does
+   *                      not allow its attributes or contents to be accessed.
+   */
+  public static FilePredicate fileKey(File f) throws IOException {
+    return and(samePathFilePredicate(attemptAbsoluteFile(f)),
+               sameAttributesFilePredicate(f),
+               sameContentsFilePredicate(f));
+  }
+
   
   private static final LinkedList<PrintStream> SYSTEM_OUT_STACK = new LinkedList<PrintStream>();
   private static final LinkedList<PrintStream> SYSTEM_ERR_STACK = new LinkedList<PrintStream>();

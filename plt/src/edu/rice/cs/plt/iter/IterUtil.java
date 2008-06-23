@@ -44,6 +44,7 @@ import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
 import edu.rice.cs.plt.recur.RecurUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.collect.ConsList;
 import edu.rice.cs.plt.text.TextUtil;
 
@@ -62,6 +63,7 @@ public final class IterUtil {
   /** @return  {@code true} iff the given iterable contains no elements */
   public static boolean isEmpty(Iterable<?> iter) { 
     if (iter instanceof Collection<?>) { return ((Collection<?>) iter).isEmpty(); }
+    else if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isEmpty(); }
     else { return ! iter.iterator().hasNext(); }
   }
   
@@ -100,7 +102,10 @@ public final class IterUtil {
     }
   }
   
-  /** Return {@code true} iff the given iterable is known to have an infinite size. */
+  /**
+   * Return {@code true} iff the given iterable is known to have an infinite size.
+   * @see SizedIterable#isInfinite
+   */
   public static boolean isInfinite(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isInfinite(); }
     else if (iter instanceof FilteredIterable<?>) { return ((FilteredIterable<?>) iter).isInfinite(); }
@@ -110,15 +115,31 @@ public final class IterUtil {
   /**
    * Return {@code true} iff the given iterable is known to have a fixed size.  Infinite iterables are considered
    * fixed if they will never become finite.
+   * @see SizedIterable#hasFixedSize
    */
-  public static boolean isFixed(Iterable<?> iter) {
-    if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isFixed(); }
-    else if (iter instanceof Collection<?>) { return isFixedCollection((Collection<?>) iter); }
+  public static boolean hasFixedSize(Iterable<?> iter) {
+    if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).hasFixedSize(); }
+    else if (iter instanceof Collection<?>) { return isFixedSizeCollection((Collection<?>) iter); }
     else { return false; }
   }
   
   /** Return {@code true} iff the given collection is known to have a fixed size. */
-  private static boolean isFixedCollection(Collection<?> iter) {
+  private static boolean isFixedSizeCollection(Collection<?> iter) {
+    return (iter == Collections.EMPTY_SET) || (iter == Collections.EMPTY_LIST);
+  }
+  
+  /**
+   * Return {@code true} iff the given iterable is known to be immutable.
+   * @see SizedIterable#isStatic
+   */
+  public static boolean isStatic(Iterable<?> iter) {
+    if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isStatic(); }
+    else if (iter instanceof Collection<?>) { return isStaticCollection((Collection<?>) iter); }
+    else { return false; }
+  }
+  
+  /** Return {@code true} iff the given collection is known to be immutable. */
+  private static boolean isStaticCollection(Collection<?> iter) {
     return (iter == Collections.EMPTY_SET) || (iter == Collections.EMPTY_LIST);
   }
   
@@ -376,13 +397,13 @@ public final class IterUtil {
     return new SnapshotIterable<T>(iter);
   }
   
-  /** Create an {@link ImmutableIterable} with the given iterable. */
+  /** Produce an {@link ImmutableIterable} with the given iterable. */
   public static <T> ImmutableIterable<T> immutable(Iterable<? extends T> iter) {
     return new ImmutableIterable<T>(iter);
   }
   
   /**
-   * Allow covariance in situations where wildcards can't be used by wraping the iterable with a less-
+   * Allow covariance in situations where wildcards can't be used by wrapping the iterable with a less-
    * precise type parameter.
    */
   public static <T> SizedIterable<T> relax(Iterable<? extends T> iter) {
@@ -397,16 +418,9 @@ public final class IterUtil {
     return new ImmutableIterator<T>(iter);
   }
     
-  /**
-   * <p>Create a SizedIterable based on the given values or array; equivalent to {@link #asIterable(Object[])}.</p>
-   * 
-   * <p>When used as a varargs method, an unchecked warning will occur at the call site when {@code T} is a 
-   * non-reifiable (generic or variable) type.  As a workaround, the function is overloaded to take a range
-   * of fixed numbers of arguments, up to a practical limit.  Above that limit, this varargs version is matched.</p>
-   */
-  public static <T> SizedIterable<T> make(T... values) {
-    return new ObjectArrayWrapper<T>(values);
-  }
+  // varargs doesn't work for make() for two reasons.  First, it doesn't support non-reifiable types for
+  // T.  Second, it can't guarantee that there is no external reference to the array, thus potentially
+  // violating the assertion that the result is immutable.
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make() {
@@ -422,55 +436,55 @@ public final class IterUtil {
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5, T v6) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5, T v6, T v7) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 , v7 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 , v7, v8 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 , v7, v8, v9 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10) {
     @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 , v7, v8, v9, v10 };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Create an infinite sequence defined by an initial value and a successor function. */
@@ -502,18 +516,23 @@ public final class IterUtil {
    * Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
    * result.  (If that is not the desired behavior, {@link #snapshot(Iterable)} may be invoked on the result.)
    */
-  public static <T> SizedIterable<T> asIterable(T[] array) {
+  public static <T> SizedIterable<T> asIterable(T... array) {
     return new ObjectArrayWrapper<T>(array);
   }
   
   private static final class ObjectArrayWrapper<T> extends AbstractIterable<T> 
-    implements SizedIterable<T>, Serializable {
+      implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
     private final T[] _array;
-    public ObjectArrayWrapper(T[] array) { _array = array; }
+    private final boolean _refs; // whether there may be other references to _array (allowing mutation)
+    public ObjectArrayWrapper(T[] array) { _array = array; _refs = true; }
+    public ObjectArrayWrapper(T[] array, boolean refs) { _array = array; _refs = refs; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return !_refs; }
+    public T last() { return _array[_array.length-1]; }
     public Iterator<T> iterator() {
       return new IndexedIterator<T>() {
         protected int size() { return _array.length; }
@@ -531,13 +550,16 @@ public final class IterUtil {
   }
   
   private static final class BooleanArrayWrapper extends AbstractIterable<Boolean> 
-    implements SizedIterable<Boolean>, Serializable {
+      implements SizedIterable<Boolean>, OptimizedLastIterable<Boolean>, Serializable {
     private final boolean[] _array;
     public BooleanArrayWrapper(boolean[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Boolean last() { return _array[_array.length-1]; }
     public Iterator<Boolean> iterator() {
       return new IndexedIterator<Boolean>() {
         protected int size() { return _array.length; }
@@ -555,13 +577,16 @@ public final class IterUtil {
   }
   
   private static final class CharArrayWrapper extends AbstractIterable<Character> 
-    implements SizedIterable<Character>, Serializable {
+      implements SizedIterable<Character>, OptimizedLastIterable<Character>, Serializable {
     private final char[] _array;
     public CharArrayWrapper(char[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Character last() { return _array[_array.length-1]; }
     public Iterator<Character> iterator() {
       return new IndexedIterator<Character>() {
         protected int size() { return _array.length; }
@@ -579,13 +604,16 @@ public final class IterUtil {
   }
   
   private static final class ByteArrayWrapper extends AbstractIterable<Byte> 
-    implements SizedIterable<Byte>, Serializable {
+      implements SizedIterable<Byte>, OptimizedLastIterable<Byte>, Serializable {
     private final byte[] _array;
     public ByteArrayWrapper(byte[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Byte last() { return _array[_array.length-1]; }
     public Iterator<Byte> iterator() {
       return new IndexedIterator<Byte>() {
         protected int size() { return _array.length; }
@@ -603,13 +631,16 @@ public final class IterUtil {
   }
   
   private static final class ShortArrayWrapper extends AbstractIterable<Short> 
-    implements SizedIterable<Short>, Serializable {
+      implements SizedIterable<Short>, OptimizedLastIterable<Short>, Serializable {
     private final short[] _array;
     public ShortArrayWrapper(short[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Short last() { return _array[_array.length-1]; }
     public Iterator<Short> iterator() {
       return new IndexedIterator<Short>() {
         protected int size() { return _array.length; }
@@ -627,13 +658,16 @@ public final class IterUtil {
   }
   
   private static final class IntArrayWrapper extends AbstractIterable<Integer> 
-    implements SizedIterable<Integer>, Serializable {
+      implements SizedIterable<Integer>, OptimizedLastIterable<Integer>, Serializable {
     private final int[] _array;
     public IntArrayWrapper(int[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Integer last() { return _array[_array.length-1]; }
     public Iterator<Integer> iterator() {
       return new IndexedIterator<Integer>() {
         protected int size() { return _array.length; }
@@ -651,13 +685,16 @@ public final class IterUtil {
   }
   
   private static final class LongArrayWrapper extends AbstractIterable<Long> 
-    implements SizedIterable<Long>, Serializable {
+      implements SizedIterable<Long>, OptimizedLastIterable<Long>, Serializable {
     private final long[] _array;
     public LongArrayWrapper(long[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Long last() { return _array[_array.length-1]; }
     public Iterator<Long> iterator() {
       return new IndexedIterator<Long>() {
         protected int size() { return _array.length; }
@@ -675,13 +712,16 @@ public final class IterUtil {
   }
   
   private static final class FloatArrayWrapper extends AbstractIterable<Float> 
-    implements SizedIterable<Float>, Serializable {
+      implements SizedIterable<Float>, OptimizedLastIterable<Float>, Serializable {
     private final float[] _array;
     public FloatArrayWrapper(float[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Float last() { return _array[_array.length-1]; }
     public Iterator<Float> iterator() {
       return new IndexedIterator<Float>() {
         protected int size() { return _array.length; }
@@ -699,13 +739,16 @@ public final class IterUtil {
   }
   
   private static final class DoubleArrayWrapper extends AbstractIterable<Double> 
-    implements SizedIterable<Double>, Serializable {
+      implements SizedIterable<Double>, OptimizedLastIterable<Double>, Serializable {
     private final double[] _array;
     public DoubleArrayWrapper(double[] array) { _array = array; }
+    public boolean isEmpty() { return _array.length == 0; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return true; }
+    public boolean hasFixedSize() { return true; }
+    public boolean isStatic() { return false; }
+    public Double last() { return _array[_array.length-1]; }
     public Iterator<Double> iterator() {
       return new IndexedIterator<Double>() {
         protected int size() { return _array.length; }
@@ -733,29 +776,35 @@ public final class IterUtil {
   
   
   /** 
-   * Wrap the given {@code Collection} in a {@code SizedIterable}.  Subsequent changes made 
-   * to the collection will be reflected in the result (if this is not the desired behavior,
-   * {@link #snapshot(Iterable)} can be used instead).
+   * Convert the given {@code Collection} to a {@code SizedIterable}.  If it already <em>is</em>
+   * a {@code SizedIterable}, cast it as such.  Otherwise, wrap it.  In either case, subsequent
+   * changes made to the collection will be reflected in the result (if this is not the desired
+   * behavior, {@link #snapshot(Iterable)} can be used instead).
    */
   public static <T> SizedIterable<T> asSizedIterable(Collection<T> coll) {
-    return new CollectionWrapper<T>(coll);
+    if (coll instanceof SizedIterable<?>) { return (SizedIterable<T>) coll; }
+    else { return new CollectionWrapper<T>(coll); }
   }
   
   private static final class CollectionWrapper<T> extends AbstractIterable<T> 
-                                                  implements SizedIterable<T>, Serializable {
+                                                  implements SizedIterable<T>, OptimizedLastIterable<T>,
+                                                             Serializable {
     private final Collection<T> _c;
     public CollectionWrapper(Collection<T> c) { _c = c; }
     public Iterator<T> iterator() { return _c.iterator(); }
+    public boolean isEmpty() { return _c.isEmpty(); }
     public int size() { return _c.size(); }
     public int size(int bound) { int result = _c.size(); return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return isFixedCollection(_c); }
+    public boolean hasFixedSize() { return isFixedSizeCollection(_c); }
+    public boolean isStatic() { return isStaticCollection(_c); }
+    public T last() { return IterUtil.last(_c); }
   }
   
 
   /** Create an iterable that wraps the given {@code CharSequence}. */
   public static SizedIterable<Character> asIterable(CharSequence sequence) {
-    return new CharSequenceWrapper(sequence, false);
+    return new CharSequenceWrapper(sequence, true);
   }
   
   /** 
@@ -763,18 +812,21 @@ public final class IterUtil {
    * but takes advantage of the fact that {@code String}s are immutable.
    */
   public static SizedIterable<Character> asIterable(final String sequence) {
-    return new CharSequenceWrapper(sequence, true);
+    return new CharSequenceWrapper(sequence, false);
   }
   
   private static final class CharSequenceWrapper extends AbstractIterable<Character> 
-    implements SizedIterable<Character>, Serializable {
+      implements SizedIterable<Character>, OptimizedLastIterable<Character>, Serializable {
     private final CharSequence _s;
-    private final boolean _fixed;
-    public CharSequenceWrapper(CharSequence s, boolean fixed) { _s = s; _fixed = fixed; }
+    private final boolean _mutable; // whether this sequence is possibly mutable
+    public CharSequenceWrapper(CharSequence s, boolean mutable) { _s = s; _mutable = mutable; }
+    public boolean isEmpty() { return _s.length() == 0; }
     public int size() { return _s.length(); }
     public int size(int bound) { int result = _s.length(); return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
-    public boolean isFixed() { return _fixed; }
+    public boolean hasFixedSize() { return !_mutable; }
+    public boolean isStatic() { return !_mutable; }
+    public Character last() { return _s.charAt(_s.length()-1); }
     public Iterator<Character> iterator() {
       return new IndexedIterator<Character>() {
         protected int size() { return _s.length(); }
@@ -784,7 +836,7 @@ public final class IterUtil {
   }
   
   /** Produce an iterable of size 0 or 1 from an {@code Option}. */
-  public static <T> SizedIterable<T> asIterable(Option<? extends T> option) {
+  public static <T> SizedIterable<T> toIterable(Option<? extends T> option) {
     return option.apply(new OptionVisitor<T, SizedIterable<T>>() {
       public SizedIterable<T> forSome(T val) { return new SingletonIterable<T>(val); }
       @SuppressWarnings("unchecked")
@@ -793,126 +845,65 @@ public final class IterUtil {
   }
 
   /** Produce an iterable of size 1 from a {@code Wrapper}. */
-  public static <T> SizedIterable<T> asIterable(Wrapper<? extends T> tuple) {
+  public static <T> SizedIterable<T> toIterable(Wrapper<? extends T> tuple) {
     return new SingletonIterable<T>(tuple.value());
   }
   
   /** Produce an iterable of size 2 from a {@code Pair}. */
-  public static <T> SizedIterable<T> asIterable(Pair<? extends T, ? extends T> tuple) {
+  public static <T> SizedIterable<T> toIterable(Pair<? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second() };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Produce an iterable of size 3 from a {@code Triple}. */
-  public static <T> SizedIterable<T> asIterable(Triple<? extends T, ? extends T, ? extends T> tuple) {
+  public static <T> SizedIterable<T> toIterable(Triple<? extends T, ? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third() };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Produce an iterable of size 4 from a {@code Quad}. */
-  public static <T> SizedIterable<T> asIterable(Quad<? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+  public static <T> SizedIterable<T> toIterable(Quad<? extends T, ? extends T, ? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth() };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
 
   /** Produce an iterable of size 5 from a {@code Quint}. */
   public static <T> SizedIterable<T>
-    asIterable(Quint<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+    toIterable(Quint<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(), 
                                      tuple.fifth() };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Produce an iterable of size 6 from a {@code Sextet}. */
   public static <T> SizedIterable<T>
-  asIterable(Sextet<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+  toIterable(Sextet<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(),
                                      tuple.fifth(), tuple.sixth() };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Produce an iterable of size 7 from a {@code Septet}. */
   public static <T> SizedIterable<T>
-  asIterable(Septet<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+  toIterable(Septet<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(),
                                      tuple.fifth(), tuple.sixth(), tuple.seventh() };
-    return new ObjectArrayWrapper<T>(values);
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /** Produce an iterable of size 8 from an {@code Octet}. */
-  public static <T> SizedIterable<T> asIterable(Octet<? extends T, ? extends T, ? extends T, ? extends T,
+  public static <T> SizedIterable<T> toIterable(Octet<? extends T, ? extends T, ? extends T, ? extends T,
                                                       ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
     @SuppressWarnings("unchecked")
     T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(),
                                      tuple.fifth(), tuple.sixth(), tuple.seventh(), tuple.eighth() };
-    return new ObjectArrayWrapper<T>(values);
-  }
-  
-  
-  /**
-   * Make a {@code List} with the given elements.  If the input <em>is</em> a {@code List},
-   * casts it as such; otherwise, creates a new list.  In the second case, changes made to
-   * one will necessarily not be reflected in the other.  Assumes the iterable is finite.
-   */
-  public static <T> List<T> asList(Iterable<T> iter) {
-    if (iter instanceof List<?>) { return (List<T>) iter; }
-    else if (iter instanceof Collection<?>) { return new ArrayList<T>((Collection<T>) iter); }
-    else {
-      ArrayList<T> result = new ArrayList<T>(0); // minimize footprint of empty
-      for (T e : iter) { result.add(e); }
-      return result;
-    }
-  }
-  
-  /**
-   * Make an {@code ArrayList} with the given elements.  If the input <em>is</em> an {@code ArrayList},
-   * casts it as such; otherwise, creates a new list.  In the second case, changes made to
-   * one will necessarily not be reflected in the other.  Assumes the iterable is finite.
-   */
-  public static <T> ArrayList<T> asArrayList(Iterable<T> iter) {
-    if (iter instanceof ArrayList<?>) { return (ArrayList<T>) iter; }
-    else if (iter instanceof Collection<?>) { return new ArrayList<T>((Collection<T>) iter); }
-    else {
-      ArrayList<T> result = new ArrayList<T>(0); // minimize footprint of empty
-      for (T e : iter) { result.add(e); }
-      return result;
-    }
-  }
-  
-  /**
-   * Make a {@link LinkedList} with the given elements.  If the input <em>is</em> a {@code List},
-   * casts it as such; otherwise, creates a new list.  In the second case, changes made to
-   * one will necessarily not be reflected in the other.  Assumes the iterable is finite.
-   */
-  public static <T> LinkedList<T> asLinkedList(Iterable<T> iter) {
-    if (iter instanceof LinkedList<?>) { return (LinkedList<T>) iter; }
-    else if (iter instanceof Collection<?>) { return new LinkedList<T>((Collection<T>) iter); }
-    else {
-      LinkedList<T> result = new LinkedList<T>();
-      for (T e : iter) { result.add(e); }
-      return result;
-    }
-  }
-  
-  /**
-   * Make a {@link ConsList} with the given elements.  If the input <em>is</em> a {@code ConsList},
-   * casts it as such; otherwise, creates a new list.  Of course, since ConsLists are immutable,
-   * subsequent changes made to {@code iter} will not be reflected in the result.  Assumes the iterable
-   * is finite.
-   */
-  public static <T> ConsList<T> asConsList(Iterable<T> iter) {
-    if (iter instanceof ConsList<?>) { return (ConsList<T>) iter; }
-    else {
-      ConsList<T> result = ConsList.empty();
-      for (T elt : reverse(iter)) { result = ConsList.cons(elt, result); }
-      return result;
-    }
+    return new ObjectArrayWrapper<T>(values, false);
   }
   
   /**
@@ -931,11 +922,10 @@ public final class IterUtil {
     }
     else {
       int i = 0;
-      for (T t : iter) { result[i] = t; i++; if (i < 0) break; }
+      for (T t : iter) { result[i++] = t; if (i < 0) break; }
     }
     return result;
   }
-  
   
   /**
    * Access the first value in the given iterable.
@@ -992,9 +982,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 0 or 1 elements to an {@code Option}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Option<T> asOption(Iterable<? extends T> iter) {
+  public static <T> Option<T> makeOption(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size == 0) { return Option.none(); }
     else if (size == 1) { return Option.some(first(iter)); }
@@ -1005,9 +995,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 1 element to a {@code Wrapper}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Wrapper<T> asWrapper(Iterable<? extends T> iter) {
+  public static <T> Wrapper<T> makeWrapper(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 1) {
       throw new IllegalArgumentException("Iterable does not have 1 element: size == " + size);
@@ -1018,9 +1008,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 2 elements to a {@code Pair}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Pair<T, T> asPair(Iterable<? extends T> iter) {
+  public static <T> Pair<T, T> makePair(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 2) {
       throw new IllegalArgumentException("Iterable does not have 2 elements: size == " + size);
@@ -1031,9 +1021,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 3 elements to a {@code Triple}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Triple<T, T, T> asTriple(Iterable<? extends T> iter) {
+  public static <T> Triple<T, T, T> makeTriple(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 3) {
       throw new IllegalArgumentException("Iterable does not have 3 elements: size == " + size);
@@ -1044,9 +1034,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 4 elements to a {@code Quad}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Quad<T, T, T, T> asQuad(Iterable<? extends T> iter) {
+  public static <T> Quad<T, T, T, T> makeQuad(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 4) {
       throw new IllegalArgumentException("Iterable does not have 4 elements: size == " + size);
@@ -1057,9 +1047,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 5 elements to a {@code Quint}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Quint<T, T, T, T, T> asQuint(Iterable<? extends T> iter) {
+  public static <T> Quint<T, T, T, T, T> makeQuint(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 5) {
       throw new IllegalArgumentException("Iterable does not have 5 elements: size == " + size);
@@ -1070,9 +1060,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 6 elements to a {@code Sextet}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Sextet<T, T, T, T, T, T> asSextet(Iterable<? extends T> iter) {
+  public static <T> Sextet<T, T, T, T, T, T> makeSextet(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 6) {
       throw new IllegalArgumentException("Iterable does not have 6 elements: size == " + size);
@@ -1083,9 +1073,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 7 elements to a {@code Septet}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Septet<T, T, T, T, T, T, T> asSeptet(Iterable<? extends T> iter) {
+  public static <T> Septet<T, T, T, T, T, T, T> makeSeptet(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 7) {
       throw new IllegalArgumentException("Iterable does not have 7 elements: size == " + size);
@@ -1096,9 +1086,9 @@ public final class IterUtil {
   
   /**
    * Convert an iterable of 8 elements to an {@code Octet}.
-   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   * @throws IllegalArgumentException  If the iterable is not of the appropriate size.
    */
-  public static <T> Octet<T, T, T, T, T, T, T, T> asOctet(Iterable<? extends T> iter) {
+  public static <T> Octet<T, T, T, T, T, T, T, T> makeOctet(Iterable<? extends T> iter) {
     int size = sizeOf(iter);
     if (size != 8) {
       throw new IllegalArgumentException("Iterable does not have 8 elements: size == " + size);
@@ -1124,7 +1114,7 @@ public final class IterUtil {
    * be reflected in the result.  Runs in linear time.
    */
   public static <T> SizedIterable<T> shuffle(Iterable<T> iter) {
-    ArrayList<T> result = asArrayList(iter);
+    ArrayList<T> result = CollectUtil.makeArrayList(iter);
     Collections.shuffle(result);
     return asSizedIterable(result);
   }
@@ -1134,7 +1124,7 @@ public final class IterUtil {
    * Subsequent changes to {@code iter} will not be reflected in the result.  Runs in linear time.
    */
   public static <T> SizedIterable<T> shuffle(Iterable<T> iter, Random random) {
-    ArrayList<T> result = asArrayList(iter);
+    ArrayList<T> result = CollectUtil.makeArrayList(iter);
     Collections.shuffle(result, random);
     return asSizedIterable(result);
   }
@@ -1144,7 +1134,7 @@ public final class IterUtil {
    * be reflected in the result.  Runs in n log n time.
    */
   public static <T extends Comparable<? super T>> SizedIterable<T> sort(Iterable<T> iter) {
-    ArrayList<T> result = asArrayList(iter);
+    ArrayList<T> result = CollectUtil.makeArrayList(iter);
     Collections.sort(result);
     return asSizedIterable(result);
   }
@@ -1154,7 +1144,7 @@ public final class IterUtil {
    * Subsequent changes to {@code iter} will not be reflected in the result.  Runs in n log n time.
    */
   public static <T> SizedIterable<T> sort(Iterable<T> iter, Comparator<? super T> comp) {
-    ArrayList<T> result = asArrayList(iter);
+    ArrayList<T> result = CollectUtil.makeArrayList(iter);
     Collections.sort(result, comp);
     return asSizedIterable(result);
   }
@@ -1218,7 +1208,7 @@ public final class IterUtil {
    * predicate fails.  May never halt if the iterable is infinite.
    */
   public static <T> boolean and(Iterable<? extends T> iter, Predicate<? super T> pred) {
-    for (T elt : iter) { if (!pred.value(elt)) { return false; } }
+    for (T elt : iter) { if (!pred.contains(elt)) { return false; } }
     return true;
   }
   
@@ -1227,7 +1217,7 @@ public final class IterUtil {
    * predicate succeeds.  May never halt if the interable is infinite.
    */
   public static <T> boolean or(Iterable<? extends T> iter, Predicate<? super T> pred) {
-    for (T elt : iter) { if (pred.value(elt)) { return true; } }
+    for (T elt : iter) { if (pred.contains(elt)) { return true; } }
     return false;
   }
   
@@ -1240,7 +1230,7 @@ public final class IterUtil {
                                      Predicate2<? super T1, ? super T2> pred) {
     Iterator<? extends T1> i1 = iter1.iterator();
     Iterator<? extends T2> i2 = iter2.iterator();
-    while (i1.hasNext()) { if (!pred.value(i1.next(), i2.next())) { return false; } }
+    while (i1.hasNext()) { if (!pred.contains(i1.next(), i2.next())) { return false; } }
     return true;
   }
   
@@ -1253,7 +1243,7 @@ public final class IterUtil {
                                     Predicate2<? super T1, ? super T2> pred) {
     Iterator<? extends T1> i1 = iter1.iterator();
     Iterator<? extends T2> i2 = iter2.iterator();
-    while (i1.hasNext()) { if (pred.value(i1.next(), i2.next())) { return true; } }
+    while (i1.hasNext()) { if (pred.contains(i1.next(), i2.next())) { return true; } }
     return false;
   }
   
@@ -1269,7 +1259,7 @@ public final class IterUtil {
     Iterator<? extends T1> i1 = iter1.iterator();
     Iterator<? extends T2> i2 = iter2.iterator();
     Iterator<? extends T3> i3 = iter3.iterator();
-    while (i1.hasNext()) { if (!pred.value(i1.next(), i2.next(), i3.next())) { return false; } }
+    while (i1.hasNext()) { if (!pred.contains(i1.next(), i2.next(), i3.next())) { return false; } }
     return true;
   }
   
@@ -1285,7 +1275,7 @@ public final class IterUtil {
     Iterator<? extends T1> i1 = iter1.iterator();
     Iterator<? extends T2> i2 = iter2.iterator();
     Iterator<? extends T3> i3 = iter3.iterator();
-    while (i1.hasNext()) { if (pred.value(i1.next(), i2.next(), i3.next())) { return true; } }
+    while (i1.hasNext()) { if (pred.contains(i1.next(), i2.next(), i3.next())) { return true; } }
     return false;
   }
   
@@ -1304,7 +1294,7 @@ public final class IterUtil {
     Iterator<? extends T3> i3 = iter3.iterator();
     Iterator<? extends T4> i4 = iter4.iterator();
     while (i1.hasNext()) { 
-      if (!pred.value(i1.next(), i2.next(), i3.next(), i4.next())) { return false; }
+      if (!pred.contains(i1.next(), i2.next(), i3.next(), i4.next())) { return false; }
     }
     return true;
   }
@@ -1324,7 +1314,7 @@ public final class IterUtil {
     Iterator<? extends T3> i3 = iter3.iterator();
     Iterator<? extends T4> i4 = iter4.iterator();
     while (i1.hasNext()) { 
-      if (pred.value(i1.next(), i2.next(), i3.next(), i4.next())) { return true; }
+      if (pred.contains(i1.next(), i2.next(), i3.next(), i4.next())) { return true; }
     }
     return false;
   }
@@ -1462,7 +1452,7 @@ public final class IterUtil {
    * given function.  The order of results is defined by {@link CartesianIterable}.
    */
   public static <T1, T2, R> SizedIterable<R> cross(Iterable<? extends T1> left, Iterable<? extends T2> right,
-                                              Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+                                                   Lambda2<? super T1, ? super T2, ? extends R> combiner) {
     return new CartesianIterable<T1, T2, R>(left, right, combiner);
   }
   

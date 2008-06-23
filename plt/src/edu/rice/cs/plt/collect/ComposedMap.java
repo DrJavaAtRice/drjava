@@ -35,57 +35,37 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Map;
-import java.util.AbstractMap;
-import java.util.Set;
+import java.util.Iterator;
+import java.io.Serializable;
+import edu.rice.cs.plt.iter.FilteredIterator;
+import edu.rice.cs.plt.lambda.Predicate;
 
 /**
- * A lazily-constructed and dynamically-updated composition of two maps.  The first is designated
- * the <em>parent</em>, and the second the <em>child</em>.  Bindings for keys in the child shadow
- * those in the parent.
+ * The transitive composition of two maps, lazily constructed and dynamically-updated.  An entry 
+ * {@code k=v} appears in the map if and only if there is an entry {@code k=x} in the first map
+ * and {@code x=v} in the second.
  */
-public class ComposedMap<K, V> extends AbstractMap<K, V> {
-  private final Map<? extends K, ? extends V> _parent;
-  private final Map<? extends K, ? extends V> _child;
-  private final Set<K> _keys;
+public class ComposedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Serializable {
+  private final Map<? extends K, ? extends X> _map1;
+  private final Map<? super X, ? extends V> _map2;
+  private final PredicateSet<K> _keys;
   
-  public ComposedMap(Map<? extends K, ? extends V> parent, Map<? extends K, ? extends V> child) {
-    _parent = parent;
-    _child = child;
-    _keys = new UnionSet<K>(parent.keySet(), child.keySet());
-  }
-  
-  public int size() { return _keys.size(); }
-  
-  public boolean isEmpty() { return _keys.isEmpty(); }
-  
-  public boolean containsKey(Object key) { return _keys.contains(key); }
-  
-  /**
-   * In the worst case, takes as long as {@code parent.containsValue()} plus a linear
-   * traversal of {@code child}.
-   */
-  public boolean containsValue(Object value) {
-    if (_parent.containsValue(value)) { return true; }
-    else {
-      for (Map.Entry<? extends K, ? extends V> childEntry : _child.entrySet()) {
-        Object childVal = childEntry.getValue();
-        if (value == null ? childVal == null : value.equals(childVal)) {
-          if (!_parent.containsKey(childEntry.getKey())) { return true; }
-        }
-      }
-      return false;
-    }
+  public ComposedMap(Map<? extends K, ? extends X> map1, Map<? super X, ? extends V> map2) {
+    _map1 = map1;
+    _map2 = map2;
+    _keys = new FilteredSet<K>(_map1.keySet(), new Predicate<K>() {
+      public boolean contains(K key) { return _map2.containsKey(_map1.get(key)); }
+    });
   }
   
   public V get(Object key) {
-    if (_child.containsKey(key)) { return _child.get(key); }
-    else { return _parent.get(key); }
+    if (_map1.containsKey(key)) {
+      X middle = _map1.get(key);
+      return _map2.get(middle);
+    }
+    else { return null; }
   }
   
-  public Set<K> keySet() { return _keys; }
-  
-  // inherit implementation of values
-  
-  public Set<Entry<K, V>> entrySet() { return new KeyDrivenEntrySet<K, V>(this); }
+  public PredicateSet<K> keySet() { return _keys; }
   
 }

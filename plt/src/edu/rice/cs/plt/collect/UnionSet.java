@@ -37,13 +37,15 @@ package edu.rice.cs.plt.collect;
 import java.util.Set;
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.io.Serializable;
 import edu.rice.cs.plt.iter.ImmutableIterator;
 import edu.rice.cs.plt.iter.ComposedIterator;
+import edu.rice.cs.plt.iter.IterUtil;
 
 /**
  * The union of two sets, lazily constructed and updated dynamically.
  */
-public class UnionSet<E> extends AbstractSet<E> {
+public class UnionSet<E> extends AbstractPredicateSet<E> implements Serializable {
   private final Set<? extends E> _set1;
   private final Set<? extends E> _set2;
   private final Set<? extends E> _set2Extras;
@@ -58,23 +60,33 @@ public class UnionSet<E> extends AbstractSet<E> {
     _set2Extras = new ComplementSet<E>(set2, set1);
   }
   
-  public Iterator<E> iterator() {
-    return new ImmutableIterator<E>(new ComposedIterator<E>(_set1.iterator(), _set2Extras.iterator()));
-  }
-  
-  /** Linear in the size of {@code set2}. */
-  public int size() {
-    return _set1.size() + _set2Extras.size();
-  }
-  
-  public boolean isEmpty() {
-    return _set1.isEmpty() && _set2.isEmpty();
-  }
-  
   public boolean contains(Object o) {
     return _set1.contains(o) || _set2.contains(o);
   }
   
-  // inherit default implementation of containsAll
+  public Iterator<E> iterator() {
+    return new ImmutableIterator<E>(new ComposedIterator<E>(_set1.iterator(), _set2Extras.iterator()));
+  }
+  
+  public boolean isInfinite() { return IterUtil.isInfinite(_set1) || IterUtil.isInfinite(_set2); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_set1) && IterUtil.hasFixedSize(_set2); }
+  public boolean isStatic() { return IterUtil.isStatic(_set1) && IterUtil.isStatic(_set2); }
+  
+  
+  /** Linear in the size of {@code set2}. */
+  @Override public int size() {
+    return _set1.size() + _set2Extras.size();
+  }
+  
+  @Override public int size(int bound) {
+    int size1 = IterUtil.sizeOf(_set1, bound);
+    int bound2 = bound - size1;
+    int size2 = (bound2 > 0) ? IterUtil.sizeOf(_set2Extras, bound) : 0;
+    return size1 + size2;
+  }
+  
+  @Override public boolean isEmpty() {
+    return _set1.isEmpty() && _set2.isEmpty();
+  }
   
 }

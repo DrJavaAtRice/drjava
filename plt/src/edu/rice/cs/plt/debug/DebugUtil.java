@@ -181,7 +181,7 @@ public final class DebugUtil {
    */
   public static Predicate2<Thread, StackTraceElement> blackListLocationFilter(final String... prefixes) {
     return new Predicate2<Thread, StackTraceElement>() {
-      public Boolean value(Thread thread, StackTraceElement location) {
+      public boolean contains(Thread thread, StackTraceElement location) {
         String caller = location.getClassName() + "." + location.getMethodName();
         for (String pre : prefixes) {
           if (caller.startsWith(pre)) { return false; }
@@ -199,7 +199,7 @@ public final class DebugUtil {
    */
   public static Predicate2<Thread, StackTraceElement> whiteListLocationFilter(final String... prefixes) {
     return new Predicate2<Thread, StackTraceElement>() {
-      public Boolean value(Thread thread, StackTraceElement location) {
+      public boolean contains(Thread thread, StackTraceElement location) {
         String caller = location.getClassName() + "." + location.getMethodName();
         for (String pre : prefixes) {
           if (caller.startsWith(pre)) { return true; }
@@ -216,7 +216,7 @@ public final class DebugUtil {
    */
   public static Predicate2<Thread, StackTraceElement> blackListThreadFilter(final Thread... threads) {
     return new Predicate2<Thread, StackTraceElement>() {
-      public Boolean value(Thread thread, StackTraceElement location) {
+      public boolean contains(Thread thread, StackTraceElement location) {
         for (Thread t : threads) {
           if (thread.equals(t)) { return false; }
         }
@@ -232,7 +232,7 @@ public final class DebugUtil {
    */
   public static Predicate2<Thread, StackTraceElement> whiteListThreadFilter(final Thread... threads) {
     return new Predicate2<Thread, StackTraceElement>() {
-      public Boolean value(Thread thread, StackTraceElement location) {
+      public boolean contains(Thread thread, StackTraceElement location) {
         for (Thread t : threads) {
           if (thread.equals(t)) { return true; }
         }

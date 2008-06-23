@@ -64,10 +64,13 @@ public class SequenceIterable<T> implements SizedIterable<T>, Serializable {
   /** Create a new {@link SequenceIterator} based on this iterable's parameters */
   public SequenceIterator<T> iterator() { return new SequenceIterator<T>(_initial, _successor); }
   
+  public boolean isEmpty() { return false; }
   public int size() { return Integer.MAX_VALUE; }
   public int size(int bound) { return bound; }
   public boolean isInfinite() { return true; }
-  public boolean isFixed() { return true; }
+  public boolean hasFixedSize() { return true; }
+  /** Always false: results of a lambda may be arbitrary. */
+  public boolean isStatic() { return false; }
 
   /** Defers to {@link IterUtil#toString} */
   public String toString() { return IterUtil.toString(this); }

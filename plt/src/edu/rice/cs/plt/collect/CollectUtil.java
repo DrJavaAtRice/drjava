@@ -39,34 +39,428 @@ import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.SizedIterable;
+import edu.rice.cs.plt.iter.IterUtil;
 
 public final class CollectUtil {
   
   /** Prevents instance creation */
   private CollectUtil() {}
   
-  public static <T> Set<T> makeSet(T... members) {
-    return new HashSet<T>(Arrays.asList(members));
+  /** A predicate that accepts Set-Object pairs such that the given object is contained by the set. */
+  public static final Predicate2<Set<?>, Object> SET_CONTENTS_PREDICATE = new SetContentsPredicate();
+  
+  private static final class SetContentsPredicate implements Predicate2<Set<?>, Object>, Serializable {
+    private SetContentsPredicate() {}
+    public boolean contains(Set<?> set, Object val) { return set.contains(val); }
   }
   
-  /** Produce an empty list.  Equivalent to {@link Collections#emptyList}; defined here for Java 1.4 compatibility. */
+  /**
+   * Get a factory that produces HashSets by invoking the empty HashSet constructor.
+   * @see HashSet#HashSet()
+   */
+  @SuppressWarnings("unchecked") public static <T> Thunk<Set<T>> hashSetFactory() {
+    return (Thunk<Set<T>>) DefaultHashSetFactory.INSTANCE;
+  }
+  
+  private static final class DefaultHashSetFactory<T> implements Thunk<Set<T>>, Serializable {
+    public static final DefaultHashSetFactory<Object> INSTANCE = new DefaultHashSetFactory<Object>();
+    private DefaultHashSetFactory() {}
+    public Set<T> value() { return new HashSet<T>(); }
+  }
+  
+  /**
+   * Get a factory that produces HashSets with the given initial capacity.
+   * @see HashSet#HashSet(int)
+   */
+  public static <T> Thunk<Set<T>> hashSetFactory(int initialCapacity) {
+    return new CustomHashSetFactory<T>(initialCapacity);
+  }
+  
+  private static final class CustomHashSetFactory<T> implements Thunk<Set<T>>, Serializable {
+    private final int _initialCapacity;
+    public CustomHashSetFactory(int initialCapacity) { _initialCapacity = initialCapacity; }
+    public Set<T> value() { return new HashSet<T>(_initialCapacity); }
+  }
+  
+  /**
+   * Get a factory that produces LinkedHashSets by invoking the empty LinkedHashSet constructor.
+   * @see LinkedHashSet#LinkedHashSet()
+   */
+  @SuppressWarnings("unchecked") public static <T> Thunk<Set<T>> linkedHashSetFactory() {
+    return (Thunk<Set<T>>) DefaultLinkedHashSetFactory.INSTANCE;
+  }
+  
+  private static final class DefaultLinkedHashSetFactory<T> implements Thunk<Set<T>>, Serializable {
+    public static final DefaultLinkedHashSetFactory<Object> INSTANCE = new DefaultLinkedHashSetFactory<Object>();
+    private DefaultLinkedHashSetFactory() {}
+    public Set<T> value() { return new LinkedHashSet<T>(); }
+  }
+  
+  /**
+   * Get a factory that produces LinkedHashSets with the given initial capacity.
+   * @see LinkedHashSet#LinkedHashSet(int)
+   */
+  public static <T> Thunk<Set<T>> linkedHashSetFactory(int initialCapacity) {
+    return new CustomLinkedHashSetFactory<T>(initialCapacity);
+  }
+  
+  private static final class CustomLinkedHashSetFactory<T> implements Thunk<Set<T>>, Serializable {
+    private final int _initialCapacity;
+    public CustomLinkedHashSetFactory(int initialCapacity) { _initialCapacity = initialCapacity; }
+    public Set<T> value() { return new LinkedHashSet<T>(_initialCapacity); }
+  }
+  
+  /**
+   * Get a factory that produces TreeSets sorted according to the elements' natural order.
+   * @see TreeSet#TreeSet()
+   */
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> Thunk<Set<T>> treeSetFactory() {
+    // not sure why the weakening cast is necessary here but not elsewhere
+    return (Thunk<Set<T>>) (Thunk<? extends Set<?>>) DefaultTreeSetFactory.INSTANCE;
+  }
+  
+  private static final class DefaultTreeSetFactory<T extends Comparable<? super T>>
+      implements Thunk<Set<T>>, Serializable {
+    public static final DefaultTreeSetFactory<String> INSTANCE = new DefaultTreeSetFactory<String>();
+    private DefaultTreeSetFactory() {}
+    public Set<T> value() { return new TreeSet<T>(); }
+  }
+  
+  /**
+   * Get a factory that produces TreeSets sorted according to the given comparator.
+   * @see TreeSet#TreeSet(Comparator)
+   */
+  public static <T> Thunk<Set<T>> treeSetFactory(Comparator<? super T> comparator) {
+    return new CustomTreeSetFactory<T>(comparator);
+  }
+  
+  private static final class CustomTreeSetFactory<T> implements Thunk<Set<T>>, Serializable {
+    private final Comparator<? super T> _comp;
+    public CustomTreeSetFactory(Comparator<? super T> comp) { _comp = comp; }
+    public Set<T> value() { return new TreeSet<T>(_comp); }
+  }
+  
+  /**
+   * Get a factory that produces HashMaps by invoking the empty HashMap constructor.
+   * @see HashMap#HashMap()
+   */
+  @SuppressWarnings("unchecked") public static <K, V> Thunk<Map<K, V>> hashMapFactory() {
+    return (Thunk<Map<K, V>>) DefaultHashMapFactory.INSTANCE;
+  }
+  
+  private static final class DefaultHashMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
+    public static final DefaultHashMapFactory<Object, Object> INSTANCE =
+      new DefaultHashMapFactory<Object, Object>();
+    private DefaultHashMapFactory() {}
+    public Map<K, V> value() { return new HashMap<K, V>(); }
+  }
+  
+  /**
+   * Get a factory that produces HashMaps with the given initial capacity.
+   * @see HashMap#HashMap(int)
+   */
+  public static <K, V> Thunk<Map<K, V>> hashMapFactory(int initialCapacity) {
+    return new CustomHashMapFactory<K, V>(initialCapacity);
+  }
+  
+  private static final class CustomHashMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
+    private final int _initialCapacity;
+    public CustomHashMapFactory(int initialCapacity) { _initialCapacity = initialCapacity; }
+    public Map<K, V> value() { return new HashMap<K, V>(_initialCapacity); }
+  }
+  
+  /**
+   * Get a factory that produces LinkedHashMaps by invoking the empty LinkedHashMap constructor.
+   * @see LinkedHashMap#LinkedHashMap()
+   */
+  @SuppressWarnings("unchecked") public static <K, V> Thunk<Map<K, V>> linkedHashMapFactory() {
+    return (Thunk<Map<K, V>>) DefaultLinkedHashMapFactory.INSTANCE;
+  }
+  
+  private static final class DefaultLinkedHashMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
+    public static final DefaultLinkedHashMapFactory<Object, Object> INSTANCE =
+      new DefaultLinkedHashMapFactory<Object, Object>();
+    private DefaultLinkedHashMapFactory() {}
+    public Map<K, V> value() { return new LinkedHashMap<K, V>(); }
+  }
+  
+  /**
+   * Get a factory that produces LinkedHashMaps with the given initial capacity.
+   * @see LinkedHashMap#LinkedHashMap(int)
+   */
+  public static <K, V> Thunk<Map<K, V>> linkedHashMapFactory(int initialCapacity) {
+    return new CustomLinkedHashMapFactory<K, V>(initialCapacity);
+  }
+  
+  private static final class CustomLinkedHashMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
+    private final int _initialCapacity;
+    public CustomLinkedHashMapFactory(int initialCapacity) { _initialCapacity = initialCapacity; }
+    public Map<K, V> value() { return new LinkedHashMap<K, V>(_initialCapacity); }
+  }
+  
+  /**
+   * Get a factory that produces TreeMaps sorted according to the elements' natural order.
+   * @see TreeMap#TreeMap()
+   */
+  @SuppressWarnings("unchecked")
+  public static <K extends Comparable<? super K>, V> Thunk<Map<K, V>> treeMapFactory() {
+    // not sure why the weakening cast is necessary here but not elsewhere
+    return (Thunk<Map<K, V>>) (Thunk<? extends Map<?, ?>>) DefaultTreeMapFactory.INSTANCE;
+  }
+  
+  private static final class DefaultTreeMapFactory<K extends Comparable<? super K>, V>
+      implements Thunk<Map<K, V>>, Serializable {
+    public static final DefaultTreeMapFactory<String, Object> INSTANCE =
+      new DefaultTreeMapFactory<String, Object>();
+    private DefaultTreeMapFactory() {}
+    public Map<K, V> value() { return new TreeMap<K, V>(); }
+  }
+  
+  /**
+   * Get a factory that produces TreeMaps sorted according to the given comparator.
+   * @see TreeMap#TreeMap(Comparator)
+   */
+  public static <K, V> Thunk<Map<K, V>> treeMapFactory(Comparator<? super K> comparator) {
+    return new CustomTreeMapFactory<K, V>(comparator);
+  }
+  
+  private static final class CustomTreeMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
+    private final Comparator<? super K> _comp;
+    public CustomTreeMapFactory(Comparator<? super K> comp) { _comp = comp; }
+    public Map<K, V> value() { return new TreeMap<K, V>(_comp); }
+  }
+  
+  /**
+   * Get a factory that produces ArrayLists by invoking the empty ArrayList constructor.
+   * @see ArrayList#ArrayList()
+   */
+  @SuppressWarnings("unchecked") public static <T> Thunk<List<T>> arrayListFactory() {
+    return (Thunk<List<T>>) DefaultArrayListFactory.INSTANCE;
+  }
+  
+  private static final class DefaultArrayListFactory<T> implements Thunk<List<T>>, Serializable {
+    public static final DefaultArrayListFactory<Object> INSTANCE = new DefaultArrayListFactory<Object>();
+    private DefaultArrayListFactory() {}
+    public List<T> value() { return new ArrayList<T>(); }
+  }
+  
+  /**
+   * Get a factory that produces ArrayLists with the given initial capacity.
+   * @see ArrayList#ArrayList(int)
+   */
+  public static <T> Thunk<List<T>> arrayListFactory(int initialCapacity) {
+    return new CustomArrayListFactory<T>(initialCapacity);
+  }
+  
+  private static final class CustomArrayListFactory<T> implements Thunk<List<T>>, Serializable {
+    private final int _initialCapacity;
+    public CustomArrayListFactory(int initialCapacity) { _initialCapacity = initialCapacity; }
+    public List<T> value() { return new ArrayList<T>(_initialCapacity); }
+  }
+  
+  /**
+   * Get a factory that produces LinkedLists by invoking the empty LinkedList constructor.
+   * @see LinkedList#LinkedList()
+   */
+  @SuppressWarnings("unchecked") public static <T> Thunk<List<T>> linkedListFactory() {
+    return (Thunk<List<T>>) DefaultLinkedListFactory.INSTANCE;
+  }
+  
+  private static final class DefaultLinkedListFactory<T> implements Thunk<List<T>>, Serializable {
+    public static final DefaultLinkedListFactory<Object> INSTANCE = new DefaultLinkedListFactory<Object>();
+    private DefaultLinkedListFactory() {}
+    public List<T> value() { return new LinkedList<T>(); }
+  }
+  
+  /**
+   * Create an immutable {@code PredicateSet} based on the given elements.  May depend on a valid
+   * {@code hashCode()} implementation.
+   */
+  public static <T> PredicateSet<T> makeSet(T... elements) {
+    return makeSet(IterUtil.asIterable(elements));
+  }
+  
+  /**
+   * Create an immutable {@code PredicateSet} based on the given elements.  May depend on a valid
+   * {@code hashCode()} implementation.
+   */
+  public static <T> PredicateSet<T> makeSet(Iterable<? extends T> elements) {
+    if (IterUtil.isEmpty(elements)) { 
+      return EmptySet.make();
+    }
+    else if (IterUtil.sizeOf(elements, 2) == 1) {
+      return new SingletonSet<T>(IterUtil.first(elements));
+    }
+    else {
+      HashSet<T> result = new HashSet<T>(asCollection(elements));
+      return new ImmutableSet<T>(result) {
+        @Override public boolean hasFixedSize() { return true; }
+        @Override public boolean isStatic() { return true; }
+      };
+    }
+  }
+  
+  /** Prodce an empty or singleton set based on the given Option. */
+  public static <T> PredicateSet<T> makeSet(Option<? extends T> opt) {
+    if (opt.isSome()) { return new SingletonSet<T>(opt.unwrap()); }
+    else { return EmptySet.make(); }
+  }
+  
+  /**
+   * Create an immutable {@code Relation} based on the given elements.  May depend on a valid
+   * {@code hashCode()} implementation.
+   */
+  public static <T1, T2> Relation<T1, T2> makeRelation(Iterable<? extends Pair<T1, T2>> pairs) {
+    if (IterUtil.isEmpty(pairs)) { 
+      return EmptyRelation.make();
+    }
+    else if (IterUtil.sizeOf(pairs, 2) == 1) {
+      return new SingletonRelation<T1, T2>(IterUtil.first(pairs));
+    }
+    else {
+      Relation<T1, T2> result = new HashRelation<T1, T2>();
+      result.addAll(asCollection(pairs));
+      return new ImmutableRelation<T1, T2>(result) {
+        @Override public boolean hasFixedSize() { return true; }
+        @Override public boolean isStatic() { return true; }
+      };
+    }
+  }
+  
+  /** Make an {@code ArrayList} with the given elements. */
+  public static <T> ArrayList<T> makeArrayList(Iterable<? extends T> iter) {
+    if (iter instanceof Collection<?>) {
+      @SuppressWarnings("unchecked") // should be legal, but javac 6 doesn't like it
+      Collection<? extends T> cast = (Collection<? extends T>) iter;
+      return new ArrayList<T>(cast);
+    }
+    else if (iter instanceof SizedIterable<?>) {
+      ArrayList<T> result = new ArrayList<T>(((SizedIterable<?>) iter).size());
+      for (T e : iter) { result.add(e); }
+      return result;
+    }
+    else {
+      ArrayList<T> result = new ArrayList<T>();
+      for (T e : iter) { result.add(e); }
+      return result;
+    }
+  }
+  
+  /** Make a {@code LinkedList} with the given elements. */
+  public static <T> LinkedList<T> makeLinkedList(Iterable<? extends T> iter) {
+    if (iter instanceof Collection<?>) {
+      @SuppressWarnings("unchecked") // should be legal, but javac 6 doesn't like it
+      Collection<? extends T> cast = (Collection<? extends T>) iter;
+      return new LinkedList<T>(cast);
+    }
+    else {
+      LinkedList<T> result = new LinkedList<T>();
+      for (T e : iter) { result.add(e); }
+      return result;
+    }
+  }
+  
+  /** Make a {@link ConsList} with the given elements. */
+  public static <T> ConsList<T> makeConsList(Iterable<? extends T> iter) {
+    ConsList<T> result = ConsList.empty();
+    for (T elt : IterUtil.reverse(iter)) { result = ConsList.cons(elt, result); }
+    return result;
+  }
+  
+  /**
+   * Produce an immutable empty list.  Equivalent to {@link Collections#emptyList}; defined here for
+   * Java 1.4 compatibility.
+   */
   @SuppressWarnings("unchecked") public static <T> List<T> emptyList() {
     return (List<T>) Collections.EMPTY_LIST;
   }
   
-  /** Produce an empty set.  Equivalent to {@link Collections#emptySet}; defined here for Java 1.4 compatibility. */
-  @SuppressWarnings("unchecked") public static <T> Set<T> emptySet() {
-    return (Set<T>) Collections.EMPTY_SET;
+  /**
+   * Produce an immutable empty set.  Similar to {@link Collections#emptySet}, but the result here is
+   * a {@link PredicateSet}.  Also defined for Java 1.4 compatibility.
+   */
+  @SuppressWarnings("unchecked") public static <T> EmptySet<T> emptySet() {
+    return (EmptySet<T>) EmptySet.INSTANCE;
   }
   
-  /** Produce an empty map.  Equivalent to {@link Collections#emptyMap}; defined here for Java 1.4 compatibility. */
-  @SuppressWarnings("unchecked") public static <K, V> Map<K, V> emptyMap() {
-    return (Map<K, V>) Collections.EMPTY_MAP;
+  /**
+   * Produce an immutable empty map.  Similar to {@link Collections#emptyMap}, but the result here is
+   * a {@link LambdaMap}.  Also defined for Java 1.4 compatibility.
+   */
+  @SuppressWarnings("unchecked") public static <K, V> EmptyMap<K, V> emptyMap() {
+    return (EmptyMap<K, V>) EmptyMap.INSTANCE;
   }
 
+  /** Produce an immutable empty relation. */
   @SuppressWarnings("unchecked") public static <T1, T2> EmptyRelation<T1, T2> emptyRelation() {
     return (EmptyRelation<T1, T2>) EmptyRelation.INSTANCE;
+  }
+  
+  /** Create an immutable singleton set.  Similar to {@link Collections#singleton}, but produces a PredicateSet. */
+  public static <T> SingletonSet<T> singleton(T elt) {
+    return new SingletonSet<T>(elt);
+  }
+  
+  /** Create an immutable singleton relation. */
+  public static <T1, T2> SingletonRelation<T1, T2> singleton(T1 first, T2 second) {
+    return new SingletonRelation<T1, T2>(first, second);
+  }
+  
+  /** Create an immutable singleton map. Similar to {@link Collections#singletonMap}, but produces a LambdaMap. */
+  public static <K, V> SingletonMap<K, V> singletonMap(K key, V value) {
+    return new SingletonMap<K, V>(key, value);
+  }
+  
+  /** 
+   * Convert the given {@code Iterable} to a {@code Set}.  If it already <em>is</em>
+   * a {@code Set}, cast it as such.  Otherwise, create an {@link IterableSet}.
+   */
+  public static <T> Set<T> asSet(Iterable<T> iter) {
+    if (iter instanceof Set<?>) { return (Set<T>) iter; }
+    else { return new IterableSet<T>(iter); }
+  }
+  
+  /** 
+   * Convert the given {@code Iterable} to a {@code PredicateSet}.  If it already <em>is</em>
+   * a {@code PredicateSet}, cast it as such.  If it is a {@code Set}, produce a {@link DelegatingSet}.
+   * Otherwise, create an {@link IterableSet}.
+   */
+  public static <T> PredicateSet<T> asPredicateSet(Iterable<T> iter) {
+    if (iter instanceof PredicateSet<?>) { return (PredicateSet<T>) iter; }
+    else if (iter instanceof Set<?>) { return new DelegatingSet<T>((Set<T>) iter); }
+    else { return new IterableSet<T>(iter); }
+  }
+  
+  /**
+   * Convert the given {@code Iterable} to a {@code Collection}.  If it already <em>is</em>
+   * a {@code Collection}, cast it as such.  Otherwise, create an {@link IterableCollection}.
+   */
+  public static <T> Collection<T> asCollection(Iterable<T> iter) {
+    if (iter instanceof Collection<?>) { return (Collection<T>) iter; }
+    else { return new IterableCollection<T>(iter); }
+  }
+  
+  /** 
+   * Convert the given {@code Map} to a {@code LambdaMap}.  If it already <em>is</em>
+   * a {@code LambdaMap}, cast it as such.  Otherwise, create a {@link DelegatingMap}.
+   */
+  public static <K, V> LambdaMap<K, V> asLambdaMap(Map<K, V> m) {
+    if (m instanceof LambdaMap<?, ?>) { return (LambdaMap<K, V>) m; }
+    else { return new DelegatingMap<K, V>(m); }
+  }
+  
+  /**
+   * Convert a Dictionary to a Map.  If it is a {@link Hashtable}, cast it as a Map.
+   * Otherwise, create a {@link DictionaryMap}.
+   */
+  public static <K, V> Map<K, V> asMap(Dictionary<K, V> d) {
+    // can't cast arbitrary Dictionaries because the dictionary type parameters may
+    // be unrelated to map parameters -- it might be a Dictionary<K, V> and a Map<K, Foo>
+    if (d instanceof Hashtable<?, ?>) { return (Hashtable<K, V>) d; }
+    return new DictionaryMap<K, V>(d);
   }
   
   /** Wrap a relation in an immutable wrapper.  Analogous to {@link Collections#unmodifiableMap}. */
@@ -74,60 +468,82 @@ public final class CollectUtil {
     return new ImmutableRelation<T1, T2>(r);
   }
   
-  public static <T> Set<T> union(Set<? extends T> s1, Set<? extends T> s2) {
+  /** Produce a lazy union of two sets.  Size-related operations have poor performance. */
+  public static <T> PredicateSet<T> union(Set<? extends T> s1, Set<? extends T> s2) {
     return new UnionSet<T>(s1, s2);
   }
   
-  public static <T> Set<T> intersection(Set<?> s1, Set<? extends T> s2) {
+  /** Produce a lazy intersection of two sets.  Size-related operations have poor performance. */
+  public static <T> PredicateSet<T> intersection(Set<?> s1, Set<? extends T> s2) {
     return new IntersectionSet<T>(s1, s2);
   }
   
-  public static <T> Set<T> complement(Set<? extends T> domain, Set<?> excluded) {
+  /**
+   * Produce the complement of a set in a domain, or, equivalently, the difference of two sets.
+   * Size-related operations have poor performance.
+   */
+  public static <T> PredicateSet<T> complement(Set<? extends T> domain, Set<?> excluded) {
     return new ComplementSet<T>(domain, excluded);
   }
   
-  public static <K, V> Map<K, V> compose(Map<? extends K, ? extends V> parent, Map<? extends K, ? extends V> child) {
-    return new ComposedMap<K, V>(parent, child);
+  /** Lazily filter the given set.  Size-related operations have poor performance. */
+  public static <T> PredicateSet<T> filter(Set<? extends T> set, Predicate<? super T> predicate) {
+    return new FilteredSet<T>(set, predicate);
   }
   
-  public static final Predicate2<Set<?>, Object> CONTAINS_PREDICATE = new ContainsPredicate();
+  /** Produce the lazy cartesian (or cross) product of two sets. */
+  public static <T1, T2> Relation<T1, T2> cross(Set<? extends T1> left, Set<? extends T2> right) {
+    return new CartesianRelation<T1, T2>(left, right);
+  }
   
-  private static final class ContainsPredicate implements Predicate2<Set<?>, Object>, Serializable {
-    private ContainsPredicate() {}
-    public Boolean value(Set<?> set, Object val) { return set.contains(val); }
+  /** Produce a lazy transitive composition of two relations.  Size-related operations have poor performance. */
+  public static <T1, T2, T3> Relation<T1, T3> compose(Relation<T1, T2> left, Relation<T2, T3> right) {
+    return new ComposedRelation<T1, T2, T3>(left, right);
+  }
+  
+  /** Lazily filter the given relation.  Size-related operations have poor performance. */
+  public static <T1, T2> Relation<T1, T2> filter(Relation<T1, T2> relation,
+                                                 Predicate2<? super T1, ? super T2> pred) {
+    return new FilteredRelation<T1, T2>(relation, pred);
+  }
+  
+  /**
+   * Produce a lazy union of two maps, with mappings in {@code child} shadowing those in {@code parent}.
+   * Size-related operations have poor performance.
+   */
+  public static <K, V> LambdaMap<K, V> union(Map<? extends K, ? extends V> parent,
+                                             Map<? extends K, ? extends V> child) {
+    return new UnionMap<K, V>(parent, child);
+  }
+  
+  /** Produce a lazy transitive composition of two maps.  Size-related operations have poor performance. */
+  public static <K, X, V> LambdaMap<K, V> compose(Map<? extends K, ? extends X> left,
+                                                  Map<? super X, ? extends V> right) {
+    return new ComposedMap<K, X, V>(left, right);
+  }
+  
+  /**
+   * Cast the given object to a collection element type if that object is contained by the collection.
+   * Assumes the collection is faithful to its specification: an object is contained by the collection
+   * if and only if it appears as an element of the {@code Iterator<T>} produced by its {@code iterator()}
+   * method (the implication being that the object must have type {@code T}).
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Option<T> castIfContains(Collection<? extends T> c, Object obj) {
+    if (c.contains(obj)) { return Option.some((T) obj); }
+    else { return Option.none(); }
   }
 
-  public static Predicate<Object> containsPredicate(Set<?> set) {
-    return LambdaUtil.bindFirst(CONTAINS_PREDICATE, set);
-  }
-  
-  public static <T> Set<T> asSet(Iterable<T> iter) {
-    if (iter instanceof Set<?>) { return (Set<T>) iter; }
-    else if (iter instanceof Collection<?>) { return new HashSet<T>((Collection<T>) iter); }
-    else if (iter instanceof SizedIterable<?>) {
-      SizedIterable<T> si = (SizedIterable<T>) iter;
-      Set<T> result = new HashSet<T>(si.size());
-      for (T elt : si) { result.add(elt); }
-      return result;
+  /**
+   * Test whether a collection contains some element of a list.
+   * @see Collection#containsAll
+   * @see IterUtil#or
+   */
+  public static boolean containsAny(Collection<?> c, Iterable<?> candidates) {
+    for (Object o : candidates) {
+      if (c.contains(o)) { return true; }
     }
-    else {
-      Set<T> result = new HashSet<T>();
-      for (T elt : iter) { result.add(elt); }
-      return result;
-    }
-  }
-  
-  /** Convert an Option to an empty or singleton set. */
-  public static <T> Set<T> asSet(Option<? extends T> opt) {
-    return opt.apply(new OptionVisitor<T, Set<T>>() {
-      public Set<T> forSome(T val) { return Collections.singleton(val); }
-      public Set<T> forNone() { return emptySet(); }
-    });
-  }
-  
-  /** Convert a Dictionary to a Map. */
-  public static <K, V> Map<K, V> asMap(final Dictionary<K, V> d) {
-    return new DictionaryMap<K, V>(d);
+    return false;
   }
 
   public static <T> Set<T> functionClosure(T base, Lambda<? super T, ? extends T> function) {
@@ -148,7 +564,7 @@ public final class CollectUtil {
   public static <T> Set<T> partialFunctionClosure(Set<? extends T> base,
                                                   final Lambda<? super T, ? extends Option<? extends T>> function) {
     Lambda<T, Set<T>> neighbors = new Lambda<T, Set<T>>() {
-      public Set<T> value(T node) { return asSet(function.value(node)); }
+      public Set<T> value(T node) { return makeSet(function.value(node)); }
     };
     return graphClosure(base, neighbors);
   }
@@ -172,29 +588,4 @@ public final class CollectUtil {
     return result;
   }
 
-  public static <K, V> Map.Entry<K, V> mapEntryForKey(final Map<K, V> map, final K key) {
-    return new Map.Entry<K, V>() {
-      public K getKey() { return key; }
-      public V getValue() { return map.get(key); }
-      public V setValue(V value) { return map.put(key, value); }
-      public boolean equals(Object o) {
-        if (this == o) { return true; }
-        else if (!(o instanceof Map.Entry<?, ?>)) { return false; }
-        else {
-          Map.Entry<?, ?> cast = (Map.Entry<?, ?>) o;
-          if (key == null ? cast.getKey() == null : key.equals(cast.getKey())) {
-            V val = map.get(key);
-            return val == null ? cast.getValue() == null : val.equals(cast.getValue());
-          }
-          else { return false; }
-        }
-      }
-      public int hashCode() {
-        V val = map.get(key);
-        return (key == null ? 0 : key.hashCode()) ^ (val == null ? 0 : val.hashCode());
-      }
-    };
-  }
-  
-    
 }

@@ -44,7 +44,9 @@ public enum JavaVersion {
   JAVA_1_3 { public String versionString() { return "1.3"; } },
   JAVA_1_4 { public String versionString() { return "1.4"; } },
   JAVA_5 { public String versionString() { return "5"; } },
-  JAVA_6 { public String versionString() { return "6"; } };
+  JAVA_6 { public String versionString() { return "6"; } },
+  JAVA_7 { public String versionString() { return "7"; } },
+  FUTURE { public String versionString() { return ">7"; } };
   
   /**
    * The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true} result 
@@ -90,7 +92,8 @@ public enum JavaVersion {
         case 48: return JAVA_1_4;
         case 49: return JAVA_5;
         case 50: return JAVA_6;
-        default: return UNRECOGNIZED;
+        case 51: return JAVA_7;
+        default: return (major > 51) ? FUTURE : UNRECOGNIZED;
       }
     }
     catch (NumberFormatException e) { return UNRECOGNIZED; }
@@ -139,6 +142,8 @@ public enum JavaVersion {
           case 4: version = JAVA_1_4; break;
           case 5: version = JAVA_5; break;
           case 6: version = JAVA_6; break;
+          case 7: version = JAVA_7; break;
+          default: if (feature > 7) { version = FUTURE; } break;
         }
       }
       

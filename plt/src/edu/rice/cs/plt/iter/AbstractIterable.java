@@ -36,11 +36,11 @@ package edu.rice.cs.plt.iter;
 
 /**
  * A parent class for iterables that implements {@code toString}, {@code hashCode},
- * and {@code equals}
+ * and {@code equals}.
  */
 public abstract class AbstractIterable<T> implements Iterable<T> {
   
-  /** Defers to {@link IterUtil#toString} */
+  /** Defers to {@link IterUtil#toString}. */
   public String toString() { return IterUtil.toString(this); }
   
   /**
@@ -54,6 +54,6 @@ public abstract class AbstractIterable<T> implements Iterable<T> {
     else { return false; }
   }
   
-  /** Defers to {@link IterUtil#hashCode} */
+  /** Defers to {@link IterUtil#hashCode}. */
   public final int hashCode() { return IterUtil.hashCode(this); }
 }

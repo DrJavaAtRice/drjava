@@ -37,7 +37,7 @@ package edu.rice.cs.plt.lambda;
 import java.io.Serializable;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.recur.RecurUtil;
-import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.*;
 
 /**
  * <p>A collection of constants and static methods that define or operate on lambdas, runnables, and 
@@ -48,6 +48,8 @@ import edu.rice.cs.plt.tuple.Option;
  * <li>{@code compose}: define the lambda that takes the result of one lambda and applies it
  *     to another, or a runnable that executes a sequence of runnables</li>
  * <li>{@code bindFirst}, {@code bindSecond}, etc.: set one of the arguments to a lambda</li>
+ * <li>{@code flatten}, {@code unary}: convert between lambdas, etc., that take multiple arguments
+ *     and equivalent lambdas that take exactly one argument.</li>
  * <li>{@code curry}: convert an n-ary lambda to a unary lambda whose result is another lambda</li>
  * <li>{@code negate}: define a predicate whose result is the opposite of the given predicate</li>
  * <li>{@code and}: define a conjunction of predicates</li>
@@ -102,10 +104,10 @@ public final class LambdaUtil {
   
   private static final class True implements GeneralPredicate, Serializable {
     private True() {}
-    public Boolean value(Object o) { return true; }
-    public Boolean value(Object o1, Object o2) { return true; }
-    public Boolean value(Object o1, Object o2, Object o3) { return true; }
-    public Boolean value(Object o1, Object o2, Object o3, Object o4) { return true; }
+    public boolean contains(Object o) { return true; }
+    public boolean contains(Object o1, Object o2) { return true; }
+    public boolean contains(Object o1, Object o2, Object o3) { return true; }
+    public boolean contains(Object o1, Object o2, Object o3, Object o4) { return true; }
   }
   
   /** A predicate whose result is always {@code false}. */
@@ -113,10 +115,10 @@ public final class LambdaUtil {
   
   private static final class False implements GeneralPredicate, Serializable {
     private False() {}
-    public Boolean value(Object o) { return false; }
-    public Boolean value(Object o1, Object o2) { return false; }
-    public Boolean value(Object o1, Object o2, Object o3) { return false; }
-    public Boolean value(Object o1, Object o2, Object o3, Object o4) { return false; }
+    public boolean contains(Object o) { return false; }
+    public boolean contains(Object o1, Object o2) { return false; }
+    public boolean contains(Object o1, Object o2, Object o3) { return false; }
+    public boolean contains(Object o1, Object o2, Object o3, Object o4) { return false; }
   }
   
   /** A predicate that returns {@code true} iff the argument is {@code null}. */
@@ -124,7 +126,7 @@ public final class LambdaUtil {
   
   private static final class IsNullPredicate implements Predicate<Object>, Serializable {
     private IsNullPredicate() {}
-    public Boolean value(Object arg) { return arg == null; }
+    public boolean contains(Object arg) { return arg == null; }
   }
   
   /** A predicate that returns {@code true} iff the argument is not {@code null}. */
@@ -133,7 +135,7 @@ public final class LambdaUtil {
   // could use negate(IS_NULL), but this is more efficient
   private static final class NotNullPredicate implements Predicate<Object>, Serializable {
     private NotNullPredicate() {}
-    public Boolean value(Object arg) { return arg != null; }
+    public boolean contains(Object arg) { return arg != null; }
   }
   
   /** A predicate that evaluates to {@link RecurUtil#safeEquals(Object, Object)} applied to the arguments. */
@@ -141,7 +143,7 @@ public final class LambdaUtil {
     
   private static final class EqualPredicate implements Predicate2<Object, Object>, Serializable {
     private EqualPredicate() {}
-    public Boolean value(Object arg1, Object arg2) { return RecurUtil.safeEquals(arg1, arg2); }
+    public boolean contains(Object arg1, Object arg2) { return RecurUtil.safeEquals(arg1, arg2); }
   }
   
   /**
@@ -155,7 +157,7 @@ public final class LambdaUtil {
   
   private static final class IdenticalPredicate implements Predicate2<Object, Object>, Serializable {
     private IdenticalPredicate() {} 
-    public Boolean value(Object arg1, Object arg2) { return arg1 == arg2; }
+    public boolean contains(Object arg1, Object arg2) { return arg1 == arg2; }
   }
   
   /** A predicate that returns {@code true} iff {@code arg1 != arg2}. */
@@ -164,7 +166,7 @@ public final class LambdaUtil {
   // could use LambdaUtil.negate(IDENTICAL), but this is more efficient
   private static final class NotIdenticalPredicate implements Predicate2<Object, Object>, Serializable {
     private NotIdenticalPredicate() {} 
-    public Boolean value(Object arg1, Object arg2) { return arg1 != arg2; }
+    public boolean contains(Object arg1, Object arg2) { return arg1 != arg2; }
   }
 
   
@@ -173,7 +175,7 @@ public final class LambdaUtil {
 
   private static final class InstanceOfPredicate implements Predicate2<Object, Class<?>>, Serializable {
     private InstanceOfPredicate() {} 
-    public Boolean value(Object val, Class<?> c) { return c.isInstance(val); }
+    public boolean contains(Object val, Class<?> c) { return c.isInstance(val); }
   }
 
   
@@ -416,7 +418,7 @@ public final class LambdaUtil {
   
   
   /** Create a {@code GeneralLambda} equivalent to {@code thunk} that ignores any arguments. */
-  public static <R> GeneralLambda<R> promote(final Thunk<? extends R> thunk) {
+  public static <R> GeneralLambda<R> promote(Thunk<? extends R> thunk) {
     return new PromotedGeneralLambda<R>(thunk);
   }
 
@@ -473,7 +475,7 @@ public final class LambdaUtil {
   private static final class PromotedPredicate2<T> implements Predicate2<T, Object>, Serializable {
     private final Predicate<? super T> _p;
     public PromotedPredicate2(Predicate<? super T> p) { _p = p; }
-    public Boolean value(T arg1, Object arg2) { return _p.value(arg1); }
+    public boolean contains(T arg1, Object arg2) { return _p.contains(arg1); }
   }
   
   /** Create a {@code Predicate3} equivalent to {@code pred} with an additional, ignored argument. */
@@ -484,7 +486,7 @@ public final class LambdaUtil {
   private static final class PromotedPredicate3<T1, T2> implements Predicate3<T1, T2, Object>, Serializable {
     private final Predicate2<? super T1, ? super T2> _p;
     public PromotedPredicate3(Predicate2<? super T1, ? super T2> p) { _p = p; }
-    public Boolean value(T1 arg1, T2 arg2, Object arg3) { return _p.value(arg1, arg2); }
+    public boolean contains(T1 arg1, T2 arg2, Object arg3) { return _p.contains(arg1, arg2); }
   }
   
   /** Create a {@code Predicate4} equivalent to {@code pred} with an additional, ignored argument. */
@@ -496,7 +498,7 @@ public final class LambdaUtil {
   private static final class PromotedPredicate4<T1, T2, T3> implements Predicate4<T1, T2, T3, Object>, Serializable {
     private final Predicate3<? super T1, ? super T2, ? super T3> _p;
     public PromotedPredicate4(Predicate3<? super T1, ? super T2, ? super T3> p) { _p = p; }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3, Object arg4) { return _p.value(arg1, arg2, arg3); }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3, Object arg4) { return _p.contains(arg1, arg2, arg3); }
   }
   
   
@@ -888,7 +890,7 @@ public final class LambdaUtil {
     public BindFirstPredicate(Predicate2<? super T1, ? super T2> pred, T1 arg1) {
       _pred = pred; _arg1 = arg1;
     }
-    public Boolean value(T2 arg2) { return _pred.value(_arg1, arg2); }
+    public boolean contains(T2 arg2) { return _pred.contains(_arg1, arg2); }
   }
   
   /** Bind a fixed argument to the given binary predicate, producing a unary predicate. */
@@ -902,7 +904,7 @@ public final class LambdaUtil {
     public BindSecondPredicate(Predicate2<? super T1, ? super T2> pred, T2 arg2) {
       _pred = pred; _arg2 = arg2;
     }
-    public Boolean value(T1 arg1) { return _pred.value(arg1, _arg2); }
+    public boolean contains(T1 arg1) { return _pred.contains(arg1, _arg2); }
   }
   
   /** Bind a fixed argument to the given ternary predicate, producing a binary predicate. */
@@ -917,7 +919,7 @@ public final class LambdaUtil {
     public BindFirstPredicate2(Predicate3<? super T1, ? super T2, ? super T3> pred, T1 arg1) {
       _pred = pred; _arg1 = arg1;
     }
-    public Boolean value(T2 arg2, T3 arg3) { return _pred.value(_arg1, arg2, arg3); }
+    public boolean contains(T2 arg2, T3 arg3) { return _pred.contains(_arg1, arg2, arg3); }
   }
   
   /** Bind a fixed argument to the given ternary predicate, producing a binary predicate. */
@@ -932,7 +934,7 @@ public final class LambdaUtil {
     public BindSecondPredicate2(Predicate3<? super T1, ? super T2, ? super T3> pred, T2 arg2) {
       _pred = pred; _arg2 = arg2;
     }
-    public Boolean value(T1 arg1, T3 arg3) { return _pred.value(arg1, _arg2, arg3); }
+    public boolean contains(T1 arg1, T3 arg3) { return _pred.contains(arg1, _arg2, arg3); }
   }
   
   /** Bind a fixed argument to the given ternary predicate, producing a binary predicate. */
@@ -947,7 +949,7 @@ public final class LambdaUtil {
     public BindThirdPredicate2(Predicate3<? super T1, ? super T2, ? super T3> pred, T3 arg3) {
       _pred = pred; _arg3 = arg3;
     }
-    public Boolean value(T1 arg1, T2 arg2) { return _pred.value(arg1, arg2, _arg3); }
+    public boolean contains(T1 arg1, T2 arg2) { return _pred.contains(arg1, arg2, _arg3); }
   }
   
   /** Bind a fixed argument to the given quaternary predicate, producing a ternary predicate. */
@@ -962,7 +964,7 @@ public final class LambdaUtil {
     public BindFirstPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T1 arg1) {
       _pred = pred; _arg1 = arg1;
     }
-    public Boolean value(T2 arg2, T3 arg3, T4 arg4) { return _pred.value(_arg1, arg2, arg3, arg4); }
+    public boolean contains(T2 arg2, T3 arg3, T4 arg4) { return _pred.contains(_arg1, arg2, arg3, arg4); }
   }
   
   /** Bind a fixed argument to the given quaternary predicate, producing a ternary predicate. */
@@ -977,7 +979,7 @@ public final class LambdaUtil {
     public BindSecondPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T2 arg2) {
       _pred = pred; _arg2 = arg2;
     }
-    public Boolean value(T1 arg1, T3 arg3, T4 arg4) { return _pred.value(arg1, _arg2, arg3, arg4); }
+    public boolean contains(T1 arg1, T3 arg3, T4 arg4) { return _pred.contains(arg1, _arg2, arg3, arg4); }
   }
   
   /** Bind a fixed argument to the given quaternary predicate, producing a ternary predicate. */
@@ -992,7 +994,7 @@ public final class LambdaUtil {
     public BindThirdPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T3 arg3) {
       _pred = pred; _arg3 = arg3;
     }
-    public Boolean value(T1 arg1, T2 arg2, T4 arg4) { return _pred.value(arg1, arg2, _arg3, arg4); }
+    public boolean contains(T1 arg1, T2 arg2, T4 arg4) { return _pred.contains(arg1, arg2, _arg3, arg4); }
   }
   
   /** Bind a fixed argument to the given quaternary pred, producing a ternary pred. */
@@ -1007,7 +1009,7 @@ public final class LambdaUtil {
     public BindFourthPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T4 arg4) {
       _pred = pred; _arg4 = arg4;
     }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3) { return _pred.value(arg1, arg2, arg3, _arg4); }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3) { return _pred.contains(arg1, arg2, arg3, _arg4); }
   }
   
   
@@ -1208,7 +1210,297 @@ public final class LambdaUtil {
       return new CurriedLambda3<T2, T3, T4, R>(new BindFirstLambda3<T1, T2, T3, T4, R>(_lambda, arg));
     }
   }
+  
+  /** Treat a lambda accepting a 0-tuple argument as a Thunk. */
+  public static <R> Thunk<R> flatten0(Lambda<? super Null, ? extends R> lambda) {
+    return new BindFirstThunk<Null, R>(lambda, Null.INSTANCE);
+  }
+  
+  /** Treat a lambda accepting a Pair argument as a Lambda2. */
+  public static <T1, T2, R> Lambda2<T1, T2, R> flatten2(Lambda<? super Pair<T1, T2>, ? extends R> lambda) {
+    return new FlattenedLambda2<T1, T2, R>(lambda);
+  }
+  
+  private static final class FlattenedLambda2<T1, T2, R> implements Lambda2<T1, T2, R>, Serializable {
+    private final Lambda<? super Pair<T1, T2>, ? extends R> _lambda;
+    public FlattenedLambda2(Lambda<? super Pair<T1, T2>, ? extends R> lambda) { _lambda = lambda; }
+    public R value(T1 arg1, T2 arg2) { return _lambda.value(new Pair<T1, T2>(arg1, arg2)); }
+  }
+  
+  /** Treat a lambda accepting a Triple argument as a Lambda3. */
+  public static <T1, T2, T3, R>
+    Lambda3<T1, T2, T3, R> flatten3(Lambda<? super Triple<T1, T2, T3>, ? extends R> lambda) {
+    return new FlattenedLambda3<T1, T2, T3, R>(lambda);
+  }
+  
+  private static final class FlattenedLambda3<T1, T2, T3, R> implements Lambda3<T1, T2, T3, R>, Serializable {
+    private final Lambda<? super Triple<T1, T2, T3>, ? extends R> _lambda;
+    public FlattenedLambda3(Lambda<? super Triple<T1, T2, T3>, ? extends R> lambda) { _lambda = lambda; }
+    public R value(T1 arg1, T2 arg2, T3 arg3) {
+      return _lambda.value(new Triple<T1, T2, T3>(arg1, arg2, arg3));
+    }
+  }
+  
+  /** Treat a lambda accepting a Quad argument as a Lambda4. */
+  public static <T1, T2, T3, T4, R>
+    Lambda4<T1, T2, T3, T4, R> flatten4(Lambda<? super Quad<T1, T2, T3, T4>, ? extends R> lambda) {
+    return new FlattenedLambda4<T1, T2, T3, T4, R>(lambda);
+  }
 
+  private static final class FlattenedLambda4<T1, T2, T3, T4, R>
+    implements Lambda4<T1, T2, T3, T4, R>, Serializable {
+    private final Lambda<? super Quad<T1, T2, T3, T4>, ? extends R> _lambda;
+    public FlattenedLambda4(Lambda<? super Quad<T1, T2, T3, T4>, ? extends R> lambda) { _lambda = lambda; }
+    public R value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+      return _lambda.value(new Quad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4));
+    }
+  }
+  
+  /** Treat a predicate accepting a Pair argument as a Predicate2. */
+  public static <T1, T2> Predicate2<T1, T2> flatten2(Predicate<? super Pair<T1, T2>> pred) {
+    return new FlattenedPredicate2<T1, T2>(pred);
+  }
+  
+  private static final class FlattenedPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
+    private final Predicate<? super Pair<T1, T2>> _pred;
+    public FlattenedPredicate2(Predicate<? super Pair<T1, T2>> pred) { _pred = pred; }
+    public boolean contains(T1 arg1, T2 arg2) { return _pred.contains(new Pair<T1, T2>(arg1, arg2)); }
+  }
+  
+  /** Treat a predicate accepting a Triple argument as a Predicate3. */
+  public static <T1, T2, T3>
+    Predicate3<T1, T2, T3> flatten3(Predicate<? super Triple<T1, T2, T3>> pred) {
+    return new FlattenedPredicate3<T1, T2, T3>(pred);
+  }
+  
+  private static final class FlattenedPredicate3<T1, T2, T3> implements Predicate3<T1, T2, T3>, Serializable {
+    private final Predicate<? super Triple<T1, T2, T3>> _pred;
+    public FlattenedPredicate3(Predicate<? super Triple<T1, T2, T3>> pred) { _pred = pred; }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3) {
+      return _pred.contains(new Triple<T1, T2, T3>(arg1, arg2, arg3));
+    }
+  }
+  
+  /** Treat a predicate accepting a Quad argument as a Predicate4. */
+  public static <T1, T2, T3, T4>
+    Predicate4<T1, T2, T3, T4> flatten4(Predicate<? super Quad<T1, T2, T3, T4>> pred) {
+    return new FlattenedPredicate4<T1, T2, T3, T4>(pred);
+  }
+
+  private static final class FlattenedPredicate4<T1, T2, T3, T4>
+    implements Predicate4<T1, T2, T3, T4>, Serializable {
+    private final Predicate<? super Quad<T1, T2, T3, T4>> _pred;
+    public FlattenedPredicate4(Predicate<? super Quad<T1, T2, T3, T4>> pred) { _pred = pred; }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+      return _pred.contains(new Quad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4));
+    }
+  }
+
+  /** Treat a runnable accepting a 0-tuple argument as a Runnable. */
+  public static Runnable flatten0(Runnable1<? super Null> runnable) {
+    return new BindFirstRunnable<Null>(runnable, Null.INSTANCE);
+  }
+  
+  /** Treat a runnable accepting a Pair argument as a Runnable2. */
+  public static <T1, T2> Runnable2<T1, T2> flatten2(Runnable1<? super Pair<T1, T2>> runnable) {
+    return new FlattenedRunnable2<T1, T2>(runnable);
+  }
+  
+  private static final class FlattenedRunnable2<T1, T2> implements Runnable2<T1, T2>, Serializable {
+    private final Runnable1<? super Pair<T1, T2>> _runnable;
+    public FlattenedRunnable2(Runnable1<? super Pair<T1, T2>> runnable) { _runnable = runnable; }
+    public void run(T1 arg1, T2 arg2) { _runnable.run(new Pair<T1, T2>(arg1, arg2)); }
+  }
+  
+  /** Treat a runnable accepting a Triple argument as a Runnable3. */
+  public static <T1, T2, T3>
+    Runnable3<T1, T2, T3> flatten3(Runnable1<? super Triple<T1, T2, T3>> runnable) {
+    return new FlattenedRunnable3<T1, T2, T3>(runnable);
+  }
+  
+  private static final class FlattenedRunnable3<T1, T2, T3> implements Runnable3<T1, T2, T3>, Serializable {
+    private final Runnable1<? super Triple<T1, T2, T3>> _runnable;
+    public FlattenedRunnable3(Runnable1<? super Triple<T1, T2, T3>> runnable) { _runnable = runnable; }
+    public void run(T1 arg1, T2 arg2, T3 arg3) {
+      _runnable.run(new Triple<T1, T2, T3>(arg1, arg2, arg3));
+    }
+  }
+  
+  /** Treat a runnable accepting a Quad argument as a Runnable4. */
+  public static <T1, T2, T3, T4>
+    Runnable4<T1, T2, T3, T4> flatten4(Runnable1<? super Quad<T1, T2, T3, T4>> runnable) {
+    return new FlattenedRunnable4<T1, T2, T3, T4>(runnable);
+  }
+
+  private static final class FlattenedRunnable4<T1, T2, T3, T4>
+    implements Runnable4<T1, T2, T3, T4>, Serializable {
+    private final Runnable1<? super Quad<T1, T2, T3, T4>> _runnable;
+    public FlattenedRunnable4(Runnable1<? super Quad<T1, T2, T3, T4>> runnable) { _runnable = runnable; }
+    public void run(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+      _runnable.run(new Quad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4));
+    }
+  }
+  
+  /** Treat a Thunk as a unary lambda accepting a 0-tuple argument. */
+  public static <R> Lambda<Null, R> unary(Thunk<? extends R> thunk) {
+    return new UnaryThunk<R>(thunk);
+  }
+  
+  private static final class UnaryThunk<R> implements Lambda<Null, R>, Serializable {
+    private final Thunk<? extends R> _thunk;
+    public UnaryThunk(Thunk<? extends R> thunk) { _thunk = thunk; }
+    public R value(Null arg) { return _thunk.value(); }
+  }
+  
+  /** Treat a Lambda2 as a unary lambda accepting a Pair argument. */
+  public static <T1, T2, R> Lambda<Pair<T1, T2>, R>
+    unary(Lambda2<? super T1, ? super T2, ? extends R> lambda) {
+    return new UnaryLambda2<T1, T2, R>(lambda);
+  }
+  
+  private static final class UnaryLambda2<T1, T2, R> implements Lambda<Pair<T1, T2>, R>, Serializable {
+    private final Lambda2<? super T1, ? super T2, ? extends R> _lambda;
+    public UnaryLambda2(Lambda2<? super T1, ? super T2, ? extends R> lambda) { _lambda = lambda; }
+    public R value(Pair<T1, T2> arg) { return _lambda.value(arg.first(), arg.second()); }
+  }
+  
+  /** Treat a Lambda3 as a unary lambda accepting a Triple argument. */
+  public static <T1, T2, T3, R> Lambda<Triple<T1, T2, T3>, R>
+    unary(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda) {
+    return new UnaryLambda3<T1, T2, T3, R>(lambda);
+  }
+  
+  private static final class UnaryLambda3<T1, T2, T3, R>
+    implements Lambda<Triple<T1, T2, T3>, R>, Serializable {
+    private final Lambda3<? super T1, ? super T2, ? super T3, ? extends R> _lambda;
+    public UnaryLambda3(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda) {
+      _lambda = lambda;
+    }
+    public R value(Triple<T1, T2, T3> arg) {
+      return _lambda.value(arg.first(), arg.second(), arg.third());
+    }
+  }
+  
+  /** Treat a Lambda4 as a unary lambda accepting a Quad argument. */
+  public static <T1, T2, T3, T4, R> Lambda<Quad<T1, T2, T3, T4>, R>
+    unary(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> lambda) {
+    return new UnaryLambda4<T1, T2, T3, T4, R>(lambda);
+  }
+  
+  private static final class UnaryLambda4<T1, T2, T3, T4, R>
+    implements Lambda<Quad<T1, T2, T3, T4>, R>, Serializable {
+    private final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> _lambda;
+    public UnaryLambda4(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> lambda) {
+      _lambda = lambda;
+    }
+    public R value(Quad<T1, T2, T3, T4> arg) {
+      return _lambda.value(arg.first(), arg.second(), arg.third(), arg.fourth());
+    }
+  }
+  
+  /** Treat a Predicate2 as a unary predicate accepting a Pair argument. */
+  public static <T1, T2> Predicate<Pair<T1, T2>>
+    unary(Predicate2<? super T1, ? super T2> pred) {
+    return new UnaryPredicate2<T1, T2>(pred);
+  }
+  
+  private static final class UnaryPredicate2<T1, T2> implements Predicate<Pair<T1, T2>>, Serializable {
+    private final Predicate2<? super T1, ? super T2> _pred;
+    public UnaryPredicate2(Predicate2<? super T1, ? super T2> pred) { _pred = pred; }
+    public boolean contains(Pair<T1, T2> arg) { return _pred.contains(arg.first(), arg.second()); }
+  }
+  
+  /** Treat a Predicate3 as a unary predicate accepting a Triple argument. */
+  public static <T1, T2, T3> Predicate<Triple<T1, T2, T3>>
+    unary(Predicate3<? super T1, ? super T2, ? super T3> pred) {
+    return new UnaryPredicate3<T1, T2, T3>(pred);
+  }
+  
+  private static final class UnaryPredicate3<T1, T2, T3>
+    implements Predicate<Triple<T1, T2, T3>>, Serializable {
+    private final Predicate3<? super T1, ? super T2, ? super T3> _pred;
+    public UnaryPredicate3(Predicate3<? super T1, ? super T2, ? super T3> pred) {
+      _pred = pred;
+    }
+    public boolean contains(Triple<T1, T2, T3> arg) {
+      return _pred.contains(arg.first(), arg.second(), arg.third());
+    }
+  }
+  
+  /** Treat a Predicate4 as a unary predicate accepting a Quad argument. */
+  public static <T1, T2, T3, T4> Predicate<Quad<T1, T2, T3, T4>>
+    unary(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred) {
+    return new UnaryPredicate4<T1, T2, T3, T4>(pred);
+  }
+  
+  private static final class UnaryPredicate4<T1, T2, T3, T4>
+    implements Predicate<Quad<T1, T2, T3, T4>>, Serializable {
+    private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _pred;
+    public UnaryPredicate4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred) {
+      _pred = pred;
+    }
+    public boolean contains(Quad<T1, T2, T3, T4> arg) {
+      return _pred.contains(arg.first(), arg.second(), arg.third(), arg.fourth());
+    }
+  }
+  
+  /** Treat a Runnable as a Runnable1 accepting a 0-tuple argument. */
+  public static Runnable1<Null> unary(Runnable runnable) {
+    return new UnaryRunnable(runnable);
+  }
+  
+  private static final class UnaryRunnable implements Runnable1<Null>, Serializable {
+    private final Runnable _runnable;
+    public UnaryRunnable(Runnable runnable) { _runnable = runnable; }
+    public void run(Null arg) { _runnable.run(); }
+  }
+  
+  /** Treat a Runnable2 as a Runnable1 accepting a Pair argument. */
+  public static <T1, T2> Runnable1<Pair<T1, T2>> unary(Runnable2<? super T1, ? super T2> runnable) {
+    return new UnaryRunnable2<T1, T2>(runnable);
+  }
+  
+  private static final class UnaryRunnable2<T1, T2> implements Runnable1<Pair<T1, T2>>, Serializable {
+    private final Runnable2<? super T1, ? super T2> _runnable;
+    public UnaryRunnable2(Runnable2<? super T1, ? super T2> runnable) { _runnable = runnable; }
+    public void run(Pair<T1, T2> arg) { _runnable.run(arg.first(), arg.second()); }
+  }
+  
+  /** Treat a Runnable3 as a Runnable1 accepting a Triple argument. */
+  public static <T1, T2, T3> Runnable1<Triple<T1, T2, T3>>
+    unary(Runnable3<? super T1, ? super T2, ? super T3> runnable) {
+    return new UnaryRunnable3<T1, T2, T3>(runnable);
+  }
+  
+  private static final class UnaryRunnable3<T1, T2, T3>
+    implements Runnable1<Triple<T1, T2, T3>>, Serializable {
+    private final Runnable3<? super T1, ? super T2, ? super T3> _runnable;
+    public UnaryRunnable3(Runnable3<? super T1, ? super T2, ? super T3> runnable) {
+      _runnable = runnable;
+    }
+    public void run(Triple<T1, T2, T3> arg) {
+      _runnable.run(arg.first(), arg.second(), arg.third());
+    }
+  }
+  
+  /** Treat a Runnable4 as a Runnable1 accepting a Quad argument. */
+  public static <T1, T2, T3, T4> Runnable1<Quad<T1, T2, T3, T4>>
+    unary(Runnable4<? super T1, ? super T2, ? super T3, ? super T4> runnable) {
+    return new UnaryRunnable4<T1, T2, T3, T4>(runnable);
+  }
+  
+  private static final class UnaryRunnable4<T1, T2, T3, T4>
+    implements Runnable1<Quad<T1, T2, T3, T4>>, Serializable {
+    private final Runnable4<? super T1, ? super T2, ? super T3, ? super T4> _runnable;
+    public UnaryRunnable4(Runnable4<? super T1, ? super T2, ? super T3, ? super T4> runnable) {
+      _runnable = runnable;
+    }
+    public void run(Quad<T1, T2, T3, T4> arg) {
+      _runnable.run(arg.first(), arg.second(), arg.third(), arg.fourth());
+    }
+  }
+  
+  
   
   /** Produce the negation ({@code !}) of {@code pred}. */
   public static <T> Predicate<T> negate(final Predicate<? super T> pred) {
@@ -1218,7 +1510,7 @@ public final class LambdaUtil {
   private static final class NegationPredicate<T> implements Predicate<T>, Serializable {
     private final Predicate<? super T> _p;
     public NegationPredicate(Predicate<? super T> p) { _p = p; }
-    public Boolean value(T arg) { return !_p.value(arg); }
+    public boolean contains(T arg) { return !_p.contains(arg); }
   }
   
   /** Produce the negation ({@code !}) of {@code pred}. */
@@ -1229,7 +1521,7 @@ public final class LambdaUtil {
   private static final class NegationPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
     private final Predicate2<? super T1, ? super T2> _p;
     public NegationPredicate2(Predicate2<? super T1, ? super T2> p) { _p = p; }
-    public Boolean value(T1 arg1, T2 arg2) { return !_p.value(arg1, arg2); }
+    public boolean contains(T1 arg1, T2 arg2) { return !_p.contains(arg1, arg2); }
   }
   
   /** Produce the negation ({@code !}) of {@code pred}. */
@@ -1240,7 +1532,7 @@ public final class LambdaUtil {
   private static final class NegationPredicate3<T1, T2, T3> implements Predicate3<T1, T2, T3>, Serializable {
     private final Predicate3<? super T1, ? super T2, ? super T3> _p;
     public NegationPredicate3(Predicate3<? super T1, ? super T2, ? super T3> p) { _p = p; }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3) { return !_p.value(arg1, arg2, arg3); }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3) { return !_p.contains(arg1, arg2, arg3); }
   }
   
   /** Produce the negation ({@code !}) of {@code pred}. */
@@ -1252,7 +1544,7 @@ public final class LambdaUtil {
   private static final class NegationPredicate4<T1, T2, T3, T4> implements Predicate4<T1, T2, T3, T4>, Serializable {
     private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _p;
     public NegationPredicate4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p) { _p = p; }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return !_p.value(arg1, arg2, arg3, arg4); }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return !_p.contains(arg1, arg2, arg3, arg4); }
   }
   
   
@@ -1275,9 +1567,9 @@ public final class LambdaUtil {
   private static final class AndPredicate<T> implements Predicate<T>, Serializable {
     private final Iterable<? extends Predicate<? super T>> _preds;
     public AndPredicate(Iterable<? extends Predicate<? super T>> preds) { _preds = preds; }
-    public Boolean value(T arg) {
-      for (Predicate<? super T> p : _preds) { if (!p.value(arg)) { return Boolean.FALSE; } }
-      return Boolean.TRUE;
+    public boolean contains(T arg) {
+      for (Predicate<? super T> p : _preds) { if (!p.contains(arg)) { return false; } }
+      return true;
     }
   }
   
@@ -1306,9 +1598,9 @@ public final class LambdaUtil {
   private static final class AndPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
     private final Iterable<? extends Predicate2<? super T1, ? super T2>> _preds;
     public AndPredicate2(Iterable<? extends Predicate2<? super T1, ? super T2>> preds) { _preds = preds; }
-    public Boolean value(T1 arg1, T2 arg2) {
-      for (Predicate2<? super T1, ? super T2> p : _preds) { if (!p.value(arg1, arg2)) { return Boolean.FALSE; } }
-      return Boolean.TRUE;
+    public boolean contains(T1 arg1, T2 arg2) {
+      for (Predicate2<? super T1, ? super T2> p : _preds) { if (!p.contains(arg1, arg2)) { return false; } }
+      return true;
     }
   }
 
@@ -1343,11 +1635,11 @@ public final class LambdaUtil {
     public AndPredicate3(Iterable<? extends Predicate3<? super T1, ? super T2, ? super T3>> preds) {
       _preds = preds;
     }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3) {
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3) {
       for (Predicate3<? super T1, ? super T2, ? super T3> p : _preds) {
-        if (!p.value(arg1, arg2, arg3)) { return Boolean.FALSE; }
+        if (!p.contains(arg1, arg2, arg3)) { return false; }
       }
-      return Boolean.TRUE;
+      return true;
     }
   }
 
@@ -1382,11 +1674,11 @@ public final class LambdaUtil {
     public AndPredicate4(Iterable<? extends Predicate4<? super T1, ? super T2, ? super T3, ? super T4>> preds) {
       _preds = preds;
     }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
       for (Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p : _preds) {
-        if (!p.value(arg1, arg2, arg3, arg4)) { return Boolean.FALSE; }
+        if (!p.contains(arg1, arg2, arg3, arg4)) { return false; }
       }
-      return Boolean.TRUE;
+      return true;
     }
   }
 
@@ -1410,9 +1702,9 @@ public final class LambdaUtil {
   private static final class OrPredicate<T> implements Predicate<T>, Serializable {
     private final Iterable<? extends Predicate<? super T>> _preds;
     public OrPredicate(Iterable<? extends Predicate<? super T>> preds) { _preds = preds; }
-    public Boolean value(T arg) {
-      for (Predicate<? super T> p : _preds) { if (p.value(arg)) { return Boolean.TRUE; } }
-      return Boolean.FALSE;
+    public boolean contains(T arg) {
+      for (Predicate<? super T> p : _preds) { if (p.contains(arg)) { return true; } }
+      return false;
     }
   }
   
@@ -1440,9 +1732,9 @@ public final class LambdaUtil {
   private static final class OrPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
     private final Iterable<? extends Predicate2<? super T1, ? super T2>> _preds;
     public OrPredicate2(Iterable<? extends Predicate2<? super T1, ? super T2>> preds) { _preds = preds; }
-    public Boolean value(T1 arg1, T2 arg2) {
-      for (Predicate2<? super T1, ? super T2> p : _preds) { if (p.value(arg1, arg2)) { return Boolean.TRUE; } }
-      return Boolean.FALSE;
+    public boolean contains(T1 arg1, T2 arg2) {
+      for (Predicate2<? super T1, ? super T2> p : _preds) { if (p.contains(arg1, arg2)) { return true; } }
+      return false;
     }
   }
 
@@ -1475,11 +1767,11 @@ public final class LambdaUtil {
     public OrPredicate3(Iterable<? extends Predicate3<? super T1, ? super T2, ? super T3>> preds) {
       _preds = preds;
     }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3) {
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3) {
       for (Predicate3<? super T1, ? super T2, ? super T3> p : _preds) {
-        if (p.value(arg1, arg2, arg3)) { return Boolean.TRUE; }
+        if (p.contains(arg1, arg2, arg3)) { return true; }
       }
-      return Boolean.FALSE;
+      return false;
     }
   }
 
@@ -1514,11 +1806,11 @@ public final class LambdaUtil {
     public OrPredicate4(Iterable<? extends Predicate4<? super T1, ? super T2, ? super T3, ? super T4>> preds) {
       _preds = preds;
     }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
       for (Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p : _preds) {
-        if (p.value(arg1, arg2, arg3, arg4)) { return Boolean.TRUE; }
+        if (p.contains(arg1, arg2, arg3, arg4)) { return true; }
       }
-      return Boolean.FALSE;
+      return false;
     }
   }
 
@@ -1674,7 +1966,7 @@ public final class LambdaUtil {
   private static final class LambdaPredicate<T> implements Predicate<T>, Serializable {
     private final Lambda<? super T, ? extends Boolean> _l;
     public LambdaPredicate(Lambda<? super T, ? extends Boolean> l) { _l = l; }
-    public Boolean value(T arg) { return _l.value(arg); }
+    public boolean contains(T arg) { return _l.value(arg); }
   }
   
   /** Create a predicate based on an input that acts as a predicate but is not typed as one. */
@@ -1685,7 +1977,7 @@ public final class LambdaUtil {
   private static final class LambdaPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
     private final Lambda2<? super T1, ? super T2, ? extends Boolean> _l;
     public LambdaPredicate2(Lambda2<? super T1, ? super T2, ? extends Boolean> l) { _l = l; }
-    public Boolean value(T1 arg1, T2 arg2) { return _l.value(arg1, arg2); }
+    public boolean contains(T1 arg1, T2 arg2) { return _l.value(arg1, arg2); }
   }
   
   /** Create a predicate based on an input that acts as a predicate but is not typed as one. */
@@ -1697,7 +1989,7 @@ public final class LambdaUtil {
   private static final class LambdaPredicate3<T1, T2, T3> implements Predicate3<T1, T2, T3>, Serializable {
     private final Lambda3<? super T1, ? super T2, ? super T3, ? extends Boolean> _l;
     public LambdaPredicate3(Lambda3<? super T1, ? super T2, ? super T3, ? extends Boolean> l) { _l = l; }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3) { return _l.value(arg1, arg2, arg3); }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3) { return _l.value(arg1, arg2, arg3); }
   }
   
   /** Create a predicate based on an input that acts as a predicate but is not typed as one. */
@@ -1709,7 +2001,54 @@ public final class LambdaUtil {
   private static final class LambdaPredicate4<T1, T2, T3, T4> implements Predicate4<T1, T2, T3, T4>, Serializable {
     private final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends Boolean> _l;
     public LambdaPredicate4(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends Boolean> l) { _l = l; }
-    public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return _l.value(arg1, arg2, arg3, arg4); }
+    public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return _l.value(arg1, arg2, arg3, arg4); }
+  }
+  
+  
+  /** Create a Boolean lambda based on a predicate. */
+  public static <T> Lambda<T, Boolean> asLambda(Predicate<? super T> predicate) {
+    return new PredicateLambda<T>(predicate);
+  }
+  
+  private static final class PredicateLambda<T> implements Lambda<T, Boolean>, Serializable {
+    private final Predicate<? super T> _p;
+    public PredicateLambda(Predicate<? super T> p) { _p = p; }
+    public Boolean value(T arg) { return _p.contains(arg); }
+  }
+  
+  /** Create a Boolean lambda based on a predicate. */
+  public static <T1, T2> Lambda2<T1, T2, Boolean> asLambda(Predicate2<? super T1, ? super T2> predicate) {
+    return new PredicateLambda2<T1, T2>(predicate);
+  }
+  
+  private static final class PredicateLambda2<T1, T2> implements Lambda2<T1, T2, Boolean>, Serializable {
+    private final Predicate2<? super T1, ? super T2> _p;
+    public PredicateLambda2(Predicate2<? super T1, ? super T2> p) { _p = p; }
+    public Boolean value(T1 arg1, T2 arg2) { return _p.contains(arg1, arg2); }
+  }
+  
+  /** Create a Boolean lambda based on a predicate. */
+  public static <T1, T2, T3> 
+    Lambda3<T1, T2, T3, Boolean> asLambda(Predicate3<? super T1, ? super T2, ? super T3> predicate) {
+    return new PredicateLambda3<T1, T2, T3>(predicate);
+  }
+  
+  private static final class PredicateLambda3<T1, T2, T3> implements Lambda3<T1, T2, T3, Boolean>, Serializable {
+    private final Predicate3<? super T1, ? super T2, ? super T3> _p;
+    public PredicateLambda3(Predicate3<? super T1, ? super T2, ? super T3> p) { _p = p; }
+    public Boolean value(T1 arg1, T2 arg2, T3 arg3) { return _p.contains(arg1, arg2, arg3); }
+  }
+  
+  /** Create a Boolean lambda based on a predicate. */
+  public static <T1, T2, T3, T4> Lambda4<T1, T2, T3, T4, Boolean> 
+    asLambda(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> predicate) {
+    return new PredicateLambda4<T1, T2, T3, T4>(predicate);
+  }
+ 
+  private static final class PredicateLambda4<T1, T2, T3, T4> implements Lambda4<T1, T2, T3, T4, Boolean>, Serializable {
+    private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _p;
+    public PredicateLambda4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p) { _p = p; }
+    public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return _p.contains(arg1, arg2, arg3, arg4); }
   }
   
   
@@ -1738,7 +2077,7 @@ public final class LambdaUtil {
         else { return Option.some(_thunk.value()); }
       }
       catch (RuntimeException e) {
-        if (_filterException.value(e)) { return Option.none(); }
+        if (_filterException.contains(e)) { return Option.none(); }
         else { throw e; }
       }
     }
@@ -1769,7 +2108,7 @@ public final class LambdaUtil {
         else { return Option.some(_lambda.value(arg)); }
       }
       catch (RuntimeException e) {
-        if (_filterException.value(e)) { return Option.none(); }
+        if (_filterException.contains(e)) { return Option.none(); }
         else { throw e; }
       }
     }
@@ -1801,7 +2140,7 @@ public final class LambdaUtil {
         else { return Option.some(_lambda.value(arg1, arg2)); }
       }
       catch (RuntimeException e) {
-        if (_filterException.value(e)) { return Option.none(); }
+        if (_filterException.contains(e)) { return Option.none(); }
         else { throw e; }
       }
     }
@@ -1833,7 +2172,7 @@ public final class LambdaUtil {
         else { return Option.some(_lambda.value(arg1, arg2, arg3)); }
       }
       catch (RuntimeException e) {
-        if (_filterException.value(e)) { return Option.none(); }
+        if (_filterException.contains(e)) { return Option.none(); }
         else { throw e; }
       }
     }
@@ -1866,7 +2205,7 @@ public final class LambdaUtil {
         else { return Option.some(_lambda.value(arg1, arg2, arg3, arg4)); }
       }
       catch (RuntimeException e) {
-        if (_filterException.value(e)) { return Option.none(); }
+        if (_filterException.contains(e)) { return Option.none(); }
         else { throw e; }
       }
     }

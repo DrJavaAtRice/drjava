@@ -266,7 +266,7 @@ public class ArgumentParser {
     public Pair<String, String> getBinaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
       if (result == null || IterUtil.sizeOf(result) != 2) { return null; }
-      else { return IterUtil.asPair(result); }
+      else { return IterUtil.makePair(result); }
     }
     
     /**
@@ -277,7 +277,7 @@ public class ArgumentParser {
     public Triple<String, String, String> getTernaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
       if (result == null || IterUtil.sizeOf(result) != 3) { return null; }
-      else { return IterUtil.asTriple(result); }
+      else { return IterUtil.makeTriple(result); }
     }
     
     /**
@@ -288,7 +288,7 @@ public class ArgumentParser {
     public Quad<String, String, String, String> getQuaternaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
       if (result == null || IterUtil.sizeOf(result) != 4) { return null; }
-      else { return IterUtil.asQuad(result); }
+      else { return IterUtil.makeQuad(result); }
     }
     
   }

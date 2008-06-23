@@ -55,6 +55,9 @@ public class Pair<T1, T2> extends Tuple {
   public T1 first() { return _first; }
   public T2 second() { return _second; }
   
+  /** Invert a pair.  Subclasses should override this method to create a new pair of the same type. */
+  public Pair<T2, T1> inverse() { return new Pair<T2, T1>(_second, _first); }
+  
   public String toString() {
     return "(" + _first + ", " + _second + ")";
   }
@@ -95,6 +98,17 @@ public class Pair<T1, T2> extends Tuple {
     public static final Factory<Object, Object> INSTANCE = new Factory<Object, Object>();
     private Factory() {}
     public Pair<T1, T2> value(T1 first, T2 second) { return new Pair<T1, T2>(first, second); }
+  }
+  
+  /** Produce a lambda that invokes {@link #inverse} on a provided pair. */
+  @SuppressWarnings("unchecked") public static <T1, T2> Lambda<Pair<T1, T2>, Pair<T2, T1>> inverter() {
+    return (Inverter<T1, T2>) Inverter.INSTANCE;
+  }
+  
+  private static final class Inverter<T1, T2> implements Lambda<Pair<T1, T2>, Pair<T2, T1>>, Serializable {
+    public static final Inverter<Void, Void> INSTANCE = new Inverter<Void, Void>();
+    private Inverter() {}
+    public Pair<T2, T1> value(Pair<T1, T2> arg) { return arg.inverse(); }
   }
   
   /** Produce a lambda that invokes {@link #first} on a provided pair. */

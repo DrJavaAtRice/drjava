@@ -50,7 +50,7 @@ public class EmptyIterator<T> implements Iterator<T> {
   public T next() { throw new NoSuchElementException(); }
   public void remove() { throw new IllegalStateException(); }
   
-  /** @return  A singleton, cast (unsafe formally, but safe in practice) to the appropriate type */
+  /** Return a singleton, cast to the appropriate type. */
   @SuppressWarnings("unchecked")
   public static <T> EmptyIterator<T> make() { return (EmptyIterator<T>) INSTANCE; }
 }

@@ -43,7 +43,8 @@ import java.io.Serializable;
  * generated iterators will traverse those same values in the same order.  Changes to the wrapped iterable will 
  * <em>not</em> be reflected.
  */
-public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
+public class SnapshotIterable<T> extends AbstractIterable<T>
+                                 implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
   
   private final ArrayList<T> _values;
   
@@ -57,11 +58,15 @@ public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIte
     while (iterator.hasNext()) { _values.add(iterator.next()); }
   }
     
-  public Iterator<T> iterator() { return _values.iterator(); }
+  public Iterator<T> iterator() { return new ImmutableIterator<T>(_values.iterator()); }
+  public boolean isEmpty() { return _values.isEmpty(); }
   public int size() { return _values.size(); }
   public int size(int bound) { int result = _values.size(); return result < bound ? result : bound; }
   public boolean isInfinite() { return false; }
-  public boolean isFixed() { return true; }
+  public boolean hasFixedSize() { return true; }
+  public boolean isStatic() { return true; }
+  
+  public T last() { return _values.get(_values.size()-1); }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> SnapshotIterable<T> make(Iterable<? extends T> iterable) {

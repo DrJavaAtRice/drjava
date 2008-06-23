@@ -42,7 +42,7 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  * value and a successor function (described by a {@link Lambda}), along with a size that
  * truncates the (otherwise infinite) list.  This is a trivial extension to 
  * {@code TruncatedIterable}, but does add optimized implementations of {@link #size} and
- * {@link #isFixed} (since the nature of the nested iterable is known).
+ * {@link #hasFixedSize} (since the nature of the nested iterable is known).
  */
 public class FiniteSequenceIterable<T> extends TruncatedIterable<T> {
   
@@ -58,7 +58,9 @@ public class FiniteSequenceIterable<T> extends TruncatedIterable<T> {
   
   public int size() { return _size; }
   public int size(int bound) { return _size <= bound ? _size : bound; }
-  public boolean isFixed() { return true; }
+  public boolean hasFixedSize() { return true; }
+  /** Always false: results of a lambda may be arbitrary. */
+  public boolean isStatic() { return false; }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> FiniteSequenceIterable<T> make(T initial, Lambda<? super T, ? extends T> successor, 

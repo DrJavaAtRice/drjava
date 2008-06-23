@@ -37,46 +37,60 @@ package edu.rice.cs.plt.collect;
 import java.util.Collection;
 import java.util.Set;
 import java.util.Iterator;
+import edu.rice.cs.plt.iter.SizedIterable;
 
 /**
- * A set-like collection that allows multiple "instances" of a value to be represented
+ * A set-like collection that allows multiple instances of a value to be represented
  * in the collection.
  */
-public interface Multiset<T> extends Collection<T> {
+public interface Multiset<T> extends Collection<T>, SizedIterable<T> {
   
-  /** @return  The size of the multiset */
+  /** The size of the multiset. */
   public int size();
+  
+  /** The size of the multiset bounded by the given value. */
+  public int size(int bound);
+  
+  /** Whether the iterator has an infinite number of elements. */
+  public boolean isInfinite();
+  
+  /** Whether the multiset can change size. */
+  public boolean hasFixedSize();
+  
+  /** Whether the multiset will always contain the same values. */
+  public boolean isStatic();
 
-  /** @return  {@code true} iff the multiset is empty */
+  /** Whether the multiset is empty. */
   public boolean isEmpty();
   
-  /** @return  {@code true} iff the multiset contains at least one instance of {@code obj} */
+  /** Whether the multiset contains at least one instance of {@code obj}. */
   public boolean contains(Object obj);
   
   /**
-   * @return  The number of times {@code value} appears in the multiset (if it does not appear,
-   *          the result is {@code 0})
+   * The number of times {@code value} appears in the multiset (if it does not appear,
+   * the result is {@code 0}).  If the number is too large, {@code Integer.MAX_VALUE} may
+   * be returned.
    */
   public int count(Object value);
   
   /**
-   * @return  A set view of the multiset (with only one entry for each unique instance).  The 
-   *          set will change as subsequent modifications are made to the multiset; 
-   *          implementations may choose to allow external modifications to the set as well.
+   * Produce a set view of the multiset (with only one entry for each unique instance).  The 
+   * set will change as subsequent modifications are made to the multiset; implementations may
+   * choose to allow external modifications to the set as well.
    */
-  public Set<T> asSet();
+  public PredicateSet<T> asSet();
   
   /**
-   * @return  An iterator for the multiset.  If the set contains {@code n} instances of a 
-   *          value, that value will appear {@code n} times during iteration.  Invoking 
-   *          {@code remove} on the iterator removes one instance.
+   * An iterator for the multiset.  If the set contains {@code n} instances of a 
+   * value, that value will appear {@code n} times during iteration.  Invoking 
+   * {@code remove} on the iterator removes one instance.
    */
   public Iterator<T> iterator();
   
-  /** @return  An array view of the multiset */
+  /** Fill an array with the contents of the multiset. */
   public Object[] toArray();
   
-  /** @return  An array view of the multiset */
+  /** Fill an array with the contents of the multiset. */
   public <T> T[] toArray(T[] fill);
   
   /**
@@ -100,25 +114,28 @@ public interface Multiset<T> extends Collection<T> {
   /**
    * Remove the given number of instances of {@code obj} from the multiset.  If 
    * {@code count(obj) <= instances}, removes all instances of the given value.
-   * 
    * @return  {@code true} iff the multiset was modified
    */
   public boolean remove(Object obj, int instances);
   
   /**
    * Remove all instances of {@code obj} from the multiset
-   * 
    * @return  {@code true} iff the multiset was modified
    */
   public boolean removeAllInstances(Object obj);
 
-  /** @return  {@code true} iff each element of the collection is contained by this multiset */
+  /** Whether each element of the collection appears at least once in this multiset. */
   public boolean containsAll(Collection<?> c);
+  
+  /**
+   * Whether each element ({@code elt}) of {@code s} appears at least {@code s.count(elt)} times
+   * in this multiset.
+   */
+  public boolean isSupersetOf(Multiset<?> s);
   
   /** 
    * Add all the elements of {@code coll} to this multiset.  If the same value appears multiple
    * times in {@code coll}, it will appear multiple times in this multiset.
-   * 
    * @return  {@code true} iff the multiset was successfully modified
    */
   public boolean addAll(Collection<? extends T> coll);
@@ -127,7 +144,6 @@ public interface Multiset<T> extends Collection<T> {
    * Remove all the elements of {@code coll} from this multiset.  If the same value appears
    * multiple times in {@code coll}, the same number of instances will be removed from
    * this multiset.
-   * 
    * @return  {@code true} iff the multiset was modified
    */
   public boolean removeAll(Collection<?> coll);
@@ -136,7 +152,6 @@ public interface Multiset<T> extends Collection<T> {
    * Remove all the elements of this multiset except those contained in {@code coll}.  If
    * the same value appears multiple times in {@code coll}, at most that number of instances
    * will not be removed from this multiset.
-   * 
    * @return  {@code true} iff the multiset was modified
    */
   public boolean retainAll(Collection<?> coll);
@@ -146,16 +161,14 @@ public interface Multiset<T> extends Collection<T> {
   
   /**
    * Compares two multisets.  Two multisets are equal if they contain all the same values
-   * (and the same number of instances of those values).
-   * 
+   * and the same number of instances of those values.
    * @return  {@code true} iff {@code obj} is a multiset with the same elements as {@code this}
    */
   public boolean equals(Object obj);
   
   /**
-   * @return  A hash code for the multiset, computed by xoring the hash code of each unique 
-   *          element xored with the count of that element (an empty multiset has hash code 
-   *          {@code 0}; a {@code null} element also has hash code 0)
+   * A hash code for the multiset, computed by summing the hash codes of each element in the iterator.
+   * (An empty multiset has hash code {@code 0}; each {@code null} element has hash code 1.)
    */
   public int hashCode();
   

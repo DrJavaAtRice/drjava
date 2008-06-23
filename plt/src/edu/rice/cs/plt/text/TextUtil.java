@@ -43,8 +43,8 @@ import java.util.Map;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.recur.RecurUtil;
-import edu.rice.cs.plt.collect.OneToOneMap;
-import edu.rice.cs.plt.collect.OneToOneHashMap;
+import edu.rice.cs.plt.collect.OneToOneRelation;
+import edu.rice.cs.plt.collect.HashOneToOneRelation;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
@@ -698,7 +698,9 @@ public final class TextUtil {
    * ({@code "}, {@code &}, {@code '}, {@code <}, and {@code >}) will be replaced with named references
    * (such as {@code &quot;}), and all non-ASCII characters will be replaced with numeric references.
    */
-  public static String xmlEscape(String s) { return sgmlEscape(s, XML_ENTITIES.value(), true); }
+  public static String xmlEscape(String s) {
+    return sgmlEscape(s, XML_ENTITIES.value().functionMap(), true);
+  }
 
  /**
   * Convert the given string to an escaped form compatible with XML.  The standard XML named entities
@@ -707,14 +709,16 @@ public final class TextUtil {
   * will be replaced with numeric references.
   */
   public static String xmlEscape(String s, boolean convertToAscii) {
-    return sgmlEscape(s, XML_ENTITIES.value(), convertToAscii);
+    return sgmlEscape(s, XML_ENTITIES.value().functionMap(), convertToAscii);
   }
 
  /**
    * Interpret all XML character entities in the given string.
    * @throws  IllegalArgumentException  If the string contains a malformed or unrecognized character entity
   */
-  public static String xmlUnescape(String s) { return sgmlUnescape(s, XML_ENTITIES.value().reverse()); }
+  public static String xmlUnescape(String s) {
+    return sgmlUnescape(s, XML_ENTITIES.value().injectionMap());
+  }
 
   /**
    * Convert the given string to an escaped form compatible with HTML.  All named entities
@@ -722,302 +726,306 @@ public final class TextUtil {
    * characters will be replaced with numeric references.  The {@code '} character will also
    * be replaced with a numeric refererence.
    */
-  public static String htmlEscape(String s) { return sgmlEscape(s, HTML_ENTITIES.value(), true); }
+  public static String htmlEscape(String s) {
+    return sgmlEscape(s, HTML_ENTITIES.value().functionMap(), true);
+  }
 
  /**
    * Interpret all HTML character entities in the given string.
    * @throws  IllegalArgumentException  If the string contains a malformed or unrecognized character entity
   */
-  public static String htmlUnescape(String s) { return sgmlUnescape(s, HTML_ENTITIES.value().reverse()); }
+  public static String htmlUnescape(String s) {
+    return sgmlUnescape(s, HTML_ENTITIES.value().injectionMap());
+  }
 
   
   /** Entity names for XML; declared lazily to prevent creation when it is not used */
-  private static final Thunk<OneToOneMap<Character, String>> XML_ENTITIES = 
-    LazyThunk.make(new Thunk<OneToOneMap<Character, String>>() {
-    public OneToOneMap<Character, String> value() {
-      OneToOneMap<Character, String> result = new OneToOneHashMap<Character, String>();
+  private static final Thunk<OneToOneRelation<Character, String>> XML_ENTITIES = 
+    LazyThunk.make(new Thunk<OneToOneRelation<Character, String>>() {
+    public OneToOneRelation<Character, String> value() {
+      OneToOneRelation<Character, String> result = new HashOneToOneRelation<Character, String>();
       // Source: Wikipedia, "List of XML and HTML character entity references"
-      result.put('"', "quot");
-      result.put('&', "amp");
-      result.put('\'', "apos");
-      result.put('<', "lt");
-      result.put('>', "gt");
+      result.add('"', "quot");
+      result.add('&', "amp");
+      result.add('\'', "apos");
+      result.add('<', "lt");
+      result.add('>', "gt");
       return result;
     }      
   });
 
   
   /** Entity names for HTML; declared lazily to prevent creation when it is not used */
-  private static final Thunk<OneToOneMap<Character, String>> HTML_ENTITIES = 
-    LazyThunk.make(new Thunk<OneToOneMap<Character, String>>() {
-    public OneToOneMap<Character, String> value() {
-      OneToOneMap<Character, String> result = new OneToOneHashMap<Character, String>();
+  private static final Thunk<OneToOneRelation<Character, String>> HTML_ENTITIES = 
+    LazyThunk.make(new Thunk<OneToOneRelation<Character, String>>() {
+    public OneToOneRelation<Character, String> value() {
+      OneToOneRelation<Character, String> result = new HashOneToOneRelation<Character, String>();
       // Source: Wikipedia, "List of XML and HTML character entity references"
-      result.put('\'', "#39"); // no entity defined, but it's safer to escape it
-      result.put('"', "quot");
-      result.put('&', "amp");
-      result.put('<', "lt");
-      result.put('>', "gt");
+      result.add('\'', "#39"); // no entity defined, but it's safer to escape it
+      result.add('"', "quot");
+      result.add('&', "amp");
+      result.add('<', "lt");
+      result.add('>', "gt");
       
-      result.put('\u00A0', "nbsp");
-      result.put('\u00A1', "iexcl");
-      result.put('\u00A2', "cent");
-      result.put('\u00A3', "pound");
-      result.put('\u00A4', "curren");
-      result.put('\u00A5', "yen");
-      result.put('\u00A6', "brvbar");
-      result.put('\u00A7', "sect");
-      result.put('\u00A8', "uml");
-      result.put('\u00A9', "copy");
-      result.put('\u00AA', "ordf");
-      result.put('\u00AB', "laquo");
-      result.put('\u00AC', "not");
-      result.put('\u00AD', "shy");
-      result.put('\u00AE', "reg");
-      result.put('\u00AF', "macr");
-      result.put('\u00B0', "deg");
-      result.put('\u00B1', "plusmn");
-      result.put('\u00B2', "sup2");
-      result.put('\u00B3', "sup3");
-      result.put('\u00B4', "acute");
-      result.put('\u00B5', "micro");
-      result.put('\u00B6', "para");
-      result.put('\u00B7', "middot");
-      result.put('\u00B8', "cedil");
-      result.put('\u00B9', "sup1");
-      result.put('\u00BA', "ordm");
-      result.put('\u00BB', "raquo");
-      result.put('\u00BC', "frac14");
-      result.put('\u00BD', "frac12");
-      result.put('\u00BE', "frac34");
-      result.put('\u00BF', "iquest");
-      result.put('\u00C0', "Agrave");
-      result.put('\u00C1', "Aacute");
-      result.put('\u00C2', "Acirc");
-      result.put('\u00C3', "Atilde");
-      result.put('\u00C4', "Auml");
-      result.put('\u00C5', "Aring");
-      result.put('\u00C6', "AElig");
-      result.put('\u00C7', "Ccedil");
-      result.put('\u00C8', "Egrave");
-      result.put('\u00C9', "Eacute");
-      result.put('\u00CA', "Ecirc");
-      result.put('\u00CB', "Euml");
-      result.put('\u00CC', "Igrave");
-      result.put('\u00CD', "Iacute");
-      result.put('\u00CE', "Icirc");
-      result.put('\u00CF', "Iuml");
-      result.put('\u00D0', "ETH");
-      result.put('\u00D1', "Ntilde");
-      result.put('\u00D2', "Ograve");
-      result.put('\u00D3', "Oacute");
-      result.put('\u00D4', "Ocirc");
-      result.put('\u00D5', "Otilde");
-      result.put('\u00D6', "Ouml");
-      result.put('\u00D7', "times");
-      result.put('\u00D8', "Oslash");
-      result.put('\u00D9', "Ugrave");
-      result.put('\u00DA', "Uacute");
-      result.put('\u00DB', "Ucirc");
-      result.put('\u00DC', "Uuml");
-      result.put('\u00DD', "Yacute");
-      result.put('\u00DE', "THORN");
-      result.put('\u00DF', "szlig");
-      result.put('\u00E0', "agrave");
-      result.put('\u00E1', "aacute");
-      result.put('\u00E2', "acirc");
-      result.put('\u00E3', "atilde");
-      result.put('\u00E4', "auml");
-      result.put('\u00E5', "aring");
-      result.put('\u00E6', "aelig");
-      result.put('\u00E7', "ccedil");
-      result.put('\u00E8', "egrave");
-      result.put('\u00E9', "eacute");
-      result.put('\u00EA', "ecirc");
-      result.put('\u00EB', "euml");
-      result.put('\u00EC', "igrave");
-      result.put('\u00ED', "iacute");
-      result.put('\u00EE', "icirc");
-      result.put('\u00EF', "iuml");
-      result.put('\u00F0', "eth");
-      result.put('\u00F1', "ntilde");
-      result.put('\u00F2', "ograve");
-      result.put('\u00F3', "oacute");
-      result.put('\u00F4', "ocirc");
-      result.put('\u00F5', "otilde");
-      result.put('\u00F6', "ouml");
-      result.put('\u00F7', "divide");
-      result.put('\u00F8', "oslash");
-      result.put('\u00F9', "ugrave");
-      result.put('\u00FA', "uacute");
-      result.put('\u00FB', "ucirc");
-      result.put('\u00FC', "uuml");
-      result.put('\u00FD', "yacute");
-      result.put('\u00FE', "thorn");
-      result.put('\u00FF', "yuml");
+      result.add('\u00A0', "nbsp");
+      result.add('\u00A1', "iexcl");
+      result.add('\u00A2', "cent");
+      result.add('\u00A3', "pound");
+      result.add('\u00A4', "curren");
+      result.add('\u00A5', "yen");
+      result.add('\u00A6', "brvbar");
+      result.add('\u00A7', "sect");
+      result.add('\u00A8', "uml");
+      result.add('\u00A9', "copy");
+      result.add('\u00AA', "ordf");
+      result.add('\u00AB', "laquo");
+      result.add('\u00AC', "not");
+      result.add('\u00AD', "shy");
+      result.add('\u00AE', "reg");
+      result.add('\u00AF', "macr");
+      result.add('\u00B0', "deg");
+      result.add('\u00B1', "plusmn");
+      result.add('\u00B2', "sup2");
+      result.add('\u00B3', "sup3");
+      result.add('\u00B4', "acute");
+      result.add('\u00B5', "micro");
+      result.add('\u00B6', "para");
+      result.add('\u00B7', "middot");
+      result.add('\u00B8', "cedil");
+      result.add('\u00B9', "sup1");
+      result.add('\u00BA', "ordm");
+      result.add('\u00BB', "raquo");
+      result.add('\u00BC', "frac14");
+      result.add('\u00BD', "frac12");
+      result.add('\u00BE', "frac34");
+      result.add('\u00BF', "iquest");
+      result.add('\u00C0', "Agrave");
+      result.add('\u00C1', "Aacute");
+      result.add('\u00C2', "Acirc");
+      result.add('\u00C3', "Atilde");
+      result.add('\u00C4', "Auml");
+      result.add('\u00C5', "Aring");
+      result.add('\u00C6', "AElig");
+      result.add('\u00C7', "Ccedil");
+      result.add('\u00C8', "Egrave");
+      result.add('\u00C9', "Eacute");
+      result.add('\u00CA', "Ecirc");
+      result.add('\u00CB', "Euml");
+      result.add('\u00CC', "Igrave");
+      result.add('\u00CD', "Iacute");
+      result.add('\u00CE', "Icirc");
+      result.add('\u00CF', "Iuml");
+      result.add('\u00D0', "ETH");
+      result.add('\u00D1', "Ntilde");
+      result.add('\u00D2', "Ograve");
+      result.add('\u00D3', "Oacute");
+      result.add('\u00D4', "Ocirc");
+      result.add('\u00D5', "Otilde");
+      result.add('\u00D6', "Ouml");
+      result.add('\u00D7', "times");
+      result.add('\u00D8', "Oslash");
+      result.add('\u00D9', "Ugrave");
+      result.add('\u00DA', "Uacute");
+      result.add('\u00DB', "Ucirc");
+      result.add('\u00DC', "Uuml");
+      result.add('\u00DD', "Yacute");
+      result.add('\u00DE', "THORN");
+      result.add('\u00DF', "szlig");
+      result.add('\u00E0', "agrave");
+      result.add('\u00E1', "aacute");
+      result.add('\u00E2', "acirc");
+      result.add('\u00E3', "atilde");
+      result.add('\u00E4', "auml");
+      result.add('\u00E5', "aring");
+      result.add('\u00E6', "aelig");
+      result.add('\u00E7', "ccedil");
+      result.add('\u00E8', "egrave");
+      result.add('\u00E9', "eacute");
+      result.add('\u00EA', "ecirc");
+      result.add('\u00EB', "euml");
+      result.add('\u00EC', "igrave");
+      result.add('\u00ED', "iacute");
+      result.add('\u00EE', "icirc");
+      result.add('\u00EF', "iuml");
+      result.add('\u00F0', "eth");
+      result.add('\u00F1', "ntilde");
+      result.add('\u00F2', "ograve");
+      result.add('\u00F3', "oacute");
+      result.add('\u00F4', "ocirc");
+      result.add('\u00F5', "otilde");
+      result.add('\u00F6', "ouml");
+      result.add('\u00F7', "divide");
+      result.add('\u00F8', "oslash");
+      result.add('\u00F9', "ugrave");
+      result.add('\u00FA', "uacute");
+      result.add('\u00FB', "ucirc");
+      result.add('\u00FC', "uuml");
+      result.add('\u00FD', "yacute");
+      result.add('\u00FE', "thorn");
+      result.add('\u00FF', "yuml");
       
-      result.put('\u0152', "OElig");
-      result.put('\u0153', "oelig");
-      result.put('\u0160', "Scaron");
-      result.put('\u0161', "scaron");
-      result.put('\u0178', "Yuml");
-      result.put('\u0192', "fnof");
+      result.add('\u0152', "OElig");
+      result.add('\u0153', "oelig");
+      result.add('\u0160', "Scaron");
+      result.add('\u0161', "scaron");
+      result.add('\u0178', "Yuml");
+      result.add('\u0192', "fnof");
       
-      result.put('\u02C6', "circ");
-      result.put('\u02DC', "tilde");
+      result.add('\u02C6', "circ");
+      result.add('\u02DC', "tilde");
       
-      result.put('\u0391', "Alpha");
-      result.put('\u0392', "Beta");
-      result.put('\u0393', "Gamma");
-      result.put('\u0394', "Delta");
-      result.put('\u0395', "Epsilon");
-      result.put('\u0396', "Zeta");
-      result.put('\u0397', "Eta");
-      result.put('\u0398', "Theta");
-      result.put('\u0399', "Iota");
-      result.put('\u039A', "Kappa");
-      result.put('\u039B', "Lambda");
-      result.put('\u039C', "Mu");
-      result.put('\u039D', "Nu");
-      result.put('\u039E', "Xi");
-      result.put('\u039F', "Omicron");
-      result.put('\u03A0', "Pi");
-      result.put('\u03A1', "Rho");
-      result.put('\u03A3', "Sigma");
-      result.put('\u03A4', "Tau");
-      result.put('\u03A5', "Upsilon");
-      result.put('\u03A6', "Phi");
-      result.put('\u03A7', "Chi");
-      result.put('\u03A8', "Psi");
-      result.put('\u03A9', "Omega");
+      result.add('\u0391', "Alpha");
+      result.add('\u0392', "Beta");
+      result.add('\u0393', "Gamma");
+      result.add('\u0394', "Delta");
+      result.add('\u0395', "Epsilon");
+      result.add('\u0396', "Zeta");
+      result.add('\u0397', "Eta");
+      result.add('\u0398', "Theta");
+      result.add('\u0399', "Iota");
+      result.add('\u039A', "Kappa");
+      result.add('\u039B', "Lambda");
+      result.add('\u039C', "Mu");
+      result.add('\u039D', "Nu");
+      result.add('\u039E', "Xi");
+      result.add('\u039F', "Omicron");
+      result.add('\u03A0', "Pi");
+      result.add('\u03A1', "Rho");
+      result.add('\u03A3', "Sigma");
+      result.add('\u03A4', "Tau");
+      result.add('\u03A5', "Upsilon");
+      result.add('\u03A6', "Phi");
+      result.add('\u03A7', "Chi");
+      result.add('\u03A8', "Psi");
+      result.add('\u03A9', "Omega");
       
-      result.put('\u03B1', "alpha");
-      result.put('\u03B2', "beta");
-      result.put('\u03B3', "gamma");
-      result.put('\u03B4', "delta");
-      result.put('\u03B5', "epsilon");
-      result.put('\u03B6', "zeta");
-      result.put('\u03B7', "eta");
-      result.put('\u03B8', "theta");
-      result.put('\u03B9', "iota");
-      result.put('\u03BA', "kappa");
-      result.put('\u03BB', "lambda");
-      result.put('\u03BC', "mu");
-      result.put('\u03BD', "nu");
-      result.put('\u03BE', "xi");
-      result.put('\u03BF', "omicron");
-      result.put('\u03C0', "pi");
-      result.put('\u03C1', "rho");
-      result.put('\u03C2', "sigmaf");
-      result.put('\u03C3', "sigma");
-      result.put('\u03C4', "tau");
-      result.put('\u03C5', "upsilon");
-      result.put('\u03C6', "phi");
-      result.put('\u03C7', "chi");
-      result.put('\u03C8', "psi");
-      result.put('\u03C9', "omega");
+      result.add('\u03B1', "alpha");
+      result.add('\u03B2', "beta");
+      result.add('\u03B3', "gamma");
+      result.add('\u03B4', "delta");
+      result.add('\u03B5', "epsilon");
+      result.add('\u03B6', "zeta");
+      result.add('\u03B7', "eta");
+      result.add('\u03B8', "theta");
+      result.add('\u03B9', "iota");
+      result.add('\u03BA', "kappa");
+      result.add('\u03BB', "lambda");
+      result.add('\u03BC', "mu");
+      result.add('\u03BD', "nu");
+      result.add('\u03BE', "xi");
+      result.add('\u03BF', "omicron");
+      result.add('\u03C0', "pi");
+      result.add('\u03C1', "rho");
+      result.add('\u03C2', "sigmaf");
+      result.add('\u03C3', "sigma");
+      result.add('\u03C4', "tau");
+      result.add('\u03C5', "upsilon");
+      result.add('\u03C6', "phi");
+      result.add('\u03C7', "chi");
+      result.add('\u03C8', "psi");
+      result.add('\u03C9', "omega");
       
-      result.put('\u03D1', "thetasym");
-      result.put('\u03D2', "upsih");
-      result.put('\u03D6', "piv");
+      result.add('\u03D1', "thetasym");
+      result.add('\u03D2', "upsih");
+      result.add('\u03D6', "piv");
       
-      result.put('\u2002', "ensp");
-      result.put('\u2003', "emsp");
-      result.put('\u2009', "thinsp");
-      result.put('\u200C', "zwnj");
-      result.put('\u200D', "zwj");
-      result.put('\u200E', "lrm");
-      result.put('\u200F', "rlm");
-      result.put('\u2013', "ndash");
-      result.put('\u2014', "mdash");
-      result.put('\u2018', "lsquo");
-      result.put('\u2019', "rsquo");
-      result.put('\u201A', "sbquo");
-      result.put('\u201C', "ldquo");
-      result.put('\u201D', "rdquo");
-      result.put('\u201E', "bdquo");
-      result.put('\u2020', "dagger");
-      result.put('\u2021', "Dagger");
-      result.put('\u2022', "bull");
-      result.put('\u2026', "hellip");
-      result.put('\u2030', "permil");
-      result.put('\u2032', "prime");
-      result.put('\u2033', "Prime");
-      result.put('\u2039', "lsaquo");
-      result.put('\u203A', "rsaquo");
-      result.put('\u203E', "oline");
-      result.put('\u2044', "frasl");
-      result.put('\u20AC', "euro");
+      result.add('\u2002', "ensp");
+      result.add('\u2003', "emsp");
+      result.add('\u2009', "thinsp");
+      result.add('\u200C', "zwnj");
+      result.add('\u200D', "zwj");
+      result.add('\u200E', "lrm");
+      result.add('\u200F', "rlm");
+      result.add('\u2013', "ndash");
+      result.add('\u2014', "mdash");
+      result.add('\u2018', "lsquo");
+      result.add('\u2019', "rsquo");
+      result.add('\u201A', "sbquo");
+      result.add('\u201C', "ldquo");
+      result.add('\u201D', "rdquo");
+      result.add('\u201E', "bdquo");
+      result.add('\u2020', "dagger");
+      result.add('\u2021', "Dagger");
+      result.add('\u2022', "bull");
+      result.add('\u2026', "hellip");
+      result.add('\u2030', "permil");
+      result.add('\u2032', "prime");
+      result.add('\u2033', "Prime");
+      result.add('\u2039', "lsaquo");
+      result.add('\u203A', "rsaquo");
+      result.add('\u203E', "oline");
+      result.add('\u2044', "frasl");
+      result.add('\u20AC', "euro");
       
-      result.put('\u2111', "image");
-      result.put('\u2118', "weierp");
-      result.put('\u211C', "real");
-      result.put('\u2122', "trade");
-      result.put('\u2135', "alefsym");
-      result.put('\u2190', "larr");
-      result.put('\u2191', "uarr");
-      result.put('\u2192', "rarr");
-      result.put('\u2193', "darr");
-      result.put('\u2194', "harr");
-      result.put('\u21B5', "crarr");
-      result.put('\u21D0', "lArr");
-      result.put('\u21D1', "uArr");
-      result.put('\u21D2', "rArr");
-      result.put('\u21D3', "dArr");
-      result.put('\u21D4', "hArr");
+      result.add('\u2111', "image");
+      result.add('\u2118', "weierp");
+      result.add('\u211C', "real");
+      result.add('\u2122', "trade");
+      result.add('\u2135', "alefsym");
+      result.add('\u2190', "larr");
+      result.add('\u2191', "uarr");
+      result.add('\u2192', "rarr");
+      result.add('\u2193', "darr");
+      result.add('\u2194', "harr");
+      result.add('\u21B5', "crarr");
+      result.add('\u21D0', "lArr");
+      result.add('\u21D1', "uArr");
+      result.add('\u21D2', "rArr");
+      result.add('\u21D3', "dArr");
+      result.add('\u21D4', "hArr");
       
-      result.put('\u2200', "forall");
-      result.put('\u2202', "part");
-      result.put('\u2203', "exist");
-      result.put('\u2205', "empty");
-      result.put('\u2207', "nabla");
-      result.put('\u2208', "isin");
-      result.put('\u2209', "notin");
-      result.put('\u220B', "ni");
-      result.put('\u220F', "prod");
-      result.put('\u2211', "sum");
-      result.put('\u2212', "minus");
-      result.put('\u2217', "lowast");
-      result.put('\u221A', "radic");
-      result.put('\u221D', "prop");
-      result.put('\u221E', "infin");
-      result.put('\u2220', "ang");
-      result.put('\u2227', "and");
-      result.put('\u2228', "or");
-      result.put('\u2229', "cap");
-      result.put('\u222A', "cup");
-      result.put('\u222B', "int");
-      result.put('\u2234', "there4");
-      result.put('\u223C', "sim");
-      result.put('\u2245', "cong");
-      result.put('\u2248', "asymp");
-      result.put('\u2260', "ne");
-      result.put('\u2261', "equiv");
-      result.put('\u2264', "le");
-      result.put('\u2265', "ge");
-      result.put('\u2282', "sub");
-      result.put('\u2283', "sup");
-      result.put('\u2284', "nsub");
-      result.put('\u2286', "sube");
-      result.put('\u2287', "supe");
-      result.put('\u2295', "oplus");
-      result.put('\u2297', "otimes");
-      result.put('\u22A5', "perp");
-      result.put('\u22C5', "sdot");
+      result.add('\u2200', "forall");
+      result.add('\u2202', "part");
+      result.add('\u2203', "exist");
+      result.add('\u2205', "empty");
+      result.add('\u2207', "nabla");
+      result.add('\u2208', "isin");
+      result.add('\u2209', "notin");
+      result.add('\u220B', "ni");
+      result.add('\u220F', "prod");
+      result.add('\u2211', "sum");
+      result.add('\u2212', "minus");
+      result.add('\u2217', "lowast");
+      result.add('\u221A', "radic");
+      result.add('\u221D', "prop");
+      result.add('\u221E', "infin");
+      result.add('\u2220', "ang");
+      result.add('\u2227', "and");
+      result.add('\u2228', "or");
+      result.add('\u2229', "cap");
+      result.add('\u222A', "cup");
+      result.add('\u222B', "int");
+      result.add('\u2234', "there4");
+      result.add('\u223C', "sim");
+      result.add('\u2245', "cong");
+      result.add('\u2248', "asymp");
+      result.add('\u2260', "ne");
+      result.add('\u2261', "equiv");
+      result.add('\u2264', "le");
+      result.add('\u2265', "ge");
+      result.add('\u2282', "sub");
+      result.add('\u2283', "sup");
+      result.add('\u2284', "nsub");
+      result.add('\u2286', "sube");
+      result.add('\u2287', "supe");
+      result.add('\u2295', "oplus");
+      result.add('\u2297', "otimes");
+      result.add('\u22A5', "perp");
+      result.add('\u22C5', "sdot");
       
-      result.put('\u2308', "lceil");
-      result.put('\u2309', "rceil");
-      result.put('\u230A', "lfloor");
-      result.put('\u230B', "rfloor");
-      result.put('\u2329', "lang");
-      result.put('\u232A', "rang");
+      result.add('\u2308', "lceil");
+      result.add('\u2309', "rceil");
+      result.add('\u230A', "lfloor");
+      result.add('\u230B', "rfloor");
+      result.add('\u2329', "lang");
+      result.add('\u232A', "rang");
       
-      result.put('\u25CA', "loz");
+      result.add('\u25CA', "loz");
       
-      result.put('\u2660', "spades");
-      result.put('\u2663', "clubs");
-      result.put('\u2665', "hearts");
-      result.put('\u2666', "diams");
+      result.add('\u2660', "spades");
+      result.add('\u2663', "clubs");
+      result.add('\u2665', "hearts");
+      result.add('\u2666', "diams");
       return result;
     }
   });

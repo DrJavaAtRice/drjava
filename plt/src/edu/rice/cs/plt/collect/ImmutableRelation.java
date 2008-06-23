@@ -34,47 +34,75 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.collect;
 
-import java.io.Serializable;
-import java.util.Set;
-import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.Iterator;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.plt.iter.ImmutableIterator;
 
 /**
  * Wraps a relation in an immutable interface.  Analogous to {@link java.util.Collections#unmodifiableMap}.
- * Note that only only <em>this</em> interface with the data is immutable --
- * if the original data structure is mutable, a client with direct access to that structure can
- * still mutate it.
+ * Note that only only <em>this</em> interface with the data is immutable -- if the original data
+ * structure is mutable, a client with direct access to that structure can still mutate it.
+ * Subclasses can invoke the overridden methods in {@link AbstractCollection} to use the
+ * default implementations there by invoking, for example, {@link #abstractCollectionAddAll}
+ * (see {@link java.util.AbstractCollection} for details on the default implementations).
  */
-public class ImmutableRelation<T1, T2> extends AbstractSet<Pair<T1, T2>> implements Relation<T1, T2>, Serializable {
+public class ImmutableRelation<T1, T2> extends DelegatingRelation<T1, T2> {
   
-  private final Relation<T1, T2> _relation;
+  private ImmutableRelation<T2, T1> _inverse; // may be null if not yet created
   
-  public ImmutableRelation(Relation<T1, T2> relation) { _relation = relation; }
+  public ImmutableRelation(Relation<T1, T2> relation) { super(relation); _inverse = null; }
   
-  public Iterator<Pair<T1, T2>> iterator() { return new ImmutableIterator<Pair<T1, T2>>(_relation.iterator()); }
-  public int size() { return _relation.size(); }
-  public boolean isEmpty() { return _relation.isEmpty(); }
-  public boolean contains(Object o) { return _relation.contains(o); }
-  public Object[] toArray() { return _relation.toArray(); }
-  public <T> T[] toArray(T[] a) { return _relation.toArray(a); }
-  public boolean containsAll(Collection<?> c) { return _relation.containsAll(c); }
+  private ImmutableRelation(Relation<T1, T2> relation, ImmutableRelation<T2, T1> inverse) {
+    super(relation);
+    _inverse = inverse;
+  }
   
-  public boolean contains(T1 first, T2 second) { return _relation.contains(first, second); }
+  public boolean add(Pair<T1, T2> o) { throw new UnsupportedOperationException(); }
+  public boolean remove(Object o) { throw new UnsupportedOperationException(); }
+  public boolean addAll(Collection<? extends Pair<T1, T2>> c) { throw new UnsupportedOperationException(); }
+  public boolean retainAll(Collection<?> c) { throw new UnsupportedOperationException(); }
+  public boolean removeAll(Collection<?> c) { throw new UnsupportedOperationException(); }
+  public void clear() { throw new UnsupportedOperationException(); }
+  
+  public boolean contains(T1 first, T2 second) {
+    return ((Relation<T1, T2>) _delegate).contains(first, second);
+  }
   public boolean add(T1 first, T2 second) { throw new UnsupportedOperationException(); }
   public boolean remove(T1 first, T2 second) { throw new UnsupportedOperationException(); }
   
-  public Set<T1> firstSet() { return _relation.firstSet(); }
-  public boolean containsFirst(T1 first) { return _relation.containsFirst(first); }
-  public Set<T2> getSeconds(T1 first) { return _relation.getSeconds(first); }
+  public Relation<T2, T1> inverse() {
+    if (_inverse == null) {
+      _inverse = new ImmutableRelation<T2, T1>(((Relation<T1, T2>) _delegate).inverse(), this);
+    }
+    return _inverse;
+  }
   
-  public Set<T2> secondSet() { return _relation.secondSet(); }
-  public boolean containsSecond(T2 second) { return _relation.containsSecond(second); }
-  public Set<T1> getFirsts(T2 second) { return _relation.getFirsts(second); }
+  public PredicateSet<T1> firstSet() {
+    return new ImmutableSet<T1>(((Relation<T1, T2>) _delegate).firstSet());
+  }
+  public boolean containsFirst(T1 first) {
+    return ((Relation<T1, T2>) _delegate).containsFirst(first);
+  }
+  public PredicateSet<T2> matchFirst(T1 first) {
+    return new ImmutableSet<T2>(((Relation<T1, T2>) _delegate).matchFirst(first));
+  }
+  public PredicateSet<T2> excludeFirsts() {
+    return new ImmutableSet<T2>(((Relation<T1, T2>) _delegate).excludeFirsts());
+  }
+
+  public PredicateSet<T2> secondSet() {
+    return new ImmutableSet<T2>(((Relation<T1, T2>) _delegate).secondSet());
+  }
+  public boolean containsSecond(T2 second) {
+    return ((Relation<T1, T2>) _delegate).containsSecond(second);
+  }
+  public PredicateSet<T1> matchSecond(T2 second) {
+    return new ImmutableSet<T1>(((Relation<T1, T2>) _delegate).matchSecond(second));
+  }
+  public PredicateSet<T1> excludeSeconds() {
+    return new ImmutableSet<T1>(((Relation<T1, T2>) _delegate).excludeSeconds());
+  }
   
-  /** Call the constructor (allows {@code T1} and {@code T2} to be inferred) */
+  /** Call the constructor (allows {@code T1} and {@code T2} to be inferred). */
   public static <T1, T2> ImmutableRelation<T1, T2> make(Relation<T1, T2> relation) {
     return new ImmutableRelation<T1, T2>(relation);
   }

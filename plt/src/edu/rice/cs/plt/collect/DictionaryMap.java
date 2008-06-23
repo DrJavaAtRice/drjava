@@ -35,60 +35,43 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Dictionary;
-import java.util.AbstractMap;
-import java.util.Set;
-import java.util.Map;
-import java.util.Collections;
-
+import java.util.Iterator;
+import java.io.Serializable;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.iter.ReadOnceIterable;
-import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.plt.lambda.LazyThunk;
 
 /**
  * A map wrapping a {@link Dictionary} object.  Defined for compatibility with legacy APIs.
  */
-public class DictionaryMap<K, V> extends AbstractMap<K, V> {
+public class DictionaryMap<K, V> extends AbstractKeyBasedMap<K, V> implements Serializable {
   
   private final Dictionary<K, V> _d;
-  private final Thunk<Set<K>> _keys;
   
   public DictionaryMap(Dictionary<K, V> d) {
     _d = d;
-    _keys = LazyThunk.make(new Thunk<Set<K>>() {
-      public Set<K> value() {
-        Set<K> result = CollectUtil.asSet(ReadOnceIterable.make(IterUtil.asIterator(_d.keys())));
-        return Collections.unmodifiableSet(result);
-      }
-    });
   }
-  
-  public int size() { return _d.size(); }
-  
-  public boolean isEmpty() { return _d.isEmpty(); }
-  
-  public boolean containsKey(Object key) { return _keys.value().contains(key); }
-
-  // use default containsValue implementation
   
   public V get(Object key) { return _d.get(key); }
   
-  public V put(K key, V value) { return _d.put(key, value); }
-  
-  public V remove(Object key) { return _d.remove(key); }
-  
-  // use default putAll implementation
-  
-  public void clear() {
-    // make a snapshot to avoid concurrent modification
-    Iterable<K> keys = IterUtil.snapshot(IterUtil.asIterator(_d.keys()));
-    for (K key : keys) { _d.remove(key); }
+  public PredicateSet<K> keySet() {
+    return new AbstractPredicateSet<K>() {
+      public boolean contains(Object o) { return _d.get(o) != null; }
+      public Iterator<K> iterator() { return IterUtil.asIterator(_d.keys()); }
+      public boolean isInfinite() { return false; }
+      public boolean hasFixedSize() { return false; }
+      public boolean isStatic() { return false; }
+      @Override public int size() { return _d.size(); }
+      @Override public int size(int b) { int s = _d.size(); return (s < b) ? s : b; }
+      @Override public boolean isEmpty() { return _d.isEmpty(); }
+      @Override public boolean remove(Object o) { return _d.remove(o) != null; }
+    };
   }
   
-  public Set<K> keySet() { return _keys.value(); }
-  
-  // use default values() implementation
-  
-  public Set<Map.Entry<K, V>> entrySet() { return new KeyDrivenEntrySet<K, V>(this); }
-  
+  @Override public V value(K key) { return _d.get(key); }
+  @Override public int size() { return _d.size(); }
+  @Override public boolean isEmpty() { return _d.isEmpty(); }
+  @Override public boolean containsKey(Object key) { return _d.get(key) != null; }
+
+  @Override public V put(K key, V value) { return _d.put(key, value); }
+  @Override public V remove(Object key) { return _d.remove(key); }
+  @Override public void clear() { keySet().clear(); }
 }

@@ -55,7 +55,7 @@ public final class RecurUtil {
   
   private static final Lambda<ArrayStringMode, Lambda<Object, String>> TO_STRING_GENERATOR;
   private static final Lambda<ArrayStringMode, Lambda<Object, String>> DEFAULT_INF_STRING_GENERATOR;
-  private static final Predicate2<Object, Object> EQUALS;
+  private static final Lambda2<Object, Object, Boolean> EQUALS;
   private static final Lambda<Object, Integer> HASH_CODE;
   private static final Lambda<Object, Integer> DEFAULT_INF_HASH_CODE;
   
@@ -89,7 +89,7 @@ public final class RecurUtil {
       }
     });
     
-    EQUALS = new Predicate2<Object, Object>() {
+    EQUALS = new Lambda2<Object, Object, Boolean>() {
       public Boolean value(Object obj1, Object obj2) {
         if (obj1.getClass().isArray()) {
           if (obj2.getClass().isArray()) { return arrayEquals(obj1, obj2); }
@@ -631,7 +631,7 @@ public final class RecurUtil {
       Thread t = Thread.currentThread();
       synchronized (EQUALS_STACKS) { stack = EQUALS_STACKS.get(t); }
       // no synchronization on stack, because it is only used in this thread
-      boolean result = stack.<T1, T2, Boolean>apply(EQUALS, infiniteEquals, obj1, obj2);
+      boolean result = stack.<T1, T2, Boolean>apply(EQUALS, LambdaUtil.asLambda(infiniteEquals), obj1, obj2);
       if (stack.isEmpty()) {
         synchronized (EQUALS_STACKS) { EQUALS_STACKS.revert(t); }
       }

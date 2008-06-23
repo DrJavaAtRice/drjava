@@ -71,7 +71,7 @@ public class FilteredIterator<T> extends ReadOnlyIterator<T> {
     _lookahead = null;
     while (_i.hasNext() && _lookahead == null) {
       T next = _i.next();
-      if (_p.value(next)) { _lookahead = next; }
+      if (_p.contains(next)) { _lookahead = next; }
     }
   }
   

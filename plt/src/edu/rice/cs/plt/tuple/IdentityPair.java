@@ -45,6 +45,8 @@ public class IdentityPair<T1, T2> extends Pair<T1, T2> {
   
   public IdentityPair(T1 first, T2 second) { super(first, second); }
   
+  @Override public IdentityPair<T2, T1> inverse() { return new IdentityPair<T2, T1>(_second, _first); }
+  
   /**
    * @return  {@code true} iff {@code this} is of the same class as {@code o}, and each
    *          corresponding element is identical (according to {@code ==})

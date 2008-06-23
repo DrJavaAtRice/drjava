@@ -50,7 +50,8 @@ import edu.rice.cs.plt.lambda.Lambda2;
  * The amount of space required by an iterator after n invocations of {@code next()} is in O(sqrt(n)).</p>
  */
 public class DiagonalCartesianIterable<T1, T2, R> extends AbstractIterable<R>
-                                                  implements SizedIterable<R>, Serializable {
+                                                  implements SizedIterable<R>, OptimizedLastIterable<R>,
+                                                             Serializable {
   
   private final Iterable<? extends T1> _left;
   private final Iterable<? extends T2> _right;
@@ -66,18 +67,33 @@ public class DiagonalCartesianIterable<T1, T2, R> extends AbstractIterable<R>
   public DiagonalCartesianIterator<T1, T2, R> iterator() {
     return new DiagonalCartesianIterator<T1, T2, R>(_left.iterator(), _right.iterator(), _combiner);
   }
+  
+  public boolean isEmpty() { return IterUtil.isEmpty(_left) || IterUtil.isEmpty(_right); }
 
   public int size() { return size(Integer.MAX_VALUE); }
   
   public int size(int bound) {
-    // won't overflow -- worst case is 2^31 * 2^31 = 2^62 < 2^63
-    long result = ((long) IterUtil.sizeOf(_left, bound)) * ((long) IterUtil.sizeOf(_right, bound));
-    return result <= bound ? (int) result : bound;
+    int size1 = IterUtil.sizeOf(_left, bound);
+    if (size1 == 0) { return 0; }
+    else {
+      int bound2 = bound / size1;
+      if (bound2 < Integer.MAX_VALUE) { bound2++; } // division must round up, not down
+      int size2 = IterUtil.sizeOf(_right, bound2);
+      // if this overflows, it must be negative:
+      // size1*size2 <= size1 * ((bound/size1)+1) = bound + size1
+      int result = size1*size2;
+      return (result > bound || result < 0) ? bound : result;
+    }
   }
   
   public boolean isInfinite() { return IterUtil.isInfinite(_left) || IterUtil.isInfinite(_right); }
   
-  public boolean isFixed() { return IterUtil.isFixed(_left) && IterUtil.isFixed(_right); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_left) && IterUtil.hasFixedSize(_right); }
+  
+  /** Always false: results of a lambda may be arbitrary. */
+  public boolean isStatic() { return false; }
+  
+  public R last() { return _combiner.value(IterUtil.last(_left), IterUtil.last(_right)); }
   
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2, R>

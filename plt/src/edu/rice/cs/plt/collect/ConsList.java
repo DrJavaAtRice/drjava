@@ -63,6 +63,9 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
   
   public abstract Iterator<T> iterator();
   
+  /** Whether this is an empty ConsList. */
+  public abstract boolean isEmpty();
+  
   /** Compute the size of the list.  Note that this is a linear &mdash; not constant-time &mdash; operation. */
   public abstract int size();
   
@@ -72,11 +75,14 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
    */
   public abstract int size(int bound);
   
-  /** Return {@code false}: cons lists are not infinite */
+  /** Return {@code false}: cons lists are not infinite. */
   public boolean isInfinite() { return false; }
   
-  /** Return {@code true}: cons lists have a fixed size */
-  public boolean isFixed() { return true; }
+  /** Return {@code true}: cons lists have a fixed size. */
+  public boolean hasFixedSize() { return true; }
+  
+  /** Return {@code true}: cons lists are immutable. */
+  public boolean isStatic() { return true; }
   
   
   /** Create an empty list (via {@link Empty#make}) */
@@ -91,9 +97,6 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
   public static <T> Nonempty<T> singleton(T value) {
     return new Nonempty<T>(value, Empty.<T>make());
   }
-  
-  /** Determine if the given list is empty */
-  public static boolean isEmpty(ConsList<?> list) { return list.apply(ConsVisitor.IS_EMPTY); }
   
   /** Attempt to access the first of the given list (throws an exception in the empty case). */
   public static <T> T first(ConsList<? extends T> list) { return list.apply(ConsVisitor.<T>first()); }
@@ -142,16 +145,19 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
     
     /** Invoke the {@code forEmpty} case of a visitor */
     public <Ret> Ret apply(ConsVisitor<? super T, ? extends Ret> visitor) {
-      return visitor.forEmpty(this);
+      return visitor.forEmpty();
     }
     
     /** Return an empty iterator */
-    public EmptyIterator<T> iterator() { return EmptyIterator.make(); }
+    public Iterator<T> iterator() { return EmptyIterator.make(); }
     
-    /** @return {@code 0} */
+    /** Return {@code true}. */
+    public boolean isEmpty() { return true; }
+    
+    /** Return {@code 0} */
     public int size() { return 0; }
     
-    /** @return {@code 0} */
+    /** Return {@code 0} */
     public int size(int bound) { return 0; }
     
   }
@@ -163,8 +169,8 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
    */
   public static class Nonempty<T> extends ConsList<T> {
     
-    private T _first;
-    private ConsList<? extends T> _rest;
+    private final T _first;
+    private final ConsList<? extends T> _rest;
     
     public Nonempty(T first, ConsList<? extends T> rest) {
       _first = first;
@@ -177,7 +183,7 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
     
     /** Invoke the {@code forNonempty} case of a visitor */
     public <Ret> Ret apply(ConsVisitor<? super T, ? extends Ret> visitor) {
-      return visitor.forNonempty(this);
+      return visitor.forNonempty(_first, _rest);
     }
     
     /** Create an iterator to traverse the list */
@@ -185,24 +191,27 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
       return new ReadOnlyIterator<T>() {
         private ConsList<? extends T> _current = Nonempty.this;
 
-        public boolean hasNext() { return !_current.apply(ConsVisitor.IS_EMPTY); }
+        public boolean hasNext() { return !_current.isEmpty(); }
 
         public T next() {
           return _current.apply(new ConsVisitor<T, T>() {
-            public T forEmpty(Empty<? extends T> list) { throw new NoSuchElementException(); }
-            public T forNonempty(Nonempty<? extends T> list) { 
-              _current = list.rest();
-              return list.first();
+            public T forEmpty() { throw new NoSuchElementException(); }
+            public T forNonempty(T first, ConsList<? extends T> rest) { 
+              _current = rest;
+              return first;
             }
           });
         }
       };
     }
     
-    /** @return {code 1 + rest.size()} */
+    /** Return {@code false}. */
+    public boolean isEmpty() { return false; }
+    
+    /** Return {@code 1 + rest.size()}. */
     public int size() { return 1 + _rest.size(); }
     
-    /** @return {code 1 + rest.size(bound - 1)}, or {@code 0} if {@code bound == 0} */
+    /** Return {@code 1 + rest.size(bound - 1)}, or {@code 0} if {@code bound == 0}. */
     public int size(int bound) {
       if (bound == 0) { return 0; }
       else { return 1 + _rest.size(bound - 1); }

@@ -40,7 +40,7 @@ import java.util.NoSuchElementException;
 /** An Iterator over a 1-length list */
 public class SingletonIterator<T> extends ReadOnlyIterator<T> {
   
-  private T _element;
+  private final T _element;
   private boolean _hasNext;
   
   public SingletonIterator(T element) { 

@@ -35,40 +35,50 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Map;
-import java.util.AbstractSet;
-import java.util.Iterator;
+import java.util.Collection;
+import java.io.Serializable;
+import edu.rice.cs.plt.iter.MappedIterable;
 import edu.rice.cs.plt.lambda.Lambda;
-import edu.rice.cs.plt.iter.MappedIterator;
 
-public class KeyDrivenEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
-  private final Map<K, V> _map;
-
-  public KeyDrivenEntrySet(Map<K, V> map) {
+/**
+ * A map whose value set is translated by a mapping lambda.
+ * @see MappedIterable, ComposedMap
+ */
+public class MappedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Serializable {
+  private final Map<K, ? extends X> _map;
+  private final Lambda<? super X, ? extends V> _lambda;
+  
+  public MappedMap(Map<K, ? extends X> map, Lambda<? super X, ? extends V> lambda) {
     _map = map;
+    _lambda = lambda;
   }
   
-  public int size() { return _map.size(); }
+  public V get(Object key) {
+    if (_map.containsKey(key)) { return _lambda.value(_map.get(key)); }
+    else { return null; }
+  }
   
-  public boolean isEmpty() { return _map.isEmpty(); }
+  public PredicateSet<K> keySet() {
+    return CollectUtil.asPredicateSet(_map.keySet());
+  }
   
-  public boolean contains(Object o) {
-    if (o instanceof Map.Entry<?, ?>) {
-      Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
-      Object key = entry.getKey();
-      if (_map.containsKey(key)) {
-        Object mappedVal = _map.get(key);
-        return mappedVal == null ? entry.getValue() == null : mappedVal.equals(entry.getValue());
-      }
-      else { return false; }
+  @Override public V remove(Object key) {
+    if (_map.containsKey(key)) {
+      X resultX = _map.remove(key);
+      return _lambda.value(resultX);
     }
-    else { return false; }
+    else { return null; }
   }
   
-  public Iterator<Map.Entry<K, V>> iterator() {
-    Lambda<K, Map.Entry<K, V>> mapper = new Lambda<K, Map.Entry<K, V>>() {
-      public Map.Entry<K, V> value(K key) { return CollectUtil.mapEntryForKey(_map, key); }
-    };
-    return new MappedIterator<K, Map.Entry<K, V>>(_map.keySet().iterator(), mapper);
+  @Override public void clear() { _map.clear(); }
+  
+  @Override public int size() { return _map.size(); }
+  @Override public boolean isEmpty() { return _map.isEmpty(); }
+  
+  @Override public boolean containsKey(Object o) { return _map.containsKey(o); }
+
+  @Override public Collection<V> values() {
+    return new IterableCollection<V>(new MappedIterable<X, V>(_map.values(), _lambda));
   }
   
 }

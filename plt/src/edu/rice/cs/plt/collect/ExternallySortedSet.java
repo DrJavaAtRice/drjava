@@ -98,6 +98,8 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
     _upperBound = upperBound;
   }
   
+  public boolean isEmpty() { return _set.isEmpty(); }
+  
   public int size() { return _set.size(); }
   
   public int size(int bound) {
@@ -107,9 +109,9 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
  
   public boolean isInfinite() { return false; }
   
-  public boolean isFixed() { return false; }
+  public boolean hasFixedSize() { return false; }
   
-  public boolean isEmpty() { return _set.isEmpty(); }
+  public boolean isStatic() { return false; }
   
   public boolean contains(Object element) {
     // We can only call _set.contains() if a mapping is defined.

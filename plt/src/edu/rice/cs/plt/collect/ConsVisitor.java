@@ -48,23 +48,14 @@ import edu.rice.cs.plt.lambda.Predicate;
 public abstract class ConsVisitor<T, Ret> implements Lambda<ConsList<? extends T>, Ret> {
   
   /** Handle an empty list */
-  public abstract Ret forEmpty(ConsList.Empty<? extends T> list);
+  public abstract Ret forEmpty();
   
   /** Handle a nonempty list */
-  public abstract Ret forNonempty(ConsList.Nonempty<? extends T> list);
+  public abstract Ret forNonempty(T first, ConsList<? extends T> rest);
   
   /** Invoke {@code list.apply(this)} */
   public Ret value(ConsList<? extends T> list) { return list.apply(this); }
   
-  
-  /** Determines if a list is empty */
-  public static final ConsVisitor<Object, Boolean> IS_EMPTY = new Empty();
-  
-  private static class Empty extends ConsVisitor<Object, Boolean> implements Serializable {
-    private Empty() {}
-    public Boolean forEmpty(ConsList.Empty<?> list) { return true; }
-    public Boolean forNonempty(ConsList.Nonempty<?> list) { return false; }
-  }
   
   /** Attempt to access the first of the given list (throws an exception in the empty case). */
   @SuppressWarnings("unchecked")
@@ -73,11 +64,11 @@ public abstract class ConsVisitor<T, Ret> implements Lambda<ConsList<? extends T
   private static class First<T> extends ConsVisitor<T, T> implements Serializable {
     private static final First<Object> INSTANCE = new First<Object>();
     private First() {}
-    public T forEmpty(ConsList.Empty<? extends T> list) {
+    public T forEmpty() {
       throw new IllegalArgumentException("Empty ConsList has no first");
     }
-    public T forNonempty(ConsList.Nonempty<? extends T> list) {
-      return list.first();
+    public T forNonempty(T first, ConsList<? extends T> rest) {
+      return first;
     }
   }
   
@@ -91,11 +82,11 @@ public abstract class ConsVisitor<T, Ret> implements Lambda<ConsList<? extends T
   private static class Rest<T> extends ConsVisitor<T, ConsList<? extends T>> implements Serializable {
     private static final Rest<Object> INSTANCE = new Rest<Object>();
     private Rest() {}
-    public ConsList<? extends T> forEmpty(ConsList.Empty<? extends T> list) {
+    public ConsList<? extends T> forEmpty() {
       throw new IllegalArgumentException("Empty ConsList has no rest");
     }
-    public ConsList<? extends T> forNonempty(ConsList.Nonempty<? extends T> list) {
-      return list.rest();
+    public ConsList<? extends T> forNonempty(T first, ConsList<? extends T> rest) {
+      return rest;
     }
   }
   
@@ -111,10 +102,10 @@ public abstract class ConsVisitor<T, Ret> implements Lambda<ConsList<? extends T
     
     public ReverseHelper(ConsList<? extends T> toAppend) { _toAppend = toAppend; }
     
-    public ConsList<? extends T> forEmpty(ConsList.Empty<? extends T> list) { return _toAppend; }
+    public ConsList<? extends T> forEmpty() { return _toAppend; }
     
-    public ConsList<? extends T> forNonempty(ConsList.Nonempty<? extends T> list) {
-      return list.rest().apply(new ReverseHelper<T>(ConsList.cons(list.first(), _toAppend)));
+    public ConsList<? extends T> forNonempty(T first, ConsList<? extends T> rest) {
+      return rest.apply(new ReverseHelper<T>(ConsList.cons(first, _toAppend)));
     }
   }
   
@@ -126,42 +117,42 @@ public abstract class ConsVisitor<T, Ret> implements Lambda<ConsList<? extends T
   }
   
   private static class Append<T> extends ConsVisitor<T, ConsList<? extends T>> implements Serializable {
-    private final ConsList<? extends T> _rest;
-    public Append(ConsList<? extends T> rest) { _rest = rest; }
-    public ConsList<? extends T> forEmpty(ConsList.Empty<? extends T> list) { return _rest; }
-    public ConsList<? extends T> forNonempty(ConsList.Nonempty<? extends T> list) {
-      return ConsList.cons(list.first(), list.rest().apply(this));
+    private final ConsList<? extends T> _toAppend;
+    public Append(ConsList<? extends T> toAppend) { _toAppend = toAppend; }
+    public ConsList<? extends T> forEmpty() { return _toAppend; }
+    public ConsList<? extends T> forNonempty(T first, ConsList<? extends T> rest) {
+      return ConsList.cons(first, rest.apply(this));
     }
   }
 
   
   /** Filters a list to contain only those elements accepted by the given predicate */
-  public static <T> ConsVisitor<T, ConsList<? extends T>> filter(Predicate<? super T> pred) {
+  public static <T> ConsVisitor<T, ConsList<T>> filter(Predicate<? super T> pred) {
     return new Filter<T>(pred);
   }
   
-  private static class Filter<T> extends ConsVisitor<T, ConsList<? extends T>> implements Serializable {
+  private static class Filter<T> extends ConsVisitor<T, ConsList<T>> implements Serializable {
     private final Predicate<? super T> _pred;
     public Filter(Predicate<? super T> pred) { _pred = pred; }
-    public ConsList<? extends T> forEmpty(ConsList.Empty<? extends T> list) { return list; }
-    public ConsList<? extends T> forNonempty(ConsList.Nonempty<? extends T> list) {
-      if (_pred.value(list.first())) { return ConsList.cons(list.first(), list.rest().apply(this)); }
-      else { return list.rest().apply(this); }
+    public ConsList<T> forEmpty() { return ConsList.empty(); }
+    public ConsList<T> forNonempty(T first, ConsList<? extends T> rest) {
+      if (_pred.contains(first)) { return ConsList.cons(first, rest.apply(this)); }
+      else { return rest.apply(this); }
     }
   }
   
   
   /** Produces a new list by applying the given lambda to each of a list's elements */
-  public static <S, T> ConsVisitor<S, ConsList<? extends T>> map(Lambda<? super S, ? extends T> lambda) {
+  public static <S, T> ConsVisitor<S, ConsList<T>> map(Lambda<? super S, ? extends T> lambda) {
     return new Map<S, T>(lambda);
   }
 
-  private static class Map<S, T> extends ConsVisitor<S, ConsList<? extends T>> implements Serializable {
+  private static class Map<S, T> extends ConsVisitor<S, ConsList<T>> implements Serializable {
     private final Lambda<? super S, ? extends T> _lambda;
     public Map(Lambda<? super S, ? extends T> lambda) { _lambda = lambda; }
-    public ConsList<? extends T> forEmpty(ConsList.Empty<? extends S> list) { return ConsList.empty(); }
-    public ConsList<? extends T> forNonempty(ConsList.Nonempty<? extends S> list) {
-      return ConsList.cons(_lambda.value(list.first()), list.rest().apply(this));
+    public ConsList<T> forEmpty() { return ConsList.empty(); }
+    public ConsList<T> forNonempty(S first, ConsList<? extends S> rest) {
+      return ConsList.cons(_lambda.value(first), rest.apply(this));
     }
   }
   

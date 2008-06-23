@@ -38,14 +38,15 @@ import java.util.Set;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import edu.rice.cs.plt.iter.FilteredIterator;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 
 /**
- * The intersection of two sets, lazily constructed and updated dynamically.
+ * The intersection of two sets, lazily constructed and updated dynamically.  This improves on
+ * a general {@code FilteredSet} by taking advantage of the fact that the predicate used for 
+ * filtering is also a set.
  */
-public class IntersectionSet<E> extends AbstractSet<E> {
-  private final Set<?> _set1;
-  private final Set<? extends E> _set2;
+public class IntersectionSet<E> extends FilteredSet<E> {
   
   /**
    * To guarantee that the intersection is a set of {@code E}, only <em>one</em> of the arguments must
@@ -54,39 +55,23 @@ public class IntersectionSet<E> extends AbstractSet<E> {
    * handled automatically because calculating sizes may be expensive).
    */
   public IntersectionSet(Set<?> set1, Set<? extends E> set2) {
-    _set1 = set1;
-    _set2 = set2;
+    super(set2, CollectUtil.asPredicateSet(set1));
   }
   
-  /** Traversing is linear in the size of {@code set2}. */
-  public Iterator<E> iterator() {
-    Predicate<Object> filter = CollectUtil.containsPredicate(_set1);
-    return new FilteredIterator<E>(_set2.iterator(), filter);
+  public boolean isInfinite() {
+    return ((PredicateSet<?>) _pred).isInfinite() && IterUtil.isInfinite(_set);
   }
   
-  /** Linear in the size of {@code set2}. */
-  public int size() {
-    int result = 0;
-    for (E elt : this) { result++; }
-    return result;
+  public boolean hasFixedSize() {
+    return ((PredicateSet<?>) _pred).hasFixedSize() && IterUtil.hasFixedSize(_set);
   }
   
-  /** Linear in the size of {@code set2}. */
-  public boolean isEmpty() {
-    if (_set1.isEmpty() || _set2.isEmpty()) { return true; }
-    else if (_set1 == _set2) { return false; }
-    else {
-      for (Object obj : _set2) {
-        if (_set1.contains(obj)) { return false; }
-      }
-      return true;
-    }
+  public boolean isStatic() {
+    return ((PredicateSet<?>) _pred).isStatic() && IterUtil.isStatic(_set);
   }
   
-  public boolean contains(Object o) {
-    return _set1.contains(o) || _set2.contains(o);
+  @Override public boolean isEmpty() {
+    return ((Set<?>) _pred).isEmpty() || (_set != _pred && super.isEmpty());
   }
-  
-  // inherit default implementation of containsAll
   
 }

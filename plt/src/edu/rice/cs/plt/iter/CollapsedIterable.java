@@ -55,6 +55,8 @@ public class CollapsedIterable<T> extends AbstractIterable<T>
     return new CollapsedIterator<T>(i);
   }
   
+  public boolean isEmpty() { return size(1) == 0; }
+  
   public int size() {
     int result = 0;
     for (Iterable<?> iter : _iters) {
@@ -82,10 +84,18 @@ public class CollapsedIterable<T> extends AbstractIterable<T>
     return false;
   }
   
-  public boolean isFixed() {
-    if (!IterUtil.isFixed(_iters)) { return false; }
+  public boolean hasFixedSize() {
+    if (!IterUtil.hasFixedSize(_iters)) { return false; }
     for (Iterable<?> iter : _iters) {
-      if (!IterUtil.isFixed(iter)) { return false; }
+      if (!IterUtil.hasFixedSize(iter)) { return false; }
+    }
+    return true;
+  }
+  
+  public boolean isStatic() {
+    if (!IterUtil.isStatic(_iters)) { return false; }
+    for (Iterable<?> iter : _iters) {
+      if (!IterUtil.isStatic(iter)) { return false; }
     }
     return true;
   }

@@ -37,52 +37,40 @@ package edu.rice.cs.plt.collect;
 import java.util.Set;
 import java.util.Collection;
 import java.util.Iterator;
+import java.io.Serializable;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.EmptyIterator;
 
-public final class EmptyRelation<T1, T2> implements Relation<T1, T2> {
+/** An immutable, empty, one-to-one relation. */
+public final class EmptyRelation<T1, T2> extends EmptyCollection<Pair<T1, T2>>
+                                         implements OneToOneRelation<T1, T2>, Serializable {
 
   public static final EmptyRelation<Object, Object> INSTANCE = new EmptyRelation<Object, Object>();
 
-  @SuppressWarnings("unchecked") public static <T1, T2> EmptyRelation<T1, T2> make() {
-    return (EmptyRelation<T1, T2>) INSTANCE;
-  }
-
   private EmptyRelation() {}
-
-  public int size() { return 0; }
-  public boolean isEmpty() { return true; }
-  public boolean contains(Object o) { return false; }
-  public boolean contains(T1 first, T2 second) { return false; }
-  public Iterator<Pair<T1, T2>> iterator() { return EmptyIterator.<Pair<T1, T2>>make(); }
-  public Object[] toArray() { return new Object[0]; }
-  public <T> T[] toArray(T[] a) {
-    if (a.length > 0) { a[0] = null; }
-    return a;
-  }
-
-  public boolean add(Pair<T1, T2> o) { throw new UnsupportedOperationException(); }
-  public boolean add(T1 first, T2 second) { throw new UnsupportedOperationException(); }
-  public boolean remove(Object o) { return false; }
-  public boolean remove(T1 first, T2 second) { return false; }
-
-  public boolean containsAll(Collection<?> c) { return c.isEmpty(); }
-  public boolean addAll(Collection<? extends Pair<T1, T2>> c) {
-    if (c.isEmpty()) { return false; }
-    else { throw new UnsupportedOperationException(); }
-  }
-  public boolean retainAll(Collection<?> c) { return false; }
-  public boolean removeAll(Collection<?> c) { return false; }
-  public void clear() {}
   
-  public Set<T1> firstSet() { return CollectUtil.<T1>emptySet(); }
-  public boolean containsFirst(T1 first) { return false; }
-  public Set<T2> getSeconds(T1 first) { return CollectUtil.<T2>emptySet(); }
-  public Set<T2> secondSet() { return CollectUtil.<T2>emptySet(); }
-  public boolean containsSecond(T2 second) { return false; }
-  public Set<T1> getFirsts(T2 second) { return CollectUtil.<T1>emptySet(); }
+  public boolean contains(T1 first, T2 second) { return false; }
 
-  public String toString() { return "[]"; }
+  public boolean add(T1 first, T2 second) { throw new UnsupportedOperationException(); }
+  public boolean remove(T1 first, T2 second) { throw new UnsupportedOperationException(); }
+ 
+  @SuppressWarnings("unchecked")
+  public OneToOneRelation<T2, T1> inverse() { return (EmptyRelation<T2, T1>) INSTANCE; }
+
+  public PredicateSet<T1> firstSet() { return EmptySet.make(); }
+  public boolean containsFirst(T1 first) { return false; }
+  public PredicateSet<T2> matchFirst(T1 first) { return EmptySet.make(); }
+  public PredicateSet<T2> excludeFirsts() { return EmptySet.make(); }
+
+  public PredicateSet<T2> secondSet() { return EmptySet.make(); }
+  public boolean containsSecond(T2 second) { return false; }
+  public PredicateSet<T1> matchSecond(T2 second) { return EmptySet.make(); }
+  public PredicateSet<T1> excludeSeconds() { return EmptySet.make(); }
+
+  public T2 value(T1 first) { return null; }
+  public T1 antecedent(T2 second) { return null; }
+  public LambdaMap<T1, T2> functionMap() { return EmptyMap.make(); }
+  public LambdaMap<T2, T1> injectionMap() { return EmptyMap.make(); }
 
   public boolean equals(Object o) {
     if (o instanceof Set<?>) { return ((Set<?>) o).isEmpty(); }
@@ -91,5 +79,9 @@ public final class EmptyRelation<T1, T2> implements Relation<T1, T2> {
 
   public int hashCode() { return 0; }
 
-}
+  /** Return a singleton, cast to the appropriate type. */
+  @SuppressWarnings("unchecked") public static <T1, T2> EmptyRelation<T1, T2> make() {
+    return (EmptyRelation<T1, T2>) INSTANCE;
+  }
 
+}

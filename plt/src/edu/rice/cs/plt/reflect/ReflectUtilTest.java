@@ -347,20 +347,20 @@ public class ReflectUtilTest extends TestCase {
     Lambda2<Predicate, Predicate, Predicate> and =
       staticMethodAsLambda2(LambdaUtil.class, "and", Predicate.class, Predicate.class, Predicate.class);
     Predicate<?> p1 = and.value(LambdaUtil.IS_NULL, LambdaUtil.IS_NULL);
-    assertTrue(p1.value(null));
+    assertTrue(p1.contains(null));
     Predicate<?> p2 = and.value(LambdaUtil.NOT_NULL, LambdaUtil.IS_NULL);
-    assertFalse(p2.value(null));
+    assertFalse(p2.contains(null));
     Predicate<?> p3 = and.value(LambdaUtil.NOT_NULL, LambdaUtil.NOT_NULL);
-    assertFalse(p3.value(null));
+    assertFalse(p3.contains(null));
     
     Lambda3<Predicate, Predicate, Predicate, Predicate> or =
       staticMethodAsLambda3(LambdaUtil.class, "or", Predicate.class, Predicate.class, Predicate.class, Predicate.class);
     Predicate<?> p4 = or.value(LambdaUtil.IS_NULL, LambdaUtil.IS_NULL, LambdaUtil.IS_NULL);
-    assertTrue(p4.value(null));
+    assertTrue(p4.contains(null));
     Predicate<?> p5 = or.value(LambdaUtil.NOT_NULL, LambdaUtil.IS_NULL, LambdaUtil.NOT_NULL);
-    assertTrue(p5.value(null));
+    assertTrue(p5.contains(null));
     Predicate<?> p6 = or.value(LambdaUtil.NOT_NULL, LambdaUtil.NOT_NULL, LambdaUtil.NOT_NULL);
-    assertFalse(p6.value(null));
+    assertFalse(p6.contains(null));
     
     // creating a bad thunk should be safe -- exception only occurs on "value()"
     Thunk<String> t = staticMethodAsThunk(LambdaUtil.class, "nullLambda", String.class);

@@ -90,27 +90,27 @@ public abstract class AbstractLog implements Log {
   public void log() {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) { write(new Date(), th, e, EMPTY_MESSAGE); }
+    if (_filter.contains(th, e)) { write(new Date(), th, e, EMPTY_MESSAGE); }
   }
   
   public void log(String message) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) { write(new Date(), th, e, processText(message)); }
+    if (_filter.contains(th, e)) { write(new Date(), th, e, processText(message)); }
   }
   
   /** Record the given throwable's message, stack trace, and cause (which is processed recursively). */
   public void log(Throwable t) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) { write(new Date(), th, e, processThrowable(t)); }
+    if (_filter.contains(th, e)) { write(new Date(), th, e, processThrowable(t)); }
   }
   
   /** Record the given throwable's message, stack trace, and cause (which is processed recursively). */
   public void log(String message, Throwable t) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       Date now = new Date();
       SizedIterable<String> ms = IterUtil.compose(processText(message), processThrowable(t));
       write(now, th, e, ms);
@@ -121,7 +121,7 @@ public abstract class AbstractLog implements Log {
   public void logStart() {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, START_MESSAGE);
       push();
     }
@@ -131,7 +131,7 @@ public abstract class AbstractLog implements Log {
   public void logStart(String message) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, processText("Start " + message));
       push();
     }
@@ -141,7 +141,7 @@ public abstract class AbstractLog implements Log {
   public void logStart(String name, Object value) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, IterUtil.compose(START_MESSAGE, processValue(name, value)));
       push();
     }
@@ -151,7 +151,7 @@ public abstract class AbstractLog implements Log {
   public void logStart(String message, String name, Object value) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       Date now = new Date();
       SizedIterable<String> ms = IterUtil.compose(processText("Start " + message),
                                                   processValue(name, value));
@@ -164,7 +164,7 @@ public abstract class AbstractLog implements Log {
   public void logStart(String[] names, Object... values) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, IterUtil.compose(START_MESSAGE, processValues(names, values)));
       push();
     }
@@ -174,7 +174,7 @@ public abstract class AbstractLog implements Log {
   public void logStart(String message, String[] names, Object... values) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       Date now = new Date();
       SizedIterable<String> ms = IterUtil.compose(processText("Start " + message),
                                                   processValues(names, values));
@@ -187,7 +187,7 @@ public abstract class AbstractLog implements Log {
   public void logEnd() {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       pop();
       write(new Date(), th, e, END_MESSAGE);
     }
@@ -197,7 +197,7 @@ public abstract class AbstractLog implements Log {
   public void logEnd(String message) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       pop();
       write(new Date(), th, e, processText("End " + message));
     }
@@ -207,7 +207,7 @@ public abstract class AbstractLog implements Log {
   public void logEnd(String name, Object value) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       pop();
       write(new Date(), th, e, IterUtil.compose(END_MESSAGE, processValue(name, value)));
     }
@@ -217,7 +217,7 @@ public abstract class AbstractLog implements Log {
   public void logEnd(String message, String name, Object value) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       pop();
       Date now = new Date();
       SizedIterable<String> ms = IterUtil.compose(processText("End " + message),
@@ -230,7 +230,7 @@ public abstract class AbstractLog implements Log {
   public void logEnd(String[] names, Object... values) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       pop();
       write(new Date(), th, e, IterUtil.compose(END_MESSAGE, processValues(names, values)));
     }
@@ -240,7 +240,7 @@ public abstract class AbstractLog implements Log {
   public void logEnd(String message, String[] names, Object... values) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       pop();
       Date now = new Date();
       SizedIterable<String> ms = IterUtil.compose(processText("End " + message),
@@ -252,7 +252,7 @@ public abstract class AbstractLog implements Log {
   public void logStack() {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       SizedIterable<String> messages = IterUtil.compose("Current stack:", processCurrentStack());
       write(new Date(), th, e, messages);
     }
@@ -261,7 +261,7 @@ public abstract class AbstractLog implements Log {
   public void logStack(String message) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       SizedIterable<String> messages = IterUtil.compose(processText(message), processCurrentStack());
       write(new Date(), th, e, messages);
     }
@@ -275,7 +275,7 @@ public abstract class AbstractLog implements Log {
   public void logValue(String name, Object value) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, processValue(name, value));
     }
   }
@@ -283,7 +283,7 @@ public abstract class AbstractLog implements Log {
   public void logValue(String message, String name, Object value) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, IterUtil.compose(processText(message), processValue(name, value)));
     }
   }
@@ -297,7 +297,7 @@ public abstract class AbstractLog implements Log {
   public void logValues(String[] names, Object... values) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, processValues(names, values));
     }
   }
@@ -305,7 +305,7 @@ public abstract class AbstractLog implements Log {
   public void logValues(String message, String[] names, Object... values) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
-    if (_filter.value(th, e)) {
+    if (_filter.contains(th, e)) {
       write(new Date(), th, e, IterUtil.compose(processText(message), processValues(names, values)));
     }
   }

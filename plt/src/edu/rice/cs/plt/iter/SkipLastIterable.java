@@ -53,6 +53,8 @@ public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIte
 
   public SkipLastIterator<T> iterator() { return new SkipLastIterator<T>(_iterable.iterator()); }
   
+  public boolean isEmpty() { return IterUtil.sizeOf(_iterable, 2) < 2; }
+  
   public int size() {
     // This can't be implemented correctly.  If the nestedSize is MAX_VALUE, that means the size
     // of this iterable is >= MAX_VALUE-1.  If we return MAX_VALUE-1, we're asserting that it is
@@ -74,7 +76,9 @@ public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIte
   
   public boolean isInfinite() { return IterUtil.isInfinite(_iterable); }
   
-  public boolean isFixed() { return IterUtil.isFixed(_iterable); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_iterable); }
+  
+  public boolean isStatic() { return IterUtil.isStatic(_iterable); }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> SkipLastIterable<T> make(Iterable<? extends T> iterable) {

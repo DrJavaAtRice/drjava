@@ -55,10 +55,12 @@ public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIt
   public TruncatedIterator<T> iterator() {
     return new TruncatedIterator<T>(_iterable.iterator(), _size);
   }
+  
+  public boolean isEmpty() { return (_size == 0) || IterUtil.isEmpty(_iterable); }
 
   /**
-   * @return  {@code size}, unless the nested iterable is smaller than {@code size}; in that
-   *          case, returns the iterable's size
+   * Return {@code size}, unless the nested iterable is smaller than {@code size}; in that
+   * case, returns the iterable's size.
    */
   public int size() { return IterUtil.sizeOf(_iterable, _size); }
   
@@ -66,7 +68,9 @@ public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIt
   
   public boolean isInfinite() { return false; }
     
-  public boolean isFixed() { return IterUtil.isFixed(_iterable); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_iterable); }
+  
+  public boolean isStatic() { return IterUtil.isStatic(_iterable); }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> TruncatedIterable<T> make(Iterable<? extends T> iterable, int size) {

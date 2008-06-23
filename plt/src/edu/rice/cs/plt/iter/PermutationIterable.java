@@ -49,12 +49,15 @@ import java.io.Serializable;
  *           {@code Iterable<T>}s, not {@code T}s.
  */
 public class PermutationIterable<T> extends AbstractIterable<Iterable<T>> 
-                                    implements SizedIterable<Iterable<T>>, Serializable {
+                                    implements SizedIterable<Iterable<T>>, OptimizedLastIterable<Iterable<T>>,
+                                               Serializable {
   
   private final Iterable<? extends T> _original;
   
   public PermutationIterable(Iterable<? extends T> original) { _original = original; }
   public PermutationIterator<T> iterator() { return new PermutationIterator<T>(_original); }
+  
+  public boolean isEmpty() { return false; }
 
   public int size() { return size(Integer.MAX_VALUE); }
   
@@ -67,7 +70,11 @@ public class PermutationIterable<T> extends AbstractIterable<Iterable<T>>
   
   public boolean isInfinite() { return IterUtil.isInfinite(_original); }
   
-  public boolean isFixed() { return IterUtil.isFixed(_original); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_original); }
+  
+  public boolean isStatic() { return IterUtil.isStatic(_original); }
+  
+  public Iterable<T> last() { return IterUtil.reverse(_original); }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> PermutationIterable<T> make(Iterable<? extends T> original) {

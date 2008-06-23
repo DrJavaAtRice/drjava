@@ -35,31 +35,71 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Set;
+import java.util.Map;
 import edu.rice.cs.plt.tuple.Pair;
 
 /**
- * A set of pairs representing a binary relation.  Additional methods provide a convenient
- * (and potentially optimized) interface for accessing sets of firsts (values of type {@code T1})
- * and seconds (values of type {@code T2}) based on a given key.  Thus, a relation can also
- * be viewed as a generalization of a map in which keys map to sets of values, and this mapping
- * occurs in both directions.
+ * A set of pairs representing a binary relation.  Relations can be viewed as generalizations
+ * of maps in which keys map to sets of values, and the mapping occurs in both directions.
  */
-public interface Relation<T1, T2> extends Set<Pair<T1, T2>> {
+public interface Relation<T1, T2> extends PredicateSet<Pair<T1, T2>> {
 
+  /** Whether the given object appears in the set. */
+  public boolean contains(Object o);
+  /** Whether {@code Pair.make(first, second)} appears in the set. */
   public boolean contains(T1 first, T2 second);
+  /**
+   * Add {@code Pair.make(p.first(), p.second())} to the set.  (That is, the pair that is
+   * added is not an instance of some subclass of Pair.)
+   */
+  public boolean add(Pair<T1, T2> pair);
+  /** Add {@code Pair.make(first, second)} to the set. */
   public boolean add(T1 first, T2 second);
+  /**
+   * If {@code o} is a pair, remove {@code Pair.make(o.first(), o.second())} from the set.
+   * (That is, equality is always defined according to the Pair class's equals method, not 
+   * that of some subclass.)
+   */
+  public boolean remove(Object o);
+  /** Remove {@code Pair.make(first, second)} from the set. */
   public boolean remove(T1 first, T2 second);
+  
+  /**
+   * Produce the inverse of the relation, derived by swapping the elements of each pair.  Need not
+   * allow mutation, but must reflect subsequent changes.
+   */
+  public Relation<T2, T1> inverse();
 
-  /** The set of firsts.  Does not allow mutation. */
-  public Set<T1> firstSet();
+  /** The set of firsts.  Need not allow mutation, but must reflect subsequent changes. */
+  public PredicateSet<T1> firstSet();
+  /** Whether a pair with the given first value appears in the set. */
   public boolean containsFirst(T1 first);
-  /** The set of seconds corresponding to a specific first.  Does not allow mutation. */
-  public Set<T2> getSeconds(T1 first);
+  /**
+   * The set of seconds corresponding to a specific first.  Need not allow mutation, but must
+   * reflect subsequent changes.
+   */
+  public PredicateSet<T2> matchFirst(T1 first);
+  /**
+   * The set of seconds for which there exists a (first, second) pair in the
+   * relation.  Equivalent to {@link #secondSet}, but defined redundantly for consistency
+   * with higher-arity relations.  Need not allow mutation, but must reflect subsequent changes.
+   */
+  public PredicateSet<T2> excludeFirsts();
 
-  /** The set of seconds.  Does not allow mutation. */
-  public Set<T2> secondSet();
+  /** The set of seconds.  Need not allow mutation, but must reflect subsequent changes. */
+  public PredicateSet<T2> secondSet();
+  /** Whether a pair with the given second value appears in the set. */
   public boolean containsSecond(T2 second);
-  /** The set of firsts corresponding to a specific second.  Does not allow mutation. */
-  public Set<T1> getFirsts(T2 second);
+  /**
+   * The set of firsts corresponding to a specific second.  Need not allow mutation, but must
+   * reflect subsequent changes.
+   */
+  public PredicateSet<T1> matchSecond(T2 second);
+  /**
+   * The set of firsts for which there exists a (first, second) pair in the
+   * relation.  Equivalent to {@link #firstSet}, but defined redundantly for consistency
+   * with higher-arity relations.  Need not allow mutation, but must reflect subsequent changes.
+   */
+  public PredicateSet<T1> excludeSeconds();
   
 }

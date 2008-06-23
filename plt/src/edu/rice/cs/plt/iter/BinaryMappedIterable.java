@@ -39,14 +39,15 @@ import edu.rice.cs.plt.lambda.Lambda2;
 
 /**
  * An Iterable containing the results of some binary operation on two input lists 
- * (assumed to always have the same size)
+ * (assumed to always have the same size).
  * 
  * @param T1  The element type of the first input list
  * @param T2  The element type of the second input list
  * @param R  The element type of the result list
  */
 public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R> 
-                                             implements SizedIterable<R>, Serializable {
+                                             implements SizedIterable<R>, OptimizedLastIterable<R>,
+                                                        Serializable {
   
   private final Iterable<? extends T1> _source1;
   private final Iterable<? extends T2> _source2;
@@ -63,10 +64,15 @@ public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R>
     return new BinaryMappedIterator<T1, T2, R>(_source1.iterator(), _source2.iterator(), _map);
   }
   
+  public boolean isEmpty() { return IterUtil.isEmpty(_source1); }
   public int size() { return IterUtil.sizeOf(_source1); }
   public int size(int bound) { return IterUtil.sizeOf(_source1, bound); }
   public boolean isInfinite() { return IterUtil.isInfinite(_source1); }
-  public boolean isFixed() { return IterUtil.isFixed(_source1); }
+  public boolean hasFixedSize() { return IterUtil.hasFixedSize(_source1); }
+  /** Always false: results of a lambda may be arbitrary. */
+  public boolean isStatic() { return false; }
+  
+  public R last() { return _map.value(IterUtil.last(_source1), IterUtil.last(_source2)); }
   
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2, R> BinaryMappedIterable<T1, T2, R> 

@@ -48,6 +48,8 @@ package edu.rice.cs.plt.iter;
  * wrapping them in a bridge class (see {@link IterUtil#asSizedIterable}).</p>
  */
 public interface SizedIterable<T> extends Iterable<T> {
+  /** Whether the iterable does not contain any elements. */
+  public boolean isEmpty();
   /**
    * Compute the number of elements in the iterable.  If the size is infinite or too large to be represented as an 
    * {@code int}, {@code Integer.MAX_VALUE} should be returned.  Otherwise, {@code next()} may be safely invoked 
@@ -64,7 +66,7 @@ public interface SizedIterable<T> extends Iterable<T> {
   
   /**
    * {@code true} if the iterable is known to have infinite size.  If true, an iterator over the iterable in its 
-   * current state will never return {@code true} from {@code hasNext()}.
+   * current state will never return {@code false} from {@code hasNext()}.
    */
   public boolean isInfinite();
   
@@ -73,5 +75,14 @@ public interface SizedIterable<T> extends Iterable<T> {
    * or if changes can only replace values, not remove or add them.  An infinite iterable may be fixed if it
    * is guaranteed to never become finite.
    */
-  public boolean isFixed();
+  public boolean hasFixedSize();
+  
+  /**
+   * {@code true} if this iterable is unchanging.  This implies that {@code hasFixedSize()} is true, and that
+   * {@code iterator()} will always return the same (either {@code ==} or {@code equal()} and immutable) elements
+   * in the same order.  ("Immutable" here means that {@code equals()} invocations are consistent over time -- if 
+   * two objects are equal, they will never become inequal, and vice versa.)
+   */
+  public boolean isStatic();
+  
 }

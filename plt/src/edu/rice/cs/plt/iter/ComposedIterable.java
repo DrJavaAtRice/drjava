@@ -47,15 +47,17 @@ public class ComposedIterable<T> extends AbstractIterable<T>
   private final int _i1Size; // negative implies dynamic size
   private final Iterable<? extends T> _i2;
   private final int _i2Size; // negative implies dynamic size
+  private final boolean _isStatic;
   
-  /** The result contains {@code i1}'s elements followed by {@code i2}'s elements */
+  /** The result contains {@code i1}'s elements followed by {@code i2}'s elements. */
   public ComposedIterable(Iterable<? extends T> i1, Iterable<? extends T> i2) {
     _i1 = i1;
     _i2 = i2;
-    if (IterUtil.isFixed(i1)) { _i1Size = IterUtil.sizeOf(_i1); }
+    if (IterUtil.hasFixedSize(_i1)) { _i1Size = IterUtil.sizeOf(_i1); }
     else { _i1Size = -1; }
-    if (IterUtil.isFixed(i2)) { _i2Size = IterUtil.sizeOf(_i2); }
+    if (IterUtil.hasFixedSize(_i2)) { _i2Size = IterUtil.sizeOf(_i2); }
     else { _i2Size = -1; }
+    _isStatic = IterUtil.isStatic(_i1) && IterUtil.isStatic(_i2);
   }
     
   /** The result contains {@code v1} followed by {@code i2}'s elements */
@@ -72,6 +74,11 @@ public class ComposedIterable<T> extends AbstractIterable<T>
     return new ComposedIterator<T>(_i1.iterator(), _i2.iterator());
   }
   
+  public boolean isEmpty() {
+    return (_i1Size < 0 ? IterUtil.isEmpty(_i1) : _i1Size == 0) &&
+           (_i2Size < 0 ? IterUtil.isEmpty(_i2) : _i2Size == 0);
+  }
+  
   public int size() {
     int result = (_i1Size < 0 ? IterUtil.sizeOf(_i1) : _i1Size) +
                  (_i2Size < 0 ? IterUtil.sizeOf(_i2) : _i2Size);
@@ -80,15 +87,19 @@ public class ComposedIterable<T> extends AbstractIterable<T>
   }
   
   public int size(int bound) {
-    int result = (_i1Size < 0 ? IterUtil.sizeOf(_i1, bound) : _i1Size) +
-                 (_i2Size < 0 ? IterUtil.sizeOf(_i2, bound) : _i2Size);
-    if (result < 0) { result = Integer.MAX_VALUE; } // overflow
-    return result <= bound ? result : bound;
+    int size1 = (_i1Size < 0) ? IterUtil.sizeOf(_i1, bound) :
+                                (bound < _i1Size) ? bound : _i1Size;
+    int bound2 = bound-size1;
+    int size2 = (_i2Size < 0) ? IterUtil.sizeOf(_i2, bound2) :
+                                (bound2 < _i2Size) ? bound2 : _i2Size;
+    return size1+size2;
   }
   
   public boolean isInfinite() { return IterUtil.isInfinite(_i1) || IterUtil.isInfinite(_i2); }
   
-  public boolean isFixed() { return _i1Size >= 0 && _i2Size >= 0; }
+  public boolean hasFixedSize() { return _i1Size >= 0 && _i2Size >= 0; }
+  
+  public boolean isStatic() { return _isStatic; }
   
   /**
    * Determine the last value in the iterable.  This implementation will usually be faster than
