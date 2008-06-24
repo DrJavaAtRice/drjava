@@ -60,6 +60,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.ui.predictive.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.CompletionMonitor;
 import static edu.rice.cs.drjava.ui.MainFrame.GoToFileListEntry;
 
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
@@ -90,6 +91,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   private int _errred = -1;
   private int _retVal;
   private String _header;
+  protected CompletionMonitor _abortMonitor = new CompletionMonitor();
 
   /** Constructs a new "process" panel to watch process output.
     * This is swing view class and hence should only be accessed from the event thread.
@@ -123,6 +125,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   }
 
   protected void initThread(ProcessCreator pc) {
+    _abortMonitor.reset();
     // MainFrame.LOG.log("\tProcessPanel ctor");
     try {
       _pc = pc;
@@ -204,28 +207,66 @@ public class ExternalProcessPanel extends AbortablePanel {
 
   /** Abort action was performed.
     * @param e action event performed by user, or null if aborted due to problem */
-  protected void abortActionPerformed(ActionEvent e) {
-    if (_is!=null) {
-      try {
-        _is.close();
+  protected void abortActionPerformed(ActionEvent e) {    
+    _abortButton.setEnabled(false);
+    _updateNowButton.setEnabled(false);
+    _runAgainButton.setEnabled(false);
+    // spin this off in a separate thread so the event thread is free
+    new Thread(new Runnable() {
+      public void run() {
+        if (_is!=null) {
+          try {
+            _is.close();
+          }
+          catch(IOException ioe) { /* ignore, just stop polling */ }
+          _is = null;
+          Utilities.invokeLater(new Runnable() {
+            public void run() { updateButtons(); } });          
+        }
+        if (_erris!=null) {
+          try {
+            _erris.close();
+          }
+          catch(IOException ioe) { /* ignore, just stop polling */ }
+          _erris = null;
+          Utilities.invokeLater(new Runnable() {
+            public void run() { updateButtons(); } });
+        }
+        if (_p!=null) {
+          _p.destroy();
+          _p = null;
+        }
+        Utilities.invokeLater(new Runnable() {
+          public void run() { updateText(); updateButtons(); } });
+        _abortMonitor.set();
       }
-      catch(IOException ioe) { /* ignore, just stop polling */ }
-      _is = null;
-      updateButtons();
-    }
-    if (_erris!=null) {
-      try {
-        _erris.close();
+    }).start();
+  }
+  
+  /** Run Again action was performed
+    * @param e action event performed by user, or null if initiated programmatically */
+  protected void runAgainActionPerformed(ActionEvent e) {
+    _abortButton.setEnabled(false);
+    _updateNowButton.setEnabled(false);
+    _runAgainButton.setEnabled(false);
+    abortActionPerformed(e);
+    // spin this off in a separate thread so the event thread is free
+    new Thread(new Runnable() {
+      public void run() {
+        while(!_abortMonitor.waitOne()) { } // wait for the abortActionPerformed() call to finish
+        _abortMonitor.reset();
+        _sb = new StringBuilder("Command line:");
+        _sb.append(_pc.cmdline());
+        _sb.append('\n');
+        _header = _sb.toString();
+        initThread(_pc);
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            _textArea.setText(_header);
+            updateText();
+          } });
       }
-      catch(IOException ioe) { /* ignore, just stop polling */ }
-      _erris = null;
-      updateButtons();
-    }
-    if (_p!=null) {
-      _p.destroy();
-      _p = null;
-    }
-    updateText();
+    }).start();
   }
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("external.txt",true);
@@ -412,15 +453,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     _runAgainButton = new JButton("Run Again");
     _runAgainButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        abortActionPerformed(e);
-        _sb = new StringBuilder("Command line:");
-        _sb.append(_pc.cmdline());
-        _sb.append('\n');
-        _header = _sb.toString();
-        initThread(_pc);
-        _textArea.setText(_header);
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() { updateText(); } });
+        runAgainActionPerformed(e);
       }
     });
     return new JComponent[] { _updateNowButton, _runAgainButton };

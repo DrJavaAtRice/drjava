@@ -225,7 +225,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
         DrJavaProperty value = PropertyMaps.TEMPLATE.getProperty(category,key);
         _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
-        _varValueField.setText(value.toString());
+        _varValueField.setText(value.getLazy(PropertyMaps.TEMPLATE));
         _helpPane.setText(value.getHelp());
         _helpPane.setCaretPosition(0);
       }
