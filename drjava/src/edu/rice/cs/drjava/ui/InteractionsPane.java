@@ -78,20 +78,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     public void run() { Toolkit.getDefaultToolkit().beep(); }
   };
   
-  //  /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
-  protected final CaretListener _matchListener = new CaretListener() {
-    
-    /** Checks caret position to see if it needs to set or remove a highlight from the document. Only modifies the 
-      * document--not any GUI classes.
-      * @param e the event fired by the caret position change
-      */
-    public void caretUpdate(CaretEvent e) { 
-      _doc.acquireReadLock();
-      try { synchronized(_doc.getReduced()) { matchUpdate(e.getDot()); } }
-      finally { _doc.releaseReadLock(); }
-    }
-  };
-  
   /** The OptionListener for TEXT_ANTIALIAS. */
   private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
@@ -129,8 +115,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     
     _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
     
-    // Add listener that checks if highlighting matching braces must be updated
-    addCaretListener(_matchListener);
+    // The superclass AbstractDJPane installs a matchListener for this class
     
     // Setup color listeners.
     
@@ -195,10 +180,10 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   public DJDocument getDJDocument() { return _doc; }
   
   /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list.  Assumes read
-    * lock and reduced locks on _doc are already held*/
-  public void matchUpdate(int offset) {
+    * lock and reduced locks on _doc are already held. */
+  protected void matchUpdate(int offset) {
     if (! _doc.hasPrompt()) return;
-    _doc.setCurrentLocation(offset); 
+    _doc._setCurrentLocation(offset); 
     _removePreviousHighlight();
     
 //    addToPromptList(getPromptPos()); // NOT USED

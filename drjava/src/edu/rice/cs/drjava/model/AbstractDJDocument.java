@@ -104,6 +104,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** The default indent setting. */
   protected volatile int _indent = 2;
   
+//  /** Whether a block indent operation is in progress on this document. */
+//  private volatile boolean _indentInProgress = false;
+  
   /** The reduced model of the document (stored in field _reduced) handles most of the document logic and keeps 
     * track of state.  This field together with _currentLocation function as a virtual object for purposes of 
     * synchronization.  All operations that access or modify this virtual object should be synchronized on _reduced.
@@ -144,7 +147,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /*-------- CONSTRUCTORS --------*/
   
-    /** Constructor used in super calls from DefinitionsDocument and InteractionsDJDocument. */
+  /** Constructor used in super calls from DefinitionsDocument and InteractionsDJDocument. */
   protected AbstractDJDocument() { 
     this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()));
   }
@@ -265,7 +268,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try { return _getHighlightStatus(start, end); }
     finally { releaseReadLock(); }
   }
-    
+  
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
     * with the same status into one.  ASSUMES that read lock is already held.  Perturbs _currentLocation.
     */
@@ -525,7 +528,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
     finally { _setCurrentLocation(origPos); }
   }
-    
+  
   /** FindS the match for the open brace immediately to the right, assuming there is such a brace.  On failure, 
     * returns -1.
     * @return the relative distance forwards to the offset after the matching brace.
@@ -554,7 +557,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** This method is used ONLY inside of document Read Lock.  This method is UNSAFE in any other context!
     * @return The reduced model of this document.
     */
-  public BraceReduction getReduced() { return _reduced; }
+  public ReducedModelControl getReduced() { return _reduced; }
   
 //  /** Returns the indent information for the current location. */
 //  public IndentInfo getIndentInformation() {
@@ -890,7 +893,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    try { return _findPrevCharPos(pos, whitespace); }
 //    finally { releaseReadLock(); }
 //  }
-    
+  
   /** Finds the position of the first non-whitespace, non-comment character before pos.  Skips comments and all 
     * whitespace, including newlines.  Assumes read lock is already held.
     * @param pos Position to start from
@@ -1070,6 +1073,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Position endPos = this.createUnwrappedPosition(end);
     // Iterate, line by line, until we get to/past the end
     int walker = start;
+//    _indentInProgress = true;
     while (walker < endPos.getOffset()) {
       _setCurrentLocation(walker);
       // Keep pointer to walker position that will stay current regardless of how indentLine changes things
@@ -1089,6 +1093,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // Adding 1 makes us point to the first character AFTER the next newline. We don't actually move the
       // location yet. That happens at the top of the loop, after we check if we're past the end. 
       walker += _reduced.getDistToNextNewline() + 1;
+//      _indentInProgress = false;
     }
   }
   
@@ -1598,7 +1603,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public BraceInfo _getLineEnclosingBrace() {
     
     assert isReadLocked();
-
+    
     int origPos = _currentLocation;
     // Check cache
     final int lineStart = _getLineStartPos(_currentLocation);
@@ -1745,14 +1750,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     while (pos >= 0 && prefix.charAt(pos) == ' ') pos--;
     return (pos < 0);
   }
-
+  
   /** Gets the number of blank characters between the current location and the first non-blank character or the end of
     * the document, whichever comes first.  TODO: cache it.
     * (The method is misnamed.)
     * @return the number of whitespace characters
     */
   private int _getWhiteSpace() throws BadLocationException {
-        
+    
     assert isReadLocked();
     
     String text = "";
@@ -1795,7 +1800,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param tab  The string to be placed between previous newline and first non-whitespace character
     */
   public void setTab(int tab, int pos) {
-        
+    
     assert isWriteLocked();
     
     try {
@@ -1823,7 +1828,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param tab  The string to be placed between previous newline and first non-whitespace character
     */
   public void setTab(String tab, int pos) {
-            
+    
     assert isWriteLocked();
     
     try {

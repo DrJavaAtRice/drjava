@@ -318,9 +318,9 @@ public class ReducedModelComment extends AbstractReducedModel {
   }
   
   /** Helper function for insertQuote.  Creates a new quote Brace and puts it in the
-   * reduced model.
-   * @param quote the quote to insert
-   */
+    * reduced model.
+    * @param quote the quote to insert
+    */
   private void _insertNewQuote(String quote) {
     String insert = _getQuoteType(quote);
     _cursor.insertNewBrace(insert);
@@ -336,12 +336,12 @@ public class ReducedModelComment extends AbstractReducedModel {
   public int walkerOffset() { return absOffset(_walker); }
   
   /** Helper function for insertNewQuote.  In the case where a backslash
-   * precedes the point of insertion, it removes the backslash and returns
-   * the text for an escaped quote.  The type of quote depends on the given
-   * argument.
-   * @param quote the type of quote to insert
-   * @return a regular or escaped quote, depending on what was previous
-   */
+    * precedes the point of insertion, it removes the backslash and returns
+    * the text for an escaped quote.  The type of quote depends on the given
+    * argument.
+    * @param quote the type of quote to insert
+    * @return a regular or escaped quote, depending on what was previous
+    */
   private String _getQuoteType(String quote) {
     if (_cursor.atStart() || _cursor.atFirstItem()) return quote;
     else if (_cursor.prevItem().getType().equals("\\")) {

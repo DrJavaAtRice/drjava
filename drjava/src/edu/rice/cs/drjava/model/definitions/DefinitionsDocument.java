@@ -721,7 +721,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     do {
 //        if (text.charAt(curPos) != '{' || text.charAt(curPos) != '}') ++curPos;
       
-//        if (oldLog) System.out.println("curPos=" + curPos + " `" +
+//        if (oldLog) System.err.println("curPos=" + curPos + " `" +
 //                                       text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
       
       curPos = _findPrevEnclosingBrace(curPos, '{', '}');
@@ -738,19 +738,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
           // this might be an inner class
           newPos = _findPrevKeyword(text, "new", openParenPos);
-//            if (oldLog) System.out.println("\tnew found at "+newPos+", openCurlyPos="+curPos);
+//            if (oldLog) System.err.println("\tnew found at "+newPos+", openCurlyPos="+curPos);
           if (! _isAnonymousInnerClass(newPos, curPos)) {
             // not an anonymous inner class
             newPos = -1;
           }
         }
       }
-//        if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+", new="+newPos+" `" +
+//        if (oldLog) System.err.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
+//        if (oldLog) System.err.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+", new="+newPos+" `" +
 //          text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
       while (classPos != -1 || interPos != -1 || newPos != -1) {
         if (newPos != -1) {
-//            if (oldLog) System.out.println("\tanonymous inner class! newPos = "+newPos);
+//            if (oldLog) System.err.println("\tanonymous inner class! newPos = "+newPos);
           classPos = -1;
           interPos = -1;
           break;
@@ -764,7 +764,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           newPos = -1;
           // see if there's a ) closer by
           closeParenPos = _findPrevNonWSCharPos(curPos);
-//            if (closeParenPos!=ERROR_INDEX (-1)) if (oldLog) System.out.println("nonWS before curPos = " + closeParenPos + 
+//            if (closeParenPos!=ERROR_INDEX (-1)) if (oldLog) System.err.println("nonWS before curPos = " + closeParenPos + 
 //              " `"+text.charAt(closeParenPos)+"`");
           if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
             // yes, find the matching (
@@ -772,12 +772,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
               // this might be an inner class
               newPos = _findPrevKeyword(text, "new", openParenPos);
-//                if (oldLog) System.out.println("\tnew found at " + newPos + ", openCurlyPos=" + curPos);
+//                if (oldLog) System.err.println("\tnew found at " + newPos + ", openCurlyPos=" + curPos);
               if (! _isAnonymousInnerClass(newPos, curPos)) newPos = -1;
             }
           }
-//            if (oldLog) System.out.println("curPos=" +curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//            if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+
+//            if (oldLog) System.err.println("curPos=" +curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
+//            if (oldLog) System.err.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+
 //              text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
         }
         else {
@@ -831,15 +831,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openCurlyPos+1);
-//    System.out.print("_isAnonymousInnerClass("+pos+", "+openCurlyPos+")");
-//    System.out.println("_isAnonymousInnerClass("+pos+", "+openCurlyPos+"): `"+
+//    System.err.print("_isAnonymousInnerClass("+pos+", "+openCurlyPos+")");
+//    System.err.println("_isAnonymousInnerClass("+pos+", "+openCurlyPos+"): `"+
 //                       t.substring(pos, openCurlyPos+1)+"`");
     
     // Check cache
     final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
     Boolean cached = (Boolean) _checkCache(key);
     if (cached != null) {
-//      System.out.println(" ==> "+cached);
+//      System.err.println(" ==> "+cached);
       return cached;
     }
     int newPos = pos;
@@ -861,12 +861,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         
         /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
-//         System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+//         System.err.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
         int parenStart = _getFirstNonWSCharPos(classEnd);
         if (parenStart != -1) {
           int origParenStart = parenStart;
           
-//           System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+//           System.err.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
           if (text.charAt(origParenStart) == '<') {
             parenStart = -1;
             // might be a generic class
@@ -887,16 +887,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //            _setCurrentLocation(parenStart + 1);   // Restore the state of the reduced model; unnecessary
             if (parenEnd > -1) {
               parenEnd = parenEnd + parenStart + 1;
-//               System.out.println("\tafter closing paren = "+parenEnd);
+//               System.err.println("\tafter closing paren = "+parenEnd);
               int afterParen = _getFirstNonWSCharPos(parenEnd);
-//               System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
+//               System.err.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
               cached = (afterParen == openCurlyPos); 
             }
           }
         }
       }
       _storeInCache(key, cached, openCurlyPos);
-//      System.out.println(" ==> "+cached);
+//      System.err.println(" ==> "+cached);
       return cached;
     }
   }
@@ -989,7 +989,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       if (nextOpenCurly == -1) { continue; }
 //      if (oldLog) System.err.println("{ found at " + nextOpenCurly + ": `" + 
 //                                     text.substring(newPos, nextOpenCurly + 1) + "`");
-//      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenCurly+")");
+//      if (oldLog) System.err.println("_isAnonymousInnerClass("+newPos+", "+nextOpenCurly+")");
       if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
 //        if (oldLog) System.err.println("is anonymous inner class");
         String cn = _getEnclosingClassName(newPos, true);
@@ -1425,7 +1425,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Formerly used to help track down memory leaks */
 //  protected void finalize() throws Throwable{
-//    System.out.println("destroying DefDocument for " + _odd);
+//    System.err.println("destroying DefDocument for " + _odd);
 //    super.finalize();
 //  }
 //  

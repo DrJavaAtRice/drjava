@@ -3339,7 +3339,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _showConfigException();
     
     KeyBindingManager.Singleton.setShouldCheckConflict(false);
-        
+    
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
     setUpKeys();    
@@ -3689,11 +3689,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     PropertyMaps.TEMPLATE.setProperty("Project", new FileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
-                                                                           "Returns a list of files that are excluded from DrJava's "+
-                                                                           "project auto-refresh.\n"+
-                                                                           "Optional attributes:\n"+
-                                                                           "\trel=\"<dir to which output should be relative\"\n"+
-                                                                           "\tsep=\"<separator between files>\"") {
+                                                                      "Returns a list of files that are excluded from DrJava's "+
+                                                                      "project auto-refresh.\n"+
+                                                                      "Optional attributes:\n"+
+                                                                      "\trel=\"<dir to which output should be relative\"\n"+
+                                                                      "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(File f: _model.getExcludedFiles()) {
@@ -3704,11 +3704,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
     PropertyMaps.TEMPLATE.setProperty("Project", new FileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
-                                                                           "Returns a list of files in the project's extra "+
-                                                                           "class path.\n"+
-                                                                           "Optional attributes:\n"+
-                                                                           "\trel=\"<dir to which output should be relative\"\n"+
-                                                                           "\tsep=\"<separator between files>\"") {
+                                                                      "Returns a list of files in the project's extra "+
+                                                                      "class path.\n"+
+                                                                      "Optional attributes:\n"+
+                                                                      "\trel=\"<dir to which output should be relative\"\n"+
+                                                                      "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(File f: _model.getExtraClassPath()) {
@@ -3749,11 +3749,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void update(PropertyMaps pm) {
         if (_attributes.get("file")!=null) {
           final String dir = StringOps.unescapeFileName(StringOps.replaceVariables(DEF_DIR,
-                                                                                          pm,
-                                                                                          PropertyMaps.GET_CURRENT));
+                                                                                   pm,
+                                                                                   PropertyMaps.GET_CURRENT));
           final String fil = StringOps.unescapeFileName(StringOps.replaceVariables(_attributes.get("file"),
-                                                                                          pm,
-                                                                                          PropertyMaps.GET_CURRENT));
+                                                                                   pm,
+                                                                                   PropertyMaps.GET_CURRENT));
           FileOpenSelector fs = new FileOpenSelector() {
             public File[] getFiles() {
               if (fil.startsWith("/")) { return new File[] { new File(fil) }; }
@@ -6734,28 +6734,25 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void caretUpdate(final CaretEvent ce) {
       DefinitionsDocument doc = _model.getActiveDocument().getDocument();
       int offset = ce.getDot();
-       
+      
       doc.acquireReadLock();
       try { 
-        synchronized(doc.getReduced()) {
-          _currentDefPane.matchUpdate(offset);  // updates _currentLocation
-          if (offset == _offset + 1 && offset < doc.getLength() && doc.getText(_offset, 1).charAt(0) != '\n') {
-            _col += 1;
-            updateLocation(_line, _col); 
-          }
-          else {
-            Element root = doc.getDefaultRootElement();
-            int line = root.getElementIndex(offset); 
-            _line = line + 1;     // line numbers are 1-based
-            _col = offset - root.getElement(line).getStartOffset();
-            _offset = offset;
-            updateLocation(_line, _col);
-          }
-          
-        }  // end synchronized
+        if (offset == _offset + 1 && offset < doc.getLength() && doc.getText(_offset, 1).charAt(0) != '\n') {
+          _col += 1;
+        }
+        else {
+          Element root = doc.getDefaultRootElement();
+          int line = root.getElementIndex(offset); 
+          _line = line + 1;     // line numbers are 1-based
+          _col = offset - root.getElement(line).getStartOffset();
+        }
       }
       catch(BadLocationException e) { /* do nothing */ }
-      finally { doc.releaseReadLock(); }
+      finally { 
+        doc.releaseReadLock();
+        _offset = offset;
+        updateLocation(_line, _col);
+      }
     }
     
     // This method appears safe outside the event thread

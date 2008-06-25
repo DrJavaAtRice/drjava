@@ -110,6 +110,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 //import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo ;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.print.DrJavaBook;
@@ -845,11 +846,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (!could) undeletableFiles.add(file);
           monitor.setProgress(progress++);
         }
-//      if (! dir.exists()) dir.mkdirs (); // TODO: figure out where to put this. AsyncTask is incredibly awkward (mgricken)
+//      if (! dir.exists()) dir.mkdirs (); // TODO: figure out where to put this.
         return undeletableFiles;
       }
       public void complete(AsyncCompletionArgs<List<File>> args) {
-        // TODO: user feedback. Maybe add a method to the notifier to set the status bar text (mgricken)
+        // TODO: user feedback. Maybe add a method to the notifier to set the status bar text
       }
       public String getDiscriptionMessage() {
         return "Deleting files...";
@@ -860,7 +861,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File dir = this.getBuildDirectory ();
       LinkedList<File> acc = new LinkedList<File>();
       getClassFilesHelper(dir, acc);
-      if (! dir.exists()) dir.mkdirs();  // TODO: what if mkdirs() fails (mgricken)
+      if (! dir.exists()) dir.mkdirs();  // TODO: what if mkdirs() fails
       return acc;
     }
     
@@ -3330,6 +3331,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Get the location of the cursor in the definitions according to the definitions document. */
     public int getCurrentLocation() { return getDocument().getCurrentLocation(); }
     
+//    public boolean indentInProgress() { return getDocument().indentInProgress(); }
+    
 //    /** @return the caret position as set by the view. */
 //    public int getCaretPosition() { return _caretPosition; }
     
@@ -3338,10 +3341,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       */
     public int balanceBackward() { return getDocument().balanceBackward(); }
     
+    /* Raw version of balanceBackward.  Assume read and reduced locks are already held. */
+    public int _balanceBackward() { return getDocument()._balanceBackward(); }
+    
     /** Forwarding method to find the match for the open brace immediately to the right, assuming there is such a brace.
       * @return the relative distance forwards to the offset after the matching brace.
       */
     public int balanceForward() { return getDocument().balanceForward(); }
+    
+    /* Raw version of balanceForward.  Assume read and reduced locks are already held. */
+    public int _balanceForward() { return getDocument()._balanceForward(); }
     
     /** @return the breakpoint region manager. */
     public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
@@ -3672,6 +3681,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void clear() { getDocument().clear(); }
     
     /* Locking operations in DJDocument interface */
+    
+    /* Gets the reduced model so it can be locked. */
+    public ReducedModelControl getReduced() { return getDocument().getReduced(); }
     
     /** Swing-style readLock(). */
     public void acquireReadLock() { getDocument().acquireReadLock(); }

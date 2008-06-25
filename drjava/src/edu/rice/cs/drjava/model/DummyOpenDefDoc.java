@@ -97,7 +97,13 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public boolean isModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
   
+//  public boolean indentInProgress() { throw new UnsupportedOperationException("Dummy method"); }
+  
   public int balanceForward() { throw new UnsupportedOperationException("Dummy method"); }
+  public int _balanceForward() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public int balanceBackward() { throw new UnsupportedOperationException("Dummy method"); }
+  public int _balanceBackward() { throw new UnsupportedOperationException("Dummy method"); }
   
   public File getFile() throws FileMovedException { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -195,7 +201,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int balanceBackward() { throw new UnsupportedOperationException("Dummy method"); }
   public void revertFile() throws IOException { throw new UnsupportedOperationException("Dummy method"); }
   public boolean checkIfClassFileInSync() { throw new UnsupportedOperationException("Dummy method"); }
   public void documentSaved() { throw new UnsupportedOperationException("Dummy method"); }
@@ -418,6 +423,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getInitialSelectionEnd() { throw new UnsupportedOperationException("Dummy method"); }
   public String getText() { throw new UnsupportedOperationException("Dummy method"); }
   public void clear() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public ReducedModelControl getReduced() { throw new UnsupportedOperationException("Dummy method"); }
  
   /** Swing-style readLock(). */
   public void acquireReadLock() { throw new UnsupportedOperationException("Dummy method"); }
