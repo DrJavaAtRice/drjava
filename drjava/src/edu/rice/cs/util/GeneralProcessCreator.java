@@ -195,8 +195,8 @@ public class GeneralProcessCreator extends ProcessCreator {
 
     // set up command line
     if (_cmdline!=null) {
-      _evaluatedWorkDir = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
-      _seqs = StringOps.commandLineToLists(_evaluatedWorkDir);
+      _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
+      _seqs = StringOps.commandLineToLists(_evaluatedCmdLine);
     }
     LOG.log("\t"+edu.rice.cs.plt.iter.IterUtil.toString(_seqs));
     if (_seqs.size()<1) { throw new IOException("No process to start."); }

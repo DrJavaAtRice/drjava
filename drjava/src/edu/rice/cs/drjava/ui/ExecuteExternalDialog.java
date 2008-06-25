@@ -128,14 +128,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private StyledDocument _commandWorkDirLineDoc;
   /** Command working directory button. */
   private JButton _commandWorkDirBtn;
-  /** Entered command line .drjavajar file. */
-  private JTextPane _commandDrJavaJarFileLine;
-  /** Command line .drjavajar file preview. */
-  private JTextPane _commandDrJavaJarFileLinePreview;
-  /** Command line .drjavajar file preview document. */
-  private StyledDocument _commandDrJavaJarFileLineDoc;
-  /** Command .drjavajar file button. */
-  private JButton _commandDrJavaJarFileBtn;
+  /** Entered command line enclosing file. */
+  private JTextPane _commandEnclosingFileLine;
+  /** Command line enclosing file preview. */
+  private JTextPane _commandEnclosingFileLinePreview;
+  /** Command line enclosing file preview document. */
+  private StyledDocument _commandEnclosingFileLineDoc;
+  /** Command enclosing file button. */
+  private JButton _commandEnclosingFileBtn;
   /** Last of the two text panes to have focus. */
   private JTextPane _lastCommandFocus;  
 
@@ -152,8 +152,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   DocumentListener _documentListener;
   /** Command line work directory document listener. */
   DocumentListener _workDirDocumentListener;
-  /** Command line .drjavajar file document listener. */
-  DocumentListener _drJavaJarFileDocumentListener;
+  /** Command line enclosing file document listener. */
+  DocumentListener _enclosingFileDocumentListener;
   
   /** Directory chooser to open when clicking the "..." button. */
   protected DirectoryChooser _dirChooser;
@@ -235,10 +235,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
       final String cmdline = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).get(editIndex);
       final String workdir = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).get(editIndex);
-      final String drJavaJarFile = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES).get(editIndex);
+      final String enclosingFile = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).get(editIndex);
       _commandLine.setText(cmdline);
       _commandWorkDirLine.setText(workdir);
-      _commandDrJavaJarFileLine.setText(drJavaJarFile);
+      _commandEnclosingFileLine.setText(enclosingFile);
     }
   }
   
@@ -255,7 +255,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _dirChooser.setDialogTitle("Select Work Directory");
     _dirChooser.setApproveButtonText("Select");
     _fileChooser = new FileChooser(null);
-    _fileChooser.setDialogTitle("Select .drjavajar File");
+    _fileChooser.setDialogTitle("Select Enclosing .djapp File");
     _fileChooser.setApproveButtonText("Select");
     
     super.getContentPane().setLayout(new GridLayout(1,1));
@@ -283,7 +283,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         public void focusLost(FocusEvent e) {
           if ((e.getOppositeComponent() == _commandLinePreview) || 
               (e.getOppositeComponent() == _commandWorkDirLinePreview) ||
-              (e.getOppositeComponent() == _commandDrJavaJarFileLinePreview)) {
+              (e.getOppositeComponent() == _commandEnclosingFileLinePreview)) {
             _runCommandButton.requestFocus();
           }
         }
@@ -442,7 +442,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
             _commandLine.requestFocus();
           }
           else {
-            _commandDrJavaJarFileLine.requestFocus();
+            _commandEnclosingFileLine.requestFocus();
           }
         }
       }
@@ -492,23 +492,23 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     gridbag.setConstraints(commandWorkDirLinePreviewSP, c);
     main.add(commandWorkDirLinePreviewSP);
 
-    // .drjavajar file
+    // enclosing .djapp file
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
-    JLabel drJavaJarFileLabel = new JLabel(".drjavajar file:");
-    gridbag.setConstraints(drJavaJarFileLabel, c);
-    main.add(drJavaJarFileLabel);
+    JLabel enclosingFileLabel = new JLabel("Enclosing .djapp file:");
+    gridbag.setConstraints(enclosingFileLabel, c);
+    main.add(enclosingFileLabel);
     
     c.weightx = 1.0;
     c.weighty = 8.0;
     c.gridwidth = GridBagConstraints.RELATIVE;
     c.insets = compInsets;
     
-    _commandDrJavaJarFileLine = new JTextPane();
+    _commandEnclosingFileLine = new JTextPane();
     // do not allow a newline
-    _commandDrJavaJarFileLine.addKeyListener(new KeyListener() {
+    _commandEnclosingFileLine.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           e.consume();
@@ -532,48 +532,48 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void  keyReleased(KeyEvent e) { }
       public void  keyTyped(KeyEvent e) { }
     });
-    JScrollPane commandDrJavaJarFileLineSP = new JScrollPane(_commandDrJavaJarFileLine);
-    commandDrJavaJarFileLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(commandDrJavaJarFileLineSP, c);
-    main.add(commandDrJavaJarFileLineSP);
+    JScrollPane commandEnclosingFileLineSP = new JScrollPane(_commandEnclosingFileLine);
+    commandEnclosingFileLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    gridbag.setConstraints(commandEnclosingFileLineSP, c);
+    main.add(commandEnclosingFileLineSP);
     
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    _commandDrJavaJarFileBtn = new JButton("...");
-    _commandDrJavaJarFileBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { chooseFile(_commandDrJavaJarFileLine); }
+    _commandEnclosingFileBtn = new JButton("...");
+    _commandEnclosingFileBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { chooseFile(_commandEnclosingFileLine); }
     });
-    gridbag.setConstraints(_commandDrJavaJarFileBtn, c);
-    main.add(_commandDrJavaJarFileBtn);
+    gridbag.setConstraints(_commandEnclosingFileBtn, c);
+    main.add(_commandEnclosingFileBtn);
     
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
-    JLabel commandDrJavaJarFileLinePreviewLabel = new JLabel(".drjavajar file preview:");
-    commandDrJavaJarFileLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
-    gridbag.setConstraints(commandDrJavaJarFileLinePreviewLabel, c);
-    main.add(commandDrJavaJarFileLinePreviewLabel);
+    JLabel commandEnclosingFileLinePreviewLabel = new JLabel("Enclosing .djapp file preview:");
+    commandEnclosingFileLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
+    gridbag.setConstraints(commandEnclosingFileLinePreviewLabel, c);
+    main.add(commandEnclosingFileLinePreviewLabel);
     
     c.weightx = 1.0;
     c.weighty = 8.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    _commandDrJavaJarFileLinePreview = new JTextPane();
-    _commandDrJavaJarFileLinePreview.setToolTipText(STALE_TOOLTIP);
-    _commandDrJavaJarFileLineDoc = (StyledDocument)_commandDrJavaJarFileLinePreview.getDocument();
+    _commandEnclosingFileLinePreview = new JTextPane();
+    _commandEnclosingFileLinePreview.setToolTipText(STALE_TOOLTIP);
+    _commandEnclosingFileLineDoc = (StyledDocument)_commandEnclosingFileLinePreview.getDocument();
     
-    _commandDrJavaJarFileLinePreview.setEditable(false);
-    _commandDrJavaJarFileLinePreview.setBackground(Color.LIGHT_GRAY);
-    _commandDrJavaJarFileLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
-    JScrollPane commandDrJavaJarFileLinePreviewSP = new JScrollPane(_commandDrJavaJarFileLinePreview);
-    commandDrJavaJarFileLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    gridbag.setConstraints(commandDrJavaJarFileLinePreviewSP, c);
-    main.add(commandDrJavaJarFileLinePreviewSP);
+    _commandEnclosingFileLinePreview.setEditable(false);
+    _commandEnclosingFileLinePreview.setBackground(Color.LIGHT_GRAY);
+    _commandEnclosingFileLinePreview.setSelectedTextColor(Color.LIGHT_GRAY);
+    JScrollPane commandEnclosingFileLinePreviewSP = new JScrollPane(_commandEnclosingFileLinePreview);
+    commandEnclosingFileLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    gridbag.setConstraints(commandEnclosingFileLinePreviewSP, c);
+    main.add(commandEnclosingFileLinePreviewSP);
     
     // bottom panel
     panel.add(main, BorderLayout.CENTER);
@@ -655,17 +655,17 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _commandWorkDirLine.setText("${drjava.working.dir}");
     _workDirDocumentListener.changedUpdate(null);
     
-    // update the preview of the actual .drjavajar file post substitution
-    _drJavaJarFileDocumentListener = new DocumentListener() {
+    // update the preview of the actual enclosing .djapp file post substitution
+    _enclosingFileDocumentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
         try {
           // preview
-          _commandDrJavaJarFileLineDoc.remove(0,_commandDrJavaJarFileLineDoc.getLength());
-          String text = StringOps.replaceVariables(_commandDrJavaJarFileLine.getText(), _props, PropertyMaps.GET_LAZY);
-          _commandDrJavaJarFileLineDoc.insertString(0, StringOps.unescapeFileName(text), null);
+          _commandEnclosingFileLineDoc.remove(0,_commandEnclosingFileLineDoc.getLength());
+          String text = StringOps.replaceVariables(_commandEnclosingFileLine.getText(), _props, PropertyMaps.GET_LAZY);
+          _commandEnclosingFileLineDoc.insertString(0, StringOps.unescapeFileName(text), null);
           
           // command line
-          colorVariables(_commandDrJavaJarFileLine,
+          colorVariables(_commandEnclosingFileLine,
                          _props,
                          this,
                          _commandLineCmdAS,
@@ -680,9 +680,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void insertUpdate(DocumentEvent e) { update(e); }
       public void removeUpdate(DocumentEvent e)  { update(e); }
     };
-    _commandDrJavaJarFileLine.getDocument().addDocumentListener(_drJavaJarFileDocumentListener);
-    _commandDrJavaJarFileLine.setText("");
-    _drJavaJarFileDocumentListener.changedUpdate(null);
+    _commandEnclosingFileLine.getDocument().addDocumentListener(_enclosingFileDocumentListener);
+    _commandEnclosingFileLine.setText("");
+    _enclosingFileDocumentListener.changedUpdate(null);
     
     _lastCommandFocus = _commandLine;
     // do not allow preview to have focus
@@ -831,9 +831,18 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
   
-  /** Run a command and return an external process panel. */
+  /** Run a command and return an external process panel.
+    * @param name name of the process
+    * @param cmdline the command line to execute, before evaluation
+    * @param workdir the work directory, before evaluation
+    * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
+    * @param pm PropertyMaps used for substitution when replacing variables
+    * @return ExternalProcessPanel that displays the output of the process
+    */
   public ExternalProcessPanel runCommand(String name, String cmdline, String workdir,
-                                         String drJavaJarFile, PropertyMaps pm) {
+                                         String enclosingFile, PropertyMaps pm) {
+    ((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).setFile(enclosingFile.length()>0?
+                                                                            new File(enclosingFile):null);
     ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim(), pm);
     String label = "External";
     if (!name.equals("")) { label += ": "+name; }
@@ -853,16 +862,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Execute the command line. */
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
-    GeneralProcessCreator.LOG.log("_runCommand(): ${drjavajar.file} = "+_commandDrJavaJarFileLine.getText());
+    GeneralProcessCreator.LOG.log("_runCommand(): ${enclosing.djapp.file} = "+_commandEnclosingFileLine.getText());
     
     _mainFrame.removeModalWindowAdapter(this);
     if (_commandLinePreview.getText().length()>0) {
       try { 
         _props = PropertyMaps.TEMPLATE.clone();
         PropertyMaps pm = _props.clone();
-        String s = _commandDrJavaJarFileLine.getText().trim();
-        ((MutableFileProperty)pm.getProperty("drjavajar.file")).setFile(s.length()>0?new File(s):null);
-        runCommand("", _commandLine.getText(), _commandWorkDirLine.getText(), _commandDrJavaJarFileLine.getText(), pm);
+        runCommand("", _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText().trim(), pm);
       } catch(CloneNotSupportedException e) {
         throw new edu.rice.cs.util.UnexpectedException(e);
       }
@@ -888,8 +895,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      editInMenu(_editIndex, name, "cmdline", _commandLine.getText(), "", _commandWorkDirLine.getText(),
-                 _commandDrJavaJarFileLine.getText());
+      editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText());
     }
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
@@ -903,7 +909,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandDrJavaJarFileLine.getText());
+      addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText());
     }
     
     // Always apply and save settings
@@ -916,15 +922,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     * @param name process name
     * @param cmdline command line
     * @param workdir work directory
+    * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
     * @return number of processes in the menu */
-  public static int addToMenu(String name, String cmdline, String workdir, String drJavaJarFile) {
-    GeneralProcessCreator.LOG.log("addToMenu(): drJavaJarFile = "+drJavaJarFile);
+  public static int addToMenu(String name, String cmdline, String workdir, String enclosingFile) {
+    GeneralProcessCreator.LOG.log("addToMenu(): enclosingFile = "+enclosingFile);
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     ++count;
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> drJavaJarFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.add(name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
@@ -935,8 +942,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     workdirs.add(workdir);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
     
-    drJavaJarFiles.add(drJavaJarFile);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,drJavaJarFiles);
+    enclosingFiles.add(enclosingFile);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
     
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,count);
     
@@ -946,17 +953,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Edit existing process in menu.
     * @param editIndex the index of the process to edit
     * @param name process name
-    * @param type type of the process, "cmdline" or "java"
     * @param cmdline command line
-    * @param jvmarg arguments for the new JVM, if type is "java", else ""
-    * @param workdir work directory */
-  public static void editInMenu(int editIndex, String name, String type, String cmdline, String jvmarg,
-                                String workdir, String drJavaJarFile) {
-    GeneralProcessCreator.LOG.log("editInMenu(): drJavaJarFile = "+drJavaJarFile);
+    * @param workdir work directory
+    * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
+    */
+  public static void editInMenu(int editIndex, String name, String cmdline, String workdir, String enclosingFile) {
+    GeneralProcessCreator.LOG.log("editInMenu(): enclosingFile = "+enclosingFile);
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> drJavaJarFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.set(editIndex,name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
@@ -967,8 +973,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     workdirs.set(editIndex,workdir);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
     
-    drJavaJarFiles.set(editIndex,drJavaJarFile);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,drJavaJarFiles);
+    enclosingFiles.set(editIndex,enclosingFile);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
   }
   
   /** Save process to file.
@@ -978,7 +984,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> drJavaJarFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     XMLConfig xc = new XMLConfig();
     System.out.println("saveToFile("+index+", "+f+")");
@@ -986,7 +992,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     xc.set("drjava/extprocess/name", names.get(index));
     xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
     xc.set("drjava/extprocess/workdir", workdirs.get(index));
-    xc.set("drjava/extprocess/drjavajarfile", drJavaJarFiles.get(index));
+    xc.set("drjava/extprocess/enlcosingfile", enclosingFiles.get(index));
     xc.save(f);
   }
   

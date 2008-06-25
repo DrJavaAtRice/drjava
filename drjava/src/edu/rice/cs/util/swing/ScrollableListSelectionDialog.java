@@ -536,12 +536,12 @@ public class ScrollableListSelectionDialog extends JDialog {
    */
   private void _addSelectButtons(final JPanel selectButtonsPanel) {
     final JButton selectAllButton = new JButton("Select All");
-    selectAllButton.setMnemonic(KeyEvent.VK_A);
+    edu.rice.cs.drjava.platform.PlatformFactory.ONLY.setMnemonic(selectAllButton,KeyEvent.VK_A);
     selectAllButton.addActionListener(new SelectAllNoneActionListener(SelectionState.SELECTED));
     selectButtonsPanel.add(selectAllButton);
     
     final JButton selectNoneButton = new JButton("Select None");
-    selectNoneButton.setMnemonic(KeyEvent.VK_N);
+    edu.rice.cs.drjava.platform.PlatformFactory.ONLY.setMnemonic(selectNoneButton,KeyEvent.VK_N);
     selectNoneButton.addActionListener(new SelectAllNoneActionListener(SelectionState.UNSELECTED));
     selectButtonsPanel.add(selectNoneButton);
   }

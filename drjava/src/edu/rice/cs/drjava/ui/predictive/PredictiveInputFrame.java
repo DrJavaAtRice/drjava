@@ -71,6 +71,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     public Object apply(PredictiveInputFrame<X> param);
     public String getName();
     public KeyStroke getKeyStroke(); // or null if none desired
+    public String getToolTipText(); // or null if none desired
   }
   
   /** Class to save the frame state, i.e. location and dimensions.*/
@@ -398,6 +399,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     int i = 0;
     for (final CloseAction<T> a: _actions) {
       _buttons[i] = new JButton(a.getName());
+      final String tooltip = a.getToolTipText();
+      if (tooltip!=null) { _buttons[i].setToolTipText(tooltip); }
       _buttons[i].addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) { buttonPressed(a); }
       });
@@ -677,7 +680,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this);
+      edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
       setOwnerEnabled(false);
       _textField.requestFocus();
       toFront();
@@ -689,6 +692,23 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     }
     super.setVisible(vis);
   }
+  
+  /** Lambda doing nothing. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      return null;
+    }
+  };
+  
+  /** Lambda that calls _cancel. */
+  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
+    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
+    public Void apply(WindowEvent e) {
+      cancel();
+      return null;
+    }
+  };
 
   /** Add the listener. */
   private void addListener() {

@@ -87,4 +87,36 @@ public interface PlatformSupport {
    *  @return true if the URL was successfully handled, false otherwise
    */
   public boolean openURL(URL address);
+  
+  /** Set the keyboard mnemonic for the component in a way that is consistent with
+    * the current platform.
+    * @param obj the component whose mnemonic should be set
+    * @param mnemonic the key code which represents the mnemonic
+    * @see javax.swing.AbstractButton#setMnemonic(int)
+    * @see java.awt.event.KeyEvent */
+  public void setMnemonic(javax.swing.AbstractButton obj, int mnemonic);
+
+  /** Set the keyboard mnemonic for the component in a way that is consistent with
+    * the current platform.
+    * @param obj the component whose mnemonic should be set
+    * @param mnemonic a char specifying the mnemonic value
+    * @see javax.swing.AbstractButton#setMnemonic(char) */
+  public void setMnemonic(javax.swing.AbstractButton obj, char mnemonic);
+
+  /** Set the keyboard mnemonic for the component in a way that is consistent with
+    * the current platform.
+    * @param obj the component whose mnemonic should be set
+    * @param mnemonic the key code which represents the mnemonic
+    * @see javax.swing.ButtonModel#setMnemonic(int)
+    * @see java.awt.event.KeyEvent */
+  public void setMnemonic(javax.swing.ButtonModel obj, int mnemonic);
+
+  /** Set the keyboard mnemonic for the component in a way that is consistent with
+    * the current platform.
+    * @param obj the component whose mnemonic should be set
+    * @param tabIndex the index of the tab that the mnemonic refers to
+    * @param mnemonic the key code which represents the mnemonic
+    * @see javax.swing.JTabbedPane#setMnemonic(int,int)
+    * @see java.awt.event.KeyEvent */
+  public void setMnemonicAt(javax.swing.JTabbedPane obj, int tabIndex, int mnemonic);
 }

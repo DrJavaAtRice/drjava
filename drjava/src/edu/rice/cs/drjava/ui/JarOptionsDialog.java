@@ -611,7 +611,7 @@ public class JarOptionsDialog extends JFrame {
       public Object construct() {
         try {
           File jarOut = _jarFileSelector.getFileFromField();
-          if (! jarOut.exists()) jarOut.createNewFile();  // TODO: what if createNewFile() fails?
+          if (! jarOut.exists()) jarOut.createNewFile();  // TODO: what if createNewFile() fails? (mgricken)
           
           if (_jarClasses.isSelected() && _jarSources.isSelected()) {
             JarBuilder mainJar = null;
@@ -633,7 +633,7 @@ public class JarOptionsDialog extends JFrame {
             mainJar.addFile(sourceJarFile, "", "source.jar");
             
             mainJar.close();
-            sourceJarFile.delete();  // TODO: what if delete() fails?
+            sourceJarFile.delete();  // TODO: what if delete() fails? (mgricken)
           }
           else if (_jarClasses.isSelected()) {
             JarBuilder jb;

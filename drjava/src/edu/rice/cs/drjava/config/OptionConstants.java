@@ -80,12 +80,9 @@ public interface OptionConstants {
   public static final String PROJECT_FILE_EXTENSION = ".xml";
 
   /** The extension for stand-alone DrJava external process file. */
-  public static final String EXTPROCESS_FILE_EXTENSION = ".drjavaxml";
+  public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
 
-  /** The extension for DrJava external process file embedded in its own jar file. */
-  public static final String EXTPROCESS_JAR_FILE_EXTENSION = ".drjavajar";
-  
-  /** The configuration XML file that DrJava looks for inside a .drjavajar file */
+  /** The configuration XML file that DrJava looks for inside a .djapp file */
   public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process"+EXTPROCESS_FILE_EXTENSION;
   
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
@@ -1257,8 +1254,8 @@ public interface OptionConstants {
                              new Vector<String>());
   
   /** The script file (or "" if none) of saved external processes. */
-  public static final VectorOption<String> EXTERNAL_SAVED_DRJAVAJAR_FILES =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"drjavajarfiles",
+  public static final VectorOption<String> EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"enclosingdjappfiles",
                              new StringOption("",""),
                              new Vector<String>());
   

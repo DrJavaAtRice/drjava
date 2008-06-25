@@ -255,9 +255,6 @@ public class DrJavaRoot {
         else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
           MainFrame.openExtProcessFile(file);
         }
-        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)) {
-          MainFrame.openExtProcessJarFile(file);
-        }
         else {
           if (jump && (lineNo>=0)) {
             // if a line number has been specified, open the file using MainFrame.open,
@@ -277,10 +274,10 @@ public class DrJavaRoot {
       }
       
       catch (FileNotFoundException ex) {
-        // TODO: show a dialog? (file not found)
+        // TODO: show a dialog? (file not found) (mgricken)
       }
       catch (SecurityException se) {
-        // TODO: show a dialog? (file not found)
+        // TODO: show a dialog? (file not found) (mgricken)
       }
       catch (AlreadyOpenException aoe) {
         // This explicitly does nothing to ignore duplicate files.
@@ -289,7 +286,7 @@ public class DrJavaRoot {
         // This explicitly does nothing to ignore duplicate files.
       }
       catch (IOException ex) {
-        // TODO: show a dialog? (file not found)
+        // TODO: show a dialog? (file not found) (mgricken)
       }
       catch (Exception ex) { throw new UnexpectedException(ex); }
     }
@@ -335,13 +332,6 @@ public class DrJavaRoot {
   /** User dropped something on the component. */
   public static void drop(DropTargetDropEvent dropTargetDropEvent) {
     _mainFrame.drop(dropTargetDropEvent);
-  }
-  
-    /** Return the modal window adapter if available, otherwise returns a non-modal dummy listener.
-    * @param w window trying to get the modal window adapter
-    * @return window adapter */
-  public static void installModalWindowAdapter(Window w) {
-    _mainFrame.installModalWindowAdapter(w);
   }
 
   /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.

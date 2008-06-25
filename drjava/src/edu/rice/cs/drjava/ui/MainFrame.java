@@ -1170,6 +1170,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
             final OpenDefinitionsDocument newDoc = p.getItem().doc;
@@ -1215,6 +1216,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           hourglassOff();
           return null;
@@ -1446,6 +1448,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           if (p.getItem() != null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
@@ -1458,6 +1461,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           hourglassOff();
           return null;
@@ -1500,7 +1504,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     if (_javaAPIList == null) {
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+      
+      // the string that will be ADDED to the beginning of the link to form the full URL
       String base = "";
+      
+      // the string that will be REMOVED from the beginning of the link to form the fully-qualified class name
+      String stripPrefix = "";
+      
+      // the HTML file name that contains all the links
       String suffix = "";
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // use the compiler's version of the Java API Javadoc
@@ -1520,18 +1531,25 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.3 Javadoc are relative
         suffix = "/allclasses-1.3.html";
       }
       else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
         suffix = "/allclasses-1.4.html";
       }
       else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.5 Javadoc are relative
         suffix = "/allclasses-1.5.html";
       }
       else if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
-        base = "";
+        base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
+        // but we do need to strip the absolute part to get correct fully-qualified class names
+        // and we take the default string here, not what the user entered, because the links in
+        // our allclasses-1.6.html file go to the original Sun website.
+        stripPrefix = JAVADOC_1_6_LINK.getDefaultString() + "/";
         suffix = "/allclasses-1.6.html";
       }
       else {
@@ -1555,7 +1573,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
             if ((aPos>=0) && (aEndPos>=0)) {
               String link = line.substring(aPos+aText.length(), aEndPos);
-              String fullClassName = link.replace('/', '.');
+              String fullClassName = link.substring(stripPrefix.length()).replace('/', '.');
               String simpleClassName = fullClassName;
               int lastDot = fullClassName.lastIndexOf('.');
               if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
@@ -1738,7 +1756,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _completeWordDialog.resetFocus();
         }
       });
-      _completeJavaAPICheckbox.setMnemonic('j');
+      PlatformFactory.ONLY.setMnemonic(_completeJavaAPICheckbox,'j');
       PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry> info = 
         new PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry>() {
         public String apply(ClassNameAndPackageEntry entry) {
@@ -1753,6 +1771,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+        public String getToolTipText() { return "Complete the identifier"; }
         public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
@@ -1790,7 +1809,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry> fullAction =
         new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
         public String getName() { return "Fully Qualified"; }
-        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK); }
+        public KeyStroke getKeyStroke() {
+          return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK);
+        }
+        public String getToolTipText() { return "Complete the word using the fully-qualified class name"; }
         public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
@@ -1832,6 +1854,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           hourglassOff();
           return null;
@@ -3383,6 +3406,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJavaErrorHandler.setButton(_errorsButton);
     
     // check for new version if desired by user
+    boolean askedForNewVersion = false;
     if (! DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
           .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
         !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
@@ -3391,6 +3415,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
                              + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
       if (new java.util.Date().after(nextCheck)) {
+        askedForNewVersion = true;
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
@@ -3399,7 +3424,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         });
       }
     }
-    else {
+    if (!askedForNewVersion) {
       // check for new version if desired by user
       // but only if we haven't just asked if the user wants to download a new version
       // two dialogs on program start is too much clutter
@@ -4040,7 +4065,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // Don't set selected file
     }
     
-    // TODO: Why are we working with _saveChooser first, then call jfc.showSaveDialog(this)? (MGR)
+    // TODO: Why are we working with _saveChooser first, then call jfc.showSaveDialog(this)? (mgricken)
     _saveChooser.removeChoosableFileFilter(_projectFilter);
     _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
     _saveChooser.setFileFilter(_javaSourceFilter);
@@ -4742,7 +4767,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return _saveAs();
         }
         boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
-        /** Delete the old file if save was successful.  TODO: what if delete() fails? */
+        /** Delete the old file if save was successful. */
+        // TODO: what if delete() fails? (mgricken)
         if (toReturn && !_model.getActiveDocument().getFile().equals(fileToDelete)) fileToDelete.delete();
         /** this highlights the document in the navigator */
         _model.setActiveDocument(_model.getActiveDocument());
@@ -6034,7 +6060,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns a file menu.  Side effects: sets values for _saveMenuItem. */
   private JMenu _setUpFileMenu(int mask) {
     JMenu fileMenu = new JMenu("File");
-    fileMenu.setMnemonic(KeyEvent.VK_F);
+    PlatformFactory.ONLY.setMnemonic(fileMenu,KeyEvent.VK_F);
     // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
@@ -6078,7 +6104,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns a edit menu. */
   private JMenu _setUpEditMenu(int mask) {
     JMenu editMenu = new JMenu("Edit");
-    editMenu.setMnemonic(KeyEvent.VK_E);
+    PlatformFactory.ONLY.setMnemonic(editMenu,KeyEvent.VK_E);
     // Undo, redo
     _addMenuItem(editMenu, _undoAction, KEY_UNDO);
     _addMenuItem(editMenu, _redoAction, KEY_REDO);
@@ -6132,7 +6158,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns a tools menu. */
   private JMenu _setUpToolsMenu(int mask) {
     JMenu toolsMenu = new JMenu("Tools");
-    toolsMenu.setMnemonic(KeyEvent.VK_T);
+    PlatformFactory.ONLY.setMnemonic(toolsMenu,KeyEvent.VK_T);
     
     // Compile, Test, Javadoc
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
@@ -6190,16 +6216,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
     final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
     final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
-    final int drJavaJarFileCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES).size();
+    final int enclosingFileCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
     if ((savedCount!=namesCount) ||
         (savedCount!=cmdlinesCount) ||
         (savedCount!=workdirsCount) ||
-        (savedCount!=drJavaJarFileCount)) {
+        (savedCount!=enclosingFileCount)) {
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES, new Vector<String>());
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new Vector<String>());
     }
     
     OptionListener<Integer> externalSavedCountListener =
@@ -6215,18 +6241,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
               final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
               final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-              final Vector<String> drjavajarfiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+              final Vector<String> enclosingfiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
               
               extMenu.insert(new AbstractAction(names.get(i)) {
                 public void actionPerformed(ActionEvent ae) {
                   try {
                     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-                    String s = drjavajarfiles.get(i).trim();
-                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): drjavajarfiles.get(i) = "+s);
-                    ((MutableFileProperty)pm.getProperty("drjavajar.file")).setFile(s.length()>0?new File(s):null);
-                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): ${drjavajar.file} = "+((MutableFileProperty)pm.getProperty("drjavajar.file")).getCurrent(pm));
+                    String s = enclosingfiles.get(i).trim();
+                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): enclosingfiles.get(i) = "+s);
+                    ((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).setFile(s.length()>0?new File(s):null);
+                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): ${enclosing.djapp.file} = "+((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).getCurrent(pm));
                     // System.out.println(names.get(i)+": cmdline "+cmdlines.get(i)+" "+workdirs.get(i));
-                    _executeExternalDialog.runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),drjavajarfiles.get(i),pm);
+                    _executeExternalDialog.runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
                   }
                   catch(CloneNotSupportedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
                 }
@@ -6260,7 +6286,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns a project menu. */
   private JMenu _setUpProjectMenu(int mask) {
     JMenu projectMenu = new JMenu("Project");
-    projectMenu.setMnemonic(KeyEvent.VK_P);
+    PlatformFactory.ONLY.setMnemonic(projectMenu,KeyEvent.VK_P);
     // New, open
     projectMenu.add(_newProjectAction);
     _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT);
@@ -6294,7 +6320,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns a debug menu. */
   private JMenu _setUpDebugMenu(int mask) {
     JMenu debugMenu = new JMenu("Debugger");
-    debugMenu.setMnemonic(KeyEvent.VK_D);
+    PlatformFactory.ONLY.setMnemonic(debugMenu,KeyEvent.VK_D);
     // Enable debugging item
     _debuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
     _debuggerEnabledMenuItem.setSelected(false);
@@ -6353,7 +6379,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns the language levels menu. */
   private JMenu _setUpLanguageLevelMenu(int mask) {
     JMenu languageLevelMenu = new JMenu("Language Level");
-    languageLevelMenu.setMnemonic(KeyEvent.VK_L);
+    PlatformFactory.ONLY.setMnemonic(languageLevelMenu,KeyEvent.VK_L);
     ButtonGroup group = new ButtonGroup();
     
     final Configuration config = DrJava.getConfig();
@@ -6405,7 +6431,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Creates and returns a help menu. */
   private JMenu _setUpHelpMenu(int mask) {
     JMenu helpMenu = new JMenu("Help");
-    helpMenu.setMnemonic(KeyEvent.VK_H);
+    PlatformFactory.ONLY.setMnemonic(helpMenu,KeyEvent.VK_H);
     _addMenuItem(helpMenu, _helpAction, KEY_HELP);
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
     helpMenu.addSeparator();
@@ -9493,9 +9519,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           else if ((file.isFile()) && ((file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)))) {
             openExtProcessFile(file);
           }
-          else if ((file.isFile()) && ((file.getName().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)))) {
-            openExtProcessJarFile(file);
-          }
         }
         final File[] fileArray = filteredFileList.toArray(new File[filteredFileList.size()]);
         FileOpenSelector fs = new FileOpenSelector() {
@@ -9528,10 +9551,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                       xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"),
                                       "");
-      // we override the drjava/extprocess/drjavajarfile and set it to the empty string ""
-      // because this external process did not come from a JAR file (*.drjavajar).
+      // we override the drjava/extprocess/enclosingfile and set it to the empty string ""
+      // because this external process did not come from a *.djapp file that was a JAR file.
     }
-    catch(XMLConfigException xce) { /* ignore drop */ }
+    catch(XMLConfigException xce) {
+      // this wasn't an XML file, try to treat it as a jar file
+      openExtProcessJarFile(file);
+    }
   }
   
   /** Open external process file in a jar file. */
@@ -9551,8 +9577,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                       xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"),
                                       file.getAbsolutePath());
-      // we override the drjava/extprocess/drjavajarfile and set it to the file specified
-      // because this external process came from a JAR file (*.drjavajar).
+      // we override the drjava/extprocess/enclosingfile and set it to the file specified
+      // because this external process came from a *.djapp file that was a JAR file.
       is.close();
       jf.close();
     }
@@ -9606,7 +9632,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _autoImportDialog.resetFocus();
         }
       });
-      _autoImportPackageCheckbox.setMnemonic('p');
+      PlatformFactory.ONLY.setMnemonic(_autoImportPackageCheckbox,'p');
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
         public String apply(JavaAPIListEntry entry) {
@@ -9618,6 +9644,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           String text;
           if (p.getItem() != null) {
@@ -9658,6 +9685,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
+        public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           // if no class was selected, do nothing
           // just reset the error information so the dialog box works next time
@@ -9849,44 +9877,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-//  edu.rice.cs.util.Log MODAL_LOG = new edu.rice.cs.util.Log("modal.txt",true);
-  /** Return the modal window adapter if available, otherwise returns a non-modal dummy listener.
-    * @param w window trying to get the modal window adapter
-    * @return window adapter */
-  public synchronized void installModalWindowAdapter(Window w) {
-//    MODAL_LOG.log("installModalWindowAdapter, window = "+System.identityHashCode(w));
-    if (_modalWindowAdapters.containsKey(w)) {
-      // already installed
-//      MODAL_LOG.log("\talready installed");
-      return;
-    } 
-    
-    if (_modalWindowAdapterOwner==null) {
-//      MODAL_LOG.log("\tadapter available");
-      // modal adapter is available, claim it
-      _modalWindowAdapterOwner = w;
-      WindowAdapter wa = new WindowAdapter() {
-        public void windowDeactivated(WindowEvent we) {
-          we.getWindow().toFront();
-          we.getWindow().requestFocus();
-        }
-        public void windowIconified(WindowEvent we) {
-          we.getWindow().toFront();
-          we.getWindow().requestFocus();
-        }
-        public void windowLostFocus(WindowEvent we) {
-          we.getWindow().toFront();
-          we.getWindow().requestFocus();
-        }
-      };
-      _modalWindowAdapters.put(w, wa);
-      // install it
-      w.addWindowListener(wa);
-      w.addWindowFocusListener(wa);
-    }
-    // else nothing to do; modal adapter is already owned by another window
-  }
-  
   /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
     * @param w window trying to get the modal window listener
     * @param toFrontAction action to be performed after the window has been moved to the front again
@@ -9895,16 +9885,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public synchronized void installModalWindowAdapter(final Window w,
                                                      final Lambda<Void,WindowEvent> toFrontAction,
                                                      final Lambda<Void,WindowEvent> closeAction) {
-//    MODAL_LOG.log("installModalWindowAdapter, window = "+System.identityHashCode(w));
     if (_modalWindowAdapters.containsKey(w)) {
       // already installed
-//      MODAL_LOG.log("\talready installed");
       return;
     }
     
     WindowAdapter wa;
     if (_modalWindowAdapterOwner==null) {
-//      MODAL_LOG.log("\tadapter available");
       // modal listener is available, claim it
       _modalWindowAdapterOwner = w;
       // create a window adapter performs the specified actions after delegating
@@ -9949,10 +9936,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Remove the modal window adapter.
     * @param w window releasing the modal window adapter */
   public synchronized void removeModalWindowAdapter(Window w) {
-//    MODAL_LOG.log("removeModalWindowListener, window = "+System.identityHashCode(w));
     if (!_modalWindowAdapters.containsKey(w)) {
       // the specified window does not have a modal windowadapter
-//      MODAL_LOG.log("\tno modal window adapter installed for this window");
       return;
     }
     w.removeWindowListener(_modalWindowAdapters.get(w));

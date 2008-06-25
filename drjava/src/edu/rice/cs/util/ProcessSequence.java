@@ -134,7 +134,7 @@ public class ProcessSequence extends Process {
             }
             catch(IOException e) {
               // could not start the process, record error but continue
-              // TODO: find a way to record the error in the ExternalProcessPanel
+              // TODO-MGR: find a way to record the error in the ExternalProcessPanel (mgricken)
 //              DrJavaErrorHandler.record(e);
               _processes[_index] = DUMMY_PROCESS;
             }
@@ -160,7 +160,7 @@ public class ProcessSequence extends Process {
     }
     catch(IOException e) {
       // could not start the process, record error but continue
-      // TODO: find a way to record the error in the ExternalProcessPanel
+      // TODO-MGR: find a way to record the error in the ExternalProcessPanel (mgricken)
       _processes[_index] = DUMMY_PROCESS;
 //      DrJavaErrorHandler.record(e);
     }

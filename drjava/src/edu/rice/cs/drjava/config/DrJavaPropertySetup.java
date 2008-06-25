@@ -1216,10 +1216,10 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                      "This property contains the separator used between "+
                                                                      "processes."));
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new MutableFileProperty("drjavajar.file", null,
-                                                                      "If the command line was stored in a .drjavajar file,"+
-                                                                      "then this property contains the file. Otherwise, it is "+
-                                                                      "empty.\n"+
+    PropertyMaps.TEMPLATE.setProperty("Misc", new MutableFileProperty("enclosing.djapp.file", null,
+                                                                      "If the command line was enclosed in a .djapp file that "+
+                                                                      "was a JAR file, then this property contains the file. "+
+                                                                      "Otherwise, it is empty.\n"+
                                                                       "Optional attributes:\n"+
                                                                       "\trel=\"<dir to which the files are relative>\""));
     String[] cps = System.getProperty("java.class.path").split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator));

@@ -845,11 +845,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (!could) undeletableFiles.add(file);
           monitor.setProgress(progress++);
         }
-//      if (! dir.exists()) dir.mkdirs (); // TODO: figure out where to put this.
+//      if (! dir.exists()) dir.mkdirs (); // TODO: figure out where to put this. AsyncTask is incredibly awkward (mgricken)
         return undeletableFiles;
       }
       public void complete(AsyncCompletionArgs<List<File>> args) {
-        // TODO: user feedback. Maybe add a method to the notifier to set the status bar text
+        // TODO: user feedback. Maybe add a method to the notifier to set the status bar text (mgricken)
       }
       public String getDiscriptionMessage() {
         return "Deleting files...";
@@ -860,7 +860,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File dir = this.getBuildDirectory ();
       LinkedList<File> acc = new LinkedList<File>();
       getClassFilesHelper(dir, acc);
-      if (! dir.exists()) dir.mkdirs();  // TODO: what if mkdirs() fails
+      if (! dir.exists()) dir.mkdirs();  // TODO: what if mkdirs() fails (mgricken)
       return acc;
     }
     

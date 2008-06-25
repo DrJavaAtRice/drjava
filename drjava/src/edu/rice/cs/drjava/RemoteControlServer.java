@@ -151,9 +151,6 @@ public final class RemoteControlServer {
                   if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
                     MainFrame.openExtProcessFile(f);
                   }
-                  else if (currFileName.endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)) {
-                    MainFrame.openExtProcessJarFile(f);
-                  }
                   else {
                     FileOpenSelector openSelector = new FileOpenSelector() {
                       public File[] getFiles() throws OperationCanceledException {

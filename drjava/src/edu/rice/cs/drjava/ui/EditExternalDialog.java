@@ -123,19 +123,18 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
   /** Completion monitor to simulate modal behavior. */
   protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
   
-  /** Filter for drjava project files (.drjavaxml and .drjavajar) */
+  /** Filter for drjava external process files (.djapp) */
   private final FileFilter _extProcFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
       return f.isDirectory() || 
-        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION) ||
-        f.getPath().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION);
+        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
     }
     public String getDescription() { 
       return "DrJava External Process Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
     }
   };
 
-  /** Filter for drjava project files (.drjavaxml only) */
+  /** Filter for drjava project files (.djapp only) */
   private final FileFilter _saveExtProcFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
       return f.isDirectory() || 
@@ -372,9 +371,9 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     v.remove(selectedIndex);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,v);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     --count;
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
@@ -407,10 +406,10 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     v.add(selectedIndex-1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,v);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex-1));
@@ -442,10 +441,10 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     v.add(selectedIndex+1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES);
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_DRJAVAJAR_FILES,v);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex+1));
@@ -471,14 +470,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
         // return a zero-size array -- handle it differently.
         if (chosen.length == 0) {
           File f = _importChooser.getSelectedFile();
-          if (f.getName().endsWith(OptionConstants.EXTPROCESS_JAR_FILE_EXTENSION)) {
-            edu.rice.cs.util.GeneralProcessCreator.LOG.log("_import: MainFrame.openExtProcessJarFile("+f+")");
-            MainFrame.openExtProcessJarFile(f);
-          }
-          else {
-            edu.rice.cs.util.GeneralProcessCreator.LOG.log("_import: MainFrame.openExtProcessFile("+f+")");
-            MainFrame.openExtProcessFile(f);
-          }
+          MainFrame.openExtProcessFile(f);
           updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
         }
         return;

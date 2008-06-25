@@ -144,6 +144,10 @@ public class DrJavaSurveyPopup extends JDialog {
   };
 
   protected void noAction() {
+    // set the date we asked even if the user pressed no
+    // so the user won't be bothered the next time he starts DrJava
+    // next popup will occur in DRJAVA_SURVEY_DAYS (91) days.
+    DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
     setVisible(false);
     dispose();
   }
@@ -151,66 +155,68 @@ public class DrJavaSurveyPopup extends JDialog {
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("survey.txt",false);
 
   protected void yesAction() {
-    noAction();
-
-    final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
-    StringBuilder sb = new StringBuilder();
-    sb.append(DRJAVA_SURVEY_PAGE);
+    try {
+      final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
+      StringBuilder sb = new StringBuilder();
+      sb.append(DRJAVA_SURVEY_PAGE);
 //    sb.append("date=");
 //    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 //    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 //    sb.append(sdf.format(new Date()));
-    boolean first = true;
-    for(String k: DRJAVA_SURVEY_KEYS) {
-      if (first) { first = false; } else { sb.append('&'); }
-      sb.append(k);
-      sb.append('=');
-      sb.append(System.getProperty(k));
-    }
-    LOG.log(sb.toString());
-    String result = sb.toString().replaceAll(" ","%20");
-    LOG.log(result);
-    
-    // check how many days have passed since the last survey
-    int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);
-    java.util.Date nextCheck = 
-      new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
-                           + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
-    if (!(new java.util.Date().after(nextCheck)) &&
-        (DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT).equals(result))) {
-      // not enough days have passed, and the configuration has not changed, quietly terminate
-      return;
-    }
-
-    BufferedReader br = null;
-    try {
-      URL url = new URL(result);
-      InputStream urls = url.openStream();
-      InputStreamReader is = new InputStreamReader(urls);
-      br = new BufferedReader(is);
-      String line;
-      sb.setLength(0);
-      while((line = br.readLine()) != null) { sb.append(line); sb.append(System.getProperty("line.separator")); }
+      boolean first = true;
+      for(String k: DRJAVA_SURVEY_KEYS) {
+        if (first) { first = false; } else { sb.append('&'); }
+        sb.append(k);
+        sb.append('=');
+        sb.append(System.getProperty(k));
+      }
       LOG.log(sb.toString());
-      DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
-      DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, result);
-    }
-    catch(IOException e) {
-      // could not open URL using Java, try web browser
-      LOG.log("Could not open URL using Java", e);
+      String result = sb.toString().replaceAll(" ","%20");
+      LOG.log(result);
+      
+      // check how many days have passed since the last survey
+      int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);
+      java.util.Date nextCheck = 
+        new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
+                             + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
+      if (!(new java.util.Date().after(nextCheck)) &&
+          (DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT).equals(result))) {
+        // not enough days have passed, and the configuration has not changed, quietly terminate
+        return;
+      }
+      
+      BufferedReader br = null;
       try {
-        PlatformFactory.ONLY.openURL(new URL(result));
+        URL url = new URL(result);
+        InputStream urls = url.openStream();
+        InputStreamReader is = new InputStreamReader(urls);
+        br = new BufferedReader(is);
+        String line;
+        sb.setLength(0);
+        while((line = br.readLine()) != null) { sb.append(line); sb.append(System.getProperty("line.separator")); }
+        LOG.log(sb.toString());
         DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
         DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, result);
       }
-      catch(IOException e2) {
-        // could not open using Java or web browser, ignore
-        LOG.log("Could not open URL using web browser", e2);
+      catch(IOException e) {
+        // could not open URL using Java, try web browser
+        LOG.log("Could not open URL using Java", e);
+        try {
+          PlatformFactory.ONLY.openURL(new URL(result));
+          DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, result);
+        }
+        catch(IOException e2) {
+          // could not open using Java or web browser, ignore
+          LOG.log("Could not open URL using web browser", e2);
+        }
+      }
+      finally { // close open input stream
+        try { if (br!=null) br.close(); }
+        catch(IOException e) { /* ignore */ }
       }
     }
-    finally { // close open input stream
-      try { if (br!=null) br.close(); }
-      catch(IOException e) { /* ignore */ }
+    finally {
+      noAction();
     }
   }
   

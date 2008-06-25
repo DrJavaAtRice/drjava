@@ -46,7 +46,7 @@ import java.util.Iterator;
  *
  *  @version $Id$
  */
-public abstract class DrJavaActionProperty extends EagerProperty {  
+public abstract class DrJavaActionProperty extends DrJavaProperty {  
   /** Create a property. */
   public DrJavaActionProperty(String name, String help) { super(name,help); }
 

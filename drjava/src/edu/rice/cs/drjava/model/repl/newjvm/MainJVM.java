@@ -704,9 +704,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Sets the interpreter to allow access to private members. Blocks until an interpreter
-    * is connected.  TODO: synchronize?
-    */
-  public void setPrivateAccessible(boolean allow) {
+    * is connected. */
+  public void setPrivateAccessible(boolean allow) { // TODO: synchronize?
     // silently fail if disabled. see killInterpreter docs for details.
     if (!_restart) return;
     

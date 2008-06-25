@@ -124,8 +124,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     acquireReadLock();
     synchronized(_stylesList) {
       try { 
-        /* TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is
-         * used as body of return statement. */
+        // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of return statement.
         @SuppressWarnings("unchecked")
         Pair<Pair<Integer, Integer>, String>[] result = 
           (Pair<Pair<Integer, Integer>, String>[]) (_stylesList.toArray(new Pair[0]));

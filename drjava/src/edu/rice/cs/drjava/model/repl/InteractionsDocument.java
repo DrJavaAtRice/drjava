@@ -331,7 +331,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void appendExceptionResult(String message, String styleName) {
     // Note that there is similar code in InteractionsDJDocument.  Something should be refactored.
     
-    // TODO: should probably log this error, or figure out what causes it
+    // TODO: should probably log this error, or figure out what causes it (mgricken)
     // it does not seem to affect the program negatively, though
     // I'm commenting out, just to see when it appears
 //    if (message != null && (message.equals("Connection refused to host: 127.0.0.1; nested exception is: \n" +
