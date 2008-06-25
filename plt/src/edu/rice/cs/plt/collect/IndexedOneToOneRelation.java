@@ -35,66 +35,42 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Map;
-import java.util.HashMap;
 import java.io.Serializable;
+import edu.rice.cs.plt.lambda.Thunk;
 
-/**
- * A hash code-based implementation of the InjectiveRelation interface.  By default, a hash-based index
- * is created mapping firsts to sets of seconds; this functionality may be turned off where it 
- * is not needed.
- */
-public class HashInjectiveRelation<T1, T2> extends AbstractInjectiveRelation<T1, T2> implements Serializable {
+/** A implementation of OneToOneRelation based on indexing maps. */
+public class IndexedOneToOneRelation<T1, T2> extends AbstractOneToOneRelation<T1, T2> implements Serializable {
   
-  private RelationIndex<T1, T2> _firstIndex;
-  private HashMap<T2, T1> _secondMap;
+  private Map<T1, T2> _firstMap;
+  private LambdaMap<T1, T2> _functionMap;
+  private Map<T2, T1> _secondMap;
   private LambdaMap<T2, T1> _injectionMap;
   
-  /** Create a HashInjectiveRelation with indexing turned on. */
-  public HashInjectiveRelation() { this(true); }
-  
-  /** Create a HashInjectiveRelation with indexing turned on and with the given initial values. */
-  public HashInjectiveRelation(InjectiveRelation<T1, T2> copy) {
-    this(true);
-    addAll(copy);
+  /** Index using {@link java.util.HashMap}s. */
+  public IndexedOneToOneRelation() {
+    this(CollectUtil.<T1, T2>hashMapFactory(), CollectUtil.<T2, T1>hashMapFactory());
   }
   
-  /** Create a HashInjectiveRelation with indexing turned on and with the given initial values. */
-  public HashInjectiveRelation(Map<T2, T1> copy) {
-    this(true);
-    for (Map.Entry<T2, T1> entry : copy.entrySet()) {
-      add(entry.getValue(), entry.getKey());
-    }
-  }
-  
-  /**
-   * Optionally create a HashInjectiveRelation without a first-to-seconds index.
-   * @param indexFirst  Whether an index from firsts to sets of seconds should be maintained.
-   */
-  public HashInjectiveRelation(boolean indexFirst) {
-    _secondMap = new HashMap<T2, T1>();
+  /** Create an IndexedOneToOneRelation using the given map factories to produce indices. */
+  public IndexedOneToOneRelation(Thunk<Map<T1, T2>> firstIndexFactory,
+                                 Thunk<Map<T2, T1>> secondIndexFactory) {
+    _firstMap = firstIndexFactory.value();
+    // TODO: support mutation:
+    _functionMap = new ImmutableMap<T1, T2>(_firstMap);
+    _secondMap = secondIndexFactory.value();
+    // TODO: support mutation:
     _injectionMap = new ImmutableMap<T2, T1>(_secondMap);
-    if (indexFirst) {
-      _firstIndex = new ConcreteRelationIndex<T1, T2>(CollectUtil.<T1, PredicateSet<T2>>hashMapFactory(),
-                                                      CollectUtil.<T2>hashSetFactory(4)) {
-        public void validateAdd(T1 first, T2 second) { HashInjectiveRelation.this.validateAdd(first, second); }
-        public void addToRelation(T1 first, T2 second) { _secondMap.put(second, first); }
-        public void removeFromRelation(T1 first, T2 second) { _secondMap.remove(second); }
-        public void clearRelation() { _secondMap.clear(); }
-      };
-    }
-    else { _firstIndex = new LazyRelationIndex<T1, T2>(this); }
   }
   
   public boolean isStatic() { return false; }
+  public LambdaMap<T1, T2> functionMap() { return _functionMap; }
   public LambdaMap<T2, T1> injectionMap() { return _injectionMap; }
-  public PredicateSet<T1> firstSet() { return _firstIndex.keys(); }
-  public PredicateSet<T2> matchFirst(T1 first) { return _firstIndex.match(first); }
-
+  
   @Override public boolean add(T1 first, T2 second) {
     boolean result = validateAdd(first, second);
     if (result) {
+      _firstMap.put(first, second);
       _secondMap.put(second, first);
-      _firstIndex.added(first, second);
     }
     return result;
   }
@@ -104,14 +80,17 @@ public class HashInjectiveRelation<T1, T2> extends AbstractInjectiveRelation<T1,
    * Throws an exception if the pair violates integrity constraints.
    */
   private boolean validateAdd(T1 first, T2 second) {
-    if (_secondMap.containsKey(second)) {
-      T1 current = _secondMap.get(second);
-      if ((current == null) ? (first == null) : current.equals(first)) {
+    if (_firstMap.containsKey(first)) {
+      T2 current = _firstMap.get(first);
+      if ((current == null) ? (second == null) : current.equals(second)) {
         return false;
       }
       else {
-        throw new IllegalArgumentException("Relation already contains an entry for " + second);
+        throw new IllegalArgumentException("Relation already contains an entry for " + first);
       }
+    }
+    else if (_secondMap.containsKey(second)) {
+      throw new IllegalArgumentException("Relation already contains an entry for " + second);
     }
     else { return true; }
   }
@@ -119,15 +98,34 @@ public class HashInjectiveRelation<T1, T2> extends AbstractInjectiveRelation<T1,
   @Override public boolean remove(T1 first, T2 second) {
     boolean result = contains(first, second);
     if (result) {
+      _firstMap.remove(first);
       _secondMap.remove(second);
-      _firstIndex.removed(first, second);
     }
     return result;
   }
   
   @Override public void clear() {
+    _firstMap.clear();
     _secondMap.clear();
-    _firstIndex.cleared();
   }
-    
+  
+  /** Make an IndexedOneToOneRelation indexed by {@link java.util.HashMap}s. */
+  public static <T1, T2> IndexedOneToOneRelation<T1, T2> makeHashBased() {
+    return new IndexedOneToOneRelation<T1, T2>(CollectUtil.<T1, T2>hashMapFactory(),
+                                               CollectUtil.<T2, T1>hashMapFactory());
+  }
+  
+  /** Make an IndexedOneToOneRelation indexed by {@link java.util.LinkedHashMap}s. */
+  public static <T1, T2> IndexedOneToOneRelation<T1, T2> makeLinkedHashBased() {
+    return new IndexedOneToOneRelation<T1, T2>(CollectUtil.<T1, T2>linkedHashMapFactory(),
+                                               CollectUtil.<T2, T1>linkedHashMapFactory());
+  }
+  
+  /** Make an IndexedOneToOneRelation indexed by {@link java.util.TreeMap}s. */
+  public static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>>
+    IndexedOneToOneRelation<T1, T2> makeTreeBased() {
+    return new IndexedOneToOneRelation<T1, T2>(CollectUtil.<T1, T2>treeMapFactory(),
+                                               CollectUtil.<T2, T1>treeMapFactory());
+  }
+  
 }

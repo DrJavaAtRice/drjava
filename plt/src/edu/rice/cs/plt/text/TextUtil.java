@@ -44,7 +44,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.recur.RecurUtil;
 import edu.rice.cs.plt.collect.OneToOneRelation;
-import edu.rice.cs.plt.collect.HashOneToOneRelation;
+import edu.rice.cs.plt.collect.IndexedOneToOneRelation;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
@@ -743,7 +743,7 @@ public final class TextUtil {
   private static final Thunk<OneToOneRelation<Character, String>> XML_ENTITIES = 
     LazyThunk.make(new Thunk<OneToOneRelation<Character, String>>() {
     public OneToOneRelation<Character, String> value() {
-      OneToOneRelation<Character, String> result = new HashOneToOneRelation<Character, String>();
+      OneToOneRelation<Character, String> result = new IndexedOneToOneRelation<Character, String>();
       // Source: Wikipedia, "List of XML and HTML character entity references"
       result.add('"', "quot");
       result.add('&', "amp");
@@ -759,7 +759,7 @@ public final class TextUtil {
   private static final Thunk<OneToOneRelation<Character, String>> HTML_ENTITIES = 
     LazyThunk.make(new Thunk<OneToOneRelation<Character, String>>() {
     public OneToOneRelation<Character, String> value() {
-      OneToOneRelation<Character, String> result = new HashOneToOneRelation<Character, String>();
+      OneToOneRelation<Character, String> result = new IndexedOneToOneRelation<Character, String>();
       // Source: Wikipedia, "List of XML and HTML character entity references"
       result.add('\'', "#39"); // no entity defined, but it's safer to escape it
       result.add('"', "quot");

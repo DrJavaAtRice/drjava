@@ -321,7 +321,7 @@ public final class CollectUtil {
       return new SingletonRelation<T1, T2>(IterUtil.first(pairs));
     }
     else {
-      Relation<T1, T2> result = new HashRelation<T1, T2>();
+      Relation<T1, T2> result = IndexedRelation.makeHashBased();
       result.addAll(asCollection(pairs));
       return new ImmutableRelation<T1, T2>(result) {
         @Override public boolean hasFixedSize() { return true; }
@@ -463,8 +463,24 @@ public final class CollectUtil {
     return new DictionaryMap<K, V>(d);
   }
   
-  /** Wrap a relation in an immutable wrapper.  Analogous to {@link Collections#unmodifiableMap}. */
-  public static <T1, T2> ImmutableRelation<T1, T2> unmodifiableRelation(Relation<T1, T2> r) {
+  /**
+   * Wrap a set in an immutable wrapper.  Similar to {@link Collections#unmodifiableSet},
+   * but produces a {@code PredicateSet}.
+   */
+  public static <T> PredicateSet<T> immutable(Set<? extends T> set) {
+    return new ImmutableSet<T>(set);
+  }
+  
+  /**
+   * Wrap a map in an immutable wrapper.  Similar to {@link Collections#unmodifiableMap},
+   * but produces a {@code LambdaMap}.
+   */
+  public static <K, V> Map<K, V> immutable(Map<? extends K, ? extends V> map) {
+    return new ImmutableMap<K, V>(map);
+  }
+  
+  /** Wrap a relation in an immutable wrapper.  Analogous to {@link Collections#unmodifiableSet}. */
+  public static <T1, T2> ImmutableRelation<T1, T2> immutable(Relation<T1, T2> r) {
     return new ImmutableRelation<T1, T2>(r);
   }
   

@@ -1192,6 +1192,17 @@ public final class IterUtil {
     return new SnapshotIterable<T>(new FilteredIterable<T>(iter, pred));
   }
   
+  /** Cast all instances of the given type appropriately; filter out any non-instances. */
+  public static <T> FilteredIterable<T> filterInstances(Iterable<? super T> iter, final Class<? extends T> c) {
+    Iterable<T> cast = IterUtil.map(iter, new Lambda<Object, T>() {
+      public T value(Object obj) {
+        if (c.isInstance(obj)) { return c.cast(obj); }
+        else { return null; }
+      }
+    });
+    return new FilteredIterable<T>(cast, LambdaUtil.NOT_NULL);
+  }
+  
   /**
    * Compute the left fold of the given list.  That is, for some combination function {@code #} (written here
    * with infix notation), compute {@code base # iter.next() # iter.next() # ...}.  Assumes the iterable is finite.

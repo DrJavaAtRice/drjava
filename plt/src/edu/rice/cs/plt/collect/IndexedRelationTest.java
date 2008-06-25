@@ -42,16 +42,16 @@ import edu.rice.cs.plt.tuple.Pair;
 import static edu.rice.cs.plt.collect.CollectUtil.makeSet;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-public class HashRelationTest extends TestCase {
+public class IndexedRelationTest extends TestCase {
   
   private static final Set<String> EMPTY = CollectUtil.<String>emptySet();
   
   public void testSecondIndexed() {
-    prodRelation(new HashRelation<String, String>());
+    prodRelation(new IndexedRelation<String, String>());
   }
   
   public void testSecondNotIndex() {
-    prodRelation(new HashRelation<String, String>(false));
+    prodRelation(new IndexedRelation<String, String>(false));
   }
   
   private void prodRelation(Relation<String, String> r) {
