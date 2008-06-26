@@ -117,13 +117,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     
     IOUtil.writeStringToFile(_projFile, _projFileText);
     
-//    Utilities.invokeAndWait(new Runnable() { 
-//      public void run() { 
     _frame = new MainFrame();
-    _frame.pack();
-//      }
-//    });
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.pack(); } });
     _model = _frame.getModel();
   }
 
