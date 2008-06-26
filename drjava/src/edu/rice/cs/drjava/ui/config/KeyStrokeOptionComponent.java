@@ -177,7 +177,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     public GetKeyDialog(Frame f, String title, boolean modal) {
       super(f, title, modal);
 //      frame = f;
-
+      // Should all of the following code be run in event thread?
       _inputField = new InputField();
       _clearButton = new JButton("Clear");
       _clearButton.addActionListener(new ActionListener() {
@@ -240,9 +240,9 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       panel.add(_currentLabel);
       panel.add(_actionLabel);
       panel.add(_cancelAndOKPanel);
-      this.setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
+      setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
       //centerOnScreen();
-      this.pack();
+      SwingUtilities.invokeLater(new Runnable() { public void run() { GetKeyDialog.this.pack(); } });
     }
 
     public void promptKey(KeyStrokeOptionComponent k) {
@@ -259,11 +259,9 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       this.setVisible(true);
     }
 
-    /**
-     * A textfield that takes in one keystroke at a time and displays
-     * its formatted String version. It updates the label that displays
-     * what action the currently displayed keystroke is bound to.
-     */
+    /** A textfield that takes in one keystroke at a time and displays its formatted String version. It updates the
+      * label that displays what action the currently displayed keystroke is bound to.
+      */
     private class InputField extends JTextField {
       /*public boolean getFocusTraversalKeysEnabled() {
         return false;

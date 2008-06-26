@@ -56,7 +56,7 @@ public class DrJavaTestCase extends TestCase {
   public DrJavaTestCase(String name) { super(name); }
   
   /** Set up for every test.
-    * @throws Exception
+    * @throws Exception.  This convention is mandated by JUnit.TestCase, the superclass of this class.
     */
   protected void setUp() throws Exception {
     super.setUp();  // declared to throw Exception, forcing throws clause on preceding line

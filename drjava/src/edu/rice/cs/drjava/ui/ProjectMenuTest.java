@@ -81,7 +81,9 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   
   private volatile String _projFileText = null;
   
-  /** Setup method for each JUnit test case in this Test class. */
+  /** Setup method for each JUnit test case in this Test class.
+    * @throws Exception.  This convention is mandated by the JUnit TestClass which is an ancestor of this class. 
+    */
   public void setUp() throws Exception {
     super.setUp();
     
@@ -118,6 +120,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     IOUtil.writeStringToFile(_projFile, _projFileText);
     
     _frame = new MainFrame();
+
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame.pack(); } });
     _model = _frame.getModel();
   }
@@ -160,7 +163,6 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _model.setBuildDirectory(f);
     Utilities.clearEventQueue();
     assertEquals("Build directory should have been set", f, _model.getBuildDirectory());
-    
   }
   
   public void testCloseAllClosesProject()  throws MalformedProjectFileException, IOException {
@@ -199,9 +201,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
         
         // open a new file and make it an auxiliary file
         _frame.open(new FileOpenSelector() {
-          public File[] getFiles() throws OperationCanceledException {
-            return new File[] {_auxFile};
-          }
+          public File[] getFiles() throws OperationCanceledException { return new File[] {_auxFile}; }
         });
         _frame._moveToAuxiliary();
 
@@ -228,5 +228,4 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     assertEquals("Wrong name for _file1", _file1.getCanonicalPath(), src[0].getCanonicalPath());
     assertEquals("Wrong aux file", _auxFile.getCanonicalPath(), aux[0].getCanonicalPath());
   }
-  
 }

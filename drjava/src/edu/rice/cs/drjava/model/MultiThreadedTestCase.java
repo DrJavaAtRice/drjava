@@ -52,7 +52,9 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   /** Flag to keep track of whether or not a test failed in another thread (not the testing thread). */
   protected volatile static boolean _testFailed = false;
 
-  /** Initialize test state to not failed. */
+  /** Initialize test state to not failed. 
+    * @throws Exception.  This convenion is mandated by the JUnit TestCase class which is an ancestor of this class. 
+    */
   public void setUp() throws Exception {
     super.setUp();
     _testFailed = false;
