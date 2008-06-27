@@ -35,15 +35,20 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.io;
 
 import java.io.*;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An implementation of {@code DirectWriter} that inherits that class's default implementations
  * and delegates all other operations to the wrapped {@code Writer}.
  */
-public class WrappedDirectWriter extends DirectWriter {
+public class WrappedDirectWriter extends DirectWriter implements Composite {
   private Writer _writer;
   
   public WrappedDirectWriter(Writer writer) { _writer = writer; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_writer) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_writer) + 1; }
   
   @Override public void close() throws IOException { _writer.close(); }
   

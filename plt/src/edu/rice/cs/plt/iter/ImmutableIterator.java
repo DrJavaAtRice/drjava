@@ -35,16 +35,22 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Wraps an iterator in an immutable interface, preventing modifications to underlying data  
  * structures via {@link #remove()}.
  */
-public class ImmutableIterator<T> extends ReadOnlyIterator<T> {
+public class ImmutableIterator<T> extends ReadOnlyIterator<T> implements Composite {
   
   private final Iterator<? extends T> _i;
   
   public ImmutableIterator(Iterator<? extends T> i) { _i = i; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_i) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_i) + 1; }
+    
   public boolean hasNext() { return _i.hasNext(); }
   public T next() { return _i.next(); }
   

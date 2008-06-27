@@ -43,11 +43,11 @@ import edu.rice.cs.plt.iter.MappedIterator;
 /**
  * An abstract parent class for implementations of Relation.  Subclasses must provide
  * the size methods {@link #isInfinite}, {@link #hasFixedSize}, and {@link #isStatic},
- * and the query methods {@link #containsObjects}, {@link #iterator},
- * {@link #firstSet}, {@link #matchFirst}, {@link #secondSet}, and {@link #matchSecond}.
- * To support mutation, they must also override {@link #add(Object, Object)} and
- * {@link #remove(Object, Object)}.  For best performance, they may also override
- * {@link #isEmpty}, {@link #size(int)} and {@link #clear}.
+ * and the query methods {@link #contains(Object, Object)}, {@link #contains(Object)},
+ * {@link #iterator}, {@link #firstSet}, {@link #matchFirst}, {@link #secondSet},
+ * and {@link #matchSecond}. To support mutation, they must also override
+ * {@link #add(Object, Object)} and {@link #remove(Object, Object)}.  For best performance,
+ * they may also override {@link #isEmpty}, {@link #size(int)} and {@link #clear}.
  */
 public abstract class AbstractRelation<T1, T2> extends AbstractPredicateSet<Pair<T1, T2>>
                                                implements Relation<T1, T2> {
@@ -61,7 +61,8 @@ public abstract class AbstractRelation<T1, T2> extends AbstractPredicateSet<Pair
    * to have types {@code T1} and {@code T2} because the {@link java.util.Collection#contains}
    * method allows arbitrary objects.
    */
-  protected abstract boolean containsObjects(Object first, Object second);
+  public abstract boolean contains(T1 first, T2 second);
+  public abstract boolean contains(Object obj);
   public abstract Iterator<Pair<T1, T2>> iterator();
   public abstract PredicateSet<T1> firstSet();
   public abstract PredicateSet<T2> matchFirst(T1 first);
@@ -70,19 +71,7 @@ public abstract class AbstractRelation<T1, T2> extends AbstractPredicateSet<Pair
   
   public boolean add(T1 first, T2 second) { throw new UnsupportedOperationException(); }
   public boolean remove(T1 first, T2 second) { throw new UnsupportedOperationException(); }
-  
-  /** Invokes {@link #containsObjects} if the argument is a pair. */
-  public boolean contains(Object o) {
-    if (o instanceof Pair<?, ?>) {
-      Pair<?, ?> p = (Pair<?, ?>) o;
-      return containsObjects(p.first(), p.second());
-    }
-    else { return false; }
-  }
-  
-  /** Invokes {@link #containsObjects}. */
-  public boolean contains(T1 first, T2 second) { return containsObjects(first, second); }
-  
+    
   /** Invokes {@link #add(Object, Object)}. */
   public boolean add(Pair<T1, T2> p) { return add(p.first(), p.second()); }
   

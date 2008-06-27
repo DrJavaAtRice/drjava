@@ -42,12 +42,14 @@ import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.FilteredIterator;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A set that contains only those elements contained by both the given set and the given
  * predicate.  Note that size operations will take linear time.
  */
-public class FilteredSet<T> extends AbstractPredicateSet<T> implements Serializable {
+public class FilteredSet<T> extends AbstractPredicateSet<T> implements Composite, Serializable {
 
   protected final Set<? extends T> _set;
   protected final Predicate<? super T> _pred;
@@ -56,6 +58,9 @@ public class FilteredSet<T> extends AbstractPredicateSet<T> implements Serializa
     _set = set;
     _pred = predicate;
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_set, _pred) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_set, _pred) + 1; }
   
   public boolean contains(Object o) {
     Option<T> cast = CollectUtil.castIfContains(_set, o);

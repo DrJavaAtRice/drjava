@@ -36,13 +36,15 @@ package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An Iterator that applies a provided mapping lambda to each corresponding member of two 
  * source iterators.  {@link #remove()} delegates to each of the source iterators.  Assumes
  * the iterators have the same length.
  */
-public class BinaryMappedIterator<T1, T2, R> implements Iterator<R> {
+public class BinaryMappedIterator<T1, T2, R> implements Iterator<R>, Composite {
 
   private final Iterator<? extends T1> _source1;
   private final Iterator<? extends T2> _source2;
@@ -54,6 +56,9 @@ public class BinaryMappedIterator<T1, T2, R> implements Iterator<R> {
     _source2 = source2;
     _map = map;
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_source1, _source2) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_source1, _source2) + 1; }
   
   public boolean hasNext() { return _source1.hasNext(); }
   public R next() { return _map.value(_source1.next(), _source2.next()); }

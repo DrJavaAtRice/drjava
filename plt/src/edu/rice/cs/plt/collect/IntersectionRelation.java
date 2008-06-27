@@ -34,35 +34,52 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.collect;
 
-import java.util.Map;
-import java.io.Serializable;
-import edu.rice.cs.plt.object.Composite;
-import edu.rice.cs.plt.object.ObjectUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 
 /**
- * A lazily-constructed and dynamically-updated union of two maps.  The first is designated
- * the <em>parent</em>, and the second the <em>child</em>.  Bindings for keys in the child shadow
- * those in the parent.
+ * The intersection of two relations, lazily constructed and updated dynamically.  This improves on
+ * a general {@code FilteredRelation} by taking advantage of the fact that the predicate used for 
+ * filtering is also a relation.
  */
-public class UnionMap<K, V> extends AbstractKeyBasedMap<K, V> implements Composite, Serializable {
-  private final Map<? extends K, ? extends V> _parent;
-  private final Map<? extends K, ? extends V> _child;
-  private final PredicateSet<K> _keys;
+public class IntersectionRelation<T1, T2> extends FilteredRelation<T1, T2> {
   
-  public UnionMap(Map<? extends K, ? extends V> parent, Map<? extends K, ? extends V> child) {
-    _parent = parent;
-    _child = child;
-    _keys = new UnionSet<K>(parent.keySet(), child.keySet());
+  /**
+   * For best performance of {@link #iterator}, {@link #size}, and {@link #isEmpty}, {@code set2}
+   * should be the smaller of the two sets (this is not handled automatically because calculating
+   * sizes may be expensive).
+   */
+  public IntersectionRelation(Relation<? super T1, ? super T2> rel1, Relation<T1, T2> rel2) {
+    super(rel2, rel1);
   }
   
-  public int compositeHeight() { return ObjectUtil.compositeHeight(_parent, _child) + 1; }
-  public int compositeSize() { return ObjectUtil.compositeSize(_parent, _child) + 1; }
-  
-  public V get(Object key) {
-    if (_child.containsKey(key)) { return _child.get(key); }
-    else { return _parent.get(key); }
+  @Override public PredicateSet<T2> matchFirst(T1 first) {
+    // cast is valid but current rules don't allow it
+    @SuppressWarnings("unchecked")
+    Relation<? super T1, ? super T2> rel1 = (Relation<? super T1, ? super T2>) _pred;
+    return new IntersectionSet<T2>(rel1.matchFirst(first), _rel.matchFirst(first));
   }
   
-  public PredicateSet<K> keySet() { return _keys; }
+  @Override public PredicateSet<T1> matchSecond(T2 second) {
+    // cast is valid but current rules don't allow it
+    @SuppressWarnings("unchecked")
+    Relation<? super T1, ? super T2> rel1 = (Relation<? super T1, ? super T2>) _pred;
+    return new IntersectionSet<T1>(rel1.matchSecond(second), _rel.matchSecond(second));
+  }
+  
+  public boolean isInfinite() {
+    return ((Relation<?, ?>) _pred).isInfinite() && IterUtil.isInfinite(_rel);
+  }
+  
+  public boolean hasFixedSize() {
+    return ((Relation<?, ?>) _pred).hasFixedSize() && IterUtil.hasFixedSize(_rel);
+  }
+  
+  public boolean isStatic() {
+    return ((Relation<?, ?>) _pred).isStatic() && IterUtil.isStatic(_rel);
+  }
+  
+  @Override public boolean isEmpty() {
+    return ((Relation<?, ?>) _pred).isEmpty() || (_rel != _pred && super.isEmpty());
+  }
   
 }

@@ -35,9 +35,11 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** An iterator over an arbitrary number of iterators.  Supports {@link #remove()}. */
-public class CollapsedIterator<T> implements Iterator<T> {
+public class CollapsedIterator<T> implements Iterator<T>, Composite {
   
   private Iterator<? extends T> _i;
   private Iterator<? extends T> _last; // to support remove()
@@ -49,6 +51,9 @@ public class CollapsedIterator<T> implements Iterator<T> {
     _rest = iters;
     advance();
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_rest) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_rest) + 1; }
   
   public boolean hasNext() { return _i.hasNext(); }
 

@@ -42,6 +42,7 @@ import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 public final class CollectUtil {
   
@@ -313,16 +314,19 @@ public final class CollectUtil {
    * Create an immutable {@code Relation} based on the given elements.  May depend on a valid
    * {@code hashCode()} implementation.
    */
-  public static <T1, T2> Relation<T1, T2> makeRelation(Iterable<? extends Pair<T1, T2>> pairs) {
+  public static <T1, T2> Relation<T1, T2> makeRelation(Iterable<? extends Pair<? extends T1, ? extends T2>> pairs) {
     if (IterUtil.isEmpty(pairs)) { 
       return EmptyRelation.make();
     }
     else if (IterUtil.sizeOf(pairs, 2) == 1) {
-      return new SingletonRelation<T1, T2>(IterUtil.first(pairs));
+      Pair<? extends T1, ? extends T2> elt = IterUtil.first(pairs);
+      return new SingletonRelation<T1, T2>(elt.first(), elt.second());
     }
     else {
       Relation<T1, T2> result = IndexedRelation.makeHashBased();
-      result.addAll(asCollection(pairs));
+      for (Pair<? extends T1, ? extends T2> elt : pairs) {
+        result.add(elt.first(), elt.second());
+      }
       return new ImmutableRelation<T1, T2>(result) {
         @Override public boolean hasFixedSize() { return true; }
         @Override public boolean isStatic() { return true; }
@@ -330,6 +334,11 @@ public final class CollectUtil {
     }
   }
   
+  /** Make an {@code ArrayList} with the given elements. */
+  public static <T> List<T> makeList(Iterable<? extends T> iter) {
+    return makeArrayList(iter);
+  }
+
   /** Make an {@code ArrayList} with the given elements. */
   public static <T> ArrayList<T> makeArrayList(Iterable<? extends T> iter) {
     if (iter instanceof Collection<?>) {
@@ -484,9 +493,61 @@ public final class CollectUtil {
     return new ImmutableRelation<T1, T2>(r);
   }
   
+  /** Alias for {@link #makeSet}. */
+  public static <T> PredicateSet<T> snapshot(Set<? extends T> set) {
+    return makeSet(set);
+  }
+  
+  /**
+   * Produce a snapshot of {@code set} if its composite size is greater than the given threshold.
+   * @see ObjectUtil#compositeSize
+   */
+  public static <T> Iterable<T> conditionalSnapshot(Set<T> set, int threshold) {
+    if (ObjectUtil.compositeSize(set) > threshold) { return makeSet(set); }
+    else { return set; }
+  }
+  
+  /** Alias for {@link #makeRelation}. */
+  public static <T1, T2> Relation<T1, T2> snapshot(Relation<? extends T1, ? extends T2> relation) {
+    return makeRelation(relation);
+  }
+  
+  /**
+   * Produce a snapshot of {@code set} if its composite size is greater than the given threshold.
+   * @see ObjectUtil#compositeSize
+   */
+  public static <T1, T2> Relation<T1, T2> conditionalSnapshot(Relation<T1, T2> rel, int threshold) {
+    if (ObjectUtil.compositeSize(rel) > threshold) { return makeRelation(rel); }
+    else { return rel; }
+  }
+  
+  /** Invoke the {@code HashMap#HashMap(Map)} constructor. */
+  public static <K, V> LambdaMap<K, V> snapshot(Map<? extends K, ? extends V> map) {
+    return new DelegatingMap<K, V>(new HashMap<K, V>(map));
+  }
+  
+  /**
+   * Produce a snapshot of {@code set} if its composite size is greater than the given threshold.
+   * @see ObjectUtil#compositeSize
+   */
+  public static <K, V> Map<K, V> conditionalSnapshot(Map<K, V> map, int threshold) {
+    if (ObjectUtil.compositeSize(map) > threshold) { return snapshot(map); }
+    else { return map; }
+  }
+  
+  /** Alias for {@link #makeArrayList}. */
+  public static <T> List<T> snapshot(List<? extends T> list) {
+    return makeArrayList(list);
+  }
+
   /** Produce a lazy union of two sets.  Size-related operations have poor performance. */
   public static <T> PredicateSet<T> union(Set<? extends T> s1, Set<? extends T> s2) {
     return new UnionSet<T>(s1, s2);
+  }
+  
+  /** Produce a lazy union of a set with an additional singleton element. */
+  public static <T> PredicateSet<T> union(Set<? extends T> set, T elt) {
+    return new UnionSet<T>(set, new SingletonSet<T>(elt));
   }
   
   /** Produce a lazy intersection of two sets.  Size-related operations have poor performance. */
@@ -502,6 +563,14 @@ public final class CollectUtil {
     return new ComplementSet<T>(domain, excluded);
   }
   
+  /**
+   * Produce the complement of a singleton in a domain set, or, equivalently, a set with
+   * a certain element removed.
+   */
+  public static <T> PredicateSet<T> complement(Set<? extends T> domain, T excluded) {
+    return new ComplementSet<T>(domain, new SingletonSet<T>(excluded));
+  }
+  
   /** Lazily filter the given set.  Size-related operations have poor performance. */
   public static <T> PredicateSet<T> filter(Set<? extends T> set, Predicate<? super T> predicate) {
     return new FilteredSet<T>(set, predicate);
@@ -510,6 +579,38 @@ public final class CollectUtil {
   /** Produce the lazy cartesian (or cross) product of two sets. */
   public static <T1, T2> Relation<T1, T2> cross(Set<? extends T1> left, Set<? extends T2> right) {
     return new CartesianRelation<T1, T2>(left, right);
+  }
+  
+  /** Produce a lazy union of two relations.  Size-related operations have poor performance. */
+  public static <T1, T2> Relation<T1, T2> union(Relation<T1, T2> r1, Relation<T1, T2> r2) {
+    return new UnionRelation<T1, T2>(r1, r2);
+  }
+  
+  /** Produce a lazy union of a relation with an additional singleton entry. */
+  public static <T1, T2> Relation<T1, T2> union(Relation<T1, T2> rel, T1 first, T2 second) {
+    return new UnionRelation<T1, T2>(rel, new SingletonRelation<T1, T2>(first, second));
+  }
+  
+  /** Produce a lazy intersection of two relations.  Size-related operations have poor performance. */
+  public static <T1, T2> Relation<T1, T2> intersection(Relation<T1, T2> r1, Relation<T1, T2> r2) {
+    return new IntersectionRelation<T1, T2>(r1, r2);
+  }
+  
+  /**
+   * Produce the complement of a relation in a domain, or, equivalently, the difference of two
+   * relations.  Size-related operations have poor performance.
+   */
+  public static <T1, T2> Relation<T1, T2> complement(Relation<T1, T2> domain,
+                                                     Relation<? super T1, ? super T2> excluded) {
+    return new ComplementRelation<T1, T2>(domain, excluded);
+  }
+  
+  /**
+   * Produce the complement of a singleton in a domain relation, or, equivalently, a relation with
+   * a certain entry removed.
+   */
+  public static <T1, T2> Relation<T1, T2> complement(Relation<T1, T2> domain, T1 first, T2 second) {
+    return new ComplementRelation<T1, T2>(domain, new SingletonRelation<T1, T2>(first, second));
   }
   
   /** Produce a lazy transitive composition of two relations.  Size-related operations have poor performance. */

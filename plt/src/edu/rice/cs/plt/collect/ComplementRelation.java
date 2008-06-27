@@ -32,37 +32,50 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.iter;
+package edu.rice.cs.plt.collect;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import edu.rice.cs.plt.object.Composite;
-import edu.rice.cs.plt.object.ObjectUtil;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.lambda.Predicate2;
 
 /**
- * Truncates a given iterator to have at most {@code size} elements.
+ * The complement of a relation {@code excluded} in a domain {@code domain} (alternatively,
+ * {@code domain - excluded}), constructed lazily and updated dynamically.
  */
-public class TruncatedIterator<T> implements Iterator<T>, Composite {
+public class ComplementRelation<T1, T2> extends FilteredRelation<T1, T2> {
   
-  private final Iterator<? extends T> _iter;
-  private int _size;
+  private final Relation<? super T1, ? super T2> _excluded;
   
-  public TruncatedIterator(Iterator<? extends T> iter, int size) {
-    _iter = iter;
-    _size = size;
+  public ComplementRelation(Relation<T1, T2> domain, Relation<? super T1, ? super T2> excluded) {
+    super(domain, LambdaUtil.negate((Predicate2<? super T1, ? super T2>)excluded));
+    _excluded = excluded;
   }
   
-  public int compositeHeight() { return ObjectUtil.compositeHeight(_iter) + 1; }
-  public int compositeSize() { return ObjectUtil.compositeSize(_iter) + 1; }
-    
-  public boolean hasNext() { return _size > 0 && _iter.hasNext(); }
-  
-  public T next() {
-    if (_size <= 0) { throw new NoSuchElementException(); }
-    _size--;
-    return _iter.next();
+  @Override public PredicateSet<T2> matchFirst(T1 first) {
+    return new ComplementSet<T2>(_rel.matchFirst(first), _excluded.matchFirst(first));
   }
   
-  public void remove() { _iter.remove(); }
+  @Override public PredicateSet<T1> matchSecond(T2 second) {
+    return new ComplementSet<T1>(_rel.matchSecond(second), _excluded.matchSecond(second));
+  }
+  
+  public boolean isInfinite() {
+    return IterUtil.isInfinite(_rel) && !_excluded.isInfinite();
+  }
+  
+  public boolean hasFixedSize() {
+    return IterUtil.hasFixedSize(_rel) && _excluded.hasFixedSize();
+  }
+  
+  public boolean isStatic() {
+    return IterUtil.isStatic(_rel) && _excluded.isStatic();
+  }
+  
+  @Override public boolean isEmpty() {
+    if (_rel.isEmpty()) { return true; }
+    else if (_excluded.isEmpty()) { return false; }
+    else if (_rel == _excluded) { return true; }
+    else { return _excluded.containsAll(_rel); }
+  }
   
 }

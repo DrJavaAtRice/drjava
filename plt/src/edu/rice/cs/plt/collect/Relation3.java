@@ -37,12 +37,13 @@ package edu.rice.cs.plt.collect;
 import java.util.Set;
 import java.util.Map;
 import edu.rice.cs.plt.tuple.Triple;
+import edu.rice.cs.plt.lambda.Predicate3;
 
 /**
  * A set of triples representing a ternary relation.  Relations can be viewed as generalizations
  * of maps in which keys map to sets of values, and the mapping occurs in all directions.
  */
-public interface Relation3<T1, T2, T3> extends PredicateSet<Triple<T1, T2, T3>> {
+public interface Relation3<T1, T2, T3> extends PredicateSet<Triple<T1, T2, T3>>, Predicate3<T1, T2, T3> {
 
   /** Whether {@code Triple.make(first, second, third)} appears in the set. */
   public boolean contains(T1 first, T2 second, T3 third);

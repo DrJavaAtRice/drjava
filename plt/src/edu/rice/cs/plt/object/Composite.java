@@ -32,37 +32,18 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.iter;
-
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import edu.rice.cs.plt.object.Composite;
-import edu.rice.cs.plt.object.ObjectUtil;
+package edu.rice.cs.plt.object;
 
 /**
- * Truncates a given iterator to have at most {@code size} elements.
+ * An object that can contain similar objects in a tree-like structure.  Typically, this is
+ * used where an object is normally composed of other objects of the <em>same</em> type, thus
+ * allowing data structures of arbitrary size.  In such cases, it may be useful to "collapse"
+ * the structure into a more efficient representation if it grows too large, and this interface
+ * provides the means to determine when such an optimization should take place.
  */
-public class TruncatedIterator<T> implements Iterator<T>, Composite {
-  
-  private final Iterator<? extends T> _iter;
-  private int _size;
-  
-  public TruncatedIterator(Iterator<? extends T> iter, int size) {
-    _iter = iter;
-    _size = size;
-  }
-  
-  public int compositeHeight() { return ObjectUtil.compositeHeight(_iter) + 1; }
-  public int compositeSize() { return ObjectUtil.compositeSize(_iter) + 1; }
-    
-  public boolean hasNext() { return _size > 0 && _iter.hasNext(); }
-  
-  public T next() {
-    if (_size <= 0) { throw new NoSuchElementException(); }
-    _size--;
-    return _iter.next();
-  }
-  
-  public void remove() { _iter.remove(); }
-  
+public interface Composite {
+  /** Get the maximum path length from this node to a leaf. */
+  public int compositeHeight();
+  /** Get the number of nodes in the tree rooted at this node.  Always 1 or greater. */
+  public int compositeSize();
 }

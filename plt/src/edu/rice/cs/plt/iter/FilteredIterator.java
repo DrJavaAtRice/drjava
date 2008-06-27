@@ -36,12 +36,14 @@ package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Predicate;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An Iterator that only returns the values in another Iterator ({@code i}) for which some
  * predicate ({@code p}) holds.  Does not support {@link #remove()}.
  */
-public class FilteredIterator<T> extends ReadOnlyIterator<T> {
+public class FilteredIterator<T> extends ReadOnlyIterator<T> implements Composite {
   
   private final Predicate<? super T> _p;
   private final Iterator<? extends T> _i;
@@ -52,6 +54,9 @@ public class FilteredIterator<T> extends ReadOnlyIterator<T> {
     _i = i;
     advanceLookahead();
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_i) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_i) + 1; }
   
   public boolean hasNext() { return _lookahead != null; }
   

@@ -37,18 +37,23 @@ package edu.rice.cs.plt.iter;
 import java.io.Serializable;
 import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Collapses a list of lists into a single list.  Subsequent changes to the list or its sublists will be
  * reflected.
  */
 public class CollapsedIterable<T> extends AbstractIterable<T> 
-  implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
+  implements SizedIterable<T>, OptimizedLastIterable<T>, Composite, Serializable {
   
   private final Iterable<? extends Iterable<? extends T>> _iters;
   
   public CollapsedIterable(Iterable<? extends Iterable<? extends T>> iters) { _iters = iters; }
     
+  public int compositeHeight() { return ObjectUtil.compositeHeight((Object) _iters) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize((Object) _iters) + 1; }
+  
   public CollapsedIterator<T> iterator() {
     Iterator<? extends Iterator<? extends T>> i =
       new MappedIterable<Iterable<? extends T>, Iterator<? extends T>>(_iters, GetIterator.<T>make()).iterator();

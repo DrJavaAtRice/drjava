@@ -42,15 +42,17 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.iter.FilteredIterator;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A relation that contains only those pairs contained by both the given relation and the given
  * predicate.  Note that size operations will take linear time.
  */
-public class FilteredRelation<T1, T2> extends AbstractRelation<T1, T2> implements Serializable {
+public class FilteredRelation<T1, T2> extends AbstractRelation<T1, T2> implements Composite, Serializable {
   
-  private final Relation<T1, T2> _rel;
-  private final Predicate2<? super T1, ? super T2> _pred;
+  protected final Relation<T1, T2> _rel;
+  protected final Predicate2<? super T1, ? super T2> _pred;
   private final PredicateSet<T1> _firstSet;
   private final PredicateSet<T2> _secondSet;
   
@@ -75,27 +77,25 @@ public class FilteredRelation<T1, T2> extends AbstractRelation<T1, T2> implement
     });
   }
   
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_rel, _pred) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_rel, _pred) + 1; }
+  
   @Override public boolean isEmpty() { return _rel.isEmpty() || super.isEmpty(); }
   public boolean isInfinite() { return false; }
   public boolean hasFixedSize() { return false; }
   public boolean isStatic() { return false; }
   
-  @Override public boolean contains(Object obj) {
+  public boolean contains(T1 first, T2 second) {
+    return _rel.contains(first, second) && _pred.contains(first, second);
+  }
+  
+  public boolean contains(Object obj) {
     Option<Pair<T1, T2>> cast = CollectUtil.castIfContains(_rel, obj);
     if (cast.isSome()) {
       Pair<T1, T2> p = cast.unwrap();
       return _pred.contains(p.first(), p.second());
     }
     else { return false; }
-  }
-  
-  @Override public boolean contains(T1 first, T2 second) {
-    return _rel.contains(first, second) && _pred.contains(first, second);
-  }
-  
-  /** Shouldn't be called, but implemented to satisfy the abstract class declaration. */
-  protected boolean containsObjects(Object first, Object second) {
-    return contains(Pair.make(first, second));
   }
   
   public Iterator<Pair<T1, T2>> iterator() {

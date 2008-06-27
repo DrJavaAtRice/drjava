@@ -37,17 +37,22 @@ package edu.rice.cs.plt.collect;
 import java.util.Map.Entry;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An implementation of {@link Entry} that does not support
  * the {@link #setValue} operation; all other methods are
  * delegated to a wrapped {@code Entry}.
  */
-public class ImmutableMapEntry<K, V> implements Entry<K, V>, Serializable {
+public class ImmutableMapEntry<K, V> implements Entry<K, V>, Composite, Serializable {
   
   protected Entry<? extends K, ? extends V> _delegate;
   
   public ImmutableMapEntry(Entry<? extends K, ? extends V> entry) { _delegate = entry; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_delegate) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_delegate) + 1; }
   
   public K getKey() { return _delegate.getKey(); }
   public V getValue() { return _delegate.getValue(); }

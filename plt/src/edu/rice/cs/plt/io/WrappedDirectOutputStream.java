@@ -35,15 +35,20 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.io;
 
 import java.io.*;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An implementation of {@code DirectOutputStream} that inherits that class's default implementations
  * and delegates all other operations to the wrapped {@code OutputStream}.
  */
-public class WrappedDirectOutputStream extends DirectOutputStream {
+public class WrappedDirectOutputStream extends DirectOutputStream implements Composite {
   private OutputStream _stream;
   
   public WrappedDirectOutputStream(OutputStream stream) { _stream = stream; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_stream) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_stream) + 1; }
   
   @Override public void close() throws IOException { _stream.close(); }
   

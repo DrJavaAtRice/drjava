@@ -36,6 +36,8 @@ package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * <p>Enumerates the elements of a cartesian (or cross) product in diagonal order.  Where the
@@ -51,7 +53,7 @@ import edu.rice.cs.plt.lambda.Lambda2;
  */
 public class DiagonalCartesianIterable<T1, T2, R> extends AbstractIterable<R>
                                                   implements SizedIterable<R>, OptimizedLastIterable<R>,
-                                                             Serializable {
+                                                             Composite, Serializable {
   
   private final Iterable<? extends T1> _left;
   private final Iterable<? extends T2> _right;
@@ -67,6 +69,9 @@ public class DiagonalCartesianIterable<T1, T2, R> extends AbstractIterable<R>
   public DiagonalCartesianIterator<T1, T2, R> iterator() {
     return new DiagonalCartesianIterator<T1, T2, R>(_left.iterator(), _right.iterator(), _combiner);
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_left, _right) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_left, _right) + 1; }
   
   public boolean isEmpty() { return IterUtil.isEmpty(_left) || IterUtil.isEmpty(_right); }
 

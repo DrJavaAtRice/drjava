@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.LinkedList;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * <p>Enumerates the elements of a cartesian (or cross) product in diagonal order.  Where the
@@ -52,7 +54,7 @@ import edu.rice.cs.plt.lambda.Lambda2;
  * <p>In order to support this traversal, the set of previously-seen values must be cached.  The amount
  * of space required by this iterator after n invocations of {@code next()} is in O(sqrt(n)).</p>
  */
-public class DiagonalCartesianIterator<T1, T2, R> extends ReadOnlyIterator<R> {
+public class DiagonalCartesianIterator<T1, T2, R> extends ReadOnlyIterator<R> implements Composite {
   
   private final Lambda2<? super T1, ? super T2, ? extends R> _combiner;
   private final Iterator<? extends T1> _left;
@@ -72,6 +74,9 @@ public class DiagonalCartesianIterator<T1, T2, R> extends ReadOnlyIterator<R> {
     _leftCacheIter = _leftCache.iterator();
     _rightCacheIter = _rightCache.iterator();
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_left, _right) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_left, _right) + 1; }
   
   public boolean hasNext() {
     if (_left.hasNext()) { return _right.hasNext() || !_rightCache.isEmpty(); }

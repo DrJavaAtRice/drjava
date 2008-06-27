@@ -36,6 +36,8 @@ package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An Iterable containing all the values in the provided Iterable after applying some 
@@ -45,7 +47,8 @@ import edu.rice.cs.plt.lambda.Lambda;
  * @param T  The element type of the transformed list
  */
 public class MappedIterable<S, T> extends AbstractIterable<T>
-                                  implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
+                                  implements SizedIterable<T>, OptimizedLastIterable<T>,
+                                             Composite, Serializable {
   
   private final Iterable<? extends S> _source;
   private final Lambda<? super S, ? extends T> _map;
@@ -54,6 +57,9 @@ public class MappedIterable<S, T> extends AbstractIterable<T>
     _source = source;
     _map = map;
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight((Object) _source) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize((Object) _source) + 1; }
   
   public MappedIterator<S, T> iterator() { 
     return new MappedIterator<S, T>(_source.iterator(), _map);

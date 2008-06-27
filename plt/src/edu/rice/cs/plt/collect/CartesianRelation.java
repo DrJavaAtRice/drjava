@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.Iterator;
 import java.io.Serializable;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 import edu.rice.cs.plt.iter.CartesianIterator;
 import edu.rice.cs.plt.iter.EmptyIterator;
 
@@ -45,7 +47,7 @@ import edu.rice.cs.plt.iter.EmptyIterator;
  * A Relation representing the cartesian (or cross) product of two sets.  Does not support mutation,
  * but the contents are updated dynamically as the given sets change.
  */
-public class CartesianRelation<T1, T2> extends AbstractRelation<T1, T2> implements Serializable {
+public class CartesianRelation<T1, T2> extends AbstractRelation<T1, T2> implements Composite, Serializable {
   
   private final PredicateSet<T1> _firstSet;
   private final PredicateSet<T2> _secondSet;
@@ -54,6 +56,9 @@ public class CartesianRelation<T1, T2> extends AbstractRelation<T1, T2> implemen
     _firstSet = new ImmutableSet<T1>(firsts);
     _secondSet = new ImmutableSet<T2>(seconds);
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_firstSet, _secondSet) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_firstSet, _secondSet) + 1; }
   
   @Override public int size(int bound) {
     // copied from CartesianIterable
@@ -75,8 +80,16 @@ public class CartesianRelation<T1, T2> extends AbstractRelation<T1, T2> implemen
   public boolean hasFixedSize() { return _firstSet.hasFixedSize() && _secondSet.hasFixedSize(); }
   public boolean isStatic() { return _firstSet.isStatic() && _secondSet.isStatic(); }
   
-  protected boolean containsObjects(Object first, Object second) {
+  public boolean contains(T1 first, T2 second) {
     return _firstSet.contains(first) && _secondSet.contains(second);
+  }
+  
+  public boolean contains(Object o) {
+    if (o instanceof Pair<?, ?>) {
+      Pair<?, ?> p = (Pair<?, ?>) o;
+      return _firstSet.contains(p.first()) && _secondSet.contains(p.second());
+    }
+    else { return false; }
   }
   
   public Iterator<Pair<T1, T2>> iterator() {

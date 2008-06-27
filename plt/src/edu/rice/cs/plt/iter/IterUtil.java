@@ -47,6 +47,7 @@ import edu.rice.cs.plt.recur.RecurUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.collect.ConsList;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * <p>A collection of static methods operating on iterables and iterators.</p>
@@ -108,7 +109,6 @@ public final class IterUtil {
    */
   public static boolean isInfinite(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isInfinite(); }
-    else if (iter instanceof FilteredIterable<?>) { return ((FilteredIterable<?>) iter).isInfinite(); }
     else { return false; }
   }
   
@@ -395,6 +395,15 @@ public final class IterUtil {
   /** Create a {@link SnapshotIterable} with the given iterator. */
   public static <T> SnapshotIterable<T> snapshot(Iterator<? extends T> iter) {
     return new SnapshotIterable<T>(iter);
+  }
+  
+  /**
+   * Produce a snapshot of {@code iter} if its composite size is greater than the given threshold.
+   * @see ObjectUtil#compositeSize
+   */
+  public static <T> Iterable<T> conditionalSnapshot(Iterable<T> iter, int threshold) {
+    if (ObjectUtil.compositeSize(iter) > threshold) { return new SnapshotIterable<T>(iter); }
+    else { return iter; }
   }
   
   /** Produce an {@link ImmutableIterable} with the given iterable. */

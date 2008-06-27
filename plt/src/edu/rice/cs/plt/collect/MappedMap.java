@@ -39,12 +39,14 @@ import java.util.Collection;
 import java.io.Serializable;
 import edu.rice.cs.plt.iter.MappedIterable;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A map whose value set is translated by a mapping lambda.
  * @see MappedIterable, ComposedMap
  */
-public class MappedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Serializable {
+public class MappedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Composite, Serializable {
   private final Map<K, ? extends X> _map;
   private final Lambda<? super X, ? extends V> _lambda;
   
@@ -52,6 +54,9 @@ public class MappedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Ser
     _map = map;
     _lambda = lambda;
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_map, _lambda) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_map, _lambda) + 1; }
   
   public V get(Object key) {
     if (_map.containsKey(key)) { return _lambda.value(_map.get(key)); }

@@ -43,6 +43,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.iter.MappedIterator;
 import edu.rice.cs.plt.iter.EmptyIterator;
 import edu.rice.cs.plt.iter.MutableSingletonIterator;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An abstract parent class for implementations of FunctionalRelation.  Subclasses must provide
@@ -71,11 +72,17 @@ public abstract class AbstractFunctionalRelation<T1, T2> extends AbstractRelatio
   public boolean hasFixedSize() { return functionMap().keySet().hasFixedSize(); }
   
   /** Checks for the given entry in {@code functionMap()}. */
-  protected boolean containsObjects(Object first, Object second) {
+  public boolean contains(T1 first, T2 second) {
     LambdaMap<T1, T2> map = functionMap();
-    if (map.containsKey(first)) {
-      T2 val = map.get(first);
-      return (second == null) ? (val == null) : second.equals(val);
+    return map.containsKey(first) && ObjectUtil.equal(map.get(first), second);
+  }
+  
+  /** Checks for the given entry in {@code functionMap()}. */
+  public boolean contains(Object obj) {
+    if (obj instanceof Pair<?, ?>) {
+      Pair<?, ?> p = (Pair<?, ?>) obj;
+      LambdaMap<T1, T2> map = functionMap();
+      return map.containsKey(p.first()) && ObjectUtil.equal(map.get(p.first()), p.second());
     }
     else { return false; }
   }
@@ -122,7 +129,9 @@ public abstract class AbstractFunctionalRelation<T1, T2> extends AbstractRelatio
     public boolean hasFixedSize() { return AbstractFunctionalRelation.this.isStatic(); }
     public boolean isStatic() { return AbstractFunctionalRelation.this.isStatic(); }
 
-    public boolean contains(Object val) { return containsObjects(_key, val); }
+    public boolean contains(Object val) {
+      return AbstractFunctionalRelation.this.contains(Pair.make(_key, val));
+    }
 
     public Iterator<T2> iterator() {
       final LambdaMap<T1, T2> map = functionMap();
@@ -135,13 +144,13 @@ public abstract class AbstractFunctionalRelation<T1, T2> extends AbstractRelatio
     }
     
     @Override public boolean add(T2 val) {
-      boolean result = !containsObjects(_key, val);
+      boolean result = !AbstractFunctionalRelation.this.contains(_key, val);
       if (result) { functionMap().put(_key, val); }
       return result;
     }
     
     @Override public boolean remove(Object val) {
-      boolean result = containsObjects(_key, val);
+      boolean result = AbstractFunctionalRelation.this.contains(Pair.make(_key, val));
       if (result) { functionMap().remove(_key); }
       return result;
     }

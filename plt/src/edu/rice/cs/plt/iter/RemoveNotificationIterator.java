@@ -36,9 +36,11 @@ package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** An iterator that notifies a callback whenever an element is removed. */
-public class RemoveNotificationIterator<T> implements Iterator<T> {
+public class RemoveNotificationIterator<T> implements Iterator<T>, Composite {
   
   private final Iterator<? extends T> _i;
   private final Runnable1<? super T> _listener;
@@ -50,6 +52,9 @@ public class RemoveNotificationIterator<T> implements Iterator<T> {
     _last = null;
   }
   
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_i) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_i) + 1; }
+    
   public boolean hasNext() { return _i.hasNext(); }
   
   public T next() {

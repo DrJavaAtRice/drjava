@@ -88,7 +88,9 @@ public abstract class AbstractOneToOneRelation<T1, T2> extends AbstractFunctiona
     public boolean hasFixedSize() { return AbstractOneToOneRelation.this.isStatic(); }
     public boolean isStatic() { return AbstractOneToOneRelation.this.isStatic(); }
 
-    public boolean contains(Object val) { return containsObjects(val, _key); }
+    public boolean contains(Object val) {
+      return AbstractOneToOneRelation.this.contains(Pair.make(val, _key));
+    }
 
     public Iterator<T1> iterator() {
       final LambdaMap<T2, T1> map = injectionMap();
@@ -101,13 +103,13 @@ public abstract class AbstractOneToOneRelation<T1, T2> extends AbstractFunctiona
     }
     
     @Override public boolean add(T1 val) {
-      boolean result = !containsObjects(val, _key);
+      boolean result = !AbstractOneToOneRelation.this.contains(val, _key);
       if (result) { injectionMap().put(_key, val); }
       return result;
     }
     
     @Override public boolean remove(Object val) {
-      boolean result = containsObjects(val, _key);
+      boolean result = AbstractOneToOneRelation.this.contains(Pair.make(val, _key));
       if (result) { injectionMap().remove(_key); }
       return result;
     }

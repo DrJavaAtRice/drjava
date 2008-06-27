@@ -39,13 +39,15 @@ import java.util.Iterator;
 import java.io.Serializable;
 import edu.rice.cs.plt.iter.FilteredIterator;
 import edu.rice.cs.plt.lambda.Predicate;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * The transitive composition of two maps, lazily constructed and dynamically-updated.  An entry 
  * {@code k=v} appears in the map if and only if there is an entry {@code k=x} in the first map
  * and {@code x=v} in the second.
  */
-public class ComposedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Serializable {
+public class ComposedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements Composite, Serializable {
   private final Map<? extends K, ? extends X> _map1;
   private final Map<? super X, ? extends V> _map2;
   private final PredicateSet<K> _keys;
@@ -57,6 +59,9 @@ public class ComposedMap<K, X, V> extends AbstractKeyBasedMap<K, V> implements S
       public boolean contains(K key) { return _map2.containsKey(_map1.get(key)); }
     });
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_map1, _map2) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_map1, _map2) + 1; }
   
   public V get(Object key) {
     if (_map1.containsKey(key)) {

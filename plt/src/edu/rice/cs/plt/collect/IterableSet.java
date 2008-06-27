@@ -38,6 +38,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 import edu.rice.cs.plt.iter.NoDuplicatesIterator;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A Set wrapping an Iterable.  Allows iterables to be viewed as sets without creating a
@@ -46,7 +48,7 @@ import edu.rice.cs.plt.iter.IterUtil;
  * and {@code contains}) require a traversal of the iterable, and thus have relatively poor
  * performance.
  */
-public class IterableSet<E> extends AbstractPredicateSet<E> implements Serializable {
+public class IterableSet<E> extends AbstractPredicateSet<E> implements Composite, Serializable {
   
   private final Iterable<? extends E> _iter;
   
@@ -55,6 +57,9 @@ public class IterableSet<E> extends AbstractPredicateSet<E> implements Serializa
   public boolean contains(Object o) {
     return IterUtil.contains(_iter, o);
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_iter) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_iter) + 1; }
   
   /**
    * Must store all previously-seen elements in order to skip duplicates.  As a result, requires

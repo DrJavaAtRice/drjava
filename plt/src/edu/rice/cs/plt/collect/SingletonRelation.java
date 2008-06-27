@@ -38,6 +38,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.SingletonIterator;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** An immutable {@code Relation} containing a single pair. */
 public class SingletonRelation<T1, T2> extends AbstractOneToOneRelation<T1, T2> implements Serializable {
@@ -59,9 +60,16 @@ public class SingletonRelation<T1, T2> extends AbstractOneToOneRelation<T1, T2> 
   public boolean hasFixedSize() { return true; }
   public boolean isStatic() { return true; }
   
-  @Override protected boolean containsObjects(Object candidate1, Object candidate2) {
-    return ((_first == null) ? (candidate1 == null) : _first.equals(candidate1)) &&
-           ((_second == null) ? (candidate2 == null) : _second.equals(candidate2));
+  public boolean contains(T1 candidate1, T2 candidate2) {
+    return ObjectUtil.equal(candidate1, _first) && ObjectUtil.equal(candidate2, _second);
+  }
+  
+  public boolean contains(Object obj) {
+    if (obj instanceof Pair<?, ?>) {
+      Pair<?, ?> p = (Pair<?, ?>) obj;
+      return ObjectUtil.equal(p.first(), _first) && ObjectUtil.equal(p.second(), _second);
+    }
+    else { return false; }
   }
   
   @Override public Iterator<Pair<T1, T2>> iterator() {

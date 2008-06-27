@@ -36,6 +36,8 @@ package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
 import java.io.Serializable;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Contains all but the first element of a wrapped iterable.  (If the wrapped iterable is
@@ -48,12 +50,16 @@ import java.io.Serializable;
  * algorithms, use a {@link edu.rice.cs.plt.collect.ConsList}.
  */
 public class SkipFirstIterable<T> extends AbstractIterable<T>
-                                  implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
+                                  implements SizedIterable<T>, OptimizedLastIterable<T>,
+                                             Composite, Serializable {
   
   private final Iterable<T> _iterable;
   
   public SkipFirstIterable(Iterable<T> iterable) { _iterable = iterable; }
 
+  public int compositeHeight() { return ObjectUtil.compositeHeight((Object) _iterable) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize((Object) _iterable) + 1; }
+    
   public Iterator<T> iterator() {
     Iterator<T> result = _iterable.iterator();
     if (result.hasNext()) { result.next(); }

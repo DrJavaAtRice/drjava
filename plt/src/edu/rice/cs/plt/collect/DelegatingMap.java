@@ -38,17 +38,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Collection;
 import java.io.Serializable;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A map that delegates all operations to a wrapped map.  Subclasses can be defined
  * that override a few of the methods, while maintaining the default delegation behavior
  * in most cases.
  */
-public class DelegatingMap<K, V> implements LambdaMap<K, V>, Serializable {
+public class DelegatingMap<K, V> implements LambdaMap<K, V>, Composite, Serializable {
   
   protected Map<K, V> _delegate;
   
   public DelegatingMap(Map<K, V> delegate) { _delegate = delegate; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_delegate) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_delegate) + 1; }
   
   public int size() { return _delegate.size(); }
   public boolean isEmpty() { return _delegate.isEmpty(); }

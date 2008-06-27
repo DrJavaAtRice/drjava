@@ -37,12 +37,13 @@ package edu.rice.cs.plt.collect;
 import java.util.Set;
 import java.util.Map;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.lambda.Predicate2;
 
 /**
  * A set of pairs representing a binary relation.  Relations can be viewed as generalizations
  * of maps in which keys map to sets of values, and the mapping occurs in both directions.
  */
-public interface Relation<T1, T2> extends PredicateSet<Pair<T1, T2>> {
+public interface Relation<T1, T2> extends PredicateSet<Pair<T1, T2>>, Predicate2<T1, T2> {
 
   /** Whether the given object appears in the set. */
   public boolean contains(Object o);

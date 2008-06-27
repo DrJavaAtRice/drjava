@@ -37,15 +37,20 @@ package edu.rice.cs.plt.io;
 import java.io.OutputStream;
 import java.io.IOException;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** An output stream that allows sending the same data to an arbitrary number of streams. */
-public class OutputStreamSplitter extends DirectOutputStream {
+public class OutputStreamSplitter extends DirectOutputStream implements Composite {
   
   private final Iterable<? extends OutputStream> _streams;
   
   public OutputStreamSplitter(OutputStream... streams) { _streams = IterUtil.asIterable(streams); }
   
   public OutputStreamSplitter(Iterable<? extends OutputStream> streams) { _streams = streams; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_streams) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_streams) + 1; }
   
   @Override public void close() throws IOException {
     for (OutputStream s : _streams) { s.close(); }

@@ -36,6 +36,8 @@ package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Enumerates the elements of a cartesian (or cross) product.  For each element in the
@@ -47,7 +49,7 @@ import edu.rice.cs.plt.lambda.Lambda2;
  */
 public class CartesianIterable<T1, T2, R> extends AbstractIterable<R>
                                           implements SizedIterable<R>, OptimizedLastIterable<R>,
-                                                     Serializable {
+                                                     Composite, Serializable {
   
   private final Iterable<? extends T1> _left;
   private final Iterable<? extends T2> _right;
@@ -63,6 +65,9 @@ public class CartesianIterable<T1, T2, R> extends AbstractIterable<R>
   public CartesianIterator<T1, T2, R> iterator() {
     return new CartesianIterator<T1, T2, R>(_left.iterator(), _right, _combiner);
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_left, _right) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_left, _right) + 1; }
   
   public boolean isEmpty() { return IterUtil.isEmpty(_left) || IterUtil.isEmpty(_right); }
 

@@ -36,12 +36,14 @@ package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An Iterator that applies a provided mapping lambda to each member of a source iterator.
  * {@link #remove()} simply delegates to the source iterator.
  */
-public class MappedIterator<S, T> implements Iterator<T> {
+public class MappedIterator<S, T> implements Iterator<T>, Composite {
 
   private final Iterator<? extends S> _source;
   private final Lambda<? super S, ? extends T> _map;
@@ -51,6 +53,9 @@ public class MappedIterator<S, T> implements Iterator<T> {
     _map = map;
   }
   
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_source) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_source) + 1; }
+    
   public boolean hasNext() { return _source.hasNext(); }
   public T next() { return _map.value(_source.next()); }
   public void remove() { _source.remove(); }

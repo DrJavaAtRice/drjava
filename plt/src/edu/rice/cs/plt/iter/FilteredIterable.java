@@ -36,13 +36,16 @@ package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Predicate;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An Iterable containing all the values in the provided Iterable for which the provided
  * Predicate holds.  Because the size cannot be determined without traversing the list,
  * does not implement {@code SizedIterable}.
  */
-public class FilteredIterable<T> extends AbstractIterable<T> implements Iterable<T>, Serializable {
+public class FilteredIterable<T> extends AbstractIterable<T>
+                                 implements Iterable<T>, Composite, Serializable {
   
   private Iterable<? extends T> _iterable;
   private Predicate<? super T> _predicate;
@@ -56,13 +59,8 @@ public class FilteredIterable<T> extends AbstractIterable<T> implements Iterable
     return new FilteredIterator<T>(_iterable.iterator(), _predicate);
   }
   
-  /**
-   * Determine whether this iterable is infinite.  While the exact size is expensive to determine, testing
-   * for infiniteness is not.  So despite not implementing {@code SizedIterable}, this class provides this method.
-   * Note that, since predicates can have arbitrary results, similar {@code hasFixedSize()} or {@code isStatic()}
-   * methods would not be useful.
-   */
-  public boolean isInfinite() { return IterUtil.isInfinite(_iterable); }
+  public int compositeHeight() { return ObjectUtil.compositeHeight((Object) _iterable) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize((Object) _iterable) + 1; }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> FilteredIterable<T> make(Iterable<? extends T> iterable, 

@@ -37,15 +37,20 @@ package edu.rice.cs.plt.io;
 import java.io.Writer;
 import java.io.IOException;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** A writer that allows sending the same data to an arbitrary number of writers. */
-public class WriterSplitter extends DirectWriter {
+public class WriterSplitter extends DirectWriter implements Composite {
   
   private final Iterable<? extends Writer> _writers;
   
   public WriterSplitter(Writer... writers) { _writers = IterUtil.asIterable(writers); }
   
   public WriterSplitter(Iterable<? extends Writer> writers) { _writers = writers; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_writers) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_writers) + 1; }
   
   @Override public void close() throws IOException {
     for (Writer w : _writers) { w.close(); }

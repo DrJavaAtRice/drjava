@@ -35,6 +35,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Contains all but the last element of a wrapped iterable.  (If the wrapped iterable is
@@ -45,12 +47,16 @@ import java.io.Serializable;
  * will have poor performance in comparison to other solutions.  For better performance or recursive 
  * list-decomposing algorithms, use a {@link edu.rice.cs.plt.collect.ConsList}.
  */
-public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
+public class SkipLastIterable<T> extends AbstractIterable<T>
+                                 implements SizedIterable<T>, Composite, Serializable {
   
   private final Iterable<? extends T> _iterable;
   
   public SkipLastIterable(Iterable<? extends T> iterable) { _iterable = iterable; }
 
+  public int compositeHeight() { return ObjectUtil.compositeHeight((Object) _iterable) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize((Object) _iterable) + 1; }
+    
   public SkipLastIterator<T> iterator() { return new SkipLastIterator<T>(_iterable.iterator()); }
   
   public boolean isEmpty() { return IterUtil.sizeOf(_iterable, 2) < 2; }

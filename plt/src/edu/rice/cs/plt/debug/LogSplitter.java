@@ -35,12 +35,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.debug;
 
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** 
  * A log that sends messages to all the logs it contains.  This allows, for example, logging to be
  * viewed at runtime while, at the same time, being recorded to a file.
  */
-public class LogSplitter implements Log {
+public class LogSplitter implements Log, Composite {
   
   private final Iterable<Log> _logs;
   
@@ -52,6 +54,9 @@ public class LogSplitter implements Log {
   public LogSplitter(Iterable<? extends Log> logs) {
     _logs = IterUtil.snapshot(logs);
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_logs) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_logs) + 1; }
   
   public void log() {
     for (Log l : _logs) { l.log(); }

@@ -35,13 +35,16 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Contains, for some value {@code size}, the first {@code size} elements of a nested iterable.
  * (If the nested list has less than {@code size} elements, this iterable is identical.)
  * Changes made to the underlying list are reflected here.
  */
-public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
+public class TruncatedIterable<T> extends AbstractIterable<T>
+                                  implements SizedIterable<T>, Composite, Serializable {
   
   private final Iterable<? extends T> _iterable;
   protected final int _size;
@@ -52,6 +55,9 @@ public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIt
     _size = size;
   }
 
+  public int compositeHeight() { return ObjectUtil.compositeHeight((Object) _iterable) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize((Object) _iterable) + 1; }
+    
   public TruncatedIterator<T> iterator() {
     return new TruncatedIterator<T>(_iterable.iterator(), _size);
   }

@@ -37,12 +37,14 @@ package edu.rice.cs.plt.collect;
 import java.util.Set;
 import java.util.Map;
 import edu.rice.cs.plt.tuple.Quad;
+import edu.rice.cs.plt.lambda.Predicate4;
 
 /**
  * A set of quads representing a quaternary relation.  Relations can be viewed as generalizations
  * of maps in which keys map to sets of values, and the mapping occurs in all directions.
  */
-public interface Relation4<T1, T2, T3, T4> extends PredicateSet<Quad<T1, T2, T3, T4>> {
+public interface Relation4<T1, T2, T3, T4> extends PredicateSet<Quad<T1, T2, T3, T4>>,
+                                                   Predicate4<T1, T2, T3, T4> {
 
   /** Whether {@code Quad.make(first, second, third, fourth)} appears in the set. */
   public boolean contains(T1 first, T2 second, T3 third, T4 fourth);

@@ -126,8 +126,16 @@ public class IndexedRelation<T1, T2> extends AbstractRelation<T1, T2> implements
   public boolean hasFixedSize() { return false; }
   public boolean isStatic() { return false; }
   
-  protected boolean containsObjects(Object first, Object second) {
+  public boolean contains(T1 first, T2 second) {
     return _firstIndex.contains(first, second);
+  }
+  
+  public boolean contains(Object obj) {
+    if (obj instanceof Pair<?, ?>) {
+      Pair<?, ?> p = (Pair<?, ?>) obj;
+      return _firstIndex.contains(p.first(), p.second());
+    }
+    else { return false; }
   }
   
   public Iterator<Pair<T1, T2>> iterator() { return _firstIndex.iterator(); }

@@ -42,6 +42,8 @@ import edu.rice.cs.plt.iter.ImmutableIterator;
 import edu.rice.cs.plt.iter.ImmutableIterable;
 import edu.rice.cs.plt.iter.MappedIterator;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Wraps a map in an immutable interface.  Similar to {@link java.util.Collections#unmodifiableMap},
@@ -49,12 +51,15 @@ import edu.rice.cs.plt.iter.IterUtil;
  * interface with the data is immutable -- if the original data structure is mutable, a client with direct
  * access to that structure can still mutate it.
  */
-public class ImmutableMap<K, V> implements LambdaMap<K, V>, Serializable {
+public class ImmutableMap<K, V> implements LambdaMap<K, V>, Composite, Serializable {
   
   // using wildcards here allows us to wrap more maps, but means we can't extend DelegatingMap
   protected Map<? extends K, ? extends V> _delegate;
   
   public ImmutableMap(Map<? extends K, ? extends V> map) { _delegate = map; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_delegate) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_delegate) + 1; }
   
   public int size() { return _delegate.size(); }
   public boolean isEmpty() { return _delegate.isEmpty(); }

@@ -35,13 +35,15 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * Defines an iterable by composing two other iterables (or a value with an iterable).
  * Subsequent changes to the input lists will be reflected.
  */
 public class ComposedIterable<T> extends AbstractIterable<T> 
-  implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
+  implements SizedIterable<T>, OptimizedLastIterable<T>, Composite, Serializable {
   
   private final Iterable<? extends T> _i1;
   private final int _i1Size; // negative implies dynamic size
@@ -73,6 +75,9 @@ public class ComposedIterable<T> extends AbstractIterable<T>
   public ComposedIterator<T> iterator() { 
     return new ComposedIterator<T>(_i1.iterator(), _i2.iterator());
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_i1, _i2) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_i1, _i2) + 1; }
   
   public boolean isEmpty() {
     return (_i1Size < 0 ? IterUtil.isEmpty(_i1) : _i1Size == 0) &&

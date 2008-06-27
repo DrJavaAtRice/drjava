@@ -41,13 +41,16 @@ import java.io.Serializable;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.ImmutableIterator;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A Collection wrapping an Iterable.  Allows iterables to be viewed as collections without creating a
  * copy (which would require linear time).  Does not support mutation, but does reflect 
  * changes made to the underlying iterable.
  */
-public class IterableCollection<E> extends AbstractCollection<E> implements SizedIterable<E>, Serializable {
+public class IterableCollection<E> extends AbstractCollection<E>
+                                   implements SizedIterable<E>, Composite, Serializable {
   
   private final Iterable<? extends E> _iter;
   private final boolean _fixedSize;
@@ -58,6 +61,9 @@ public class IterableCollection<E> extends AbstractCollection<E> implements Size
     _fixedSize = IterUtil.hasFixedSize(iter);
     _size = -1;
   }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_iter) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_iter) + 1; }
   
   @Override public boolean isEmpty() {
     if (_size == -1) { return IterUtil.isEmpty(_iter); }

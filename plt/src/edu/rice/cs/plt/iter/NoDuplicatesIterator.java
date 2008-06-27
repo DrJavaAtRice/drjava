@@ -34,12 +34,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.iter;
 
+import java.util.Set;
 import java.util.Iterator;
 import java.util.HashSet;
 import edu.rice.cs.plt.collect.PredicateSet;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
-
 /**
  * An Iterator that returns each value only once.  Values are compared via {@code equals()} and
  * hashed in order to detect duplicates.  A set of previously-seen values is maintained, which
@@ -47,15 +47,15 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  */
 public class NoDuplicatesIterator<T> extends FilteredIterator<T> {
   
-  private final PredicateSet<T> _seen;
+  private final Set<T> _seen;
   
   public NoDuplicatesIterator(Iterator<? extends T> i) {
     this(i, CollectUtil.asPredicateSet(new HashSet<T>()));
   }
   
   /** Declared to allow {@code seen} to be created before calling {@code super()} */
-  private NoDuplicatesIterator(Iterator<? extends T> i, PredicateSet<T> seen) {
-    super(i, LambdaUtil.negate(seen));
+  private NoDuplicatesIterator(Iterator<? extends T> i, Set<T> seen) {
+    super(i, LambdaUtil.negate(CollectUtil.asPredicateSet(seen)));
     _seen = seen;
   }
   

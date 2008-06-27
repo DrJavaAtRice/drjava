@@ -43,6 +43,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.iter.MappedIterator;
 import edu.rice.cs.plt.iter.EmptyIterator;
 import edu.rice.cs.plt.iter.MutableSingletonIterator;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An abstract parent class for implementations of InjectiveRelation.  Subclasses must provide
@@ -70,12 +71,18 @@ public abstract class AbstractInjectiveRelation<T1, T2> extends AbstractRelation
   /** Returns {@code injectionMap().keySet().hasFixedSize()}. */
   public boolean hasFixedSize() { return injectionMap().keySet().hasFixedSize(); }
   
-  /** Checks for the given entry in {@code injectionMap()}. */
-  protected boolean containsObjects(Object first, Object second) {
+  /** Checks for the given entry in {@code functionMap()}. */
+  public boolean contains(T1 first, T2 second) {
     LambdaMap<T2, T1> map = injectionMap();
-    if (map.containsKey(second)) {
-      T1 val = map.get(second);
-      return (first == null) ? (val == null) : first.equals(val);
+    return map.containsKey(second) && ObjectUtil.equal(map.get(second), first);
+  }
+  
+  /** Checks for the given entry in {@code functionMap()}. */
+  public boolean contains(Object obj) {
+    if (obj instanceof Pair<?, ?>) {
+      Pair<?, ?> p = (Pair<?, ?>) obj;
+      LambdaMap<T2, T1> map = injectionMap();
+      return map.containsKey(p.second()) && ObjectUtil.equal(map.get(p.second()), p.first());
     }
     else { return false; }
   }
@@ -122,7 +129,9 @@ public abstract class AbstractInjectiveRelation<T1, T2> extends AbstractRelation
     public boolean hasFixedSize() { return AbstractInjectiveRelation.this.isStatic(); }
     public boolean isStatic() { return AbstractInjectiveRelation.this.isStatic(); }
 
-    public boolean contains(Object val) { return containsObjects(val, _key); }
+    public boolean contains(Object val) {
+      return AbstractInjectiveRelation.this.contains(Pair.make(val, _key));
+    }
 
     public Iterator<T1> iterator() {
       final LambdaMap<T2, T1> map = injectionMap();
@@ -135,13 +144,13 @@ public abstract class AbstractInjectiveRelation<T1, T2> extends AbstractRelation
     }
     
     @Override public boolean add(T1 val) {
-      boolean result = !containsObjects(val, _key);
+      boolean result = !AbstractInjectiveRelation.this.contains(val, _key);
       if (result) { injectionMap().put(_key, val); }
       return result;
     }
     
     @Override public boolean remove(Object val) {
-      boolean result = containsObjects(val, _key);
+      boolean result = AbstractInjectiveRelation.this.contains(Pair.make(val, _key));
       if (result) { injectionMap().remove(_key); }
       return result;
     }

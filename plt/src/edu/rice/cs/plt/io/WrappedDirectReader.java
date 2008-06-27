@@ -36,15 +36,20 @@ package edu.rice.cs.plt.io;
 
 import java.io.*;
 import java.nio.CharBuffer;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An implementation of {@code DirectReader} that inherits that class's default implementations
  * and delegates all other operations to the wrapped {@code Reader}.
  */
-public class WrappedDirectReader extends DirectReader {
+public class WrappedDirectReader extends DirectReader implements Composite {
   private Reader _reader;
   
   public WrappedDirectReader(Reader reader) { _reader = reader; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_reader) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_reader) + 1; }
   
   @Override public void close() throws IOException { _reader.close(); }
   

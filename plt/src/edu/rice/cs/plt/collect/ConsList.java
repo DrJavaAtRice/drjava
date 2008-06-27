@@ -43,6 +43,7 @@ import edu.rice.cs.plt.iter.EmptyIterator;
 import edu.rice.cs.plt.iter.ReadOnlyIterator;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
 
 /**
  * <p>A Lisp- or Scheme-style immutable list.  A {@code ConsList} is either an {@link Empty}
@@ -57,7 +58,7 @@ import edu.rice.cs.plt.lambda.Lambda;
  * client code.  A static import ({@code import static edu.rice.cs.plt.collect.ConsList.*})
  * will eliminate the need for explicit name qualifiers when using these methods.</p>
  */
-public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
+public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIterable<T>, Composite, Serializable {
   
   public abstract <Ret> Ret apply(ConsVisitor<? super T, ? extends Ret> visitor);
   
@@ -84,6 +85,8 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
   /** Return {@code true}: cons lists are immutable. */
   public boolean isStatic() { return true; }
   
+  public int compositeHeight() { return size(); }
+  public int compositeSize() { return size() + 1; /* add 1 for empty */ }
   
   /** Create an empty list (via {@link Empty#make}) */
   public static <T> Empty<T> empty() { return Empty.<T>make(); }

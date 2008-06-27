@@ -43,6 +43,8 @@ import edu.rice.cs.plt.iter.EmptyIterator;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * The transitive composition of two relations, lazily constructed and dynamically-updated.  An entry 
@@ -78,21 +80,27 @@ public class ComposedRelation<T1, T2, T3> extends AbstractRelation<T1, T3> imple
     });
   }
   
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_rel1, _rel2) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_rel1, _rel2) + 1; }
+  
   @Override public boolean isEmpty() { return _firstSet.isEmpty(); }
   public boolean isInfinite() { return false; }
   public boolean hasFixedSize() { return false; }
   public boolean isStatic() { return _rel1.isStatic() && _rel2.isStatic(); }
-        
-  protected boolean containsObjects(Object first, Object second) {
-    Option<T1> cast = CollectUtil.castIfContains(_firstSet, first);
-    if (cast.isSome()) { return matchFirst(cast.unwrap()).contains(second); }
-    else { return false; }
-  }
   
-  @Override public boolean contains(T1 first, T3 second) {
+  public boolean contains(T1 first, T3 second) {
     return matchFirst(first).contains(second);
   }
   
+  public boolean contains(Object o) {
+    if (o instanceof Pair<?, ?>) {
+      Pair<?, ?> p = (Pair<?, ?>) o;
+      Option<T1> first = CollectUtil.castIfContains(_firstSet, p.first());
+      return first.isSome() && matchFirst(first.unwrap()).contains(p.second());
+    }
+    else { return false; }
+  }
+        
   /** For each element of {@code rel1.firstSet()}, iterate over all transitive matches. */
   public Iterator<Pair<T1, T3>> iterator() {
     return new ReadOnlyIterator<Pair<T1, T3>>() {

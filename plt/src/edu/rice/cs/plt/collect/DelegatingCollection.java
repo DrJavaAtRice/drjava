@@ -40,6 +40,8 @@ import java.util.AbstractCollection;
 import java.io.Serializable;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * A collection that delegates all operations to a wrapped collection.  Subclasses can be defined
@@ -51,11 +53,14 @@ import edu.rice.cs.plt.iter.IterUtil;
  * default implementations there by invoking, for example, {@link #abstractCollectionAddAll}
  * (see {@link java.util.AbstractCollection} for details on the default implementations).
  */
-public class DelegatingCollection<T> extends AbstractCollection<T> implements SizedIterable<T>, Serializable {
+public class DelegatingCollection<T> extends AbstractCollection<T> implements SizedIterable<T>, Composite, Serializable {
   
   protected Collection<T> _delegate;
   
   public DelegatingCollection(Collection<T> delegate) { _delegate = delegate; }
+  
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_delegate) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_delegate) + 1; }
   
   public boolean isEmpty() { return _delegate.isEmpty(); }
   public int size() { return _delegate.size(); }
