@@ -518,10 +518,10 @@ public abstract class StringOps {
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", true);
   
   /** Escapes spaces ' ' with the sequence "\u001b ", and a single '\u001b' with a double.
-    * It treats File.pathSeparatorChar (';' or ':'), ProcessChain.PROCESS_SEPARATOR_CHAR (':' or ';'),
-    * and ProcessChain.PIPE_SEPARATOR_CHAR the same way.
+    * It treats File.pathSeparatorChar (';' or ':'), ProcessChain.PROCESS_SEPARATOR_CHAR ('#'),
+    * ProcessChain.PIPE_SEPARATOR_CHAR, and ':' (for Windows drive letters) the same way.
     * '\u001b' was picked because its ASCII meaning is 'escape', and it should be platform-independent.
-    * This method keeps file names with spaces, colons and semicolons together and prevents them
+    * This method keeps file names with spaces, pound, colons and semicolons together and prevents them
     * from being split apart.
     * @param s string to encode
     * @return encoded string */
@@ -546,6 +546,10 @@ public abstract class StringOps {
         sb.append('\u001b');
         sb.append(ProcessChain.PIPE_SEPARATOR_CHAR);
       }
+      else if (s.charAt(i)==':') {
+        sb.append("\u001b:"); // for Windows, escape the : in drive letters
+        // on Unix, this case is irrelevant, since pathSeparatorChar==':'
+      }
       else {
         sb.append(String.valueOf(s.charAt(i)));
       }
@@ -568,11 +572,12 @@ public abstract class StringOps {
           else if (next==java.io.File.pathSeparatorChar) { sb.append(java.io.File.pathSeparatorChar); ++i; }
           else if (next==ProcessChain.PROCESS_SEPARATOR_CHAR) { sb.append(ProcessChain.PROCESS_SEPARATOR_CHAR); ++i; }
           else if (next==ProcessChain.PIPE_SEPARATOR_CHAR) { sb.append(ProcessChain.PIPE_SEPARATOR_CHAR); ++i; }
+          else if (next==':') { sb.append(':'); ++i; }
           else { throw new IllegalArgumentException("1b hex followed by character other than space, "+
-                                                    "path separator, process separator, pipe or 1b hex"); }
+                                                    "path separator, process separator, pipe, colon, or 1b hex"); }
         }
         else { throw new IllegalArgumentException("1b hex followed by character other than space, "+
-                                                    "path separator, process separator, pipe or 1b hex"); }
+                                                    "path separator, process separator, pipe, colon, or 1b hex"); }
       }
       else {
         sb.append(""+s.charAt(i));
@@ -684,12 +689,17 @@ public abstract class StringOps {
     // also add escaped path separator (';' or ':') as keyword, but treat it differently
     final String ESCAPED_PATH_SEPARATOR = ESCAPE+java.io.File.pathSeparator;
     tok.addKeyword(ESCAPED_PATH_SEPARATOR); // escaped path separator
-    // also add escaped process separator (':' or ';') as keyword, but treat it differently
+    // also add escaped process separator ('#') as keyword, but treat it differently
     final String ESCAPED_PROCESS_SEPARATOR = ESCAPE+ProcessChain.PROCESS_SEPARATOR;
     tok.addKeyword(ESCAPED_PROCESS_SEPARATOR); // escaped process separator
     // also add escaped pipe ('|') as keyword, but treat it differently
     final String ESCAPED_PIPE_SEPARATOR = ESCAPE+ProcessChain.PIPE_SEPARATOR;
     tok.addKeyword(ESCAPED_PIPE_SEPARATOR); // escaped pipe
+    // also add escaped colon (':') as keyword on Windows, but treat it differently
+    final String ESCAPED_COLON_SEPARATOR = ESCAPE+":";
+    if (!ESCAPED_COLON_SEPARATOR.equals(ESCAPED_PATH_SEPARATOR)) {
+      tok.addKeyword(ESCAPED_COLON_SEPARATOR); // escaped colon
+    }
     // read tokens; concatenate tokens until keyword is found
     String n = null, p = null;
     BalancingStreamTokenizer.Token pTok = BalancingStreamTokenizer.Token.NONE;
@@ -730,7 +740,8 @@ public abstract class StringOps {
           else if (n.equals(ESCAPED_SPACE) ||
                    n.equals(ESCAPED_PATH_SEPARATOR) ||
                    n.equals(ESCAPED_PROCESS_SEPARATOR) ||
-                   n.equals(ESCAPED_PIPE_SEPARATOR)) {
+                   n.equals(ESCAPED_PIPE_SEPARATOR) ||
+                   n.equals(ESCAPED_COLON_SEPARATOR)) {
             // escaped characters
             sb.append(n);
           }

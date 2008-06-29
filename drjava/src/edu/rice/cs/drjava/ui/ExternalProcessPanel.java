@@ -101,7 +101,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     */
   public ExternalProcessPanel(MainFrame frame, String title, ProcessCreator pc) {
     super(frame, title);
-    _sb = new StringBuilder("Command line:");
+    _sb = new StringBuilder("Command line: ");
     _sb.append(pc.cmdline());
     _sb.append('\n');
     _header = _sb.toString();
@@ -150,7 +150,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         }
       },"External Process Update Thread");
       _p = _pc.start();
-      _sb.append("Evaluated command line:");
+      _sb.append("Evaluated command line: ");
       _sb.append(_pc.evaluatedCommandLine());
       _sb.append('\n');
       _is = new InputStreamReader(_p.getInputStream());

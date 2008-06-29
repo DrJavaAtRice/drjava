@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 public class ProcessChain extends Process {
   /** Separator used between different process chains. */
-  public static final char PROCESS_SEPARATOR_CHAR = (File.pathSeparatorChar==':')?';':':';
+  public static final char PROCESS_SEPARATOR_CHAR = '#';
 
   /** Separator used between different process chains. */
   public static final String PROCESS_SEPARATOR = String.valueOf(PROCESS_SEPARATOR_CHAR);
