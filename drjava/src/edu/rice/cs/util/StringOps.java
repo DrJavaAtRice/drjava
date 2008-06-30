@@ -586,68 +586,6 @@ public abstract class StringOps {
     return sb.toString();
   }
   
-  /** Convert a command line into a list of individual arguments.
-    * This keeps quoted parts together using " and '.
-    * It also keeps treats a '\u001b' followed by a space, colon, semicolon or pipe as
-    * non-breaking space, colon, semicolon or pipe.
-    * And a double '\u001b' becomes a single '\u001b'. 
-    * It does not allow escaping of the quote characters. */
-  public static List<String> commandLineToList(String cmdline) {
-    StreamTokenizer tok = new StreamTokenizer(new StringReader(cmdline));
-    tok.resetSyntax();
-    tok.ordinaryChars(0,255);
-    tok.quoteChar('\'');
-    tok.quoteChar('"');
-    // tok.quoteChar('`'); // back tick not yet supported
-    tok.slashSlashComments(false);
-    tok.slashStarComments(false);
-    ArrayList<String> cmds = new ArrayList<String>();
-    
-    boolean justEscape = false;
-    StringBuilder sb = new StringBuilder();
-    int next;
-    try {
-      while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
-            (next!=StreamTokenizer.TT_EOL)) {
-        switch(next) {
-          case '\u001b':
-            if (justEscape) {
-              sb.append('\u001b');
-              justEscape = false;
-            }
-            else {
-              justEscape = true;
-            }
-            break;
-          case ' ':
-            if (justEscape) {
-              sb.append(' ');
-            }
-            else {
-              cmds.add(sb.toString());
-              sb = new StringBuilder();
-            }
-            justEscape = false;
-            break;
-          case '\'':
-          case '"':
-          case '`':
-            sb.append(""+((char)next)+tok.sval+((char)next));
-            justEscape = false;
-            break;
-          default:
-            sb.append(""+((char)next));
-            break;
-        }
-      }
-      if (sb.length()>0) { cmds.add(sb.toString()); }
-    }
-    catch(IOException ioe) {
-      return new ArrayList<String>();
-    }
-    return cmds;
-  }
-  
   /** Convert a command line into a list of list of lists of individual
     * arguments. The outermost list is a list of list of lists of arguments
     * for processes separated by ProcessChain.PROCESS_SEPARATOR (either ';'
@@ -696,10 +634,13 @@ public abstract class StringOps {
     final String ESCAPED_PIPE_SEPARATOR = ESCAPE+ProcessChain.PIPE_SEPARATOR;
     tok.addKeyword(ESCAPED_PIPE_SEPARATOR); // escaped pipe
     // also add escaped colon (':') as keyword on Windows, but treat it differently
-    final String ESCAPED_COLON_SEPARATOR = ESCAPE+":";
-    if (!ESCAPED_COLON_SEPARATOR.equals(ESCAPED_PATH_SEPARATOR)) {
-      tok.addKeyword(ESCAPED_COLON_SEPARATOR); // escaped colon
+    final String ESCAPED_COLON = ESCAPE+":";
+    if (!ESCAPED_COLON.equals(ESCAPED_PATH_SEPARATOR)) {
+      tok.addKeyword(ESCAPED_COLON); // escaped colon
     }
+    // also add escaped escape ('\u001b') as keyword, but treat it differently
+    final String ESCAPED_ESCAPE = ESCAPE+ESCAPE;
+    tok.addKeyword(ESCAPED_ESCAPE); // escaped escape
     // read tokens; concatenate tokens until keyword is found
     String n = null, p = null;
     BalancingStreamTokenizer.Token pTok = BalancingStreamTokenizer.Token.NONE;
@@ -741,9 +682,10 @@ public abstract class StringOps {
                    n.equals(ESCAPED_PATH_SEPARATOR) ||
                    n.equals(ESCAPED_PROCESS_SEPARATOR) ||
                    n.equals(ESCAPED_PIPE_SEPARATOR) ||
-                   n.equals(ESCAPED_COLON_SEPARATOR)) {
-            // escaped characters
-            sb.append(n);
+                   n.equals(ESCAPED_COLON) ||
+                   n.equals(ESCAPED_ESCAPE)) {
+            // escaped characters, append the string after the ESCAPE character
+            sb.append(n.substring(ESCAPE.length()));
           }
           else { // must be whitespace
             // add the current string to the argument list and start a new argument

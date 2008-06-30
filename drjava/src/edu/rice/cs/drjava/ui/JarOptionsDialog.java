@@ -180,7 +180,7 @@ public class JarOptionsDialog extends JFrame {
     }
   }
   
-  /** Create a configuration diaglog
+  /** Create a "Create Jar" dialog
     * @param mf the instance of mainframe to query into the project
     */
   public JarOptionsDialog(MainFrame mf) {

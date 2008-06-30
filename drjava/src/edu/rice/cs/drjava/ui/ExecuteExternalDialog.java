@@ -596,13 +596,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
-//          StringBuilder sb = new StringBuilder();
           String text = StringOps.replaceVariables(_commandLine.getText(), _props, PropertyMaps.GET_LAZY);
-          /* List<String> cmds = StringOps.commandLineToList(text);
-           for(String s: cmds) {
-           sb.append(s);
-           sb.append(' ');
-           } */
           _commandLineDoc.insertString(_commandLineDoc.getLength(), StringOps.unescapeFileName(text), null);
           
           // command line

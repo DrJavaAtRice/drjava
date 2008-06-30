@@ -156,6 +156,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   // Tabbed panel fields
   public final LinkedList<TabbedPanel>  _tabs = new LinkedList<TabbedPanel>();  
   public final JTabbedPane _tabbedPane;
+  public final TabbedPanesFrame _tabbedPanesFrame;
   public volatile Component _lastFocusOwner;
   
   private final CompilerErrorPanel _compilerErrorPanel;
@@ -429,7 +430,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** The jar options dialog. */
   private final JarOptionsDialog _jarOptionsDialog;
   
-  /** Initializes the "Create Jar from Project dialog. */
+  /** Initializes the "Create Jar from Project" dialog. */
   private void initJarOptionsDialog() {
     if (DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
       _jarOptionsDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STATE));  
@@ -442,11 +443,36 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DrJava.getConfig().setSetting(DIALOG_JAROPTIONS_STATE, "default");
     }
   }
-  
   private final Action _jarProjectAction = new AbstractAction("Create Jar File from Project...") {
     public void actionPerformed(ActionEvent ae) { _jarOptionsDialog.setVisible(true); }
   };
   
+  /** Initializes the "Tabbed Panes" frame. */
+  private void initTabbedPanesFrame() {
+    if (DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue()) {
+      _tabbedPanesFrame.setFrameState(DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STATE));  
+    }
+  }
+  
+  /** Reset the position of the "Tabbed Panes" dialog. */
+  public void resetTabbedPanesFrame() {
+    _tabbedPanesFrame.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_TABBEDPANES_STATE, "default");
+    }
+  }
+  
+  /** Action that detaches the tabbed panes.  Only runs in the event thread. */
+  private final Action _detachTabbedPanesAction = new AbstractAction("Detach Tabbed Panes") {
+    public void actionPerformed(ActionEvent ae) { 
+      JMenuItem m = (JMenuItem)ae.getSource();
+      boolean b = m.isSelected();
+      DrJava.getConfig().setSetting(DETACH_TABBEDPANES, b);
+      _tabbedPanesFrame.setDisplayInFrame(b);
+    }
+  };
+  
+  private JMenuItem _detachTabbedPanesMenuItem;
   
   /** Sets the document in the definitions pane to a new templated junit test class. */
   private final Action _newJUnitTestAction = new AbstractAction("New JUnit Test Case...") {
@@ -3010,6 +3036,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
 //    Utilities.show("Global Model started");
     
+    _tabbedPanesFrame = new TabbedPanesFrame(MainFrame.this,_tabbedPane,_mainSplit);
+    _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        _detachTabbedPanesMenuItem.setSelected(false);
+        DrJava.getConfig().setSetting(DETACH_TABBEDPANES, false);
+      }
+    });
+    
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
     
@@ -3315,6 +3349,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _editExternalDialog = new EditExternalDialog(MainFrame.this);
     _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
     
+    initTabbedPanesFrame();
     initJarOptionsDialog();
     initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
@@ -3443,6 +3478,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
     }
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        _tabbedPanesFrame.setDisplayInFrame(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+      }
+    });
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
@@ -5091,6 +5132,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // Reset to defaults to restore pristine behavior.
       config.setSetting(DIALOG_JAROPTIONS_STATE, DIALOG_JAROPTIONS_STATE.getDefault());
     }
+
+    // "Tabbed Panes" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue())
+          && (_tabbedPanesFrame != null) && (_tabbedPanesFrame.getFrameState() != null)) {
+      config.setSetting(DIALOG_TABBEDPANES_STATE, (_tabbedPanesFrame.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_TABBEDPANES_STATE, DIALOG_TABBEDPANES_STATE.getDefault());
+    }
     
     // Panel heights.
     if (_showDebugger) config.setSetting(DEBUG_PANEL_HEIGHT, Integer.valueOf(_debugPanel.getHeight()));
@@ -6146,6 +6197,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     editMenu.addSeparator();
     _addMenuItem(editMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
     _addMenuItem(editMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
+    _detachTabbedPanesMenuItem = _newCheckBoxMenuItem(_detachTabbedPanesAction);
+    _detachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+    _setMenuShortcut(_detachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES);
+    editMenu.add(_detachTabbedPanesMenuItem);
     
     // access to configurations GUI
     editMenu.addSeparator();

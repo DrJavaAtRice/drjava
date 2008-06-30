@@ -164,7 +164,11 @@ public class ProcessCreator {
     // set up command line, if necessary
     if (_cmdline!=null) {
       _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
-      List<String> cmds = StringOps.commandLineToList(_evaluatedCmdLine);
+      List<List<List<String>>> seqs = StringOps.commandLineToLists(_evaluatedCmdLine);
+      if (seqs.size()!=1) { throw new IllegalArgumentException("ProcessCreator needs a command line with just one process."); }
+      List<List<String>> pipe = seqs.get(0);
+      if (pipe.size()<1) { throw new IllegalArgumentException("ProcessCreator needs a command line with just one process."); }
+      List<String> cmds = pipe.get(0);
       _cmdarray = new String[cmds.size()];
       for (int i=0; i<cmds.size(); ++i) {
         _cmdarray[i] = StringOps.unescapeFileName(cmds.get(i));

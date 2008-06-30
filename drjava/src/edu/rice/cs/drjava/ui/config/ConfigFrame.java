@@ -669,7 +669,29 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
                                                   "Save \"Open Javadoc\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog.", false)
+                                                  "Whether to save and restore the position of the \"Open Javadoc\" dialog.", false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetOpenJavadocDialogPosition();
+      }
+    }, "Reset \"Open Javadoc\" Dialog Position", this, "This resets the dialog position to its default values."));
+
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_TABBEDPANES_STORE_POSITION,
+                                                  "Save \"Tabbed Panes\" Window Position", this,
+                                                  "Whether to save and restore the position of the \"Tabbed Panes\" window.", false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetTabbedPanesFrame();
+      }
+    }, "Reset \"Tabbed Panes\" Window Position", this, "This resets the window position to its default values."));
+
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DETACH_TABBEDPANES,
+                                                  "Detach Tabbed Panes", this,
+                                                  "Whether to detach the tabbed panes and display them in a separate window.", false)
                          .setEntireColumn(true));
     panel.displayComponents();
   }

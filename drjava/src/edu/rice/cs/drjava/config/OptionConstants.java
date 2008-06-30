@@ -768,6 +768,10 @@ public interface OptionConstants {
     new KeyStrokeOption("key.exec.process",
                         KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK | SHIFT_MASK));
   
+  /** The key binding to detach/re-attach the tabbed panes. */
+  public static final KeyStrokeOption KEY_DETACH_TABBEDPANES = 
+    new KeyStrokeOption("key.detach.tabbedpanes", KeyStrokeOption.NULL_KEYSTROKE);
+  
   /* ---------- Find Replace Options ---------- */
   
   public static final BooleanOption FIND_MATCH_CASE = 
@@ -1174,7 +1178,18 @@ public interface OptionConstants {
   public static final NonNegativeIntegerOption DIALOG_LIGHTWEIGHT_PARSING_DELAY =
     new NonNegativeIntegerOption("lightweight.parsing.delay", Integer.valueOf(500));
   
-  /** The last state of the "Create Jar from Project " dialog. */
+  /** The last state of the "Tabbed Panes" frame. */
+  public static final StringOption DIALOG_TABBEDPANES_STATE = new StringOption("tabbedpanes.state", "default");
+  
+  /** Whether to save and restore window size and position at startUp/shutdown. */
+  public static final BooleanOption DIALOG_TABBEDPANES_STORE_POSITION =
+    new BooleanOption("tabbedpanes.store.position", Boolean.TRUE);
+  
+  /** Whether the tabbed pane is detached from the MainFrame. */
+  public static final BooleanOption DETACH_TABBEDPANES =
+    new BooleanOption("tabbedpanes.detach", Boolean.FALSE);
+  
+  /** The last state of the "Create Jar from Project" dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");
   
   /** Whether to save and restore window size and position at startUp/shutdown. */
