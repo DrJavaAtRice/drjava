@@ -771,6 +771,10 @@ public interface OptionConstants {
   /** The key binding to detach/re-attach the tabbed panes. */
   public static final KeyStrokeOption KEY_DETACH_TABBEDPANES = 
     new KeyStrokeOption("key.detach.tabbedpanes", KeyStrokeOption.NULL_KEYSTROKE);
+
+  /** The key binding to detach/re-attach the debugger panel. */
+  public static final KeyStrokeOption KEY_DETACH_DEBUGGER = 
+    new KeyStrokeOption("key.detach.debugger", KeyStrokeOption.NULL_KEYSTROKE);
   
   /* ---------- Find Replace Options ---------- */
   
@@ -1188,6 +1192,17 @@ public interface OptionConstants {
   /** Whether the tabbed pane is detached from the MainFrame. */
   public static final BooleanOption DETACH_TABBEDPANES =
     new BooleanOption("tabbedpanes.detach", Boolean.FALSE);
+
+  /** The last state of the "Debugger" frame. */
+  public static final StringOption DIALOG_DEBUGFRAME_STATE = new StringOption("debugger.state", "default");
+  
+  /** Whether to save and restore window size and position at startUp/shutdown. */
+  public static final BooleanOption DIALOG_DEBUGFRAME_STORE_POSITION =
+    new BooleanOption("debugger.store.position", Boolean.TRUE);
+  
+  /** Whether the debugger is detached from the MainFrame. */
+  public static final BooleanOption DETACH_DEBUGGER =
+    new BooleanOption("debugger.detach", Boolean.FALSE);
   
   /** The last state of the "Create Jar from Project" dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");

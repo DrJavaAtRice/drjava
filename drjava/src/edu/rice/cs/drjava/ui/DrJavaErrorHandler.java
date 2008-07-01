@@ -45,6 +45,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.swing.SwingUtil;
+import edu.rice.cs.util.Log;
 
 /** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
  *  The static log() method can be used to put log entries into the error log but continue execution.
@@ -56,6 +57,9 @@ import edu.rice.cs.plt.swing.SwingUtil;
 public class DrJavaErrorHandler {
   /** the list of errors */
   private static ArrayList<Throwable> _errors = new ArrayList<Throwable>();
+  
+  /** Log to file. */
+  public static final Log LOG = new Log("error_handler.txt", false);
 
   /** the button to show */
   private static JButton _errorsButton;
@@ -90,6 +94,7 @@ public class DrJavaErrorHandler {
   
   /** Record the throwable in the errors list. */
   public static void record(final Throwable thrown) {
+    LOG.log("DrJavaErrorHandler.record", thrown);
     SwingUtil.invokeLater(new Runnable() {
       public void run() {
         if (thrown instanceof OutOfMemoryError) {

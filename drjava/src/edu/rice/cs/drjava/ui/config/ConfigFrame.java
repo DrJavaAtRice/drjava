@@ -676,7 +676,6 @@ public class ConfigFrame extends JFrame {
         _mainFrame.resetOpenJavadocDialogPosition();
       }
     }, "Reset \"Open Javadoc\" Dialog Position", this, "This resets the dialog position to its default values."));
-
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_TABBEDPANES_STORE_POSITION,
@@ -693,6 +692,23 @@ public class ConfigFrame extends JFrame {
                                                   "Detach Tabbed Panes", this,
                                                   "Whether to detach the tabbed panes and display them in a separate window.", false)
                          .setEntireColumn(true));
+
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_DEBUGFRAME_STORE_POSITION,
+                                                  "Save \"Debugger\" Window Position", this,
+                                                  "Whether to save and restore the position of the \"Debugger\" window.", false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetDebugFrame();
+      }
+    }, "Reset \"Debugger\" Window Position", this, "This resets the window position to its default values."));
+
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DETACH_DEBUGGER,
+                                                  "Detach Debugger", this,
+                                                  "Whether to detach the debugger and display it in a separate window.", false)
+                         .setEntireColumn(true));
+
     panel.displayComponents();
   }
 

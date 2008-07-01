@@ -156,7 +156,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   // Tabbed panel fields
   public final LinkedList<TabbedPanel>  _tabs = new LinkedList<TabbedPanel>();  
   public final JTabbedPane _tabbedPane;
-  public final TabbedPanesFrame _tabbedPanesFrame;
+  private final DetachedFrame _tabbedPanesFrame;
   public volatile Component _lastFocusOwner;
   
   private final CompilerErrorPanel _compilerErrorPanel;
@@ -179,6 +179,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile InteractionsScriptController _interactionsScriptController;
   private volatile InteractionsScriptPane _interactionsScriptPane;
   private volatile DebugPanel _debugPanel;
+  private final DetachedFrame _debugFrame;
   
   /** Panel to hold both InteractionsPane and its sync message. */
   
@@ -471,8 +472,40 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _tabbedPanesFrame.setDisplayInFrame(b);
     }
   };
-  
+
+  // menu item (checkbox menu) for detaching the tabbed panes
   private JMenuItem _detachTabbedPanesMenuItem;
+
+  /** Initializes the "Debugger" frame. */
+  private void initDebugFrame() {
+    if (_debugFrame==null) return; // debugger isn't used
+    if (DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
+      _debugFrame.setFrameState(DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STATE));  
+    }
+  }
+  
+  /** Reset the position of the "Debugger" dialog. */
+  public void resetDebugFrame() {
+    if (_debugFrame==null) return; // debugger isn't used
+    _debugFrame.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_DEBUGFRAME_STATE, "default");
+    }
+  }
+
+  /** Action that detaches the debugger pane.  Only runs in the event thread. */
+  private final Action _detachDebugFrameAction = new AbstractAction("Detach Debugger") {
+    public void actionPerformed(ActionEvent ae) { 
+      if (_debugFrame==null) return; // debugger isn't used
+      JMenuItem m = (JMenuItem)ae.getSource();
+      boolean b = m.isSelected();
+      DrJava.getConfig().setSetting(DETACH_DEBUGGER, b);
+      _debugFrame.setDisplayInFrame(b);
+    }
+  };
+  
+  // menu item (checkbox menu) for detaching the debugger pane
+  private JMenuItem _detachDebugFrameMenuItem;
   
   /** Sets the document in the definitions pane to a new templated junit test class. */
   private final Action _newJUnitTestAction = new AbstractAction("New JUnit Test Case...") {
@@ -3038,7 +3071,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    
 //    Utilities.show("Global Model started");
     
-    _tabbedPanesFrame = new TabbedPanesFrame(MainFrame.this,_tabbedPane,_mainSplit);
+    _tabbedPanesFrame = new DetachedFrame(MainFrame.this, new Lambda<Void,DetachedFrame>() {
+      public Void apply(DetachedFrame frame) {
+        frame.getContentPane().add(_tabbedPane);
+        return null;
+      }
+    }, new Lambda<Void,DetachedFrame>() {
+      public Void apply(DetachedFrame frame) {
+        _mainSplit.setBottomComponent(_tabbedPane);
+        return null;
+      }
+    });
     _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent we) {
         _detachTabbedPanesMenuItem.setSelected(false);
@@ -3193,6 +3236,34 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     };
     _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu, projAct, 
                                                   OptionConstants.RECENT_PROJECTS);
+    
+    // Create detachable debug frame
+    if (_debugPanel!=null) { // using debugger
+      _debugFrame = new DetachedFrame(MainFrame.this, new Lambda<Void,DetachedFrame>() {
+        public Void apply(DetachedFrame frame) {
+          frame.getContentPane().add(_debugPanel);
+          return null;
+        }
+      }, new Lambda<Void,DetachedFrame>() {
+        public Void apply(DetachedFrame frame) {
+          _debugSplitPane.setTopComponent(_docSplitPane);
+          _debugSplitPane.setBottomComponent(_debugPanel);
+          _mainSplit.setTopComponent(_debugSplitPane);
+          return null;
+        }
+      });
+      _debugFrame.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent we) {
+          if (_debugFrame==null) return; // debugger not used
+          _detachDebugFrameMenuItem.setSelected(false);
+          DrJava.getConfig().setSetting(DETACH_DEBUGGER, false);
+        }
+      });
+    }
+    else { // not using debugger
+      _debugFrame = null;
+    }
+    
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());
     
@@ -3352,6 +3423,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
     
     initTabbedPanesFrame();
+    initDebugFrame();
     initJarOptionsDialog();
     initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
@@ -3465,11 +3537,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // but only if we haven't just asked if the user wants to download a new version
       // two dialogs on program start is too much clutter
       if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
-        int days = DrJava.getConfig().getSetting(DRJAVA_SURVEY_DAYS);
-        java.util.Date nextCheck = 
-          new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
-                               + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
-        if (new java.util.Date().after(nextCheck)) {
+        if (DrJavaSurveyPopup.maySubmitSurvey()) {
+          // either enough days have passed, or the configuration has changed
           EventQueue.invokeLater(new Runnable() {
             public void run() {
               DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
@@ -4053,14 +4122,24 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   private void _showDebuggerPanel() {
-    _debugSplitPane.setTopComponent(_docSplitPane);
-    _mainSplit.setTopComponent(_debugSplitPane);
+    if (_detachDebugFrameMenuItem.isSelected()) {
+      _debugFrame.setDisplayInFrame(true);
+    }
+    else {
+      _debugSplitPane.setTopComponent(_docSplitPane);
+      _mainSplit.setTopComponent(_debugSplitPane);
+    }
     _debugPanel.updateData();
     _lastFocusOwner.requestFocusInWindow();
   }
   
   private void _hideDebuggerPanel() {
-    _mainSplit.setTopComponent(_docSplitPane);
+    if (_detachDebugFrameMenuItem.isSelected()) {
+      _debugFrame.setVisible(false);
+    }
+    else {
+      _mainSplit.setTopComponent(_docSplitPane);
+    }
     _lastFocusOwner.requestFocusInWindow();
   }
   
@@ -5160,7 +5239,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       config.setSetting(DIALOG_JAROPTIONS_STATE, DIALOG_JAROPTIONS_STATE.getDefault());
     }
     
-    // "Tabbed Panes" dialog position and size.
+    // "Tabbed Panes" frame position and size.
     if ((DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue())
           && (_tabbedPanesFrame != null) && (_tabbedPanesFrame.getFrameState() != null)) {
       config.setSetting(DIALOG_TABBEDPANES_STATE, (_tabbedPanesFrame.getFrameState().toString()));
@@ -5168,6 +5247,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     else {
       // Reset to defaults to restore pristine behavior.
       config.setSetting(DIALOG_TABBEDPANES_STATE, DIALOG_TABBEDPANES_STATE.getDefault());
+    }
+
+    // "Debugger" frame position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue())
+          && (_debugFrame != null) && (_debugFrame.getFrameState() != null)) {
+      config.setSetting(DIALOG_DEBUGFRAME_STATE, (_debugFrame.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_DEBUGFRAME_STATE, DIALOG_DEBUGFRAME_STATE.getDefault());
     }
     
     // Panel heights.
@@ -6433,6 +6522,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
     _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
     
+    debugMenu.addSeparator();
+    _detachDebugFrameMenuItem = _newCheckBoxMenuItem(_detachDebugFrameAction);
+    _detachDebugFrameMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_DEBUGGER));
+    _setMenuShortcut(_detachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER);
+    debugMenu.add(_detachDebugFrameMenuItem);
+
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
     
@@ -6451,6 +6546,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _stepIntoDebugAction.setEnabled(false);
     _stepOverDebugAction.setEnabled(false);
     _stepOutDebugAction.setEnabled(false);
+    _detachDebugFrameAction.setEnabled(isEnabled);
     
     if (_showDebugger) _debugPanel.disableButtons();
   }
@@ -9955,11 +10051,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
     }
     else {
-      // modal listener is already owned by another window; create a window adapter that performs the specified actions
+      // modal listener is already owned by another window
+      // create a window adapter that just performs the closeAction.
+      // it does not perform the toFrontAction, since that can lead to
+      // two windows bouncing back and forth, both trying to stay on top.
       wa = new WindowAdapter() {
-        public void windowDeactivated(WindowEvent we) { toFrontAction.apply(we); }
-        public void windowIconified(WindowEvent we) { toFrontAction.apply(we); }
-        public void windowLostFocus(WindowEvent we) { toFrontAction.apply(we); }
+        public void windowDeactivated(WindowEvent we) { }
+        public void windowIconified(WindowEvent we) { }
+        public void windowLostFocus(WindowEvent we) { }
         public void windowClosing(WindowEvent we) { closeAction.apply(we); }
       };
     }

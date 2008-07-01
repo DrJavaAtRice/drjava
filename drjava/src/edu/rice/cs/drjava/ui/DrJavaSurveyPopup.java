@@ -105,7 +105,7 @@ public class DrJavaSurveyPopup extends JDialog {
     _questionPanel = new JOptionPane("May DrJava anonymously send the information\nbelow to the DrJava developers?",
                                      JOptionPane.QUESTION_MESSAGE,JOptionPane.DEFAULT_OPTION,null,
                                      new Object[0]);
-    int size = DRJAVA_SURVEY_KEYS.length;
+    int size = DRJAVA_SURVEY_KEYS.length + 2;
     String[][] rowData = new String[size][2];
     int rowNum = 0;
     for(String k: DRJAVA_SURVEY_KEYS) {
@@ -113,6 +113,10 @@ public class DrJavaSurveyPopup extends JDialog {
       rowData[rowNum][1] = System.getProperty(k);
       ++rowNum;
     }
+    rowData[rowNum  ][0] = "DrJava revision";
+    rowData[rowNum++][1] = String.valueOf(Version.getRevisionNumber());
+    rowData[rowNum  ][0] = "DrJava build time";
+    rowData[rowNum++][1] = String.valueOf(Version.getBuildTimeString());
     java.util.Arrays.sort(rowData,new java.util.Comparator<String[]>() {
       public int compare(String[] o1, String[] o2) {
         return o1[0].compareTo(o2[0]);
@@ -154,24 +158,41 @@ public class DrJavaSurveyPopup extends JDialog {
 
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("survey.txt",false);
 
+  /** Return the URL that would be used to answer the DrJava survey.
+    * @param URL used to answer the DrJava survey */
+  public static String getSurveyURL() {
+    final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
+    StringBuilder sb = new StringBuilder();
+    sb.append(DRJAVA_SURVEY_PAGE);
+    sb.append("rev=");
+    sb.append(Version.getRevisionNumber());
+    sb.append("&buildtime=");
+    sb.append(Version.getBuildTimeString());
+    for(String k: DRJAVA_SURVEY_KEYS) {
+      sb.append('&');
+      sb.append(k);
+      sb.append('=');
+      sb.append(System.getProperty(k));
+    }
+    LOG.log(sb.toString());
+    return sb.toString().replaceAll(" ","%20");
+  }
+  
+  /** Returns true if the user may participate in the survey, i.e. either the configuration
+    * string has changed from the last time, or enough days have passed since the last test (3 months) */
+  public static boolean maySubmitSurvey() {
+    // check how many days have passed since the last survey
+    int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);
+    java.util.Date nextCheck = 
+      new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
+                           + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
+    return (new java.util.Date().after(nextCheck)) ||
+      (!DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT).equals(getSurveyURL()));
+  }
+  
   protected void yesAction() {
     try {
-      final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
-      StringBuilder sb = new StringBuilder();
-      sb.append(DRJAVA_SURVEY_PAGE);
-//    sb.append("date=");
-//    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-//    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-//    sb.append(sdf.format(new Date()));
-      boolean first = true;
-      for(String k: DRJAVA_SURVEY_KEYS) {
-        if (first) { first = false; } else { sb.append('&'); }
-        sb.append(k);
-        sb.append('=');
-        sb.append(System.getProperty(k));
-      }
-      LOG.log(sb.toString());
-      String result = sb.toString().replaceAll(" ","%20");
+      String result = getSurveyURL();
       LOG.log(result);
       
       // check how many days have passed since the last survey
@@ -179,9 +200,8 @@ public class DrJavaSurveyPopup extends JDialog {
       java.util.Date nextCheck = 
         new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
                              + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
-      if (!(new java.util.Date().after(nextCheck)) &&
-          (DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT).equals(result))) {
-        // not enough days have passed, and the configuration has not changed, quietly terminate
+      if (!maySubmitSurvey()) {
+        // not enough days have passed, or the configuration has not changed, quietly terminate
         return;
       }
       
@@ -192,7 +212,7 @@ public class DrJavaSurveyPopup extends JDialog {
         InputStreamReader is = new InputStreamReader(urls);
         br = new BufferedReader(is);
         String line;
-        sb.setLength(0);
+        StringBuilder sb = new StringBuilder();
         while((line = br.readLine()) != null) { sb.append(line); sb.append(System.getProperty("line.separator")); }
         LOG.log(sb.toString());
         DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
