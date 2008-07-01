@@ -443,11 +443,12 @@ public class ReducedModelComment extends AbstractReducedModel {
   /* The walker design is an ugly kludge.  The reduced model consists of two separate TokenLists, a reduced "comment"
    * and a reduced "brace" model.  There are glued together in the class ReducedModelControl.  In brace matching, the
    * reduced brace model is dominant but walking through this TokenList is not sufficient because some braces can be
-   * shadowed by comments or quotation marks.  This information is stored in the reduced comment model.  ReducedModelControl
-   * should support an iterator over the reduced model that consists of two iterators, a reduced brace iterator and a reduced
-   * comment iterator that are always in sync.  Then it would be easy to get shadowing information given the position of
-   * a reduced model control iterator.  But no such iterator exits.  So the code in DrJava limps by using an iterator
-   * over the reduced brace model and a separate reduced comment "walker" (iterator) with a truly horrible interface.  
+   * shadowed by comments or quotation marks.  This information is stored in the reduced comment model.  
+   * ReducedModelControl keeps the _cursor fields of the enclosed ReducedModelBrace and ReducedModelCommentsupport in
+   * sync, but does not support the notion of a dual iterator as an abstraction.  Hence, if a transient iterator is 
+   * created for ReducedModelBrace, there is no corresponding iterator for ReducedModelComment.  The "walker" is used
+   * as a weak substitute. So the code in DrJava limps by using transient iterators over the reduced brace model and 
+   * a separate SHARED reduced comment "walker" (iterator) with a truly horrible interface.  
    * -- Corky */
   
   // Comment by the code authors
@@ -512,60 +513,6 @@ public class ReducedModelComment extends AbstractReducedModel {
 //    System.err.println("Returning walk count of " + walkcount);
     return walkcount;
   }
-  
-//  /** Gets distance to the start of the line containing the brace enclosing the start of this line and stores this 
-//    * info in the IndentInfo field _distToLineEnclosingBraceStart.  Assumes that 
-//    * getDistToLineEnclosingBrace has already been called. */
-//  void getDistToLineEnclosingBraceStart(IndentInfo info) {
-//    TokenList.Iterator copyCursor = _cursor.copy();
-//    
-//    if (info.distToLineEnclosingBrace() == -1 || copyCursor.atStart()) {
-//      info.setDistToLineEnclosingBraceStart(-1);  // should not be necessary
-//      return; // no brace
-//    }
-//    
-//    copyCursor.move(-info.distToLineEnclosingBrace());
-//    int walkcount = _getDistToStart(copyCursor);
-//    
-//    if (walkcount == -1) info.setDistToLineEnclosingBraceStart(-1);  // should not be necessary
-//    else info.setDistToLineEnclosingBraceStart(walkcount + info.distToLineEnclosingBrace());
-//    
-//    return;
-//  }
-  
-//  /** Computes the distance to the beginning of the line (except first) containing the brace enclosing
-//    * the current location given the distnace to this brace.
-//    */
-//  int getDistToCurrentBraceNewline(int distToBraceCurrent) {
-//    
-//    TokenList.Iterator copyCursor = _cursor._copy();
-//    
-//    if (distToBraceCurrent == -1 || copyCursor.atStart()) return -1; // no brace
-//    
-//    copyCursor.move(- distToBraceCurrent);
-//    int walkcount = _getDistToPreviousNewline(copyCursor);
-//    
-//    if (walkcount == -1) return  -1;  // no newline
-//    else return walkcount + distToBraceCurrent;
-//  }
-  
-//  /** Computes the distance to the beginning of the line containing the brace enclosing
-//    * the current location and stores this info in the IndentInfo field distToNewlineCurrent.
-//    */
-//  void getDistToEnclosingBraceStart(IndentInfo info) {
-//    TokenList.Iterator copyCursor = _cursor.copy();
-//    
-//    if (info.distToEnclosingBrace() == -1 || copyCursor.atStart()) return; // no brace
-//    
-//    copyCursor.move(-info.distToEnclosingBrace());
-//    int walkcount = _getDistToStart(copyCursor);
-//    
-//    if (walkcount == -1) info.setDistToEnclosingBraceStart(-1);
-//    else {
-//      info.setDistToEnclosingBraceStart(walkcount + info.distToEnclosingBrace());
-//    }
-//    return;
-//  }
   
   /** Computes the distance to the beginning of the line (except first) containing the brace enclosing
     * the current location given the distnace to this brace.

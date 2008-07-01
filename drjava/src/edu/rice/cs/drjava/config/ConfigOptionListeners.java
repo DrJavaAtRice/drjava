@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
+import java.awt.EventQueue;
 import javax.swing.*;
 
 /** @version $Id$ */
@@ -152,7 +153,7 @@ public class ConfigOptionListeners implements OptionConstants {
         DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
           public void optionChanged(OptionEvent<String> oe) {
             DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
-            SwingUtilities.invokeLater(new Runnable() { 
+            EventQueue.invokeLater(new Runnable() { 
               public void run() { DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, l); }
             });
           }
@@ -330,7 +331,7 @@ public class ConfigOptionListeners implements OptionConstants {
         DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, new OptionListener<String>() {
           public void optionChanged(OptionEvent<String> oe) {
             DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
-            SwingUtilities.invokeLater(new Runnable() { 
+            EventQueue.invokeLater(new Runnable() { 
               public void run() { DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, l); }
             });
           }

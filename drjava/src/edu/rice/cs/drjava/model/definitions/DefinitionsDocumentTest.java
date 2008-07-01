@@ -50,6 +50,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import javax.swing.text.BadLocationException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /** Tests the functionality of the definitions document.
@@ -211,7 +213,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   /** Make sure the vector is consistent: all elements immediately adjoin one another (no overlap), and make sure all
     * indices between start and end are in the vector. Vector is guaranteed to not have size zero.
     */
-  private void _checkHighlightStatusConsistent(Vector<HighlightStatus> v, int start, int end) {
+  private void _checkHighlightStatusConsistent(List<HighlightStatus> v, int start, int end) {
     // location we're at so far
     int walk = start;
     for (int i = 0; i < v.size(); i++) {
@@ -228,7 +230,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     * @exception BadLocationException
     */
   public void textHighlightKeywords1() throws BadLocationException {
-    Vector<HighlightStatus> v;
+    List<HighlightStatus> v;
     final String s = "public class Foo {\n" +
       "  private int _x = 0;\n" +
       "}";
@@ -260,7 +262,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     * @throws BadLocationException
     */
   public void textHighlightKeywords2() throws BadLocationException {
-    Vector<HighlightStatus> v;
+    List<HighlightStatus> v;
     final String s = "int y";
     _doc.insertString(_doc.getLength(), s, null);
     // First sanity check the whole string's status

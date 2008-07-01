@@ -51,6 +51,8 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     // "_{_"/*_(_)_*/
     // }#
     assertEquals("#1.0", 36, model0.balanceBackward());
+    assertFalse(model0._rmb.openBraceImmediatelyLeft());
+    assertTrue(model0._rmb.closedBraceImmediatelyLeft());
     model0.move(-2);
     assertEquals("#2.0", -1, model0.balanceBackward());
     model0.move(-14);
@@ -61,9 +63,17 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#5.0", -1, model0.balanceBackward());
     model1.insertChar(')');
     assertEquals("#6.0", -1, model1.balanceBackward());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertTrue(model1._rmb.closedBraceImmediatelyLeft());
     model1.move(-1);
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.insertChar('{');
+    assertTrue(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.move(1);
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertTrue(model1._rmb.closedBraceImmediatelyLeft());
     assertEquals("#7.0", -1, model1.balanceBackward());
   }
   
@@ -114,16 +124,26 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
 
   /** Tests that a gap inserted inside another gap unites with the enclosing gap. */
   public void testInsertGapInsideGap() {
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     insertGap(model1, 3);
     assertTrue("#0.0", model1.atEnd());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.move(-3);
     assertTrue("#0.1", model1.currentToken().isGap());
     assertEquals("#0.2", 3, model1.currentToken().getSize());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     insertGap(model1, 3);
     assertTrue("#1.1", model1.currentToken().isGap());
     assertEquals("#1.2", 6, model1.currentToken().getSize());
     assertEquals("#1.3", 3, model1.absOffset());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     insertGap(model1, 4);
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     assertTrue("#1.1", model1.currentToken().isGap());
     assertEquals("#1.2", 10, model1.currentToken().getSize());
     assertEquals("#1.3", 7, model1._offset);
@@ -131,26 +151,48 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
 
   /** Tests that inserting a curly brace at the beginning/end of the document creates the proper tokens. */
   public void testInsertBraceAtStartAndEnd() {
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.insertChar('(');
     assertTrue("#0.0", model1.atEnd());
+    assertTrue(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.move(-1);
     assertEquals("#0.1", "(", model1.currentToken().getType());
     assertEquals("#0.2", 1, model1.currentToken().getSize());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
+    assertFalse(model2._rmb.openBraceImmediatelyLeft());
+    assertFalse(model2._rmb.closedBraceImmediatelyLeft());
     model2.insertChar(')');
     assertTrue("#1.0", model2.atEnd());
+    assertTrue(model2._rmb.closedBraceImmediatelyLeft());
+    assertFalse(model2._rmb.openBraceImmediatelyLeft());
     model2.move(-1);
     assertEquals("#1.1", ")", model2.currentToken().getType());
     assertEquals("#1.2", 1, model2.currentToken().getSize());
+    assertFalse(model2._rmb.openBraceImmediatelyLeft());
+    assertFalse(model2._rmb.closedBraceImmediatelyLeft());
   }
 
   /** Tests that inserting a curly brace inside a gap creates the proper tokens. */
   public void testInsertBraceInsideGap() {
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     insertGap(model1, 4);
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.move(-4);
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     insertGap(model1, 3);
     assertEquals("#0.0", 3, model1.absOffset());
     assertEquals("#0.1", 7, model1.currentToken().getSize());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     model1.insertChar('{');
+    assertTrue(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
     assertEquals("#1.0", 4, model1.absOffset());
     assertEquals("#1.1", 4, model1.currentToken().getSize());
     assertTrue("#1.2", model1.currentToken().isGap());
@@ -161,6 +203,8 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#3.0", 0, model1.absOffset());
     assertEquals("#3.1", 3, model1.currentToken().getSize());
     assertTrue("#3.2", model1.currentToken().isGap());
+    assertFalse(model1._rmb.openBraceImmediatelyLeft());
+    assertFalse(model1._rmb.closedBraceImmediatelyLeft());
   }
 
   /** Tests that inserting other forms of braces creates the proper tokens. */

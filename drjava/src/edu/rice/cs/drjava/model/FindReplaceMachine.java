@@ -439,7 +439,7 @@ public class FindReplaceMachine {
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     // search from current position to "end" of document ("end" is start if searching backward)
 //    Utilities.show("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
-    _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
+//    _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
     FindResult fr = _findNextInDocSegment(doc, start, len);
     if (fr.getFoundOffset() >= 0 || searchAll) return fr;
     
@@ -466,8 +466,8 @@ public class FindReplaceMachine {
     assert (_isForward && start + len == docLen) || (! _isForward && start == 0);
 //    Utilities.show("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
 //                       doc.getLength() + ", _isForward = " + _isForward);
-    _log.log("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
-             doc.getLength() + ", _isForward = " + _isForward);
+//    _log.log("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
+//             doc.getLength() + ", _isForward = " + _isForward);
     
     int newLen;
     int newStart;
@@ -485,8 +485,8 @@ public class FindReplaceMachine {
       newLen = docLen - newStart;
     }
     
-    _log.log("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
-             newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
+//    _log.log("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
+//             newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
   
@@ -511,7 +511,7 @@ public class FindReplaceMachine {
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     boolean inTestCase = (_doc.getFileName().endsWith("Test.java"));
     
-    if (!_ignoreTestCases || !inTestCase) {
+    if (!_ignoreTestCases || ! inTestCase) {
       final int docLen = doc.getLength();;     // The length of the segment to be searched
       final int wordLen = _findWord.length();   // length of search key (word being searched for)
       
@@ -620,9 +620,11 @@ public class FindReplaceMachine {
         
         // find next match in _doc
         FindResult fr;
-        _doc.acquireReadLock();
-        try { fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); } 
-        finally { _doc.releaseReadLock(); }
+//        _doc.acquireReadLock();
+//        try { 
+        fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); 
+//        } 
+//        finally { _doc.releaseReadLock(); }
         
         if (fr.getFoundOffset() >= 0) return fr;
       }
@@ -632,12 +634,15 @@ public class FindReplaceMachine {
     }
     
     // No valid match found; perform wrapped search.  _findWrapped assumes acquireReadLock is held.
-    startDoc.acquireReadLock();
-    try { return _findWrapped(startDoc, start, len, true); }  // last arg is true because searching all docs has wrapped
-    finally { startDoc.releaseReadLock(); } 
+//    startDoc.acquireReadLock();
+//    try { 
+    return _findWrapped(startDoc, start, len, true); 
+//    }  // last arg is true because searching all docs has wrapped
+//    finally { startDoc.releaseReadLock(); } 
   } 
   
-  /** Determines whether the whole find word is found at the input position
+  /** Determines whether the whole find word is found at the input position.  Assumes read lock or hourglass is
+    * already held.
     * @param doc - the document where an instance of the find word was found
     * @param foundOffset - the position where that instance was found
     * @return true if the whole word is found at foundOffset, false otherwise
@@ -651,16 +656,16 @@ public class FindReplaceMachine {
     boolean leftOutOfBounds = false;
     boolean rightOutOfBounds = false;
     
-    doc.acquireReadLock();
-    try { 
+//    doc.acquireReadLock();
+//    try { 
       try { leftOfMatch = doc.getText(leftLoc, 1).charAt(0); }
       catch (BadLocationException e) { leftOutOfBounds = true; } 
       catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
       try { rightOfMatch = doc.getText(rightLoc, 1).charAt(0); }
       catch (BadLocationException e) { rightOutOfBounds = true; } 
       catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
-    }
-    finally {doc.releaseReadLock();}      
+//    }
+//    finally { doc.releaseReadLock(); }      
     
     if (! leftOutOfBounds && ! rightOutOfBounds) return isDelimiter(rightOfMatch) && isDelimiter(leftOfMatch);
     if (! leftOutOfBounds) return isDelimiter(leftOfMatch);

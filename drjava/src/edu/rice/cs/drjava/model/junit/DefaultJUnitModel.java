@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.junit;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 
@@ -257,7 +258,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             _rawJUnitOpenDefDocs(lod, allTests);
           }
           finally {  // always remove this listener after its first execution
-            SwingUtilities.invokeLater(new Runnable() { 
+            EventQueue.invokeLater(new Runnable() { 
               public void run() { _compilerModel.removeListener(listenerThis); }
             });
           }

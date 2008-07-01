@@ -37,16 +37,16 @@
 package edu.rice.cs.drjava.ui;
 
 import java.awt.*;
-import java.awt.event.*;
-
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
 import java.awt.datatransfer.*;
+import java.awt.event.*;
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.lang.ref.WeakReference;
+
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -183,7 +183,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     super(frame, "Find/Replace");
     _model = model;
     _machine = new FindReplaceMachine(_model, _model.getDocumentIterator());
-    _updateMachine();
+//    _updateMachine();
     
     
     /********* Button Initialization ********/
@@ -506,12 +506,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     if (title.length() > 10) { title = title.substring(0,10) + "..."; }
     title = "Find: " + title;
     RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
-    FindResultsPanel panel = _frame.createFindResultsPanel(rm, title, searchStr, searchAll,
-                                                           _machine.getMatchCase(), _machine.getMatchWholeWord(),
-                                                           _machine.getIgnoreCommentsAndStrings(),
-                                                           _ignoreTestCases.isSelected(),
-                                                           new WeakReference<OpenDefinitionsDocument>(startDoc),
-                                                           this);
+    FindResultsPanel panel = 
+      _frame.createFindResultsPanel(rm, title, searchStr, searchAll, _machine.getMatchCase(), 
+                                    _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
+                                    _ignoreTestCases.isSelected(), new WeakReference<OpenDefinitionsDocument>(startDoc),
+                                    this);
     findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, panel);
   }
@@ -587,30 +586,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         
 //        // get the original time stamp
 //        long origts = fr.getDocument().getTimestamp();
+         
+        final OpenDefinitionsDocument doc = fr.getDocument();
         
-        if (! _model.getActiveDocument().equals(fr.getDocument())) {
-          _model.setActiveDocument(fr.getDocument());
-        }
+        if (_model.getActiveDocument() != doc) _model.setActiveDocument(doc);
         else _model.refreshActiveDocument();
-        
-        final OpenDefinitionsDocument doc = _model.getActiveDocument();
-//        final OpenDefinitionsDocument doc = fr.getDocument();
-        
-//        // get the time stamp after making the document the active one
-//        long newts = doc.getTimestamp();
-//        if (newts != origts) {
-//          // timestamps changed, document has been modified, so all our FindResults
-//          // may not apply anymore. we are going to discard all FindResults for this
-//          // document.
-//          // add thi document to the list of reverted documents
-//          reverted.add(doc);
-//          continue;
-//        }
         
         final StringBuilder sb = new StringBuilder();
         int endSel = fr.getFoundOffset();
         int startSel = endSel - searchLen;
-        doc.acquireReadLock();
+//        doc.acquireReadLock();
         try {
           final Position startPos = doc.createPosition(startSel);
           final Position endPos = doc.createPosition(endSel);
@@ -673,11 +658,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         }
         catch (FileMovedException fme) { throw new UnexpectedException(fme); }
         catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-        finally { doc.releaseReadLock(); }
+//        finally { doc.releaseReadLock(); }
       }
       panel.finishChanging();
       
-      SwingUtilities.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {
         public void run() {
           Toolkit.getDefaultToolkit().beep();
           _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
@@ -697,7 +682,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Performs the "replace all" command. */
   private void _replaceAll() {
     _frame.updateStatusField("Replacing All");
-    _updateMachine();
+//    _updateMachine();
     _machine.setFindWord(_findField.getText());
     _machine.setReplaceWord(_replaceField.getText());
     _frame.clearStatusMessage();
@@ -786,7 +771,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   private void _replace() {
     _frame.updateStatusField("Replacing");
-    _updateMachine();
+//    _updateMachine();
     _machine.setFindWord(_findField.getText());
     final String replaceWord = _replaceField.getText();
     _machine.setReplaceWord(replaceWord);
@@ -846,14 +831,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     } 
   }
   
-  /** Abstracted out since this is called from find and replace/find. */
+  /** Abstracted out since this is called from findNext and findPrevious. */
   private void _doFind() {
     
     if (_findField.getText().length() > 0) {
       
-//      _model.addToBrowserHistory();
       
-      _updateMachine();
+//      _updateMachine();
       final String findWord = _findField.getText();
       _machine.setFindWord(findWord);
       _machine.setReplaceWord(_replaceField.getText());
@@ -863,63 +847,70 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       // FindResult contains the document that the result was found in, offset to the next occurrence of 
       // the string, and a flag indicating whether the end of the document was wrapped around while searching
       // for the string.
-      FindResult fr = _machine.findNext();
-      OpenDefinitionsDocument doc = fr.getDocument();
-      OpenDefinitionsDocument matchDoc = _model.getODDForDocument(doc);
-      OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
-      final boolean docChanged = ! matchDoc.equals(openDoc);
-      
-      final int pos = fr.getFoundOffset();
-      
-      if (searchAll) {  // if search was global, reset the active document
-        if (docChanged) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-        else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
-      } 
-      
-      if (fr.getWrapped() && ! searchAll) {
-        Toolkit.getDefaultToolkit().beep();
-        if (! _machine.isSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
-        else _frame.setStatusMessage("Search wrapped to end.");
-      }
-      
-      if (fr.getAllWrapped() && searchAll) {
-        Toolkit.getDefaultToolkit().beep();
-        _frame.setStatusMessage("Search wrapped around all documents.");
-      }
-      
-      if (pos >= 0) { // found a match
-        Caret c = _defPane.getCaret();
-        c.setDot(c.getDot());
-        _defPane.setCaretPosition(pos);
-        _caretChanged = true;
-        _updateMachine();
+      _frame.hourglassOn();
+      try {
+        FindResult fr = _machine.findNext();
+        OpenDefinitionsDocument matchDoc = fr.getDocument();
+//      OpenDefinitionsDocument matchDoc = _model.getODDForDocument(doc);
+        OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
+        final boolean docChanged = matchDoc != openDoc;
         
-        final Runnable command = new Runnable() {
-          public void run() {
-            _selectFoundOrReplacedItem(findWord.length());
-            _replaceAction.setEnabled(true);
-            _replaceFindNextAction.setEnabled(true);
-            _replaceFindPreviousAction.setEnabled(true);
-            _machine.setLastFindWord();
-            _model.addToBrowserHistory();
-          } };
+        final int pos = fr.getFoundOffset();
         
-        if (docChanged)
-          // defer executing this code until after active document switch is complete
-          SwingUtilities.invokeLater(command);
-        else command.run();
+        if (pos >= 0) _model.addToBrowserHistory();  // pos >= 0  <=> search succeeded
+        
+        if (searchAll) {  // if search was global, reset the active document
+          if (docChanged) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+          else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
+        } 
+        
+        if (fr.getWrapped() && ! searchAll) {
+          Toolkit.getDefaultToolkit().beep();
+          if (! _machine.isSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
+          else _frame.setStatusMessage("Search wrapped to end.");
+        }
+        
+        if (fr.getAllWrapped() && searchAll) {
+          Toolkit.getDefaultToolkit().beep();
+          _frame.setStatusMessage("Search wrapped around all documents.");
+        }
+        
+        if (pos >= 0) { // found a match
+//        Caret c = _defPane.getCaret();
+//        c.setDot(c.getDot());
+          _defPane.setCaretPosition(pos);
+          _caretChanged = true;
+          _updateMachine();
+          
+          final Runnable command = new Runnable() {
+            public void run() {
+              _selectFoundOrReplacedItem(findWord.length());
+              _replaceAction.setEnabled(true);
+              _replaceFindNextAction.setEnabled(true);
+              _replaceFindPreviousAction.setEnabled(true);
+              _machine.setLastFindWord();
+              _model.addToBrowserHistory();
+            } };
+          
+          if (docChanged)
+            // defer executing this code until after active document switch is complete
+            EventQueue.invokeLater(command);
+          else command.run();
+        }
+        // else the entire document was searched and no instance of the string
+        // was found. display at most 50 characters of the non-found string
+        else {
+          Toolkit.getDefaultToolkit().beep();
+          final StringBuilder statusMessage = new StringBuilder("Search text \"");
+          if (findWord.length() <= 50) statusMessage.append(findWord);
+          else statusMessage.append(findWord.substring(0, 49) + "...");
+          statusMessage.append("\" not found.");
+          _frame.setStatusMessage(statusMessage.toString());
+        }
       }
-      // else the entire document was searched and no instance of the string
-      // was found. display at most 50 characters of the non-found string
-      else {
-        Toolkit.getDefaultToolkit().beep();
-        final StringBuilder statusMessage = new StringBuilder("Search text \"");
-        if (findWord.length() <= 50) statusMessage.append(findWord);
-        else statusMessage.append(findWord.substring(0, 49) + "...");
-        statusMessage.append("\" not found.");
-        _frame.setStatusMessage(statusMessage.toString());
-      }
+      finally { _frame.hourglassOff(); }
     }
+      
     
     if (! DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
       _findField.requestFocusInWindow();
@@ -1053,7 +1044,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     // Found this little statement that will show the selected text in _defPane without giving _defPane 
     // focus, allowing the user to hit enter repeatedly and change the document while finding next.
-    SwingUtilities.invokeLater(new Runnable() { 
+    EventQueue.invokeLater(new Runnable() { 
       public void run() { _defPane.getCaret().setSelectionVisible(true); } 
     });
 //    _defPane.centerViewOnOffset(from);

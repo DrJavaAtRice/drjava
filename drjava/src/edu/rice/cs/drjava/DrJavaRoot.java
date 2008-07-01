@@ -36,6 +36,11 @@
 
 package edu.rice.cs.drjava;
 
+import java.awt.EventQueue;
+import java.awt.Window;
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -45,10 +50,6 @@ import java.util.StringTokenizer;
 import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
-import java.awt.Window;
-import java.awt.dnd.*;
-import java.awt.datatransfer.*;
-import java.awt.event.WindowEvent;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
@@ -170,7 +171,7 @@ public class DrJavaRoot {
        * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
        * specifying a file (ex: java -jar drjava.jar somefile.java)
        */
-      SwingUtilities.invokeLater(new Runnable(){ public void run(){ 
+      EventQueue.invokeLater(new Runnable(){ public void run(){ 
         _mainFrame.start();
         if (anyLineNumbersSpecified) {
           // this time, we do want to jump to the line number

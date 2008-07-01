@@ -125,8 +125,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       */
     void _splitCurrentIfCommentBlock(boolean splitClose, boolean splitEscape) {
       String type = current().getType();
-      if (type.equals("//") ||
-          type.equals("/*") ||
+      if (type.equals("//") || type.equals("/*") ||
           (splitClose && type.equals("*/")) ||
           (splitEscape && type.equals("\\\\")) ||
           (splitEscape && type.equals("\\\"")) ||

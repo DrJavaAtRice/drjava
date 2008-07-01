@@ -36,6 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
+import java.awt.EventQueue;
 import javax.swing.SwingUtilities;
 
 /** SwingWorker, adapted from Sun's Java Tutorial.  This is the 3rd version of SwingWorker (also known as 
@@ -108,17 +109,17 @@ public abstract class SwingWorker {
         try { setValue(construct()); }
         catch (final RuntimeException e) {
           // Throw the exception in the event dispatching thread.
-          SwingUtilities.invokeLater(new Runnable() { public void run() { throw e; } });
+          EventQueue.invokeLater(new Runnable() { public void run() { throw e; } });
           throw e;
         }
         catch (final Error e) {
           // Throw the error in the event dispatching thread.
-          SwingUtilities.invokeLater(new Runnable() { public void run() { throw e; } });
+          EventQueue.invokeLater(new Runnable() { public void run() { throw e; } });
           throw e;
         }
         finally { _threadVar.clear(); }
 
-        SwingUtilities.invokeLater(doFinished);
+        EventQueue.invokeLater(doFinished);
       }
     };
 

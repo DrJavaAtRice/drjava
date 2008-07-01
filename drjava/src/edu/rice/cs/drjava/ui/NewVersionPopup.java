@@ -150,7 +150,7 @@ public class NewVersionPopup extends JDialog {
     pack();
     Utilities.clearEventQueue();
     
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
         _msg = getMessage(null);
         _versionPanel = new JOptionPane(_msg,JOptionPane.INFORMATION_MESSAGE,

@@ -214,10 +214,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
   
   /** Create a dialog.
-    *  @param mf the instance of mainframe to query into the project
-    *  @param editMode true if a saved external process is edited
-    *  @param editIndex index of the saved external processes to edit
-    *  @param cm completion monitor telling the calling dialog that we are done
+    * @param mf the instance of mainframe to query into the project
+    * @param editMode true if a saved external process is edited
+    * @param editIndex index of the saved external processes to edit
+    * @param cm completion monitor telling the calling dialog that we are done
     */
   public ExecuteExternalDialog(MainFrame mf, boolean editMode, int editIndex, CompletionMonitor cm) {
     super("Execute External Process");
@@ -235,7 +235,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
       final String cmdline = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).get(editIndex);
       final String workdir = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).get(editIndex);
-      final String enclosingFile = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).get(editIndex);
+      final String enclosingFile = 
+        DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).get(editIndex);
       _commandLine.setText(cmdline);
       _commandWorkDirLine.setText(workdir);
       _commandEnclosingFileLine.setText(enclosingFile);
@@ -321,7 +322,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     MainFrame.setPopupLoc(this, _mainFrame);
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
         _commandLine.requestFocus();
       }
@@ -354,22 +355,18 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     // do not allow a newline
     _commandLine.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-        }
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) e.consume();
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
           e.consume();
           if (e.isShiftDown()) {
             _insertCommandButton.setEnabled(false);
             _cancelCommandButton.requestFocus();
           }
-          else {
-            _commandWorkDirLine.requestFocus();
-          }
+          else _commandWorkDirLine.requestFocus();
         }
       }
-      public void  keyReleased(KeyEvent e) { }
-      public void  keyTyped(KeyEvent e) { }
+      public void keyReleased(KeyEvent e) { }
+      public void keyTyped(KeyEvent e) { }
     });
     JScrollPane commandLineSP = new JScrollPane(_commandLine);
     commandLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -433,17 +430,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     // do not allow a newline
     _commandWorkDirLine.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-        }
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) e.consume();
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
           e.consume();
           if (e.isShiftDown()) {
             _commandLine.requestFocus();
           }
-          else {
-            _commandEnclosingFileLine.requestFocus();
-          }
+          else _commandEnclosingFileLine.requestFocus();
         }
       }
       public void  keyReleased(KeyEvent e) { }
@@ -510,22 +503,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     // do not allow a newline
     _commandEnclosingFileLine.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-        }
+        if (e.getKeyCode() == KeyEvent.VK_ENTER)  e.consume();
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
           e.consume();
-          if (e.isShiftDown()) {
-            _commandWorkDirLine.requestFocus();
-          }
+          if (e.isShiftDown()) _commandWorkDirLine.requestFocus();
           else {
             _insertCommandButton.setEnabled(false);
             if (_editMode) {
               _saveCommandButton.requestFocus();
             }
-            else {
-              _runCommandButton.requestFocus();
-            }
+            else _runCommandButton.requestFocus();
           }
         }
       }
@@ -609,9 +596,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _commandLinePreviewLabel.setText("<html>Command line preview:<br>("+_commandLinePreview.getText().length()+
                                            " characters)</html>");
         }
-        catch(BadLocationException ble) {
-          _commandLinePreview.setText("Error.");
-        }
+        catch(BadLocationException ble) { _commandLinePreview.setText("Error."); }
       }
       public void changedUpdate(DocumentEvent e) { update(e); }
       public void insertUpdate(DocumentEvent e) { update(e); }
@@ -637,9 +622,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
         }
-        catch(BadLocationException ble) {
-          _commandLinePreview.setText("Error: "+ble);
-        }
+        catch(BadLocationException ble) { _commandLinePreview.setText("Error: "+ble); }
       }
       public void changedUpdate(DocumentEvent e) { update(e); }
       public void insertUpdate(DocumentEvent e) { update(e); }
@@ -719,7 +702,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                                 final SimpleAttributeSet normal,
                                 final SimpleAttributeSet variable,
                                 final SimpleAttributeSet error) {
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
         StyledDocument doc = (StyledDocument)pane.getDocument();
         doc.removeDocumentListener(dl);
@@ -776,26 +759,30 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                         added += n.length();
                         String name = n.trim();
                         n = atok.getNextToken();
-                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.trim().equals("="))) {
+                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || 
+                            (!n.trim().equals("="))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         n = atok.getNextToken();
-                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.trim().startsWith("\""))) {
+                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || 
+                            (!n.trim().startsWith("\""))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         n = atok.getNextToken();
-                        if (((n!=null) && ((atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
-                            ((n==null) && (atok.token()!=BalancingStreamTokenizer.Token.END))) {
+                        if ((n != null && (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD || ! n.equals(";"))) ||
+                            (n == null && atok.token()!=BalancingStreamTokenizer.Token.END)) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         if (n!=null) { added += n.length(); }
                         try { p.getAttribute(name); }
-                        catch(IllegalArgumentException e) { doc.setCharacterAttributes(subpos,subpos+added,error,true); }
+                        catch(IllegalArgumentException e) { 
+                          doc.setCharacterAttributes(subpos, subpos + added, error, true); 
+                        }
                         subpos += added;
                       }
                     }
@@ -859,14 +846,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     GeneralProcessCreator.LOG.log("_runCommand(): ${enclosing.djapp.file} = "+_commandEnclosingFileLine.getText());
     
     _mainFrame.removeModalWindowAdapter(this);
-    if (_commandLinePreview.getText().length()>0) {
+    if (_commandLinePreview.getText().length() > 0) {
       try { 
         _props = PropertyMaps.TEMPLATE.clone();
         PropertyMaps pm = _props.clone();
-        runCommand("", _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText().trim(), pm);
-      } catch(CloneNotSupportedException e) {
-        throw new edu.rice.cs.util.UnexpectedException(e);
-      }
+        runCommand("", _commandLine.getText(), _commandWorkDirLine.getText(), 
+                   _commandEnclosingFileLine.getText().trim(), pm);
+      } 
+      catch(CloneNotSupportedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
     }
     
     // Always apply and save settings
@@ -889,7 +876,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         if (_cm!=null) { _cm.set(); }
         return;
       }
-      editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText());
+      editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText(), 
+                 _commandEnclosingFileLine.getText());
     }
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
@@ -925,7 +913,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    final Vector<String> enclosingFiles = 
+      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.add(name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
@@ -1008,13 +997,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void run() {
         _insertVarDialogMonitor.waitOne();
         // dialog has finished, figure out the results in the event thread
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
           public void run() {
-            SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                ExecuteExternalDialog.this.toFront();
-              }
-            });
+            EventQueue.invokeLater(new Runnable() { public void run() { ExecuteExternalDialog.this.toFront(); } });
             _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, NO_OP, CANCEL);
 
             edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
@@ -1023,9 +1008,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               Caret caret = _lastCommandFocus.getCaret();
               int min = Math.min(caret.getDot(), caret.getMark());
               int max = Math.max(caret.getDot(), caret.getMark());
-              if (min != max) {
-                text = text.substring(0, min) + text.substring(max);
-              }
+              if (min != max) { text = text.substring(0, min) + text.substring(max); }
               text = text.substring(0,min) + "${" + selected.first() + "}" + text.substring(min);
               _lastCommandFocus.setText(text);
               caret.setDot(min+selected.first().length()+2);
@@ -1040,9 +1023,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Lambda doing nothing. */
   protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
     = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
+    public Void apply(WindowEvent e) { return null; }
   };
   
   /** Lambda that calls _cancel. */

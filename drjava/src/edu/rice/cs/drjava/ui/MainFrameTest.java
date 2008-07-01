@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.event.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -91,7 +92,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     _frame  = new MainFrame();
     _log.log("new MainFrame() for next test completed");
-    SwingUtilities.invokeLater(new Runnable() { public void run() { _frame.pack(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _frame.pack(); } });
     _log.log("setUp complete for next test");
   }
   

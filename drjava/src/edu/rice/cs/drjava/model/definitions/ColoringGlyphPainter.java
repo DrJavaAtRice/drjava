@@ -40,7 +40,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import javax.swing.event.DocumentEvent;
 // TODO: Check synchronization.
-import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -118,25 +118,21 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     
     text = v.getText(start, end);
     
-    Vector<HighlightStatus> stats = djdoc._getHighlightStatus(start, end);
+    ArrayList<HighlightStatus> stats = djdoc._getHighlightStatus(start, end);
     if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
     try {
-      for (int i = 0; i < stats.size(); i++) {
-        HighlightStatus stat = stats.get(i);
+      for (HighlightStatus stat: stats) {
         int length = stat.getLength();
         int location = stat.getLocation();
         
-        
-        if ((location < end) && ((location + length) > start)) {
+        if (location < end && location + length > start) {
           
           // Adjust the length and location to fit within the bounds of the element we're about to render
           if (location < start) {
             length -= (start-location);
             location = start;
           }        
-          if ((location + length) > end) {
-            length = end - location;
-          }
+          if (location + length > end) length = end - location;
           
           if (!(djdoc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)djdoc).setColoring((start+end)/2,g))      
             setFormattingForState(g, stat.getState());
@@ -146,9 +142,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
         }
       }
     }
-    catch(BadLocationException ble) {
-      // don't continue rendering if such an exception is found
-    }
+    catch(BadLocationException ble) { /* don't continue rendering if such an exception is found */ }
   }
   
   /** Determines the span the glyphs given a start location (for tab expansion).  Assumes ReadLock is held. */

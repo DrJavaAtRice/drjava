@@ -155,8 +155,7 @@ public class FontChooser extends JDialog {
   }
 
   private void addLists() {
-    _fontList = new NwList(GraphicsEnvironment.getLocalGraphicsEnvironment()
-                           .getAvailableFontFamilyNames());
+    _fontList = new NwList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
     _styleList = new NwList(STYLES);
     _sizeList = new NwList(SIZES);
     getContentPane().add(_fontList);
@@ -189,11 +188,8 @@ public class FontChooser extends JDialog {
 
   private void showSample() {
     int g = 0;
-    try {
-      g = Integer.parseInt(_sizeList.getSelectedValue());
-    }
-    catch (NumberFormatException nfe) {
-    }
+    try { g = Integer.parseInt(_sizeList.getSelectedValue()); }
+    catch (NumberFormatException nfe) { /* do nothing */ }
     String st = _styleList.getSelectedValue();
     int s = Font.PLAIN;
     if (st.equalsIgnoreCase("Bold")) s = Font.BOLD;
@@ -204,22 +200,15 @@ public class FontChooser extends JDialog {
     _sampleText.setVerticalAlignment(SwingConstants.TOP);
   }
 
-  /** Returns whether the user clicked OK when the dialog was closed.
-   * (If false, the user clicked cancel.)
-   */
-  public boolean clickedOK() {
-    return _clickedOK;
-  }
+  /** Returns whether the user clicked OK when the dialog was closed. (If false, the user clicked cancel.) */
+  public boolean clickedOK() { return _clickedOK; }
 
-  /** Returns the currently selected Font.
-   */
-  public Font getFont() {
-    return _sampleText.getFont();
-  }
+  /** Returns the currently selected Font. */
+  public Font getFont() { return _sampleText.getFont(); }
 
-  /** Private inner class for a list which displays a list of options in addition to a label
-   * indicating the currently selected item.
-   */
+  /** Private inner class for a list which displays a list of options in addition to a label indicating the currently
+    * selected item.
+    */
   public class NwList extends JPanel {
     JList jl;
     JScrollPane sp;
@@ -254,13 +243,8 @@ public class FontChooser extends JDialog {
       jt.setBounds(0, 0, w, 20);
     }
 
-    public String getSelectedValue() {
-      return (si);
-    }
+    public String getSelectedValue() { return (si); }
 
-    public void setSelectedItem(String s) {
-      jl.setSelectedValue(s, true);
-    }
-
+    public void setSelectedItem(String s) { jl.setSelectedValue(s, true);}
   }
 }

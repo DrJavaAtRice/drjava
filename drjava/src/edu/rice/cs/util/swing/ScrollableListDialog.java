@@ -37,28 +37,30 @@
 package edu.rice.cs.util.swing;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
-/**
- * <p>The ScrollableListDialog is a popup dialog with a message and a
- * scrollable list of items. A ScrollableListDialog should be used when
- * a message may need to display a variable number of items, for
- * example, when reporting missing files.</p>
- * 
- * <p>The message (also know as the leader text) is displayed above the
- * items with an optional icon. The items are displayed in a scrollable
- * list. Buttons are added below the list of items.</p>
- * 
- * <p>This dialog is somewhat styled after
- * {@link javax.swing.JOptionPane} and uses the message-type constants
- * from JOptionPane.</p>
- * 
- * @author Chris Warrington
- * @version $Id$
- * @since 2007-03-06
- */
+
+/** <p>The ScrollableListDialog is a popup dialog with a message and a scrollable list of items. A ScrollableListDialog
+  * should be used when a message may need to display a variable number of items, for example, when reporting missing 
+  * files.</p>
+  * <p>The message (also know as the leader text) is displayed above the items with an optional icon. The items are 
+  * displayed in a scrollable list. Buttons are added below the list of items.</p>
+  * <p>This dialog is somewhat styled after {@link javax.swing.JOptionPane} and uses the message-type constants from 
+  * JOptionPane.</p>
+  * 
+  * @author Chris Warrington
+  * @version $Id$
+  * @since 2007-03-06
+  */
 public class ScrollableListDialog<T> extends JDialog {
   /** The default width for this dialog. */
   private static final int DEFAULT_WIDTH = 400;
@@ -77,7 +79,7 @@ public class ScrollableListDialog<T> extends JDialog {
   protected int _buttonPressed = -1;
   
   /** The list of items being listed. */
-  protected java.util.List<T> listItems;
+  protected List<T> listItems;
   
   /** Factory design pattern. Used to create new ScrollableListDialogs with
     * less complicated and ambiguous constructors. */
@@ -85,21 +87,21 @@ public class ScrollableListDialog<T> extends JDialog {
     protected Frame _owner;
     protected String _dialogTitle;
     protected String _leaderText;
-    protected java.util.List<T> _listItems = new java.util.ArrayList<T>();
-    protected java.util.List<T> _selectedItems = new java.util.ArrayList<T>();
+    protected List<T> _listItems = new ArrayList<T>();
+    protected List<T> _selectedItems = new ArrayList<T>();
     protected int _messageType = JOptionPane.PLAIN_MESSAGE;
     protected int _width = DEFAULT_WIDTH;
     protected int _height = DEFAULT_HEIGHT;
     protected Icon _icon = null;
     protected boolean _fitToScreen = true;
-    protected java.util.List<JButton> _buttons = new java.util.ArrayList<JButton>();
+    protected List<JButton> _buttons = new ArrayList<JButton>();
     protected boolean _selectable = false;
     public Builder() { addOkButton(); }
     public Builder<T> setOwner(Frame owner) { _owner = owner; return this; }
     public Builder<T> setTitle(String dialogTitle) { _dialogTitle = dialogTitle; return this; }
     public Builder<T> setText(String leaderText) { _leaderText = leaderText; return this; }
-    public Builder<T> setItems(java.util.List<T> listItems) { _listItems = listItems; return this; }
-    public Builder<T> setSelectedItems(java.util.List<T> selItems) { _selectedItems = selItems; return this; }
+    public Builder<T> setItems(List<T> listItems) { _listItems = listItems; return this; }
+    public Builder<T> setSelectedItems(List<T> selItems) { _selectedItems = selItems; return this; }
     public Builder<T> setMessageType(int messageType) { _messageType = messageType; return this; }
     public Builder<T> setWidth(int width) { _width = width; return this; }
     public Builder<T> setHeight(int height) { _height = height; return this; }
@@ -110,61 +112,43 @@ public class ScrollableListDialog<T> extends JDialog {
     public Builder<T> addButton(JButton b) { _buttons.add(b); return this; }
     public Builder<T> setSelectable(boolean b) { _selectable = b; return this; }
     public ScrollableListDialog<T> build() {
-      return new ScrollableListDialog<T>(_owner,
-                                         _dialogTitle,
-                                         _leaderText,
-                                         _listItems,
-                                         _selectedItems,
-                                         _messageType,
-                                         _width,
-                                         _height,
-                                         _icon,
-                                         _fitToScreen,
-                                         _buttons,
-                                         _selectable);
+      return new ScrollableListDialog<T>(_owner, _dialogTitle, _leaderText, _listItems, _selectedItems, _messageType, 
+                                         _width, _height, _icon, _fitToScreen, _buttons, _selectable);
     }
   }  
   
-  /**
-   * <p>Creates a new ScrollableListDialog with the given title, leader
-   * text, items, message type, width, height, and icon. The list of
-   * items is used to construct an internal string list that is not
-   * backed by the original list. Changes made to the list or items
-   * after dialog construction will not be reflected in the dialog.</p>
-   * 
-   * <p>The message type must be one of the message types from
-   * {@link javax.swing.JOptionPane}. The message type controlls which
-   * default icon is used. If {@code icon} is non-null, it is used
-   * instead of the default icon.</p>
-   * 
-   * @param owner The frame that owns this dialog. May be {@code null}.
-   * @param dialogTitle The text to use as the dialog title.
-   * @param leaderText Text to display before the list of items.
-   * @param listItems The items to display in the list.
-   * @param selItems The items selected at the beginning.
-   * @param messageType The type of dialog message.
-   * @param width The width of the dialog box.
-   * @param height The height of the dialog box.
-   * @param icon The icon to display. May be {@code null}.
-   * @param fitToScreen If {@code true}, the width and height of the dialog will be calculated using the screen dimensions, {@link #WIDTH_RATIO}, and {@link #HEIGHT_RATIO}. If {@code false}, the provided width and height will be used.
-   * @param buttons The list of buttons to display
-   * 
-   * @throws IllegalArgumentException if {@code listItems} is {@code null.}
-   * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
-   */
+  /** <p>Creates a new ScrollableListDialog with the given title, leader
+    * text, items, message type, width, height, and icon. The list of
+    * items is used to construct an internal string list that is not
+    * backed by the original list. Changes made to the list or items
+    * after dialog construction will not be reflected in the dialog.</p>
+    * 
+    * <p>The message type must be one of the message types from
+    * {@link javax.swing.JOptionPane}. The message type controlls which
+    * default icon is used. If {@code icon} is non-null, it is used
+    * instead of the default icon.</p>
+    * 
+    * @param owner The frame that owns this dialog. May be {@code null}.
+    * @param dialogTitle The text to use as the dialog title.
+    * @param leaderText Text to display before the list of items.
+    * @param listItems The items to display in the list.
+    * @param selItems The items selected at the beginning.
+    * @param messageType The type of dialog message.
+    * @param width The width of the dialog box.
+    * @param height The height of the dialog box.
+    * @param icon The icon to display. May be {@code null}.
+    * @param fitToScreen If {@code true}, the width and height of the dialog will be calculated using the screen 
+    *        dimensions, {@link #WIDTH_RATIO}, and {@link #HEIGHT_RATIO}. If {@code false}, the provided width and
+    *        height will be used.
+    * @param buttons The list of buttons to display
+    * 
+    * @throws IllegalArgumentException if {@code listItems} is {@code null.}
+    * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
+    */
   @SuppressWarnings("unchecked")
-  private ScrollableListDialog(Frame owner, 
-                               String dialogTitle,
-                               String leaderText,
-                               java.util.List<T> listItems,
-                               java.util.List<T> selItems,
-                               int messageType,
-                               int width,
-                               int height,
-                               Icon icon,
-                               boolean fitToScreen,
-                               java.util.List<JButton> buttons,
-                               boolean selectable) {
+  private ScrollableListDialog(Frame owner, String dialogTitle, String leaderText, List<T> listItems, List<T> selItems,
+                               int messageType, int width, int height, Icon icon, boolean fitToScreen, 
+                               List<JButton> buttons, boolean selectable) {
     super(owner, dialogTitle, true);
     this.listItems = listItems;
     
@@ -172,29 +156,22 @@ public class ScrollableListDialog<T> extends JDialog {
       throw new IllegalArgumentException("The message type \"" + messageType + "\" is unknown");
     }
     
-    if (listItems == null) {
-      throw new IllegalArgumentException("listItems cannot be null");
-    }
+    if (listItems == null) throw new IllegalArgumentException("listItems cannot be null");
     
     /* create the leader text panel */
     JLabel dialogIconLabel = null;
-    if (icon != null) {
-      //use the user-provided icon
+    if (icon != null) { //use the user-provided icon
       dialogIconLabel = new JLabel(icon);
-    } else {
-      //lookup the message-dependent icon
+    } 
+    else { //lookup the message-dependent icon
       Icon messageIcon = _getIcon(messageType);
-      if (messageIcon != null) {
-       dialogIconLabel = new JLabel(messageIcon); 
-      }
+      if (messageIcon != null) dialogIconLabel = new JLabel(messageIcon); 
     }
 
     final JLabel leaderLabel = new JLabel(leaderText);
     final JPanel leaderPanel = new JPanel();
     leaderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-    if (dialogIconLabel != null) {
-      leaderPanel.add(dialogIconLabel);
-    }
+    if (dialogIconLabel != null) leaderPanel.add(dialogIconLabel);
     leaderPanel.add(leaderLabel);
     
     /* create the item list box */
@@ -332,7 +309,7 @@ public class ScrollableListDialog<T> extends JDialog {
    * @param buttonPanel The JPanel that should contain the buttons.
    * @param buttons The list of buttons
    */
-  protected void _addButtons(JPanel buttonPanel, java.util.List<JButton> buttons) {
+  protected void _addButtons(JPanel buttonPanel, List<JButton> buttons) {
     int i = 0;
     for (JButton b: buttons) {
       final int j = i++;
@@ -368,7 +345,7 @@ public class ScrollableListDialog<T> extends JDialog {
   public int getButtonPressed() { return _buttonPressed; }
   
   /** Return a list of the selected items. */
-  public java.util.List<T> getSelectedItems() {
+  public List<T> getSelectedItems() {
     ArrayList<T> l = new ArrayList<T>();
     for(int i: list.getSelectedIndices()) {
       l.add(listItems.get(i));
@@ -382,13 +359,13 @@ public class ScrollableListDialog<T> extends JDialog {
    * @param args Not used.
    */
   public static void main(String args[]) {
-    final java.util.List<String> data = new java.util.ArrayList<String>();
+    final List<String> data = new java.util.ArrayList<String>();
     data.add("how");
     data.add("now");
     data.add("brown");
     data.add("cow");
     
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
         ScrollableListDialog<String> ld = new ScrollableListDialog.Builder<String>()
           .setOwner(null)

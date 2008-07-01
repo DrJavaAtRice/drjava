@@ -242,7 +242,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       panel.add(_cancelAndOKPanel);
       setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
       //centerOnScreen();
-      SwingUtilities.invokeLater(new Runnable() { public void run() { GetKeyDialog.this.pack(); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { GetKeyDialog.this.pack(); } });
     }
 
     public void promptKey(KeyStrokeOptionComponent k) {

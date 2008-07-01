@@ -35,7 +35,7 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.*;
@@ -411,7 +411,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
 //  public IndentInfo getIndentInformation() { throw new UnsupportedOperationException("Dummy method"); }
   public void move(int dist) { throw new UnsupportedOperationException("Dummy method"); }
 
-  public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+  public ArrayList<HighlightStatus> getHighlightStatus(int start, int end) {
     throw new UnsupportedOperationException("Dummy method");
   }
   

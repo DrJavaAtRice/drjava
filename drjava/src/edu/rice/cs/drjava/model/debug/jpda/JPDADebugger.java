@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug.jpda;
 
+import java.awt.EventQueue;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -47,6 +48,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.Arrays;
+import javax.swing.SwingUtilities;
 
 // DrJava stuff
 import edu.rice.cs.util.StringOps;
@@ -67,7 +69,6 @@ import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
-import javax.swing.SwingUtilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -225,7 +226,7 @@ public class JPDADebugger implements Debugger {
       
       /* Move the following command to the end of the event queue so that it is done outside outside the readLock
        * held when this method is called from an InteractionsListener. */
-      SwingUtilities.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {
         public void run() { _model.getInteractionsModel().addListener(_watchListener); }
       });
       
@@ -257,7 +258,7 @@ public class JPDADebugger implements Debugger {
       
       /* Use SwingUtilities.invokeLater rather than Utilities.invokeLater because we want to defer executing this
        * code after pending events (that may involve the _watchListener) */
-      SwingUtilities.invokeLater(command);
+      EventQueue.invokeLater(command);
       
       _removeAllDebugInterpreters();
       

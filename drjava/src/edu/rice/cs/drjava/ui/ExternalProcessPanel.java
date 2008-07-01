@@ -36,11 +36,14 @@
 
 package edu.rice.cs.drjava.ui;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.font.*;
+import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Enumeration;
-import java.io.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -49,9 +52,6 @@ import javax.swing.table.*;
 import javax.swing.text.*;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicToolTipUI;
-import java.awt.event.*;
-import java.awt.font.*;
-import java.awt.*;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
@@ -119,7 +119,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       public void mousePressed(MouseEvent e) { }
       public void mouseReleased(MouseEvent e) { }
     });
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() { updateText(); } });
     // MainFrame.LOG.log("\tProcessPanel ctor done");
   }
@@ -220,8 +220,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           }
           catch(IOException ioe) { /* ignore, just stop polling */ }
           _is = null;
-          Utilities.invokeLater(new Runnable() {
-            public void run() { updateButtons(); } });          
+          Utilities.invokeLater(new Runnable() { public void run() { updateButtons(); } });          
         }
         if (_erris!=null) {
           try {
@@ -229,15 +228,13 @@ public class ExternalProcessPanel extends AbortablePanel {
           }
           catch(IOException ioe) { /* ignore, just stop polling */ }
           _erris = null;
-          Utilities.invokeLater(new Runnable() {
-            public void run() { updateButtons(); } });
+          Utilities.invokeLater(new Runnable() { public void run() { updateButtons(); } });
         }
         if (_p!=null) {
           _p.destroy();
           _p = null;
         }
-        Utilities.invokeLater(new Runnable() {
-          public void run() { updateText(); updateButtons(); } });
+        Utilities.invokeLater(new Runnable() { public void run() { updateText(); updateButtons(); } });
         _abortMonitor.set();
       }
     }).start();
@@ -260,7 +257,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         _sb.append('\n');
         _header = _sb.toString();
         initThread(_pc);
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
           public void run() {
             _textArea.setText(_header);
             updateText();
@@ -446,9 +443,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     _updateNowButton = new JButton("Update");
     _updateNowButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { 
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() { updateText(); } });
-      }
+        EventQueue.invokeLater(new Runnable() { public void run() { updateText(); } }); }
     });
     _runAgainButton = new JButton("Run Again");
     _runAgainButton.addActionListener(new ActionListener() {
@@ -561,7 +556,7 @@ public class ExternalProcessPanel extends AbortablePanel {
 //      }
       if (_changeCount>0) {
         _changeCount = 0;
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
           public void run() {
             // MainFrame.LOG.log("\tsetting text");
             _textArea.setText(_sb.toString());

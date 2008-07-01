@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import edu.rice.cs.util.UnexpectedException;
@@ -55,7 +56,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
   * <li> There is no nesting of comment open characters. If // is encountered in the middle of a comment, it is 
   * treated as two separate slashes.  Similarly for /*.
   * </ol>
-  * All of the code in the class assumes that a lock on this is held.
+  * All of the code in the class assumes that the document read lock and the lock on this are held.
   * @author JavaPLT
   * @version $Id$
   */
@@ -378,13 +379,13 @@ public class ReducedModelControl implements BraceReduction {
   public int getDistToNextNewline() { return _rmc.getDistToNextNewline(); }
   
   /** Return all highlight status info for text between the current location and current location + length.  This should
-    * collapse adjoining blocks with the same status into one.
+    * collapse adjoining blocks with the same status into one.  Assumes read and reduced locks are already held.
     * @param start  The start location of the area being inspected.  The reduced model cursor is already set at this
     *               position, but this value is needed to compute the absolute positions of HighlightStatus objects.
     * @param length The length of the text segment for which status information must be generated.
     */
-  public Vector<HighlightStatus> getHighlightStatus(final int start, final int length) {
-    Vector<HighlightStatus> vec = new Vector<HighlightStatus>();
+  public ArrayList<HighlightStatus> getHighlightStatus(final int start, final int length) {
+    ArrayList<HighlightStatus> vec = new ArrayList<HighlightStatus>();
     
     int curState;
     int curLocation;
@@ -405,7 +406,7 @@ public class ReducedModelControl implements BraceReduction {
       curState = cursor.current().getHighlightState();
     }
     
-    while ((curLocation + curLength) < (start + length)) {
+    while (curLocation + curLength < start + length) {
       cursor.next();
       //TODO: figure out why this function is iterating past the end of the collection
       //when it gets called from the ColoringGlyphPainter after deleting the last character
@@ -429,9 +430,7 @@ public class ReducedModelControl implements BraceReduction {
     // This is because we guarantee that the returned vector only refers
     // to chars on [start, start+length).
     int requestEnd = start + length;
-    if ((curLocation + curLength) > requestEnd) {
-      curLength = requestEnd - curLocation;
-    }
+    if (curLocation + curLength > requestEnd)  curLength = requestEnd - curLocation;
     
     // Add the last one, which has not been added yet
     vec.add(new HighlightStatus(curLocation, curLength, curState));

@@ -56,6 +56,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -263,7 +264,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
     * with the same status into one. Perturbs _currentLocation.
     */
-  public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+  public ArrayList<HighlightStatus> getHighlightStatus(int start, int end) {
     acquireReadLock();
     try { return _getHighlightStatus(start, end); }
     finally { releaseReadLock(); }
@@ -272,12 +273,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
     * with the same status into one.  ASSUMES that read lock is already held.  Perturbs _currentLocation.
     */
-  public Vector<HighlightStatus> _getHighlightStatus(int start, int end) {
+  public ArrayList<HighlightStatus> _getHighlightStatus(int start, int end) {
     
     assert isReadLocked();
     
-    if (start == end) return new Vector<HighlightStatus>(0);
-    Vector<HighlightStatus> v;
+    if (start == end) return new ArrayList<HighlightStatus>(0);
+    ArrayList<HighlightStatus> v;
     
     synchronized(_reduced) {
       _setCurrentLocation(start);
@@ -310,7 +311,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param i Index of the single HighlightStatus to check for keywords in
     * @return the index into the vector of the last processed element
     */
-  private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
+  private int _highlightKeywords(ArrayList<HighlightStatus> v, int i) {
     // Basically all non-alphanumeric chars are delimiters
     final String delimiters = " \t\n\r{}()[].+-/*;:=!@#$%^&*~<>?,\"`'<>|";
     final HighlightStatus original = v.get(i);

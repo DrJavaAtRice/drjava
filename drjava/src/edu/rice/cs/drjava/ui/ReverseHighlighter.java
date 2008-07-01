@@ -793,9 +793,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       p0.add(pos0);
       p1.add(pos1);
       
-      if (addToQueue) {
-        SwingUtilities.invokeLater(this);
-      }
+      if (addToQueue) EventQueue.invokeLater(this);
     }
   }
 }

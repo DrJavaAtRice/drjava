@@ -42,7 +42,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
@@ -64,7 +64,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public void setIndent(int indent);
   
   /** Returns highlight status info for text between start and end, coalescing adjoining blocks with the same status. */
-  public Vector<HighlightStatus> getHighlightStatus(int start, int end);
+  public ArrayList<HighlightStatus> getHighlightStatus(int start, int end);
   
   /** Gets the current location of the cursor the document. Unlike the Swing document model, which is stateless, we must
     * maintain a current location as part of the document because the implementation of the reduced model relies on this

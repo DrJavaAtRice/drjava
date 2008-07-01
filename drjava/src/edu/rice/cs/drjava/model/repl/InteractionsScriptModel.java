@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.awt.EventQueue;
 import java.io.Serializable;
 import javax.swing.SwingUtilities;
 
@@ -143,7 +144,7 @@ public class InteractionsScriptModel /* implements Serializable */ {
        * the determination of the current interaction on the event queue. If we forced the interpret method to run 
        * asynchronously in SimpleInteractionsModel, then we could determine the current interaction within this write
        * locked section avoiding the race. */
-      SwingUtilities.invokeLater(new Runnable() { public void run() { _model.interpretCurrentInteraction(); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _model.interpretCurrentInteraction(); } });
     }
     finally { _doc.releaseWriteLock(); }
   }

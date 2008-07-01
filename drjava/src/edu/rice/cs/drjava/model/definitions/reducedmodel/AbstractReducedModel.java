@@ -79,7 +79,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     */
   public int absOffset() { return absOffset(_cursor); }
   
-  /** Absolute offset of the specified iterator for testing purposes. */
+  /** Absolute offset of the specified iterator.  Inefficient so only used for testing purposes. */
   public int absOffset(TokenList.Iterator cursor) {
     int off = cursor.getBlockOffset();
     TokenList.Iterator it = cursor.copy();
@@ -251,7 +251,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   /** Move to the token immediately right. This function forwards its responsibilities to the cursor.
     * If the cursor is at the end, it will throw an exception.
     */
-  protected void  next() { _cursor.next(); }
+  protected void next() { _cursor.next(); }
   
   /** Move to the token immediately left. This function forwards its responsibilities to the TokenList iterator.  If the
     * cursor is at the start, it will throw an exception.

@@ -36,9 +36,10 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
+import java.awt.EventQueue;
+import java.util.LinkedList;
 import javax.swing.undo.*;
 import javax.swing.SwingUtilities;
-import java.util.LinkedList;
 
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.util.swing.Utilities;
@@ -190,7 +191,7 @@ public class CompoundUndoManager extends UndoManager {
       _keys.remove(0);
       
       
-      SwingUtilities.invokeLater(new Runnable() { 
+      EventQueue.invokeLater(new Runnable() { 
         public void run() { 
           ce.end();
           ce.undo();
@@ -212,7 +213,7 @@ public class CompoundUndoManager extends UndoManager {
     */
   private void _notifyUndoHappened() { 
     // Use SwingUtilities.invokeLater so that notification is deferred when running in the event thread.
-    SwingUtilities.invokeLater(new Runnable() { public void run() { _notifier.undoableEditHappened(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.undoableEditHappened(); } });
   }
   
   /** Ends the compoundEdit in progress if any.  Used by undo(), redo(), documentSaved(). */

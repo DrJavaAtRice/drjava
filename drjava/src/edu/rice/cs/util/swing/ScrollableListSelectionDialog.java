@@ -242,8 +242,9 @@ public class ScrollableListSelectionDialog extends JDialog {
    * @param width The width of the dialog box.
    * @param height The height of the dialog box.
    * @param icon The icon to display. May be {@code null}.
-   * @param fitToScreen If {@code true}, the width and height of the dialog will be calculated using the screen dimensions, {@link #WIDTH_RATIO}, and {@link #HEIGHT_RATIO}. If {@code false}, the provided width and height will be used.
-   * 
+   * @param fitToScreen If {@code true}, the width and height of the dialog will be calculated using the screen 
+   *        dimensions, {@link #WIDTH_RATIO}, and {@link #HEIGHT_RATIO}. If {@code false}, the provided width and
+   *        height will be used. 
    * @throws IllegalArgumentException if {@code listItems} is {@code null.}
    * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
    */
@@ -659,9 +660,11 @@ public class ScrollableListSelectionDialog extends JDialog {
     data.add("brown");
     data.add("cow");
     
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
-        ScrollableListSelectionDialog ld = new ScrollableListSelectionDialog(null, "TITLE", "LEADER", data, "Words", SelectionState.SELECTED, JOptionPane.ERROR_MESSAGE) {
+        ScrollableListSelectionDialog ld = 
+          new ScrollableListSelectionDialog(null, "TITLE", "LEADER", data, "Words", SelectionState.SELECTED, 
+                                            JOptionPane.ERROR_MESSAGE) {
           @Override
           protected void closeDialog() {
             super.closeDialog();

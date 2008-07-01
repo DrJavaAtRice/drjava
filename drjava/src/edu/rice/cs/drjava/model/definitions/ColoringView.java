@@ -40,7 +40,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import javax.swing.event.DocumentEvent;
 // TODO: Check synchronization.
-import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -160,11 +160,10 @@ public class ColoringView extends PlainView implements OptionConstants {
     _doc.acquireReadLock();
     try {
       
-      Vector<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
+      ArrayList<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
       if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
       
-      for (int i = 0; i < stats.size(); i++) {
-        HighlightStatus stat = stats.get(i);
+      for (HighlightStatus stat: stats) {
         int location = stat.getLocation();
         int length = stat.getLength();
         

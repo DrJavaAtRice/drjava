@@ -171,8 +171,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final FindReplacePanel _findReplace;
   private final BreakpointsPanel _breakpointsPanel;
   final BookmarksPanel _bookmarksPanel;
-  private final LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
-    new LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
+  private final LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>> 
+    _findResults = new LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
   
   private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
   
@@ -639,8 +639,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   private final Action _saveProjectAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
-      if (_saveProjectAs()) {  // asks the user for a new project file name; sets _projectFile in global model to this value
-        _saveAll();  // performs a save all operation using this new project file name, but ONLY if the "Save as" was not cancelled
+      if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
+        _saveAll();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
       }
     }
   };
@@ -650,8 +650,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) {
       File cpf = _currentProjFile;
       _currentProjFile = FileOps.NULL_FILE;
-      if (_saveProjectAs()) {  // asks the user for a new project file name; sets _projectFile in global model to this value
-        _saveAllOld();
+      if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
+        _saveAllOld();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
       }
       _currentProjFile = cpf;
       _model.setProjectFile(cpf);
@@ -1417,9 +1417,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _gotoFileDialog.setModel(true, pim); // ignore case
         if (currentEntry != null) _gotoFileDialog.setCurrentItem(currentEntry);
         hourglassOn();
-        /* The following predicate suppresses the display of the dialog during unit testing.  If the unit test is revised
+        /* Following boolean flag suppresses display of the dialog during unit testing.  If the unit test is revised
          * to confirm that the dialog is displayed, this test must be removed. */
-        if (MainFrame.this.isVisible()) _gotoFileDialog.setVisible(true);  // predicate suppresses display in unit tests
+        if (MainFrame.this.isVisible()) _gotoFileDialog.setVisible(true);
       }
     }
   }
@@ -2478,7 +2478,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     * @return new find results tab.
     * @param searchString string that was searched for
     * @param searchAll whether all files were searched
-    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
+    * @param doc weak reference to document in which search occurred (or started, if all documents were searched)
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title,
@@ -2895,8 +2895,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** These listeners support the travel operations that cycle through recent documents. */
   KeyListener _historyListener = new KeyListener() {
     public void keyPressed(KeyEvent e) {
-      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && !e.isShiftDown()) nextRecentDoc();
-      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && e.isShiftDown()) prevRecentDoc();
+      int backQuote = java.awt.event.KeyEvent.VK_BACK_QUOTE;
+      if (e.getKeyCode() == backQuote && e.isControlDown() && ! e.isShiftDown()) nextRecentDoc();
+      if (e.getKeyCode() == backQuote && e.isControlDown() && e.isShiftDown()) prevRecentDoc();
 //    else if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE) {
 //        transferFocusUpCycle();
 //    }
@@ -2993,7 +2994,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _tabbedPane.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) {
         Component c = _tabbedPane.getSelectedComponent();
-//         System.err.println("focus gained in tabbed pane with selected tab " + c + " with paramString " + e.paramString());
+//         System.err.println("focus gained in tabbed pane with tab " + c + " with paramString " + e.paramString());
         if (c == _interactionsContainer) {
           _interactionsPane.requestFocusInWindow();
 //           System.err.println("Selected tab was interactions container");
@@ -3013,7 +3014,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                               new JScrollPane(_model.getDocumentNavigator().asContainer()), defScroll);
     _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
     _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
-// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+// Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
 //    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
@@ -3032,8 +3033,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
 //    parsingEnabledListener.
 //      optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
-//                                             DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
-    
+//                                             DrJava.getConfig().
+//                                               getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
+//    
 //    Utilities.show("Global Model started");
     
     _tabbedPanesFrame = new TabbedPanesFrame(MainFrame.this,_tabbedPane,_mainSplit);
@@ -3206,7 +3208,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     
     final int menubarHeight = 24;
-    if (height > screenSize.height - menubarHeight)  height = screenSize.height - menubarHeight;  // Too tall, so resize
+    if (height > screenSize.height - menubarHeight)  height = screenSize.height - menubarHeight; // Too tall, so resize
     
     if (width > screenSize.width)  width = screenSize.width; // Too wide, so resize
     
@@ -3363,7 +3365,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     config.addOptionListener(MASTER_JVM_ARGS, masterJVMArgsListener);
     _masterJvmXmxListener = new ConfigOptionListeners.MasterJVMXMXListener(_configFrame);
     config.addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
-    config.addOptionListener(JAVADOC_CUSTOM_PARAMS, new ConfigOptionListeners.JavadocCustomParamsListener(_configFrame));
+    config.addOptionListener(JAVADOC_CUSTOM_PARAMS, 
+                             new ConfigOptionListeners.JavadocCustomParamsListener(_configFrame));
     ConfigOptionListeners.sanitizeSlaveJVMArgs(this, config.getSetting(SLAVE_JVM_ARGS), slaveJVMArgsListener);
     ConfigOptionListeners.sanitizeSlaveJVMXMX(this, config.getSetting(SLAVE_JVM_XMX));
     ConfigOptionListeners.sanitizeMasterJVMArgs(this, config.getSetting(MASTER_JVM_ARGS), masterJVMArgsListener);
@@ -3393,7 +3396,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //          System.out.println("discarding `, modifiers = "+e.getModifiersEx()+": "+e.getComponent());
           discardEvent = true;
         }
-        
         return discardEvent;
       }
     });
@@ -3402,8 +3404,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // start remote control server if no server is running
       try {
         if (!RemoteControlClient.isServerRunning()) {
-          edu.rice.cs.drjava.RemoteControlServer rcServer =
-            new edu.rice.cs.drjava.RemoteControlServer(this);
+          edu.rice.cs.drjava.RemoteControlServer rcServer = new edu.rice.cs.drjava.RemoteControlServer(this);
         }
       }
       catch(IOException ioe) {
@@ -3451,7 +3452,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                              + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
       if (new java.util.Date().after(nextCheck)) {
         askedForNewVersion = true;
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
           public void run() {
             NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
             if (popup.checkNewVersion()) { popup.setVisible(true); }
@@ -3469,7 +3470,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
                                + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
         if (new java.util.Date().after(nextCheck)) {
-          SwingUtilities.invokeLater(new Runnable() {
+          EventQueue.invokeLater(new Runnable() {
             public void run() {
               DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
               popup.setVisible(true);
@@ -3499,23 +3500,25 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJavaPropertySetup.setup(); 
     
     // Files
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileProperty("drjava.current.file", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileProperty("drjava.current.file", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getActiveDocument().getRawFile(); }
     }, 
-                                                                 "Returns the current document in DrJava.\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\trel=\"<dir to which the output should be relative\"") {
-                                                                   public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                 });
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.line", 
-                                                                   "Returns the current line in the Definitions Pane.") {
-      public void update(PropertyMaps pm) {
-        _value = String.valueOf(_posListener.lastLine());
-      }
+                                   "Returns the current document in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
+    PropertyMaps.TEMPLATE.setProperty("DrJava", 
+                                      new DrJavaProperty("drjava.current.line", 
+                                                         "Returns the current line in the Definitions Pane.") {
+      public void update(PropertyMaps pm) { _value = String.valueOf(_posListener.lastLine()); }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.col",
-                                                                   "Returns the current column in the Definitions Pane.") {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", new DrJavaProperty("drjava.current.col",
+                                               "Returns the current column in the Definitions Pane.") {
       public void update(PropertyMaps pm) {
 //        int line = _currentDefPane.getCurrentLine();
 //        int lineOffset = _currentDefPane.getLineStartOffset(line);
@@ -3524,29 +3527,35 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileProperty("drjava.working.dir", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileProperty("drjava.working.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getInteractionsModel().getWorkingDirectory(); }
     },
-                                                                 "Returns the current working directory of DrJava.\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\trel=\"<dir to which output should be relative\"") {
-                                                                   public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                 });
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
+                                   "Returns the current working directory of DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMasterWorkingDirectory(); }
     },
-                                                                 "Returns the working directory of the DrJava master JVM.\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\trel=\"<dir to which output should be relative\"") {
-                                                                   public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                 });
+                                   "Returns the working directory of the DrJava master JVM.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
     
     // Files
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
-                                                                     "Returns a list of all files open in DrJava.\n"+
-                                                                     "Optional attributes:\n"+
-                                                                     "\trel=\"<dir to which output should be relative\"\n"+
-                                                                     "\tsep=\"<separator between files>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrJava.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) {
@@ -3556,12 +3565,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR,
-                                                                     "Returns a list of all files open in DrJava that belong "+
-                                                                     "to a project and are underneath the project root.\n"+
-                                                                     "Optional attributes:\n"+
-                                                                     "\trel=\"<dir to which output should be relative\"\n"+
-                                                                     "\tsep=\"<separator between files>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrJava that belong " +
+                                       "to a project and are underneath the project root.\n" +
+                                       "Optional attributes:\n" +
+                                       "\trel=\"<dir to which output should be relative\"\n" +
+                                       "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getProjectDocuments()) {
@@ -3571,13 +3582,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR,
-                                                                     "Returns a list of all files open in DrJava that are "+
-                                                                     "not underneath the project root but are included in "+
-                                                                     "the project.\n"+
-                                                                     "Optional attributes:\n"+
-                                                                     "\trel=\"<dir to which output should be relative\"\n"+
-                                                                     "\tsep=\"<separator between files>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrJava that are " +
+                                       "not underneath the project root but are included in " +
+                                       "the project.\n" +
+                                       "Optional attributes:\n" +
+                                       "\trel=\"<dir to which output should be relative\"\n" +
+                                       "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getAuxiliaryDocuments()) {
@@ -3587,13 +3600,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new FileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
-                                                                     "Returns a list of all files open in DrJava that are "+
-                                                                     "not underneath the project root and are not included in "+
-                                                                     "the project.\n"+
-                                                                     "Optional attributes:\n"+
-                                                                     "\trel=\"<dir to which output should be relative\"\n"+
-                                                                     "\tsep=\"<separator between files>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("DrJava", 
+                  new FileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrJava that are "+
+                                       "not underneath the project root and are not included in "+
+                                       "the project.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getNonProjectDocuments()) {
@@ -3604,11 +3619,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));    
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("input", "(User Input...)",
-                                                                 "Get an input string from the user.\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\tprompt=\"<prompt to display>\"\n"+
-                                                                 "\tdefault=\"<suggestion to the user>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Misc", 
+                  new DrJavaProperty("input", "(User Input...)",
+                                     "Get an input string from the user.\n"+
+                                     "Optional attributes:\n"+
+                                     "\tprompt=\"<prompt to display>\"\n"+
+                                     "\tdefault=\"<suggestion to the user>\"") {
       public String toString() {
         return "(User Input...)";
       }
@@ -3634,8 +3651,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
     
     // Project
-    PropertyMaps.TEMPLATE.setProperty("Project", new DrJavaProperty("project.mode",
-                                                                    "Evaluates to true if a project is loaded.") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new DrJavaProperty("project.mode",
+                                     "Evaluates to true if a project is loaded.") {
       public void update(PropertyMaps pm) {
         Boolean b = _model.isProjectActive();
         String f = _attributes.get("fmt").toLowerCase();
@@ -3649,9 +3668,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.TEMPLATE.setProperty("Project", new DrJavaProperty("project.changed",
-                                                                    "Evaluates to true if the project has been "+
-                                                                    "changed since the last save.") {  //TODO: factor out repeated code!
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new DrJavaProperty("project.changed",
+                                     "Evaluates to true if the project has been "+
+                                     "changed since the last save.") {  //TODO: factor out repeated code!
       public void update(PropertyMaps pm) {
 //        long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
@@ -3666,39 +3687,51 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.file", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new FileProperty("project.file", 
+                                   new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getProjectFile(); }
     },
-                                                                  "Returns the current project file in DrJava.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which the output should be relative\"") {
-                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                  });
+                                   "Returns the current project file in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
     
-    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.main.class", new Lambda<File,Void>() {
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new FileProperty("project.main.class", 
+                                   new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getMainClass(); }
     },
-                                                                  "Returns the current project file in DrJava.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which the output should be relative\"") {
-                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                  });
-    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.root", new Lambda<File,Void>() {
+                                   "Returns the current project file in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new FileProperty("project.root", 
+                                   new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getProjectRoot(); }
     },
-                                                                  "Returns the current project root in DrJava.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which the output should be relative\"") {
-                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                  });
-    PropertyMaps.TEMPLATE.setProperty("Project", new FileProperty("project.build.dir", new Lambda<File,Void>() {
+                                   "Returns the current project root in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new FileProperty("project.build.dir", 
+                                   new Lambda<File,Void>() {
       public File apply(Void notUsed) { return _model.getBuildDirectory(); }
     },
-                                                                  "Returns the current build directory in DrJava.\n"+
-                                                                  "Optional attributes:\n"+
-                                                                  "\trel=\"<dir to which the output should be relative\"") {
-                                                                    public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                                  });
+                                   "Returns the current build directory in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"") {
+                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                   });
     RecursiveFileListProperty classFilesProperty = 
       new RecursiveFileListProperty("project.class.files", File.pathSeparator, DEF_DIR,
                                     _model.getBuildDirectory().getAbsolutePath(),
@@ -3714,8 +3747,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     };
     PropertyMaps.TEMPLATE.setProperty("Project", classFilesProperty);
-    PropertyMaps.TEMPLATE.setProperty("Project", new DrJavaProperty("project.auto.refresh",
-                                                                    "Evaluates to true if project auto-refresh is enabled.") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new DrJavaProperty("project.auto.refresh",
+                                     "Evaluates to true if project auto-refresh is enabled.") {
       public void update(PropertyMaps pm) {
         Boolean b = _model.getAutoRefreshStatus();
         String f = _attributes.get("fmt").toLowerCase();
@@ -3729,32 +3764,32 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("fmt", "boolean");
       }
     });
-    PropertyMaps.TEMPLATE.setProperty("Project", new FileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
-                                                                      "Returns a list of files that are excluded from DrJava's "+
-                                                                      "project auto-refresh.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which output should be relative\"\n"+
-                                                                      "\tsep=\"<separator between files>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new FileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of files that are excluded from DrJava's "+
+                                       "project auto-refresh.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
-        for(File f: _model.getExcludedFiles()) {
-          l.add(f);
-        }
+        for(File f: _model.getExcludedFiles()) { l.add(f); }
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     });
-    PropertyMaps.TEMPLATE.setProperty("Project", new FileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
-                                                                      "Returns a list of files in the project's extra "+
-                                                                      "class path.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which output should be relative\"\n"+
-                                                                      "\tsep=\"<separator between files>\"") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Project", 
+                  new FileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of files in the project's extra "+
+                                       "class path.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
-        for(File f: _model.getExtraClassPath()) {
-          l.add(f);
-        }
+        for(File f: _model.getExtraClassPath()) { l.add(f); }
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -3763,18 +3798,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // Actions
     PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
                                                                          "Execute a \"Save All\" action.") {
-      public void update(PropertyMaps pm) {
-        _saveAll();
-      }
+      public void update(PropertyMaps pm) { _saveAll(); }
     });
-    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.compile.all", "(Compile All...)",
-                                                                         "Execute a \"Compile All\" action.") {
-      public void update(PropertyMaps pm) {
-        _compileAll();
-      }
+    PropertyMaps.TEMPLATE.
+      setProperty("Action", new DrJavaActionProperty("action.compile.all", "(Compile All...)",
+                                                     "Execute a \"Compile All\" action.") {
+      public void update(PropertyMaps pm) { _compileAll(); }
     });
-    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.clean", "(Clean Build Directory...)",
-                                                                         "Execute a \"Clean Build Directory\" action.") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Action", 
+                  new DrJavaActionProperty("action.clean", "(Clean Build Directory...)",
+                                           "Execute a \"Clean Build Directory\" action.") {
       public void update(PropertyMaps pm) {
         // could not use _clean(), since ProjectFileGroupingState.cleanBuildDirectory()
         // is implemented as an asynchronous task, and DrJava would not wait for its completion
@@ -3789,12 +3823,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                                          "\tline=\"<line number to display>") {
       public void update(PropertyMaps pm) {
         if (_attributes.get("file")!=null) {
-          final String dir = StringOps.unescapeFileName(StringOps.replaceVariables(DEF_DIR,
-                                                                                   pm,
-                                                                                   PropertyMaps.GET_CURRENT));
-          final String fil = StringOps.unescapeFileName(StringOps.replaceVariables(_attributes.get("file"),
-                                                                                   pm,
-                                                                                   PropertyMaps.GET_CURRENT));
+          final String dir = StringOps.
+            unescapeFileName(StringOps.replaceVariables(DEF_DIR, pm, PropertyMaps.GET_CURRENT));
+          final String fil = StringOps.
+            unescapeFileName(StringOps.replaceVariables(_attributes.get("file"), pm, PropertyMaps.GET_CURRENT));
           FileOpenSelector fs = new FileOpenSelector() {
             public File[] getFiles() {
               if (fil.startsWith("/")) { return new File[] { new File(fil) }; }
@@ -3804,21 +3836,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           open(fs);
           int lineNo = -1;
           if (_attributes.get("line")!=null) {
-            try {
-              lineNo = Integer.valueOf(_attributes.get("line"));
-            }
-            catch(NumberFormatException nfe) {
-              lineNo = -1;
-            }
+            try { lineNo = Integer.valueOf(_attributes.get("line")); }
+            catch(NumberFormatException nfe) { lineNo = -1; }
           }
-          if (lineNo>=0) {
+          if (lineNo >= 0) {
             final int l = lineNo;
-            edu.rice.cs.util.swing.Utilities.invokeLater(new Runnable() { 
-              public void run() { _jumpToLine(l); }
-            });
+            Utilities.invokeLater(new Runnable() { public void run() { _jumpToLine(l); } });
           }
         }
       }
+      
       /** Reset the attributes. */
       public void resetAttributes() {
         _attributes.clear();
@@ -3826,8 +3853,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("line", null);
       }
     });
-    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.auto.refresh", "(Auto-Refresh...)",
-                                                                         "Execute an \"Auto-Refresh Project\" action.") {
+    PropertyMaps.TEMPLATE.
+      setProperty("Action", 
+                  new DrJavaActionProperty("action.auto.refresh", "(Auto-Refresh...)",
+                                           "Execute an \"Auto-Refresh Project\" action.") {
       public void update(PropertyMaps pm) {
         _model.autoRefreshProject();
       }
@@ -3837,12 +3866,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Set a new painters for existing breakpoint highlights. */
   void refreshBreakpointHighlightPainter() {
     for(java.util.Map.Entry<Breakpoint,HighlightManager.HighlightInfo> pair: _documentBreakpointHighlights.entrySet()) {
-      if (pair.getKey().isEnabled()) {
-        pair.getValue().refresh(DefinitionsPane.BREAKPOINT_PAINTER);
-      }
-      else {
-        pair.getValue().refresh(DefinitionsPane.DISABLED_BREAKPOINT_PAINTER);
-      }
+      if (pair.getKey().isEnabled()) pair.getValue().refresh(DefinitionsPane.BREAKPOINT_PAINTER);
+      else pair.getValue().refresh(DefinitionsPane.DISABLED_BREAKPOINT_PAINTER);
     }
   }
   
@@ -4059,7 +4084,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     String text = "Editing " + path;
     
-// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+// Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
 //      String temp = _model.getParsingControl().getEnclosingClassName(doc);
 //      if ((temp != null) && (temp.length() > 0)) { text = text + " - " + temp; }
@@ -4209,8 +4234,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (d != null) {
         if (! d.isUntitled()) {
           _model.addAuxiliaryFile(d);
-          try{
-            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          try {
+            _model.getDocumentNavigator().
+              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
@@ -4230,7 +4256,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (! d.isUntitled()) {
           _model.removeAuxiliaryFile(d);
           try {
-            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+            _model.getDocumentNavigator().
+              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
@@ -4251,8 +4278,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (d != null) {
         if (! d.isUntitled()) {
           _model.addAuxiliaryFile(d);
-          try{
-            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          try {
+            _model.getDocumentNavigator().
+              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
           }
           catch(IOException ex) { /* do nothing */ }
         }
@@ -4276,8 +4304,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (d != null) {
         if (! d.isUntitled()) {
           _model.removeAuxiliaryFile(d);
-          try{
-            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          try {
+            _model.getDocumentNavigator().
+              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
           }
           catch(IOException ex) { /* do nothing */ }
         }
@@ -4305,14 +4334,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     openFolder(_folderChooser); 
   }
   
-  
   private void _openFileOrProject() {
     try {
       final File[] fileList = _openFileOrProjectSelector.getFiles();
       
-      FileOpenSelector fos = new FileOpenSelector() {
-        public File[] getFiles() { return fileList; }
-      };
+      FileOpenSelector fos = new FileOpenSelector() { public File[] getFiles() { return fileList; } };
       
       if (_openChooser.getFileFilter().equals(_projectFilter)) openProject(fos);
       else open(fos);
@@ -4982,7 +5008,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public Pair<Integer,Integer> getSelection() {
         Integer selStart = Integer.valueOf(pane.getSelectionStart());
         Integer selEnd = Integer.valueOf(pane.getSelectionEnd());
-        if ((selStart==0)&&(selEnd==0)) return new Pair<Integer,Integer>(pane.getCaretPosition(),pane.getCaretPosition());
+        if ( selStart == 0 && selEnd == 0) 
+          return new Pair<Integer,Integer>(pane.getCaretPosition(),pane.getCaretPosition());
         if (pane.getCaretPosition() == selStart) return new Pair<Integer,Integer>(selEnd,selStart);
         return new Pair<Integer,Integer>(selStart,selEnd);
       }
@@ -5132,7 +5159,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // Reset to defaults to restore pristine behavior.
       config.setSetting(DIALOG_JAROPTIONS_STATE, DIALOG_JAROPTIONS_STATE.getDefault());
     }
-
+    
     // "Tabbed Panes" dialog position and size.
     if ((DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue())
           && (_tabbedPanesFrame != null) && (_tabbedPanesFrame.getFrameState() != null)) {
@@ -5924,7 +5951,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_printConsoleAction, "Print", "Print the Console pane");
     _setUpAction(_printInteractionsAction, "Print", "Print the Interactions pane");
     _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Change the printer settings");
-    _setUpAction(_printDefDocPreviewAction, "Print Preview", "PrintPreview", "Preview how the document will be printed");
+    _setUpAction(_printDefDocPreviewAction, "Print Preview", "PrintPreview", 
+                 "Preview how the document will be printed");
     _setUpAction(_printConsolePreviewAction, "Print Preview", "PrintPreview", 
                  "Preview how the console document will be printed");
     _setUpAction(_printInteractionsPreviewAction, "Print Preview", "PrintPreview", 
@@ -5976,8 +6004,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch focus to the previous pane");
     _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch focus to the next pane");
-    _setUpAction(_gotoOpeningBraceAction, "Go to Opening Brace", "Go th the opening brace of the block enclosing the cursor");
-    _setUpAction(_gotoClosingBraceAction, "Go to Closing Brace", "Go th the closing brace of the block enclosing the cursor");
+    _setUpAction(_gotoOpeningBraceAction, "Go to Opening Brace", 
+                 "Go th the opening brace of the block enclosing the cursor");
+    _setUpAction(_gotoClosingBraceAction, "Go to Closing Brace", 
+                 "Go th the closing brace of the block enclosing the cursor");
     
     _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrJava");
     
@@ -5988,7 +6018,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     
     _setUpAction(_openJavadocAction, "Open Java API Javadoc...", "Open the Java API Javadoc Web page for a class");
-    _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API "+
+    _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API " +
                  "Javadoc Web page for the word under the cursor");
     
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
@@ -6025,7 +6055,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
-    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", "Send anonymous system information to DrJava developers");
+    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
+                 "Send anonymous system information to DrJava developers");
     _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
   }
@@ -6271,7 +6302,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
     final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
     final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
-    final int enclosingFileCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
+    final int enclosingFileCount = 
+      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
     if ((savedCount!=namesCount) ||
         (savedCount!=cmdlinesCount) ||
         (savedCount!=workdirsCount) ||
@@ -6296,18 +6328,23 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
               final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
               final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-              final Vector<String> enclosingfiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+              final Vector<String> enclosingfiles = 
+                DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
               
               extMenu.insert(new AbstractAction(names.get(i)) {
                 public void actionPerformed(ActionEvent ae) {
                   try {
                     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
                     String s = enclosingfiles.get(i).trim();
-                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): enclosingfiles.get(i) = "+s);
-                    ((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).setFile(s.length()>0?new File(s):null);
-                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): ${enclosing.djapp.file} = "+((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).getCurrent(pm));
+                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): enclosingfiles.get(i) = " + s);
+                    ((MutableFileProperty) pm.getProperty("enclosing.djapp.file")).
+                      setFile(s.length() > 0 ? new File(s) : null);
+                    edu.rice.cs.util.GeneralProcessCreator.LOG.
+                      log("actionPerformed(): ${enclosing.djapp.file} = " + 
+                          ((MutableFileProperty) pm.getProperty("enclosing.djapp.file")).getCurrent(pm));
                     // System.out.println(names.get(i)+": cmdline "+cmdlines.get(i)+" "+workdirs.get(i));
-                    _executeExternalDialog.runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
+                    _executeExternalDialog.
+                      runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
                   }
                   catch(CloneNotSupportedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
                 }
@@ -6777,7 +6814,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //     SpringLayout.SOUTH, _currLocationField);
   }
   
-  /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane. **/
+  /** Inner class to handle updating the current position in a document.  Registered with the DefinitionsPane. **/
   private class PositionListener implements CaretListener {
     
     /* Cached caret coordinates */
@@ -6792,8 +6829,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       
       doc.acquireReadLock();
       try { 
-        if (offset == _offset + 1 && offset < doc.getLength() && doc.getText(_offset, 1).charAt(0) != '\n') {
+        if (offset == _offset + 1 && doc.getText(_offset, 1).charAt(0) != '\n') {
           _col += 1;
+          _offset += 1;
         }
         else {
           Element root = doc.getDefaultRootElement();
@@ -6802,7 +6840,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _col = offset - root.getElement(line).getStartOffset();
         }
       }
-      catch(BadLocationException e) { /* do nothing */ }
+      catch(BadLocationException e) { /* do nothing; should never happen */ }
       finally { 
         doc.releaseReadLock();
         _offset = offset;
@@ -6814,8 +6852,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void updateLocation() {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
-      try { updateLocation(doc.getCurrentLine(), doc.getCurrentCol()); }
+      try { 
+        _line = doc.getCurrentLine();
+        _col = doc.getCurrentCol(); 
+      }
       finally { doc.releaseReadLock(); }
+      updateLocation(_line, _col);
     }
     
     private void updateLocation(int line, int col) { // Not run in event thread because setText is thread safe.
@@ -6911,7 +6953,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
-          _currentDefPane.removeErrorHighlight(); // removes the highlighting whenever the current tabbed pane is switched
+          _currentDefPane.removeErrorHighlight(); // removes highlighting whenever the current tabbed pane is switched
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
         }
       }
@@ -7190,15 +7232,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               if (!externalBinSelected && !auxiliaryBinSelected) {
                 // open only makes sense if it's real folders, and not
                 // the external or auxiliary bins
-                m.add(Utilities.createDelegateAction("Open All Files in All Folders ("+groupSelectedCount+")",
+                m.add(Utilities.createDelegateAction("Open All Files in All Folders (" + groupSelectedCount + ")",
                                                      _openAllFolderAction));
               }
-              m.add(Utilities.createDelegateAction("Close All Folders ("+groupSelectedCount+")",
-                                                   _closeFolderAction));
-              m.add(Utilities.createDelegateAction("Compile All Folders ("+groupSelectedCount+")",
-                                                   _compileFolderAction));
-              m.add(Utilities.createDelegateAction("Test All Folders ("+groupSelectedCount+")",
-                                                   _junitFolderAction));
+              m.add(Utilities.
+                      createDelegateAction("Close All Folders ("+groupSelectedCount+")", _closeFolderAction));
+              m.add(Utilities.
+                      createDelegateAction("Compile All Folders ("+groupSelectedCount+")", _compileFolderAction));
+              m.add(Utilities.
+                      createDelegateAction("Test All Folders ("+groupSelectedCount+")", _junitFolderAction));
               
             }
           }
@@ -7372,7 +7414,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   
-  /** Create a new DefinitionsPane and JScrollPane for an open definitions document.  Package private for testing purposes.
+  /** Create new DefinitionsPane and JScrollPane for an open definitions document.  Package private for testing purposes.
     * @param doc The open definitions document to wrap
     * @return JScrollPane containing a DefinitionsPane for the given document.
     */
@@ -7402,7 +7444,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           }
         });
       }
-      public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // only attribute changes that matter are inserts and removes
+      public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }
       public void removeUpdate(DocumentEvent e) { updateUI(); }
     });
@@ -7745,9 +7787,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       
       if (rhvport != null) {
         Component view = rhvport.getView();
-        if (view != null) {
-          view.repaint();
-        }
+        if (view != null) view.repaint();
       }
     }
   }
@@ -7849,8 +7889,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     Utilities.invokeLater(command);
   }
   
-  // Comment out current selection using wing commenting.  Non-private for testing purposes only. Only runs in event thread. */
-  void commentLines() {
+  /** Comment current selection using wing commenting.  public for testing purposes only. Runs in event thread. */
+  public void commentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
     int caretPos = _currentDefPane.getCaretPosition();
@@ -7865,7 +7905,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     if (start != end) _currentDefPane.moveCaretPosition(newEnd);
   }
   
-  // Uncomment out current selection using wing commenting.  Public for testing purposes only. Only runs in event thread. */
+  /** Uncomment current selection using wing commenting.  Public for testing purposes only.  Runs in event thread. */
   public void uncommentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
@@ -7925,7 +7965,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
                                         final boolean shouldHighlight, final boolean shouldAddToHistory) {
-//    if (shouldAddToHistory) addToBrowserHistory();
+    if (shouldAddToHistory) addToBrowserHistory();
     
     boolean toSameDoc = _model.getActiveDocument().equals(doc);
     
@@ -7966,7 +8006,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocusInWindow();
 //          System.err.println("Showing Interactions Tab" );
-//          showTab(_interactionsContainer);  // disabled to avoid switching to interactions when browsing findall results
+          // following line disabled to avoid switching to interactions when browsing findall results
+//          showTab(_interactionsContainer); 
           _updateDebugStatus();
         }
         
@@ -7996,17 +8037,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
       // Print a message if step takes a long time
-      synchronized(_debugStepTimer) { if (!_debugStepTimer.isRunning()) _debugStepTimer.start(); }
+      synchronized(_debugStepTimer) { if (! _debugStepTimer.isRunning()) _debugStepTimer.start(); }
     }
     
     public void currThreadSuspended() {
       _disableStepTimer();
       
       // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() { _setThreadDependentDebugMenuItems(true); }
-      };
-      Utilities.invokeLater(command);
+      Utilities.invokeLater(new Runnable() { public void run() { _setThreadDependentDebugMenuItems(true); } });
     }
     
     /* Must be executed in the event thread. */
@@ -8098,16 +8136,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       value = "not set, implying the system's default";
     }
     
-    String res = (String)JOptionPane.showInputDialog(MainFrame.this,
-                                                     "Your program ran out of memory. You may try to enter a larger\n" +
-                                                     "maximum heap size for the Interactions JVM. The maximum heap size is\n" +
-                                                     "currently "+value+".\n"+
-                                                     "A restart is required after changing this setting.",
-                                                     "Increase Maximum Heap Size?",
-                                                     JOptionPane.QUESTION_MESSAGE,
-                                                     null,
-                                                     OptionConstants.heapSizeChoices.toArray(),
-                                                     DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+    String res = (String)JOptionPane.
+      showInputDialog(MainFrame.this,
+                      "Your program ran out of memory. You may try to enter a larger\n" +
+                      "maximum heap size for the Interactions JVM. The maximum heap size is\n" +
+                      "currently "+value+".\n"+
+                      "A restart is required after changing this setting.",
+                      "Increase Maximum Heap Size?",
+                      JOptionPane.QUESTION_MESSAGE,
+                      null,
+                      OptionConstants.heapSizeChoices.toArray(),
+                      DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
     
     if (res != null) {
       // temporarily make MainFrame the parent of the dialog that pops up
@@ -8116,7 +8155,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, l);
       // change the setting
       DrJava.getConfig().setSetting(SLAVE_JVM_XMX,res.trim());
-      SwingUtilities.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {
         public void run() {
           // reinstall ConfigFrame as parent
           DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, l);
@@ -8153,7 +8192,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, l);
       // change the setting
       DrJava.getConfig().setSetting(MASTER_JVM_XMX,res.trim());
-      SwingUtilities.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {
         public void run() {
           // reinstall ConfigFrame as parent
           DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, l);
@@ -8221,9 +8260,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       else {
         final java.util.List<String> filePaths = new ArrayList<String>();
-        for (File f : files) {
-          filePaths.add(f.getPath());
-        }
+        for (File f : files) { filePaths.add(f.getPath()); }
         
         ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
           .setOwner(MainFrame.this)
@@ -8247,9 +8284,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       choices.add("Yes");
       choices.add("No");
       final java.util.List<String> filePaths = new ArrayList<String>();
-      for (File f : files) {
-        filePaths.add(f.getPath());
-      }
+      for (File f : files) { filePaths.add(f.getPath()); }
       ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
         .setOwner(MainFrame.this)
         .setTitle("Files are Read-Only")
@@ -8268,34 +8303,29 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       
       if (files.length == 1) {
         int res = JOptionPane.showConfirmDialog(MainFrame.this,
-                                                "The following file could not be saved because it is read-only.\n"+
-                                                "Do you want to overwrite it anyway?\n"+
-                                                files[0].getPath(),
+                                                "The following file could not be saved because it is read-only.\n" +
+                                                "Do you want to overwrite it anyway?\n" + files[0].getPath(),
                                                 "File is Read-Only",
                                                 JOptionPane.YES_NO_OPTION,
                                                 JOptionPane.QUESTION_MESSAGE);
-        overwrite = (res==0);
+        overwrite = (res == 0);
       }
       else {
         setPopupLoc(dialog);
         dialog.showDialog();
-        overwrite = (dialog.getButtonPressed()==0);
+        overwrite = (dialog.getButtonPressed() == 0);
       }
       
       if (overwrite) {
-        if (files.length==1) { return files; }
+        if (files.length == 1) return files;
         else {
           File[] overwriteFiles = new File[dialog.getSelectedItems().size()];
           int i = 0;
-          for(String s: dialog.getSelectedItems()) {
-            overwriteFiles[i++] = new File(s);
-          }
+          for(String s: dialog.getSelectedItems()) { overwriteFiles[i++] = new File(s); }
           return overwriteFiles;
         }
       }
-      else {
-        return new File[0];
-      }
+      else return new File[0];
     }
     
     public void fileSaved(final OpenDefinitionsDocument doc) {
@@ -8577,7 +8607,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     public void runStarted(final OpenDefinitionsDocument doc) {
       // Only change GUI from event-dispatching AbstractDJDocument
-      SwingUtilities.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {
         public void run() {
           // Switch to the interactions pane to show results.
           showTab(_interactionsContainer);
@@ -8635,7 +8665,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
-//      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").show();
+//      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").
+//        show();
       // syncUI...?
       Utilities.invokeLater(new Runnable() {
         public void run() {
@@ -8975,7 +9006,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void classFileError(ClassFileError e) {
       
       final String message = 
-        "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + " cannot be loaded.\n "
+        "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + 
+        " cannot be loaded.\n "
         + "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
       
       // Not necessarily invoked from event-handling thread!
@@ -9059,7 +9091,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       * and save the document if yes.
       * @return true if quitting should continue, false if the user cancelled
       */
-    public boolean quitFile(OpenDefinitionsDocument doc) { return _fileSaveHelper(doc, JOptionPane.YES_NO_CANCEL_OPTION); }
+    public boolean quitFile(OpenDefinitionsDocument doc) { 
+      return _fileSaveHelper(doc, JOptionPane.YES_NO_CANCEL_OPTION); 
+    }
     
     /** Called to ask the listener if it is OK to revert the current document to a newer version saved on file. */
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
@@ -9317,8 +9351,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //                                               DefaultEditorKit.selectionBeginLineAction);
     KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE, _selectionBeginLineAction);
     
-    KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD, _actionMap.get(DefaultEditorKit.previousWordAction), null, 
-                                    "Previous Word");
+    KeyBindingManager.Singleton.
+      put(KEY_PREVIOUS_WORD, _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
     KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD, DefaultEditorKit.selectionPreviousWordAction);
     
     KeyBindingManager.Singleton.put(KEY_DOWN, _actionMap.get(DefaultEditorKit.downAction), null, "Down");
@@ -9347,10 +9381,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     KeyBindingManager.Singleton.put(KEY_PAGE_UP, _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
     KeyBindingManager.Singleton.put(KEY_CUT_LINE, _cutLineAction, null, "Cut Line");
     KeyBindingManager.Singleton.put(KEY_CLEAR_LINE, _clearLineAction, null, "Clear Line");
-    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_PREVIOUS, _actionMap.get(DefaultEditorKit.deletePrevCharAction), 
-                                    null, "Delete Previous");
-    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_NEXT, _actionMap.get(DefaultEditorKit.deleteNextCharAction), 
-                                    null, "Delete Next");
+    KeyBindingManager.Singleton.
+      put(KEY_SHIFT_DELETE_PREVIOUS, _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
+    KeyBindingManager.Singleton.
+      put(KEY_SHIFT_DELETE_NEXT, _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
   }
   
   /** @param listener The ComponentListener to add to the open documents list
@@ -9518,12 +9552,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Linux URI drag-and-drop data flavor. */
   private static DataFlavor uriListFlavor;
   static {
-    try {
-      uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String");
-    }
-    catch(ClassNotFoundException cnfe) {
-      uriListFlavor = null;
-    }
+    try { uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String"); }
+    catch(ClassNotFoundException cnfe) { uriListFlavor = null; }
   }
   
   /** User dragged something into the component. */
@@ -9550,8 +9580,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           fileList = data;
         }
         else {
-          // work-around for Linux drag-and-drop
-          // see Java bug 4899516
+          // work-around for Linux drag-and-drop; see Java bug 4899516
           @SuppressWarnings("unchecked")
           String data = (String)tr.getTransferData(uriListFlavor);
           fileList = textURIListToFileList(data);
@@ -9560,15 +9589,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         java.util.List<File> filteredFileList = new java.util.ArrayList<File>();
         while (iterator.hasNext()) {
           File file = iterator.next();
-          if ((file.isFile()) && ((file.getName().endsWith(".java")) || 
-                                  (file.getName().endsWith(".dj0")) || 
-                                  (file.getName().endsWith(".dj1")) || 
-                                  (file.getName().endsWith(".dj2")) || 
-                                  (file.getName().endsWith(".dj0")) ||
-                                  (file.getName().endsWith(".txt")))) {
+          if (file.isFile() && (file.getName().endsWith(".java") || file.getName().endsWith(".dj0") || 
+                                file.getName().endsWith(".dj1") || file.getName().endsWith(".dj2") || 
+                                file.getName().endsWith(".dj0") || file.getName().endsWith(".txt"))) {
             filteredFileList.add(file);
           }
-          else if ((file.isFile()) && ((file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)))) {
+          else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
             openExtProcessFile(file);
           }
         }
@@ -9680,15 +9706,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     if (_autoImportDialog == null) {
       _autoImportPackageCheckbox = new JCheckBox("Import Package");
       _autoImportPackageCheckbox.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          _autoImportDialog.resetFocus();
-        }
+        public void actionPerformed(ActionEvent e) { _autoImportDialog.resetFocus(); }
       });
       PlatformFactory.ONLY.setMnemonic(_autoImportPackageCheckbox,'p');
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-        public String apply(JavaAPIListEntry entry) {
-          // show full class name as information
+        public String apply(JavaAPIListEntry entry) { // show full class name as information
           return entry.getFullString();
         }
       };
@@ -9699,19 +9722,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           String text;
-          if (p.getItem() != null) {
-            // if a class was selected...
+          if (p.getItem() != null) { // if a class was selected...
             text = p.getItem().getFullString();
           }
-          else {
-            // otherwise use the text that was entered
+          else { // use the text that was entered
             text = p.getText();
           }
           if (_autoImportPackageCheckbox.isSelected()) {
             int lastDot = text.lastIndexOf('.');
-            if (lastDot>0) {
-              text = text.substring(0,lastDot+1)+"*";
-            }
+            if (lastDot > 0) text = text.substring(0,lastDot+1)+"*";
           }
           final InteractionsModel im = _model.getInteractionsModel();
           // get the last line (the one that caused the error) and remove it from the history
@@ -9721,8 +9740,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           // ...and try to do the last line again
           final String code = importLine + ((lastLine != null)  ?  ("\n" + lastLine)  : "");
           EventQueue.invokeLater(new Runnable() { 
-            public void run() {
-              // interpret with the added import
+            public void run() { // interpret with the added import
               try {
                 im.append(code, InteractionsDocument.DEFAULT_STYLE);
                 im.interpretCurrentInteraction();
@@ -9739,8 +9757,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public String getToolTipText() { return null; }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
-          // if no class was selected, do nothing
-          // just reset the error information so the dialog box works next time
+          // if no class was selected, just reset the error information so the dialog box works next time
           _model.getInteractionsModel().resetLastErrors();
           hourglassOff();
           return null;
@@ -9757,23 +9774,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       actions.add(okAction);
       actions.add(cancelAction);
       _autoImportDialog = 
-        new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
-                                                   "Auto Import Class",
-                                                   false, // force
-                                                   true, // ignore case
-                                                   info,
-                                                   strategies,
-                                                   actions, 1, // cancel is action 1
-                                                   new JavaAPIListEntry("dummyImport", "dummyImport", null)) {
-        public void setOwnerEnabled(boolean b) {
-          if (b) { hourglassOff(); } else { hourglassOn(); }
-        }
-        protected JComponent[] makeOptions() {
-          return new JComponent[] { _autoImportPackageCheckbox };
-        }
+        new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this, "Auto Import Class", false, true, info, strategies,
+                                                   actions, 1, new JavaAPIListEntry("dummyImport", "dummyImport", null)) 
+      {
+        public void setOwnerEnabled(boolean b) { if (b) hourglassOff(); else hourglassOn(); }
+        protected JComponent[] makeOptions() { return new JComponent[] { _autoImportPackageCheckbox }; }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
-      
       if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
         _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
       }
@@ -9788,19 +9795,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Imports a class. */
   void _showAutoImportDialog(String s) {
     generateJavaAPIList();
-    if (_javaAPIList == null) {
-      return;
-    }
+    if (_javaAPIList == null) return;
+    
     List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(_javaAPIList);
-    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
-        (_autoImportClassList.size()>0)) {
+    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
+        _autoImportClassList.size() > 0) {
       autoImportList.addAll(_autoImportClassList);
     }
     else {
       File projectRoot = _model.getProjectRoot();
       List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
       if (docs != null) {
-        for(OpenDefinitionsDocument d: docs) {
+        for (OpenDefinitionsDocument d: docs) {
           if (d.isUntitled()) continue;
           try {
             String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
@@ -9812,11 +9818,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               }
             }
             String simple = full;
-            if (simple.lastIndexOf('.')>=0) {
-              simple = simple.substring(simple.lastIndexOf('.')+1);
-            }
+            if (simple.lastIndexOf('.') >= 0) simple = simple.substring(simple.lastIndexOf('.') + 1);
+            
             JavaAPIListEntry entry = new JavaAPIListEntry(simple, full, null);
-            if (!autoImportList.contains(entry)) { autoImportList.add(entry); }
+            if (! autoImportList.contains(entry)) { autoImportList.add(entry); }
           }
           catch(IOException ioe) { /* ignore, just don't add this one */ }
           catch(SecurityException se) { /* ignore, just don't add this one */ }
@@ -9835,30 +9840,20 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Follow a file. */
   private final Action _followFileAction = new AbstractAction("Follow File...") {
-    public void actionPerformed(ActionEvent ae) {
-      _followFile();
-    }
+    public void actionPerformed(ActionEvent ae) { _followFile(); }
   };
-  
-  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("less.txt", true);
   
   /** Open a file for following (like using "less" and F).  Only runs in the event thread. */
   private void _followFile() {
     updateStatusField("Opening File for Following");
-    // LOG.log("_followFile");
     try {      
       final File[] files = _openAnyFileSelector.getFiles();
-      // LOG.log("\tfiles = "+files);
       if (files == null) { return; }
-      // LOG.log("\tlength = "+files.length);
       for (final File f: files) {
         if (f == null) continue;
-        // LOG.log("\tf = "+f);
         String end = f.getName();
         int lastIndex = end.lastIndexOf(File.separatorChar);
-        if (lastIndex>=0) {
-          end = end.substring(lastIndex+1);
-        }
+        if (lastIndex >= 0) end = end.substring(lastIndex+1);
         final LessPanel panel = new LessPanel(this, "Follow: "+end, f);
         _tabs.addLast(panel);
         panel.getMainPanel().addFocusListener(new FocusAdapter() {
@@ -9876,15 +9871,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Execute an external process. */
   private final Action _executeExternalProcessAction = new AbstractAction("New External Process...") {
-    public void actionPerformed(ActionEvent ae) {
-      _executeExternalProcess();
-    }
+    public void actionPerformed(ActionEvent ae) { _executeExternalProcess(); }
   };
   
   /** Execute an external process and monitor its output. */
-  private void _executeExternalProcess() {
-    _executeExternalDialog.setVisible(true);
-  }
+  private void _executeExternalProcess() { _executeExternalDialog.setVisible(true); }
   
   /** The execute external dialog. */
   private final ExecuteExternalDialog _executeExternalDialog;
@@ -9924,9 +9915,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Action that edits saved processes.  Only runs in the event thread. */
   private final Action _editExternalProcessesAction = new AbstractAction("Edit...") {
-    public void actionPerformed(ActionEvent ae) {
-      _editExternalDialog.setVisible(true);
-    }
+    public void actionPerformed(ActionEvent ae) { _editExternalDialog.setVisible(true); }
   };
   
   /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
@@ -9937,8 +9926,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public synchronized void installModalWindowAdapter(final Window w,
                                                      final Lambda<Void,WindowEvent> toFrontAction,
                                                      final Lambda<Void,WindowEvent> closeAction) {
-    if (_modalWindowAdapters.containsKey(w)) {
-      // already installed
+    if (_modalWindowAdapters.containsKey(w)) { // already installed
       return;
     }
     
@@ -9946,8 +9934,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     if (_modalWindowAdapterOwner==null) {
       // modal listener is available, claim it
       _modalWindowAdapterOwner = w;
-      // create a window adapter performs the specified actions after delegating
-      // to the modal window adapter
+      // create a window adapter performs the specified actions after delegating to the modal window adapter
       wa = new WindowAdapter() {
         public void windowDeactivated(WindowEvent we) {
           we.getWindow().toFront();
@@ -9964,14 +9951,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           we.getWindow().requestFocus();
           toFrontAction.apply(we);
         }
-        public void windowClosing(WindowEvent we) {
-          closeAction.apply(we);
-        }
+        public void windowClosing(WindowEvent we) { closeAction.apply(we); }
       };
     }
     else {
-      // modal listener is already owned by another window
-      // create a window adapter that just performs the specified actions
+      // modal listener is already owned by another window; create a window adapter that performs the specified actions
       wa = new WindowAdapter() {
         public void windowDeactivated(WindowEvent we) { toFrontAction.apply(we); }
         public void windowIconified(WindowEvent we) { toFrontAction.apply(we); }
@@ -9985,11 +9969,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     w.addWindowFocusListener(wa);
   }
   
-  /** Remove the modal window adapter.
-    * @param w window releasing the modal window adapter */
+  /** Removes the modal window adapter.
+    * @param w window releasing the modal window adapter 
+    */
   public synchronized void removeModalWindowAdapter(Window w) {
-    if (!_modalWindowAdapters.containsKey(w)) {
-      // the specified window does not have a modal windowadapter
+    if (! _modalWindowAdapters.containsKey(w)) { // the specified window does not have a modal windowadapter
       return;
     }
     w.removeWindowListener(_modalWindowAdapters.get(w));

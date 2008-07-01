@@ -157,7 +157,7 @@ public class InteractionsController extends AbstractConsoleController {
       _box = new InputBox();
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
-      SwingUtilities.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {
         public void run() { 
           
           // These commands only run in the event thread
@@ -211,7 +211,7 @@ public class InteractionsController extends AbstractConsoleController {
           finally { _doc.releaseWriteLock(); }
           
           _box.setVisible(true);
-          SwingUtilities.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
+          EventQueue.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
           
           _pane.setEditable(false);
         }
@@ -324,7 +324,7 @@ public class InteractionsController extends AbstractConsoleController {
     * that this lock is released.  This method is thread safe.
     * @throws UnsupportedOperationException If the interactions pane is not receiving console input
     */
-  public void interruptConsoleInput() { SwingUtilities.invokeLater(_inputCompletionCommand); }
+  public void interruptConsoleInput() { EventQueue.invokeLater(_inputCompletionCommand); }
   
   /** Inserts text into the console.  Can only be called from the event thread.  ONLY used in unit tests.
     * @param input The text to insert into the console input box

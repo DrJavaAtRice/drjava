@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** The interface BraceReduction serves as the template for our reduced view of a java document, which stores only the
  * information necessary for parenthesis matching.
@@ -114,7 +114,7 @@ public interface BraceReduction {
     *               HighlightStatus objects we return.
     * @param length  The length of the text area being inspected.
     */
-  public Vector<HighlightStatus> getHighlightStatus(int start, int length);
+  public ArrayList<HighlightStatus> getHighlightStatus(int start, int length);
 
   /** Returns the state at the relLocation, where relLocation is the location relative to the walker
     * @param relLocation distance from walker to get state at.

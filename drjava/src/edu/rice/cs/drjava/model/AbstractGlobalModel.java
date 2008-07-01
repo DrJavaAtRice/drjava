@@ -2037,7 +2037,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });
     // Only remove listeners after pending events have completed
-    SwingUtilities.invokeLater(new Runnable() { public void run() { _notifier.removeAllListeners(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.removeAllListeners(); } });
   }
   
   /** Disposes of external resources. This is a no op in AbstractGlobalModel. */
@@ -3630,7 +3630,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void move(int dist) { getDocument().move(dist); }
     
-    public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+    public ArrayList<HighlightStatus> getHighlightStatus(int start, int end) {
       return getDocument().getHighlightStatus(start, end);
     }
     

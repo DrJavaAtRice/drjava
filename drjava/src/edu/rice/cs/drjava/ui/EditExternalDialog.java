@@ -36,6 +36,19 @@
 
 package edu.rice.cs.drjava.ui;
 
+import java.awt.EventQueue;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.FontMetrics;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.text.*;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.*;
@@ -45,17 +58,6 @@ import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.*;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.text.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.FontMetrics;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 public class EditExternalDialog extends JFrame implements OptionConstants {
   private static final int FRAME_WIDTH = 503;
@@ -333,13 +335,9 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
       public void run() {
         _editExternalDialogMonitor.waitOne();
         // dialog has finished, figure out the results in the event thread
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
           public void run() {
-            SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                EditExternalDialog.this.toFront();
-              }
-            });
+            EventQueue.invokeLater(new Runnable() { public void run() { EditExternalDialog.this.toFront(); } });
             _mainFrame.installModalWindowAdapter(EditExternalDialog.this, NO_OP, OK);
             updateList(selectedIndex);
           }
