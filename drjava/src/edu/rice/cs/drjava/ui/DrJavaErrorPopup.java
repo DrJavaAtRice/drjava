@@ -125,7 +125,7 @@ public class DrJavaErrorPopup extends JDialog {
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorPopup.this.dispose();
-      MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getFrame());
+      MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getOwner());
       DrJavaErrorWindow.singleton().setVisible(true);
     }
   };

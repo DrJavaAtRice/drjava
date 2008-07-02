@@ -92,7 +92,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** the currently selected error index */
   private volatile int _errorIndex;
   /** the parent frame */
-  private static volatile JFrame _parentFrame = new JFrame();
+  private static volatile JFrame _parentFrame = null;
   /** true if parent changed since last singleton() call */
   private static volatile boolean _parentChanged = true;
   
@@ -197,12 +197,16 @@ public class DrJavaErrorWindow extends JDialog {
     validate();
     if (vis) {
       init();
-      edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
+      if (_parentFrame!=null) {
+        edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
+      }
       toFront();
     }
     else {
-      edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
-      _parentFrame.toFront();
+      if (_parentFrame!=null) {
+        edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
+        _parentFrame.toFront();
+      }
     }
     super.setVisible(vis);
   }

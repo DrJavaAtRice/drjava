@@ -171,12 +171,13 @@ public class DetachedFrame extends JFrame {
   }
   
   /** Create a tabbed pane frame. Initially, the tabbed pane is displayed in the split pane
+    * @param name frame name
     * @param mf the MainFrame
     * @param detach command to detach the component. The parameter is the instance of DetachedFrame that may contain the component.
     * @param reattach command to re-attach the component. The parameter is the instance of DetachedFrame that may contain the component.
     */
-  public DetachedFrame(MainFrame mf, Lambda<Void,DetachedFrame> detach, Lambda<Void,DetachedFrame> reattach) {
-    super("Tabbed Panes");
+  public DetachedFrame(String name, MainFrame mf, Lambda<Void,DetachedFrame> detach, Lambda<Void,DetachedFrame> reattach) {
+    super(name);
     _mainFrame = mf;
     _detach = detach;
     _reattach = reattach;

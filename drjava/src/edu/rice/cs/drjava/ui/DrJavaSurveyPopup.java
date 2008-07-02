@@ -166,8 +166,6 @@ public class DrJavaSurveyPopup extends JDialog {
     sb.append(DRJAVA_SURVEY_PAGE);
     sb.append("rev=");
     sb.append(Version.getRevisionNumber());
-    sb.append("&buildtime=");
-    sb.append(Version.getBuildTimeString());
     for(String k: DRJAVA_SURVEY_KEYS) {
       sb.append('&');
       sb.append(k);
@@ -192,7 +190,9 @@ public class DrJavaSurveyPopup extends JDialog {
   
   protected void yesAction() {
     try {
-      String result = getSurveyURL();
+      // append build time here so it does not change when comparing the survey information
+      // to the information submitted the last time; the revision number does matter, though
+      String result = getSurveyURL()+"&buildtime="+Version.getBuildTimeString();
       LOG.log(result);
       
       // check how many days have passed since the last survey

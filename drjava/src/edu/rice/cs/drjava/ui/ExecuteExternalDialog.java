@@ -833,7 +833,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void focusGained(FocusEvent e) { _mainFrame._lastFocusOwner = panel; }
     });
     panel.setVisible(true);
-    _mainFrame.showTab(panel);
+    _mainFrame.showTab(panel, true);
     _mainFrame._tabbedPane.setSelectedComponent(panel);
     // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the panel has been selected
     EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });

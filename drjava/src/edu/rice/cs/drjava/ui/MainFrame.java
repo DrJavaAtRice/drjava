@@ -1089,11 +1089,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
   /** Shows the find/replace tab in the interactions pane.  Only executes in the event thread. */
-  private void _showFindReplaceTab() {
+  private void _showFindReplaceTab(boolean showDetachedWindow) {
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
-    if (! _findReplace.isDisplayed()) {
-      showTab(_findReplace);
+    final boolean wasDisplayed = _findReplace.isDisplayed();
+    showTab(_findReplace, showDetachedWindow);
+    if (!wasDisplayed) {
       _findReplace.beginListeningTo(_currentDefPane);
     }
     _findReplace.setVisible(true);
@@ -1103,7 +1104,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Action that shows the find/replace tab.  Only executes in the event thread. */
   private final Action _findReplaceAction = new AbstractAction("Find/Replace") {
     public void actionPerformed(ActionEvent ae) {
-      _showFindReplaceTab();
+      _showFindReplaceTab(true);
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
       EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
     }
@@ -1112,7 +1113,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Find the next instance of the find word. */
   private final Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent ae) {
-      _showFindReplaceTab();
+      _showFindReplaceTab(false);
       if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
         // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
@@ -1126,7 +1127,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Does the find next in the opposite direction. If the direction is backward it searches forward. */
   private final Action _findPrevAction = new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent ae) {
-      _showFindReplaceTab();
+      _showFindReplaceTab(false);
       if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
         // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
@@ -2361,7 +2362,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     Component newC = c;
 //    if (c == _interactionsContainer) newC = _interactionsPane;
 //    if (c == _consoleScroll) newC = _consolePane;
-    showTab(newC);
+    showTab(newC, true);
   }
   
   /** This method allows the user to cycle through the definitions pane and all of the open tabs.
@@ -2451,9 +2452,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes(); 
-      if (! _breakpointsPanel.isDisplayed()) {
-        showTab(_breakpointsPanel);
-      }
+      showTab(_breakpointsPanel, true);
       _breakpointsPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_breakpointsPanel);
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _breakpointsPanel has been selected
@@ -2466,9 +2465,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes(); 
-      if (! _bookmarksPanel.isDisplayed()) {
-        showTab(_bookmarksPanel);
-      }
+      showTab(_bookmarksPanel, true);
       _bookmarksPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_bookmarksPanel);
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _bookmarksPanel has been selected
@@ -2575,7 +2572,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     assert EventQueue.isDispatchThread();
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
-    if (! panel.isDisplayed()) showTab(panel);
+    showTab(panel, true);
     panel.setVisible(true);
     _tabbedPane.setSelectedComponent(panel);
     // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
@@ -2958,7 +2955,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public MainFrame() {
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig(); 
-    
 //    Utilities.show("MainFrame starting");
     
     // create our model
@@ -3071,7 +3067,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //    
 //    Utilities.show("Global Model started");
     
-    _tabbedPanesFrame = new DetachedFrame(MainFrame.this, new Lambda<Void,DetachedFrame>() {
+    _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Lambda<Void,DetachedFrame>() {
       public Void apply(DetachedFrame frame) {
         frame.getContentPane().add(_tabbedPane);
         return null;
@@ -3201,7 +3197,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _editMenu = _setUpEditMenu(mask);
     _toolsMenu = _setUpToolsMenu(mask);
     _projectMenu = _setUpProjectMenu(mask);
-    
+    _debugMenu = null;
     if (_showDebugger) _debugMenu = _setUpDebugMenu(mask);
     _languageLevelMenu = _setUpLanguageLevelMenu(mask);
     _helpMenu = _setUpHelpMenu(mask);
@@ -3223,23 +3219,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     _setUpToolBar();
     
-    // add recent file and project manager
-    
-    RecentFileAction fileAct = new RecentFileManager.RecentFileAction() { 
-      public void actionPerformed(FileOpenSelector selector) { open(selector); }
-    }; 
-    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu, fileAct, 
-                                               OptionConstants.RECENT_FILES);
-    
-    RecentFileAction projAct = new RecentFileManager.RecentFileAction() { 
-      public void actionPerformed(FileOpenSelector selector) { openProject(selector); } 
-    };
-    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu, projAct, 
-                                                  OptionConstants.RECENT_PROJECTS);
-    
     // Create detachable debug frame
     if (_debugPanel!=null) { // using debugger
-      _debugFrame = new DetachedFrame(MainFrame.this, new Lambda<Void,DetachedFrame>() {
+      _debugFrame = new DetachedFrame("Debugger", MainFrame.this, new Lambda<Void,DetachedFrame>() {
         public Void apply(DetachedFrame frame) {
           frame.getContentPane().add(_debugPanel);
           return null;
@@ -3264,6 +3246,19 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _debugFrame = null;
     }
     
+    // add recent file and project manager
+    RecentFileAction fileAct = new RecentFileManager.RecentFileAction() { 
+      public void actionPerformed(FileOpenSelector selector) { open(selector); }
+    }; 
+    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu,
+                                               fileAct, OptionConstants.RECENT_FILES);
+    
+    RecentFileAction projAct = new RecentFileManager.RecentFileAction() { 
+      public void actionPerformed(FileOpenSelector selector) { openProject(selector); } 
+    };
+    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu,
+                                                  projAct, OptionConstants.RECENT_PROJECTS);
+
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());
     
@@ -6184,9 +6179,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Sets up the components of the menu bar and links them to the private fields within MainFrame.  This method 
     * serves to make the code more legible on the higher calling level, i.e., the constructor.
+    * @param frame frame for which the menu bar should be set
+    * @param menuBar menu bar to which the individual menus should be added
+    * @param menus menus to add
     */
   private void _setUpMenuBar() {
-    
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
     _menuBar.add(_toolsMenu);
@@ -6425,13 +6422,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                   try {
                     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
                     String s = enclosingfiles.get(i).trim();
-                    edu.rice.cs.util.GeneralProcessCreator.LOG.log("actionPerformed(): enclosingfiles.get(i) = " + s);
                     ((MutableFileProperty) pm.getProperty("enclosing.djapp.file")).
                       setFile(s.length() > 0 ? new File(s) : null);
-                    edu.rice.cs.util.GeneralProcessCreator.LOG.
-                      log("actionPerformed(): ${enclosing.djapp.file} = " + 
-                          ((MutableFileProperty) pm.getProperty("enclosing.djapp.file")).getCurrent(pm));
-                    // System.out.println(names.get(i)+": cmdline "+cmdlines.get(i)+" "+workdirs.get(i));
                     _executeExternalDialog.
                       runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
                   }
@@ -7119,7 +7111,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void run() { 
         setVisible(true);
         _compilerErrorPanel.setVisible(true);
-        showTab(_compilerErrorPanel); 
+        showTab(_compilerErrorPanel, true); 
         /* The following two step sequence was laboriously developed by trial and error; without it the _tabbedPane
          * does not display properly. */
         _tabbedPane.invalidate();
@@ -8661,7 +8653,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       Utilities.invokeLater(new Runnable() {
         public void run() {
 //          hourglassOn();
-          showTab(_compilerErrorPanel);
+          showTab(_compilerErrorPanel, true);
           _compilerErrorPanel.setCompilationInProgress();
           _saveAction.setEnabled(false);
         }
@@ -8706,7 +8698,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       EventQueue.invokeLater(new Runnable() {
         public void run() {
           // Switch to the interactions pane to show results.
-          showTab(_interactionsContainer);
+          showTab(_interactionsContainer, true);
           _lastFocusOwner = _interactionsContainer;
         }
       });
@@ -8722,7 +8714,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         public void run() {
           // new ScrollableDialog(null, "Ready for hourglassOn in junitStarted", "", "").show();
           
-          try { showTab(_junitErrorPanel);
+          try { showTab(_junitErrorPanel, true);
             _junitErrorPanel.setJUnitInProgress();
             // _junitAction.setEnabled(false);
             // _junitAllAction.setEnabled(false);
@@ -8740,7 +8732,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         public void run() {
 //          new ScrollableDialog(null, "Ready for hourglassOn in junitClassesStarted", "", "").show();
 //          hourglassOn();
-          showTab(_junitErrorPanel);
+          showTab(_junitErrorPanel, true);
           _junitErrorPanel.setJUnitInProgress();
           // _junitAction.setEnabled(false);
           // _junitAllAction.setEnabled(false);
@@ -8802,7 +8794,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //          // if we don't lock edits, our error highlighting might break
       hourglassOn();
       
-      showTab(_javadocErrorPanel);
+      showTab(_javadocErrorPanel, true);
       _javadocErrorPanel.setJavadocInProgress();
       _javadocAllAction.setEnabled(false);
       _javadocCurrentAction.setEnabled(false);
@@ -8817,7 +8809,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       Runnable command = new Runnable() {
         public void run() {
           try {
-            showTab(_javadocErrorPanel);
+            showTab(_javadocErrorPanel, true);
             _javadocAllAction.setEnabled(true);
             _javadocCurrentAction.setEnabled(true);
             _javadocErrorPanel.reset();
@@ -9085,7 +9077,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                         JOptionPane.ERROR_MESSAGE);
           // clean up as in JUnitEnded 
           try {
-            showTab(_junitErrorPanel);
+            showTab(_junitErrorPanel, true);
             _junitAction.setEnabled(true);
             _junitAllAction.setEnabled(true);
             _junitProjectAction.setEnabled(_model.isProjectActive());
@@ -9114,7 +9106,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                         "Testing works only on valid class files",
                                         JOptionPane.ERROR_MESSAGE);
           // clean up as junitEnded except hourglassOff (should factored into a private method)
-          showTab(_junitErrorPanel);
+          showTab(_junitErrorPanel, true);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
           _junitProjectAction.setEnabled(_model.isProjectActive());
@@ -9327,43 +9319,49 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
     * the component in the _tabs list.  Only runs in the event thread.
     * @param c the component to show in the tabbedPane
+    * @param showDetachedWindow true if the "Detached Panes" window should be shown
     */
-  public void showTab(final Component c) {
+  public void showTab(final Component c, boolean showDetachedWindow) {
     // TODO: put all of the _tabbedPane components in _tabs. eliminating special cases for interactions, console (which 
     // are always displayed)
     assert EventQueue.isDispatchThread();
-    int numVisible = 0;      
+    try {
+      int numVisible = 0;      
 //        System.err.println("showTab called with c = " + c);
-    
-    if (c == _interactionsContainer) {
+      
+      if (c == _interactionsContainer) {
 //          Utilities.show("InteractionsTab selected");
-      _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
-      c.requestFocusInWindow();
-    }
-    else if (c == _consoleScroll) {
-      _tabbedPane.setSelectedIndex(CONSOLE_TAB);
-      c.requestFocusInWindow();
-    }
-    else {
-      for (TabbedPanel tp: _tabs) {
-        if (tp == c) {
-          // 2 right now is a magic number for the number of tabs always visible: interactions & console
-          if (! tp.isDisplayed()) {
-            _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
-            tp.setVisible(true);
-            tp.setDisplayed(true);
-            tp.repaint();
-          }
-          _tabbedPane.setSelectedIndex(numVisible + 2);
-          
-          c.requestFocusInWindow();
-          return;
-        }
-        if (tp.isDisplayed()) numVisible++;
+        _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
+        c.requestFocusInWindow();
       }
+      else if (c == _consoleScroll) {
+        _tabbedPane.setSelectedIndex(CONSOLE_TAB);
+        c.requestFocusInWindow();
+      }
+      else {
+        for (TabbedPanel tp: _tabs) {
+          if (tp == c) {
+            // 2 right now is a magic number for the number of tabs always visible: interactions & console
+            if (! tp.isDisplayed()) {
+              _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+              tp.setVisible(true);
+              tp.setDisplayed(true);
+              tp.repaint();
+            }
+            _tabbedPane.setSelectedIndex(numVisible + 2);
+            
+            c.requestFocusInWindow();
+            return;
+          }
+          if (tp.isDisplayed()) numVisible++;
+        }
+      }
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
     }
-    if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
-      _mainSplit.resetToPreferredSizes(); 
+    finally {
+      if (showDetachedWindow && (_tabbedPanesFrame!=null) && (_tabbedPanesFrame.isVisible())) { _tabbedPanesFrame.toFront(); }
+    }
   }
   
   /** Sets the location of the main divider.
@@ -9581,7 +9579,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     Point ownerLoc = null;
     Dimension ownerSize = null;
-    if (owner != null) {
+    if ((owner != null) && (owner.isVisible())) {
       ownerLoc = owner.getLocation();
       ownerSize = owner.getSize();
     }
@@ -9717,10 +9715,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Open stand-alone external process file. */
   public static void openExtProcessFile(File file) {
-    edu.rice.cs.util.GeneralProcessCreator.LOG.log("openExtProcessFile");
     try {
       XMLConfig xc = new XMLConfig(file);
-      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tXML file opened");
       ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
                                       xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"),
@@ -9736,17 +9732,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Open external process file in a jar file. */
   public static void openExtProcessJarFile(File file) {
-    edu.rice.cs.util.GeneralProcessCreator.LOG.log("openExtProcessJarFile");
     try {
-      edu.rice.cs.util.GeneralProcessCreator.LOG.log("openExtProcessJarFile(file="+file+")");
       JarFile jf = new JarFile(file);
-      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tJAR file opened");
       JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
-      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tJAR entry found for "+EXTPROCESS_FILE_NAME_INSIDE_JAR);
       InputStream is = jf.getInputStream(je);
-      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tGot InputStream");
       XMLConfig xc = new XMLConfig(is);
-      edu.rice.cs.util.GeneralProcessCreator.LOG.log("\tXML file opened");
       ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"),
                                       xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"),
@@ -9956,7 +9946,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }
         });
         panel.setVisible(true);
-        showTab(panel);
+        showTab(panel, true);
         _tabbedPane.setSelectedComponent(panel);
         // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
