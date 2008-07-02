@@ -152,6 +152,7 @@ public class DrJavaSurveyPopup extends JDialog {
     // so the user won't be bothered the next time he starts DrJava
     // next popup will occur in DRJAVA_SURVEY_DAYS (91) days.
     DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
+    DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, getSurveyURL());
     setVisible(false);
     dispose();
   }
@@ -215,8 +216,6 @@ public class DrJavaSurveyPopup extends JDialog {
         StringBuilder sb = new StringBuilder();
         while((line = br.readLine()) != null) { sb.append(line); sb.append(System.getProperty("line.separator")); }
         LOG.log(sb.toString());
-        DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
-        DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, result);
       }
       catch(IOException e) {
         // could not open URL using Java, try web browser
