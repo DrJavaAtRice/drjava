@@ -41,12 +41,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.FileOption;
-
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
-
 import edu.rice.cs.plt.io.IOUtil;
+
+import static edu.rice.cs.drjava.config.OptionConstants.*;
+
 /** A class to provide some convenient file operations as static methods.
   * It's abstract to prevent (useless) instantiation, though it can be subclassed
   * to provide convenient namespace importation of its methods.
@@ -645,26 +647,26 @@ public abstract class FileOps {
     */
   public static void saveFile(FileSaver fileSaver) throws IOException {
     
-//    ScrollableDialog sd1 = new ScrollableDialog(null, "saveFile (" + fileSaver + ") called in FileOps.java", "", "");
-//    sd1.show();
+    
     boolean makeBackup = fileSaver.shouldBackup();
     boolean success = false;
     File file = fileSaver.getTargetFile();
+//    System.err.println("Saving file " + file + " with backup status = " + makeBackup);
     File backup = null;
     boolean tempFileUsed = true;
-    // file.canWrite() is false if file.exists() is false
-    // but we want to be able to save a file that doesn't
-    // yet exist.
-    if (file.exists() && !file.canWrite()) throw new IOException("Permission denied");
-    /* First back up the file, if necessary */
+    // file.canWrite() is false if file.exists() is false, but we want to be able to save a file that doesn't yet exist.
+    if (file.exists() && ! file.canWrite()) throw new IOException("Permission denied");
+    // First back up the file, if necessary.
     if (makeBackup) {
       backup = fileSaver.getBackupFile();
-      if (!renameFile(file, backup)){
+      if (! renameFile(file, backup)) {
         throw new IOException("Save failed. Could not create backup file "
                                 + backup.getAbsolutePath() +
                               "\nIt may be possible to save by disabling file backups\n");
       }
-      fileSaver.backupDone();
+//      System.err.println("saveFile renamed " + file + " as " + backup);
+      fileSaver.backupDone();  // Why? This action may have to be reversed if writing new file fails!
+//      System.err.println("Contents: '" + IOUtil.toString(backup) + "'");
     }
     
 //    ScrollableDialog sd2 = new ScrollableDialog(null, "backup done in FileOps.saveFile", "", "");
@@ -675,6 +677,7 @@ public abstract class FileOps {
     //up the temp file and restore the file from its backup.
     File parent = file.getParentFile();
     File tempFile = File.createTempFile("drjava", ".temp", parent);
+//    System.err.println("tempfileName = " + tempFile + " for backup file " + backup);
     
 //    ScrollableDialog sd3 = new ScrollableDialog(null, "temp file " + tempFile + "created in FileOps.saveFile", "", "");
 //    sd3.show();
@@ -701,12 +704,16 @@ public abstract class FileOps {
       }
       BufferedOutputStream bos = new BufferedOutputStream(fos);
       fileSaver.saveTo(bos);
+//      System.err.println(bos + " written");
+//      System.err.println("Closing " + bos + " and " + fos);
       bos.close();
-      fos.close();
+//      fos.close();
       
-      if (tempFileUsed && !renameFile(tempFile, file))
+//      System.err.println("Wrote: " + tempFile);
+      if (tempFileUsed && ! renameFile(tempFile, file))
         throw new IOException("Save failed. Another process may be using " + file + ".");
-      
+//      System.err.println("Renamed " + tempFile + " as " + file);
+//      if (makeBackup) System.err.println("Does " + backup + " still exists? " + backup.exists());
       success = true;
     } 
     finally {
@@ -719,7 +726,10 @@ public abstract class FileOps {
         /* On failure, attempt to move the backup back to its original location if we
          made one.  On success, register that a backup was successfully made */
         if (success) fileSaver.backupDone();
-        else  renameFile(backup, file);
+        else {
+          renameFile(backup, file);
+          System.out.println("Forced to rename backup " + backup + " as file " + file);
+        }
       }
     }
   }
@@ -769,13 +779,13 @@ public abstract class FileOps {
     
     private File outputFile = FileOps.NULL_FILE;
     private static Set<File> filesNotNeedingBackup = new HashSet<File>();
-    private static boolean backupsEnabled = true;
+    private boolean backupsEnabled = DrJava.getConfig().getSetting(BACKUP_FILES);  // uses the config default
     
     /** This field keeps track of whether or not outputFile has been resolved to its canonical name. */
     private boolean isCanonical = false;
     
-    /** Globally enables backups for any DefaultFileSaver that does not override the shouldBackup method. */
-    public static void setBackupsEnabled(boolean isEnabled) { backupsEnabled = isEnabled; }
+//    /** Globally enables backups for any DefaultFileSaver that does not override the shouldBackup method. */
+//    public static void setBackupsEnabled(boolean isEnabled) { backupsEnabled = isEnabled; }
     
     public DefaultFileSaver(File file){ outputFile = file.getAbsoluteFile(); }
     
@@ -784,8 +794,8 @@ public abstract class FileOps {
     public File getBackupFile() throws IOException{ return new File(getTargetFile().getPath() + "~"); }
     
     public boolean shouldBackup() throws IOException{
-      if (!backupsEnabled) return false;
-      if (!getTargetFile().exists()) return false;
+      if (! backupsEnabled) return false;
+      if (! getTargetFile().exists()) return false;
       if (filesNotNeedingBackup.contains(getTargetFile())) return false;
       return true;
     }
@@ -829,7 +839,7 @@ public abstract class FileOps {
     // EXCEPT for the last item in the array, because that's the "x" we added
     String[] pathEntries = path.split(pathSep);
     final StringBuilder sb = new StringBuilder();
-    for(int i = 0; i<pathEntries.length - 1; ++i) { // length-1 to ignore the last element
+    for(int i = 0; i < pathEntries.length - 1; ++i) { // length-1 to ignore the last element
       File f = new File(pathEntries[i]);
       sb.append(f.getAbsolutePath());
       sb.append(pathSep);
@@ -905,10 +915,8 @@ public abstract class FileOps {
   public static URL toURL(File f) throws MalformedURLException { return f.toURI().toURL(); }
   
   public static boolean makeWritable(File roFile) throws IOException {
-    // try to make the file writable
-    // strangely enough, there is a File.setReadOnly() method, but
-    // no built-in way to make the file writable
-    // Sun recommends deleting the read-only file (does that work on all operating systems?)
+    /* Try to make the file writable.  Strangely enough, there is a File.setReadOnly() method, but no built-in way to 
+     * make the file writable.  Sun recommends deleting the read-only file (does that work on all operating systems?).*/
     boolean shouldBackup = edu.rice.cs.drjava.DrJava.getConfig().
       getSetting(edu.rice.cs.drjava.config.OptionConstants.BACKUP_FILES);
     boolean madeBackup = false;
@@ -916,12 +924,8 @@ public abstract class FileOps {
     try {
       boolean noBackup = true;
       if (backup.exists()) {
-        try {
-          noBackup = backup.delete();
-        }
-        catch(SecurityException se) {
-          noBackup = false;
-        }
+        try { noBackup = backup.delete(); }
+        catch(SecurityException se) { noBackup = false; }
       }
       if (noBackup) {
         try {
@@ -929,38 +933,24 @@ public abstract class FileOps {
           madeBackup = true;
           roFile.createNewFile();
         }
-        catch(SecurityException se) {
-          noBackup = false;
-        }
+        catch(SecurityException se) { noBackup = false; }
         catch(IOException ioe) { }
-        try {
-          roFile.createNewFile();
-        }
+        try { roFile.createNewFile(); }
         catch(SecurityException se) { }
         catch(IOException ioe) { }
       }
-      if (!noBackup) {
-        try {
-          roFile.delete();
-        }
+      if (! noBackup) {
+        try { roFile.delete(); }
         catch(SecurityException se) { return false; }
       }
-      try {
-        edu.rice.cs.plt.io.IOUtil.copyFile(backup, roFile);
-      }
-      catch(SecurityException se) {
-        return false;
-      }
-      catch(IOException ioe) {
-        return false;
-      }
+      try { edu.rice.cs.plt.io.IOUtil.copyFile(backup, roFile);}
+      catch(SecurityException se) { return false; }
+      catch(IOException ioe) { return false; }
       return true;
     }
     finally {
-      if (!shouldBackup && madeBackup) {
-        try {
-          backup.delete();
-        }
+      if (! shouldBackup && madeBackup) {
+        try { backup.delete(); }
         catch(Exception e) { /* not so important if we made a backup and now can't delete it */ }
       }
     }
@@ -985,7 +975,7 @@ public abstract class FileOps {
           File newChild = new File(n, child);
           res = res && moveRecursively(oldChild, newChild);
         }
-        if (!f.delete()) { return false; }
+        if (! f.delete()) { return false; }
       }
     }
     catch(Exception e) { return false; }

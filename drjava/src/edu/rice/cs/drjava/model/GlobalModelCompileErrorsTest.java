@@ -142,7 +142,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    doc.startCompile();
+    testStartCompile(doc);
+    
     listener.waitCompileDone();
     listener.checkCompileOccurred();
     
@@ -158,14 +159,15 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     * invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
     */
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
-    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    doc.startCompile();
+    testStartCompile(doc);
+
     listener.waitCompileDone();
     listener.checkCompileOccurred();
     
@@ -179,14 +181,15 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
-    OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    doc.startCompile();
+    testStartCompile(doc);
+    
     listener.waitCompileDone();
     assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
@@ -217,7 +220,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    doc.startCompile();
+    testStartCompile(doc);
     listener.waitCompileDone();
     
     listener.checkCompileOccurred();

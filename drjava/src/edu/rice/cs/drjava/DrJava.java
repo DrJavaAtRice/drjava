@@ -463,10 +463,8 @@ public class DrJava {
   
   /* Erase all non-final bindings created in this class.  Only used in testing. */
   public static void cleanUp() {
-    _propertiesFile = null;
     _filesToOpen.clear();
     _jvmArgs.clear();
-//    _config = null;  // appears to cause problems in cleanup
   }
      
 }

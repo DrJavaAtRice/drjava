@@ -45,7 +45,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
     * and a String is immutable.
     */
   public final String name;
-  private final T defaultValue;
+  protected final T defaultValue;
   
   /** An inner hashtable that maps DefaultOptionMaps to value T's. Part of the magic inner workings of this package. */
   final Hashtable<DefaultOptionMap,T> map = new Hashtable<DefaultOptionMap,T>();
@@ -72,6 +72,9 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
     * @return the statically-typed representation of the string value.
     */
   public abstract T parse(String value);
+  
+  /** Returns a string representation of this OptionParser/Option suitable for debugging. */
+  public String toString() { return "Option<" + name + ", " + defaultValue + ">"; }
   
   /* PACKAGE PRIVATE MAGIC STUFF
    * This package-private magic stuff makes all of the config "magic" types work. Basically, it's achieved via a 

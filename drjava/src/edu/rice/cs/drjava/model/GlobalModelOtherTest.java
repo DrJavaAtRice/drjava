@@ -59,7 +59,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
   //  _log can be inherited from GlobalModelTestCase
-  Log _log = new Log("GlobalModelOtherTest.txt", false);
+  Log _log = new Log("GlobalModelOtherTest.txt", true);
   
   private static final String FOO_CLASS =
     "package bar;\n" +
@@ -76,26 +76,32 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
-  public void testUndoEventsOccur() throws BadLocationException {
-    final OpenDefinitionsDocument doc = _model.newFile();
+  public void testUndoEventsOccur() /* throws BadLocationException */ {
     
-    // Have to add an undoable edit listener for Undo to work
-    doc.addUndoableEditListener(new UndoableEditListener() {
-      public void undoableEditHappened(UndoableEditEvent e) { doc.getUndoManager().addEdit(e.getEdit()); }
+    final OpenDefinitionsDocument doc = _model.newFile();
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        // Have to add an undoable edit listener for Undo to work
+        doc.addUndoableEditListener(new UndoableEditListener() {
+          public void undoableEditHappened(UndoableEditEvent e) { doc.getUndoManager().addEdit(e.getEdit()); }
+        });
+      }
     });
     
     TestListener listener = new TestListener() { public void undoableEditHappened() { undoableEditCount++; } };
     
     _model.addListener(listener);
+    
     changeDocumentText("test", doc);
     
-    Utilities.clearEventQueue();
+//        Utilities.clearEventQueue();
     _model.removeListener(listener);
     listener.assertUndoableEditCount(1);
-//    Utilities.showDebug("testUndoEvents finished");
     
-//    _log.log("testUndoEventsOccur() completed");
+    _log.log("testUndoEventsOccur() completed");
+    
   }
+  
   
   /** Checks that System.exit is handled appropriately from interactions pane. */
   public void testExitInteractions() throws EditDocumentException, InterruptedException {

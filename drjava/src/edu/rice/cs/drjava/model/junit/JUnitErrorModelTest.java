@@ -147,15 +147,17 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   public void testErrorsArrayInOrder() throws Exception {
     debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
-    OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
     
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     
-    doc.startCompile();
+    testStartCompile(doc);
+    
     listener.waitCompileDone();
+    
     if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
     listener.checkCompileOccurred();
     
@@ -201,18 +203,22 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //      System.out.println("compiling all");
     _model.getCompilerModel().compileAll();
     
-    OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
+    final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
     doc3.saveFile(new FileSelector(file3));
     
     JUnitTestListener listener = new JUnitNonTestListener();
     // Compile the incorrect ABC
 //      System.out.println("compiling doc3");
-    doc3.startCompile();
+    
+    _model.addListener(listener);
+    
+    listener.compile(doc3);
+
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
-    _model.addListener(listener);
+    listener.resetCounts();
     // Run the test: a VerifyError will be thrown in Java 1.4
 //    JUnitTestListener listener2 = new JUnitTestListener();
 //    _model.addListener(listener2);
@@ -238,7 +244,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   public void testLanguageLevelJUnitErrorLine() throws Exception {
     debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
-    OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
+    final OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
     final File file = new File(_tempDir, "MyTest.dj0");
     doc.saveFile(new FileSelector(file));
     
@@ -246,8 +252,10 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _model.addListener(listener);
     
     
-    doc.startCompile();
+    testStartCompile(doc);
+    
     listener.waitCompileDone();
+    
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }

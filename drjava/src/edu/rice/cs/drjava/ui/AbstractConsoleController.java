@@ -69,7 +69,7 @@ import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 public abstract class AbstractConsoleController /* implements Serializable */ {
   
   /** Adapter for the Swing document used by the model.*/
-  protected final InteractionsDJDocument _swingConsoleDocument;
+  protected final InteractionsDJDocument _interactionsDJDocument;
 
   /** Pane from the view. */
   protected final InteractionsPane _pane;
@@ -93,7 +93,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
    *  of their constructors.
    */
   protected AbstractConsoleController(InteractionsDJDocument doc, InteractionsPane pane) {
-    _swingConsoleDocument = doc;
+    _interactionsDJDocument = doc;
     _pane = pane;
     _defaultStyle = new SimpleAttributeSet();
     _systemOutStyle = new SimpleAttributeSet();
@@ -113,7 +113,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Adds AttributeSets as named styles to the Swing console document. */
   protected void _addDocumentStyles() {
     // Default
-    _swingConsoleDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
+    _interactionsDJDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -125,7 +125,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     _systemOutStyle.addAttributes(_defaultStyle);
     _systemOutStyle.addAttribute(StyleConstants.Foreground,
                                  DrJava.getConfig().getSetting(OptionConstants.SYSTEM_OUT_COLOR));
-    _swingConsoleDocument.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
+    _interactionsDJDocument.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_OUT_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -137,7 +137,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     _systemErrStyle.addAttributes(_defaultStyle);
     _systemErrStyle.addAttribute(StyleConstants.Foreground,
                                  DrJava.getConfig().getSetting(OptionConstants.SYSTEM_ERR_COLOR));
-    _swingConsoleDocument.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
+    _interactionsDJDocument.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_ERR_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -180,7 +180,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
       if (c != null) {
         StyleConstants.setForeground(fontSet, c);
       }
-      _swingConsoleDocument.setCharacterAttributes(0, _swingConsoleDocument.getLength()+1, fontSet, false);
+      _interactionsDJDocument.setCharacterAttributes(0, _interactionsDJDocument.getLength()+1, fontSet, false);
       _pane.setCharacterAttributes(fontSet, false);
       _updateStyles(fontSet);
     }
@@ -270,7 +270,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   };
 
   /** Accessor method for the InteractionsDJDocument. */
-  public InteractionsDJDocument getDocumentAdapter() { return _swingConsoleDocument; }
+  public InteractionsDJDocument getDocumentAdapter() { return _interactionsDJDocument; }
 
   /** Accessor method for the InteractionsPane. */
   public InteractionsPane getPane() { return _pane; }
@@ -284,9 +284,11 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   AbstractAction newLineAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) { 
       ConsoleDocument doc = getConsoleDoc();
-      doc.acquireWriteLock();
-      try { doc.insertNewline(_pane.getCaretPosition()); }
-      finally { doc.releaseWriteLock(); }
+//      doc.acquireWriteLock();
+//      try { 
+      doc.insertNewline(_pane.getCaretPosition()); 
+//      }
+//      finally { doc.releaseWriteLock(); }
     }
   };
 
@@ -304,9 +306,11 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   AbstractAction selectToEndAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) { 
       ConsoleDocument doc = getConsoleDoc();
-      doc.acquireReadLock();
-      try { _pane.moveCaretPosition(doc.getLength()); }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();
+//      try { 
+      _pane.moveCaretPosition(doc.getLength()); 
+//      }
+//      finally { doc.releaseReadLock(); }
     }
   };
 

@@ -595,7 +595,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         final StringBuilder sb = new StringBuilder();
         int endSel = fr.getFoundOffset();
         int startSel = endSel - searchLen;
-//        doc.acquireReadLock();
         try {
           final Position startPos = doc.createPosition(startSel);
           final Position endPos = doc.createPosition(endSel);
@@ -658,7 +657,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         }
         catch (FileMovedException fme) { throw new UnexpectedException(fme); }
         catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-//        finally { doc.releaseReadLock(); }
       }
       panel.finishChanging();
       

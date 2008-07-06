@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.text.BadLocationException;
 
@@ -64,7 +66,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
     assertTrue("should not be in sync before compile", ! doc.checkIfClassFileInSync());
     assertTrue("The state of all open documents should be out of sync", _model.hasOutOfSyncDocuments());
-    doc.startCompile();
+    testStartCompile(doc);
     listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -105,7 +107,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
 //    System.err.println("cached class file is " + doc.getCachedClassFile());
     assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
     assertTrue("should not be in sync before compile", !doc.checkIfClassFileInSync());
-    doc.startCompile();
+    testStartCompile(doc);
     listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -125,20 +127,23 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   
   /** Tests a compile after a file has unexpectedly been moved or delete. */
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
     TestListener listener = new TestListener();
     _model.addListener(listener);
     file.delete();
-    try {
-      doc.startCompile();
-      fail("Compile should not have begun.");
-    }
-    catch (FileMovedException fme) {
-      //compile should never have begun because the file was not where it was expected
-      // to be on disk.
-    }
+    Utilities.invokeLater(new Runnable() { 
+      public void run() {
+        try {
+          doc.startCompile();
+          fail("Compile should not have begun.");
+        }
+        catch(FileMovedException e) { /* The expected behavior! */ }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
+    });
+
     assertCompileErrorsPresent("compile should succeed", false);
     
     // Make sure .class exists

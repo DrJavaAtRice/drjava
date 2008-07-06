@@ -73,27 +73,27 @@ public final class BraceInfoTest extends DrJavaTestCase {
   }
   
   private void _lineEnclosingBraceTestHelper(int location, String msg, int expDist, String expBraceType) {
-    _document.acquireReadLock();
-    try {
-      _document.setCurrentLocation(location);
-      //_reduced = _document.getReduced();
-      BraceInfo info = _document._getLineEnclosingBrace();
-      assertEquals(msg + ": distance", expDist, info.distance());
-      assertEquals(msg + ": braceType", expBraceType, info.braceType());
-    }
-    finally { _document.releaseReadLock(); }
+//    _document.acquireReadLock();
+//    try {
+    _document.setCurrentLocation(location);
+    //_reduced = _document.getReduced();
+    BraceInfo info = _document._getLineEnclosingBrace();
+    assertEquals(msg + ": distance", expDist, info.distance());
+    assertEquals(msg + ": braceType", expBraceType, info.braceType());
+//    }
+//    finally { _document.releaseReadLock(); }
   }
   
   private void _enclosingBraceTestHelper(int location, String msg, int expDist, String expBraceType) {
-    _document.acquireReadLock();
-    try {
-      _document.setCurrentLocation(location);
-      //_reduced = _document.getReduced();
-      BraceInfo info = _document._getEnclosingBrace();
-      assertEquals(msg + ": distance", expDist, info.distance());
-      assertEquals(msg + ": braceType", expBraceType, info.braceType());
-    }
-    finally { _document.releaseReadLock(); }
+//    _document.acquireReadLock();
+//    try {
+    _document.setCurrentLocation(location);
+    //_reduced = _document.getReduced();
+    BraceInfo info = _document._getEnclosingBrace();
+    assertEquals(msg + ": distance", expDist, info.distance());
+    assertEquals(msg + ": braceType", expBraceType, info.braceType());
+//    }
+//    finally { _document.releaseReadLock(); }
   }
   
   public void testFieldsForCurrentLocation() throws BadLocationException {

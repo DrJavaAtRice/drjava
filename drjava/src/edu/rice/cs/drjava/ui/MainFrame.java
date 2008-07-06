@@ -1361,31 +1361,31 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   void _gotoFileUnderCursor() {
 //    Utilities.show("Calling gotoFileUnderCursor()");
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
+//    odd.acquireReadLock();
     String mask = "";
-    try {
-      int loc = getCurrentDefPane().getCaretPosition();
-      String s = odd.getText();
-      // find start
-      int start = loc;
-      while(start>0) {
-        if (! Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
-        --start;
-      }
-      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
-        ++start;
-      }
-      // find end
-      int end = loc-1;
-      while(end<s.length()-1) {
-        if (! Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
-        ++end;
-      }
-      if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end + 1);
-      }
+//    try {
+    int loc = getCurrentDefPane().getCaretPosition();
+    String s = odd.getText();
+    // find start
+    int start = loc;
+    while(start>0) {
+      if (! Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+      --start;
     }
-    finally { odd.releaseReadLock(); }
+    while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+      ++start;
+    }
+    // find end
+    int end = loc-1;
+    while(end<s.length()-1) {
+      if (! Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+      ++end;
+    }
+    if ((start>=0) && (end<s.length())) {
+      mask = s.substring(start, end + 1);
+    }
+//    }
+//    finally { odd.releaseReadLock(); }
     gotoFileMatchingMask(mask);
   }
   
@@ -1683,32 +1683,32 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PredictiveInputModel<JavaAPIListEntry> pim =
       new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), _javaAPIList);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
+//    odd.acquireReadLock();
     String mask = "";
-    try {
-      int loc = getCurrentDefPane().getCaretPosition();
-      String s = odd.getText();
-      // find start
-      int start = loc;
-      while(start>0) {
-        if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
-        --start;
-      }
-      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
-        ++start;
-      }
-      // find end
-      int end = loc-1;
-      while(end<s.length()-1) {
-        if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
-        ++end;
-      }
-      if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end + 1);
-        pim.setMask(mask);
-      }
+//    try {
+    int loc = getCurrentDefPane().getCaretPosition();
+    String s = odd.getText();
+    // find start
+    int start = loc;
+    while(start>0) {
+      if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+      --start;
     }
-    finally { odd.releaseReadLock(); }
+    while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+      ++start;
+    }
+    // find end
+    int end = loc-1;
+    while(end<s.length()-1) {
+      if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+      ++end;
+    }
+    if ((start>=0) && (end<s.length())) {
+      mask = s.substring(start, end + 1);
+      pim.setMask(mask);
+    }
+//    }
+//    finally { odd.releaseReadLock(); }
     
 //    Utilities.show("Matching items are: " + pim.getMatchingItems());
     
@@ -1860,7 +1860,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-            finally { odd.releaseWriteLock(); }
           }
           hourglassOff();
           return null;
@@ -1904,7 +1903,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-            finally { odd.releaseWriteLock(); }
+//            finally { odd.releaseWriteLock(); }
           }
           hourglassOff();
           return null;
@@ -2012,7 +2011,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PredictiveInputModel<ClassNameAndPackageEntry> pim = 
       new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireWriteLock();
+//    odd.acquireWriteLock();
     boolean uniqueMatch = true;
     try {
       String mask = "";
@@ -2072,7 +2071,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-    finally { if (uniqueMatch) odd.releaseWriteLock(); }
+//    finally { if (uniqueMatch) odd.releaseWriteLock(); }
   }
   
   /** Auto-completes word the cursor is on. */
@@ -2330,13 +2329,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-      odd.acquireReadLock();
+//      odd.acquireReadLock();
       try {
         int pos = odd._findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-      finally { odd.releaseReadLock(); }
+//      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2344,13 +2343,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-      odd.acquireReadLock();
+//      odd.acquireReadLock();
       try {
         int pos = odd._findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-      finally { odd.releaseReadLock(); }
+//      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2494,9 +2493,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
-    try { _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); }
-    finally { odd.releaseReadLock(); }
+//    odd.acquireReadLock();
+//    try { 
+    _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
+//    }
+//    finally { odd.releaseReadLock(); }
   }
   
   /** Add the current location to the browser history. */
@@ -5545,28 +5546,28 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private void _junitProject() {
     updateStatusField("Running JUnit Tests in Project");
     hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-    new Thread("Running Junit Tests") {
-      public void run() {
-        _disableJUnitActions();
+//    new Thread("Running Junit Tests") {
+//      public void run() {
+    _disableJUnitActions();
 //        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-        try { _model.getJUnitModel().junitProject(); } 
-        catch(UnexpectedException e) { _junitInterrupted(e); }
-      }
-    }.start();
+    try { _model.getJUnitModel().junitProject(); } 
+    catch(UnexpectedException e) { _junitInterrupted(e); }
+//      }
+//    }.start();
   }
   
   /** Tests all open documents. */
   private void _junitAll() {
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-    new Thread("Running Junit Tests") {
-      public void run() {
-        _disableJUnitActions();
+//    new Thread("Running Junit Tests") {
+//      public void run() {
+    _disableJUnitActions();
 //        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-        try { _model.getJUnitModel().junitAll(); } 
-        catch(UnexpectedException e) { _junitInterrupted(e); }
-      }
-    }.start();
+    try { _model.getJUnitModel().junitAll(); } 
+    catch(UnexpectedException e) { _junitInterrupted(e); }
+//      }
+//    }.start();
   }
   
   /* These are used to save the state of the enabled property of the actions disabled during junit testing. */
@@ -6915,7 +6916,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DefinitionsDocument doc = _model.getActiveDocument().getDocument();
       int offset = ce.getDot();
       
-      doc.acquireReadLock();
+//      doc.acquireReadLock();
       try { 
         if (offset == _offset + 1 && doc.getText(_offset, 1).charAt(0) != '\n') {
           _col += 1;
@@ -6930,7 +6931,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       catch(BadLocationException e) { /* do nothing; should never happen */ }
       finally { 
-        doc.releaseReadLock();
+//        doc.releaseReadLock();
         _offset = offset;
         updateLocation(_line, _col);
       }
@@ -6939,12 +6940,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // This method appears safe outside the event thread
     public void updateLocation() {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
-      try { 
-        _line = doc.getCurrentLine();
-        _col = doc.getCurrentCol(); 
-      }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
+//      try { 
+      _line = doc.getCurrentLine();
+      _col = doc.getCurrentCol(); 
+//      }
+//      finally { doc.releaseReadLock(); }
       updateLocation(_line, _col);
     }
     
@@ -8076,18 +8077,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         
         if (shouldHighlight) {
           _removeThreadLocationHighlight();
-          doc.acquireReadLock();
-          try {
-            int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
-            if (startOffset > -1) {
-              int endOffset = doc._getLineEndPos(startOffset);
-              if (endOffset > -1) {
-                _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
-                  addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
-              }
+//          doc.acquireReadLock();
+//          try {
+          int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
+          if (startOffset > -1) {
+            int endOffset = doc._getLineEndPos(startOffset);
+            if (endOffset > -1) {
+              _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
+                addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
             }
           }
-          finally { doc.releaseReadLock(); }
+//          }
+//          finally { doc.releaseReadLock(); }
         }
         
         if (_showDebugger) {
@@ -8148,9 +8149,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       * @param shouldHighlight true iff the line should be highlighted.
       */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
-      doc.acquireReadLock();
-      try { scrollToDocumentAndOffset(doc, doc._getOffset(lineNumber), shouldHighlight); }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();
+//      try { 
+      scrollToDocumentAndOffset(doc, doc._getOffset(lineNumber), shouldHighlight); 
+//      }
+//      finally { doc.releaseReadLock(); }
     }
     
     /* Must be executed in event thread. */
@@ -8681,6 +8684,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       });
     }
+    
+    /** Called if a compilation is aborted. */
+    public void compileAborted(Exception e) { /* Should probably display a simple popup */ }
     
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {

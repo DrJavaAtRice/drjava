@@ -283,13 +283,15 @@ public interface GlobalModel extends ILoadDocuments {
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole();
   
-  /** Prints System.out to the DrJava console. */
+  /** Prints System.out to the DrJava console.  This method may be safely called from outside the event thread. */
   public void systemOutPrint(String s);
   
-  /** Prints System.err to the DrJava console. */
+  /** Prints System.err to the DrJava console.  This method may be safely called from outside the event thread. */
   public void systemErrPrint(String s);
   
-  /** Prints the given string to the DrJava console as an echo of System.in */
+  /** Prints the given string to the DrJava console as an echo of System.in.  This method may be safely called from
+    * outside the event thread.  
+    */
   public void systemInEcho(String s);
   
   //----------------------------- Interactions -----------------------------//

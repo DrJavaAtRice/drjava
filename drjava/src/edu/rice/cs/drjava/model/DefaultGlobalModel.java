@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.*;
 
 import java.rmi.RemoteException;
 
@@ -57,20 +58,6 @@ import java.util.TreeMap;
 import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
 
-import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
-
-import edu.rice.cs.util.NullFile;
-import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.newjvm.AbstractMasterJVM;
-import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.swing.Utilities;
-
-import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.io.IOUtil;
-
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -78,6 +65,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
@@ -105,7 +93,18 @@ import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.ui.MainFrame;
 
-import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
+
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.NullFile;
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.newjvm.AbstractMasterJVM;
+import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -161,10 +160,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void slaveJVMUsed() { }
   };
   
-  private CompilerListener _clearInteractionsListener =
-    new CompilerListener() {
-    public void compileStarted() { }
-    
+  private CompilerListener _clearInteractionsListener = new DummyCompilerListener() {
     public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       // Only clear interactions if there were no errors and unit testing is not in progress
       if ( (_compilerModel.getNumErrors() == 0 || _compilerModel.getCompilerErrorModel().hasOnlyWarnings())
@@ -173,9 +169,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         resetInteractions(workDir);  // use same working directory as current interpreter
       }
     }
-    public void saveBeforeCompile() { }
-    public void saveUntitled() { }
-    public void activeCompilerChanged() { }
   };
   
   // ---- Compiler Fields ----
@@ -488,8 +481,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /* Standard constructor for a new document (no associated file) */
     ConcreteOpenDefDoc(NullFile f) { super(f); }
     
-    /** Starting compiling this document.  Used only for unit testing */
-    public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
+    /** Starting compiling this document.  Used only for unit testing.  Only rus in the event thread. */
+    public void startCompile() throws IOException { 
+      assert EventQueue.isDispatchThread();
+      _compilerModel.compile(ConcreteOpenDefDoc.this); 
+    }
     
     private volatile InteractionsListener _runMain;
     

@@ -61,7 +61,7 @@ import java.util.Vector;
   */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
   
-  /** A hashtable that maps Configuration Objects to a list of listeners for this particular option.  Part of the magic
+  /** A hashtable that maps Configuration objects to a list of listeners for this particular option.  Part of the magic
     * inner workings of this package.
     */
   final Hashtable<Configuration,Vector<OptionListener<T>>> listeners =
@@ -90,10 +90,12 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   String getString(DefaultOptionMap om) { return format(getOption(om)); }
   
   /** Sends an OptionEvent to all OptionListeners who have registered on this Option. */
-  void notifyListeners(Configuration config, T val) {
+  synchronized void notifyListeners(Configuration config, T val) {
     final Vector<OptionListener<T>> v = listeners.get(config);
+//    System.err.println("Notifying " + v + " with value " + val);
     if (v == null) return; // no listeners
     final OptionEvent<T> e = new OptionEvent<T>(this, val);
+//    System.err.println("OptionEvent = " + e);
     Utilities.invokeLater(new Runnable() { 
       public void run() {
         for (int i = 0; i < v.size(); ++i) v.get(i).optionChanged(e);
@@ -102,7 +104,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   }
   
   /** Magic listener-bag adder */
-  void addListener(Configuration c, OptionListener<T> l) {
+  synchronized void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if (v == null) {
       v = new Vector<OptionListener<T>>();
@@ -112,7 +114,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   }
   
   /** Magic listener-bag remover */
-  void removeListener(Configuration c, OptionListener<T> l) {
+  synchronized void removeListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if (v != null && v.remove(l) && v.size() == 0) listeners.remove(c);  // v.remove(l) has a side effect!
   }

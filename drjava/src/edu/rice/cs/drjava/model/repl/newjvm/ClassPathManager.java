@@ -90,7 +90,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   private final Lambda<Iterable<File>, Iterable<File>> _makeSafeSnapshot =
     new Lambda<Iterable<File>, Iterable<File>>() {
     public Iterable<File> value(Iterable<File> arg) {
-      synchronized (ClassPathManager.this) { return IterUtil.snapshot(arg); }
+      synchronized(ClassPathManager.this) { return IterUtil.snapshot(arg); }
     }
   };
   

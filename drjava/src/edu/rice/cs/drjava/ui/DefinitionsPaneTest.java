@@ -308,9 +308,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
     Utilities.invokeAndWait(new Runnable() { public void run() { pane.endCompoundEdit(); } });
      
-    doc.acquireWriteLock();
-    try { doc.commentLines(0, doc.getLength()); }
-    finally { doc.releaseWriteLock(); }
+//    doc.acquireWriteLock();
+//    try { 
+    doc.commentLines(0, doc.getLength()); 
+//    }
+//    finally { doc.releaseWriteLock(); }
     
     //    pane.endCompoundEdit();
     assertEquals("commenting", commented, doc.getText());
@@ -342,9 +344,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { pane.endCompoundEdit(); } });
     Utilities.clearEventQueue();
     
-    doc.acquireWriteLock();
-    try { doc.uncommentLines(0, doc.getLength()); }
-    finally { doc.releaseWriteLock(); }
+//    doc.acquireWriteLock();
+//    try { 
+      doc.uncommentLines(0, doc.getLength()); 
+//    }
+//    finally { doc.releaseWriteLock(); }
     
     //    pane.endCompoundEdit();
     assertEquals("uncommenting", text, doc.getText());

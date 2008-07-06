@@ -69,8 +69,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * @param adapter InteractionsDJDocument to use for the document
     * @param wd  the working directory for interactions i/o
     */
-  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface adapter, File wd) {
-    super(jvm, adapter, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
+  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface cDoc, File wd) {
+    super(jvm, cDoc, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
@@ -87,7 +87,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     });
   }
   
-  /** Called when the repl prints to System.out.
+  /** Called when the repl prints to System.out.  This method can safely be called from outside the event thread.
     * @param s String to print
     */
   public void replSystemOutPrint(String s) {
@@ -95,7 +95,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemOutPrint(s);    // Print s to console
   }
   
-  /** Called when the repl prints to System.err.
+  /** Called when the repl prints to System.err.  This method can safely be called from outside the event thread.
     * @param s String to print
     */
   public void replSystemErrPrint(String s) {
@@ -116,7 +116,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * @param t The Throwable thrown by System.exit
     */
   protected void _interpreterResetFailed(Throwable t) {
-    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + _newLine,
+    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + StringOps.NEWLINE,
                                      InteractionsDocument.ERROR_STYLE);
     // Print the exception to the console
     _model.systemErrPrint(StringOps.getStackTrace(t));
@@ -129,7 +129,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   /** Notifies listeners that an interaction has started. */
-  protected void _notifyInteractionStarted() { 
+  public void _notifyInteractionStarted() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
   }
   

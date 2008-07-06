@@ -230,7 +230,7 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     if (! onMatch()) return false;
-    _doc.acquireWriteLock();
+//    _doc.acquireWriteLock();
     try {
 //      boolean atStart = false;
       int offset = getCurrentOffset();
@@ -251,7 +251,7 @@ public class FindReplaceMachine {
       return true;
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-    finally { _doc.releaseWriteLock(); }
+//    finally { _doc.releaseWriteLock(); }
   }
   
   /** Replaces all occurences of the find word with the replace word in the current document of in all documents

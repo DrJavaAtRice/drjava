@@ -245,7 +245,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     private int _index;
     public FindResultsColorOptionListener(int i) { _index = i; }
     public void optionChanged(OptionEvent<Color> oce) {
-      synchronized (FIND_RESULTS_PAINTERS) {
+      synchronized(FIND_RESULTS_PAINTERS) {
         FIND_RESULTS_PAINTERS[_index] = new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, 2);
       }
     }
@@ -388,13 +388,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       // Only indent if in code
 
-      _doc.acquireWriteLock();  // reduced model lock unnecessary!
-      try {
-        _doc.setCurrentLocation(getCaretPosition());
-        ReducedModelState state = _doc._getStateAtCurrent();
-        if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
-      }
-      finally { _doc.releaseWriteLock(); }
+//      _doc.acquireWriteLock();  // reduced model lock unnecessary!
+//      try {
+      _doc.setCurrentLocation(getCaretPosition());
+      ReducedModelState state = _doc._getStateAtCurrent();
+      if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
+//      }
+//      finally { _doc.releaseWriteLock(); }
     }
   }
 
@@ -932,7 +932,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
     
-    _doc.acquireWriteLock();
+//    _doc.acquireWriteLock();
     int len = _doc.getLength();
     if (len < _position || len < _selEnd) {
       // the document changed since we're set inactive
@@ -941,19 +941,19 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selStart = len;
       _selEnd = len;
     }
-    try {
-      if (_position == _selStart) {
-        setCaretPosition(_selEnd);
-        moveCaretPosition(_selStart);
-        _doc.setCurrentLocation(_selStart);
-      }
-      else {
-        setCaretPosition(_selStart);
-        moveCaretPosition(_selEnd);
-        _doc.setCurrentLocation(_selEnd);
-      }
+//    try {
+    if (_position == _selStart) {
+      setCaretPosition(_selEnd);
+      moveCaretPosition(_selStart);
+      _doc.setCurrentLocation(_selStart);
     }
-    finally { _doc.releaseWriteLock(); }
+    else {
+      setCaretPosition(_selStart);
+      moveCaretPosition(_selEnd);
+      _doc.setCurrentLocation(_selEnd);
+    }
+//    }
+//    finally { _doc.releaseWriteLock(); }
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
     // Explicitly set scrollbar policies fixing bug #1445898 
@@ -1055,14 +1055,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     * forwards.  If selection is backwards, then the caret ends up at the start of the selection rather than the end.
     */
   public void select(int selectionStart, int selectionEnd) {
-    _doc.acquireReadLock();
-    try {
-//      if (selectionStart < 0) selectionStart = 0;
-//      if (selectionEnd < 0) selectionEnd = 0;
-      setCaretPosition(selectionStart);
-      moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is updated by a listener.
-    }
-    finally { _doc.releaseReadLock(); }
+    setCaretPosition(selectionStart);
+    moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is updated by a listener.
   }
 
   /** Reset the document Undo list. */
@@ -1132,7 +1126,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
-    _doc.acquireWriteLock();  // reduced lock unnecessary!
+//    _doc.acquireWriteLock();  // reduced lock unnecessary!
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();
@@ -1151,7 +1145,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //      endCompoundEdit();
 //      throw e;
 //    }
-    finally { _doc.releaseWriteLock(); }
+//    finally { _doc.releaseWriteLock(); }
   }
     
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */

@@ -304,7 +304,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     final int numItems = dataAsStrings.size();
     
     selectedItems = new Vector<Boolean>(numItems);
-    synchronized (selectedItems) {
+    synchronized(selectedItems) {
       for (int i = 0; i < numItems; ++i) {
         selectedItems.add(i, defaultSelection == SelectionState.SELECTED);
       }
@@ -328,7 +328,7 @@ public class ScrollableListSelectionDialog extends JDialog {
         if (column == CHECKBOXES_COLUMN_INDEX) {
           assert row >= 0;
           assert row < numItems;
-          synchronized (selectedItems) {
+          synchronized(selectedItems) {
             return selectedItems.get(row);
           }
         } else if (column == STRINGS_COLUMN_INDEX) {
@@ -379,7 +379,7 @@ public class ScrollableListSelectionDialog extends JDialog {
         
         final Boolean booleanValue = (Boolean)newValue;
         
-        synchronized (selectedItems) {
+        synchronized(selectedItems) {
           selectedItems.set(rowIndex, booleanValue);
         }
       }
@@ -404,7 +404,7 @@ public class ScrollableListSelectionDialog extends JDialog {
           final int clickRow = table.rowAtPoint(clickPoint);
           
           if (clickRow >= 0 && clickRow < numItems) {
-            synchronized (selectedItems) {
+            synchronized(selectedItems) {
               final boolean currentValue = selectedItems.get(clickRow);
               final boolean newValue = !currentValue;
               
@@ -596,7 +596,7 @@ public class ScrollableListSelectionDialog extends JDialog {
   public java.util.List<String> selectedItems() {
     final java.util.List<String> results = new ArrayList<String>();
     
-    synchronized (selectedItems) {
+    synchronized(selectedItems) {
       /* This entire loop is synchronized so that we get a consistent
        * view of the selected items. It is also faster.
        */
@@ -640,7 +640,7 @@ public class ScrollableListSelectionDialog extends JDialog {
       /* See comment in the table's mouse listener for a discussion
        * about the duration of the lock.
        */
-      synchronized (selectedItems) {
+      synchronized(selectedItems) {
         for (int i = 0; i < selectedItems.size(); ++i) {
           selectedItems.set(i, _setToValue);
         }

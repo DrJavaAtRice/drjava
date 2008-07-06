@@ -416,6 +416,12 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
+   /** Called if a compile is aborted. */
+  public void compileAborted(Exception e) {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.compileAborted(e); } }
+    finally { _lock.endRead(); }
+  }
   /** Called to demand that all files be saved before compiling. It is up to the caller of this method to check
     * if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
     */

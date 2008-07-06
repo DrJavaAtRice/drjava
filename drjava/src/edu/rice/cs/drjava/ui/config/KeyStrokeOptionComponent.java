@@ -110,7 +110,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       getKeyStroke() + "jb: " + _button.getText() + "</KSOC>\n";
   }
 
-  /** Updates the config object with the new setting.
+  /** Updates the config object with the new setting.  Should run in event thread.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {

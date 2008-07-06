@@ -206,7 +206,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public boolean saveFileAs(FileSaveSelector com) throws IOException;
 
   /** Starts compiling the source.  Demands that the definitions be saved before proceeding with the compile.  
-   *  Fires the appropriate events as the compiliation proceeds and finishes.
+   *  Fires the appropriate events as the compiliation proceeds and finishes.  Only executes in the event thread.
    *  @exception IOException if a file with errors cannot be opened
    */
   public void startCompile() throws IOException;

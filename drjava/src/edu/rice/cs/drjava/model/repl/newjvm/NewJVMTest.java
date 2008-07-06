@@ -247,13 +247,8 @@ public final class NewJVMTest extends DrJavaTestCase {
       }
     }
 
-    public void systemErrPrint(String s) throws RemoteException {
-      errBuf = s;
-    }
-
-    public void systemOutPrint(String s) throws RemoteException {
-      outBuf = s;
-    }
+    public void systemErrPrint(String s) throws RemoteException { errBuf = s; }
+    public void systemOutPrint(String s) throws RemoteException { outBuf = s; }
 
     private class TestResultHandler implements InterpretResult.Visitor<Void> {
       public Void forNoValue() {

@@ -341,10 +341,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     assertEquals("Should have inserted correctly.", text, doc.getText());
     
-    doc.acquireWriteLock();
-    
-    try { doc.indentLines(0, doc.getLength()); }
-    finally { doc.releaseWriteLock(); }
+//    doc.acquireWriteLock();
+//    try { 
+    doc.indentLines(0, doc.getLength()); 
+//    }
+//    finally { doc.releaseWriteLock(); }
     
     assertEquals("Should have indented.", indented, doc.getText());
     

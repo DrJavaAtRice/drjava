@@ -327,7 +327,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void systemErrPrint(String s) throws RemoteException {
     debug.logStart();
-    _interactionsModel.replSystemErrPrint(s);  // spawns an event queue task
+    _interactionsModel.replSystemErrPrint(s);
 //    Utilities.clearEventQueue();               // wait for event queue task to complete
     debug.logEnd();
   }
@@ -337,7 +337,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void systemOutPrint(String s) throws RemoteException {
     debug.logStart();
-    _interactionsModel.replSystemOutPrint(s);   // spawns an event queue task
+    _interactionsModel.replSystemOutPrint(s); 
 //    Utilities.clearEventQueue();                // wait for event queue task to complete
     debug.logEnd();
   }

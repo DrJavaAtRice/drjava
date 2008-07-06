@@ -36,15 +36,18 @@
 
 package edu.rice.cs.util.text;
 
-import edu.rice.cs.util.UnexpectedException;
-import static edu.rice.cs.util.text.AbstractDocumentInterface.*;
-
+import java.awt.EventQueue;
 import java.awt.print.Pageable;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
+
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
+import static edu.rice.cs.util.text.AbstractDocumentInterface.*;
 
 import java.util.Hashtable;
 
@@ -55,15 +58,15 @@ import java.util.Hashtable;
   */
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
-//  /** The lock state.  See ReadersWritersLocking interface for documentation. */
-  protected volatile int _lockState = UNLOCKED;
+////  /** The lock state.  See ReadersWritersLocking interface for documentation. */
+//  protected volatile int _lockState = UNREADLOCKED;
   
   /** The modified state. */
   protected volatile boolean _isModifiedSinceSave = false;
   
-  /** The visible locking state. */
-  protected volatile boolean _readLocked = false;
-  protected volatile boolean _writeLocked = false;
+//  /** The visible locking state. */
+//  protected volatile boolean _readLocked = false;
+//  protected volatile boolean _writeLocked = false;
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -71,8 +74,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
   
-  /** Lock used to protect _wrappedPosListLock in DefinitionsDocument.  Placed here to ensure that it initialized before
-    * use! */
+  /** Lock that protects _wrappedPosListLock in DefinitionsDocument.  Placed here to ensure that it initialized before
+    * use! 
+    */
   protected static final Object _wrappedPosListLock = new Object();
   
   /** Creates a new document adapter for a Swing StyledDocument. TODO: convert _styles and _condition to lazily 
@@ -109,17 +113,19 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @param condition Object to determine legality of inputs
     */
   public void setEditCondition(DocumentEditCondition condition) {
-    acquireWriteLock();
-    try { _condition = condition; }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock();
+//    try { 
+    _condition = condition; 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
   /* Clears the document. */
   public void clear() {
-    acquireWriteLock();
+//    acquireWriteLock();
     try { remove(0, getLength()); }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
-    finally { releaseWriteLock(); }
+//    finally { releaseWriteLock(); }
   }
   
   /** Inserts a string into the document at the given offset and style, if the edit condition allows it.
@@ -129,9 +135,11 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @throws EditDocumentException if the offset is illegal
     */
   public void insertText(int offs, String str, String style) {
-    acquireWriteLock();
-    try { _insertText(offs, str, style); }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock();
+//    try { 
+      _insertText(offs, str, style); 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
   /** Behaves exactly like insertText except for assuming that WriteLock is already held. */
@@ -159,18 +167,22 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @throws EditDocumentException if the offset is illegal
     */
   public void forceInsertText(int offs, String str, String style) {
-    acquireWriteLock();
-    try { _forceInsertText(offs, str, style); }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock();
+//    try { 
+    _forceInsertText(offs, str, style); 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
   /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
     * which sees a null style name.
     */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
-    acquireWriteLock();  // locking is used to make the test and modification atomic
-    try { _insertString(offs, str, set); }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock();  // locking is used to make the test and modification atomic
+//    try { 
+      _insertString(offs, str, set); 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
   /** Raw version of insertString.  Assumes write lock is already held. */
@@ -184,9 +196,11 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @throws EditDocumentException if the offset or length are illegal
     */
   public void removeText(int offs, int len) {
-    acquireWriteLock();  // locking is used to make the test and modification atomic
-    try { _removeText(offs, len); }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock();  // locking is used to make the test and modification atomic
+//    try { 
+    _removeText(offs, len); 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
   /** Removes a portion of the document, if the edit condition allows it, as above.  Assume sthat WriteLock is held */
@@ -207,9 +221,11 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
-    acquireWriteLock(); // locking is used to make the test and modification atomic
-    try { if (_condition.canRemoveText(offs))  super.remove(offs, len); }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock(); // locking is used to make the test and modification atomic
+//    try { 
+    if (_condition.canRemoveText(offs))  super.remove(offs, len); 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
 //  /** Returns the length of the document. */
@@ -227,9 +243,11 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
    /** Gets the document text; this method is threadsafe. */
   public String getText() {
-    acquireReadLock();
-    try { return _getText(); }
-    finally { releaseReadLock(); }
+//    acquireReadLock();
+//    try { 
+      return _getText(); 
+//    }
+//    finally { releaseReadLock(); }
   }
   
   /** Raw version of getText() that assumes the ReadLock is already held. */
@@ -245,9 +263,11 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   }
   /** Appends given string with specified attributes to end of this document. */
   public void append(String str, AttributeSet set) {
-    acquireWriteLock();
-    try { _append(str, set); }
-    finally { releaseWriteLock(); }
+//    acquireWriteLock();
+//    try { 
+    _append(str, set); 
+//    }
+//    finally { releaseWriteLock(); }
   }
   
   /** Same as append above except that it assumes the Write Lock is already held. */
@@ -265,46 +285,41 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** A SwingDocument instance does not have a default style */
   public String getDefaultStyle() { return null; }
   
-  public void print() {
-    throw new UnsupportedOperationException("Printing not supported");
-  }
+  public void print() { throw new UnsupportedOperationException("Printing not supported"); }
   
-  public Pageable getPageable() {
-    throw new UnsupportedOperationException("Printing not supported");
-  }
+  public Pageable getPageable() { throw new UnsupportedOperationException("Printing not supported"); }
   
   /* Locking operations */
   
-  /* Swing-style readLock(). Must be renamed because inherited writeLock is final. */
-  public synchronized void acquireReadLock() {
-    readLock();
-    if (_lockState >= UNLOCKED) _lockState++;
-    // otherwise a write locked object is being recursively read locked; ignore
-  }
-  
-  /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
-  public synchronized void releaseReadLock() {
-    readUnlock();
-    if (_lockState > UNLOCKED) _lockState--;
-  }
-  
-  /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
-  public synchronized void acquireWriteLock() {
-    writeLock(); 
-    if (_lockState <= UNLOCKED) _lockState--; 
-  }
-  
-  /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
-  public synchronized void releaseWriteLock() { 
-    writeUnlock();
-    if (_lockState < UNLOCKED) _lockState++; 
-  }
-  
-  /** Returns true iff this thread holds a read lock or write lock. */
-  public boolean isReadLocked() { return _lockState != UNLOCKED; }
-  
-  /** Returns true iff this thread holds a write lock. */
-  public boolean isWriteLocked() { return _lockState < 0; }
+//  /* Swing-style readLock(). Must be renamed because inherited writeLock is final. */
+//  public /* synchronized */ void acquireReadLock() {
+////    if (! Utilities.TEST_MODE && ! EventQueue.isDispatchThread()) 
+////      DrJavaErrorHandler.log("acquireReadLock() invoked from outside the event thread");
+////    readLock();
+////    _lockState++;
+//  }
+//  
+//  /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
+//  public /* synchronized */ void releaseReadLock() {
+////    readUnlock();
+////    _lockState--;
+//  }
+//  
+//  /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
+//  public void acquireWriteLock() {
+////    if (! Utilities.TEST_MODE && ! EventQueue.isDispatchThread()) 
+////      DrJavaErrorHandler.log("acquireWriteLock() invoked from outside the event thread");
+////    writeLock();  
+//  }
+//  
+//  /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
+//  public void releaseWriteLock() { /* writeUnlock(); */ }
+//  
+//  /** Returns true iff a thread holds a read lock or this thread holds a write lock. */
+//  public boolean isReadLocked() { return true; /* _lockState != UNREADLOCKED || isWriteLocked();*/}
+//  
+//  /** Returns true iff this thread holds a write lock. */
+//  public boolean isWriteLocked() { return true; /* getCurrentWriter() == Thread.currentThread(); */}
   
   /** Performs the default behavior for createPosition in DefaultStyledDocument. */
   public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }

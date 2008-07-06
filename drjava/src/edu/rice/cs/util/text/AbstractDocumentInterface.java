@@ -42,7 +42,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 /** Swing Document interface augmented by readers/writers locking operations */
-public interface AbstractDocumentInterface extends ReadersWritersLocking { 
+public interface AbstractDocumentInterface /* extends ReadersWritersLocking */ { 
   
   /* Methods from Document interface used in FindReplaceMachine */
   

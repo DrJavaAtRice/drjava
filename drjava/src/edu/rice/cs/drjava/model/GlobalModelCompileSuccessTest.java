@@ -53,9 +53,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
   /** Tests calling compileAll with different source roots works.
    */
-  public void testCompileAllDifferentSourceRoots()
-    throws BadLocationException, IOException, InterruptedException
-  {
+  public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileAllDifferentSourceRoots()");
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -106,7 +104,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     doc1.saveFile(new FileSelector(fooFile));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    doc1.startCompile();
+    testStartCompile(doc1);
+    listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -119,7 +118,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
-    doc2.startCompile();
+    testStartCompile(doc2);
+    listener2.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -160,7 +160,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     
-    doc1.startCompile();
+    testStartCompile(doc1);
+    
+    listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -179,7 +181,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
     
-    doc2.startCompile();
+    testStartCompile(doc2);
+    listener2.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
