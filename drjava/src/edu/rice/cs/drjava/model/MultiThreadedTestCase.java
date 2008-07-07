@@ -75,8 +75,8 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     */
   protected static void listenerFail(String s) {
     StackTraceElement[] trace = Thread.getAllStackTraces().get(Thread.currentThread());
-//    System.err.println("TEST FAILED in a listener thread");
-//    System.err.println("Failing thread stack trace:\n " + Log.traceToString(trace));
+    System.out.println("TEST FAILED in a listener thread");
+    System.out.println("Failing thread stack trace:\n " + Log.traceToString(trace));
 //    new AssertionFailedError(s).printStackTrace(System.out);
     _testFailed = true;
     fail(s);
@@ -127,7 +127,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
       _t = t;
       _e = e;
       if (_mainThread != null) {
-//        System.err.println("***Uncaught Exception in spawned thread within a MultiThreadedTestCase:");
+        System.out.println("***Uncaught Exception in spawned thread within a MultiThreadedTestCase:");
         e.printStackTrace(System.out);
         _mainThread.interrupt();
       }

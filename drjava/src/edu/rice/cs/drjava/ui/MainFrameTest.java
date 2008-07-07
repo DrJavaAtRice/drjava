@@ -341,11 +341,10 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     assertEquals("Should have inserted correctly.", text, doc.getText());
     
-//    doc.acquireWriteLock();
-//    try { 
-    doc.indentLines(0, doc.getLength()); 
-//    }
-//    finally { doc.releaseWriteLock(); }
+    doc.acquireWriteLock();
+    
+    try { doc.indentLines(0, doc.getLength()); }
+    finally { doc.releaseWriteLock(); }
     
     assertEquals("Should have indented.", indented, doc.getText());
     
@@ -637,7 +636,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("File saved and compiled");
     
     if (! IOUtil.deleteRecursively(_tempDir))
-      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     
     _log.log("testDancingUIFileOpened completed");
   }
@@ -705,7 +704,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
     
     if (! IOUtil.deleteRecursively(_tempDir)) {
-      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
+      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                          "\nDo it by hand.\n");
     }
     _log.log("testDancingUIFileClosed completed");

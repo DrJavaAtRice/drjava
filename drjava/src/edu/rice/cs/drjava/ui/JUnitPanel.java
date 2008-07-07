@@ -258,7 +258,7 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       SwingDocument doc = getSwingDocument();
-//      doc.acquireWriteLock();
+      doc.acquireWriteLock();
       try {
         int len = doc.getLength();
         // Insert the classname if it has changed
@@ -280,7 +280,7 @@ public class JUnitPanel extends ErrorPanel {
         // Inserting at end, shouldn't happen
         throw new UnexpectedException(ble);
       }
-//      finally { doc.releaseWriteLock(); }
+      finally { doc.releaseWriteLock(); }
     }
     
     /** Displays the results of a test that has finished. */

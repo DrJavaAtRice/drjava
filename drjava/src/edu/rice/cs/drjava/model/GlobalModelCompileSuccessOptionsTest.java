@@ -65,8 +65,8 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(1);
-    saveFile(doc, new FileSelector(file));
-    saveFile(doc2, new FileSelector(file2));
+    doc.saveFile(new FileSelector(file));
+    doc2.saveFile(new FileSelector(file2));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     listener.compile(doc);
@@ -104,7 +104,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     if (Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {
       OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
       final File file = tempFile();
-      saveFile(doc, new FileSelector(file));
+      doc.saveFile(new FileSelector(file));
       CompileShouldFailListener listener = new CompileShouldFailListener();
       _model.addListener(listener);
       
@@ -158,7 +158,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       
       OpenDefinitionsDocument doc = setupDocument(FOO_WITH_GENERICS);
       final File file = new File(_tempDir, "DrJavaTestFooGenerics.java");
-      saveFile(doc, new FileSelector(file));
+      doc.saveFile(new FileSelector(file));
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
       _model.addListener(listener);

@@ -53,7 +53,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
   /** Tests calling compileAll with different source roots works.
    */
-  public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
+  public void testCompileAllDifferentSourceRoots()
+    throws BadLocationException, IOException, InterruptedException
+  {
 //    System.out.println("testCompileAllDifferentSourceRoots()");
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -61,10 +63,10 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     bDir.mkdir();
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(aDir, "DrJavaTestFoo.java");
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    saveFile(doc2, new FileSelector(file2));
+    doc2.saveFile(new FileSelector(file2));
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
@@ -101,11 +103,10 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
     final File fooFile = new File(_tempDir, "DrJavaTestFoo.java");
     
-    saveFile(doc1, new FileSelector(fooFile));
+    doc1.saveFile(new FileSelector(fooFile));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    testStartCompile(doc1);
-    listener.waitCompileDone();
+    doc1.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -114,12 +115,11 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(_tempDir, "DrJavaTestFoo2.java");
-    saveFile(doc2, new FileSelector(foo2File));
+    doc2.saveFile(new FileSelector(foo2File));
 
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
-    testStartCompile(doc2);
-    listener2.waitCompileDone();
+    doc2.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -152,7 +152,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     OpenDefinitionsDocument doc1 = setupDocument("package a;\n" + "public " + FOO_TEXT);
     final File fooFile = new File(aDir, "DrJavaTestFoo.java");
 //    System.err.println("fooFile = " + fooFile.getCanonicalPath());
-    saveFile(doc1, new FileSelector(fooFile));
+    doc1.saveFile(new FileSelector(fooFile));
     // _packageName must be updated on save
     assertEquals("Check package name of doc1", "a", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc1)._packageName); 
 //    System.err.println("doc1 = " + doc1);
@@ -160,9 +160,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     
-    testStartCompile(doc1);
-    
-    listener.waitCompileDone();
+    doc1.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -173,7 +171,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
       setupDocument("package b;\nimport a.DrJavaTestFoo;\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "DrJavaTestFoo2.java");
 //    System.err.println("foo2File = " + foo2File.getCanonicalPath());
-    saveFile(doc2, new FileSelector(foo2File));
+    doc2.saveFile(new FileSelector(foo2File));
     // _packageName must be updated on save
     assertEquals("Check packangeName of doc2", "b", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc2)._packageName); 
 //    System.err.println("doc2 = " + doc2);
@@ -181,8 +179,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
     
-    testStartCompile(doc2);
-    listener2.waitCompileDone();
+    doc2.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }

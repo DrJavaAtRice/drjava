@@ -45,7 +45,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedToken;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -82,11 +81,9 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Convenience method that wraps _doc.indentLines calls in a write lock. */
   private void indentLines(int selStart, int selEnd) {
-//    _doc.acquireWriteLock(); 
-//    try { 
-      _doc.indentLines(selStart, selEnd); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock(); 
+    try { _doc.indentLines(selStart, selEnd); }
+    finally { _doc.releaseWriteLock(); }
   }
   
   /** Test insertion. */
@@ -958,8 +955,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
-    Utilities.clearEventQueue();
-    _doc.insertString(0, text, null);
+    _doc.insertString(0,text,null);
     assertEquals("insertion",text, _doc.getText()); 
     /* This is necessary here and other places where indenting or commenting takes place because the undoListener in DefinitionsPane 
      * currently starts compound edits, but here, there's no DefinitionsPane.
@@ -1000,7 +996,6 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
-    Utilities.clearEventQueue();
     _doc.insertString(0,text,null);
     assertEquals("insertion",text, _doc.getText());
     
@@ -1038,7 +1033,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     _doc.addUndoableEditListener(undoManager);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
-    Utilities.clearEventQueue();
+    
     // 1
     
     // Start a compound edit and verify the returned key
@@ -1434,48 +1429,38 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     int exp, act;
     substr = "{ /*Test$4*/";
     exp = 4;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-    act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();  // implicitly locks the _reduced model
+    try { act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); }
+    finally { _doc.releaseWriteLock(); }
     assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
     
 //    SySystem.err.println(NESTED_CLASSES_TEXT);
     substr = "{ /*Test$5*/";
     exp = 5;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-      act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();  // implicitly locks the _reduced model
+    try { act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); }
+    finally { _doc.releaseWriteLock(); }
     assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
     
     substr = "{ /*Test$6*/";
     exp = 6;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-    act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();  // implicitly locks the _reduced model
+    try { act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); }
+    finally { _doc.releaseWriteLock(); }
     assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
     
     substr = "{ /*Test$7*/";
     exp = 7;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-      act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();  // implicitly locks the _reduced model
+    try { act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); }
+    finally { _doc.releaseWriteLock(); }
     assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
     
     substr = "{ /*Test$8*/";
     exp = 8;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-    act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();  // implicitly locks the _reduced model
+    try { act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); }
+    finally { _doc.releaseWriteLock(); }
     assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
   }
   

@@ -80,9 +80,9 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     * @param val new boolean value for _hasPrompt.
     */
   public void setHasPrompt(boolean val) { 
-//    acquireWriteLock();
+    acquireWriteLock();
     _hasPrompt = val;
-//    releaseWriteLock();
+    releaseWriteLock();
   }
   
   protected int startCompoundEdit() { return 0; /* Do nothing */ }
@@ -121,16 +121,16 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   
   /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */
   public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
-//    acquireReadLock();
+    acquireReadLock();
     synchronized(_stylesList) {
-//      try { 
+      try { 
         // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of return statement.
         @SuppressWarnings("unchecked")
         Pair<Pair<Integer, Integer>, String>[] result = 
           (Pair<Pair<Integer, Integer>, String>[]) (_stylesList.toArray(new Pair[0]));
         return result;
-//      }
-//      finally { releaseReadLock(); }
+      }
+      finally { releaseReadLock(); }
     }
   }
   
@@ -218,17 +218,17 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     * @return true iff the end of the current interaction is an open comment block
     */
   public boolean _inBlockComment() {
-//    acquireReadLock();
-//    try {
-//      synchronized(_reduced) {
+    acquireReadLock();
+    try {
+      synchronized(_reduced) {
 //        resetReducedModelLocation();
 //        ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
 //        boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
         boolean toReturn = _inBlockComment(getLength());
         return toReturn;
-//      }
-//    }
-//    finally { releaseReadLock(); }
+      }
+    }
+    finally { releaseReadLock(); }
   }
   
   /** Inserts the given exception data into the document with the given style.
@@ -237,9 +237,9 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     */
   public void appendExceptionResult(String message, String styleName) {
     // Note that there is similar code in InteractionsDocument.  Something should be refactored.
-//    acquireWriteLock();
+    acquireWriteLock();
     try { _insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-//    finally { releaseWriteLock(); }
+    finally { releaseWriteLock(); }
   } 
 }

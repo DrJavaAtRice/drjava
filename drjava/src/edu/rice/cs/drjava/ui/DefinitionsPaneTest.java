@@ -308,11 +308,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
     Utilities.invokeAndWait(new Runnable() { public void run() { pane.endCompoundEdit(); } });
      
-//    doc.acquireWriteLock();
-//    try { 
-    doc.commentLines(0, doc.getLength()); 
-//    }
-//    finally { doc.releaseWriteLock(); }
+    doc.acquireWriteLock();
+    try { doc.commentLines(0, doc.getLength()); }
+    finally { doc.releaseWriteLock(); }
     
     //    pane.endCompoundEdit();
     assertEquals("commenting", commented, doc.getText());
@@ -344,11 +342,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { pane.endCompoundEdit(); } });
     Utilities.clearEventQueue();
     
-//    doc.acquireWriteLock();
-//    try { 
-      doc.uncommentLines(0, doc.getLength()); 
-//    }
-//    finally { doc.releaseWriteLock(); }
+    doc.acquireWriteLock();
+    try { doc.uncommentLines(0, doc.getLength()); }
+    finally { doc.releaseWriteLock(); }
     
     //    pane.endCompoundEdit();
     assertEquals("uncommenting", text, doc.getText());
@@ -634,7 +630,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
                        (6 - _finalDocCt));
     
-//    if (ct > 1) System.err.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
+    if (ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
     
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
@@ -788,7 +784,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { defPane.setCaretPosition(102);  } });
     // Complete the actions spawned by the preceding command before executing the following command
     Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
-    assertEquals("Should display the document matched", "Bracket matches:      new Object(", _result);
+    assertEquals("Should display the document matched", taggedFileName, _result);
     
     Utilities.invokeAndWait(new Runnable() { public void run() { defPane.setCaretPosition(119); } });
     // Complete the actions spawned by the preceding command before executing the following command

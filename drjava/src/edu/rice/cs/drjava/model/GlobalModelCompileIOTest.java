@@ -38,8 +38,6 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.text.BadLocationException;
 
@@ -58,7 +56,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final File file = tempFile();
 //    System.err.println("Temp source file is " + file.getAbsolutePath());
     
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
@@ -66,7 +64,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
     assertTrue("should not be in sync before compile", ! doc.checkIfClassFileInSync());
     assertTrue("The state of all open documents should be out of sync", _model.hasOutOfSyncDocuments());
-    testStartCompile(doc);
+    doc.startCompile();
     listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -82,7 +80,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     // Have to wait 2 seconds so file will have a different timestamp
     Thread.sleep(2000);
     
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     assertTrue("should not be in sync after save", ! doc.checkIfClassFileInSync());
     
     // Make sure .class exists
@@ -100,14 +98,14 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final File file = tempFile();
     final File file2 = tempFile(2);
     
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
 //    System.err.println("cached class file is " + doc.getCachedClassFile());
     assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
     assertTrue("should not be in sync before compile", !doc.checkIfClassFileInSync());
-    testStartCompile(doc);
+    doc.startCompile();
     listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -121,29 +119,26 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     Thread.sleep(2000);
     
     // Rename to a different file
-    saveFileAs(doc, new FileSelector(file2));
+    doc.saveFileAs(new FileSelector(file2));
     assertTrue("should not be in sync after renaming", ! doc.checkIfClassFileInSync());
   }
   
   /** Tests a compile after a file has unexpectedly been moved or delete. */
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     TestListener listener = new TestListener();
     _model.addListener(listener);
     file.delete();
-    Utilities.invokeLater(new Runnable() { 
-      public void run() {
-        try {
-          doc.startCompile();
-          fail("Compile should not have begun.");
-        }
-        catch(FileMovedException e) { /* The expected behavior! */ }
-        catch(Exception e) { throw new UnexpectedException(e); }
-      }
-    });
-
+    try {
+      doc.startCompile();
+      fail("Compile should not have begun.");
+    }
+    catch (FileMovedException fme) {
+      //compile should never have begun because the file was not where it was expected
+      // to be on disk.
+    }
     assertCompileErrorsPresent("compile should succeed", false);
     
     // Make sure .class exists

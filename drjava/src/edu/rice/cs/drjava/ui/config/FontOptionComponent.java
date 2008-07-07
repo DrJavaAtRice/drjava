@@ -115,7 +115,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (! _font.equals(DrJava.getConfig().getSetting(_option))) DrJava.getConfig().setSetting(_option, _font);
+    if (!_font.equals(DrJava.getConfig().getSetting(_option))) DrJava.getConfig().setSetting(_option, _font);
     return true;
   }
   

@@ -104,11 +104,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument doc1 = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file1 = new File(aDir, "DrJavaTestFoo.java");
-    saveFile(doc1, new FileSelector(file1));
+    doc1.saveFile(new FileSelector(file1));
     
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    saveFile(doc2, new FileSelector(file2));
+    doc2.saveFile(new FileSelector(file2));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     
@@ -137,13 +137,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
-    saveFile(doc,new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    testStartCompile(doc);
-    
+    doc.startCompile();
     listener.waitCompileDone();
     listener.checkCompileOccurred();
     
@@ -159,15 +158,14 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     * invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
     */
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
+    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    testStartCompile(doc);
-
+    doc.startCompile();
     listener.waitCompileDone();
     listener.checkCompileOccurred();
     
@@ -181,15 +179,14 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    testStartCompile(doc);
-    
+    doc.startCompile();
     listener.waitCompileDone();
     assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
@@ -214,13 +211,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_INSIDE_CLASS);
-    saveFileAs(doc, new FileSelector(fooFile));
+    doc.saveFileAs(new FileSelector(fooFile));
     
     // do compile -- should fail since package decl is not valid!
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
-    testStartCompile(doc);
+    doc.startCompile();
     listener.waitCompileDone();
     
     listener.checkCompileOccurred();
@@ -246,10 +243,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     bDir.mkdir();
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AFTER_IMPORT);
     final File file = new File(aDir, "DrJavaTestFoo.java");
-    saveFile(doc, new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    saveFile(doc2, new FileSelector(file2));
+    doc2.saveFile(new FileSelector(file2));
+    
     
     // do compile -- should fail since package decl is not valid!
     CompileShouldFailListener listener = new CompileShouldFailListener();

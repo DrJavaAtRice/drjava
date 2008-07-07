@@ -41,8 +41,9 @@ package edu.rice.cs.util.text;
  *  write locking operations are protected not public.*/
 public interface ReadersWritersLocking {
   
-  /** The count indicating that there are no readers of this object (logged using acquireReadLock()). */
-  public static final int UNREADLOCKED = 0;
+  /** Unlocked and write lock states.  A positive lock state indicates the number of threads holding read locks. */
+  public static final int UNLOCKED = 0;
+//  public static final int MODIFYLOCKED = Integer.MIN_VALUE/2;
   
   /* Locking operations */
   

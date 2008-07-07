@@ -107,14 +107,14 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
   /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _comboBox; }
 
-  /** Updates the config object with the new setting.  Should run in event thread.
+  /** Updates the config object with the new setting.
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {
     String oldValue = DrJava.getConfig().getSetting(_option);
     String newValue = _comboBox.getSelectedItem().toString();
 
-    if (! newValue.equals(oldValue)) { DrJava.getConfig().setSetting(_option, newValue); }
+    if (!newValue.equals(oldValue)) { DrJava.getConfig().setSetting(_option, newValue); }
 
     return true;
   }

@@ -76,23 +76,11 @@ public class History implements OptionConstants, Serializable {
 
   /** A placeholder for the current search string. */
   private volatile String _currentSearchString = "";
-  
-   /** The OptionListener for HISTORY_MAX_SIZE */
-  public final OptionListener<Integer> historyOptionListener = new OptionListener<Integer>() {
-    public void optionChanged (OptionEvent<Integer> oce) {
-      int newSize = oce.value;
-//      System.err.println("optionChanged called for historyOptionListener; newSize = " + newSize);
-      setMaxSize(newSize);
-    }
-    public String toString() { return "HISTORY_MAX_SIZE OptionListener #" + hashCode(); }
-  };
-    
 
   /** Constructor, so we can add a listener to the Config item being used. */
   public History() {
-    this(DrJava.getConfig().getSetting(HISTORY_MAX_SIZE));
-    // the reference to historyOptionListener below is delicate
-    DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, historyOptionListener);  
+    this(DrJava.getConfig().getSetting(HISTORY_MAX_SIZE).intValue());
+    DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, historyOptionListener);
   }
 
   /** Creates a new History with the given size.  An option listener is not added for the config framework.
@@ -101,16 +89,6 @@ public class History implements OptionConstants, Serializable {
   public History(int maxSize) {
     if (maxSize < 0) maxSize = 0;   // Sanity check on _maxSize
     _maxSize = maxSize;
-  }
-  
-  /* Getter for historyOptionListener. */  
-  public OptionListener<Integer> getHistoryOptionListener() { return historyOptionListener; }
-
-  /** Sets the edited entry to the given value.
-    * @param entry the string to set
-    */
-  public void setEditedEntry(String entry) {
-    if (! entry.equals(getCurrent())) _editedEntries.put(Integer.valueOf(_cursor), entry);
   }
 
   /** Adds an item to the history and moves the cursor to point to the place after it.
@@ -136,9 +114,9 @@ public class History implements OptionConstants, Serializable {
     * @return last element before it was removed, or null if history is empty
     */
   public String removeLast() {
-    if (_vector.size() == 0) { return null; }
+    if (_vector.size()==0) { return null; }
     String last = _vector.remove(_vector.size()-1);
-    if (_cursor > _vector.size()) { _cursor = _vector.size()-1; }
+    if (_cursor>_vector.size()) { _cursor = _vector.size()-1; }
     return last;
   }
 
@@ -265,6 +243,24 @@ public class History implements OptionConstants, Serializable {
       moveEnd();
     }
     _maxSize = newSize;
+  }
+  
+  /** The OptionListener for HISTORY_MAX_SIZE */
+  public final OptionListener<Integer> historyOptionListener = new OptionListener<Integer>() {
+    public void optionChanged (OptionEvent<Integer> oce) {
+      int newSize = oce.value.intValue();
+      setMaxSize(newSize);
+    }
+  };
+
+  /* Getter for historyOptionListener. */  
+  public OptionListener<Integer> getHistoryOptionListener() { return historyOptionListener; }
+
+  /** Sets the edited entry to the given value.
+    * @param entry the string to set
+    */
+  public void setEditedEntry(String entry) {
+    if (!entry.equals(getCurrent())) _editedEntries.put(Integer.valueOf(_cursor), entry);
   }
 
   /** Reverse-searches the history for the previous matching string.

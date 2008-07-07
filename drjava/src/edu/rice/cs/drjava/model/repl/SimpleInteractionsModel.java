@@ -158,7 +158,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     * @param t The Throwable thrown by System.exit
     */
   protected void _interpreterResetFailed(Throwable t) {
-    _document.insertBeforeLastPrompt("Reset Failed!" + StringOps.NEWLINE, InteractionsDocument.ERROR_STYLE);
+    _document.insertBeforeLastPrompt("Reset Failed!" + _newLine, InteractionsDocument.ERROR_STYLE);
   }
   
   /** Resets the Java interpreter. */
@@ -170,7 +170,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
   
   /** Notifies listeners that an interaction has started. */
-  public void _notifyInteractionStarted() { 
+  protected void _notifyInteractionStarted() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
   }
   

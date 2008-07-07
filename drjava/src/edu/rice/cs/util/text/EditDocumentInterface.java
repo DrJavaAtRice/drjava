@@ -46,7 +46,7 @@ import java.awt.print.PrinterException;
   *
   * @version $Id$
   */
-public interface EditDocumentInterface /* extends ReadersWritersLocking, Serializable */ {
+public interface EditDocumentInterface extends ReadersWritersLocking /*, Serializable */ {
   
   /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.
     * @return an Object to determine legality of inputs

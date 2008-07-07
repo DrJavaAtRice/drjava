@@ -137,7 +137,9 @@ public class DrJavaRoot {
       
 //      Utilities.showDebug("Creating MainFrame");
       
-      try { _mainFrame = new MainFrame(); }
+      try {
+        _mainFrame = new MainFrame();
+      }
       catch(RuntimeException e) {
         Throwable c = e.getCause();
         if ((c instanceof java.rmi.server.ExportException) && (c.getMessage().equals("Listen failed on port: 0"))) {
@@ -333,7 +335,7 @@ public class DrJavaRoot {
     _mainFrame.drop(dropTargetDropEvent);
   }
 
-  /** Installs the modal window adapter if available, otherwise installs a non-modal dummy listener.
+  /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
     * @param w window trying to get the modal window listener
     * @param toFrontAction action to be performed after the window has been moved to the front again
     * @param closeAction action to be performed when the window is closing
@@ -344,7 +346,7 @@ public class DrJavaRoot {
     _mainFrame.installModalWindowAdapter(w, toFrontAction, closeAction);
   }
   
-  /** Removes the modal window adapter.
+  /** Removethe modal window adapter.
     * @param w window releasing the modal window adapter */
   public static void removeModalWindowAdapter(Window w) {
     _mainFrame.removeModalWindowAdapter(w);

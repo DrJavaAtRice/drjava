@@ -81,12 +81,12 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
   
   /** Clears the text of the _doc field and sets it to the given string. */
   protected final void _setDocText(String text) throws BadLocationException {
-//    _doc.acquireWriteLock();
-//    try {
-    _doc.clear();
-    _doc._insertString(0, text, null);
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();
+    try {
+      _doc.clear();
+      _doc._insertString(0, text, null);
+    }
+    finally { _doc.releaseWriteLock(); }
     Utilities.clearEventQueue();  // make sure that all listener actions triggered by this document update have completed
     Utilities.clearEventQueue();
   }

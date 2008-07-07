@@ -327,7 +327,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void systemErrPrint(String s) throws RemoteException {
     debug.logStart();
-    _interactionsModel.replSystemErrPrint(s);
+    _interactionsModel.replSystemErrPrint(s);  // spawns an event queue task
 //    Utilities.clearEventQueue();               // wait for event queue task to complete
     debug.logEnd();
   }
@@ -337,7 +337,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void systemOutPrint(String s) throws RemoteException {
     debug.logStart();
-    _interactionsModel.replSystemOutPrint(s); 
+    _interactionsModel.replSystemOutPrint(s);   // spawns an event queue task
 //    Utilities.clearEventQueue();                // wait for event queue task to complete
     debug.logEnd();
   }
@@ -667,7 +667,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     setPrivateAccessible(allowAccess.booleanValue());
     
 //    System.out.println("Calling interpreterReady(" + _workDir + ") called in MainJVM");  // DEBUG
-    _interactionsModel.interpreterReady(_workDir);  // not running in the event thread!
+    _interactionsModel.interpreterReady(_workDir);
     _junitModel.junitJVMReady();
     
     _log.log("Main JVM Thread for slave connection is: " + Thread.currentThread());
@@ -699,7 +699,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
-  private void _threwException(final Throwable t) { DrJavaErrorHandler.record(t); }
+  private void _threwException(final Throwable t) {
+    DrJavaErrorHandler.record(t);
+  }
   
   /** Sets the interpreter to allow access to private members. Blocks until an interpreter
     * is connected. */

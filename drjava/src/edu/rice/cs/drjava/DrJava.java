@@ -75,7 +75,7 @@ import edu.rice.cs.plt.debug.DebugUtil;
   */
 public class DrJava {
   
-  private static volatile Log _log = new Log("DrJava.txt", false);
+  private static Log _log = new Log("DrJava.txt", false);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
   
@@ -178,7 +178,7 @@ public class DrJava {
       // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
       if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
       
-      if (! _propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
+      if (!_propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
         // Placed in reversed order to get "-config filename"
         classArgsList.addFirst(_propertiesFile.getAbsolutePath());
         classArgsList.addFirst("-config");
@@ -388,12 +388,10 @@ public class DrJava {
     
     FileConfiguration config;
     
-    final File propFile = _propertiesFile;    // a static variable shared across configurations in tests
-    
-    try { propFile.createNewFile(); }               // be nice and ensure a config file if there isn't one
+    try { _propertiesFile.createNewFile(); }               // be nice and ensure a config file if there isn't one
     catch (IOException e) { /* IOException occurred, continue without a real file */ }
     
-    config = new FileConfiguration(propFile);
+    config = new FileConfiguration(_propertiesFile);
     try { config.loadConfiguration(); }
     catch (Exception e) {
       // Problem parsing the config file.  Use defaults and remember what happened (for the UI).
@@ -465,9 +463,10 @@ public class DrJava {
   
   /* Erase all non-final bindings created in this class.  Only used in testing. */
   public static void cleanUp() {
+    _propertiesFile = null;
     _filesToOpen.clear();
     _jvmArgs.clear();
-    // Do not set _config or _propertiesFile to null because THEY ARE static
+//    _config = null;  // appears to cause problems in cleanup
   }
      
 }

@@ -426,21 +426,21 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public ReducedModelControl getReduced() { throw new UnsupportedOperationException("Dummy method"); }
  
-//  /** Swing-style readLock(). */
-//  public void acquireReadLock() { throw new UnsupportedOperationException("Dummy method"); }
-//  
-//  /** Swing-style readUnLock(). */
-//  public void releaseReadLock() { throw new UnsupportedOperationException("Dummy method"); }
-//
-//  /** Swing-style writeLock(). */
-//  public void acquireWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
-//  
-//  /** Swing-style writeUnlock(). */
-//  public void releaseWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
-//  
-//  public boolean isReadLocked() { throw new UnsupportedOperationException("Dummy method"); }
-//  
-//  public boolean isWriteLocked() { throw new UnsupportedOperationException("Dummy method"); }
+  /** Swing-style readLock(). */
+  public void acquireReadLock() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  /** Swing-style readUnLock(). */
+  public void releaseReadLock() { throw new UnsupportedOperationException("Dummy method"); }
+
+  /** Swing-style writeLock(). */
+  public void acquireWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  /** Swing-style writeUnlock(). */
+  public void releaseWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public boolean isReadLocked() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public boolean isWriteLocked() { throw new UnsupportedOperationException("Dummy method"); }
   
 //  public int getLockState() { throw new UnsupportedOperationException("Dummy method"); }
   

@@ -140,7 +140,7 @@ public class ConfigPanel extends JPanel {
     this.add(scroll, BorderLayout.CENTER);
   }
 
-  /** Tells each component in the vector to update Config with its value.  Should run in event thread.
+  /** Tells each component in the vector to update Config with its value
    *  @return whether update() of all the components succeeded
    */
   public boolean update() {

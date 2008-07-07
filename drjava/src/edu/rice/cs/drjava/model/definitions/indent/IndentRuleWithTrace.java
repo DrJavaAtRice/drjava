@@ -112,20 +112,16 @@ public abstract class IndentRuleWithTrace implements IndentRule {
   
   /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
   public boolean testIndentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
-//    doc.acquireWriteLock();
-//    try { 
-      return indentLine(doc, pos, reason); 
-//    }
-//    finally { doc.releaseWriteLock(); }
+    doc.acquireWriteLock();
+    try { return indentLine(doc, pos, reason); }
+    finally { doc.releaseWriteLock(); }
   }
   
   /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
    public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-//     doc.acquireWriteLock();
-//     try { 
-     return indentLine(doc, reason); 
-//     }
-//     finally { doc.releaseWriteLock(); }
+     doc.acquireWriteLock();
+     try { return indentLine(doc, reason); }
+     finally { doc.releaseWriteLock(); }
    }
 
   /** The rule name to report to _addToIndentTrace */

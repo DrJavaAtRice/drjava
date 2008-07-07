@@ -43,9 +43,8 @@ import javax.swing.JFrame;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
-//import edu.rice.cs.plt.swing.SwingUtil;
+import edu.rice.cs.plt.swing.SwingUtil;
 import edu.rice.cs.util.Log;
 
 /** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
@@ -95,7 +94,8 @@ public class DrJavaErrorHandler {
   
   /** Record the throwable in the errors list. */
   public static void record(final Throwable thrown) {
-    Utilities.invokeLater(new Runnable() {
+    LOG.log("DrJavaErrorHandler.record", thrown);
+    SwingUtil.invokeLater(new Runnable() {
       public void run() {
         if (thrown instanceof OutOfMemoryError) {
           // if this is an OutOfMemoryError inside DrJava, try to suggest to increase Main JVM's max heap
@@ -118,8 +118,7 @@ public class DrJavaErrorHandler {
         if (_errorsButton != null) {
           _errorsButton.setVisible(true);
         }
-        if (_errors.size() == 1 && ! Utilities.TEST_MODE &&
-            DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
+        if (_errors.size() == 1 && DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
           DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
           MainFrame.setPopupLoc(popup, popup.getOwner());
           popup.setVisible(true);

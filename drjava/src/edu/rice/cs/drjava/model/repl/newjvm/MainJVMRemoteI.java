@@ -50,14 +50,16 @@ import edu.rice.cs.util.classloader.ClassFileError;
  */
 public interface MainJVMRemoteI extends MasterRemote {
   
-  /** Forwards a call to System.err from InterpreterJVM to the MainJVM for output to the user.
-    * @param s String that was printed in the other JVM
-    */
+  /** Forwards a call to System.err from InterpreterJVM to the
+   * MainJVM for output to the user.
+   * @param s String that was printed in the other JVM
+   */
   public void systemErrPrint(String s) throws RemoteException;
   
-  /** Forwards a call to System.out from InterpreterJVM to the MainJVM for output to the user.
-    * @param s String that was printed in the other JVM
-    */
+  /** Forwards a call to System.out from InterpreterJVM to the
+   * MainJVM for output to the user.
+   * @param s String that was printed in the other JVM
+   */
   public void systemOutPrint(String s) throws RemoteException;
   
   /** Asks the main jvm for input from the console.

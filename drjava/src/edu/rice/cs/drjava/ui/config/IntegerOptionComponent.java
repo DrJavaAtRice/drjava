@@ -73,7 +73,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     _label.setToolTipText(description);
   }
 
-  /** Updates the config object with the new setting.  Should run in event thread.
+  /** Updates the config object with the new setting.
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {

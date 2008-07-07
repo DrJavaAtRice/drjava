@@ -65,7 +65,6 @@ public class Configuration {
     */
   public <T> T setSetting(final Option<T> op, final T value) {
     T ret = map.setOption(op, value);
-//    System.err.println("setSetting(" + op + ", " + value + ") called");
     Utilities.invokeLater(new Runnable() { public void run() { op.notifyListeners(Configuration.this, value); } });
     return ret;
   }

@@ -258,17 +258,16 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     public BreakpointRegionTreeUserObj (Breakpoint bp) { super(bp); }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
-//      _region.getDocument().acquireReadLock();
-//      try {
-      sb.append(lineNumber());
+      _region.getDocument().acquireReadLock();
       try {
-        if (!_region.isEnabled()) { sb.append(" (disabled)"); }
-        sb.append(": ");
-        int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
-        sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
-      } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
-//      } 
-//      finally { _region.getDocument().releaseReadLock(); }
+        sb.append(lineNumber());
+        try {
+          if (!_region.isEnabled()) { sb.append(" (disabled)"); }
+          sb.append(": ");
+          int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
+          sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
+        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
+      } finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
     public boolean equals(Object other) {

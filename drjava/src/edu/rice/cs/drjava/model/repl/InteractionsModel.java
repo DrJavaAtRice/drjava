@@ -36,16 +36,15 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.awt.EventQueue;
 import java.io.*;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.awt.EventQueue;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.drjava.ui.InteractionsPane;
 import edu.rice.cs.util.FileOpenSelector;
@@ -61,7 +60,6 @@ import edu.rice.cs.plt.tuple.Pair;
 
 /** A Swing specific model for the DrJava InteractionsPane.  It glues together an InteractionsDocument, an 
   * InteractionsPane and a JavaInterpreter.  This abstract class provides common functionality for all such models.
-  * The methods in this class generally can be executed only in the event thread once the model has been constructed.
   * @version $Id$
   */
 public abstract class InteractionsModel implements InteractionsModelCallback {
@@ -69,7 +67,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
   
-//  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
+  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
@@ -106,7 +104,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected volatile InputListener _inputListener;
   
   /** The embedded interactions document (a SwingDocument in native DrJava) */
-  protected final ConsoleDocumentInterface _cDoc;
+  protected final ConsoleDocumentInterface _adapter;
   
   /** The interactions pane bundled with this document.  In contrast to a standard MVC decomposition, where the model
     * and the view are independent components, an interactions model inherently includes a prompt and a cursor marking
@@ -131,10 +129,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println
     */
-  public InteractionsModel(ConsoleDocumentInterface cDoc, File wd, int historySize, int writeDelay) {
-    _document = new InteractionsDocument(cDoc, historySize);
+  public InteractionsModel(ConsoleDocumentInterface adapter, File wd, int historySize, int writeDelay) {
+    _document = new InteractionsDocument(adapter, historySize);
     _document.setBanner(generateBanner(wd));
-    _cDoc = cDoc;
+    _adapter = adapter;
     _writeDelay = writeDelay;
     _waitingForFirstInterpreter = true;
     _workingDirectory = wd;
@@ -182,23 +180,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Interprets the current given text at the prompt in the interactions doc. Must run in the event thread to get current 
     * interaction (which depends on the state of the interactions pane).*/
   public void interpretCurrentInteraction() {
-//    assert EventQueue.isDispatchThread();  // violated in GlobalModelIOTest, InteractionsModelTest
-
-    if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
-    
-    String text = _document.getCurrentInteraction();
-    String toEval = text.trim();
-    if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
-//          System.err.println("Preparing to interpret '" + toEval +"'");
-    _prepareToInterpret(toEval);  // Writes a newLine!
-    final String evalText = toEval;
-
-    new Thread(new Runnable() { 
-      public void run() { 
-        try { interpret(evalText); } 
-        catch(Throwable t) { DrJavaErrorHandler.record(t); }
-      } 
-    }).start(); 
+    String toEval;
+    _document.acquireWriteLock();
+    try {
+      if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
+      
+      String text = _document.getCurrentInteraction();
+      toEval = text.trim();
+      if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
+//          System.err.println("Preparing to interpret '" + text +"'");
+      _prepareToInterpret(text);  // Writes a newLine!
+    }
+    finally{ _document.releaseWriteLock(); }
+    interpret(toEval);
   }
   
   /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
@@ -211,12 +205,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
-  /** Appends a newLine to _document assuming that the Write Lock is already held.  Must run in the event thread. */
-  public void _addNewline() { append(StringOps.NEWLINE, InteractionsDocument.DEFAULT_STYLE); }
+  /** Appends a newLine to _document assuming that the Write Lock is already held. Must run in the event thread. */
+  public void _addNewline() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
   
   /** Interprets the given command.
     * @param toEval command to be evaluated. */
-  public final void interpret(String toEval) { _interpret(toEval); }
+  public final void interpret(String toEval) {
+    _interpret(toEval);
+  }
   
   /** Interprets the given command.  This should only be called from interpret, never directly.
     * @param toEval command to be evaluated
@@ -227,7 +223,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifyInteractionIncomplete();
   
   /** Notifies listeners that an interaction has started. (Subclasses must maintain listeners.) */
-  public abstract void _notifyInteractionStarted();
+  protected abstract void _notifyInteractionStarted();
   
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
@@ -383,8 +379,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
     Utilities.invokeAndWait(new Runnable() {  // must run in event thread because caret is updated indivisibly
       public void run() {
-//        _document.acquireWriteLock();
-//        try {
+        _document.acquireWriteLock();
+        try {
           _document.clearCurrentInteraction();
           
           // Insert into the document and interpret
@@ -401,8 +397,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           String text = buf.toString().trim();
 //          System.err.println("Histtory is: '" + text + "'");
           append(text, InteractionsDocument.DEFAULT_STYLE);
-//        }
-//        finally { _document.releaseWriteLock(); }
+        }
+        finally { _document.releaseWriteLock(); }
         interpretCurrentInteraction();  // Must be executed in event thread
       }
     });
@@ -461,12 +457,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void replSystemOutPrint(final String s) {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-//        _document.acquireWriteLock();  // couple insert with caret update
-//        try {  
+        _document.acquireWriteLock();  // couple insert with caret update
+        try {  
           _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
 //          advanceCaret(s.length());
-//        }
-//        finally { _document.releaseWriteLock(); }
+        }
+        finally { _document.releaseWriteLock(); }
       } });
     scrollToCaret();
     _writerDelay();      
@@ -479,12 +475,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void replSystemErrPrint(final String s) {
       Utilities.invokeLater(new Runnable() {
         public void run() {
-//          _document.acquireWriteLock();  // couple insert with caret update
-//          try {
+          _document.acquireWriteLock();  // couple insert with caret update
+          try {
             _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
 //            advanceCaret(s.length());
-//          }
-//          finally { _document.releaseWriteLock(); }
+          }
+          finally { _document.releaseWriteLock(); }
         } });
       scrollToCaret();
 //      System.err.println(s + " printed; caretPostion = " + _pane.getCaretPosition());
@@ -526,15 +522,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void _interactionIsOver() {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-//        _document.acquireWriteLock();
-//        try {
+        _document.acquireWriteLock();
+        try {
           _document.addToHistory(_toAddToHistory);
           _document.setInProgress(false);
           _document.insertPrompt();
 //          int len = _document.getPromptLength();
 //          advanceCaret(len); 
-//        }
-//        finally { _document.releaseWriteLock(); }
+        }
+        finally { _document.releaseWriteLock(); }
         // runs in event thread
         _notifyInteractionEnded();
       }
@@ -550,11 +546,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param styleName  Name of the style to use for s
     */
   public void append(final String s, final String styleName) {
-    Utilities.invokeLater(new Runnable() { public void run() { _document.append(s, styleName); } });
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.acquireWriteLock();
+        try {
+          _document.append(s, styleName);
+//          advanceCaret(s.length());
+        }
+        finally { _document.releaseWriteLock(); }
+      } 
+    });
     scrollToCaret();
   }
-  
-  /** Waits for a small amount of time on a shared writer lock. */
+        /** Waits for a small amount of time on a shared writer lock. */
   public void _writerDelay() {
     synchronized(_writerLock) {
       try {
@@ -649,12 +653,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + 
 //      _waitingForFirstInterpreter);
     if (! _waitingForFirstInterpreter) {
-//      _document.acquireWriteLock();
-//      try {
+      _document.acquireWriteLock();
+      try {
         _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
         _document.setInProgress(true);
-//      }
-//      finally { _document.releaseWriteLock(); }
+      }
+      finally { _document.releaseWriteLock(); }
 //      Utilities.showDebug("interpreter resetting in progress");
       
       // Change to a new debug port to avoid conflicts
@@ -735,17 +739,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
     if (! _waitingForFirstInterpreter) {
       Utilities.invokeLater(new Runnable() {
-        public void run() {
-//          _document.acquireWriteLock();
-//          try {
-          _document.reset(generateBanner(wd));
-          _document.setInProgress(false);
-          _pane.setCaretPosition(_document.getLength());
+          public void run() {
+            _document.acquireWriteLock();
+              try {
+              _document.reset(generateBanner(wd));
+              _document.setInProgress(false);
+              _pane.setCaretPosition(_document.getLength());
 //              _caretInit();
-//          }
-//          finally { _document.releaseWriteLock(); }
+            }
+              finally { _document.releaseWriteLock(); }
           _notifyInterpreterReady(wd);
-        }
+          }
       });
     }
     _waitingForFirstInterpreter = false;

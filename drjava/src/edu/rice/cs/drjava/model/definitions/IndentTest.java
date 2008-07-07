@@ -87,20 +87,16 @@ public final class IndentTest extends DrJavaTestCase {
   
   /** Convenience method that wraps _doc._indentLine calls in a write lock. */
   private void _indentLine(Indenter.IndentReason reason) {
-//    _doc.acquireWriteLock();
-//    try { 
-    _doc._indentLine(reason); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();
+    try { _doc._indentLine(reason); }
+    finally { _doc.releaseWriteLock(); }
   }
  
   /** Convenience method that wraps _doc._indentLines calls in a write lock. */
   private void indentLines(int startSel, int endSel) {
-//    _doc.acquireWriteLock();
-//    try { 
-      _doc.indentLines(startSel, endSel); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.acquireWriteLock();
+    try { _doc.indentLines(startSel, endSel); }
+    finally { _doc.releaseWriteLock(); }
   }
   
   /** Regression test for comment portion of indent tree. */
@@ -1393,24 +1389,24 @@ public final class IndentTest extends DrJavaTestCase {
   }
   
   private void _assertLineBraceInfo(int distance, String braceType) {
-//    _doc.acquireReadLock();
-//    try {
-    BraceInfo info = _doc._getLineEnclosingBrace();
+    _doc.acquireReadLock();
+    try {
+      BraceInfo info = _doc._getLineEnclosingBrace();
 //      System.err.println(info);
-    assertEquals("line brace info: brace distance", distance, info.distance());
-    assertEquals("line brace info: brace type", braceType, info.braceType());
-//    }
-//    finally { _doc.releaseReadLock(); }
+      assertEquals("line brace info: brace distance", distance, info.distance());
+      assertEquals("line brace info: brace type", braceType, info.braceType());
+    }
+    finally { _doc.releaseReadLock(); }
   }
   
   private void _assertBraceInfo(int distance, String braceType) {
-//    _doc.acquireReadLock();
-//    try {
-    BraceInfo info = _doc._getEnclosingBrace();
-    assertEquals("line brace info: brace distance", distance, info.distance());
-    assertEquals("line brace info: brace type", braceType, info.braceType());
-//    }
-//    finally { _doc.releaseReadLock(); }
+    _doc.acquireReadLock();
+    try {
+      BraceInfo info = _doc._getEnclosingBrace();
+      assertEquals("line brace info: brace distance", distance, info.distance());
+      assertEquals("line brace info: brace type", braceType, info.braceType());
+    }
+    finally { _doc.releaseReadLock(); }
   }
 //  /** Copies fromFile to toFile, assuming both files exist. */
 //  private void _copyFile(File fromFile, File toFile) throws IOException {

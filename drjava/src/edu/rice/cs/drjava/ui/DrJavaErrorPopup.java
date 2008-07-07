@@ -48,7 +48,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Displays a popup window for the first uncaught exception or logged conditions.
  *  @version $Id$
@@ -118,18 +117,16 @@ public class DrJavaErrorPopup extends JDialog {
   private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorPopup.this.dispose();
-      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
+      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
     }
   };
 
   /** Close this window, but display the full DrJava Errors window. */
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
-      if (! Utilities.TEST_MODE) {
-        DrJavaErrorPopup.this.dispose();
-        MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getFrame());
-        DrJavaErrorWindow.singleton().setVisible(true);
-      }
+      DrJavaErrorPopup.this.dispose();
+      MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getOwner());
+      DrJavaErrorWindow.singleton().setVisible(true);
     }
   };
 

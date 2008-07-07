@@ -85,16 +85,14 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     * @param typed A string typed by the user
     * @param expected What the processor should return
     */
-  protected void _assertProcessedContents(final String typed, final String expected) throws EditDocumentException {
+  protected void _assertProcessedContents(String typed, String expected) throws EditDocumentException {
     assertTrue(_model instanceof TestInteractionsModel);
-    final TestInteractionsModel model = (TestInteractionsModel)_model;
-    final InteractionsDocument doc = model.getDocument();
-    Utilities.invokeAndWait(new Runnable() { public void run() { 
-      doc.reset("This is a test"); 
-      doc.append(typed, InteractionsDocument.DEFAULT_STYLE); 
-      model.interpretCurrentInteraction(); } 
-    });
-    Utilities.clearEventQueue();
+    TestInteractionsModel model = (TestInteractionsModel)_model;
+    InteractionsDocument doc = model.getDocument();
+    doc.reset("This is a test");
+    doc.append(typed, InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();  // required because subsequent interpretCurrentInteraction is not run in event thread.
+    model.interpretCurrentInteraction();
     assertEquals("processed output should match expected", expected, model.toEval);
   }
   
@@ -103,33 +101,31 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     * @param typed the "java classname args ..." typed by the user
     * @param expected the expected main class call
     */
-  protected void _assertMainTransformation(final String typed, final String expected) {
+  protected void _assertMainTransformation(String typed, String expected) {
     assertEquals("main transformation should match expected", expected, TestInteractionsModel._testClassCall(typed));
   }
   
   /** Tests that the correct text is returned when interpreting. */
   public void testInterpretCurrentInteraction() throws EditDocumentException {
     assertTrue(_model instanceof TestInteractionsModel);
-    final TestInteractionsModel model = (TestInteractionsModel) _model;
-    final String code = "int x = 3;";
-    final InteractionsDocument doc = model.getDocument();
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        model.interpretCurrentInteraction();
-        model.replReturnedVoid(); // pretend call completed
-      } 
-    });
+    TestInteractionsModel model = (TestInteractionsModel) _model;
+    String code = "int x = 3;";
+    InteractionsDocument doc = model.getDocument();
+    model.interpretCurrentInteraction();  // empty string is already sitting at prompt in the interactions pane
+    Utilities.clearEventQueue();
+    // pretend the call completed
+    model.replReturnedVoid();
     Utilities.clearEventQueue();
     assertEquals("string being interpreted", "", model.toEval);
     
     // Insert text and evaluate
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        doc.append(code, InteractionsDocument.DEFAULT_STYLE); // spawns an event queue task
-        model.interpretCurrentInteraction();
-        model.replReturnedVoid(); 
-      } 
-    });
+    doc.append(code, InteractionsDocument.DEFAULT_STYLE);  // spawns an event queue task
+    Utilities.clearEventQueue();  // required because subsequent interpretCurrentInteraction is not run in event thread.
+    Utilities.clearEventQueue();
+    model.interpretCurrentInteraction();
+    Utilities.clearEventQueue();
+    // pretend the call completed
+    model.replReturnedVoid();
     Utilities.clearEventQueue();
     assertEquals("string being interpreted", code, model.toEval);
   }
@@ -147,48 +143,31 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
   
   /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
-  protected void assertReplThrewContinuationException(final String code) throws EditDocumentException, InterruptedException {
+  protected void assertReplThrewContinuationException(String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
-    final IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel) _model;
-    final InteractionsDocument doc = model.getDocument();
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() {
-        doc.reset("This is a test");
-        doc.append(code, InteractionsDocument.DEFAULT_STYLE);
-      }
-    });
-    Utilities.clearEventQueue();
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() {
-        model._logInteractionStart();
-        model.interpretCurrentInteraction();
-        _log.log("Waiting for InteractionDone()");
-      }
-    });
-    Utilities.clearEventQueue();
+    IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel) _model;
+    InteractionsDocument doc = model.getDocument();
+    doc.reset("This is a test");
+    doc.append(code, InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();  // required because subsequent interpretCurrentInteraction is not run in event thread.
+    model._logInteractionStart();
+    model.interpretCurrentInteraction();
+    _log.log("Waiting for InteractionDone()");
     model._waitInteractionDone();
-    Utilities.clearEventQueue();
     assertTrue("Code '" + code + "' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
   
   /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
-  protected void assertReplThrewSyntaxException(final String code) throws EditDocumentException, InterruptedException {
+  protected void assertReplThrewSyntaxException(String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
-    final IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
-    final InteractionsDocument doc = model.getDocument();
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() {
-        doc.reset("This is a test");
-        doc.append(code, InteractionsDocument.DEFAULT_STYLE);
-        model._logInteractionStart();
-        model.interpretCurrentInteraction();
-      }
-    });
-    Utilities.clearEventQueue();
+    IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
+    InteractionsDocument doc = model.getDocument();
+    doc.reset("This is a test");
+    doc.append(code, InteractionsDocument.DEFAULT_STYLE);
+    model._logInteractionStart();
+    model.interpretCurrentInteraction();
     model._waitInteractionDone();
-
-    Utilities.clearEventQueue();
     assertTrue("Code '" + code +  "' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
@@ -315,7 +294,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   /** Tests that an interactions history can be loaded in as a script. */
   public void testScriptLoading() throws IOException, OperationCanceledException {
     assertTrue(_model instanceof TestInteractionsModel);
-    final TestInteractionsModel model = (TestInteractionsModel)_model;
+    TestInteractionsModel model = (TestInteractionsModel)_model;
     // Set up a sample history
     String line1 = "System.out.println(\"hi\")";
     String line2 = "System.out.println(\"bye\")";
@@ -333,12 +312,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     });
     
     // Load the history as a script
-    final InteractionsScriptModel ism = model.loadHistoryAsScript(new FileOpenSelector() {
+    InteractionsScriptModel ism = model.loadHistoryAsScript(new FileOpenSelector() {
       public File[] getFiles() {
         return new File[] {temp};
       }
     });
-    final InteractionsDocument doc = model.getDocument();
+    InteractionsDocument doc = model.getDocument();
     
     // Should not be able to get the previous interaction
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
@@ -381,13 +360,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // Go back to the second line and execute it
     ism.nextInteraction();
     Utilities.clearEventQueue();
-    Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction(); } });
-    Utilities.clearEventQueue();
+    ism.executeInteraction();
     Utilities.clearEventQueue();
     assertEquals("Should have \"executed\" the second interaction.", line2, model.toEval);
     // pretend the call completed
-    Utilities.invokeAndWait(new Runnable() { public void run() { model.replReturnedVoid(); } });
-    Utilities.clearEventQueue();
+    model.replReturnedVoid();
     
     // Should not be able to get the next interaction, since we're at the end
     assertTrue("Should have no next", !ism.hasNextInteraction());
@@ -417,21 +394,18 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertTrue("Should have no previous", ! ism.hasPrevInteraction());
     
     // Now execute the first interaction
-    Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction(); } });
-    Utilities.clearEventQueue();
+    ism.executeInteraction();
     Utilities.clearEventQueue();
 //    System.err.println("line1 = '" + line1 + "'");
 //    System.err.println("model.toEval = '" + model.toEval + "'");
       
     assertEquals("Should have \"executed\" the first interaction.", line1, model.toEval);
     // pretend the call completed
-    Utilities.invokeAndWait(new Runnable() { public void run() { model.replReturnedVoid(); } });
-    Utilities.clearEventQueue();
+    model.replReturnedVoid();
     
     // Get Previous should return the most recent (first) interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
-    Utilities.clearEventQueue();
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Should not be able to get the previous interaction this time
@@ -473,19 +447,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   /** Tests that the interactions history is stored correctly. See bug # 992455 */
   public void testInteractionsHistoryStoredCorrectly() throws EditDocumentException {
     final Object _lock = new Object();
-    final String code = "public class A {\n";
+    String code = "public class A {\n";
     
-    final InteractionsDocument doc = _model.getDocument();
+    InteractionsDocument doc = _model.getDocument();
     
     // Insert text and evaluate
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
-        _model.interpretCurrentInteraction();
-      }
-    });
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     
+    _model.interpretCurrentInteraction();
+    Utilities.clearEventQueue();
     //Simulate result
     _model.replReturnedSyntaxError("Encountered Unexpected \"<EOF>\"", "public class A {\n", -1, -1, -1, -1);
     
@@ -498,20 +469,22 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     History h = doc.getHistory();
     assertEquals("History should be empty", 0, h.size());
     
-    final String code1 = "}\n";
+    code = "}\n";
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        doc.insertText(doc.getLength(), code1, InteractionsDocument.DEFAULT_STYLE);
-        _model.interpretCurrentInteraction();
-        _model.replReturnedVoid();
-      }
-    });
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();
+    
+    synchronized(_lock) {
+      _model.interpretCurrentInteraction();
+      _model.replReturnedVoid();
+    }
     
     Utilities.clearEventQueue();
     
-    assertEquals("Current interaction should not be there - should have interpreted", "", doc.getCurrentInteraction());
-    assertEquals("History should contain one interaction", 1, h.size());
+    synchronized(_lock) {
+      assertEquals("Current interaction should not be there - should have interpreted", "", doc.getCurrentInteraction());
+      assertEquals("History should contain one interaction", 1, h.size());
+    }
   }
   
   /** A generic InteractionsModel for testing purposes.  (Used here and in InteractionsPaneTest.) */
@@ -544,7 +517,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
     protected void _resetInterpreter(File wd) { fail("cannot reset interpreter in a test"); }
     
-    public void _notifyInteractionStarted() { }
+    protected void _notifyInteractionStarted() { }
     protected void _notifyInteractionEnded() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
@@ -570,8 +543,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     public void _logInteractionStart() { _interactionDone = false; }
     
     public void _waitInteractionDone() throws InterruptedException { 
-      synchronized(_interactionLock) { 
-        while (! _interactionDone) _interactionLock.wait(); }
+      synchronized(_interactionLock) { while (! _interactionDone) _interactionLock.wait(); }
     }
     
     /** Constructs a new IncompleteInputInteractionsModel. */
@@ -584,7 +556,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       syntaxException = false;
     }
     
-    public void _notifyInteractionStarted() { }
+    protected void _notifyInteractionStarted() { }
     protected void _notifyInteractionEnded() { 
       _log.log("_notifyInteractionEnded called.");
       synchronized(_interactionLock) {

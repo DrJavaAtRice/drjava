@@ -81,7 +81,8 @@ public class IndentFiles {
     }
   }
 
-  /** Displays a message showing how to use this class. */
+  /** Displays a message showing how to use this class.
+   */
   private static void _displayUsage() {
     System.out.println(
       "Usage:" +
@@ -110,14 +111,14 @@ public class IndentFiles {
       try {
         String fileContents = IOUtil.toString(file);
         DefinitionsDocument doc = new DefinitionsDocument(indenter, new GlobalEventNotifier());
-//        doc.acquireWriteLock();
-//        try {
-        doc._insertString(0, fileContents, null); // (no attributes)
-        int docLen = doc.getLength();
-        doc.indentLines(0, docLen);
-        fileContents = doc.getText();
-//        }
-//        finally { doc.releaseWriteLock(); }
+        doc.acquireWriteLock();
+        try {
+          doc._insertString(0, fileContents, null); // (no attributes)
+          int docLen = doc.getLength();
+          doc.indentLines(0, docLen);
+          fileContents = doc.getText();
+        }
+        finally { doc.releaseWriteLock(); }
         IOUtil.writeStringToFile(file, fileContents);
         if (!silent) System.out.println("done.");
       }
