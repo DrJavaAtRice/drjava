@@ -58,7 +58,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final File file = tempFile();
 //    System.err.println("Temp source file is " + file.getAbsolutePath());
     
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
@@ -82,7 +82,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     // Have to wait 2 seconds so file will have a different timestamp
     Thread.sleep(2000);
     
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     assertTrue("should not be in sync after save", ! doc.checkIfClassFileInSync());
     
     // Make sure .class exists
@@ -100,7 +100,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final File file = tempFile();
     final File file2 = tempFile(2);
     
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
@@ -121,7 +121,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     Thread.sleep(2000);
     
     // Rename to a different file
-    doc.saveFileAs(new FileSelector(file2));
+    saveFileAs(doc, new FileSelector(file2));
     assertTrue("should not be in sync after renaming", ! doc.checkIfClassFileInSync());
   }
   
@@ -129,7 +129,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     TestListener listener = new TestListener();
     _model.addListener(listener);
     file.delete();

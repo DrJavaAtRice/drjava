@@ -45,6 +45,7 @@ import java.util.Vector;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -155,13 +156,15 @@ public abstract class OptionComponent<T> implements Serializable {
   public void removeChangeListener(ChangeListener listener) { _changeListeners.remove(listener); }
   
   /** Notify all change listeners of a change. Notification performed in the event thread. */
-  protected void notifyChangeListeners() { 
-    Utilities.invokeLater(new Runnable() {
-      public void run() { 
-        // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
-        ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
-        for (ChangeListener l: listeners)  l.apply(OptionComponent.this); }
-    });
+  protected void notifyChangeListeners() {
+//    assert MainFrame.MAIN_FRAME_INIT || EventQueue.isDispatchThread();
+//    Utilities.invokeLater(new Runnable() {
+//      public void run() { 
+      // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
+      ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
+    for (ChangeListener l: listeners)  l.apply(OptionComponent.this); 
+//      }
+//    });
   }
   
   /** List of change listeners.  A volatile Vector is used here because a race involving operations on this field was 

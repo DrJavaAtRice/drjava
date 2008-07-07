@@ -169,9 +169,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param updatePrompt whether or not the interpreter has changed
     */
   private void _updateDocument(final String prompt, final boolean inProgress, boolean updatePrompt) {
+    assert EventQueue.isDispatchThread();
     if (updatePrompt) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
 //          _document.acquireWriteLock();
 //          try {
           _document.setPrompt(prompt);
@@ -180,11 +181,12 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //            int len = _document.getPromptLength();  
 //            advanceCaret(len);
           _document.setInProgress(inProgress);
+          scrollToCaret();
 //          }
 //          finally { _document.releaseWriteLock(); }
-        }
-      });
-      scrollToCaret();
+//        }
+//      });
+
     }   
   }
   

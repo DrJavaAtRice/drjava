@@ -254,7 +254,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  @param file File to save the class in
    */
   protected void doCompile(final OpenDefinitionsDocument doc, File file) throws IOException,  InterruptedException {
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
 
     // Perform a mindless interpretation to force interactions to reset (only to simplify this method)
     try { interpret("0"); }
@@ -442,6 +442,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         try { doc.saveFileAs(fss); }
         catch(Exception e) { throw new UnexpectedException(e); }
       } });
+  }
+  
+  protected void saveAllFiles(final GlobalModel model, final FileSaveSelector fs) {
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try { model.saveAllFiles(fs); } // this should save the files as file1,file2,file3 respectively
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
+    });
   }
 
   protected void assertCompileErrorsPresent(boolean b) { assertCompileErrorsPresent("", b); }
@@ -1177,38 +1186,38 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       activeCompilerChangedCount = 0;
     }
     @Override public void junitStarted() {
-      if (printMessages) System.out.println("listener.junitStarted");
+      if (printMessages) System.err.println("listener.junitStarted");
       synchronized(this) { junitStartCount++; }
     }
     @Override public void junitSuiteStarted(int numTests) {
-      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = "+numTests);
+      if (printMessages) System.err.println("listener.junitSuiteStarted, numTests = "+numTests);
       assertJUnitStartCount(1);
       synchronized(this) { junitSuiteStartedCount++; }
     }
     @Override public void junitTestStarted(String name) {
-      if (printMessages) System.out.println("  listener.junitTestStarted, " + name);
+      if (printMessages) System.err.println("  listener.junitTestStarted, " + name);
       synchronized(this) { junitTestStartedCount++; }
     }
     @Override public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-      if (printMessages) System.out.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
+      if (printMessages) System.err.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
                                             " err = " + causedError);
       synchronized(this) { junitTestEndedCount++; }
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
                    junitTestStartedCount);
     }
     @Override public void nonTestCase(boolean isTestAll) {
-      if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
+      if (printMessages) System.err.println("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
       _notifyJUnitDone();
     }
     @Override public void classFileError(ClassFileError e) {
-      if (printMessages) System.out.println("listener.classFileError, e="+e);
+      if (printMessages) System.err.println("listener.classFileError, e="+e);
       synchronized(this) { classFileErrorCount++; }
       _notifyJUnitDone();
     }
     @Override public void junitEnded() {
       //assertJUnitSuiteStartedCount(1);
-      if (printMessages) System.out.println("junitEnded event!");
+      if (printMessages) System.err.println("junitEnded event!");
       synchronized(this) { junitEndCount++; }
       _notifyJUnitDone();
     }

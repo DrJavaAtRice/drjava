@@ -104,11 +104,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument doc1 = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file1 = new File(aDir, "DrJavaTestFoo.java");
-    doc1.saveFile(new FileSelector(file1));
+    saveFile(doc1, new FileSelector(file1));
     
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    doc2.saveFile(new FileSelector(file2));
+    saveFile(doc2, new FileSelector(file2));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     
@@ -137,7 +137,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc,new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
@@ -161,7 +161,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
@@ -183,7 +183,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
@@ -214,7 +214,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_INSIDE_CLASS);
-    doc.saveFileAs(new FileSelector(fooFile));
+    saveFileAs(doc, new FileSelector(fooFile));
     
     // do compile -- should fail since package decl is not valid!
     CompileShouldFailListener listener = new CompileShouldFailListener();
@@ -246,11 +246,10 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     bDir.mkdir();
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AFTER_IMPORT);
     final File file = new File(aDir, "DrJavaTestFoo.java");
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    doc2.saveFile(new FileSelector(file2));
-    
+    saveFile(doc2, new FileSelector(file2));
     
     // do compile -- should fail since package decl is not valid!
     CompileShouldFailListener listener = new CompileShouldFailListener();

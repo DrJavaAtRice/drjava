@@ -168,7 +168,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
     try {
       _jvm.setActiveInterpreter("thisisabadname");
-      System.out.println("outbuf: " + _jvm.outBuf);
+      System.err.println("outbuf: " + _jvm.outBuf);
       fail("Should have thrown an exception!");
     }
     catch (IllegalArgumentException e) {

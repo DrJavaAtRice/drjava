@@ -72,37 +72,39 @@ public class ErrorCaretListener implements CaretListener {
     // Now we can assume at least one error.
     updateHighlight(evt.getDot()); // invokeLater unnecessary here; this method runs in the event thread!
   }
-
+  
   /** Update the highlight appropriately. */
   public void updateHighlight(final int curPos) {
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      ErrorPanel panel = _frame.getSelectedErrorPanel();
-      if (panel == null) {
-        // no error panel is currently selected
-        return;
-      }
-      CompilerErrorModel model =  panel.getErrorModel();
-      
-      if (!model.hasErrorsWithPositions(_openDoc)) return;
-      
-//    Utilities.showDebug("ErrorCaretListener.updateHighlight invoked");
-      
-      CompilerError error = model.getErrorAtOffset(_openDoc, curPos);
-      
-      ErrorPanel.ErrorListPane errorListPane = panel.getErrorListPane();
-      // if no error is on this line, select the (none) item
-      if (error == null) errorListPane.selectNothing();
-      else {      
-        if (errorListPane.shouldShowHighlightsInSource()) {
-          // No need to move the caret since it's already here!
-          _highlightErrorInSource(model.getPosition(error));
-        }
-        
-        // Select item wants the CompilerError
-        errorListPane.selectItem(error);
-      }
+//    assert EventQueue.isDispatchThread();  // violated during undo in DefinitionsPaneTest
+//    Utilities.invokeLater(new Runnable() { 
+//      public void run() { 
+    ErrorPanel panel = _frame.getSelectedErrorPanel();
+    if (panel == null) {
+      // no error panel is currently selected
+      return;
     }
-    });
+    CompilerErrorModel model =  panel.getErrorModel();
+    
+    if (!model.hasErrorsWithPositions(_openDoc)) return;
+    
+//    Utilities.showDebug("ErrorCaretListener.updateHighlight invoked");
+    
+    CompilerError error = model.getErrorAtOffset(_openDoc, curPos);
+    
+    ErrorPanel.ErrorListPane errorListPane = panel.getErrorListPane();
+    // if no error is on this line, select the (none) item
+    if (error == null) errorListPane.selectNothing();
+    else {      
+      if (errorListPane.shouldShowHighlightsInSource()) {
+        // No need to move the caret since it's already here!
+        _highlightErrorInSource(model.getPosition(error));
+      }
+      
+      // Select item wants the CompilerError
+      errorListPane.selectItem(error);
+    }
+//      }
+//    });
   }
   
   /** Hides the error highlight in the document. */

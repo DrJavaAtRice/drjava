@@ -83,7 +83,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     // Use the interpreter so resetInteractions is not optimized to a no-op
     interpret("0");
@@ -185,11 +185,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
         
-        try {
-          doc.saveFile(new FileSelector(file));
-          doc2.saveFile(new FileSelector(file2));
-        }
-        catch (IOException ioe) { fail("Save produced exception: " + ioe); }
+        saveFile(doc, new FileSelector(file));
+        saveFile(doc2, new FileSelector(file2));
         
         synchronized(this) { saveBeforeCompileCount++; }
       }
@@ -254,8 +251,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
         
-        try { doc2.saveFile(new FileSelector(file2)); }
-        catch (IOException ioe) { fail("Save produced exception: " + ioe); }
+        saveFile(doc2, new FileSelector(file2)); 
         
         synchronized(this) { saveBeforeCompileCount++; }
         assertModified(false, doc);
@@ -283,7 +279,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     };
     
     assertModified(true, doc);
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     assertModified(false, doc);
     assertModified(true, doc2);
     _model.addListener(listener);

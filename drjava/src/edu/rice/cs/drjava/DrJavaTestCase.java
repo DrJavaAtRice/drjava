@@ -67,9 +67,9 @@ public class DrJavaTestCase extends TestCase {
 //      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        DrJava.setPropertiesFile(newName);
+        DrJava.setPropertiesFile(newName);  // spawns change updates which should run in event thread
 //        Utilities.clearEventQueue();
-        DrJava._initConfig();
+        DrJava._initConfig();               // spawns change updates which should run in event thread
 //        Utilities.clearEventQueue();
       }
     });
@@ -81,7 +81,7 @@ public class DrJavaTestCase extends TestCase {
     * @throws Exception
     */
   protected void tearDown() throws Exception { 
-    DrJava.cleanUp();  // clobbers _config
+    DrJava.cleanUp();  
     super.tearDown();
   }
 }

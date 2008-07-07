@@ -550,19 +550,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param styleName  Name of the style to use for s
     */
   public void append(final String s, final String styleName) {
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
-//        _document.acquireWriteLock();
-//        try {
-          _document.append(s, styleName);
-//          advanceCaret(s.length());
-//        }
-//        finally { _document.releaseWriteLock(); }
-      } 
-    });
+    Utilities.invokeLater(new Runnable() { public void run() { _document.append(s, styleName); } });
     scrollToCaret();
   }
-        /** Waits for a small amount of time on a shared writer lock. */
+  
+  /** Waits for a small amount of time on a shared writer lock. */
   public void _writerDelay() {
     synchronized(_writerLock) {
       try {

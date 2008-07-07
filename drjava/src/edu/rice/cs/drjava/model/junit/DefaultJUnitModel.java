@@ -171,39 +171,39 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     junitOpenDefDocs(lod, true);
   }
   
-  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
-    * since we don't have ODD's to send out with the notification of junit start.
-    * @param qualifiedClassnames a list of all the qualified class names to test.
-    * @param files a list of their source files in the same order as qualified class names.
-    */
-  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
-    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
-    synchronized(_compilerModel.getCompilerLock()) {
-      
-      // Check _testInProgress 
-      if (_testInProgress) return;
-      
-      List<String> testClasses;
-      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
-      catch(IOException e) { throw new UnexpectedException(e); }
-      
-//      System.err.println("Found test classes: " + testClasses);
-      
-      if (testClasses.isEmpty()) {
-        nonTestCase(true);
-        return;
-      }
-      _notifier.junitClassesStarted();
-      _testInProgress = true;
-      try { _jvm.runTestSuite(); } 
-      catch(Exception e) {
-//        System.err.println("Threw exception " + e);
-        _notifier.junitEnded();
-        _testInProgress = false;
-        throw new UnexpectedException(e); 
-      }
-    }
-  }
+//  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
+//    * since we don't have ODD's to send out with the notification of junit start.
+//    * @param qualifiedClassnames a list of all the qualified class names to test.
+//    * @param files a list of their source files in the same order as qualified class names.
+//    */
+//  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
+//    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
+//    synchronized(_compilerModel.getCompilerLock()) {
+//      
+//      // Check _testInProgress 
+//      if (_testInProgress) return;
+//      
+//      List<String> testClasses;
+//      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
+//      catch(IOException e) { throw new UnexpectedException(e); }
+//      
+////      System.err.println("Found test classes: " + testClasses);
+//      
+//      if (testClasses.isEmpty()) {
+//        nonTestCase(true);
+//        return;
+//      }
+//      _notifier.junitClassesStarted();
+//      _testInProgress = true;
+//      try { _jvm.runTestSuite(); } 
+//      catch(Exception e) {
+////        System.err.println("Threw exception " + e);
+//        _notifier.junitEnded();
+//        _testInProgress = false;
+//        throw new UnexpectedException(e); 
+//      }
+//    }
+//  }
   
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
@@ -280,7 +280,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-    * classes by searching the build directories for the documents. 
+    * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
+    * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
     File buildDir = _model.getBuildDirectory();
@@ -431,11 +432,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
     catch(Exception e) {
 //      new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
-      throw new UnexpectedException(e); 
+      throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
-//    finally { 
-//      new ScrollableDialog(null, "junit setup loop terminated", classNames.toString(), "").show();
-//    }
     
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
     // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
@@ -451,11 +449,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         return;
       }
       
-      try {
+     try {  /** Run the junit test suite that has already been set up on the slave JVM */
         _testInProgress = true;
-        /** Run the junit test suite that has already been set up on the slave JVM */
-        _notifier.junitStarted(); // notify listeners that JUnit testing has finally started!
-        //          new ScrollableDialog(null, "junitStarted executed in DefaultJunitModel", "", "").show();
+        
+        // notify listeners that JUnit testing has finally started!
+        Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitStarted(); } });
+        
         _jvm.runTestSuite();
         
       }

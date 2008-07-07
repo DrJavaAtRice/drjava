@@ -38,17 +38,17 @@ package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
+import java.io.IOException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * A test on the GlobalModel for JUnit testing.
- *
- * @version $Id$
- */
+/** A test on the GlobalModel for JUnit testing.
+  * @version $Id$
+  */
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private JUnitErrorModel _m;
@@ -143,13 +143,22 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  }\n"+
     "}\n";
   
+//  private void testSaveFile(final OpenDefinitionsDocument doc, final FileSelector fs) {
+//    Utilities.invokeAndWait(new Runnable() { 
+//      public void run() {
+//        try { doc.saveFile(fs); }
+//        catch(IOException e) { throw new UnexpectedException(e); }
+//      } 
+//    });
+//  }
+    
   /** Tests that the errors array contains all encountered failures and error in the right order. */
   public void testErrorsArrayInOrder() throws Exception {
     debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -192,11 +201,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   public void testVerifyErrorHandledCorrectly() throws Exception {
     OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
     final File file = new File(_tempDir, "ABC1.java");
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.java");
-    doc2.saveFile(new FileSelector(file2));
+    saveFile(doc2, new FileSelector(file2));
     
     // Compile the correct ABC and the test
 //    JUnitTestListener listener = new JUnitTestListener(false);
@@ -205,7 +214,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
-    doc3.saveFile(new FileSelector(file3));
+    saveFile(doc3, new FileSelector(file3));
     
     JUnitTestListener listener = new JUnitNonTestListener();
     // Compile the incorrect ABC
@@ -246,7 +255,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     final OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
     final File file = new File(_tempDir, "MyTest.dj0");
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -256,9 +265,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     listener.waitCompileDone();
     
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
+    if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
     listener.checkCompileOccurred();
     
     listener.runJUnit(doc);
@@ -284,8 +291,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
     final File file1 = new File(_tempDir, "TestOne.java");
     final File file2 = new File(_tempDir, "TestTwo.java");
-    doc1.saveFile(new FileSelector(file1));
-    doc2.saveFile(new FileSelector(file2));
+    saveFile(doc1, new FileSelector(file1));
+    saveFile(doc2, new FileSelector(file2));
     
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);

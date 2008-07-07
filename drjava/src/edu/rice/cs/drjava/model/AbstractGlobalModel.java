@@ -124,6 +124,7 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 
@@ -1655,10 +1656,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final DocFile[] excludedFiles = ir.getExcludedFiles();
     final File projectFile = ir.getProjectFile();
     File pr = ir.getProjectRoot();
-    try {
-      pr = pr.getCanonicalFile();
-    }
+    
+    try { pr = pr.getCanonicalFile(); }
     catch(IOException ioe) { /* could not canonize file, we'll take what we have */ }
+    
     final File projectRoot = pr;
     final File buildDir = ir.getBuildDirectory ();
     final File workDir = ir.getWorkingDirectory();
@@ -1688,38 +1689,35 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     List<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>> l =
       new LinkedList<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>>();
     
-    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(),
-                                                                          new INavigatorItemFilter<OpenDefinitionsDocument>() {
+    INavigatorItemFilter<OpenDefinitionsDocument> navItem1 = new INavigatorItemFilter<OpenDefinitionsDocument>() {
       public boolean accept(OpenDefinitionsDocument d) { return d.inProjectPath(); }
-    }));
+    };
     
-    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(),
-                                                                          new INavigatorItemFilter<OpenDefinitionsDocument>() {
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(), navItem1));
+    
+    INavigatorItemFilter<OpenDefinitionsDocument> navItem2 = new INavigatorItemFilter<OpenDefinitionsDocument>() {
       public boolean accept(OpenDefinitionsDocument d) { return d.isAuxiliaryFile(); }
-    }));
+    };
     
-    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getExternalBinTitle(),
-                                                                          new INavigatorItemFilter<OpenDefinitionsDocument>() {
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(), navItem2));
+    
+    INavigatorItemFilter<OpenDefinitionsDocument> navItem3 = new INavigatorItemFilter<OpenDefinitionsDocument>() {
       public boolean accept(OpenDefinitionsDocument d) {
         return !(d.inProject() || d.isAuxiliaryFile()) || d.isUntitled();
       }
-    }));
-    
+    };
+                                                                          
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getExternalBinTitle(), navItem3));
+                                                                    
     IDocumentNavigator<OpenDefinitionsDocument> newNav =
-      new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
+      new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
+      makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
     
     setDocumentNavigator(newNav);
     
-//    synchronized(_auxiliaryFiles) {
-//      _auxiliaryFiles.clear();
-//      for (File file: auxFiles) { _auxiliaryFiles.add(file); }
-//    }
-    
-//    Utilities.show("Project Root loaded into grouping state is " + projRoot);
-    
     setFileGroupingState(makeProjectFileGroupingState(projectRoot, mainClass, buildDir, workDir, projectFile, srcFiles,
-                                                      auxFiles, excludedFiles, projectClassPaths, createJarFile, createJarFlags, 
-                                                      autoRefresh));
+                                                      auxFiles, excludedFiles, projectClassPaths, createJarFile, 
+                                                      createJarFlags, autoRefresh));
     
     resetInteractions(getWorkingDirectory());  // Shutdown debugger and reset interactions pane in new working directory
     
@@ -1782,11 +1780,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (! modifiedFiles.contains(f)) {
           int lnr = dbd.getLineNumber();
           OpenDefinitionsDocument odd = getDocumentForFile(f);
-//          odd.acquireReadLock();
-//          try { 
           getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled()); 
-//          }
-//          finally { odd.releaseReadLock(); }
         }
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
@@ -1810,9 +1804,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         File f = bm.getFile();
         if (! modifiedFiles.contains(f)) {
           final OpenDefinitionsDocument odd = getDocumentForFile(f);
-          final Position startPos = odd.createPosition(bm.getStartOffset());
-          final Position endPos = odd.createPosition(bm.getEndOffset());
-          getBookmarkManager().addRegion(new DocumentRegion(odd, startPos, endPos));
+          if (getOpenDefinitionsDocuments().contains(odd)) { // bookmark is not stale
+            final Position startPos = odd.createPosition(bm.getStartOffset());
+            final Position endPos = odd.createPosition(bm.getEndOffset());
+            try { getBookmarkManager().addRegion(new DocumentRegion(odd, startPos, endPos)); }
+            catch(Exception e) { DrJavaErrorHandler.record(e); }  // should never happen
+          }
+          // should remove stale bookmark
         }
       }
     }
@@ -2154,9 +2152,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
     for (OpenDefinitionsDocument doc: lod) {
-      if ((doc.isSourceFile()) &&
-          (!isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
-          (!doc.checkIfClassFileInSync())) return true;
+      if (doc.isSourceFile() &&
+          (! isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
+          (! doc.checkIfClassFileInSync())) return true;
     }
     return false;
   }
@@ -2954,6 +2952,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return true if the file was saved, false if the operation was canceled
       */
     public boolean saveFileAs(FileSaveSelector com) throws IOException {
+      assert EventQueue.isDispatchThread();
 //      System.err.println("AbstractGlobalModel.saveFileAs called on " + this);
       File oldFile = getRawFile();
       // Update _packageName since modifiedSinceSaved flag will be set to false

@@ -667,7 +667,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     setPrivateAccessible(allowAccess.booleanValue());
     
 //    System.out.println("Calling interpreterReady(" + _workDir + ") called in MainJVM");  // DEBUG
-    _interactionsModel.interpreterReady(_workDir);
+    _interactionsModel.interpreterReady(_workDir);  // not running in the event thread!
     _junitModel.junitJVMReady();
     
     _log.log("Main JVM Thread for slave connection is: " + Thread.currentThread());
@@ -699,9 +699,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
-  private void _threwException(final Throwable t) {
-    DrJavaErrorHandler.record(t);
-  }
+  private void _threwException(final Throwable t) { DrJavaErrorHandler.record(t); }
   
   /** Sets the interpreter to allow access to private members. Blocks until an interpreter
     * is connected. */

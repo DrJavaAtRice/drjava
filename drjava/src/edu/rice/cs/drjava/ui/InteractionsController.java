@@ -154,7 +154,7 @@ public class InteractionsController extends AbstractConsoleController {
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
       final CompletionMonitor completionMonitor = new CompletionMonitor();
-      _box = new InputBox();
+      _box = new InputBox();  // FIX: move _box inside run as final local variable
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
       EventQueue.invokeLater(new Runnable() {

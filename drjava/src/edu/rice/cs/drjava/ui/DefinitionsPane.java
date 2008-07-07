@@ -179,7 +179,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     String docText;
     docText = doc.getText();
    
-    if (docText.charAt(braceIndex) == '{') {//match everything before if we found a curly brace
+    char ch = docText.charAt(braceIndex);
+    if ( ch == '{' || ch == '(') { //match everything before if we found a curly brace
       Character charBefore = null;
       int charBeforeIndex = braceIndex-1;
       boolean previousLine = false;
@@ -197,7 +198,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       final StringBuilder returnText = new StringBuilder(docText.substring(0, charBeforeIndex+2));          
       if (previousLine) returnText.append("...");
-      returnText.append("{");
+      returnText.append(ch);
       
       int lastNewlineIndex = returnText.lastIndexOf("\n");
       return returnText.substring(lastNewlineIndex+1);

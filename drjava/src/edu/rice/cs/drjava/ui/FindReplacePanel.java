@@ -102,15 +102,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          _replaceAction.setEnabled(false);
-          _replaceFindNextAction.setEnabled(false);
-          _replaceFindPreviousAction.setEnabled(false);
-          _machine.positionChanged();
-          _caretChanged = true;
-        }
-      });
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+      _replaceAction.setEnabled(false);
+      _replaceFindNextAction.setEnabled(false);
+      _replaceFindPreviousAction.setEnabled(false);
+      _machine.positionChanged();
+      _caretChanged = true;
+//        }
+//      });
     }
   };
   
@@ -450,7 +450,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     // DocumentListener that keeps track of changes in the find field.
     _findField.getDocument().addDocumentListener(new DocumentListener() {
       
-      /**If attributes in the find field have changed, gray out "Replace" & "Replace and Find Next" buttons.
+      /** If attributes in the find field have changed, gray out "Replace" & "Replace and Find Next" buttons.
+        * Assumes all updates are performed in the event thread.
         * @param e the event caught by this listener
         */
       public void changedUpdate(DocumentEvent e) { _updateHelper(); }
@@ -466,8 +467,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void removeUpdate(DocumentEvent e) { _updateHelper(); }
       
       private void _updateHelper() {
-        Utilities.invokeLater(new Runnable() {
-          public void run() {
+//        Utilities.invokeLater(new Runnable() {
+//          public void run() {
 //            _machine.makeCurrentOffsetStart();
             updateFirstDocInSearch();
             _replaceAction.setEnabled(false);
@@ -477,8 +478,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
             else                                 _replaceAllAction.setEnabled(true);
             updateUI();
-          }
-        });
+//          }
+//        });
       }
     });  
     

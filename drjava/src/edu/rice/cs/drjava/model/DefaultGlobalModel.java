@@ -373,7 +373,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
     * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
     * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
-    * if a valid directory cannot be determined.  In that case, the former working directory is used.
+    * if a valid directory cannot be determined.  In that case, the former working directory is used.  This
+    * method may run outside the event thread.
     */
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
@@ -447,7 +448,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Blocks until the interpreter has registered. */
   public void waitForInterpreter() { _jvm.ensureInterpreterConnected(); }
-  
   
   /** Returns the current classpath in use by the Interpreter JVM. */
   public Iterable<File> getInteractionsClassPath() { return _jvm.getClassPath(); }
@@ -685,9 +685,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 
     * "extra classpath" config option, as well as any project-specific classpaths to the interpreter's classpath. 
-    * This method is called in DefaultInteractionsModel when the interpreter becomes ready.
+    * This method is called in DefaultInteractionsModel when the interpreter becomes ready.  Runs outside the event
+    * thread.
     */
   public void resetInteractionsClassPath() {
+//    System.err.println("Resetting interactions class path");
     Iterable<File> projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
@@ -714,7 +716,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     // add project source root to projectFilesClassPath.  All files in project tree have this root.
     
-    _interactionsModel.addProjectFilesClassPath(getProjectRoot());
+    _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
     setClassPathChanged(false);  // reset classPathChanged state
   }
   

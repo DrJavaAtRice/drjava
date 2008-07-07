@@ -508,8 +508,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // No need to override methods since no events should be fired
     _model.addListener(new TestListener());
     
-    boolean saved = doc.saveFile(new CancelingSelector());
-    assertTrue("doc should not have been saved", ! saved);
+//    boolean saved = 
+      saveFile(doc, new CancelingSelector());
+//    assertTrue("doc should not have been saved", ! saved);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
     
@@ -807,9 +808,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // None of these documents has been entered in the _documentsRepos
     
     // check.
-    FileSelector fs = new FileSelector(file1);
+    final FileSelector fs = new FileSelector(file1);
     
-    _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
+    saveAllFiles(_model, fs);
     
     assertEquals("contents of saved file1", FOO_TEXT, IOUtil.toString(file1));
     assertEquals("contents of saved file2", BAR_TEXT, IOUtil.toString(file2));

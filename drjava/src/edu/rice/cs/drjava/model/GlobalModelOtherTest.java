@@ -59,7 +59,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
   //  _log can be inherited from GlobalModelTestCase
-  Log _log = new Log("GlobalModelOtherTest.txt", true);
+  Log _log = new Log("GlobalModelOtherTest.txt", false);
   
   private static final String FOO_CLASS =
     "package bar;\n" +
@@ -243,7 +243,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    doc.saveFileAs(new FileSelector(fooFile));
+    saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
     _model.addListener(new TestListener());
@@ -270,7 +270,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
-    doc.saveFileAs(new FileSelector(fooFile));
+    saveFileAs(doc, new FileSelector(fooFile));
 //    System.err.println("Package name is: " + _model.getPackageName());
     
     // No events should fire
@@ -299,7 +299,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File fooFile = makeCanonical(new File(relDir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
-    doc.saveFileAs(new FileSelector(fooFile));
+    saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
     _model.addListener(new TestListener());
@@ -324,9 +324,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
-    OpenDefinitionsDocument doc =
-      setupDocument("package a.b.c;\n" + FOO_TEXT);
-    doc.saveFileAs(new FileSelector(fooFile));
+    OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
+    saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
     _model.addListener(new TestListener());
@@ -349,7 +348,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
-    doc.saveFileAs(new FileSelector(fooFile));
+    saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
     _model.addListener(new TestListener());
@@ -376,17 +375,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Save the footext to DrJavaTestFoo.java in subdirectory 1
     File file1 = makeCanonical(new File(subdir1, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    doc1.saveFileAs(new FileSelector(file1));
+    saveFileAs(doc1, new FileSelector(file1));
     
     // Save the bartext to Bar.java in subdirectory 1
     File file2 = makeCanonical(new File(subdir1, "Bar.java"));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    doc2.saveFileAs(new FileSelector(file2));
+    saveFileAs(doc2, new FileSelector(file2));
     
     // Save the bartext to Bar.java in subdirectory 2
     File file3 = makeCanonical(new File(subdir2, "Bar.java"));
     OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
-    doc3.saveFileAs(new FileSelector(file3));
+    saveFileAs(doc3, new FileSelector(file3));
     
     Utilities.clearEventQueue();
     
@@ -462,14 +461,18 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     };
     _model.addListener(listener);
     
-    DefaultInteractionsModel dim = _model.getInteractionsModel();
+    final DefaultInteractionsModel dim = _model.getInteractionsModel();
     
     // Create a new Java interpreter, and set it to be active
-    dim.addInterpreter("testInterpreter");
     
-    dim.setActiveInterpreter("testInterpreter", "myPrompt>");
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        dim.addInterpreter("testInterpreter");
+        dim.setActiveInterpreter("testInterpreter", "myPrompt>"); 
+      }
+    });
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     listener.assertInterpreterChangedCount(1);
     _model.removeListener(listener);
     
