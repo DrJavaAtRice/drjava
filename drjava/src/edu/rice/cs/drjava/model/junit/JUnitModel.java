@@ -95,12 +95,12 @@ public interface JUnitModel {
     */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException;
   
-  /** Forwards the classnames and files to the test manager to test all of them.
-    * @param qualifiedClassnames a list of all the qualified class names to test.
-    * @param files a list of their source files in the same order as qualified class names.
-    */
-  public void junitClasses(List<String> qualifiedClassnames, List<File> files);
-  
+//  /** Forwards the classnames and files to the test manager to test all of them.
+//    * @param qualifiedClassnames a list of all the qualified class names to test.
+//    * @param files a list of their source files in the same order as qualified class names.
+//    */
+//  public void junitClasses(List<String> qualifiedClassnames, List<File> files);
+//  
   //---------------------------- Model Callbacks ----------------------------//
   
   /** Cleans up an attempt JUnit test exeuction when suitable test code is not available.

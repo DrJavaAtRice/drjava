@@ -45,7 +45,7 @@ public class IntegerOption extends Option<Integer> {
     * @param def The default value for this option
     */
   public IntegerOption(String key, Integer def) {
-    super(key,def);
+    super(key, def);
   }
   
   /** @param s The String to be parsed.

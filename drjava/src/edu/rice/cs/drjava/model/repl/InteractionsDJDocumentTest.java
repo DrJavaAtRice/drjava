@@ -151,16 +151,16 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
 //    System.err.println("The styles list is: " + _adapter.getStylesList());
    
     Utilities.clearEventQueue();  // assures that pending updates to _pane have been performed
-    _doc.acquireReadLock();       // assures that any pending updates to _doc have been performed
-    try {
-      assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStyles().length);
-      
-      assertEquals("The first element pushed on StylesList after reset should be", styleElt1,
-                   _adapter.getStyles()[1].toString());
-      assertEquals("The second element pushed on StylesList after reset should be", styleElt2,
-                   _adapter.getStyles()[0].toString());
-    }
-    finally { _doc.releaseReadLock(); }
+//    _doc.acquireReadLock();       // assures that any pending updates to _doc have been performed
+//    try {
+    assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStyles().length);
+    
+    assertEquals("The first element pushed on StylesList after reset should be", styleElt1,
+                 _adapter.getStyles()[1].toString());
+    assertEquals("The second element pushed on StylesList after reset should be", styleElt2,
+                 _adapter.getStyles()[0].toString());
+//    }
+//    finally { _doc.releaseReadLock(); }
 //    System.err.println("testStylesList complete");
   }
 

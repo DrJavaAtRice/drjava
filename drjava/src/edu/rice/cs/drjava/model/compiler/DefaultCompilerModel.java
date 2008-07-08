@@ -145,9 +145,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compileAll() throws IOException {
-    if (_prepareForCompile()) {
-      _doCompile(_model.getOpenDefinitionsDocuments());
-    }
+    if (_prepareForCompile()) { _doCompile(_model.getOpenDefinitionsDocuments()); }
+    else _notifier.compileAborted(new UnexpectedException("Some modified open files are unsaved"));
   }
   
   /** Compiles all documents in the project source tree.  Assumes DrJava currently contains an active project.
@@ -165,9 +164,8 @@ public class DefaultCompilerModel implements CompilerModel {
     if (! _model.isProjectActive()) 
       throw new UnexpectedException("compileProject invoked when DrJava is not in project mode");
     
-    if (_prepareForCompile()) {
-      _doCompile(_model.getProjectDocuments());
-    }
+    if (_prepareForCompile()) { _doCompile(_model.getProjectDocuments()); }
+    else _notifier.compileAborted(new UnexpectedException("Project contains unsaved modified files"));
   }
   
   /** Compiles all of the given files.
@@ -181,9 +179,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * performance, we now always compile all open documents.</p>                                                                                                                              @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
-    if (_prepareForCompile()) {
-      _doCompile(defDocs);
-    }
+    if (_prepareForCompile()) { _doCompile(defDocs); }
+    else _notifier.compileAborted(new UnexpectedException("The files to be compiled include unsaved modified files"));
   }
   
   /** Compiles the given file.
@@ -198,9 +195,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compile(OpenDefinitionsDocument doc) throws IOException {
-    if (_prepareForCompile()) {
-      _doCompile(Arrays.asList(doc));
-    }
+    if (_prepareForCompile()) { _doCompile(Arrays.asList(doc)); }
+    else _notifier.compileAborted(new UnexpectedException(doc + "is modified but unsaved"));
   }
   
   /** Check that there are no unsaved or untitled files currently open.
@@ -209,7 +205,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private boolean _prepareForCompile() {
     if (_model.hasModifiedDocuments()) _notifier.saveBeforeCompile();
     // If user cancelled save, abort compilation
-    return !_model.hasModifiedDocuments();
+    return ! _model.hasModifiedDocuments();
   }
   
   /** Compile the given documents. */

@@ -62,6 +62,7 @@ import java.io.IOException;
 public abstract class StringOps {
   
   public static final String EOL = System.getProperty("line.separator");
+  public static final String NEWLINE = "\n";
   
   /** Takes theString fullString and replaces all instances of toReplace with replacement. 
     * TODO: deprecate and used corresponding String method added in Java 5.0. 
@@ -127,7 +128,7 @@ public abstract class StringOps {
    * @throws IllegalArgumentException if col is after the end of the given row
    */
   private static void _ensureColInRow(String fullString, int col, int rowStartIndex) {
-    int endOfLine = fullString.indexOf("\n",rowStartIndex);
+    int endOfLine = fullString.indexOf(NEWLINE,rowStartIndex);
     if (endOfLine == -1) {
       endOfLine = fullString.length();
     }
@@ -152,7 +153,7 @@ public abstract class StringOps {
     int currentChar = 0;
     int linesSeen = 1;
     while (startRow > linesSeen) {
-      currentChar = fullString.indexOf("\n",currentChar);
+      currentChar = fullString.indexOf(NEWLINE,currentChar);
       if (currentChar == -1) {
         throw new IllegalArgumentException("startRow is beyond the end of the string");
       }
@@ -166,7 +167,7 @@ public abstract class StringOps {
 
     // find the length
     while (endRow > linesSeen) {
-      currentChar = fullString.indexOf("\n",currentChar);
+      currentChar = fullString.indexOf(NEWLINE, currentChar);
       if (currentChar == -1) {
         throw new IllegalArgumentException("endRow is beyond the end of the string");
       }
@@ -472,7 +473,7 @@ public abstract class StringOps {
     s = StringOps.replace(s, "<", "&lt;");
     s = StringOps.replace(s, ">", "&gt;");
     s = StringOps.replace(s, EOL,"<br>");
-    s = StringOps.replace(s, "\n","<br>");
+    s = StringOps.replace(s, NEWLINE,"<br>");
     return s;
   }
 

@@ -56,6 +56,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -265,9 +266,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * with the same status into one. Perturbs _currentLocation.
     */
   public ArrayList<HighlightStatus> getHighlightStatus(int start, int end) {
-    acquireReadLock();
-    try { return _getHighlightStatus(start, end); }
-    finally { releaseReadLock(); }
+//    acquireReadLock();
+//    try { 
+      return _getHighlightStatus(start, end); 
+//    }
+//    finally { releaseReadLock(); }
   }
   
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
@@ -275,12 +278,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public ArrayList<HighlightStatus> _getHighlightStatus(int start, int end) {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     if (start == end) return new ArrayList<HighlightStatus>(0);
     ArrayList<HighlightStatus> v;
     
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       _setCurrentLocation(start);
       /* Now ask reduced model for highlight status for chars till end */
       v = _reduced.getHighlightStatus(start, end - start);
@@ -290,7 +293,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         HighlightStatus stat = v.get(i);
         if (stat.getState() == HighlightStatus.NORMAL) i = _highlightKeywords(v, i);
       }
-    }
+//    }
     
     // bstoler: Previously we moved back to the old location. This was
     // very bad and severly slowed down rendering when scrolling.
@@ -434,7 +437,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * document is modified. */
   protected void _clearCache(int offset) {
     if (_queryCache == null) return;
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       if (offset <= 0) {
         _queryCache.clear();
         _offsetToQueries.clear();
@@ -448,7 +451,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         }
         _offsetToQueries.remove(i);   // remove query bucket for i from offsetToQueries table
       }
-    }
+//    }
   }
   
   /** Add a character to the underlying reduced model. ASSUMEs _reduced lock is already held!
@@ -468,11 +471,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Change the current location of the document
     * @param loc the new absolute location 
     */
-  public void setCurrentLocation(int loc)  { 
-    acquireReadLock();
-    try { synchronized(_reduced) {_setCurrentLocation(loc); } }
-    finally { releaseReadLock(); }
-  }  
+  public void setCurrentLocation(int loc)  { _setCurrentLocation(loc); }  
   
   /** Change the current location of the document assuming that read lock and _reduced lock (or exclusive
     * read lock) are already held.  Identical to _move except that loc is absolute.
@@ -481,20 +480,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void _setCurrentLocation(int loc) {
     int dist = loc - _currentLocation;  // _currentLocation and _reduced can be updated asynchronously
     _currentLocation = loc;
-    _reduced.move(dist); 
+    _reduced.move(dist);   // must call _reduced.move here; this._move changes _currentLocation
+//    System.err.println("_setCurrentLocation(" + loc + ") executed");
   }
   
   /** Moves _currentLocation the specified distance.
     * @param dist the distance from the current location to the new location.
     */
-  public void move(int dist) {
-    acquireReadLock();
-    try { synchronized(_reduced) { _move(dist); }}
-    finally { releaseReadLock(); } 
-  }
+  public void move(int dist) { _move(dist);  }
   
   /** Moves _currentLocation the specified distance.  Assumes that read lock and reduced locks are already held.
-    * Identical to _setCurrentLocation, except that input arg is relative rather than absolute.
+    * Identical to _setCurrentLocation, except that input arg is relative rather than absolute and the new location
+    * is bounds checked.
     * @param dist the distance from the current location to the new location.
     */
   public void _move(int dist) {
@@ -511,11 +508,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * returns -1.
     * @return the relative distance backwards to the offset before the matching brace.
     */
-  public int balanceBackward() {
-    acquireReadLock();
-    try { synchronized(_reduced) { return _balanceBackward(); } }
-    finally { releaseReadLock(); }  
-  }
+  public int balanceBackward() { return _balanceBackward(); }
   
   /** Raw version of balanceBackward.  Assumes that read lock and reduced locks are already held. */
   public int _balanceBackward() {
@@ -535,9 +528,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @return the relative distance forwards to the offset after the matching brace.
     */
   public int balanceForward() {
-    acquireReadLock();
-    try { synchronized(_reduced) { return _balanceForward(); } }
-    finally { releaseReadLock(); }  
+//    acquireReadLock();
+//    try { 
+//    synchronized(_reduced) { 
+      return _balanceForward(); 
+//    } 
+//    }
+//    finally { releaseReadLock(); }  
   }
   
   /** Raw version of balanceForward.  Assumes that read lock and reduced locks are already held. */
@@ -558,36 +555,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** This method is used ONLY inside of document Read Lock.  This method is UNSAFE in any other context!
     * @return The reduced model of this document.
     */
-  public ReducedModelControl getReduced() { return _reduced; }
-  
-//  /** Returns the indent information for the current location. */
-//  public IndentInfo getIndentInformation() {
-//    acquireReadLock();
-//    try { return _getIndentInformation(); }
-//    finally { releaseReadLock(); }  
-//  }
-//  
-//  /* Performs same computation as getIndentInformation, except it assumes that the read lock is alreay held. */
-//  public IndentInfo _getIndentInformation() {
-//    // check cache
-//    final int pos = _currentLocation;
-//    Query key = new Query.IndentInformation(pos);
-//    IndentInfo cached = (IndentInfo) _checkCache(key);
-//    if (cached != null) return cached; 
-//    
-//    IndentInfo info;
-//    synchronized(_reduced) { info = _reduced.getIndentInformation(); } 
-//    _storeInCache(key, info, pos - 1);
-//    
-//    return info;
-//  }
+  public ReducedModelControl getReduced() { return _reduced; } 
   
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState stateAtRelLocation(int dist) { return _reduced.moveWalkerGetState(dist); }
   
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState _getStateAtCurrent() { 
-    assert isReadLocked();
+    // assert isReadLocked();
     return _reduced._getStateAtCurrent(); 
   }
   
@@ -604,7 +579,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _findPrevEnclosingBrace(final int pos, final char opening, final char closing) throws BadLocationException {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     // Check cache
     final Query key = new Query.PrevEnclosingBrace(pos, opening, closing);
     final Integer cached = (Integer) _checkCache(key);
@@ -619,7 +594,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     String text = getText(0, pos);
     
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       final int origPos = _currentLocation;
       // Move reduced model to location pos
       _setCurrentLocation(pos);  // reduced model points to pos == reducedPos
@@ -651,7 +626,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       /* Invariant: same as for loop except that -1 <= i <= reducedPos <= pos */
       
       _setCurrentLocation(origPos);    // Restore the state of the reduced model;
-    }  // end synchronized
+//    }  // end synchronized
     
     if (i == -1) reducedPos = -1; // No matching char was found
     _storeInCache(key, reducedPos, pos - 1);
@@ -665,13 +640,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** @return true iff specified pos is inside comment pr string. */
   public boolean _isShadowed(int pos) {
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       int origPos = _currentLocation;
       _setCurrentLocation(pos);
       boolean result = _isShadowed();
       _setCurrentLocation(origPos);
       return result;
-    }
+//    }
   }
   
   /** Searching forward, finds the position of the enclosing brace, which may be a pointy bracket. NB: ignores comments.
@@ -682,7 +657,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @return position of enclosing brace, or ERROR_INDEX (-1) if beginning of document is reached.
     */
   public int _findNextEnclosingBrace(final int pos, final char opening, final char closing) throws BadLocationException {
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.NextEnclosingBrace(pos, opening, closing);
@@ -698,7 +673,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     String text = _getText();
 //    try {      
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       final int origPos = _currentLocation;
       // Move reduced model to location pos
       _setCurrentLocation(pos);  // reduced model points to pos == reducedPos
@@ -729,7 +704,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       /* Invariant: same as for loop except that pos <= reducedPos <= i <= text.length() */
       
       _setCurrentLocation(origPos);    // Restore the state of the reduced model;
-    }  // end synchronized
+//    }  // end synchronized
     
     if (i == text.length()) reducedPos = -1; // No matching char was found
     _storeInCache(key, reducedPos, reducedPos);
@@ -762,7 +737,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int _findPrevDelimiter(final int pos, final char[] delims, final boolean skipBracePhrases)
     throws BadLocationException {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
@@ -774,8 +749,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     int reducedPos = pos;
     int i;  // index for for loop below
-//    acquireReadLock();
-//    try {
     int lineStartPos = _getLineStartPos(pos);
     if (lineStartPos < 0) lineStartPos = 0;
     
@@ -783,7 +756,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     else { 
       assert lineStartPos < pos;
       String line = getText(lineStartPos, pos - lineStartPos);  // the line containing pos
-      synchronized(_reduced) {
+//      synchronized(_reduced) {
         final int origPos = _currentLocation;
         
         // Walk backwards from specificed position, scanning current line for a delimiter
@@ -824,7 +797,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         }  // end for
         
         _setCurrentLocation(origPos);    // Restore the state of the reduced model;
-      }  // end synchronized
+//      }  // end synchronized
     } // end processing of text on same line as pos
     
     /* Invariant: same as for loop except that lineStartPos-1 <= i <= reducedPos <= pos && 0 <= reducedPos */
@@ -839,8 +812,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     // Return position of matching char or ERROR_INDEX (-1) 
     return reducedPos;  
-//    } // end try
-//    finally { releaseReadLock(); }
   }
   
   private static boolean match(char c, char[] delims) {
@@ -853,7 +824,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean _findCharInStmtBeforePos(char findChar, int position) {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     if (position == -1) {
       String msg = 
@@ -867,7 +838,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     // Find the position of the preceding occurrence findChar position (looking in paren phrases as well)
     boolean found;
     
-//    acquireReadLock();
     try {
       prevFindChar = this._findPrevDelimiter(position, findCharDelims, false);
       
@@ -879,7 +849,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       found = (foundChar == findChar);
     }
     catch (Throwable t) { throw new UnexpectedException(t); }
-//    finally { releaseReadLock(); }
     return found;
   }
   
@@ -903,7 +872,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _findPrevCharPos(final int pos, final char[] whitespace) throws BadLocationException {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.PrevCharPos(pos, whitespace);
@@ -913,11 +882,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int reducedPos = pos;
     int i = pos - 1;
     String text;
-//    acquireReadLock();
-//    try { 
     text = getText(0, pos); 
     
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       
       final int oldPos = _currentLocation;
       // Move reduced model to location reducedPpos
@@ -958,14 +925,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       /* Exit invariant same as for loop except that i <= reducedPos because at break i = reducedPos */
       _setCurrentLocation(oldPos);
-    }
+//    }
     
     int result = reducedPos;
     if (i < 0) result = -1;
     _storeInCache(key, result, pos - 1);
     return result;
-//    }
-//    finally { releaseReadLock(); } 
   }
   
   /** Checks the query cache for a stored value.  Returns the value if it has been cached, or null 
@@ -974,7 +939,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   protected Object _checkCache(final Query key) {
     if (_queryCache == null) return null;
-    synchronized (_reduced) { return _queryCache.get(key); }
+//    synchronized(_reduced) { 
+      return _queryCache.get(key); 
+//    }
   }
   
   /** Stores the given result in the helper method cache. Query classes define equality structurally.
@@ -985,10 +952,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   protected void _storeInCache(final Query query, final Object answer, final int offset) {
     if (_queryCache == null) return;
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       _queryCache.put(query, answer);
       _addToOffsetsToQueries(query, offset);
-    }
+//    }
   }
   
   /** Add <query,offset> pair to _offsetToQueries map. Assumes lock on _queryCache is already held. */
@@ -1006,7 +973,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param selEnd the offset of the last character of the region to indent
     */
   public void indentLines(int selStart, int selEnd) {
-    assert isWriteLocked();
+    // assert isWriteLocked();
     try { indentLines(selStart, selEnd, Indenter.IndentReason.OTHER, null); }
     catch (OperationCanceledException oce) {
       // Indenting without a ProgressMonitor should never be cancelled!
@@ -1026,14 +993,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException {
     
-    assert isWriteLocked();
+    // assert isWriteLocked();
     
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
     
 //    acquireWriteLock();
     try {
-//      synchronized(_reduced) {   // Unnecessary. Write access is exclusive.
       if (selStart == selEnd) {  // single line to indent
 //          Utilities.showDebug("selStart = " + selStart + " currentLocation = " + _currentLocation);
         Position oldPosition = createUnwrappedPosition(_currentLocation);
@@ -1048,7 +1014,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         }
       }
       else _indentBlock(selStart, selEnd, reason, pm);
-//      }
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
 //    finally { releaseWriteLock(); } 
@@ -1110,12 +1075,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
     String prefix;
     int firstChar;
-    acquireReadLock();
-    try {
-      firstChar = _getLineStartPos(currPos);
-      prefix = getText(firstChar, currPos-firstChar);
-    }
-    finally { releaseReadLock(); }
+//    acquireReadLock();
+//    try {
+    firstChar = _getLineStartPos(currPos);
+    prefix = getText(firstChar, currPos-firstChar);
+//    }
+//    finally { releaseReadLock(); }
     
     // Walk through string until we find a non-whitespace character
     int i;
@@ -1158,11 +1123,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param whitespace  characters to skip when looking for beginning of next statement
     */
   public int _getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
-    assert isReadLocked();
+    // assert isReadLocked();
     
-//    acquireReadLock();
     try {
-      synchronized(_reduced) {
+//      synchronized(_reduced) {
         // Check cache
         int lineStart = _getLineStartPos(pos);  // returns 0 for initial line
         
@@ -1196,10 +1160,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         int wSPrefix = firstNonWS - newLineStart;
         _storeInCache(key, wSPrefix, firstNonWS);  // relying on autoboxing
         return wSPrefix;
-      }
+//      }
     }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseReadLock(); }
 //    Utilities.show("getIdentCurrStmt(...) call completed");     
   }
   
@@ -1282,7 +1245,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int findCharOnLine(final int pos, final char findChar) {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.CharOnLine(pos, findChar);
@@ -1292,9 +1255,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int i;
     int matchIndex; // absolute index of matching character 
     
-//    acquireReadLock();
     try {
-      synchronized(_reduced) {
+//      synchronized(_reduced) {
         final int oldPos = _currentLocation;
         int lineStart = _getLineStartPos(pos);
         int lineEnd = _getLineEndPos(pos);
@@ -1316,13 +1278,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           i = lineText.indexOf(findChar, i+1);
         }
         _setCurrentLocation(oldPos);  // restore old position
-      }
+//      }
       
       if (i == -1) matchIndex = -1;
       _storeInCache(key, matchIndex, Math.max(pos - 1, matchIndex));
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseReadLock(); }
     
     return matchIndex;
   }
@@ -1334,7 +1295,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _getLineStartPos(final int pos) {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     if (pos < 0 || pos > getLength()) return -1;
     // Check cache
@@ -1343,12 +1304,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     if (cached != null) return cached.intValue();
     
     int dist;
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       final int oldPos = _currentLocation;
       _setCurrentLocation(pos);
       dist = _reduced.getDistToStart(0);
       _setCurrentLocation(oldPos);
-    }
+//    }
     
     int newPos = 0;
     if (dist >= 0)  newPos = pos - dist;
@@ -1364,7 +1325,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _getLineEndPos(final int pos) {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     if (pos < 0 || pos > getLength()) return -1;
     
@@ -1374,20 +1335,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     if (cached != null) return cached.intValue();
     
     int dist, newPos;
-//    acquireReadLock();
-//    try {
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       final int oldPos = _currentLocation;
       _setCurrentLocation(pos);
       dist = _reduced.getDistToNextNewline();
       _setCurrentLocation(oldPos);
-    }
+//    }
     newPos = pos + dist;
     assert newPos == getLength() || _getText(newPos, 1).charAt(0) == '\n';
     _storeInCache(key, newPos, newPos);
     return newPos;
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Returns the absolute position of the first non-blank/tab character on the current line including comment text or
@@ -1399,15 +1356,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _getLineFirstCharPos(final int pos) throws BadLocationException {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.LineFirstCharPos(pos);
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
-//    acquireReadLock();
-//    try {
     final int startLinePos = _getLineStartPos(pos);
     final int endLinePos = _getLineEndPos(pos);
     int nonWSPos = endLinePos;
@@ -1424,8 +1379,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
     _storeInCache(key, nonWSPos, Math.max(pos - 1, nonWSPos));
     return nonWSPos;  // may equal lineEndPos
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
@@ -1459,7 +1412,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int _getFirstNonWSCharPos(final int pos, final char[] whitespace, final boolean acceptComments) throws 
     BadLocationException {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.FirstNonWSCharPos(pos, whitespace, acceptComments);
@@ -1468,13 +1421,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     int result = -1;  // correct result if no non-whitespace chars are found
     
-//    acquireReadLock();
-//    try {
     final int docLen = getLength();
     final int origPos = _currentLocation;
     final int endPos = _getLineEndPos(pos);
     
-    synchronized(_reduced) {
+//    synchronized(_reduced) {
       String line = getText(pos, endPos - pos);   // Get text from pos to end of line
       _setCurrentLocation(pos);  // Move reduced model to location pos
       try {
@@ -1523,11 +1474,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       }
       finally { _setCurrentLocation(origPos); }  // restore _currentLocation
       
-    }  // end sync
+//    }  // end sync
     // Search through remaining lines of document; recursion depth is bounded by number of blank lines following pos
     return _getFirstNonWSCharPos(endPos + 1, whitespace, acceptComments);
-//    }
-//    finally { releaseReadLock(); }
   }
   
   public int _findPrevNonWSCharPos(int pos) throws BadLocationException {
@@ -1575,7 +1524,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean _inParenPhrase(final int pos) {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     // Check cache
     final Query key = new Query.PosInParenPhrase(pos);
@@ -1583,19 +1532,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     if (cached != null) return cached.booleanValue();
     
     boolean _inParenPhrase;
-    
-//    acquireReadLock();
-//    try {
-    synchronized(_reduced) {
+
+//    synchronized(_reduced) {
       final int oldPos = _currentLocation;
       // assert pos == here if read lock and reduced already held before call
       _setCurrentLocation(pos);
       _inParenPhrase = _inParenPhrase();
       _setCurrentLocation(oldPos);
-    }
-    _storeInCache(key, _inParenPhrase, pos - 1);
 //    }
-//    finally { releaseReadLock(); }
+    _storeInCache(key, _inParenPhrase, pos - 1);
     
     return _inParenPhrase;
   }
@@ -1603,7 +1548,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
   public BraceInfo _getLineEnclosingBrace() {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     int origPos = _currentLocation;
     // Check cache
@@ -1736,7 +1681,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   private boolean onlyWhiteSpaceBeforeCurrent() throws BadLocationException{
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line
@@ -1759,7 +1704,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   private int _getWhiteSpace() throws BadLocationException {
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     String text = "";
     int lineEnd = _getLineEndPos(_currentLocation);  // index of next '\n' char or end of document
@@ -1779,7 +1724,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 //    System.err.println("lockState = " + _lockState);
     
-    assert isReadLocked();
+    // assert isReadLocked();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line
@@ -1802,7 +1747,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public void setTab(int tab, int pos) {
     
-    assert isWriteLocked();
+    // assert isWriteLocked();
     
     try {
       int startPos = _getLineStartPos(pos);
@@ -1830,7 +1775,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public void setTab(String tab, int pos) {
     
-    assert isWriteLocked();
+    // assert isWriteLocked();
     
     try {
       int startPos = _getLineStartPos(pos);
@@ -1870,7 +1815,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (length > 0) _clearCache(offset);    // Selectively clear the query cache
       
       InsertCommand doCommand = new InsertCommand(offset, str);
-      RemoveCommand undoCommand = new RemoveCommand(offset, length);
+      RemoveCommand undoCommand = new UninsertCommand(offset, length);
       
       // add the undo/redo
       addUndoRedo(chng, undoCommand, doCommand);
@@ -1901,7 +1846,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (length > 0) _clearCache(offset);  // Selectively clear the query cache
       
       Runnable doCommand = new RemoveCommand(offset, length);
-      Runnable undoCommand = new InsertCommand(offset, removedText);
+      Runnable undoCommand = new UnremoveCommand(offset, removedText);
       
       // add the undo/redo info
       addUndoRedo(chng, undoCommand, doCommand);
@@ -1919,10 +1864,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    
 //    acquireWriteLock();
 //    try {
-//      synchronized(_reduced) {    // Unnecessary.  The write lock on the document is exclusive.
 //      clearCache(offset);         // Selectively clear the query cache; unnecessary: done in insertUpdate
 //      super.insertString(offset, str, a);
-//      }
 //    }
 //    finally { releaseWriteLock(); }
 //  }
@@ -1934,10 +1877,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    
 //    acquireWriteLock();
 //    try {
-//      synchronized(_reduced) {   // Unnecessary.  The write lock on the document is exclusive.
-//        clearCache();            // Selectively clear the query cache; unnecessary: done in removeUpdate.
+//      clearCache();            // Selectively clear the query cache; unnecessary: done in removeUpdate.
 //      super.remove(offset, len);
-//      }
 //    }
 //    finally { releaseWriteLock(); }  
 //  }
@@ -1948,10 +1889,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public byte[] getBytes() { return _getText().getBytes(); }
   
   public void clear() {
-    acquireWriteLock();
+//    acquireWriteLock();
     try { remove(0, getLength()); }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
-    finally { releaseWriteLock(); }
+//    finally { releaseWriteLock(); }
   }
   
   /** @return true if pos is the position of one of the chars in an occurrence of "//" or "/*" in text. */
@@ -1983,8 +1924,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   //-------- INNER CLASSES ------------
   
   protected class InsertCommand implements Runnable {
-    private final int _offset;
-    private final String _text;
+    protected final int _offset;
+    protected final String _text;
     
     public InsertCommand(final int offset, final String text) {
       _offset = offset;
@@ -1994,9 +1935,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     /** Inserts chars in reduced model and moves location to end of insert; cache has already been cleared. */
     public void run() {
       
-//      acquireReadLock();  // Unnecessary! exclusive readLock should already be held!
-//      try {
-//        synchronized(_reduced) {  // Unnecessary?  no other thread should hold a readLock
+//      System.err.println("Inserting '" + _text + "' at offset " + _offset);
       _reduced.move(_offset - _currentLocation);  
       int len = _text.length();
       // loop over string, inserting characters into reduced model
@@ -2004,17 +1943,28 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         char curChar = _text.charAt(i);
         _addCharToReducedModel(curChar);
       }
-      _currentLocation = _offset + len;  // current location is at end of inserted string
+      _currentLocation = _offset + len;  // update _currentLocation to match effects on the reduced model
       _styleChanged();
-//        }
-//      }
-//      finally { releaseReadLock(); }
+//      if (getClass() ==  InsertCommand.class) 
+//        System.err.println("Inserted '" + _text + "' loc is now " + _currentLocation);
     }
   }
   
+  // command that undoes a RemoveCommand; same as InsertCommand except the cursor is placed before the inserted text
+  protected class UnremoveCommand extends InsertCommand {
+    public UnremoveCommand(final int offset, final String text) { super(offset, text); }
+    public void run() {
+      super.run();
+//      System.err.println("Restoring currentLocation in unremove operation; before restoration = " + getCurrentLocation());
+      // The following command effectively modifies a document in a document listener; the invokeLater
+      // call moves it out of the listener; pending events reset _currentLocation
+      EventQueue.invokeLater(new Runnable() { public void run() { _setCurrentLocation(_offset); } });
+    }
+  }
+      
   protected class RemoveCommand implements Runnable {
-    private final int _offset;
-    private final int _length;
+    protected final int _offset;
+    protected final int _length;
     
     public RemoveCommand(final int offset, final int length) {
       _offset = offset;
@@ -2023,15 +1973,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     /** Removes chars from reduced model; cache has already been selectively cleared. */
     public void run() {
-//      acquireReadLock();  // unnecessary! exclusive readLock should already be held!
-//      try {
-//        synchronized(_reduced) {  // unnecessary?  no other thread should hold a readLock
       _setCurrentLocation(_offset);
       _reduced.delete(_length);    
-      _styleChanged();
-//        }
-//      }
-//      finally { releaseReadLock(); } 
+      _styleChanged(); 
     }
+  }
+
+  // command that undoes an InsertCommand; identical to RemoveCommand; separate for debugging purposes
+  protected class UninsertCommand extends RemoveCommand {
+    public UninsertCommand(final int offset, final int length) { super(offset, length); }
+    public void run() { super.run(); }
   }
 }

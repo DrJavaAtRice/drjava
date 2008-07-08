@@ -157,28 +157,28 @@ public class ColoringView extends PlainView implements OptionConstants {
     final AbstractDJDocument _doc = (AbstractDJDocument) doc;
     
     /* It is not clear if swing only calls this method doc read locked.  So we lock for safety's sake. */
-    _doc.acquireReadLock();
-    try {
+//    _doc.acquireReadLock();
+//    try {
+    
+    ArrayList<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
+    if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
+    
+    for (HighlightStatus stat: stats) {
+      int location = stat.getLocation();
+      int length = stat.getLength();
       
-      ArrayList<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
-      if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
+      // If this highlight status extends past p1, end at p1
+      if (location + length > end) length = end - stat.getLocation();
       
-      for (HighlightStatus stat: stats) {
-        int location = stat.getLocation();
-        int length = stat.getLength();
-        
-        // If this highlight status extends past p1, end at p1
-        if (location + length > end) length = end - stat.getLocation();
-        
-        if (! (_doc instanceof InteractionsDJDocument) || 
-            ! ((InteractionsDJDocument)_doc).setColoring((start + end)/2, g))      
-          setFormattingForState(g, stat.getState());
-        Segment text = getLineBuffer(); 
-        _doc.getText(location, length, text);
-        x = Utilities.drawTabbedText(text, x, y, g, this, location);  // updates x on each iteration
-      }
+      if (! (_doc instanceof InteractionsDJDocument) || 
+          ! ((InteractionsDJDocument)_doc).setColoring((start + end)/2, g))      
+        setFormattingForState(g, stat.getState());
+      Segment text = getLineBuffer(); 
+      _doc.getText(location, length, text);
+      x = Utilities.drawTabbedText(text, x, y, g, this, location);  // updates x on each iteration
     }
-    finally { _doc.releaseReadLock(); }
+//    }
+//    finally { _doc.releaseReadLock(); }
     //DrJava.consoleErr().println("returning x: " + x);
     return  x;
   }

@@ -178,7 +178,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   /** Return's this OptionComponent's configurable component. */
   public JComponent getComponent() { return _buttonPanel; }
 
-  /** Updates the config object with the new setting.
+  /** Updates the config object with the new setting.  Should run in event thread.
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {

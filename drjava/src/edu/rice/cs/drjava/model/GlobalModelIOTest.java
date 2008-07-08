@@ -41,6 +41,10 @@ import java.io.*;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
@@ -51,13 +55,10 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** Test I/O functions of the global model.
+/** Test I/O functions of the global model.  TODO: move document observations to event thread.
   * @version $Id$
   */
 public final class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants {
@@ -367,7 +368,6 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertContents(BAR_TEXT, docs.get(1));
     
     _log.log("testOpenMultipleFiles completed");
-    
   }
   
   /** Initiates a file open, but cancels. */
@@ -508,8 +508,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // No need to override methods since no events should be fired
     _model.addListener(new TestListener());
     
-    boolean saved = doc.saveFile(new CancelingSelector());
-    assertTrue("doc should not have been saved", ! saved);
+//    boolean saved = 
+      saveFile(doc, new CancelingSelector());
+//    assertTrue("doc should not have been saved", ! saved);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
     
@@ -535,7 +536,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     };
     
     _model.addListener(listener);
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     listener.assertSaveCount(1);
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
@@ -546,16 +547,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Saves a file already saved and overwrites its contents. */
-  public void testSaveAlreadySaved() throws BadLocationException, IOException {
+  public void testSaveAlreadySaved() throws Exception {
     //disable file backups, remember original setting
     Boolean backupStatus = DrJava.getConfig().getSetting(BACKUP_FILES);
     DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);
+    Utilities.clearEventQueue();  // config changes rely on the event thread
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
     // No listeners here -- other tests ensure the first save works
-    doc.saveFile(new FileSelector(file));
+    assertFalse("Confirm that backup status is initially false", DrJava.getConfig().getSetting(BACKUP_FILES));
+    saveFile(doc, new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
@@ -565,7 +568,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
         try { f = doc.getFile(); }
-        catch (FileMovedException fme) { fail("file does not exist"); }   // We know file should exist
+        catch (FileMovedException fme) { 
+//          System.err.println("File " + f + " to be saved DOES NOT EXIST");
+          fail("file does not exist"); // We know file should exist
+        }   
         try {
           assertEquals("saved file", file.getCanonicalFile(), f.getCanonicalFile());
           synchronized(this) { saveCount++; }
@@ -574,34 +580,56 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       }
     };
     
-    File backup = new File(file.getPath() + "~");
+    final File backup = new File(file.getPath() + "~");
+//    System.err.println("fileName = " + file);
+//    System.err.println("backupName = " + backup);
     backup.delete();
+    
+    assertFalse("Confirm that backup has been deleted if it already existed", backup.exists());
     
     _model.addListener(listener);
     
     // Muck up the document
     changeDocumentText(BAR_TEXT, doc);
+    Utilities.clearEventQueue();
+    
+//    System.err.println("Document text = '" + doc.getText() + "'");
     
     // Save over top of the previous file
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file)); 
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     listener.assertSaveCount(1);
-    assertEquals("contents of saved file 2nd write", BAR_TEXT, IOUtil.toString(file));
-    assertFalse("no backup was made", backup.exists());
-    
+    assertEquals("Contents of saved file 2nd write", BAR_TEXT, IOUtil.toString(file));
+    assertFalse("No backup was made", backup.exists());
+//    System.err.println("Confirm that " + backup + " does not exist: " + backup.exists());
     //enable file backups
+    
     DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.TRUE);
+    Utilities.clearEventQueue();
     
     // Muck up the document
     changeDocumentText(FOO_TEXT, doc);
+
+//    System.err.println("Backup status = " + DrJava.getConfig().getSetting(BACKUP_FILES) + " for backup file " + backup);
+//    System.err.println("Before saving to '" + file + "', confirm " + backup + " does not exist: " + backup.exists());
+    
+    assertTrue("Confirm that BACKUP_FILES is true", DrJava.getConfig().getSetting(BACKUP_FILES));
+    assertFalse("Confirm that backup file " + backup + " does not yet exist", backup.exists());
+    assertEquals("Confirm that file " + file + " was modified properly", BAR_TEXT, IOUtil.toString(file));
+//    System.err.println("Old contents of file " + file + " = '" + IOUtil.toString(file) + "'");
+     // Save over top of the previous file
+    saveFile(doc, new FileSelector(file));
     Utilities.clearEventQueue();
     
-    // Save over top of the previous file
-    doc.saveFile(new FileSelector(file));
+    assertTrue("Confirm that backup file " + backup + " was created", backup.exists());
     
-    Utilities.clearEventQueue();
+//    System.err.println("After saving, confirm " + backup + " exists: " + backup.exists());
+//    System.err.println("Backup has contents '" + IOUtil.toString(backup) + "'");
+//    System.err.println("New file has contents '" + IOUtil.toString(file) + "'");
+
     listener.assertSaveCount(2);
+//    System.err.println("After checking save count, confirm " + backup + " exists: " + backup.exists());
     assertEquals("contents of saved file 3rd write", FOO_TEXT, IOUtil.toString(file));
     assertEquals("contents of backup file 3rd write", BAR_TEXT, IOUtil.toString(backup));
     
@@ -620,7 +648,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File file = tempFile();
     
     // No listeners here -- other tests ensure the first save works
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
@@ -643,7 +671,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // Muck up the document
     changeDocumentText(BAR_TEXT, doc);
     
-    doc.saveFile(new CancelingSelector());
+    saveFile(doc, new CancelingSelector());
     
     // The file should have saved on top of the old text anyhow.
     // The canceling selector should never have been called.
@@ -662,7 +690,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File file = tempFile();
     
     // No listeners here -- other tests ensure the first save works
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
@@ -673,7 +701,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // Muck up the document
     changeDocumentText(BAR_TEXT, doc);
     
-    doc.saveFileAs(new CancelingSelector());
+    saveFileAs(doc, new CancelingSelector());
     
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
     
@@ -687,7 +715,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File file2 = tempFile();
     
     // No listeners here -- other tests ensure the first save works
-    doc.saveFile(new FileSelector(file1));
+    saveFile(doc, new FileSelector(file1));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file1));
@@ -711,7 +739,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // Muck up the document
     changeDocumentText(BAR_TEXT, doc);
     
-    doc.saveFileAs(new FileSelector(file2));
+    saveFileAs(doc, new FileSelector(file2));
     
     assertEquals("contents of saved file1", FOO_TEXT, IOUtil.toString(file1));
     
@@ -722,35 +750,41 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   
   public void testSaveAsExistsForOverwrite() throws BadLocationException, IOException {
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file1 = tempFile();
-    try {
-      doc.saveFileAs(new WarningFileSelector(file1));
-      fail("Did not ask to verify overwrite as expected");
-    }
-    catch (OverwriteException e1) { /* Good behavior for file saving ... */ }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try { 
+          doc.saveFileAs(new WarningFileSelector(file1));
+          fail("Did not warn of open file as expected");
+        }
+        catch (Exception e) { /* Good behavior for file saving ... */ }
+      }
+    });
     
     _log.log("testSaveAsExistsForOverwrite completed");
   }
   
   public void testSaveAsExistsAndOpen() throws BadLocationException, IOException {
-    OpenDefinitionsDocument doc1,doc2;
-    final File file1,file2;
     
-    file1 = tempFile(1);
-    doc1 = _model.getDocumentForFile(file1);
+    final File file1 = tempFile(1);
+    final OpenDefinitionsDocument doc1 = _model.getDocumentForFile(file1);
     changeDocumentText(FOO_TEXT,doc1);
-    doc1.saveFileAs(new FileSelector(file1));
+    saveFileAs(doc1, new FileSelector(file1));
     
-    file2 = tempFile(2);
-    doc2 = _model.getDocumentForFile(file2);
+    final File file2 = tempFile(2);
+    final OpenDefinitionsDocument doc2 = _model.getDocumentForFile(file2);
     changeDocumentText(BAR_TEXT, doc2);
     
-    try {
-      doc2.saveFileAs(new WarningFileSelector(file1));
-      fail("Did not warn of open file as expected");
-    }
-    catch (OpenWarningException e) { /* Good behavior for file saving ... */ }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try { 
+          doc2.saveFileAs(new WarningFileSelector(file1));
+          fail("Did not warn of open file as expected");
+        }
+        catch (Exception e) { /* Good behavior for file saving ... */ }
+      }
+    });
     
     _log.log("testSaveAsExistsAndOpen completed");
   }
@@ -774,9 +808,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // None of these documents has been entered in the _documentsRepos
     
     // check.
-    FileSelector fs = new FileSelector(file1);
+    final FileSelector fs = new FileSelector(file1);
     
-    _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
+    saveAllFiles(_model, fs);
     
     assertEquals("contents of saved file1", FOO_TEXT, IOUtil.toString(file1));
     assertEquals("contents of saved file2", BAR_TEXT, IOUtil.toString(file2));
@@ -1021,10 +1055,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testFileMovedWhenTriedToSave()
     throws BadLocationException, IOException {
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
-    doc.saveFile(new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     TestListener listener = new TestListener();
     
@@ -1032,19 +1066,20 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     file.delete();
     changeDocumentText(BAR_TEXT, doc);
-    try {
-      doc.saveFile(new WarningFileSelector(file));
-      fail("Save file should have thrown an exception");
-    }
-    catch (GlobalModelTestCase.FileMovedWarningException fme) {
-      // this is expected to occur:
-      //  WarningFileSelector throws it in shouldSaveAfterFileMoved()
-    }
     
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try { 
+          doc.saveFile(new WarningFileSelector(file));
+          fail("Did not warn of open file as expected");
+        }
+        catch (Exception e) { /* Good behavior for file saving ... */ }
+      }
+    });
+
     assertModified(true, doc);
     assertContents(BAR_TEXT, doc);
-    
-    
+   
     _log.log("testFileMovedWhenTriedToSave completed");
   }
   

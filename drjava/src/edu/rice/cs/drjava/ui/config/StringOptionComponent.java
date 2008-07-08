@@ -74,7 +74,7 @@ public class StringOptionComponent extends OptionComponent<String> {
     _label.setToolTipText(description);
   }
 
-  /** Updates the config object with the new setting.
+  /** Updates the config object with the new setting.  Should run in event thread.
    *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {

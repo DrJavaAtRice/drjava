@@ -50,6 +50,9 @@ public interface CompilerListener {
   /** Called when a compile has finished running. */
   public void compileEnded(File workDir, List<? extends File> excludedFiles);
   
+  /** Called if a compilation is aborted. */
+  public void compileAborted(Exception e);
+  
   /** Called to demand that all open source files be saved before compiling. */
   public void saveBeforeCompile();
 

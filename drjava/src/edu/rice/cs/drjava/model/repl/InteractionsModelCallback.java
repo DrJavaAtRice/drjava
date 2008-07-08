@@ -39,7 +39,8 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.File;
 import java.io.IOException;
 
-/** Callback interface which allows an InteractionsModel to respond to events in a remote Java interpreter.
+/** Callback interface which allows an InteractionsModel to respond to events in a remote Java interpreter.  These
+  * methods may run outside the event thread!
   * @version $Id$
   */
 public interface InteractionsModelCallback {
@@ -53,6 +54,12 @@ public interface InteractionsModelCallback {
     * @param s String to print
     */
   public void replSystemOutPrint(String s);
+  
+    
+  /** Called when the repl prints to System.err.
+    * @param s String to print
+    */
+  public void replSystemErrPrint(String s);
   
   /** Called when input is request from System.in.
     * @return the input given to System.in
@@ -73,11 +80,6 @@ public interface InteractionsModelCallback {
     * @throws IllegalArgumentException if oldListener is not the currently installed listener
     */
   public void changeInputListener(InputListener oldListener, InputListener newListener);
-  
-  /** Called when the repl prints to System.err.
-    * @param s String to print
-    */
-  public void replSystemErrPrint(String s);
   
   /** Signifies that the most recent interpretation completed successfully,
    * returning no value.

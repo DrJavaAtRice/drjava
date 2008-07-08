@@ -154,7 +154,7 @@ public class InteractionsController extends AbstractConsoleController {
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
       final CompletionMonitor completionMonitor = new CompletionMonitor();
-      _box = new InputBox();
+      _box = new InputBox();  // FIX: move _box inside run as final local variable
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
       EventQueue.invokeLater(new Runnable() {
@@ -174,11 +174,12 @@ public class InteractionsController extends AbstractConsoleController {
               
               /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
                * interim. */
-              _doc.acquireWriteLock();
-              try { 
-                _pane.setEditable(true);
-                _pane.setCaretPosition(_doc.getLength()); }
-              finally { _doc.releaseWriteLock(); }
+//              _doc.acquireWriteLock();
+//              try { 
+              _pane.setEditable(true);
+              _pane.setCaretPosition(_doc.getLength()); 
+//              }
+//              finally { _doc.releaseWriteLock(); }
               _pane.requestFocusInWindow();
               
               completionMonitor.set();
@@ -196,19 +197,19 @@ public class InteractionsController extends AbstractConsoleController {
           StyleConstants.setComponent(inputAttributes, _box);
           
           /* Insert box in document. */
-          _doc.acquireWriteLock();
-          try {
-            _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
-            
-            // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
-            _swingConsoleDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
-            
-            // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
-            _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
-            
-            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-          }
-          finally { _doc.releaseWriteLock(); }
+//          _doc.acquireWriteLock();
+//          try {
+          _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+          
+          // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
+          _interactionsDJDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
+          
+          // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
+          _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
+          
+          _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+//          }
+//          finally { _doc.releaseWriteLock(); }
           
           _box.setVisible(true);
           EventQueue.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
@@ -237,7 +238,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterResetting() {
       Utilities.invokeLater(new Runnable() { 
         public void run() { 
-          _swingConsoleDocument.clearColoring();
+          _interactionsDJDocument.clearColoring();
 //          _pane.resetPrompts();  // NOT USED
         }
       });
@@ -355,7 +356,7 @@ public class InteractionsController extends AbstractConsoleController {
     _errStyle.addAttribute(StyleConstants.Foreground, 
                            DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
     _errStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    _swingConsoleDocument.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
+    _interactionsDJDocument.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
@@ -367,7 +368,7 @@ public class InteractionsController extends AbstractConsoleController {
     _debugStyle.addAttribute(StyleConstants.Foreground, 
                              DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
     _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    _swingConsoleDocument.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
+    _interactionsDJDocument.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _debugStyle.addAttribute(StyleConstants.Foreground, oe.value);
@@ -448,37 +449,50 @@ public class InteractionsController extends AbstractConsoleController {
   
   /** Evaluates the interaction on the current line. */
   AbstractAction evalAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      _doc.acquireWriteLock();
-      try {
-        if (! _swingConsoleDocument._inBlockComment()) {
-          Thread command = new Thread("Evaluating Interaction") { 
-            public void run() {  // not under a Write Lock!
-              try { _model.interpretCurrentInteraction(); }
-              catch (Throwable t) { DrJavaErrorHandler.record(t); }
-            }
-          };
-          command.start();
-        }
-        else {
-          _model._addNewline();
-          _model.interactionContinues();
-        }
-      }
-      finally { _doc.releaseWriteLock(); }
-    }
+    public void actionPerformed(ActionEvent e) { _model.interpretCurrentInteraction(); }
   };
   
+//  /** Evaluates the current text following the prompt in the interactions document.*/
+//  private void _evalCurrentInteraction() {
+//    
+//    if (! _interactionsDJDocument._inBlockComment()) {
+//       
+//    String toEval;
+//    if (_doc.inProgress()) return;  // Don't start a new interaction while one is in progress
+//      
+//      String text = _doc.getCurrentInteraction();
+//      toEval = text.trim();
+//      if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
+////          System.err.println("Preparing to interpret '" + text +"'");
+//      _prepareToInterpret(text);  // Writes a newLine!
+//    }
+//    try { _model.interpret(toEval); }
+//    catch (Throwable t) { DrJavaErrorHandler.record(t); }
+//  };
+//  
+//  /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
+//    * event thread for newline to be inserted at proper time.  Assumes that Write Lock is already held. */
+//  private void _prepareToInterpret(String text) {
+//    _addNewline();
+//    _notifyInteractionStarted();
+//    _doc.setInProgress(true);
+//    _model.setAddToHistory(text); // _document.addToHistory(text);
+//    //Do not add to history immediately in case the user is not finished typing when they press return
+//  }
+//  
+//  /** Appends a newLine to _document assuming that the Write Lock is already held. Must run in the event thread. */
+//  private void _addNewline() { append(StringOps.NEWLINE, InteractionsDocument.DEFAULT_STYLE); }
+         
   /** Recalls the previous command from the history. */
   AbstractAction historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        _doc.acquireWriteLock();  // recall... below acquires WriteLock!
-        try {
-          if (_doc.recallPreviousInteractionInHistory()) moveToEnd();
-          if (!_isCursorAfterPrompt()) moveToPrompt();
-        }
-        finally { _doc.releaseWriteLock(); }
+//        _doc.acquireWriteLock();  // recall... below acquires WriteLock!
+//        try {
+        if (_doc.recallPreviousInteractionInHistory()) moveToEnd();
+        if (!_isCursorAfterPrompt()) moveToPrompt();
+//        }
+//        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -487,9 +501,11 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        _doc.acquireWriteLock();
-        try { if (_doc.recallNextInteractionInHistory() || !_isCursorAfterPrompt()) moveToPrompt(); }
-        finally { _doc.releaseWriteLock(); }
+//        _doc.acquireWriteLock();
+//        try { 
+        if (_doc.recallNextInteractionInHistory() || !_isCursorAfterPrompt()) moveToPrompt(); 
+//        }
+//        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -500,16 +516,16 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveUpAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        _doc.acquireWriteLock();
-        try {
-          if (_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) 
-            historyPrevAction.actionPerformed(e);
-          else {
-            defaultUpAction.actionPerformed(e);
-            if (! _isCursorAfterPrompt()) moveToPrompt();
-          }
+//        _doc.acquireWriteLock();
+//        try {
+        if (_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) 
+          historyPrevAction.actionPerformed(e);
+        else {
+          defaultUpAction.actionPerformed(e);
+          if (! _isCursorAfterPrompt()) moveToPrompt();
         }
-        finally { _doc.releaseWriteLock(); }
+//        }
+//        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -520,13 +536,13 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveDownAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        _doc.acquireWriteLock();
-        try {
-          if (_shouldGoIntoHistory(_pane.getCaretPosition(), _swingConsoleDocument.getLength())) {
-            historyNextAction.actionPerformed(e);
-          } else { defaultDownAction.actionPerformed(e); }
-        }
-        finally { _doc.releaseWriteLock(); }
+//        _doc.acquireWriteLock();
+//        try {
+        if (_shouldGoIntoHistory(_pane.getCaretPosition(), _interactionsDJDocument.getLength())) {
+          historyNextAction.actionPerformed(e);
+        } else { defaultDownAction.actionPerformed(e); }
+//        }
+//        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -538,7 +554,7 @@ public class InteractionsController extends AbstractConsoleController {
   private boolean _shouldGoIntoHistory(int start, int end) {
     if (_isCursorAfterPrompt() && end >= start) {
       String text = "";
-      try { text = _swingConsoleDocument.getText(start, end - start); }
+      try { text = _interactionsDJDocument.getText(start, end - start); }
       catch(BadLocationException ble) {
         throw new UnexpectedException(ble); //The conditional should prevent this from ever happening
       }
@@ -556,12 +572,8 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction historyReverseSearchAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
-//        _doc.acquireReadLock();  // may be overkill
-//        try {
         _doc.reverseSearchInteractionsInHistory();
         moveToEnd();
-//        }
-//        finally { _doc.releaseReadLock(); }
       }
     }
   };
@@ -584,18 +596,18 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveLeftAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        _doc.acquireWriteLock(); 
-        try {
-          int promptPos = _doc.getPromptPos();
-          int pos = _pane.getCaretPosition();
-          if (pos < promptPos) moveToPrompt();
-          else if (pos == promptPos) moveToEnd(); // Wrap around to the end
-          else {
-            _pane.setCaretPosition(pos - 1); // pos > promptPos
+//        _doc.acquireWriteLock(); 
+//        try {
+        int promptPos = _doc.getPromptPos();
+        int pos = _pane.getCaretPosition();
+        if (pos < promptPos) moveToPrompt();
+        else if (pos == promptPos) moveToEnd(); // Wrap around to the end
+        else {
+          _pane.setCaretPosition(pos - 1); // pos > promptPos
 //            setCachedCaretPos(pos - 1);
           }
-        }
-        finally { _doc.releaseWriteLock(); }
+//        }
+//        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -603,47 +615,47 @@ public class InteractionsController extends AbstractConsoleController {
   /** Moves the caret right or wraps around. */
   AbstractAction moveRightAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireWriteLock();
-      try {
-        int pos = _pane.getCaretPosition();
-        if (pos < _doc.getPromptPos()) moveToEnd();
-        else if (pos >= _doc.getLength()) moveToPrompt(); // Wrap around to the star
-        else {
-          _pane.setCaretPosition(pos + 1); // position between prompt and end
+//      _doc.acquireWriteLock();
+//      try {
+      int pos = _pane.getCaretPosition();
+      if (pos < _doc.getPromptPos()) moveToEnd();
+      else if (pos >= _doc.getLength()) moveToPrompt(); // Wrap around to the star
+      else {
+        _pane.setCaretPosition(pos + 1); // position between prompt and end
 //          setCachedCaretPos(pos + 1);
-        }
       }
-      finally { _doc.releaseWriteLock(); }
+//      }
+//      finally { _doc.releaseWriteLock(); }
     }
   };
   
   /** Skips back one word.  Doesn't move past the prompt. */
   AbstractAction prevWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireWriteLock();
-      try {
-        int position = _pane.getCaretPosition();
-        int promptPos = _doc.getPromptPos();
-        if (position < promptPos) moveToPrompt();
-        else if (position == promptPos) moveToEnd(); // Wrap around to the end
-        else _pane.getActionMap().get(DefaultEditorKit.previousWordAction).actionPerformed(e);
-      }
-      finally { _doc.releaseWriteLock(); }
+//      _doc.acquireWriteLock();
+//      try {
+      int position = _pane.getCaretPosition();
+      int promptPos = _doc.getPromptPos();
+      if (position < promptPos) moveToPrompt();
+      else if (position == promptPos) moveToEnd(); // Wrap around to the end
+      else _pane.getActionMap().get(DefaultEditorKit.previousWordAction).actionPerformed(e);
+//      }
+//      finally { _doc.releaseWriteLock(); }
     }
   };
   
   /** Skips forward one word.  Doesn't move past the prompt. */
   AbstractAction nextWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireWriteLock();
-      try {
-        int position = _pane.getCaretPosition();
-        int promptPos = _doc.getPromptPos();
-        if (position < promptPos) moveToEnd();
-        else if (position >= _doc.getLength()) moveToPrompt(); // Wrap around to the start
-        else _pane.getActionMap().get(DefaultEditorKit.nextWordAction).actionPerformed(e);
-      }
-      finally { _doc.releaseWriteLock(); }
+//      _doc.acquireWriteLock();
+//      try {
+      int position = _pane.getCaretPosition();
+      int promptPos = _doc.getPromptPos();
+      if (position < promptPos) moveToEnd();
+      else if (position >= _doc.getLength()) moveToPrompt(); // Wrap around to the start
+      else _pane.getActionMap().get(DefaultEditorKit.nextWordAction).actionPerformed(e);
+//      }
+//      finally { _doc.releaseWriteLock(); }
     }
   };
   

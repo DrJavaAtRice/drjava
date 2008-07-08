@@ -99,7 +99,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** The error model containing all current JUnit errors. */
   private volatile JUnitErrorModel _junitErrorModel;
   
-  /** State flag to prevent starting new tests on top of old ones */
+  /** State flag to prevent starting new tests on top of old ones and to prevent resetting interactions after compilation
+    * is forced by unit testing.
+    */
   private volatile boolean _testInProgress = false;
   
   /** State flag to record if test classes in projects must end in "Test" */
@@ -169,38 +171,39 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     junitOpenDefDocs(lod, true);
   }
   
-  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
-    * since we don't have ODD's to send out with the notification of junit start.
-    * @param qualifiedClassnames a list of all the qualified class names to test.
-    * @param files a list of their source files in the same order as qualified class names.
-    */
-  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
-    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
-    synchronized(_compilerModel.getCompilerLock()) {
-      
-      // Check _testInProgress 
-      if (_testInProgress) return;
-      
-      List<String> testClasses;
-      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
-      catch(IOException e) { throw new UnexpectedException(e); }
-      
-//      System.err.println("Found test classes: " + testClasses);
-      
-      if (testClasses.isEmpty()) {
-        nonTestCase(true);
-        return;
-      }
-      _notifier.junitClassesStarted(); 
-      try { _jvm.runTestSuite(); } 
-      catch(Exception e) {
-//        System.err.println("Threw exception " + e);
-        _notifier.junitEnded();
-        _testInProgress = false;
-        throw new UnexpectedException(e); 
-      }
-    }
-  }
+//  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
+//    * since we don't have ODD's to send out with the notification of junit start.
+//    * @param qualifiedClassnames a list of all the qualified class names to test.
+//    * @param files a list of their source files in the same order as qualified class names.
+//    */
+//  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
+//    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
+//    synchronized(_compilerModel.getCompilerLock()) {
+//      
+//      // Check _testInProgress 
+//      if (_testInProgress) return;
+//      
+//      List<String> testClasses;
+//      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
+//      catch(IOException e) { throw new UnexpectedException(e); }
+//      
+////      System.err.println("Found test classes: " + testClasses);
+//      
+//      if (testClasses.isEmpty()) {
+//        nonTestCase(true);
+//        return;
+//      }
+//      _notifier.junitClassesStarted();
+//      _testInProgress = true;
+//      try { _jvm.runTestSuite(); } 
+//      catch(Exception e) {
+////        System.err.println("Threw exception " + e);
+//        _notifier.junitEnded();
+//        _testInProgress = false;
+//        throw new UnexpectedException(e); 
+//      }
+//    }
+//  }
   
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
@@ -233,7 +236,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    System.err.println("junitOpenDefDocs(" + lod + "," + allTests + ")");
     
     // Check_testInProgress flag
-    if (_testInProgress) return; 
+    if (_testInProgress) return;
     
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
@@ -255,7 +258,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               nonTestCase(allTests);
               return;
             }
-            _rawJUnitOpenDefDocs(lod, allTests);
+            SwingUtilities.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
+              public void run() { _rawJUnitOpenDefDocs(lod, allTests); }
+            });
           }
           finally {  // always remove this listener after its first execution
             EventQueue.invokeLater(new Runnable() { 
@@ -266,14 +271,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       };
       
 //        Utilities.show("Notifying JUnitModelListener");
+      _testInProgress = true;
       _notifier.compileBeforeJUnit(testAfterCompile);
+      _testInProgress = false;
     }
     
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
   /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-    * classes by searching the build directories for the documents. 
+    * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
+    * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
     File buildDir = _model.getBuildDirectory();
@@ -424,11 +432,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
     catch(Exception e) {
 //      new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
-      throw new UnexpectedException(e); 
+      throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
-//    finally { 
-//      new ScrollableDialog(null, "junit setup loop terminated", classNames.toString(), "").show();
-//    }
     
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
     // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
@@ -444,10 +449,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         return;
       }
       
-      try {
-        /** Run the junit test suite that has already been set up on the slave JVM */
-        _notifier.junitStarted(); // notify listeners that JUnit testing has finally started!
-        //          new ScrollableDialog(null, "junitStarted executed in DefaultJunitModel", "", "").show();
+     try {  /** Run the junit test suite that has already been set up on the slave JVM */
+        _testInProgress = true;
+        
+        // notify listeners that JUnit testing has finally started!
+        Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitStarted(); } });
+        
         _jvm.runTestSuite();
         
       }
@@ -488,7 +495,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //       is used to prevent a new test from being started and overrunning the existing one.
 //      Utilities.show("DefaultJUnitModel.nonTestCase(" + isTestAll + ") called");
     _notifier.nonTestCase(isTestAll);
-    _testInProgress = false;
+    _testInProgress = false;  // redundant but doesn't hurt
   }
   
   /** Called to indicate that an illegal class file was encountered
@@ -522,7 +529,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifier.junitEnded();
-    _testInProgress = false;
+    _testInProgress = false;  // redundant but doesn't hurt
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
   }
   
@@ -543,6 +550,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifier.junitEnded();
-    _testInProgress = false; 
+    _testInProgress = false;   // may be redundant
   }
 }

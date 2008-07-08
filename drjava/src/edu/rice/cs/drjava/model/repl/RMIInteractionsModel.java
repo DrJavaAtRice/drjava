@@ -61,8 +61,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println
     */
-  public RMIInteractionsModel(MainJVM jvm, ConsoleDocumentInterface adapter, File wd, int historySize, int writeDelay) {
-    super(adapter, wd, historySize, writeDelay);
+  public RMIInteractionsModel(MainJVM jvm, ConsoleDocumentInterface cDoc, File wd, int historySize, int writeDelay) {
+    super(cDoc, wd, historySize, writeDelay);
     _jvm = jvm;
   }
   
@@ -169,22 +169,24 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param updatePrompt whether or not the interpreter has changed
     */
   private void _updateDocument(final String prompt, final boolean inProgress, boolean updatePrompt) {
+    assert EventQueue.isDispatchThread();
     if (updatePrompt) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          _document.acquireWriteLock();
-          try {
-            _document.setPrompt(prompt);
-            _document.insertNewline(_document.getLength());
-            _document.insertPrompt();
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+//          _document.acquireWriteLock();
+//          try {
+          _document.setPrompt(prompt);
+          _document.insertNewline(_document.getLength());
+          _document.insertPrompt();
 //            int len = _document.getPromptLength();  
 //            advanceCaret(len);
-            _document.setInProgress(inProgress);
-          }
-          finally { _document.releaseWriteLock(); }
-        }
-      });
-      scrollToCaret();
+          _document.setInProgress(inProgress);
+          scrollToCaret();
+//          }
+//          finally { _document.releaseWriteLock(); }
+//        }
+//      });
+
     }   
   }
   

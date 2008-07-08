@@ -188,8 +188,9 @@ public class JPDADebugger implements Debugger {
   /** Returns whether the debugger is currently enabled. */
   public boolean isReady() { return _vm != null; }
   
-  /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
+  /** Attaches the debugger to the Interactions JVM to prepare for debugging.  Only runs in event thread. */
   public synchronized void startUp() throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) {
       _eventHandlerError = null;
       // check if all open documents are in sync
@@ -237,9 +238,11 @@ public class JPDADebugger implements Debugger {
         Breakpoint bp = oldBreakpoints.get(i);
         int lnr = bp.getLineNumber();
         OpenDefinitionsDocument odd = bp.getDocument();
-        odd.acquireReadLock();
-        try { setBreakpoint(new JPDABreakpoint(odd, odd._getOffset(lnr), lnr, bp.isEnabled(), this)); }
-        finally { odd.releaseReadLock(); }
+//        odd.acquireReadLock();
+//        try { 
+          setBreakpoint(new JPDABreakpoint(odd, odd._getOffset(lnr), lnr, bp.isEnabled(), this)); 
+//        }
+//        finally { odd.releaseReadLock(); }
       }
     }
     

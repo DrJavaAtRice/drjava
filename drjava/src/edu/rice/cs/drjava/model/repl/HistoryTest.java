@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
@@ -55,8 +56,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   private History _history;
   private File _tempDir;
 
-  /** Initialize fields for each test.
-   */
+  /** Initialize fields for each test. */
   public void setUp() throws Exception {
     super.setUp();
     DrJava.getConfig().resetToDefaults();
@@ -65,8 +65,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history = new History();
   }
 
-  /** Cleans up temporary files and tries to free used variables after each test.
-   */
+  /** Cleans up temporary files and tries to free used variables after each test. */
   public void tearDown() throws Exception {
     boolean ret = IOUtil.deleteRecursively(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
@@ -101,9 +100,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.add(entry);
 
     _history.movePrevious("");
-    assertEquals("Prev did not move to correct item",
-                 entry,
-                 _history.getCurrent());
+    assertEquals("Prev did not move to correct item", entry, _history.getCurrent());
 
     _history.moveNext(entry);
     assertEquals("Can't move to blank line at end",
@@ -111,8 +108,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
                  _history.getCurrent());
   }
 
-  /** Ensures that Histories are bound to 500 entries.
-   */
+  /** Ensures that Histories are bound to 500 entries. */
   public void testHistoryIsBounded() {
     int maxLength = 500;
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength));
@@ -133,8 +129,10 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    */
   public void testLiveUpdateOfHistoryMaxSize() {
     int maxLength = 20;
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
+    FileConfiguration config = DrJava.getConfig();
+    config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
     
+    Utilities.clearEventQueue();
     Utilities.clearEventQueue();
 
     for (int i = 0; i < maxLength; i++) {
@@ -142,10 +140,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     }
 
     assertEquals("History size should be 20", 20, _history.size());
+    
+//    System.err.println("Setting HISTORY_MAX_SIZE to 10");
 
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(10));
-   
+    config.setSetting(HISTORY_MAX_SIZE, 10);
     Utilities.clearEventQueue();
+    
     assertEquals("History size should be 10", 10, _history.size());
     _history.setMaxSize(100);
 
@@ -154,14 +154,13 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.setMaxSize(0);
     assertEquals("History size should be 0", 0, _history.size());
 
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(-1));
+    config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(-1));
 
     Utilities.clearEventQueue();
     assertEquals("History size should still be 0", 0, _history.size());
   }
 
-  /** Tests the getHistoryAsString() method
-   */
+  /** Tests the getHistoryAsString() method. */
   public void testGetHistoryAsString() {
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
 

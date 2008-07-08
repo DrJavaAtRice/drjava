@@ -331,15 +331,15 @@ public interface DJDocument extends SwingDocumentInterface {
   /* Gets the reduced model so it can be locked. */
   public ReducedModelControl getReduced();
   
-  /** Swing-style acquireReadLock(). */
-  public void acquireReadLock();
-  
-  /** Swing-style releaseReadLock(). */
-  public void releaseReadLock();
-  
-  /** Swing-style writeLock(). */
-  public void acquireWriteLock();
-  
-  /** Swing-style writeUnlock(). */
-  public void releaseWriteLock();
+//  /** Swing-style acquireReadLock(). */
+//  public void acquireReadLock();
+//  
+//  /** Swing-style releaseReadLock(). */
+//  public void releaseReadLock();
+//  
+//  /** Swing-style writeLock(). */
+//  public void acquireWriteLock();
+//  
+//  /** Swing-style writeUnlock(). */
+//  public void releaseWriteLock();
 }

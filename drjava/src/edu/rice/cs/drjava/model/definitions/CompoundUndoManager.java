@@ -179,32 +179,32 @@ public class CompoundUndoManager extends UndoManager {
     super.undo();
   }
   
-  /** Overload for undo which allows the initiator of a CompoundEdit to abandon it.
-    * WARNING: this has been used to date and has not been properly tested and very possibly may not work.
-    * @param key the key returned by the last call to startCompoundEdit
-    * @throws IllegalArgumentException if the key is incorrect
-    */
-  public synchronized void undo(int key) {
-    if (_keys.get(0) == key) {
-      final CompoundEdit ce = _compoundEdits.get(0);
-      _compoundEdits.remove(0);
-      _keys.remove(0);
-      
-      
-      EventQueue.invokeLater(new Runnable() { 
-        public void run() { 
-          ce.end();
-          ce.undo();
-          ce.die(); 
-        } 
-      });  // unsafe methods inherited from CompoundEdit
-    }
-    else throw new IllegalArgumentException("Bad undo key " + key + "!");
-  }
+  // Not currently used.
+//  /** Overload for undo which allows the initiator of a CompoundEdit to abandon it.
+//    * WARNING: this has been used to date and has not been properly tested and very possibly may not work.
+//    * @param key the key returned by the last call to startCompoundEdit
+//    * @throws IllegalArgumentException if the key is incorrect
+//    */
+//  public synchronized void undo(int key) {
+//    if (_keys.get(0) == key) {
+//      final CompoundEdit ce = _compoundEdits.get(0);
+//      _compoundEdits.remove(0);
+//      _keys.remove(0);
+//
+//      EventQueue.invokeLater(new Runnable() { 
+//        public void run() { 
+//          ce.end();
+//          ce.undo();
+//          ce.die(); 
+//        } 
+//      });  // unsafe methods inherited from CompoundEdit
+//    }
+//    else throw new IllegalArgumentException("Bad undo key " + key + "!");
+//  }
   
   /** Overrides redo so that any compound edit in progress is ended before the redo is performed. */
   public synchronized void redo() {
-    endCompoundEdit();  // How can there be a compound edit in progress if redo is available?
+    endCompoundEdit();
     super.redo();
   }
   

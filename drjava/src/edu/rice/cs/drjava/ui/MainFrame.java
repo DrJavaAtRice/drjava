@@ -138,13 +138,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     */
   private static final int DEBUG_STEP_TIMER_VALUE = 2000;
   
+  /** flag that is true while this is being initialized.  FIX; introduce DJFrame interface for such a field and force
+    * all DrJava frames to implement it. */
+  public static volatile boolean MAIN_FRAME_INIT;  // static declaration is kludge because frame may not be accessible
+  
   /** The model which controls all logic in DrJava. */
   private final AbstractGlobalModel _model;
   
   /** The main model listener attached by the main frame to the global model */
   private final ModelListener _mainListener; 
   
-  /** Maps an OpenDefDoc to its JScrollPane. */
+  /** Maps an OpenDefDoc to its JScrollPane.  Why doesn't OpenDefDoc contain a defScrollPane field? */
   private final Hashtable<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
   
   /** The currently displayed DefinitionsPane. */
@@ -1361,31 +1365,31 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   void _gotoFileUnderCursor() {
 //    Utilities.show("Calling gotoFileUnderCursor()");
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
+//    odd.acquireReadLock();
     String mask = "";
-    try {
-      int loc = getCurrentDefPane().getCaretPosition();
-      String s = odd.getText();
-      // find start
-      int start = loc;
-      while(start>0) {
-        if (! Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
-        --start;
-      }
-      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
-        ++start;
-      }
-      // find end
-      int end = loc-1;
-      while(end<s.length()-1) {
-        if (! Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
-        ++end;
-      }
-      if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end + 1);
-      }
+//    try {
+    int loc = getCurrentDefPane().getCaretPosition();
+    String s = odd.getText();
+    // find start
+    int start = loc;
+    while(start>0) {
+      if (! Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+      --start;
     }
-    finally { odd.releaseReadLock(); }
+    while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+      ++start;
+    }
+    // find end
+    int end = loc-1;
+    while(end<s.length()-1) {
+      if (! Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+      ++end;
+    }
+    if ((start>=0) && (end<s.length())) {
+      mask = s.substring(start, end + 1);
+    }
+//    }
+//    finally { odd.releaseReadLock(); }
     gotoFileMatchingMask(mask);
   }
   
@@ -1683,32 +1687,32 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PredictiveInputModel<JavaAPIListEntry> pim =
       new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), _javaAPIList);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
+//    odd.acquireReadLock();
     String mask = "";
-    try {
-      int loc = getCurrentDefPane().getCaretPosition();
-      String s = odd.getText();
-      // find start
-      int start = loc;
-      while(start>0) {
-        if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
-        --start;
-      }
-      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
-        ++start;
-      }
-      // find end
-      int end = loc-1;
-      while(end<s.length()-1) {
-        if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
-        ++end;
-      }
-      if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end + 1);
-        pim.setMask(mask);
-      }
+//    try {
+    int loc = getCurrentDefPane().getCaretPosition();
+    String s = odd.getText();
+    // find start
+    int start = loc;
+    while(start>0) {
+      if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+      --start;
     }
-    finally { odd.releaseReadLock(); }
+    while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+      ++start;
+    }
+    // find end
+    int end = loc-1;
+    while(end<s.length()-1) {
+      if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+      ++end;
+    }
+    if ((start>=0) && (end<s.length())) {
+      mask = s.substring(start, end + 1);
+      pim.setMask(mask);
+    }
+//    }
+//    finally { odd.releaseReadLock(); }
     
 //    Utilities.show("Matching items are: " + pim.getMatchingItems());
     
@@ -1860,7 +1864,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-            finally { odd.releaseWriteLock(); }
           }
           hourglassOff();
           return null;
@@ -1904,7 +1907,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-            finally { odd.releaseWriteLock(); }
+//            finally { odd.releaseWriteLock(); }
           }
           hourglassOff();
           return null;
@@ -2012,7 +2015,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PredictiveInputModel<ClassNameAndPackageEntry> pim = 
       new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireWriteLock();
+//    odd.acquireWriteLock();
     boolean uniqueMatch = true;
     try {
       String mask = "";
@@ -2072,7 +2075,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-    finally { if (uniqueMatch) odd.releaseWriteLock(); }
+//    finally { if (uniqueMatch) odd.releaseWriteLock(); }
   }
   
   /** Auto-completes word the cursor is on. */
@@ -2330,13 +2333,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-      odd.acquireReadLock();
+//      odd.acquireReadLock();
       try {
         int pos = odd._findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-      finally { odd.releaseReadLock(); }
+//      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2344,13 +2347,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private final Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-      odd.acquireReadLock();
+//      odd.acquireReadLock();
       try {
         int pos = odd._findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-      finally { odd.releaseReadLock(); }
+//      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2494,9 +2497,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
-    try { _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); }
-    finally { odd.releaseReadLock(); }
+//    odd.acquireReadLock();
+//    try { 
+    _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
+//    }
+//    finally { odd.releaseReadLock(); }
   }
   
   /** Add the current location to the browser history. */
@@ -2953,6 +2958,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Creates the main window, and shows it. */ 
   public MainFrame() {
+    MAIN_FRAME_INIT = true;
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig(); 
 //    Utilities.show("MainFrame starting");
@@ -3544,11 +3550,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
         _tabbedPanesFrame.setDisplayInFrame(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
       }
     });
+    MAIN_FRAME_INIT = false;
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
@@ -4260,24 +4267,24 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //        });
       }
       public void insertUpdate(DocumentEvent e) {
-        Utilities.invokeLater(new Runnable() {
-          public void run() {
-            _saveAction.setEnabled(true);
-            if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
-              _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+//        Utilities.invokeLater(new Runnable() {
+//          public void run() {
+        _saveAction.setEnabled(true);
+        if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
+          _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
 //            updateStatusField();  // file title not changed by insert operation
-          }
-        });
+//          }
+//        });
       }
       public void removeUpdate(DocumentEvent e) {
-        Utilities.invokeLater(new Runnable() {
-          public void run() {
-            _saveAction.setEnabled(true);
-            if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
-              _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+//        Utilities.invokeLater(new Runnable() {
+//          public void run() {
+        _saveAction.setEnabled(true);
+        if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
+          _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
 //            updateStatusField();  // file title not changed by remove operation
-          }
-        });
+//          }
+//        });
       }
     });
   }
@@ -4343,6 +4350,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   void _moveAllToAuxiliary() {
+    assert EventQueue.isDispatchThread();
     // move all external files to auxiliary files
     OpenDefinitionsDocument d;
     Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().
@@ -4363,12 +4371,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
-    Utilities.invokeLater(new Runnable() { 
-      public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
-    });
+    _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument());
   }
   
   private void _removeAllAuxiliary() {
+    assert EventQueue.isDispatchThread();
     // move all auxiliary files to external files
     OpenDefinitionsDocument d;
     Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().
@@ -4389,9 +4396,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
-    Utilities.invokeLater(new Runnable() { 
-      public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
-    });
+
+    _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument());
   }
   
   private void _new() { 
@@ -5319,27 +5325,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   private void _compileAll() {
     _cleanUpForCompile();
-//    new Thread("Compile All") {
-//      public void run() {
     hourglassOn();
     try { _model.getCompilerModel().compileAll(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { hourglassOff();}
-//      }
-//    }.start();
-//    update(getGraphics()); 
   }
   
   private boolean showCleanWarning() {
     if (DrJava.getConfig().getSetting(PROMPT_BEFORE_CLEAN).booleanValue()) {
       String buildDirTxt = "";
-      try {
-        buildDirTxt = _model.getBuildDirectory().getCanonicalPath();
-      }
-      catch (Exception e) {
-        buildDirTxt = _model.getBuildDirectory().getPath();
-      }
+      try { buildDirTxt = _model.getBuildDirectory().getCanonicalPath(); }
+      catch (Exception e) { buildDirTxt = _model.getBuildDirectory().getPath(); }
       ConfirmCheckBoxDialog dialog =
         new ConfirmCheckBoxDialog(MainFrame.this,
                                   "Clean Build Directory?",
@@ -5353,44 +5349,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         case JOptionPane.YES_OPTION:
           _saveAll();
           // Only remember checkbox if they say yes
-          if (dialog.getCheckBoxValue()) {
-            DrJava.getConfig().setSetting(PROMPT_BEFORE_CLEAN, Boolean.FALSE);
-          }
+          if (dialog.getCheckBoxValue()) DrJava.getConfig().setSetting(PROMPT_BEFORE_CLEAN, Boolean.FALSE);
           return true;
-        case JOptionPane.NO_OPTION:
-          return false;
-        case JOptionPane.CANCEL_OPTION:
-          return false;
-        case JOptionPane.CLOSED_OPTION:
-          return false;
-        default:
-          throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+        case JOptionPane.NO_OPTION:      return false;
+        case JOptionPane.CANCEL_OPTION:  return false;
+        case JOptionPane.CLOSED_OPTION:  return false;
+        default:  throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
       }
     }
     return true;
   }
   
-//  private void _clean() {
-//    final SwingWorker worker = new SwingWorker() {
-//      public Object construct() {
-//        if (showCleanWarning()) {
-//          try {
-//            hourglassOn();
-//            _model.cleanBuildDirectory();
-//          }
-//          catch (FileMovedException fme) { _showFileMovedError(fme); }
-//          catch (IOException ioe) { _showIOError(ioe); }
-//          finally { hourglassOff(); }
-//        }
-//        return null;
-//      }
-//    };
-//    worker.start();
-//  }
-  
-  private void _clean() {
-    _model.cleanBuildDirectory(); // The model performs this as an AsyncTask
-  }
+  private void _clean() { _model.cleanBuildDirectory(); }  // The model performs this as an AsyncTask
   
   /** List with entries for the complete dialog. */
   ArrayList<GoToFileListEntry> _completeClassList = new ArrayList<GoToFileListEntry>();
@@ -5410,15 +5380,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           DummyOpenDefDoc dummyDoc = new DummyOpenDefDoc();
           for(File f: classFiles) {
             String s = f.toString();
-            if (s.lastIndexOf(java.io.File.separatorChar)>=0) {
+            if (s.lastIndexOf(java.io.File.separatorChar) >= 0) {
               s = s.substring(s.lastIndexOf(java.io.File.separatorChar)+1);
             }
             s = s.substring(0, s.lastIndexOf(".class"));
             s = s.replace('$', '.');
             int pos = 0;
             boolean ok = true;
-            while((pos=s.indexOf('.', pos)) >= 0) {
-              if ((s.length()<=pos+1) || (Character.isDigit(s.charAt(pos+1)))) {
+            while ((pos=s.indexOf('.', pos)) >= 0) {
+              if (s.length() <= pos + 1 || Character.isDigit(s.charAt(pos + 1))) {
                 ok = false;
                 break;
               }
@@ -5499,28 +5469,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   private void _junit() {
-    hourglassOn(); // turned off in JUnitStarted/NonTestCase  
+    hourglassOn(); // turned off in junitStarted/nonTestCase/_junitInterrupted  
     new Thread("Run JUnit on Current Document") {
       public void run() {
         _disableJUnitActions();
         // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
-        try { 
-          _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); 
-//          _model.getActiveDocument().startJUnit();  // Equivalent to preceding
-        }
-        
-//        catch (FileMovedException fme) { _showFileMovedError(fme); }
-//        catch (IOException ioe) { _showIOError(ioe); }
-//        catch (ClassNotFoundException cnfe) { _showClassNotFoundError(cnfe); }
-        catch (NoClassDefFoundError ncde) { _showNoClassDefError(ncde); }
+        try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
+        catch(UnexpectedException e) { _junitInterrupted(e); }
+        catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
       }
     }.start();
   }
   
   private void _junitFolder() {
     updateStatusField("Running Unit Tests in Current Folder");
-    hourglassOn();  // turned off when JUnitStarted event is fired
+    hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     new Thread("Run JUnit on specified folder") {
       public void run() { 
         INavigatorItem n;
@@ -5534,8 +5498,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             if (_model.getDocumentNavigator().isSelectedInGroup(doc))
               l.add(doc);
           }
-          try { _model.getJUnitModel().junitDocs(l); }
+          try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
           catch(UnexpectedException e) { _junitInterrupted(e); }
+          catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
         }
       }
     }.start();
@@ -5544,29 +5509,21 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
   private void _junitProject() {
     updateStatusField("Running JUnit Tests in Project");
-    hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-    new Thread("Running Junit Tests") {
-      public void run() {
-        _disableJUnitActions();
-//        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-        try { _model.getJUnitModel().junitProject(); } 
-        catch(UnexpectedException e) { _junitInterrupted(e); }
-      }
-    }.start();
+    hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
+    _disableJUnitActions();
+    try { _model.getJUnitModel().junitProject(); } 
+    catch(UnexpectedException e) { _junitInterrupted(e); }
+    catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
   
   /** Tests all open documents. */
   private void _junitAll() {
     updateStatusField("Running All Open Unit Tests");
-    hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-    new Thread("Running Junit Tests") {
-      public void run() {
-        _disableJUnitActions();
-//        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-        try { _model.getJUnitModel().junitAll(); } 
-        catch(UnexpectedException e) { _junitInterrupted(e); }
-      }
-    }.start();
+    hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
+    _disableJUnitActions();
+    try { _model.getJUnitModel().junitAll(); } 
+    catch(UnexpectedException e) { _junitInterrupted(e); }
+    catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
   
   /* These are used to save the state of the enabled property of the actions disabled during junit testing. */
@@ -6404,8 +6361,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     OptionListener<Integer> externalSavedCountListener =
       new OptionListener<Integer>() {
       public void optionChanged(final OptionEvent<Integer> oce) {
-        Utilities.invokeLater(new Runnable() {
-          public void run() {
+//        Utilities.invokeLater(new Runnable() {
+//          public void run() {
             extMenu.removeAll();
             extMenu.add(execItem);
             extMenu.addSeparator();
@@ -6431,13 +6388,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                 }
               },i+2);
             }
-            if (oce.value>0) { 
-              extMenu.addSeparator();
-            }
+            if (oce.value>0) { extMenu.addSeparator(); }
             extMenu.add(_editExternalProcessesAction);
             _editExternalProcessesAction.setEnabled(true); // always keep enabled, because it allows import
-          }
-        });
+//          }
+//        });
       }
     };
     DrJava.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
@@ -6915,7 +6870,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DefinitionsDocument doc = _model.getActiveDocument().getDocument();
       int offset = ce.getDot();
       
-      doc.acquireReadLock();
+//      doc.acquireReadLock();
       try { 
         if (offset == _offset + 1 && doc.getText(_offset, 1).charAt(0) != '\n') {
           _col += 1;
@@ -6930,7 +6885,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       catch(BadLocationException e) { /* do nothing; should never happen */ }
       finally { 
-        doc.releaseReadLock();
+//        doc.releaseReadLock();
         _offset = offset;
         updateLocation(_line, _col);
       }
@@ -6939,12 +6894,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // This method appears safe outside the event thread
     public void updateLocation() {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
-      try { 
-        _line = doc.getCurrentLine();
-        _col = doc.getCurrentCol(); 
-      }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
+//      try { 
+      _line = doc.getCurrentLine();
+      _col = doc.getCurrentCol(); 
+//      }
+//      finally { doc.releaseReadLock(); }
       updateLocation(_line, _col);
     }
     
@@ -7520,17 +7475,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
       private void updateUI() {
-        EventQueue.invokeLater(new Runnable() {  // ?? Why EventQueue?
-          public void run() {
+//        EventQueue.invokeLater(new Runnable() {
+//          public void run() {
             // revalidateLineNums();
-            if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
-            if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
-            for(Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
-              FindResultsPanel panel = pair.first();
-              if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
-            }
-          }
-        });
+        if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
+        if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
+        for(Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+          FindResultsPanel panel = pair.first();
+          if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
+        }
+//          }
+//        });
       }
       public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }
@@ -7694,7 +7649,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc) {
     JScrollPane scroll = _defScrollPanes.get(doc);
     if (scroll == null) { 
-      throw new UnexpectedException(new Exception("Attempted to get DefinitionsPane for a closed document")); 
+      if (_model.getOpenDefinitionsDocuments().contains(doc)) scroll = _createDefScrollPane(doc);
+      else throw new UnexpectedException(new Exception("Attempted to get DefinitionsPane for a closed document")); 
     }
     
     DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
@@ -8076,18 +8032,18 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         
         if (shouldHighlight) {
           _removeThreadLocationHighlight();
-          doc.acquireReadLock();
-          try {
-            int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
-            if (startOffset > -1) {
-              int endOffset = doc._getLineEndPos(startOffset);
-              if (endOffset > -1) {
-                _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
-                  addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
-              }
+//          doc.acquireReadLock();
+//          try {
+          int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
+          if (startOffset > -1) {
+            int endOffset = doc._getLineEndPos(startOffset);
+            if (endOffset > -1) {
+              _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
+                addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
             }
           }
-          finally { doc.releaseReadLock(); }
+//          }
+//          finally { doc.releaseReadLock(); }
         }
         
         if (_showDebugger) {
@@ -8148,9 +8104,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       * @param shouldHighlight true iff the line should be highlighted.
       */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
-      doc.acquireReadLock();
-      try { scrollToDocumentAndOffset(doc, doc._getOffset(lineNumber), shouldHighlight); }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();
+//      try { 
+      scrollToDocumentAndOffset(doc, doc._getOffset(lineNumber), shouldHighlight); 
+//      }
+//      finally { doc.releaseReadLock(); }
     }
     
     /* Must be executed in event thread. */
@@ -8493,35 +8451,34 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       });
     }
     
-    public void undoableEditHappened() {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {      
-          _currentDefPane.getUndoAction().updateUndoState();
-          _currentDefPane.getRedoAction().updateRedoState();
-        }
-      });
+    public void undoableEditHappened() {    
+      assert EventQueue.isDispatchThread();
+      _currentDefPane.getUndoAction().updateUndoState();
+      _currentDefPane.getRedoAction().updateRedoState();
     }
     
     public void activeDocumentRefreshed(final OpenDefinitionsDocument active) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
+      assert EventQueue.isDispatchThread();
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
 //          System.err.println("activeDocumentRefreshed");
-          _recentDocFrame.pokeDocument(active);
-          _refreshDefScrollPane();
-          
-          // Update error highlights
-          int pos = _currentDefPane.getCaretPosition();
-          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-          focusOnLastFocusOwner();
-        }
-      });
+      _recentDocFrame.pokeDocument(active);
+      _refreshDefScrollPane();
+      
+      // Update error highlights
+      int pos = _currentDefPane.getCaretPosition();
+      _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+      focusOnLastFocusOwner();
+//        }
+//      });
     }
     
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
+      assert EventQueue.isDispatchThread();
 //      Utilities.show("MainFrame Listener: ActiveDocument changed to " + active);
       // code that accesses the GUI must run in the event-dispatching thread. 
-      Utilities.invokeLater(new Runnable() {  // invokeAndWait can create occasional deadlocks.
-        public void run() {
+//      Utilities.invokeLater(new Runnable() {  // invokeAndWait can create occasional deadlocks.
+//        public void run() {
           _recentDocFrame.pokeDocument(active);
           _switchDefScrollPane();  // Updates _currentDefPane
           
@@ -8564,8 +8521,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             _currentDefPane.requestFocusInWindow(); 
             PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.current.file").invalidate();
           } });
-        }
-      });
+//        }
+//      });
     }
     
     public void focusOnLastFocusOwner() {
@@ -8682,6 +8639,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       });
     }
     
+    /** Called if a compilation is aborted. */
+    public void compileAborted(Exception e) { /* Should probably display a simple popup */ }
+    
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
@@ -8703,84 +8663,91 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       });
     }
-    
+    /** Only runs in event thread. */
     public void junitStarted() {
-      /* Note: simpleHourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off 
+      /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off 
        * for actual testing; the balancing simpleHourglassOff() is located here and in nonTestCase */
       
       // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "junitStarted(" + docs + ") called in MainFrame", "", "").show();
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          // new ScrollableDialog(null, "Ready for hourglassOn in junitStarted", "", "").show();
-          
-          try { showTab(_junitErrorPanel, true);
-            _junitErrorPanel.setJUnitInProgress();
-            // _junitAction.setEnabled(false);
-            // _junitAllAction.setEnabled(false);
-          }
-          finally { hourglassOff(); }  
-        }
-      });
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+      // new ScrollableDialog(null, "Ready for hourglassOn in junitStarted", "", "").show();
+      
+      try { showTab(_junitErrorPanel, true);
+        _junitErrorPanel.setJUnitInProgress();
+        // _junitAction.setEnabled(false);
+        // _junitAllAction.setEnabled(false);
+      }
+      finally { hourglassOff(); }  
+//        }
+//      });
     }
     
     /** We are junit'ing a specific list of classes given their source files. */
     public void junitClassesStarted() {
+      assert EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread
       // new ScrollableDialog(null, "junitClassesStarted called in MainFrame", "", "").show();
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
 //          new ScrollableDialog(null, "Ready for hourglassOn in junitClassesStarted", "", "").show();
 //          hourglassOn();
           showTab(_junitErrorPanel, true);
           _junitErrorPanel.setJUnitInProgress();
           // _junitAction.setEnabled(false);
           // _junitAllAction.setEnabled(false);
-        } // no hourglassOff here because junitClasses does not perform hourglassOn
-      });
+//        } // no hourglassOff here because junitClasses does not perform hourglassOn
+//      });
     }
     
     //public void junitRunning() { }
     
     public void junitSuiteStarted(final int numTests) {
-      Utilities.invokeLater(new Runnable() { public void run() { _junitErrorPanel.progressReset(numTests); } });
+      assert EventQueue.isDispatchThread();
+      _junitErrorPanel.progressReset(numTests);
     }
     
     public void junitTestStarted(final String name) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() { _junitErrorPanel.getErrorListPane().testStarted(name); /* this does nothing! */ }
-      });          
+      assert EventQueue.isDispatchThread();
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() { 
+      _junitErrorPanel.getErrorListPane().testStarted(name); /* this does nothing! */ 
+//        }
+//      });          
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
+      assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").
 //        show();
       // syncUI...?
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError); // this does nothing!
-          _junitErrorPanel.progressStep(succeeded);
-          _model.refreshActiveDocument();
-        }
-      });
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+      _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError); // this does nothing!
+      _junitErrorPanel.progressStep(succeeded);
+      _model.refreshActiveDocument();
+//        }
+//      });
     }
     
     public void junitEnded() {
+      assert EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-            _restoreJUnitActionsEnabled();
-            _junitErrorPanel.reset();
-            _model.refreshActiveDocument();
-          }
-          finally { 
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+      try {
+        _restoreJUnitActionsEnabled();
+        _junitErrorPanel.reset();
+        _model.refreshActiveDocument();
+      }
+      finally { 
 //            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
 //            hourglassOff(); 
-          }
-        }
-      });
+      }
+//        }
+//      });
     }
     
     /** Fire just before javadoc asynchronous thread is started. Only runs in the event thread. */
@@ -8936,16 +8903,17 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public void consoleReset() { }
     
     public void saveBeforeCompile() {
+      assert EventQueue.isDispatchThread();
       // The following event thread switch supports legacy test code that calls compile methods outside of the
       // event thread.  The wait is necessary because compilation process cannot proceed until saving is complete.
-      Utilities.invokeAndWait(new Runnable() {  
-        public void run() {
+//      Utilities.invokeAndWait(new Runnable() {  
+//        public void run() {
           _saveAllBeforeProceeding
             ("To compile, you must first save ALL modified files.\n" + "Would you like to save and then compile?",
              ALWAYS_SAVE_BEFORE_COMPILE,
              "Always save before compiling");
-        }
-      });
+//        }
+//      });
     }
     
     /** Compile all open source files if this option is configured or running as a unit test.  Otherwise, pop up a
@@ -9413,7 +9381,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _showJUnitInterrupted(e);
         removeTab(_junitErrorPanel);
         _model.refreshActiveDocument();
-        // hourglassOff();
+        hourglassOff();
       }
     });
   }

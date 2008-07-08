@@ -124,6 +124,7 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 
@@ -160,7 +161,7 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.ReaderWriterLock;
+//import edu.rice.cs.util.ReaderWriterLock;
 
 import static java.lang.Math.*;
 
@@ -1042,10 +1043,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param pos1 first selection position
     * @param pos2 second selection position */
   public void toggleBookmark(int pos1, int pos2) { 
-    final OpenDefinitionsDocument doc = getActiveDocument();
-    doc.acquireReadLock();
-    try { _toggleBookmark(pos1, pos2); }
-    finally { doc.releaseReadLock(); }
+//    final OpenDefinitionsDocument doc = getActiveDocument();
+//    doc.acquireReadLock();
+//    try { 
+      _toggleBookmark(pos1, pos2); 
+//    }
+//    finally { doc.releaseReadLock(); }
   }
   
   /** Raw version of toggleBookmark.  ASSUMES that read lock is already held
@@ -1054,11 +1057,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void _toggleBookmark(int pos1, int pos2) {
 //    Utilities.show("AGM.toggleBookmark called");
     final OpenDefinitionsDocument doc = getActiveDocument();
-    assert doc.isReadLocked();
+//    assert doc.isReadLocked();
     
     int startSel = Math.min(pos1, pos2);
     int endSel = Math.max(pos1, pos2);
-//    doc.acquireReadLock();  // Must follow readers/writers protocol even in event thread
     try {
       final RegionManager<OrderedDocumentRegion> rm = getBookmarkManager();
       
@@ -1083,7 +1085,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 //    catch (FileMovedException fme) { throw new UnexpectedException(fme); }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-//    finally { doc.releaseReadLock(); }
   }
   
   
@@ -1655,10 +1656,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final DocFile[] excludedFiles = ir.getExcludedFiles();
     final File projectFile = ir.getProjectFile();
     File pr = ir.getProjectRoot();
-    try {
-      pr = pr.getCanonicalFile();
-    }
+    
+    try { pr = pr.getCanonicalFile(); }
     catch(IOException ioe) { /* could not canonize file, we'll take what we have */ }
+    
     final File projectRoot = pr;
     final File buildDir = ir.getBuildDirectory ();
     final File workDir = ir.getWorkingDirectory();
@@ -1688,38 +1689,35 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     List<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>> l =
       new LinkedList<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>>();
     
-    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(),
-                                                                          new INavigatorItemFilter<OpenDefinitionsDocument>() {
+    INavigatorItemFilter<OpenDefinitionsDocument> navItem1 = new INavigatorItemFilter<OpenDefinitionsDocument>() {
       public boolean accept(OpenDefinitionsDocument d) { return d.inProjectPath(); }
-    }));
+    };
     
-    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(),
-                                                                          new INavigatorItemFilter<OpenDefinitionsDocument>() {
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(), navItem1));
+    
+    INavigatorItemFilter<OpenDefinitionsDocument> navItem2 = new INavigatorItemFilter<OpenDefinitionsDocument>() {
       public boolean accept(OpenDefinitionsDocument d) { return d.isAuxiliaryFile(); }
-    }));
+    };
     
-    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getExternalBinTitle(),
-                                                                          new INavigatorItemFilter<OpenDefinitionsDocument>() {
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(), navItem2));
+    
+    INavigatorItemFilter<OpenDefinitionsDocument> navItem3 = new INavigatorItemFilter<OpenDefinitionsDocument>() {
       public boolean accept(OpenDefinitionsDocument d) {
         return !(d.inProject() || d.isAuxiliaryFile()) || d.isUntitled();
       }
-    }));
-    
+    };
+                                                                          
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getExternalBinTitle(), navItem3));
+                                                                    
     IDocumentNavigator<OpenDefinitionsDocument> newNav =
-      new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
+      new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
+      makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
     
     setDocumentNavigator(newNav);
     
-//    synchronized(_auxiliaryFiles) {
-//      _auxiliaryFiles.clear();
-//      for (File file: auxFiles) { _auxiliaryFiles.add(file); }
-//    }
-    
-//    Utilities.show("Project Root loaded into grouping state is " + projRoot);
-    
     setFileGroupingState(makeProjectFileGroupingState(projectRoot, mainClass, buildDir, workDir, projectFile, srcFiles,
-                                                      auxFiles, excludedFiles, projectClassPaths, createJarFile, createJarFlags, 
-                                                      autoRefresh));
+                                                      auxFiles, excludedFiles, projectClassPaths, createJarFile, 
+                                                      createJarFlags, autoRefresh));
     
     resetInteractions(getWorkingDirectory());  // Shutdown debugger and reset interactions pane in new working directory
     
@@ -1782,9 +1780,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (! modifiedFiles.contains(f)) {
           int lnr = dbd.getLineNumber();
           OpenDefinitionsDocument odd = getDocumentForFile(f);
-          odd.acquireReadLock();
-          try { getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled()); }
-          finally { odd.releaseReadLock(); }
+          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled()); 
         }
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
@@ -1808,9 +1804,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         File f = bm.getFile();
         if (! modifiedFiles.contains(f)) {
           final OpenDefinitionsDocument odd = getDocumentForFile(f);
-          final Position startPos = odd.createPosition(bm.getStartOffset());
-          final Position endPos = odd.createPosition(bm.getEndOffset());
-          getBookmarkManager().addRegion(new DocumentRegion(odd, startPos, endPos));
+          if (getOpenDefinitionsDocuments().contains(odd)) { // bookmark is not stale
+            final Position startPos = odd.createPosition(bm.getStartOffset());
+            final Position endPos = odd.createPosition(bm.getEndOffset());
+            try { getBookmarkManager().addRegion(new DocumentRegion(odd, startPos, endPos)); }
+            catch(Exception e) { DrJavaErrorHandler.record(e); }  // should never happen
+          }
+          // should remove stale bookmark
         }
       }
     }
@@ -2152,9 +2152,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
     for (OpenDefinitionsDocument doc: lod) {
-      if ((doc.isSourceFile()) &&
-          (!isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
-          (!doc.checkIfClassFileInSync())) return true;
+      if (doc.isSourceFile() &&
+          (! isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
+          (! doc.checkIfClassFileInSync())) return true;
     }
     return false;
   }
@@ -2224,9 +2224,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    // Listen to any relevant config options
 //    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
     
-    DrJava.getConfig().addOptionListener(BACKUP_FILES, new BackUpFileOptionListener());
-    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
-    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue ());
+    // The following is unnecessary because the DefaultFileSaver constructor directly uses BACKUP_FILES
+//    DrJava.getConfig().addOptionListener(BACKUP_FILES, new BackUpFileOptionListener());
+//    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
+//    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue ());
     
 //    DrJava.getConfig().addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
@@ -2256,14 +2257,28 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  /** Prints System.out to the DrJava console. */
-  public void systemOutPrint(String s) {_docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
+  /** Prints System.out to the DrJava console.  This method can safely be run outside the event thread. */
+  public void systemOutPrint(final String s) { 
+    Utilities.invokeLater(new Runnable() {
+      public void run() { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
+    });
+  }
   
-  /** Prints System.err to the DrJava console. */
-  public void systemErrPrint(String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
+  /** Prints System.err to the DrJava console.  This method can safely be run outside the event thread. */
+  public void systemErrPrint(final String s) { 
+    Utilities.invokeLater(new Runnable() {
+      public void run() { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
+    });
+  }
   
-  /** Prints the given string to the DrJava console as an echo of System.in */
-  public void systemInEcho(String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
+  /** Prints the given string to the DrJava console as an echo of System.in.  This method can safely be run outside the
+    * event thread. 
+    */
+  public void systemInEcho(final String s) { 
+    Utilities.invokeLater(new Runnable() {
+      public void run() { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
+    });
+  }
   
   /** throws UnsupportedOperationException */
   public void printDebugMessage(String s) {
@@ -2526,14 +2541,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Returns the file field for this document; does not check whether the file is NullFile or file exists. */
     public File getRawFile() { return _file; }
     
-    /** Returns the file for this document, null if the document is null (which should never happen).  If the document's
+    /** Returns the file for this document, null if the document is untitled.  If the document's
       * file does not exist, this throws a FileMovedException.  If a FileMovedException is thrown, you
       * can retrieve the non-existence source file from the FileMovedException by using the getFile() method.
       * @return the file for this document
       */
     public File getFile() throws FileMovedException {
       File f = _file;  // single read of f
-      if (AbstractGlobalModel.isUntitled(f)) return null;  // assert f != null
+      if (AbstractGlobalModel.isUntitled(f)) return null;  // Should we return NULL_FILE here
       if (f.exists()) return f;
       else throw new FileMovedException(f, "This document's file has been moved or deleted.");
     }
@@ -2896,7 +2911,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return true if the file was saved, false if the operation was canceled
       */
     public boolean saveFile(FileSaveSelector com) throws IOException {
-//      System.err.println("saveFile called on " + this);
+//      System.err.println("AbstractGlobalModel.saveFile called on " + this);
       // Update value of _packageName since modification flag will be set to false
       if (! isModifiedSinceSave()) return true;
       if (isUntitled()) return saveFileAs(com);
@@ -2905,20 +2920,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
 //      System.err.println("Saving file: " + getFile());
       
-      // Update package name by parsing file
+      // Update package name by parsing the documet text
       _packageName = getDocument().getPackageName();
       FileSaveSelector realCommand = com;
       try {
         final File file = getFile();
-//        System.err.println("file name for doc to be saved is: " + file);
+//        System.err.println("File name for doc to be saved is: " + file);
         if (! isUntitled()) {
+//          System.err.println("Document has a title");
           realCommand = new TrivialFSS(file);
 //          System.err.println("TrivialFSS set up");
         }
       }
       catch (FileMovedException fme) {
         // getFile() failed, prompt the user if a new one should be selected
-        if ( com.shouldSaveAfterFileMoved(this, fme.getFile())) realCommand = com;
+        if (com.shouldSaveAfterFileMoved(this, fme.getFile())) realCommand = com;
         else return false;
         // User declines to save as a new file, so don't save
       }
@@ -2936,6 +2952,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return true if the file was saved, false if the operation was canceled
       */
     public boolean saveFileAs(FileSaveSelector com) throws IOException {
+      assert EventQueue.isDispatchThread();
+//      System.err.println("AbstractGlobalModel.saveFileAs called on " + this);
       File oldFile = getRawFile();
       // Update _packageName since modifiedSinceSaved flag will be set to false
       _packageName = getDocument().getPackageName();
@@ -2947,6 +2965,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         
         // Check if file is already open in another document
         boolean openInOtherDoc = ((otherDoc != null) && (openDoc != otherDoc));
+        
+//        System.err.println("AbstractGlobalModel.saveFileAs.openInOtherDoc = " + openInOtherDoc);
         
         // If the file is open in another document, abort if user does not confirm overwriting it
         if (openInOtherDoc) {
@@ -2966,7 +2986,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
           
           // if file is read-only, ask if it should be made writable
-          if(file.exists() && ! file.canWrite()) {
+          if (file.exists() && ! file.canWrite()) {
             File[] res = _notifier.filesReadOnly(new File[] {file});
             for(File roFile: res) {
               FileOps.makeWritable(roFile);
@@ -3382,16 +3402,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (_cacheAdapter.isReady()) getDocument().addDocumentListener(listener);
       else _cacheAdapter.addDocumentListener(listener);
     }
-    
-    List<UndoableEditListener> _undoableEditListeners = new LinkedList<UndoableEditListener>();
+    // Not in current use
+//    List<UndoableEditListener> _undoableEditListeners = new LinkedList<UndoableEditListener>();
     
     public void addUndoableEditListener(UndoableEditListener listener) {
-      _undoableEditListeners.add(listener);
+//      _undoableEditListeners.add(listener);
       getDocument().addUndoableEditListener(listener);
     }
     
     public void removeUndoableEditListener(UndoableEditListener listener) {
-      _undoableEditListeners.remove(listener);
+//      _undoableEditListeners.remove(listener);
       getDocument().removeUndoableEditListener(listener);
     }
     
@@ -3475,17 +3495,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Assumes read lock is already held. */    
     public int _getLineStartPos(int pos) { 
       DefinitionsDocument doc = getDocument();
-      doc.acquireReadLock();
-      try { return doc._getLineStartPos(pos); }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();
+//      try { 
+      return doc._getLineStartPos(pos); 
+//      }
+//      finally { doc.releaseReadLock(); }
     }
     
     /** Assumes read lock is already held. */
     public int _getLineEndPos(int pos) { 
       DefinitionsDocument doc = getDocument();
-      doc.acquireReadLock();
-      try { return doc._getLineEndPos(pos); }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();
+//      try { 
+        return doc._getLineEndPos(pos); 
+//      }
+//      finally { doc.releaseReadLock(); }
     }
     
     public int commentLines(int selStart, int selEnd) { return getDocument().commentLines(selStart, selEnd); }
@@ -3496,17 +3520,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void indentLines(int selStart, int selEnd) { 
       DefinitionsDocument doc = getDocument();
-      doc.acquireWriteLock();
-      try { doc.indentLines(selStart, selEnd); }
-      finally { doc.releaseWriteLock(); }
+//      doc.acquireWriteLock();
+//      try { 
+      doc.indentLines(selStart, selEnd); 
+//      }
+//      finally { doc.releaseWriteLock(); }
     }
     
     public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
       throws OperationCanceledException {
       DefinitionsDocument doc = getDocument();
-      doc.acquireWriteLock();
-      try { doc.indentLines(selStart, selEnd, reason, pm); }
-      finally { doc.releaseWriteLock(); }
+//      doc.acquireWriteLock();
+//      try { 
+      doc.indentLines(selStart, selEnd, reason, pm); 
+//      }
+//      finally { doc.releaseWriteLock(); }
     }
     
     public int getCurrentLine() { return getDocument().getCurrentLine(); }
@@ -3685,23 +3713,23 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /* Gets the reduced model so it can be locked. */
     public ReducedModelControl getReduced() { return getDocument().getReduced(); }
     
-    /** Swing-style readLock(). */
-    public void acquireReadLock() { getDocument().acquireReadLock(); }
-    
-    /** Swing-style readUlLock(). */
-    public void releaseReadLock() { getDocument().releaseReadLock(); }
-    
-    /** Swing-style writeLock(). */
-    public void acquireWriteLock() { getDocument().acquireWriteLock(); }
-    
-    /** Swing-style writeUnlock(). */
-    public void releaseWriteLock() { getDocument().releaseWriteLock(); }
-    
-    /** Returns true iff this thread holds a read lock or write lock. */
-    public boolean isReadLocked() { return getDocument().isReadLocked(); }
-    
-    /** Returns true iff this thread holds a write lock. */
-    public boolean isWriteLocked() { return getDocument().isWriteLocked(); }
+//    /** Swing-style readLock(). */
+//    public void acquireReadLock() { getDocument().acquireReadLock(); }
+//    
+//    /** Swing-style readUlLock(). */
+//    public void releaseReadLock() { getDocument().releaseReadLock(); }
+//    
+//    /** Swing-style writeLock(). */
+//    public void acquireWriteLock() { getDocument().acquireWriteLock(); }
+//    
+//    /** Swing-style writeUnlock(). */
+//    public void releaseWriteLock() { getDocument().releaseWriteLock(); }
+//    
+//    /** Returns true iff this thread holds a read lock or write lock. */
+//    public boolean isReadLocked() { return getDocument().isReadLocked(); }
+//    
+//    /** Returns true iff this thread holds a write lock. */
+//    public boolean isWriteLocked() { return getDocument().isWriteLocked(); }
     
 //    public int getLockState() { return getDocument().getLockState(); }
     
@@ -3890,12 +3918,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _notifier.fileOpened(d);
   }
   
-  private static class BackUpFileOptionListener implements OptionListener<Boolean> {
-    public void optionChanged (OptionEvent<Boolean> oe) {
-      Boolean value = oe.value;
-      FileOps.DefaultFileSaver.setBackupsEnabled (value.booleanValue());
-    }
-  }
+//  private static class BackUpFileOptionListener implements OptionListener<Boolean> {
+//    public void optionChanged (OptionEvent<Boolean> oe) {
+//      Boolean value = oe.value;
+//      FileOps.DefaultFileSaver.setBackupsEnabled (value.booleanValue());
+//    }
+//  }
   
 //----------------------- SingleDisplay Methods -----------------------//
   

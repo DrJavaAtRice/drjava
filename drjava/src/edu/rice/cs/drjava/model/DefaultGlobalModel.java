@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.*;
 
 import java.rmi.RemoteException;
 
@@ -57,20 +58,6 @@ import java.util.TreeMap;
 import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
 
-import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
-
-import edu.rice.cs.util.NullFile;
-import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.newjvm.AbstractMasterJVM;
-import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.swing.Utilities;
-
-import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.io.IOUtil;
-
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -78,6 +65,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
@@ -105,7 +93,18 @@ import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.ui.MainFrame;
 
-import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
+
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.NullFile;
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.newjvm.AbstractMasterJVM;
+import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -161,10 +160,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void slaveJVMUsed() { }
   };
   
-  private CompilerListener _clearInteractionsListener =
-    new CompilerListener() {
-    public void compileStarted() { }
-    
+  private CompilerListener _clearInteractionsListener = new DummyCompilerListener() {
     public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       // Only clear interactions if there were no errors and unit testing is not in progress
       if ( (_compilerModel.getNumErrors() == 0 || _compilerModel.getCompilerErrorModel().hasOnlyWarnings())
@@ -173,9 +169,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         resetInteractions(workDir);  // use same working directory as current interpreter
       }
     }
-    public void saveBeforeCompile() { }
-    public void saveUntitled() { }
-    public void activeCompilerChanged() { }
   };
   
   // ---- Compiler Fields ----
@@ -380,7 +373,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
     * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
     * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
-    * if a valid directory cannot be determined.  In that case, the former working directory is used.
+    * if a valid directory cannot be determined.  In that case, the former working directory is used.  This
+    * method may run outside the event thread.
     */
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
@@ -455,7 +449,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Blocks until the interpreter has registered. */
   public void waitForInterpreter() { _jvm.ensureInterpreterConnected(); }
   
-  
   /** Returns the current classpath in use by the Interpreter JVM. */
   public Iterable<File> getInteractionsClassPath() { return _jvm.getClassPath(); }
   
@@ -488,8 +481,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /* Standard constructor for a new document (no associated file) */
     ConcreteOpenDefDoc(NullFile f) { super(f); }
     
-    /** Starting compiling this document.  Used only for unit testing */
-    public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
+    /** Starting compiling this document.  Used only for unit testing.  Only rus in the event thread. */
+    public void startCompile() throws IOException { 
+      assert EventQueue.isDispatchThread();
+      _compilerModel.compile(ConcreteOpenDefDoc.this); 
+    }
     
     private volatile InteractionsListener _runMain;
     
@@ -689,9 +685,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 
     * "extra classpath" config option, as well as any project-specific classpaths to the interpreter's classpath. 
-    * This method is called in DefaultInteractionsModel when the interpreter becomes ready.
+    * This method is called in DefaultInteractionsModel when the interpreter becomes ready.  Runs outside the event
+    * thread.
     */
   public void resetInteractionsClassPath() {
+//    System.err.println("Resetting interactions class path");
     Iterable<File> projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
@@ -718,7 +716,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     // add project source root to projectFilesClassPath.  All files in project tree have this root.
     
-    _interactionsModel.addProjectFilesClassPath(getProjectRoot());
+    _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
     setClassPathChanged(false);  // reset classPathChanged state
   }
   

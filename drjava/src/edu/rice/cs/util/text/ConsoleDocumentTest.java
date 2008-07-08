@@ -42,8 +42,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 /** Tests ConsoleDocument.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class ConsoleDocumentTest extends DrJavaTestCase {
   protected ConsoleDocument _doc;
   

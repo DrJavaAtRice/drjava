@@ -63,13 +63,17 @@ public class DrJavaTestCase extends TestCase {
     Utilities.TEST_MODE = true;
     final String newName = System.getProperty(TEST_DRJAVA_CONFIG_PROPERTY);
     assert newName != null;
-    if (newName != null) {
+//    if (newName != null) {
 //      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
-      DrJava.setPropertiesFile(newName);
-      Utilities.clearEventQueue();
-      DrJava._initConfig();
-      Utilities.clearEventQueue();
-    }
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        DrJava.setPropertiesFile(newName);  // spawns change updates which should run in event thread
+//        Utilities.clearEventQueue();
+        DrJava._initConfig();               // spawns change updates which should run in event thread
+//        Utilities.clearEventQueue();
+      }
+    });
+//    }
   }
   
   /** Clean up for every test case.  Only used in unit tests.  Added because Windows would intermittently throw
@@ -77,7 +81,7 @@ public class DrJavaTestCase extends TestCase {
     * @throws Exception
     */
   protected void tearDown() throws Exception { 
-    DrJava.cleanUp();  // clobbers _config
+    DrJava.cleanUp();  
     super.tearDown();
   }
 }

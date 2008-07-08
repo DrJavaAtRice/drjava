@@ -87,9 +87,13 @@ public abstract class AbstractDJPane extends JTextPane
       
       DJDocument doc = getDJDocument();  // The Swing Document interface has no provision for synchronization
 //      if (doc.indentInProgress()) return;
-      doc.acquireReadLock();
-      try { synchronized(doc.getReduced()) { matchUpdate(e.getDot()); } }
-      finally { doc.releaseReadLock(); }
+//      doc.acquireReadLock();
+//      try { 
+//      synchronized(doc.getReduced()) { 
+        matchUpdate(e.getDot()); 
+//      } 
+//      }
+//      finally { doc.releaseReadLock(); }
     }
   };
   
@@ -142,16 +146,16 @@ public abstract class AbstractDJPane extends JTextPane
   public void setCaretPos(int pos) {
 //    System.err.println("setCaretPos(" + pos + ") called");
     DJDocument doc = getDJDocument();
-    doc.acquireReadLock();
-    try {
-      int len = doc.getLength();
-      if (pos > len) {
-        setCaretPosition(len);
-        return;
-      }
-      setCaretPosition(pos);
+//    doc.acquireReadLock();
+//    try {
+    int len = doc.getLength();
+    if (pos > len) {
+      setCaretPosition(len);
+      return;
     }
-    finally { doc.releaseReadLock(); }
+    setCaretPosition(pos);
+//    }
+//    finally { doc.releaseReadLock(); }
   }
 
 // This block of code is used solely for debugging

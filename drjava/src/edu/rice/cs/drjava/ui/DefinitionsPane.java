@@ -84,6 +84,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   
   private volatile UndoAction _undoAction;
   private volatile RedoAction _redoAction;
+  
   private volatile boolean testVariable;   //For Tests ONLY
 //  private Document _defdoc;
   
@@ -179,7 +180,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     String docText;
     docText = doc.getText();
    
-    if (docText.charAt(braceIndex) == '{') {//match everything before if we found a curly brace
+    char ch = docText.charAt(braceIndex);
+    if ( ch == '{' || ch == '(') { //match everything before if we found a curly brace
       Character charBefore = null;
       int charBeforeIndex = braceIndex-1;
       boolean previousLine = false;
@@ -197,7 +199,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       final StringBuilder returnText = new StringBuilder(docText.substring(0, charBeforeIndex+2));          
       if (previousLine) returnText.append("...");
-      returnText.append("{");
+      returnText.append(ch);
       
       int lastNewlineIndex = returnText.lastIndexOf("\n");
       return returnText.substring(lastNewlineIndex+1);
@@ -245,7 +247,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     private int _index;
     public FindResultsColorOptionListener(int i) { _index = i; }
     public void optionChanged(OptionEvent<Color> oce) {
-      synchronized (FIND_RESULTS_PAINTERS) {
+      synchronized(FIND_RESULTS_PAINTERS) {
         FIND_RESULTS_PAINTERS[_index] = new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, 2);
       }
     }
@@ -283,7 +285,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Listens to any undoable events in the document, and adds them to the undo manager.  Must be done in the view 
-    * because the edits are stored along with the caret position at the time of the edit.
+    * because the edits are stored along with the caret position at the time of the edit.   Correction: document
+    * cursor position should be used instead of caret position.  Perhaps this listener shoud be attached to the 
+    * document.
     */
   private final UndoableEditListener _undoListener = new UndoableEditListener() {
     
@@ -291,8 +295,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
      *  @param e
      */
     public void undoableEditHappened(UndoableEditEvent e) {
-      UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
-      if (!_inCompoundEdit) {
+//      UndoWithPosition undo = new UndoWithPosition(e.getEdit(), _doc.getCurrentLocation());
+      UndoableEdit undo = e.getEdit();
+      if (! _inCompoundEdit) {
         CompoundUndoManager undoMan = _doc.getUndoManager();
         _inCompoundEdit = true;
         _compoundEditKey = undoMan.startCompoundEdit();
@@ -388,13 +393,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       // Only indent if in code
 
-      _doc.acquireWriteLock();  // reduced model lock unnecessary!
-      try {
-        _doc.setCurrentLocation(getCaretPosition());
-        ReducedModelState state = _doc._getStateAtCurrent();
-        if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
-      }
-      finally { _doc.releaseWriteLock(); }
+//      _doc.acquireWriteLock();  // reduced model lock unnecessary!
+//      try {
+      _doc.setCurrentLocation(getCaretPosition());
+      ReducedModelState state = _doc._getStateAtCurrent();
+      if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
+//      }
+//      finally { _doc.releaseWriteLock(); }
     }
   }
 
@@ -425,7 +430,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Tells us whether we currently are in the middle of a CompoundEdit for regular keystrokes.
    *  Helps us with granular undo.
    */
-  private volatile boolean _inCompoundEdit = false;
+  public volatile boolean _inCompoundEdit = false;
   private volatile int _compoundEditKey;
 
   /** Our keymap containing key bindings.  Takes precedence over the default map. */
@@ -932,7 +937,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
     
-    _doc.acquireWriteLock();
+//    _doc.acquireWriteLock();
     int len = _doc.getLength();
     if (len < _position || len < _selEnd) {
       // the document changed since we're set inactive
@@ -941,19 +946,19 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selStart = len;
       _selEnd = len;
     }
-    try {
-      if (_position == _selStart) {
-        setCaretPosition(_selEnd);
-        moveCaretPosition(_selStart);
-        _doc.setCurrentLocation(_selStart);
-      }
-      else {
-        setCaretPosition(_selStart);
-        moveCaretPosition(_selEnd);
-        _doc.setCurrentLocation(_selEnd);
-      }
+//    try {
+    if (_position == _selStart) {
+      setCaretPosition(_selEnd);
+      moveCaretPosition(_selStart);
+      _doc.setCurrentLocation(_selStart);
     }
-    finally { _doc.releaseWriteLock(); }
+    else {
+      setCaretPosition(_selStart);
+      moveCaretPosition(_selEnd);
+      _doc.setCurrentLocation(_selEnd);
+    }
+//    }
+//    finally { _doc.releaseWriteLock(); }
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
     // Explicitly set scrollbar policies fixing bug #1445898 
@@ -1055,14 +1060,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     * forwards.  If selection is backwards, then the caret ends up at the start of the selection rather than the end.
     */
   public void select(int selectionStart, int selectionEnd) {
-    _doc.acquireReadLock();
-    try {
-//      if (selectionStart < 0) selectionStart = 0;
-//      if (selectionEnd < 0) selectionEnd = 0;
-      setCaretPosition(selectionStart);
-      moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is updated by a listener.
-    }
-    finally { _doc.releaseReadLock(); }
+    setCaretPosition(selectionStart);
+    moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is updated by a listener.
   }
 
   /** Reset the document Undo list. */
@@ -1132,7 +1131,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
-    _doc.acquireWriteLock();  // reduced lock unnecessary!
+//    _doc.acquireWriteLock();  // reduced lock unnecessary!
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();
@@ -1151,7 +1150,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //      endCompoundEdit();
 //      throw e;
 //    }
-    finally { _doc.releaseWriteLock(); }
+//    finally { _doc.releaseWriteLock(); }
   }
     
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
@@ -1275,38 +1274,44 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /** Wrapper for UndoableEdit that pairs UndoableEdits with their caret positions */
-  private class UndoWithPosition implements UndoableEdit {
-    private final UndoableEdit _undo;
-    private final int _pos;
-
-    public UndoWithPosition(UndoableEdit undo, int pos) {
-      _undo = undo;
-      _pos = pos;
-    }
-
-    public int getPosition() { return _pos;  }
-    public boolean addEdit(UndoableEdit ue) { return _undo.addEdit(ue); }
-    public boolean canRedo() { return _undo.canRedo(); }
-    public boolean canUndo() { return _undo.canUndo(); }
-    public void die() { _undo.die(); }
-    public String getPresentationName() { return _undo.getPresentationName(); }
-    public String getUndoPresentationName() { return _undo.getUndoPresentationName(); }
-    public String getRedoPresentationName() { return _undo.getRedoPresentationName(); }
-    public boolean isSignificant() { return _undo.isSignificant(); }
-
-    public void redo() {
-      _undo.redo();
-      if (_pos > -1) setCaretPosition(_pos);
-    }
-
-    public boolean replaceEdit(UndoableEdit ue) { return _undo.replaceEdit(ue); }
-
-    public void undo() {
-      if (_pos > -1) setCaretPosition(_pos);
-      _undo.undo();
-    }
-  }
+//  /** Wrapper for UndoableEdit that pairs UndoableEdits with their caret positions */
+//  private class UndoWithPosition implements UndoableEdit {
+//    private final UndoableEdit _undo;
+//    private final int _pos;
+//
+//    public UndoWithPosition(UndoableEdit undo, int pos) {
+//      _undo = undo;
+//      _pos = pos;
+//    }
+//
+//    public int getPosition() { return _pos;  }
+//    public boolean addEdit(UndoableEdit ue) { return _undo.addEdit(ue); }
+//    public boolean canRedo() { return _undo.canRedo(); }
+//    public boolean canUndo() { return _undo.canUndo(); }
+//    public void die() { _undo.die(); }
+//    public String getPresentationName() { return _undo.getPresentationName(); }
+//    public String getUndoPresentationName() { return _undo.getUndoPresentationName(); }
+//    public String getRedoPresentationName() { return _undo.getRedoPresentationName(); }
+//    public boolean isSignificant() { return _undo.isSignificant(); }
+//
+//    public void redo() {
+//      _undo.redo();
+//      if (_pos > -1) {
+//        _doc.setCurrentLocation(_pos);  // probably unnecessary
+//        setCaretPosition(_pos);
+//      }
+//    }
+//
+//    public boolean replaceEdit(UndoableEdit ue) { return _undo.replaceEdit(ue); }
+//
+//    public void undo() {
+//      if (_pos > -1) {
+//        _doc.setCurrentLocation(_pos);
+//        setCaretPosition(_pos);
+//      }
+//      _undo.undo();
+//    }
+//  }
   
   /** This list of listeners to notify when we are finalized */
   private List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 

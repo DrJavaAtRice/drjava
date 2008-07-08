@@ -258,25 +258,26 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     public BrowserHistoryListUserObj(BrowserDocumentRegion r) { super(r); }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
-      _region.getDocument().acquireReadLock();
+//      _region.getDocument().acquireReadLock();
+//      try {
+      sb.append("<html>");
+      if (_region==_model.getBrowserHistoryManager().getCurrentRegion()) {
+        sb.append("<font color=\"red\">");
+      }
+      sb.append(_region.getDocument().toString());
+      sb.append(':');
+      sb.append(lineNumber());
       try {
-        sb.append("<html>");
-        if (_region==_model.getBrowserHistoryManager().getCurrentRegion()) {
-          sb.append("<font color=\"red\">");
-        }
-        sb.append(_region.getDocument().toString());
-        sb.append(':');
-        sb.append(lineNumber());
-        try {
-          sb.append(": ");
-          int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
-          sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
-        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }
-        if (_region.equals(_model.getBrowserHistoryManager().getCurrentRegion())) {
-          sb.append("</font>");
-        }
-        sb.append("</html>");
-      } finally { _region.getDocument().releaseReadLock(); }
+        sb.append(": ");
+        int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
+        sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
+      } catch(BadLocationException bpe) { /* ignore, just don't display line */ }
+      if (_region.equals(_model.getBrowserHistoryManager().getCurrentRegion())) {
+        sb.append("</font>");
+      }
+      sb.append("</html>");
+//      } 
+//      finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
     public boolean equals(Object other) {

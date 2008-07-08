@@ -89,6 +89,15 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
     try { for (CompilerListener cl : _listeners) { cl.compileEnded(workDir, excludedFiles); } }
     finally { _lock.endRead(); }
   }
+
+  /** Called if the compile cannot be performed. By default, the Exception is an UnexpectedException containing an
+    * explanatory message.
+    */
+  public void compileAborted(Exception e) {
+    _lock.startRead();
+    try { for (CompilerListener cl : _listeners) { cl.compileAborted(e); } }
+    finally { _lock.endRead(); }
+  }
   
   /** Called when files are saved before compiling. It is up to the caller of this method to check if the 
     * documents have been saved, using IGetDocuments.hasModifiedDocuments().
