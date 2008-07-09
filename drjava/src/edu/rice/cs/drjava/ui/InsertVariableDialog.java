@@ -41,6 +41,7 @@ import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.DrJavaProperty;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.util.swing.SwingFrame;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -52,7 +53,7 @@ import java.util.*;
 /**
  * Dialog allowing the user to select a variable.
  */
-public class InsertVariableDialog extends JFrame implements OptionConstants {
+public class InsertVariableDialog extends SwingFrame implements OptionConstants {
   /** Tab pane. */
   JTabbedPane _tabbedPane = new JTabbedPane();
   
@@ -96,6 +97,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     _mainFrame = mf;
     _cm = cm;
     initComponents();
+    initDone();  // call mandated by SwingFrame contract
+    pack();        
+    MainFrame.setPopupLoc(InsertVariableDialog.this, _mainFrame);
   }
   
   /** Build the dialog. */
@@ -185,9 +189,6 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     
     super.getContentPane().add(main);
     super.setResizable(false);
-    pack();        
-
-    MainFrame.setPopupLoc(InsertVariableDialog.this, _mainFrame);
   }
   
   /** Create a scroll pane for the specified category with the properties provided in the map.

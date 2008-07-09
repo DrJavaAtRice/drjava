@@ -49,11 +49,12 @@ import java.util.Vector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** The frame for displaying the HTML help files.
   * @version $Id$
   */
-public class HTMLFrame extends JFrame {
+public class HTMLFrame extends SwingFrame {
   
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 600;
@@ -250,6 +251,8 @@ public class HTMLFrame extends JFrame {
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     MainFrame.setPopupLoc(this, null);
+    
+    initDone(); // call mandated by SwingFrame contract
   }
   
   /** Hides the navigation panel on the left.  Cannot currently be undone. */

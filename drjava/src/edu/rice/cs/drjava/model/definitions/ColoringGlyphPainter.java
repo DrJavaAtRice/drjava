@@ -394,7 +394,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
     DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
     
-    edu.rice.cs.util.swing.Utilities.invokeLater(_lambdaRepaint);
+    EventQueue.invokeLater(_lambdaRepaint);
   }
   
   /** The OptionListeners for DEFINITIONS COLORs */

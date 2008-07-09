@@ -45,6 +45,7 @@ import edu.rice.cs.util.jar.ManifestWriter;
 import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.FileSelectorStringComponent;
 import edu.rice.cs.util.swing.FileSelectorComponent;
+import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -67,7 +68,7 @@ import java.awt.event.WindowEvent;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
-public class DetachedFrame extends JFrame {
+public class DetachedFrame extends SwingFrame {
   /** Class to save the frame state, i.e. location. */
   public static class FrameState {
     private Point _loc;
@@ -181,6 +182,7 @@ public class DetachedFrame extends JFrame {
     _mainFrame = mf;
     _detach = detach;
     _reattach = reattach;
+    initDone(); // call mandated by SwingFrame contract
   }
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */

@@ -47,12 +47,14 @@ import java.awt.image.*;
 import java.net.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** DrJava's print preview window
   * @version $Id$
   */
-public abstract class PreviewFrame extends JFrame {
+public abstract class PreviewFrame extends SwingFrame {
   
   protected final SingleDisplayModel _model;
   protected final MainFrame _mainFrame;
@@ -186,6 +188,9 @@ public abstract class PreviewFrame extends JFrame {
     
     setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    
+    initDone(); // call mandated by SwingFrame contract
+    
     setVisible(true);
   }
   

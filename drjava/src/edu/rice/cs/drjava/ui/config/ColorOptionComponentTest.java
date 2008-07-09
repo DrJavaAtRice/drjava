@@ -39,14 +39,15 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
-/**
- * Tests functionality of this OptionComponent
- * @version $Id:
- */
+/** Tests functionality of this OptionComponent
+  * @version $Id:
+  */
 public final class ColorOptionComponentTest extends DrJavaTestCase {
 
   private static ColorOptionComponent _option;
@@ -55,7 +56,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", new Frame());
+    _option = new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", new DefaultSwingFrame());
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }

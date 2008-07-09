@@ -36,11 +36,12 @@
 
 package edu.rice.cs.drjava.ui.config;
 
+import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
-import java.awt.*;
-import java.awt.event.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a ColorOption.
  *  @version $Id$
@@ -58,18 +59,18 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    *  @param text The text to display in the label of the component
    *  @param parent The Frame displaying this component
    */
-  public ColorOptionComponent (ColorOption opt, String text, Frame parent) {
+  public ColorOptionComponent (ColorOption opt, String text, SwingFrame parent) {
     this(opt, text, parent, false);
   }
   
   /** An alternate constructor, allowing the caller to specify whether this color is a background color.  If so, 
    *  the button will display the color as its background.
    */
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent, boolean isBackgroundColor) {
+  public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, boolean isBackgroundColor) {
     this(opt, text, parent, isBackgroundColor, false);
   }
   
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent, boolean isBackgroundColor, boolean isBoldText)
+  public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, boolean isBackgroundColor, boolean isBoldText)
   {
     super(opt, text, parent);
     _isBackgroundColor = isBackgroundColor;
@@ -114,19 +115,19 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   }
   
   /** Constructor that allows for a tooltip description. */
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description) {
+  public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
   /** Constructor that allows for a tooltip description as well as whether or not this is a background color. */
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description, boolean isBackgroundColor)
+  public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, String description, boolean isBackgroundColor)
   {
     this(opt, text, parent, isBackgroundColor);
     setDescription(description);
   }
 
   /** Constructor that allows for a tooltip description as well as whether or not this is a background color.*/
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description, boolean isBackgroundColor, 
+  public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, String description, boolean isBackgroundColor, 
                               boolean isBoldText) {
     this(opt, text, parent, isBackgroundColor, isBoldText);
     setDescription(description);

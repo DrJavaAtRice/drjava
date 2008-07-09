@@ -52,14 +52,17 @@ import javax.swing.text.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.swing.DropDownButton;
 import edu.rice.cs.util.CompletionMonitor;
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.DropDownButton;
+import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
+
+import edu.rice.cs.plt.tuple.Pair;
 
 
-public class EditExternalDialog extends JFrame implements OptionConstants {
+
+public class EditExternalDialog extends SwingFrame implements OptionConstants {
   private static final int FRAME_WIDTH = 503;
   private static final int FRAME_HEIGHT = 318;
   
@@ -193,6 +196,7 @@ public class EditExternalDialog extends JFrame implements OptionConstants {
     super("Edit External Processes");
     _mainFrame = mf;
     initComponents();
+    initDone();   // call mandated by SwingFrame contract
   }
 
   /** Build the dialog. */

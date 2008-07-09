@@ -86,30 +86,35 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
         * @param e the event corresponding to the change
         */
       public void valueChanged(final ListSelectionEvent e) {
-        Utilities.invokeLater( new Runnable() {
-          public void run() {
-            if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
-              @SuppressWarnings("unchecked") final ItemT newItem = (ItemT) getSelectedValue();
+//        assert EventQueue.isDispatchThread();
+//        Utilities.invokeLater( new Runnable() {
+//          public void run() {
+        if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
+          @SuppressWarnings("unchecked") final ItemT newItem = (ItemT) getSelectedValue();
 //              final int newIndex = getSelectedIndex();
-              if (_current != newItem) {                                
-                final ItemT oldItem = _current;                                
-                NodeData<ItemT> oldData = new NodeData<ItemT>() {
-                  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.itemCase(oldItem, p); }
-                };
-                NodeData<ItemT> newData = new NodeData<ItemT>() {
-                  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.itemCase(newItem, p); }
-                };
-                for(INavigationListener<? super ItemT> listener: navListeners) {
-                  if (oldItem != null) listener.lostSelection(oldData, isNextChangeModelInitiated());
-                  if (newItem != null) listener.gainedSelection(newData, isNextChangeModelInitiated());
-                }
-                setNextChangeModelInitiated(false);
-                _current = newItem;
-//                _currentIndex = newIndex;
+          if (_current != newItem) {                                
+            final ItemT oldItem = _current;                                
+            NodeData<ItemT> oldData = new NodeData<ItemT>() {
+              public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { 
+                return v.itemCase(oldItem, p); 
               }
+            };
+            NodeData<ItemT> newData = new NodeData<ItemT>() {
+              public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { 
+                return v.itemCase(newItem, p); 
+              }
+            };
+            for(INavigationListener<? super ItemT> listener: navListeners) {
+              if (oldItem != null) listener.lostSelection(oldData, isNextChangeModelInitiated());
+              if (newItem != null) listener.gainedSelection(newData, isNextChangeModelInitiated());
             }
+            setNextChangeModelInitiated(false);
+            _current = newItem;
+//                _currentIndex = newIndex;
           }
-        });
+        }
+//          }
+//        });
       }
     });
     

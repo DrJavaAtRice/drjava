@@ -59,12 +59,13 @@ import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.FileChooser;
+import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.filechooser.FileFilter;
 
 /** A frame for setting Project Preferences */
-public class ProjectPropertiesFrame extends JFrame {
+public class ProjectPropertiesFrame extends SwingFrame {
 
   private static final int FRAME_WIDTH = 503;
   private static final int FRAME_HEIGHT = 500;
@@ -129,6 +130,7 @@ public class ProjectPropertiesFrame extends JFrame {
     _cancelButton = new JButton(cancelAction);
     
     init();
+    initDone(); // call mandated by SwingFrame contract
   }
 
   /** Initializes the components in this frame. */

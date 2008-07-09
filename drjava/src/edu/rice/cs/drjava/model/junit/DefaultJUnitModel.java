@@ -258,7 +258,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               nonTestCase(allTests);
               return;
             }
-            SwingUtilities.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
+            EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
               public void run() { _rawJUnitOpenDefDocs(lod, allTests); }
             });
           }
@@ -453,7 +453,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         _testInProgress = true;
         
         // notify listeners that JUnit testing has finally started!
-        Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitStarted(); } });
+//        Utilities.invokeLater(new Runnable() { public void run() { 
+          _notifier.junitStarted(); 
+//        } });
         
         _jvm.runTestSuite();
         

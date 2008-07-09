@@ -36,38 +36,40 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.util.ProcessCreator;
-import edu.rice.cs.util.GeneralProcessCreator;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.CompletionMonitor;
-import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.util.swing.FileChooser;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.PropertyMaps;
-import edu.rice.cs.util.BalancingStreamTokenizer;
-import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.swing.DropDownButton;
-import edu.rice.cs.util.XMLConfig;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 
-import java.io.StringReader;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.*;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.text.*;
+import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.util.BalancingStreamTokenizer;
+import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.util.ProcessCreator;
+import edu.rice.cs.util.GeneralProcessCreator;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.XMLConfig;
+import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.FileChooser;
+import edu.rice.cs.util.swing.DropDownButton;
+import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.FontMetrics;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.text.*;
 
-public class ExecuteExternalDialog extends JFrame implements OptionConstants {
+public class ExecuteExternalDialog extends SwingFrame implements OptionConstants {
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 500;
   
@@ -241,6 +243,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       _commandWorkDirLine.setText(workdir);
       _commandEnclosingFileLine.setText(enclosingFile);
     }
+    initDone(); // call mandated by SwingFrame contract
   }
   
   /** Create a dialog with the "Run" button.

@@ -52,9 +52,10 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** Frame with history of clipboard. */
-public class ClipboardHistoryFrame extends JFrame {
+public class ClipboardHistoryFrame extends SwingFrame {
   /** Interface for an action to be performed when the user closes the frame,
    *  either by using "OK" or "Cancel".
    */
@@ -148,6 +149,7 @@ public class ClipboardHistoryFrame extends JFrame {
     _okAction = okAction;
     _cancelAction = cancelAction;
     init();
+    initDone();  // call mandated by SwingFrame contract
   }
   
   /** Returns the last state of the frame, i.e. the location and dimension.
@@ -195,8 +197,7 @@ public class ClipboardHistoryFrame extends JFrame {
     return _buttonPressed;
   }
 
-  /** Initialize the frame.
-   */
+  /** Initialize the frame. */
   private void init() {
     addComponentListener(new java.awt.event.ComponentAdapter() {
       public void componentResized(ComponentEvent e) {

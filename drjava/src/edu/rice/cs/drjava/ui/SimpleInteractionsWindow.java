@@ -41,14 +41,16 @@ import java.awt.Font;
 import java.awt.event.*;
 import java.io.File;
 
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.swing.SwingFrame;
+
 
 /** A standalone Interactions Window that provides the functionality of DrJava's Interactions Pane in a single JVM.
   * Useful for quickly testing small pieces of code if DrJava is not running.
   * @version $Id$
   */
-public class SimpleInteractionsWindow extends JFrame {
+public class SimpleInteractionsWindow extends SwingFrame {
   //private final SimpleRMIInteractionsModel _rmiModel;
   private final SimpleInteractionsModel _model;
   private final InteractionsDJDocument _adapter;
@@ -100,6 +102,8 @@ public class SimpleInteractionsWindow extends JFrame {
     this.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent ev) { close(); }
     });
+    
+    initDone(); // call mandated by SwingFrame contract
   }
   
   /** Terminates this process. This is overridden in DrJava so that is disposes of itself instead of calling 

@@ -41,6 +41,8 @@ import javax.swing.event.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FileSelectorComponent;
+import edu.rice.cs.util.swing.SwingFrame;
+
 import java.awt.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
@@ -52,7 +54,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
 
   private volatile FileSelectorComponent _component;
 
-  public FileOptionComponent (FileOption opt, String text, Frame parent, JFileChooser jfc) {
+  public FileOptionComponent (FileOption opt, String text, SwingFrame parent, JFileChooser jfc) {
     super(opt, text, parent);
     _component = new FileSelectorComponent(parent, jfc, 30, 10f);
     File setting = DrJava.getConfig().getSetting(_option);
@@ -65,7 +67,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
   }
 
   /** Constructor that allows for a tooltip description. */
-  public FileOptionComponent (FileOption opt, String text, Frame parent, String description, JFileChooser jfc) {
+  public FileOptionComponent (FileOption opt, String text, SwingFrame parent, String description, JFileChooser jfc) {
     this(opt, text, parent, jfc);
     setDescription(description);
   }

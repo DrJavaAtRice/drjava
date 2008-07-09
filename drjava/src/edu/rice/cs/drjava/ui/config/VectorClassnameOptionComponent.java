@@ -41,15 +41,16 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 public class VectorClassnameOptionComponent extends VectorOptionComponent<String> {
-  public VectorClassnameOptionComponent(VectorOption<String> opt, String text, Frame parent) {
+  public VectorClassnameOptionComponent(VectorOption<String> opt, String text, SwingFrame parent) {
     super(opt, text, parent);
   }
 
   /** Constructor that allows for a tooltip description.
    */
-  public VectorClassnameOptionComponent(VectorOption<String> opt, String text, Frame parent, String description) {
+  public VectorClassnameOptionComponent(VectorOption<String> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }

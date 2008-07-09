@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
@@ -51,7 +52,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new FontOptionComponent( OptionConstants.FONT_MAIN, "Main font", new Frame());
+    _option = new FontOptionComponent( OptionConstants.FONT_MAIN, "Main font", new DefaultSwingFrame());
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }

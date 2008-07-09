@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
@@ -56,7 +57,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new BooleanOptionComponent( OptionConstants.LINEENUM_ENABLED, "Line Enumeration", new Frame());
+    _option = new BooleanOptionComponent( OptionConstants.LINEENUM_ENABLED, "Line Enumeration", new DefaultSwingFrame());
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }

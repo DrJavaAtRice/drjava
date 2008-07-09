@@ -47,6 +47,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 /** The graphical form of an Option. Provides a way to see the values of Option while running DrJava and perform live 
@@ -56,11 +57,11 @@ import edu.rice.cs.util.swing.Utilities;
 public abstract class OptionComponent<T> implements Serializable {
   protected final Option<T> _option;
   protected final JLabel _label;
-  protected final Frame _parent;
+  protected final SwingFrame _parent;
   protected volatile boolean _entireColumn;
   protected volatile String _labelText;
     
-  public OptionComponent(Option<T> option, String labelText, Frame parent) {
+  public OptionComponent(Option<T> option, String labelText, SwingFrame parent) {
     _option = option;
     _labelText = labelText;
     _label = new JLabel(_labelText);
@@ -77,7 +78,7 @@ public abstract class OptionComponent<T> implements Serializable {
    *  @param labelText Text for descriptive label of this option.
    *  @param parent The parent frame.
    */
-  public OptionComponent (String labelText, Frame parent) { this(null, labelText, parent); }
+  public OptionComponent (String labelText, SwingFrame parent) { this(null, labelText, parent); }
   
   public Option<T> getOption() { return _option; }
   
@@ -157,7 +158,7 @@ public abstract class OptionComponent<T> implements Serializable {
   
   /** Notify all change listeners of a change. Notification performed in the event thread. */
   protected void notifyChangeListeners() {
-//    assert MainFrame.MAIN_FRAME_INIT || EventQueue.isDispatchThread();
+//    assert _parent.duringInit() || EventQueue.isDispatchThread();
 //    Utilities.invokeLater(new Runnable() {
 //      public void run() { 
       // Make a copy of _changeListeners to prevent potential ConcurrentModificationException

@@ -45,6 +45,7 @@ import edu.rice.cs.util.jar.ManifestWriter;
 import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.FileSelectorStringComponent;
 import edu.rice.cs.util.swing.FileSelectorComponent;
+import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -66,13 +67,11 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
-public class JarOptionsDialog extends JFrame {
+public class JarOptionsDialog extends SwingFrame {
   /** Class to save the frame state, i.e. location. */
   public static class FrameState {
     private Point _loc;
-    public FrameState(Point l) {
-      _loc = l;
-    }
+    public FrameState(Point l) { _loc = l; }
     public FrameState(String s) {
       StringTokenizer tok = new StringTokenizer(s);
       try {
@@ -80,16 +79,10 @@ public class JarOptionsDialog extends JFrame {
         int y = Integer.valueOf(tok.nextToken());
         _loc = new Point(x, y);
       }
-      catch(NoSuchElementException nsee) {
-        throw new IllegalArgumentException("Wrong FrameState string: " + nsee);
-      }
-      catch(NumberFormatException nfe) {
-        throw new IllegalArgumentException("Wrong FrameState string: " + nfe);
-      }
+      catch(NoSuchElementException nsee) { throw new IllegalArgumentException("Wrong FrameState string: " + nsee); }
+      catch(NumberFormatException nfe) { throw new IllegalArgumentException("Wrong FrameState string: " + nfe); }
     }
-    public FrameState(JarOptionsDialog comp) {
-      _loc = comp.getLocation();
-    }
+    public FrameState(JarOptionsDialog comp) { _loc = comp.getLocation(); }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
       sb.append(_loc.x);
@@ -163,8 +156,9 @@ public class JarOptionsDialog extends JFrame {
   }
   
   /** Frame that gets displayed when the program is processing data. */
-  private static class ProcessingFrame extends JFrame {
+  private static class ProcessingFrame extends SwingFrame {
     private Component _parent;
+    
     public ProcessingFrame(Component parent, String title, String label) {
       super(title);
       _parent = parent;
@@ -173,7 +167,9 @@ public class JarOptionsDialog extends JFrame {
       JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
       getRootPane().setLayout(new BorderLayout());
       getRootPane().add(waitLabel, BorderLayout.CENTER);
+      initDone();  // call mandated by SwingFrame contract
     }
+    
     public void setVisible(boolean vis) {
       MainFrame.setPopupLoc(this, _parent);
       super.setVisible(vis);
@@ -188,6 +184,11 @@ public class JarOptionsDialog extends JFrame {
     _mainFrame = mf;
     _model = mf.getModel();
     initComponents();
+    
+    initDone();  // call by mandated by SwingFrame contract
+    pack();
+    
+    MainFrame.setPopupLoc(this, _mainFrame);   
   }
   
   /** Load the initial state from the previous files or with defaults. */
@@ -251,18 +252,10 @@ public class JarOptionsDialog extends JFrame {
     super.getContentPane().setLayout(new BorderLayout());
     super.getContentPane().add(main, BorderLayout.NORTH);
     
-    Action okAction = new AbstractAction("OK") {
-      public void actionPerformed(ActionEvent e) {
-        _ok();
-      }
-    };
+    Action okAction = new AbstractAction("OK") { public void actionPerformed(ActionEvent e) { _ok(); } };
     _okButton = new JButton(okAction);
     
-    Action cancelAction = new AbstractAction("Cancel") {
-      public void actionPerformed(ActionEvent e) {
-        _cancel();
-      }
-    };
+    Action cancelAction = new AbstractAction("Cancel") { public void actionPerformed(ActionEvent e) { _cancel(); } };
     _cancelButton = new JButton(cancelAction);
     
     // Add buttons
@@ -275,10 +268,7 @@ public class JarOptionsDialog extends JFrame {
     bottom.add(Box.createHorizontalGlue());
     
     super.getContentPane().add(bottom, BorderLayout.SOUTH);
-    super.setResizable(false);
-    pack();
-    
-    MainFrame.setPopupLoc(this, _mainFrame);    
+    super.setResizable(false); 
   }
   
   /** Make the options panel. 

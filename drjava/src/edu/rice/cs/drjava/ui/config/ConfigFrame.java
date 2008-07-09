@@ -58,12 +58,14 @@ import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$
  */
-public class ConfigFrame extends JFrame {
+public class ConfigFrame extends SwingFrame {
 
   private static final int FRAME_WIDTH = 850;
   private static final int FRAME_HEIGHT = 550;
@@ -215,6 +217,8 @@ public class ConfigFrame extends JFrame {
     _tree.expandRow(0);
     _tree.expandRow(1);
     _tree.expandRow(2);
+    
+    initDone(); // call mandated by SwingFrame contract
   }
   
   /** Performs deferred initialization.  Only runs in the event thread.  Some of this code occasionally generated swing

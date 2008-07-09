@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -69,7 +70,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
    * @param text the label to display
    * @param parent the parent frame
    */
-  public VectorOptionComponent(VectorOption<T> opt, String text, Frame parent) {
+  public VectorOptionComponent(VectorOption<T> opt, String text, SwingFrame parent) {
     super(opt, text, parent);
 
     //set up list
@@ -166,8 +167,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   
   /** Constructor that allows for a tooltip description.
    */
-  public VectorOptionComponent(VectorOption<T> opt, String text,
-                               Frame parent, String description) {
+  public VectorOptionComponent(VectorOption<T> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }

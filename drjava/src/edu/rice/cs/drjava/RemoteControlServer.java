@@ -157,7 +157,7 @@ public final class RemoteControlServer {
                         return new File[] { f };
                       }
                     };
-                    if (_frame!=null) { 
+                    if (_frame != null) { 
                       _frame.open(openSelector);
                       if (lineNo>=0) {
                         final int l = lineNo;

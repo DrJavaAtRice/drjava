@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.SwingFrame;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Iterator;
@@ -54,7 +56,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
   /** Main constructor builds a panel containing a set of radio buttons for the
     * legal values of the ForcedChoiceOption.
     */
-  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, Frame parent) {
+  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, SwingFrame parent) {
     super(option, labelText, parent);
 
     // Build the combo box from the Iterator of legal values
@@ -74,7 +76,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
   }
 
   /** Constructor that allows for a tooltip description. */
-  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, Frame parent, String description) {
+  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, SwingFrame parent, String description) {
     this(option, labelText, parent);
     setDescription(description);
   }

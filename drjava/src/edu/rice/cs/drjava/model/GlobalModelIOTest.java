@@ -940,10 +940,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testModifiedByOtherFalse completed");
   }
   
-  /** Interprets some statements, saves the history, clears the history, then loads  the history. */
+  /** Interprets some statements, saves the history, clears the history, then loads the history. */
   public void testSaveClearAndLoadHistory() throws EditDocumentException, IOException, InterruptedException {
     String newLine = StringOps.EOL;
-    InteractionListener listener = new InteractionListener();
+    final InteractionListener listener = new InteractionListener();
     
     _model.addListener(listener);
     File f = tempFile();
@@ -978,37 +978,36 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
                  _model.getHistoryAsStringWithSemicolons());
     listener.assertInteractionEndCount(3);
     listener.assertInteractionStartCount(3);
-    _model.saveHistory(fs);
+    safeSaveHistory(fs);
     
     // check that the file contains the correct value
-    assertEquals("contents of saved file",
-                 History.HISTORY_FORMAT_VERSION_2 +
-                 s1 + delim + s2 + delim + s3 + delim,
+    assertEquals("contents of saved file", History.HISTORY_FORMAT_VERSION_2 + s1 + delim + s2 + delim + s3 + delim,
                  IOUtil.toString(f));
     
     _model.clearHistory();
     // confirm that the history is clear
     assertEquals("History is not clear", "", _model.getHistoryAsString());
     
-    _model.resetInteractions(_model.getWorkingDirectory());
-    _model.resetConsole();
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { 
+        _model.resetInteractions(_model.getWorkingDirectory());
+        _model.resetConsole();
+      }
+    });
     listener.waitResetDone();
     
     listener.logInteractionStart();
-    _model.loadHistory(fs);
+    safeLoadHistory(fs);
     listener.waitInteractionDone();
-//    Utilities.clearEventQueue();
         
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
     debug.log(con.getDocText(0, con.getLength()).trim());
-    assertEquals("Output of loaded history is not correct",
-                 "x = 5",
-                 con.getDocText(0, con.getLength()).trim());
+    assertEquals("Output of loaded history is not correct", "x = 5", con.getDocText(0, con.getLength()).trim());
     listener.assertInteractionStartCount(4);
     listener.assertInteractionEndCount(4);
     _model.removeListener(listener);
-    
+
     _log.log("testSaveClearAndLoadHistory completed");
   }
   
@@ -1018,7 +1017,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException, 
     InterruptedException {
     
-    InteractionListener listener = new InteractionListener();
+    final InteractionListener listener = new InteractionListener();
     _model.addListener(listener);
     File f1 = tempFile(1);
     File f2 = tempFile(2);
@@ -1028,15 +1027,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     String s2 = "System.out.println(\"x = \" + x)";
     String s3 = "x = 5;";
     String s4 = "System.out.println(\"x = \" + x)";
-    IOUtil.writeStringToFile(f1,s1+'\n'+s2+'\n');
-    IOUtil.writeStringToFile(f2,s3+'\n'+s4+'\n');
+    IOUtil.writeStringToFile(f1, s1 + '\n' + s2 + '\n');
+    IOUtil.writeStringToFile(f2, s3 + '\n' + s4 + '\n');
     
     listener.assertInteractionStartCount(0);
-    _model.loadHistory(fs1);
+    safeLoadHistory(fs1);
     listener.waitInteractionDone();
     
     listener.logInteractionStart();
-    _model.loadHistory(fs2);
+    safeLoadHistory(fs2);
     listener.waitInteractionDone();
     
     // check that output of loaded history is correct
@@ -1044,16 +1043,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("Output of loaded history is not correct: " + con.getDocText(0, con.getLength()).trim(),
                  "x = 5" + StringOps.EOL + "x = 5",
                  con.getDocText(0, con.getLength()).trim());
-    
-    
+
     _log.log("testLoadHistoryWithAndWithoutSemicolons completed");
   }
   
   /** Test for the possibility that the file has been moved or deleted
     * since it was last referenced
     */
-  public void testFileMovedWhenTriedToSave()
-    throws BadLocationException, IOException {
+  public void testFileMovedWhenTriedToSave() throws BadLocationException, IOException {
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();

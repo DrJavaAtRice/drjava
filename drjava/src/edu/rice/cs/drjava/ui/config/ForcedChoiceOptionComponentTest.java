@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
@@ -49,7 +50,7 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new ForcedChoiceOptionComponent( OptionConstants.JAVADOC_ACCESS_LEVEL, "Private", new Frame());
+    _option = new ForcedChoiceOptionComponent( OptionConstants.JAVADOC_ACCESS_LEVEL, "Private", new DefaultSwingFrame());
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }

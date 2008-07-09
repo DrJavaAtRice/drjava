@@ -42,6 +42,7 @@ import java.io.PrintWriter;
 
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
+import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.drjava.model.GlobalModel;
 
 import edu.rice.cs.util.StringOps;
@@ -61,8 +62,9 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
   */
 public class SimpleInteractionsModel extends InteractionsModel {
   
-  /** Milliseconds to wait after each println */
-  protected static final int WRITE_DELAY = 100;
+  // Elided in favor of same constant in AbstractGlobalModel
+//  /** Milliseconds to wait after each println */
+//  protected static final int WRITE_DELAY = 30;
   
   protected ClassPathManager _classPathManager;
   protected Interpreter _interpreter;
@@ -74,7 +76,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     * @param document Toolkit-independent document adapter
     */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
-    super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
+    super(document, new File(System.getProperty("user.dir")), 1000, AbstractGlobalModel.WRITE_DELAY);
     _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     //_interpreter.defineVariable("INTERPRETER", _interpreter);

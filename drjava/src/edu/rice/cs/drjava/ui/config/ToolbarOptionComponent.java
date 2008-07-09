@@ -36,11 +36,13 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import javax.swing.*;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
+
+import edu.rice.cs.drjava.*;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /**
  * The special option component for the toolbar text and toolbar icon options.
@@ -72,7 +74,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    * @param title the title for this panel
    * @param parent the parent frame
    */
-  public ToolbarOptionComponent(String title, Frame parent) {
+  public ToolbarOptionComponent(String title, SwingFrame parent) {
     super(title, parent);
 
     _noneButton = new JRadioButton(NONE);
@@ -131,7 +133,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   }
 
   /** Constructor that allows for a tooltip description. */
-  public ToolbarOptionComponent(String title, Frame parent, String description) {
+  public ToolbarOptionComponent(String title, SwingFrame parent, String description) {
     this(title, parent);
     setDescription(description);
   }

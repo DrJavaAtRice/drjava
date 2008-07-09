@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
@@ -59,7 +60,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     _option = 
-      new FileOptionComponent(OptionConstants.JAVAC_LOCATION, "Javac Location", new Frame(), new JFileChooser());
+      new FileOptionComponent(OptionConstants.JAVAC_LOCATION, "Javac Location", new DefaultSwingFrame(), new JFileChooser());
     Utilities.clearEventQueue();
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();

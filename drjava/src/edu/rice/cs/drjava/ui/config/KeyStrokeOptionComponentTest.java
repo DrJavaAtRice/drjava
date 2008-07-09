@@ -40,6 +40,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.KeyStrokeOption;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
@@ -53,7 +54,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new KeyStrokeOptionComponent(OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new Frame());
+    _option = new KeyStrokeOptionComponent(OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new DefaultSwingFrame());
     DrJava.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }

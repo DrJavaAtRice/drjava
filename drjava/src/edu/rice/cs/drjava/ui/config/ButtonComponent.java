@@ -36,12 +36,13 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import javax.swing.*;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /**
  * Button component to perform some action. Nothing gets saved.
@@ -54,7 +55,7 @@ public class ButtonComponent extends OptionComponent<Object> {
    * @param text the text to display with the option
    * @param parent the parent frame
    */
-  public ButtonComponent(ActionListener l, String text, Frame parent) {
+  public ButtonComponent(ActionListener l, String text, SwingFrame parent) {
     super(null, "", parent);
     _jb = new JButton(text);
     _jb.addActionListener(l);
@@ -69,7 +70,7 @@ public class ButtonComponent extends OptionComponent<Object> {
    * @param parent the parent frame
    * @param description text to show in a tooltip over 
    */
-  public ButtonComponent(ActionListener l, String text, Frame parent, String description) {
+  public ButtonComponent(ActionListener l, String text, SwingFrame parent, String description) {
     this(l, text, parent);
     setDescription(description);
   }

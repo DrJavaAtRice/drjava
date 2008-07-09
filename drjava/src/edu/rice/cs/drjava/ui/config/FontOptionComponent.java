@@ -40,6 +40,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FontChooser;
+import edu.rice.cs.util.swing.SwingFrame;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -54,7 +55,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
   private final JPanel _panel;
   private volatile Font _font;
   
-  public FontOptionComponent(FontOption opt, String text, Frame parent) {
+  public FontOptionComponent(FontOption opt, String text, SwingFrame parent) {
     super(opt, text, parent);
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
@@ -77,7 +78,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
   }
   
   /** Constructor that allows for a tooltip description. */
-  public FontOptionComponent(FontOption opt, String text, Frame parent, String description) {
+  public FontOptionComponent(FontOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }

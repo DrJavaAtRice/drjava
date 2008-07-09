@@ -36,16 +36,19 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import javax.swing.*;
-import edu.rice.cs.drjava.ui.*;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.*;
 
 import java.util.ArrayList;
+
+import edu.rice.cs.drjava.ui.*;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options. Uses a file chooser for each File element.
  *  @version $Id$
@@ -56,17 +59,17 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
   protected boolean _moveButtonEnabled = true;
   protected File _baseDir = null;
   
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent) {
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent) {
     this(opt, text, parent, false);
   }
   
   /** Constructor that allows for a tooltip description. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description) {
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
   /** Constructor with flag for move buttons. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, boolean moveButtonEnabled) {
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
     super(opt, text, parent);  // creates all four buttons
     _moveButtonEnabled = moveButtonEnabled;
     
@@ -82,7 +85,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
   }
   
   /** Constructor that allows for a tooltip description. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description,
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent, String description,
                                     boolean moveButtonEnabled) {
     this(opt, text, parent, moveButtonEnabled);
     setDescription(description);

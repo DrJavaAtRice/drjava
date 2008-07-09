@@ -224,6 +224,19 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return _doc;
   }
   
+  protected void safeLoadHistory(final FileSelector fs) {
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.loadHistory(fs); } });
+  }
+  
+  protected void safeSaveHistory(final FileSelector fs) {
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try {_model.saveHistory(fs); } 
+        catch(IOException e) { throw new UnexpectedException(e); }
+      }
+    });
+  }
+                                
   /** Invokes startCompile on the given document in the event thread. */
   protected static void testStartCompile(final OpenDefinitionsDocument doc) {
     Utilities.invokeLater(new Runnable() { 

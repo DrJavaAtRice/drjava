@@ -533,7 +533,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   /** Verifies that we get a nonTestCase event and that opening a single test file enables testing. */
-  public void testJUnitAllWithNoValidTests() throws Exception {
+  public void safeJUnitAllWithNoValidTests() throws Exception {
     
 //    if (printMessages) System.err.println("-----testJUnitAllWithNoValidTests-----");
     
@@ -576,7 +576,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   /** Tests that junit all works with one or two test cases that should pass. */
-  public void testJUnitAllWithNoErrors() throws Exception {
+  public void safeJUnitAllWithNoErrors() throws Exception {
 //    _log.log("Starting testJUnitAllWithNoErrors");
     
 //    final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
@@ -629,7 +629,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   /** Tests that junit all works with test cases that do not pass. */
-  public void testJUnitAllWithErrors() throws Exception {
+  public void safeJUnitAllWithErrors() throws Exception {
     
     if (printMessages) System.out.println("-----testJUnitAllWithErrors-----");
     
@@ -665,7 +665,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   } 
   
   /** Tests that junit all works with one or two test cases that should pass. */
-  public void testJUnitStaticInnerClass() throws Exception {
+  public void safeJUnitStaticInnerClass() throws Exception {
     if (printMessages) System.out.println("-----testJUnitAllWithStaticInnerClass-----");
     
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);

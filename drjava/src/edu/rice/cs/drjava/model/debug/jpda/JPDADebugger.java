@@ -1540,8 +1540,6 @@ public class JPDADebugger implements Debugger {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.stepRequested(); } });
   }
   
-  
-  
   /** Invoke the given method, and handle any errors that may arise.  Note that the result
     * does not have garbage collection disabled; if the result is a reference 
     * that will be needed later and that is not referenced elsewhere in the VM, garbage

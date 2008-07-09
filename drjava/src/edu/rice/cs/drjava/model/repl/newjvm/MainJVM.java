@@ -336,10 +336,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @param s String that was printed in the other JVM
     */
   public void systemOutPrint(String s) throws RemoteException {
-    debug.logStart();
+//    debug.logStart();
     _interactionsModel.replSystemOutPrint(s); 
 //    Utilities.clearEventQueue();                // wait for event queue task to complete
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases

@@ -92,7 +92,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     */
   public void replSystemOutPrint(String s) {
     super.replSystemOutPrint(s); // Print s to interactions pane
-    _model.systemOutPrint(s);    // Print s to console
+   _model.systemOutPrint(s);    // Print s to console
   }
   
   /** Called when the repl prints to System.err.  This method can safely be called from outside the event thread.

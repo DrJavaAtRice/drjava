@@ -49,10 +49,11 @@ import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Frame with predictive string input based on a list of strings. */
-public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFrame {
+public class PredictiveInputFrame<T extends Comparable<? super T>> extends SwingFrame {
   
   /** Interface that is used to generate additional information about an item. */
   public static interface InfoSupplier<X> extends Lambda<String, X> {
@@ -165,7 +166,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private final JLabel _infoLabel = new JLabel("");
   
   /** Owner frame. */
-  private final Frame _owner;
+  private final SwingFrame _owner;
   
   /** Action to be performed when the user closes the frame using "OK". */
   private final ArrayList<CloseAction<T>> _actions;
@@ -195,7 +196,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    *  @param items list of items
    */
 
-  public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
+  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, java.util.List<T> items) {
     super(title);
@@ -212,6 +213,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _buttons = new JButton[actions.size()];
     _cancelIndex = cancelIndex;
     init(_info != null);
+    initDone(); // call mandated by SwingFrame contract
   }
   
   /** Create a new predictive string input frame.
@@ -222,7 +224,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
    *  @param items varargs/array of items
    */
-  public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
+  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
     this(owner, title, force, ignoreCase, info, strategies, actions, cancelIndex, Arrays.asList(items));

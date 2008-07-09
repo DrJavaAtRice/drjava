@@ -36,17 +36,16 @@
 
 package edu.rice.cs.drjava.ui.config;
 
+import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
-import java.awt.*;
-import java.awt.event.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
-
-/**
- * Graphical form of a BooleanOption.
- * @version $Id$
- */
+/** Graphical form of a BooleanOption.
+  * @version $Id$
+  */
 public class BooleanOptionComponent extends OptionComponent<Boolean> {
   protected JCheckBox _jcb;
 
@@ -56,7 +55,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    * @param parent the parent frame
    * @param left whether the descriptive text should be on the left
    */
-  public BooleanOptionComponent(BooleanOption opt, String text, Frame parent, boolean left) {
+  public BooleanOptionComponent(BooleanOption opt, String text, SwingFrame parent, boolean left) {
     super(opt, left?text:"", parent);
     _jcb = new JCheckBox();
     _jcb.setText(left?"":text);
@@ -74,8 +73,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    *  @param description text to show in a tooltip over 
    *  @param left whether the descriptive text should be on the left
    */
-  public BooleanOptionComponent(BooleanOption opt, String text,
-                                Frame parent, String description, boolean left) {
+  public BooleanOptionComponent(BooleanOption opt, String text, SwingFrame parent, String description, boolean left) {
     this(opt, text, parent, left);
     setDescription(description);
   }
@@ -85,7 +83,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    * @param text the text to display with the option
    * @param parent the parent frame
    */
-  public BooleanOptionComponent(BooleanOption opt, String text, Frame parent) {
+  public BooleanOptionComponent(BooleanOption opt, String text, SwingFrame parent) {
     this(opt, text, parent, true);
   }
 
@@ -95,11 +93,9 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    *  @param parent the parent frame
    *  @param description text to show in a tooltip over 
    */
-  public BooleanOptionComponent(BooleanOption opt, String text,
-                                Frame parent, String description) {
+  public BooleanOptionComponent(BooleanOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, true);
   }
-
 
   /** Sets the tooltip description text for this option.
     * @param description the tooltip text

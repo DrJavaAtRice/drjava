@@ -37,12 +37,14 @@
 package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.ui.MainFrame;
-import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.SwingFrame;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Hashtable;
+import javax.swing.*;
 
 /**
  * Graphical form of a KeyStrokeOption.
@@ -60,9 +62,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
 
   private KeyStroke _key;
 
-  public KeyStrokeOptionComponent(KeyStrokeOption opt,
-                                  String text,
-                                  final Frame parent) {
+  public KeyStrokeOptionComponent(KeyStrokeOption opt, String text, final SwingFrame parent) {
     super(opt, text, parent);
 
     _key = DrJava.getConfig().getSetting(opt);
@@ -90,7 +90,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
 
   /** Constructor that allows for a tooltip description. */
   public KeyStrokeOptionComponent(KeyStrokeOption opt, String text,
-                                  Frame parent, String description) {
+                                  SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
@@ -174,7 +174,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     private KeyStrokeOptionComponent _ksoc;
 //    private Frame frame;
 
-    public GetKeyDialog(Frame f, String title, boolean modal) {
+    public GetKeyDialog(SwingFrame f, String title, boolean modal) {
       super(f, title, modal);
 //      frame = f;
       // Should all of the following code be run in event thread?

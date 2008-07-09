@@ -37,6 +37,7 @@ package edu.rice.cs.drjava.model;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
@@ -205,14 +206,14 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     assert _documents.contains(odd);
     
     // only notify if the region was actually added
-    if (!alreadyContained) {
+    if (! alreadyContained) {
       // notify.  invokeLater unnecessary if it only runs in the event thread
-      Utilities.invokeLater(new Runnable() { public void run() {
-        _lock.startRead();
-        try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
-        } finally { _lock.endRead(); }
-      } });
+      Utilities.invokeLater(new Runnable() { 
+        public void run() {
+          _lock.startRead();
+          try { for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); } } 
+          finally { _lock.endRead(); }
+        } });
     }
   }
   
@@ -236,14 +237,22 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     }
     
     // only notify if the region was actually added
-    if (wasRemoved) {
-      // notify
-      Utilities.invokeLater(new Runnable() { public void run() {
-        _lock.startRead();
-        try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-        finally { _lock.endRead(); }
-      } });
-    }
+    if (wasRemoved) _notifyRegionRemoved(region);
+//      // notify
+//      Utilities.invokeLater(new Runnable() { public void run() {
+//        _lock.startRead();
+//        try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
+//        finally { _lock.endRead(); }
+//      } });
+//    }
+  }
+  
+  private void _notifyRegionRemoved(final R region) {
+    Utilities.invokeLater(new Runnable() { public void run() {
+      _lock.startRead();
+      try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
+      finally { _lock.endRead(); }
+    } });
   }
   
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
@@ -252,18 +261,31 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     boolean found = _documents.remove(doc);
     if (found) {
       final SortedSet<R> regions = _regions.get(doc);
-      // notify
-      Utilities.invokeLater(new Runnable() { public void run() {
+      // notify all listeners for all regions
+      _notifyRegionsRemoved(regions);
+//      Utilities.invokeLater(new Runnable() { public void run() {
+//        _lock.startRead();
+//        try {
+//          for (RegionManagerListener<R> l: _listeners) { 
+//            for (R r: regions) { l.regionRemoved(r); }
+//          } 
+//        } 
+//        finally { _lock.endRead(); }
+//      } });
+      _regions.remove(doc);
+    }
+  }
+    
+  private void _notifyRegionsRemoved(final Collection<R> regions) {
+     Utilities.invokeLater(new Runnable() { public void run() {
         _lock.startRead();
         try {
           for (RegionManagerListener<R> l: _listeners) { 
-            for (final R r: regions) { l.regionRemoved(r); }
+            for (R r: regions) { l.regionRemoved(r); }
           } 
         } 
         finally { _lock.endRead(); }
       } });
-      _regions.remove(doc);
-    }
   }
   
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
@@ -290,15 +312,16 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     // Remove all regions in this manager
     
     // Notify all listeners for this manager that all regions have been removed
-    Utilities.invokeLater(new Runnable() { public void run() {
-      _lock.startRead();
-      try {
-        for (RegionManagerListener<R> l: _listeners) { 
-          for (R r: regions) { l.regionRemoved(r); }
-        }
-      } 
-      finally { _lock.endRead(); }
-    } });
+    _notifyRegionsRemoved(regions);
+//    Utilities.invokeLater(new Runnable() { public void run() {
+//      _lock.startRead();
+//      try {
+//        for (RegionManagerListener<R> l: _listeners) { 
+//          for (R r: regions) { l.regionRemoved(r); }
+//        }
+//      } 
+//      finally { _lock.endRead(); }
+//    } });
     
     _regions.clear();
     _documents.clear();
@@ -317,9 +340,8 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     Utilities.invokeLater(new Runnable() { public void run() {
       // notify
       _lock.startRead();
-      try {
-        for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); }
-      } finally { _lock.endRead(); }            
+      try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
+      finally { _lock.endRead(); }            
     } });
   }
 } 

@@ -221,7 +221,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls.
     * TODO: why is this here, and why is it public?
     */
-  public static final int WRITE_DELAY = 100;
+  public static final int WRITE_DELAY = 50;
   
   /** A PageFormat object for printing to paper. */
   protected volatile PageFormat _pageFormat = new PageFormat();
@@ -1088,10 +1088,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   
-  /** Creates a new open definitions document and adds it to the list. Public for testing purposes.
+  /** Creates a new open definitions document and adds it to the list.  Public for testing purposes.  Only runs in 
+    * the event thread.
     * @return The new open document
     */
   public OpenDefinitionsDocument newFile(File parentDir) {
+//    assert EventQueue.isDispatchThread();
     final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument(new NullFile());
     doc.setParentDirectory(parentDir);
     addDocToNavigator(doc);
@@ -1941,9 +1943,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // if the document was an auxiliary file, remove it from the list
     if (doc.isAuxiliaryFile()) { removeAuxiliaryFile(doc); }
     
-    Utilities.invokeLater (new SRunnable() {
-      public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
-    });
+//    Utilities.invokeLater (new SRunnable() {
+//      public void run() { 
+        _documentNavigator.removeDocument(doc); 
+//      }   // this operation must run in event thread
+//    });
     _notifier.fileClosed(doc);
     doc.close();
     return true;
@@ -2239,46 +2243,26 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Appends a string to the given document using a particular attribute set.
     * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
     * writer from flooding the model with print calls to the point that the
-    * user interface could become unresponsive.
+    * user interface could become unresponsive. 
+    * Only runs in event thread.
     * @param doc Document to append to
     * @param s String to append to the end of the document
     * @param style the style to print with
     */
-  protected void _docAppend(ConsoleDocument doc, String s, String style) {
-    /** A lock object to prevent print calls from flooding the JVM, ensuring the UI remains responsive. */
-    final Object systemWriterLock = new Object();
-    
-    synchronized(systemWriterLock) {
-      try {
-        doc.insertBeforeLastPrompt(s, style);
-        systemWriterLock.wait(WRITE_DELAY);  // Wait to prevent being print flooding
-      }
-      catch (InterruptedException e) { /* Ignore and resume */ }
-    }
+  protected void _docAppend(final ConsoleDocument doc, final String s, final String style) {
+    Utilities.invokeLater(new Runnable() {
+      public void run() { doc.insertBeforeLastPrompt(s, style); }
+    });
   }
   
   /** Prints System.out to the DrJava console.  This method can safely be run outside the event thread. */
-  public void systemOutPrint(final String s) { 
-    Utilities.invokeLater(new Runnable() {
-      public void run() { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
-    });
-  }
+  public void systemOutPrint(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
   
   /** Prints System.err to the DrJava console.  This method can safely be run outside the event thread. */
-  public void systemErrPrint(final String s) { 
-    Utilities.invokeLater(new Runnable() {
-      public void run() { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
-    });
-  }
+  public void systemErrPrint(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
   
-  /** Prints the given string to the DrJava console as an echo of System.in.  This method can safely be run outside the
-    * event thread. 
-    */
-  public void systemInEcho(final String s) { 
-    Utilities.invokeLater(new Runnable() {
-      public void run() { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
-    });
-  }
+  /** Prints to the DrJava console as an echo of System.in.  This method can safely be run outside the event thread. */
+  public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
   
   /** throws UnsupportedOperationException */
   public void printDebugMessage(String s) {
@@ -2424,8 +2408,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final OpenDefinitionsDocument doc = getActiveDocument();
     assert doc != null;
     
-    Utilities.invokeLater(new Runnable() { 
-      public void run() {   
+//    Utilities.invokeLater(new Runnable() { 
+//      public void run() {   
         Position startPos = null;  // required by javac
         Position endPos = null;    // required by javac
         File file = FileOps.NULL_FILE;  // required by javac
@@ -2440,8 +2424,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         
 //        Utilities.show("Adding (" + doc + ", " + startPos + ", " + endPos + ") to browser history");
         _browserHistoryManager.addBrowserRegion(new BrowserDocumentRegion(doc, startPos, endPos), _notifier);
-      }
-    });
+//      }
+//    });
   }
   
   /** throws an UnsupportedOperationException */
@@ -2617,9 +2601,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         try {
           _notifier.documentNotFound(this, _file);
           final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
-          Utilities.invokeLater(new SRunnable() { // formerly invokeAndWait(...)  Why?
-            public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
-          });
+//          Utilities.invokeLater(new SRunnable() { // formerly invokeAndWait(...)  Why?
+//            public void run() { 
+              _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); 
+//            }
+//          });
           return _cacheAdapter.getDocument();
         }
         catch(Throwable t) { throw new UnexpectedException(t); }
@@ -3872,8 +3858,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param doc the document to add to the navigator
     */
   protected void addDocToNavigator(final OpenDefinitionsDocument doc) {
-    Utilities.invokeLater(new SRunnable() {
-      public void run() {
+//    assert EventQueue.isDispatchThread();
+//    Utilities.invokeLater(new SRunnable() {
+//      public void run() {
         try {
           if (doc.isUntitled()) _documentNavigator.addDocument(doc);
           else {
@@ -3882,7 +3869,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           }
         }
         catch(IOException e) { _documentNavigator.addDocument(doc); }
-      }});
+//      }});
     synchronized(_documentsRepos) { _documentsRepos.put(doc.getRawFile(), doc); }
   }
   

@@ -39,11 +39,13 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import java.awt.*;
 
+import edu.rice.cs.util.swing.SwingFrame;
+
 /** Displays a label in the form of an option component, to be displayed in a config panel. */
 public class LabelComponent extends OptionComponent<Object> {
   private JTextArea _text;
 
-  public LabelComponent(String text, Frame parent, boolean left) {
+  public LabelComponent(String text, SwingFrame parent, boolean left) {
     super(left?text:"", parent);
     _text = new JTextArea(left?"":text);
     _text.setEditable(false);
@@ -51,14 +53,14 @@ public class LabelComponent extends OptionComponent<Object> {
 //    _text.setBackground(new Color(204,204,204));
   }
 
-  public LabelComponent(String text, Frame parent, String description, boolean left) {
+  public LabelComponent(String text, SwingFrame parent, String description, boolean left) {
     this(text, parent, left);
     setDescription(description);
   }
 
-  public LabelComponent(String text, Frame parent) { this(text,parent,false); }
+  public LabelComponent(String text, SwingFrame parent) { this(text,parent,false); }
 
-  public LabelComponent(String text, Frame parent, String description) {
+  public LabelComponent(String text, SwingFrame parent, String description) {
     this(text, parent, description, false);
   }
 

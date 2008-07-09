@@ -36,15 +36,18 @@
 
 package edu.rice.cs.drjava.ui.config;
 
+import java.awt.*;
+import java.io.File;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
+
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
-import java.awt.*;
-import java.io.File;
-import javax.swing.filechooser.FileFilter;
+import edu.rice.cs.util.swing.DefaultSwingFrame;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a FileOption.
  *
@@ -54,7 +57,7 @@ public class DirectoryOptionComponent extends OptionComponent<File> implements O
 
   private DirectorySelectorComponent _component;
 
-  public DirectoryOptionComponent (FileOption opt, String text,Frame parent, DirectoryChooser dc) {
+  public DirectoryOptionComponent (FileOption opt, String text, SwingFrame parent, DirectoryChooser dc) {
     super(opt, text, parent);
     
     _component = new DirectorySelectorComponent(parent, dc, 30, 10f);
@@ -67,7 +70,7 @@ public class DirectoryOptionComponent extends OptionComponent<File> implements O
   }
 
   /** Constructor that allows for a tooltip description. */
-  public DirectoryOptionComponent (FileOption opt, String text, Frame parent, String desc, DirectoryChooser dc) {
+  public DirectoryOptionComponent (FileOption opt, String text, SwingFrame parent, String desc, DirectoryChooser dc) {
     this(opt, text, parent, dc);
     setDescription(desc);
   }

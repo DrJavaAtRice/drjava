@@ -62,7 +62,7 @@ public class FileSelectorComponent extends JPanel {
   public static final float DEFAULT_FONT_SIZE = 10f;
   
   /** The parent frame of this component. */
-  protected final Frame _parent;
+  protected final SwingFrame _parent;
   
   /** Text field with the name of the selected file. */
   protected final JTextField _fileField;
@@ -86,7 +86,7 @@ public class FileSelectorComponent extends JPanel {
     * @param parent  Parent of this component.
     * @param chooser File chooser to display from the "..." button.
     */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser) {
+  public FileSelectorComponent(SwingFrame parent, JFileChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE, true);
   }
   
@@ -96,7 +96,7 @@ public class FileSelectorComponent extends JPanel {
     * @param numCols  Number of columns to display in the text field
     * @param fontSize Font size for the text field
     */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize) {
+  public FileSelectorComponent(SwingFrame parent, JFileChooser chooser, int numCols, float fontSize) {
     this(parent, chooser, numCols, fontSize, true);
   }
   
@@ -107,7 +107,7 @@ public class FileSelectorComponent extends JPanel {
     * @param fontSize  Font size for the text field
     * @param mustExist force selection of existing file
     */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize, boolean mustExist) {
+  public FileSelectorComponent(SwingFrame parent, JFileChooser chooser, int numCols, float fontSize, boolean mustExist) {
     
     if (chooser == null) throw new UnexpectedException("Error: called new FileSelectorComponent(...) with a null chooser!");
     

@@ -403,7 +403,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Interprets file selected in the FileOpenSelector. Assumes strings have no trailing whitespace. Interpretation is
     * aborted after the first error.
     */
-  public void loadHistory(FileOpenSelector selector) throws IOException { _interactionsModel.loadHistory(selector); }
+  public void loadHistory(final FileOpenSelector selector) { 
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { 
+        try {_interactionsModel.loadHistory(selector); } 
+        catch(IOException e) { throw new UnexpectedException(e); }
+      }
+    });
+  }
   
   /** Loads the history/histories from the given selector. */
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
@@ -511,10 +518,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       final boolean wasDebuggerEnabled = getDebugger().isReady();
       
       _runMain = new DummyInteractionsListener() {
-        private boolean alreadyRun = false;
         public void interpreterReady(File wd) {
+          _interactionsModel.removeListener(_runMain);  // listener cannot run
           // prevent listener from running twice
-          if (alreadyRun) return; else alreadyRun = true;
           // Restart debugger if it was previously enabled and is now off
           if (wasDebuggerEnabled && (! getDebugger().isReady())) {
             try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
@@ -527,7 +533,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           // Finally, execute the new interaction and record that event
           new Thread("Running main method") {
             public void run() { _interactionsModel.interpretCurrentInteraction(); }
-            
           }.start();
           _notifier.runStarted(ConcreteOpenDefDoc.this);
           
@@ -536,7 +541,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           // safe; the removal could still happen before the read lock was released
           // Now removeListener has been rewritten and can be called even when the lock is
           // held. In that case, the removal will be done as soon as possible.
-          _interactionsModel.removeListener(_runMain);
+
         }
       };
       

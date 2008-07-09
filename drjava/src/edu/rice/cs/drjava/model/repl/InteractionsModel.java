@@ -179,26 +179,29 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
   
-  /** Interprets the current given text at the prompt in the interactions doc. Must run in the event thread to get current 
-    * interaction (which depends on the state of the interactions pane).*/
+  /** Interprets the current given text at the prompt in the interactions doc. May run outside the event thread. */
   public void interpretCurrentInteraction() {
-//    assert EventQueue.isDispatchThread();  // violated in GlobalModelIOTest, InteractionsModelTest
 
-    if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
-    
-    String text = _document.getCurrentInteraction();
-    String toEval = text.trim();
-    if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        
+        if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
+        
+        String text = _document.getCurrentInteraction();
+        String toEval = text.trim();
+        if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
 //          System.err.println("Preparing to interpret '" + toEval +"'");
-    _prepareToInterpret(toEval);  // Writes a newLine!
-    final String evalText = toEval;
+        _prepareToInterpret(toEval);  // Writes a newLine!
+        final String evalText = toEval;
 
-    new Thread(new Runnable() { 
-      public void run() { 
-        try { interpret(evalText); } 
-        catch(Throwable t) { DrJavaErrorHandler.record(t); }
-      } 
-    }).start(); 
+        new Thread(new Runnable() { 
+          public void run() { 
+            try { interpret(evalText); } 
+            catch(Throwable t) { DrJavaErrorHandler.record(t); }
+          } 
+        }).start(); 
+      }
+    });
   }
   
   /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
@@ -283,12 +286,49 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
   
-  /** Opens the files chosen in the given file selector, and returns an ArrayList with one history string 
+ 
+  /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace.
+    * Interprets the array all at once so if there are any errors, none of the statements after the first 
+    * erroneous one are processed.  Only runs in the event thread.
+    */
+  public void loadHistory(final FileOpenSelector selector) throws IOException {
+    ArrayList<String> histories;
+    try { histories = _getHistoryText(selector); }
+    catch (OperationCanceledException oce) { return; }
+    final ArrayList<String> _histories = histories;
+    
+    Utilities.invokeAndWait(new Runnable() {  // must run in event thread because caret is updated indivisibly
+      public void run() {
+        _document.clearCurrentInteraction();
+        
+        // Insert into the document and interpret
+        final StringBuilder buf = new StringBuilder();
+        for (String hist: _histories) {
+          ArrayList<String> interactions = _removeSeparators(hist);
+          for (String curr: interactions) {
+            int len = curr.length();
+            buf.append(curr);
+            if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
+            buf.append(StringOps.EOL);
+          }
+        }
+        String text = buf.toString().trim();
+//          System.err.println("Histtory is: '" + text + "'");
+        append(text, InteractionsDocument.DEFAULT_STYLE);
+        interpretCurrentInteraction();  // Must be executed in event thread
+      }
+    });
+    // Wait is necessary because interpretation can only be applied after history is loaded
+//    System.err.println("Interpreting loaded history");
+    
+  }
+  
+   /** Opens the files chosen in the given file selector, and returns an ArrayList with one history string 
     * for each selected file.
     * @param selector A file selector supporting multiple file selection
     * @return a list of histories (one for each selected file)
     */
-  protected ArrayList<String> _getHistoryText(FileOpenSelector selector)
+  protected static ArrayList<String> _getHistoryText(FileOpenSelector selector)
     throws IOException, OperationCanceledException {
     File[] files = selector.getFiles();
     if (files == null) throw new IOException("No Files returned from FileSelector");
@@ -344,13 +384,23 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return histories;
   }
   
+  /* Loads the contents of the specified file(s) into the histories buffer. This method is dynamic because it refers
+   * to this. */
+  public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
+    throws IOException, OperationCanceledException {
+    ArrayList<String> histories = _getHistoryText(selector);
+    ArrayList<String> interactions = new ArrayList<String>();
+    for (String hist: histories) interactions.addAll(_removeSeparators(hist));
+    return new InteractionsScriptModel(this, interactions);
+  }
+  
   /** Removes the interaction-separator comments from a history, so that they will not appear when executing
     * the history.
     * @param text The full, formatted text of an interactions history (obtained from _getHistoryText)
     * @return A list of strings representing each interaction in the history. If no separators are present, 
     * the entire history is treated as one interaction.
     */
-  protected ArrayList<String> _removeSeparators(String text) {
+  protected static ArrayList<String> _removeSeparators(String text) {
     String sep = History.INTERACTION_SEPARATOR;
     int len = sep.length();
     ArrayList<String> interactions = new ArrayList<String>();
@@ -369,55 +419,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     String last = text.substring(lastIndex, text.length()).trim();
     if (!"".equals(last)) interactions.add(last);
     return interactions;
-  }
-  
-  /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace.
-    * Interprets the array all at once so if there are any errors, none of the statements after the first 
-    * erroneous one are processed.
-    */
-  public void loadHistory(final FileOpenSelector selector) throws IOException {
-    ArrayList<String> histories;
-    try { histories = _getHistoryText(selector); }
-    catch (OperationCanceledException oce) { return; }
-    final ArrayList<String> _histories = histories;
-
-    Utilities.invokeAndWait(new Runnable() {  // must run in event thread because caret is updated indivisibly
-      public void run() {
-//        _document.acquireWriteLock();
-//        try {
-          _document.clearCurrentInteraction();
-          
-          // Insert into the document and interpret
-          final StringBuilder buf = new StringBuilder();
-          for (String hist: _histories) {
-            ArrayList<String> interactions = _removeSeparators(hist);
-            for (String curr: interactions) {
-              int len = curr.length();
-              buf.append(curr);
-              if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
-              buf.append(StringOps.EOL);
-            }
-          }
-          String text = buf.toString().trim();
-//          System.err.println("Histtory is: '" + text + "'");
-          append(text, InteractionsDocument.DEFAULT_STYLE);
-//        }
-//        finally { _document.releaseWriteLock(); }
-        interpretCurrentInteraction();  // Must be executed in event thread
-      }
-    });
-    // Wait is necessary because interpretation can only be applied after history is loaded
-//    System.err.println("Interpreting loaded history");
-
-  }
-  
-  /* Loads the contents of the specified file(s) into the histories buffer. */
-  public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
-    throws IOException, OperationCanceledException {
-    ArrayList<String> histories = _getHistoryText(selector);
-    ArrayList<String> interactions = new ArrayList<String>();
-    for (String hist: histories) interactions.addAll(_removeSeparators(hist));
-    return new InteractionsScriptModel(this, interactions);
   }
   
   /** Returns the port number to use for debugging the interactions JVM. Generates an available port if one has 
@@ -454,41 +455,40 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPort = port;
     _debugPortSet = true;
   }
+    
+  private final int DELAY_INTERVAL = 10;
+  private volatile int delayCount = DELAY_INTERVAL;
   
   /** Called when the repl prints to System.out.  Includes a delay to prevent flooding the interactions document.
     * @param s String to print
     */
   public void replSystemOutPrint(final String s) {
     Utilities.invokeLater(new Runnable() {
-      public void run() {
-//        _document.acquireWriteLock();  // couple insert with caret update
-//        try {  
-          _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
-//          advanceCaret(s.length());
-//        }
-//        finally { _document.releaseWriteLock(); }
-      } });
-    scrollToCaret();
-    _writerDelay();      
+      public void run() { _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE); }
+    });
+    if (delayCount == 0) {
+      scrollToCaret();
+//      System.err.println(s + " printed; caretPostion = " + _pane.getCaretPosition());
+      _writerDelay();
+      delayCount = DELAY_INTERVAL;
+    }
+    else delayCount--;   
   }
-  
   
   /** Called when the repl prints to System.err.  Includes a delay to prevent flooding the interactions document.
     * @param s String to print 
     */
   public void replSystemErrPrint(final String s) {
       Utilities.invokeLater(new Runnable() {
-        public void run() {
-//          _document.acquireWriteLock();  // couple insert with caret update
-//          try {
-            _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
-//            advanceCaret(s.length());
-//          }
-//          finally { _document.releaseWriteLock(); }
-        } });
-      scrollToCaret();
+        public void run() { _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE); } 
+      });
+      if (delayCount == 0) {
+        scrollToCaret();
 //      System.err.println(s + " printed; caretPostion = " + _pane.getCaretPosition());
-      _writerDelay();
+        _writerDelay();
+        delayCount = DELAY_INTERVAL;
+      }
+      else delayCount--;
   }
   
   /** Returns a line of text entered by the user at the equivalent of System.in. */

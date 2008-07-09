@@ -36,11 +36,13 @@
 
 package edu.rice.cs.drjava.ui.config;
 
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
+
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
-import java.awt.*;
+import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of an IntegerOption.
   * @version $Id$
@@ -48,7 +50,7 @@ import java.awt.*;
 public class IntegerOptionComponent extends OptionComponent<Integer> {
   private volatile JTextField _jtf;
   
-  public IntegerOptionComponent (IntegerOption opt, String text, Frame parent) {
+  public IntegerOptionComponent (IntegerOption opt, String text, SwingFrame parent) {
     super(opt, text, parent);
     _jtf = new JTextField();
     _jtf.setText(_option.format(DrJava.getConfig().getSetting(_option)));
@@ -60,7 +62,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
   }
   
   /** Constructor that allows for a tooltip description. */
-  public IntegerOptionComponent (IntegerOption opt, String text, Frame parent, String description) {
+  public IntegerOptionComponent (IntegerOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
