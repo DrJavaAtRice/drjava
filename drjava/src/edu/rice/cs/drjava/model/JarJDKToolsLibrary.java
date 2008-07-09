@@ -72,7 +72,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
     * least in OS X's classes.jar, can only be loaded by the JVM.)
     */
-  private static final Iterable<String> TOOLS_PACKAGES = IterUtil.make(
+  private static final Iterable<String> TOOLS_PACKAGES = IterUtil.asIterable(new String[]{
       // From 1.4 tools.jar:
       "com.sun.javadoc",
       "com.sun.jdi",
@@ -96,7 +96,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       "com.sun.xml.internal.dtdparser", // other xml.internal packages are in rt.jar
       "com.sun.xml.internal.rngom",
       "com.sun.xml.internal.xsom",
-      "org.relaxng");
+      "org.relaxng"
+  });
 
   
   private final File _location;
@@ -146,7 +147,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
         List<File> bootClassPath = null; // null defers to the compiler's default behavior
         if (libDir != null) {
-          File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFileFilter("jar"));
+          File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFilePredicate("jar"));
           if (jars != null) { bootClassPath = Arrays.asList(jars); }
         }
 
@@ -306,9 +307,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
      */
     LinkedHashSet<File> jars = new LinkedHashSet<File>();
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (as in OS X)
-    Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexpCanonicalCaseFilePredicate("j2sdk.*"),
-                                                 IOUtil.regexpCanonicalCaseFilePredicate("jdk.*"),
-                                                 IOUtil.regexpCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"));
+    Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
+                                                 IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
+                                                 IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"));
     
     for (File root : roots) {
       for (File subdir : IOUtil.attemptListFilesAsIterable(root, subdirFilter)) {

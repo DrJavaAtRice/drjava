@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -302,12 +303,12 @@ public class DefaultCompilerModel implements CompilerModel {
       if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
       if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
       
-      List<File> classPath = IterUtil.asList(_model.getClassPath());
+      List<File> classPath = CollectUtil.makeList(_model.getClassPath());
       
       // Temporary hack to allow a boot class path to be specified
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("drjava.bootclasspath");
-      if (bootProp != null) { bootClassPath = IterUtil.asList(IOUtil.parsePath(bootProp)); }
+      if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
       
       final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
       

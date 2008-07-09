@@ -44,7 +44,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
@@ -118,7 +118,7 @@ public class JDKToolsLibrary {
     if (compilerAdapter != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
-      if (bootProp != null) { bootClassPath = IterUtil.asList(IOUtil.parsePath(bootProp)); }
+      if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
       try {
         Class[] sig = new Class[]{ FullVersion.class, String.class, List.class };
         Object[] args = new Object[]{ version, "the runtime class path", bootClassPath };

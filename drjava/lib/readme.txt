@@ -7,11 +7,11 @@ VERSIONS:
 
 asm-3.1.jar:              ASM 3.1 (http://asm.objectweb.org)
 docs.jar:                 docs-20060901-2010
-dynamicjava-base-15.jar:  dynamicjava-20080307
-javalanglevels.jar:       javalanglevels-20080201-2132
+dynamicjava-base-15.jar:  dynamicjava-20080709
+javalanglevels.jar:       javalanglevels-20080709
 junit.jar:                JUnit 4.4
 platform.jar:             platform-20070213-2003
-plt.jar:                  plt-20080307
+plt.jar:                  plt-20080709-1847
 retroweaver-rt-1.2.3.jar: Retroweaver 1.2.3
 winlaf-0.5.1.jar:         WinLAF 0.5.1
 

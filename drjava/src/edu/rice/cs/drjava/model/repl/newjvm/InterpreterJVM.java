@@ -53,6 +53,7 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
@@ -374,7 +375,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     RuntimeBindings bindings = RuntimeBindings.EMPTY;
     if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
-    bindings = new RuntimeBindings(bindings, vars, IterUtil.make(localVars));
+    bindings = new RuntimeBindings(bindings, vars, IterUtil.asIterable(localVars));
     
     Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
     _environments.put(name, Pair.make(ctx, bindings));
@@ -540,6 +541,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void addBuildDirectoryClassPath(File f) { _classPathManager.addBuildDirectoryCP(f); }
   public void addProjectFilesClassPath(File f) { _classPathManager.addProjectFilesCP(f); }
   public void addExternalFilesClassPath(File f) { _classPathManager.addExternalFilesCP(f); }
-  public List<File> getClassPath() { return IterUtil.asList(_classPathManager.getClassPath()); }
+  public List<File> getClassPath() { return CollectUtil.makeList(_classPathManager.getClassPath()); }
   
 }

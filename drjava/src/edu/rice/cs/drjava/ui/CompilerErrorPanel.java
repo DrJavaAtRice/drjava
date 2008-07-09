@@ -97,7 +97,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     // to listen on the active compiler.
     final CompilerModel compilerModel = getModel().getCompilerModel();
     Iterable<CompilerInterface> iter = getModel().getCompilerModel().getAvailableCompilers();
-    _compilerChoiceBox = new JComboBox(IterUtil.asArray(iter, CompilerInterface.class));
+    _compilerChoiceBox = new JComboBox(IterUtil.toArray(iter, CompilerInterface.class));
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {

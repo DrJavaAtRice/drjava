@@ -336,7 +336,7 @@ public class DefaultJavadocModel implements JavadocModel {
       errors.add(new CompilerError("InterruptedException: " + e.getMessage(), false));
     }
     
-    _javadocErrorModel = new CompilerErrorModel(IterUtil.asArray(errors, CompilerError.class), _model);
+    _javadocErrorModel = new CompilerErrorModel(IterUtil.toArray(errors, CompilerError.class), _model);
     
     // waitFor() exit value is 1 for both errors and warnings, so it's no use
     boolean success = _javadocErrorModel.hasOnlyWarnings();

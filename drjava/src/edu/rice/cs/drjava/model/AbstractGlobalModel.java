@@ -131,6 +131,7 @@ import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 
@@ -1333,7 +1334,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     Predicate<File> match = LambdaUtil.and(IOUtil.IS_FILE, IOUtil.extensionFilePredicate(extension));
     if (rec) { filesIterable = IOUtil.listFilesRecursively(dir, match); }
     else { filesIterable = IOUtil.attemptListFilesAsIterable(dir, match); }
-    List<File> files = IterUtil.asList(filesIterable);
+    List<File> files = CollectUtil.makeList(filesIterable);
     
     if (isProjectActive()) {
       Collections.sort(files, new Comparator<File>() {

@@ -53,6 +53,7 @@ import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
@@ -211,7 +212,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     
     _autoRefreshComponent.setSelected(_getAutoRefreshStatus());
 
-    Vector<File> cp = new Vector<File>(IterUtil.asList(_model.getExtraClassPath()));
+    Vector<File> cp = new Vector<File>(CollectUtil.makeList(_model.getExtraClassPath()));
     _extraClassPathList.setValue(cp);
 
     cp = new Vector<File>();
