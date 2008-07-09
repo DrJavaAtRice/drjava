@@ -99,9 +99,9 @@ public class ForStatement extends ForSlashEachStatement implements ContinueTarge
   
   /**
    * Creates a new for statement
-   * @param init  the initialization statements
+   * @param init  the initialization statements (either Statements or declarations)
    * @param cond  the condition to evaluate at each loop
-   * @param updt  the update statements
+   * @param updt  the update statements (either Statements or declarations)
    * @param body  the body
    * @param fn    the filename
    * @param bl    the begin line

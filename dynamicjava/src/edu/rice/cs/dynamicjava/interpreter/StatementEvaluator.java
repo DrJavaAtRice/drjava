@@ -194,7 +194,7 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
         catch (ContinueException e) {
           if (e.hasLabel() && !node.hasLabel(e.label())) { throw e; }
         }
-        if (update != null) { evaluateSequence(update); }
+        if (update != null) { seval.evaluateSequence(update); }
       }
     }
     catch (BreakException e) {

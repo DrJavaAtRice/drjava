@@ -2677,7 +2677,7 @@ PARSER_END(Parser)
            |
            ( init=forInit() | ";" )
            [ exp=expression() ] ";"
-           [ update=statementExpressionList() ]
+           [ update=expressionStatementList() ]
            )
         ")" stmt=statement(true)
       {
@@ -2701,7 +2701,8 @@ PARSER_END(Parser)
   }
   
   /**
-   * Used internally to parse a 'for' statement
+   * Used internally to parse a 'for' statement; produces a list of
+   * ExpressionStatements or a variable declaration
    */
   List<Node> forInit() :
   {
@@ -2710,7 +2711,7 @@ PARSER_END(Parser)
   {
     (   LOOKAHEAD( variableDeclarationLookahead() )
          list=localVariableDeclaration(true)
-      | list=statementExpressionList() ";"
+      | list=expressionStatementList() ";"
     )
     {
       return list;
@@ -2718,26 +2719,24 @@ PARSER_END(Parser)
   }
   
   /**
-   * Parses a comma separated list of expression
+   * Parses a comma separated list of strict ExpressionStatements
    */
-  List<Node> statementExpressionList() :
+  List<Node> expressionStatementList() :
+  { List<Node> list = new LinkedList<Node>(); Expression exp; }
   {
-    List<Node> list = new LinkedList<Node>();
-    Node node;
-  }
-  {
-    node=statementExpression()
+    exp=statementExpression()
     {
-      list.add(node);
+      list.add(new ExpressionStatement(exp, true, filename,
+                                       exp.getBeginLine(), exp.getBeginColumn(),
+                                       exp.getEndLine(), exp.getEndColumn()));
     }
-    ( "," node=statementExpression()
-       {
-      list.add(node);
-    }
+    ( "," exp=statementExpression()
+      {  list.add(new ExpressionStatement(exp, true, filename,
+                                          exp.getBeginLine(), exp.getBeginColumn(),
+                                          exp.getEndLine(), exp.getEndColumn()));
+      }
     )*
-    {
-      return list;
-    }
+    { return list; }
   }
   
   /**
@@ -2918,7 +2917,7 @@ PARSER_END(Parser)
    * a trailing semicolon is required and only StatementExpressions
    * will be allowed.
    */
-  Node expressionStatement(boolean strictExpression) :
+  ExpressionStatement expressionStatement(boolean strictExpression) :
   { Expression exp; Token t = null; }
   {
     { lookaheadFlag = strictExpression; } // makes strictExpression visible to lookahead

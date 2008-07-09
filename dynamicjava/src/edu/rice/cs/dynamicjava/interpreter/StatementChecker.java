@@ -125,11 +125,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   
   private TypeContext checkList(Iterable<? extends Node> l) {
     TypeContext c = context;
-    for (Node n : l) {
-      // TODO: fix the parser so there aren't any Expressions here
-      if (n instanceof Expression) { n.acceptVisitor(new ExpressionChecker(c, opt)); }
-      else { c = n.acceptVisitor(new StatementChecker(c, opt)); }
-    }
+    for (Node n : l) { c = n.acceptVisitor(new StatementChecker(c, opt)); }
     return c;
   }
 
