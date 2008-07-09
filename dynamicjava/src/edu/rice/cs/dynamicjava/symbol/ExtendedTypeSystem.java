@@ -3200,6 +3200,10 @@ public class ExtendedTypeSystem extends TypeSystem {
       
       public Iterable<Object> defaultCase(Type t) { return IterUtil.empty(); }
       
+      @Override public Iterable<Object> forArrayType(ArrayType t) {
+        return name.equals("length") ? IterUtil.singleton(null) : IterUtil.empty();
+      }
+      
       @Override public Iterable<Object> forClassType(ClassType t) {
         for (DJField f : t.ofClass().declaredFields()) {
           if (f.declaredName().equals(name) && validField(f)) {
@@ -3239,6 +3243,13 @@ public class ExtendedTypeSystem extends TypeSystem {
       }
       
       public Iterable<ObjectFieldReference> defaultCase(Type t) { return IterUtil.empty(); }
+      
+      @Override public Iterable<ObjectFieldReference> forArrayType(ArrayType t) {
+        if (name.equals("length")) {
+          return IterUtil.make(new ObjectFieldReference(ArrayLengthField.INSTANCE, INT, object));
+        }
+        else { return IterUtil.empty(); }
+      }
       
       @Override public Iterable<ObjectFieldReference> forSimpleClassType(SimpleClassType t) {
         for (DJField f : t.ofClass().declaredFields()) {

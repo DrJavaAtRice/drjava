@@ -52,11 +52,10 @@ public abstract class TypeSystem {
   public static final SimpleClassType FLOAT_CLASS = new SimpleClassType(SymbolUtil.wrapClass(Float.class));
   public static final SimpleClassType DOUBLE_CLASS = new SimpleClassType(SymbolUtil.wrapClass(Double.class));
   public static final SimpleClassType VOID_CLASS = new SimpleClassType(SymbolUtil.wrapClass(Void.class));
-    
+  
   protected static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
   protected static final Iterable<Type> EMPTY_TYPE_ITERABLE = IterUtil.empty();
   protected static final Iterable<Expression> EMPTY_EXPRESSION_ITERABLE = IterUtil.empty();
-    
   
   public TypeWrapper wrap(Type t) { return new TypeWrapper(t); }
   
