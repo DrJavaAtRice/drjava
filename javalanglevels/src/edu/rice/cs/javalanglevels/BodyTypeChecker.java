@@ -268,7 +268,7 @@ public class BodyTypeChecker extends Bob {
   public TypeData forIfThenStatement(IfThenStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getTestExpression() instanceof Expression) {
-      Expression exp = (Expression) that.getTestExpression();
+      Expression exp = that.getTestExpression();
       // Assignment cannot be used in this expression
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the conditional expression of an if-then statement"));
     }
@@ -316,7 +316,7 @@ public class BodyTypeChecker extends Bob {
   public TypeData forIfThenElseStatement(IfThenElseStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getTestExpression() instanceof Expression) {
-      Expression exp = (Expression) that.getTestExpression();
+      Expression exp = that.getTestExpression();
       // Assignment cannot be used in this expression
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the conditional expression of an if-then-else statement"));
     }
@@ -388,7 +388,7 @@ public class BodyTypeChecker extends Bob {
   public TypeData forWhileStatement(WhileStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getCondition() instanceof Expression) {
-      Expression exp = (Expression) that.getCondition();
+      Expression exp = that.getCondition();
       // Assignment cannot be used in this expression
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the condition expression of a while statement"));
     }
@@ -439,7 +439,7 @@ public class BodyTypeChecker extends Bob {
     
     Boolean expOk = Boolean.TRUE;
     if (that.getCondition() instanceof Expression) {
-      Expression exp = (Expression) that.getCondition();
+      Expression exp = that.getCondition();
       // Assignment cannot be used in this expression
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the condition expression of a do statement"));
     }

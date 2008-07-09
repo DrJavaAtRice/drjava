@@ -558,7 +558,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     LinkedList<MethodData> methods = sd.getMethods();
     MethodData accessor = null;
     Iterator<MethodData> iter = methods.iterator();
-    VariableData[] vars = (VariableData[])sd.getVars().toArray(new VariableData[sd.getVars().size()]);
+    VariableData[] vars = sd.getVars().toArray(new VariableData[sd.getVars().size()]);
     for (int i = 0; i < vars.length; i++) {
       accessor = null;
       iter = methods.iterator();
@@ -599,7 +599,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     if (toString == null) { return; }
     
     LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd); //This builds up a list of all MethodData accessors for the VariableDatas of this class.
-    MethodData[] mds = (MethodData[]) allMds.toArray(new MethodData[allMds.size()]);
+    MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
 
     if (_safeSupportCode) { writeSafeToString(sd, baseIndent, valueToStringName, mds); }
     else { writeSimpleToString(sd, baseIndent, valueToStringName, mds); }
@@ -698,7 +698,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     if (equals == null) { return; }
 
     LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd);
-    MethodData[] mds = (MethodData[]) allMds.toArray(new MethodData[allMds.size()]);
+    MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
 
     if (_safeSupportCode) { writeSafeEquals(className, sd, baseIndent, valueEqualsName, mds); }
     else { writeSimpleEquals(className, sd, baseIndent, valueEqualsName, mds); }
@@ -869,7 +869,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     if (hashCode == null) { return; }
 
     LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd);
-    MethodData[] mds = (MethodData[]) allMds.toArray(new MethodData[allMds.size()]);
+    MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
     
     if (_safeSupportCode) { writeSafeHashCode(className, sd, baseIndent, waitForVarDef, valueHashCodeName, mds); }
     else { writeSimpleHashCode(className, sd, baseIndent, waitForVarDef, valueHashCodeName, mds); }

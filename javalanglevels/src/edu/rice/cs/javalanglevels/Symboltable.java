@@ -51,7 +51,7 @@ public class Symboltable extends Hashtable<String, SymbolData> {
    * the table, simply update its fields.  Otherwise, do a normal put operation.
    * */
   public SymbolData put (String name, SymbolData sd) {
-    SymbolData inTable = (SymbolData) this.get(sd.getName());
+    SymbolData inTable = this.get(sd.getName());
     if (inTable != null) {
       /**Replace all its fields with those of sd.*/
       inTable.setIsContinuation(sd.isContinuation());

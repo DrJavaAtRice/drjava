@@ -292,7 +292,7 @@ public class LanguageLevelConverter {
                     filesNotToCheck.addLast(fileToAdd);
                   }
                 }
-                files = (File[]) newFiles.toArray(new File[newFiles.size()]);
+                files = newFiles.toArray(new File[newFiles.size()]);
               }
               
               mediator.put(new Integer(ind), new Pair<SourceFile, LanguageLevelVisitor>(sf, llv));

@@ -696,7 +696,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       sd.setSuperClass(_sd1);
       
       MethodData md = new MethodData("ClassName", _publicMav, new TypeParameter[0], sd, 
-                                   (VariableData[])sd.getVars().toArray(new VariableData[0]), 
+                                   sd.getVars().toArray(new VariableData[0]), 
                                    new String[0], 
                                    sd,
                                    null);

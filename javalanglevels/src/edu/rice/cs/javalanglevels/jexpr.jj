@@ -713,7 +713,7 @@ CompoundWord CompoundWord() :
     /* lookahead to check for ".*" */
     LOOKAHEAD(2) <DOT> word = Word() { list.add(word); }
   )*
-  { return new CompoundWord(_loc((Word) list.getFirst()), list.toArray(new Word[list.size()])); }
+  { return new CompoundWord(_loc(list.getFirst()), list.toArray(new Word[list.size()])); }
 }
 
 ModifiersAndVisibility ModifiersAndVisibility() :

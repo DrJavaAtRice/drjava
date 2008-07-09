@@ -761,7 +761,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
       sd = symbolTable.get("Bart");
       assertTrue("Bart should be in _newSDs", _newSDs.containsKey(sd));
       MethodData md = new MethodData("Bart", _publicMav, new TypeParameter[0], sd, 
-                          (VariableData[])sd.getVars().toArray(new VariableData[0]), 
+                          sd.getVars().toArray(new VariableData[0]), 
                           new String[0], 
                           sd,
                           null);
