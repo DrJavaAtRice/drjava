@@ -736,7 +736,7 @@ public final class ConcurrentUtil {
     args = IterUtil.compose(args, jvmParams);
     args = IterUtil.compose(args, IterUtil.compose(mainClass, classParams));
     
-    return Runtime.getRuntime().exec(IterUtil.asArray(args, String.class), null, workingDir);
+    return Runtime.getRuntime().exec(IterUtil.toArray(args, String.class), null, workingDir);
   }
 
   /** Find the java executable command.  (This logic originally came from Ant.) */

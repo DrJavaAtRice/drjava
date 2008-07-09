@@ -67,13 +67,13 @@ public class IterUtilTest extends TestCase {
     assertFalse(nIter.hasNext());
   }
   
-  public void testAsArray() {
+  public void testToArray() {
     String[] strings;
     
-    strings = asArray(IterUtil.<String>empty(), String.class);
+    strings = toArray(IterUtil.<String>empty(), String.class);
     assertTrue(Arrays.equals(new String[0], strings));
     
-    strings = asArray(make("foo", "bar", "baz"), String.class);
+    strings = toArray(make("foo", "bar", "baz"), String.class);
     assertTrue(Arrays.equals(new String[]{ "foo", "bar", "baz" }, strings));
     try { ((Object[]) strings)[0] = new Object(); }
     catch (ArrayStoreException e) { return; /* correct behavior */ }

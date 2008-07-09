@@ -921,7 +921,7 @@ public final class IterUtil {
    * {@code iter} to fill the array.  If the size of the iterable is larger than {@code Integer.MAX_VALUE}
    * or is infinite, it will be truncated to fit in an array.
    */
-  public static <T> T[] asArray(Iterable<? extends T> iter, Class<T> type) {
+  public static <T> T[] toArray(Iterable<? extends T> iter, Class<T> type) {
     // Cast is safe because the result has the type of the variable "type"
     @SuppressWarnings("unchecked") T[] result = (T[]) Array.newInstance(type, sizeOf(iter));
     if (iter instanceof Collection<?>) {
