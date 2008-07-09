@@ -120,7 +120,7 @@ public class Javac160Compiler extends JavacCompiler {
                               this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
 
     if (_filterExe) {
-      FileFilter filter = IOUtil.extensionFileFilter("exe");
+      FileFilter filter = IOUtil.extensionFilePredicate("exe");
       Iterator<? extends File> i = classPath.iterator();
       while (i.hasNext()) {
         if (filter.accept(i.next())) { i.remove(); }

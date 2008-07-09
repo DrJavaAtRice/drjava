@@ -18,8 +18,8 @@
 
   <property environment="env" />
   <property name="java14-home" value="${env.JAVA14_HOME}" />
-  <property name="java15-home" value="${env.JAVA15_HOME}" />
-  <property name="java16-home" value="${env.JAVA16_HOME}" />
+  <property name="java15-home" value="${env.JAVA5_HOME}" />
+  <property name="java16-home" value="${env.JAVA6_HOME}" />
   <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
   
   <!-- Testing defaults -->
@@ -60,8 +60,8 @@
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined (as necessary for the invoked target):" />
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 J2SDK" />
-    <echo message="JAVA15_HOME: Home folder of the Java 5 JDK" />
-    <echo message="JAVA16_HOME: Home folder of the Java 6 JDK" />
+    <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
+    <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
     <echo message="DRJAVA_JAR: Location of the DrJava jar file.  Preferably, this file" />
     <echo message="            should be 'drjava-15.jar', preventing problems due to" />
     <echo message="            interfaces changed by Retroweaver." />
