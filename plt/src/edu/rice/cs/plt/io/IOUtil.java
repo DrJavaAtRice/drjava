@@ -1343,7 +1343,7 @@ public final class IOUtil {
    * end in {@code .txt}).
    */
   public static FilePredicate extensionFilePredicate(String extension) {
-    return new RegexCanonicalCaseFilePredicate("\\." + canonicalCase(new File(extension)).getName());
+    return new RegexCanonicalCaseFilePredicate(".*\\." + canonicalCase(new File(extension)).getName());
   }
   
   /**
