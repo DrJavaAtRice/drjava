@@ -165,6 +165,7 @@ import edu.rice.cs.util.text.ConsoleDocument;
 //import edu.rice.cs.util.ReaderWriterLock;
 
 import static java.lang.Math.*;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
   * Hence, it only has only document handling functionality
@@ -1312,13 +1313,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * If "open folders recursively" is checked, this operation opens all files in the subtree rooted at dir.
     */
   public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
+    debug.logStart();
     
     final File[] sfiles =  getFilesInFolder(dir, rec); 
     if(sfiles == null) return;
     openFiles(new FileOpenSelector() { public File[] getFiles() { return sfiles; } });
     
     if (sfiles.length > 0 && _state.inProjectPath(dir)) setProjectChanged(true);
-    
+   
+    debug.logEnd();
   }
   
   
