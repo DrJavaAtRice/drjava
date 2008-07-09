@@ -78,7 +78,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   };
 
   private static final Predicate<Type> IS_ARRAY_PRED = new Predicate<Type>() {
-    public Boolean value(Type t) { return t.apply(IS_ARRAY); }
+    public boolean contains(Type t) { return t.apply(IS_ARRAY); }
   };
 
   /**
@@ -233,7 +233,7 @@ public class ExtendedTypeSystem extends TypeSystem {
         if (subT instanceof BottomType) { return true; }
         else {
           return IterUtil.and(superT.ofTypes(), new Predicate<Type>() {
-            public Boolean value(Type t) { return isSubtype(subT, t, stack); }
+            public boolean contains(Type t) { return isSubtype(subT, t, stack); }
           });
         }
       }
@@ -242,7 +242,7 @@ public class ExtendedTypeSystem extends TypeSystem {
         return subT.apply(new TypeAbstractVisitor<Boolean>() {
           @Override public Boolean defaultCase(Type t) {
             return IterUtil.or(superT.ofTypes(), new Predicate<Type>() {
-              public Boolean value(Type t) { return isSubtype(subT, t, stack); }
+              public boolean contains(Type t) { return isSubtype(subT, t, stack); }
             });
           }
           public Boolean forVariableType(VariableType t) { return defaultCase(subT) ? true : null; }
@@ -391,13 +391,13 @@ public class ExtendedTypeSystem extends TypeSystem {
       
       public Boolean forIntersectionType(IntersectionType subT) {
         return IterUtil.or(subT.ofTypes(), new Predicate<Type>() {
-          public Boolean value(Type t) { return isSubtype(t, superT, stack); }
+          public boolean contains(Type t) { return isSubtype(t, superT, stack); }
         });
       }
       
       public Boolean forUnionType(UnionType subT) {
         return IterUtil.and(subT.ofTypes(), new Predicate<Type>() {
-          public Boolean value(Type t) { return isSubtype(t, superT, stack); }
+          public boolean contains(Type t) { return isSubtype(t, superT, stack); }
         });
       }
       
@@ -1140,7 +1140,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     try {
       ObjectMethodInvocation inv = lookupMethod(exp, methodName, EMPTY_TYPE_ITERABLE, EMPTY_EXPRESSION_ITERABLE);
       result.setExpression(inv.object());
-      result.setArguments(IterUtil.asList(inv.args()));
+      result.setArguments(CollectUtil.makeList(inv.args()));
       NodeProperties.setMethod(result, inv.method());
       NodeProperties.setType(result, capture(inv.returnType()));
       return result;
@@ -1186,7 +1186,7 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                 exp.getEndLine(), exp.getEndColumn());
       try {
         MethodInvocation inv = lookupStaticMethod(boxedType, "valueOf", EMPTY_TYPE_ITERABLE, arguments);
-        m.setArguments(IterUtil.asList(inv.args()));
+        m.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setMethod(m, inv.method());
         NodeProperties.setType(m, capture(inv.returnType()));
         return m;
@@ -1198,7 +1198,7 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                 exp.getBeginColumn(), exp.getEndLine(), exp.getEndColumn());
       try {
         ConstructorInvocation inv = lookupConstructor(boxedType, EMPTY_TYPE_ITERABLE, arguments); 
-        k.setArguments(IterUtil.asList(inv.args()));
+        k.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setConstructor(k, inv.constructor());
         NodeProperties.setType(k, boxedType);
         return k;
@@ -1579,7 +1579,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     // possible in general, but possible in situations in which this method is called), or
     // is an "empty" type name sufficient?
     NodeProperties.setType(tn, arrayType.ofType());
-    ArrayInitializer init = new ArrayInitializer(IterUtil.asList(elements));
+    ArrayInitializer init = new ArrayInitializer(CollectUtil.makeList(elements));
     NodeProperties.setType(init, arrayType);
     NodeProperties.setErasedType(init, erasedType);
     Expression result = new ArrayAllocation(tn, new ArrayAllocation.TypeDescriptor(new ArrayList<Expression>(0), 
@@ -1812,7 +1812,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     //debug.logValues("Beginning inferTypeArguments", new String[]{ "tparams", "params", "args" },
     //                wrap(tparams), wrap(params), wrap(args));
     RecursionStack3<Type, Type, InferenceMode> stack = RecursionStack3.make();
-    Set<? extends VariableType> tparamSet = CollectUtil.asSet(tparams);
+    Set<? extends VariableType> tparamSet = CollectUtil.makeSet(tparams);
     
     ConstraintSet constraintsBuilder = EMPTY_CONSTRAINTS;
     for (Pair<Type, Type> pair : IterUtil.zip(args, params)) {
@@ -2959,7 +2959,7 @@ public class ExtendedTypeSystem extends TypeSystem {
       
       public LookupMethod(final boolean includePrivate) {
         _matchMethod = new Predicate<DJMethod>() {
-          public Boolean value(DJMethod m) {
+          public boolean contains(DJMethod m) {
             if (m.declaredName().equals(name)) {
               return includePrivate || !m.accessibility().equals(Access.PRIVATE);
             }
@@ -3078,7 +3078,7 @@ public class ExtendedTypeSystem extends TypeSystem {
       
       public LookupMethod(final boolean includePrivate) {
         _matchMethod = new Predicate<DJMethod>() {
-          public Boolean value(DJMethod m) {
+          public boolean contains(DJMethod m) {
             if (m.declaredName().equals(name)) {
               if (includePrivate) { return m.isStatic(); }
               else { return m.isStatic() && !m.accessibility().equals(Access.PRIVATE); }
@@ -3354,7 +3354,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
       public Predicate<DJClass> value(final Boolean includePrivate) {
         return new Predicate<DJClass>() {
-          public Boolean value(DJClass c) {
+          public boolean contains(DJClass c) {
             if (c.declaredName().equals(name)) {
               return includePrivate || !c.accessibility().equals(Access.PRIVATE);
             }
@@ -3371,7 +3371,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
       public Predicate<DJClass> value(final Boolean includePrivate) {
         return new Predicate<DJClass>() {
-          public Boolean value(DJClass c) {
+          public boolean contains(DJClass c) {
             if (c.declaredName().equals(name)) {
               if (includePrivate) { return c.isStatic(); }
               else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
@@ -3419,7 +3419,7 @@ public class ExtendedTypeSystem extends TypeSystem {
       Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
         public Predicate<DJClass> value(final Boolean includePrivate) {
           return new Predicate<DJClass>() {
-            public Boolean value(DJClass c) {
+            public boolean contains(DJClass c) {
               if (c.declaredName().equals(name)) {
                 return includePrivate || !c.accessibility().equals(Access.PRIVATE);
               }
@@ -3451,7 +3451,7 @@ public class ExtendedTypeSystem extends TypeSystem {
       Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
         public Predicate<DJClass> value(final Boolean includePrivate) {
           return new Predicate<DJClass>() {
-            public Boolean value(DJClass c) {
+            public boolean contains(DJClass c) {
               if (c.declaredName().equals(name)) {
                 if (includePrivate) { return c.isStatic(); }
                 else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }

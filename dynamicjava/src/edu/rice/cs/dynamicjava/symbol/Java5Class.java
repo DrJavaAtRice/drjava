@@ -30,39 +30,39 @@ public class Java5Class extends JavaClass {
   
   /** List all type variables declared by this class (but not by its enclosing classes) */
   public Iterable<VariableType> declaredTypeParameters() {
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getTypeParameters()), CONVERT_VAR);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getTypeParameters()), CONVERT_VAR);
   }
   
   /** List the declared supertypes of this class */
   public Iterable<Type> declaredSupertypes() {
     Type superC = immediateSuperclass();
-    Iterable<Type> superIs = IterUtil.mapSnapshot(IterUtil.make(_c.getGenericInterfaces()), CONVERT_TYPE);
+    Iterable<Type> superIs = IterUtil.mapSnapshot(IterUtil.asIterable(_c.getGenericInterfaces()), CONVERT_TYPE);
     return superC == null ? superIs : IterUtil.compose(superC, superIs);
   }
   
   public Iterable<DJField> declaredFields() {
     // CONVERT_FIELD is shadowed here to create a Java5Field
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredFields()), CONVERT_FIELD);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredFields()), CONVERT_FIELD);
   }
   
   public Iterable<DJConstructor> declaredConstructors() {
     // CONVERT_CONSTRUCTOR is shadowed here to create a Java5Constructor
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredConstructors()), CONVERT_CONSTRUCTOR);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredConstructors()), CONVERT_CONSTRUCTOR);
   }
   
   public Iterable<DJMethod> declaredMethods() {
     // CONVERT_METHOD is shadowed here to create a Java5Method
-    Iterable<Method> ms = IterUtil.filter(IterUtil.make(_c.getDeclaredMethods()), IS_NOT_BRIDGE);
+    Iterable<Method> ms = IterUtil.filter(IterUtil.asIterable(_c.getDeclaredMethods()), IS_NOT_BRIDGE);
     return IterUtil.mapSnapshot(ms, CONVERT_METHOD);
   }
   
   private static final Predicate<Method> IS_NOT_BRIDGE = new Predicate<Method>() {
-    public Boolean value(Method m) { return !m.isBridge(); }
+    public boolean contains(Method m) { return !m.isBridge(); }
   };
   
   public Iterable<DJClass> declaredClasses() {
     // CONVERT_CLASS is shadowed here to create a Java5Class
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredClasses()), CONVERT_CLASS);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredClasses()), CONVERT_CLASS);
   }
   
 
@@ -262,10 +262,10 @@ public class Java5Class extends JavaClass {
   private class Java5Constructor extends JavaConstructor {
     public Java5Constructor(Constructor k) { super(k); }
     public Iterable<VariableType> declaredTypeParameters() {
-      return IterUtil.mapSnapshot(IterUtil.make(_k.getTypeParameters()), CONVERT_VAR);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(_k.getTypeParameters()), CONVERT_VAR);
     }
     public Iterable<Type> thrownTypes() {
-      return IterUtil.mapSnapshot(IterUtil.make(_k.getGenericExceptionTypes()), CONVERT_TYPE);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(_k.getGenericExceptionTypes()), CONVERT_TYPE);
     }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() {
       return paramFactory(_k.getGenericParameterTypes(), _k.isVarArgs());
@@ -276,10 +276,10 @@ public class Java5Class extends JavaClass {
     public Java5Method(Method m) { super(m); }
     public Type returnType() { return CONVERT_TYPE.value(_m.getGenericReturnType()); }
     public Iterable<VariableType> declaredTypeParameters() {
-      return IterUtil.mapSnapshot(IterUtil.make(_m.getTypeParameters()), CONVERT_VAR);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(_m.getTypeParameters()), CONVERT_VAR);
     }
     public Iterable<Type> thrownTypes() {
-      return IterUtil.mapSnapshot(IterUtil.make(_m.getGenericExceptionTypes()), CONVERT_TYPE);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(_m.getGenericExceptionTypes()), CONVERT_TYPE);
     }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() {
       return paramFactory(_m.getGenericParameterTypes(), _m.isVarArgs());

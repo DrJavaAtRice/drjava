@@ -154,10 +154,10 @@ public class TreeClass implements DJClass {
   public Iterable<VariableType> declaredTypeParameters() {
     Iterable<TypeParameter> paramAsts = IterUtil.empty();
     if (_ast instanceof GenericClassDeclaration) {
-      paramAsts = IterUtil.make(((GenericClassDeclaration)_ast).getTypeParameters());
+      paramAsts = IterUtil.asIterable(((GenericClassDeclaration)_ast).getTypeParameters());
     }
     else if (_ast instanceof GenericInterfaceDeclaration) {
-      paramAsts = IterUtil.make(((GenericClassDeclaration)_ast).getTypeParameters());
+      paramAsts = IterUtil.asIterable(((GenericClassDeclaration)_ast).getTypeParameters());
     }
     return IterUtil.mapSnapshot(paramAsts, NodeProperties.NODE_TYPE_VARIABLE);
   }
@@ -309,7 +309,7 @@ public class TreeClass implements DJClass {
     public Iterable<VariableType> declaredTypeParameters() {
       if (_k instanceof PolymorphicConstructorDeclaration) {
         TypeParameter[] ps = ((PolymorphicConstructorDeclaration)_k).getTypeParameters();
-        return IterUtil.mapSnapshot(IterUtil.make(ps), NodeProperties.NODE_TYPE_VARIABLE);
+        return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
       }
       else { return IterUtil.empty(); }
     }
@@ -357,7 +357,7 @@ public class TreeClass implements DJClass {
     public Iterable<VariableType> declaredTypeParameters() {
       if (_m instanceof PolymorphicMethodDeclaration) {
         TypeParameter[] ps = ((PolymorphicMethodDeclaration)_m).getTypeParameters();
-        return IterUtil.mapSnapshot(IterUtil.make(ps), NodeProperties.NODE_TYPE_VARIABLE);
+        return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
       }
       else { return IterUtil.empty(); }
     }

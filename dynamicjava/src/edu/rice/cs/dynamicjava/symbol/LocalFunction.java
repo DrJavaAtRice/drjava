@@ -32,7 +32,7 @@ public class LocalFunction implements Function {
   public Iterable<VariableType> declaredTypeParameters() {
     if (_ast instanceof PolymorphicMethodDeclaration) {
       TypeParameter[] ps = ((PolymorphicMethodDeclaration)_ast).getTypeParameters();
-      return IterUtil.mapSnapshot(IterUtil.make(ps), NodeProperties.NODE_TYPE_VARIABLE);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
     }
     else { return IterUtil.empty(); }
   }

@@ -2622,7 +2622,7 @@ PARSER_END(Parser)
         }
         
         if (list.size() != 0) {
-          Node n = (Node)list.get(list.size() - 1);
+          Node n = list.get(list.size() - 1);
           el = n.getEndLine();
           ec = n.getEndColumn();
         }
@@ -4793,7 +4793,7 @@ PARSER_END(Parser)
     {
       GenericTypesEnv = GenericTypesEnv.extend(TypeParamsMap); // push the map of typename/typeparam to the generic types env
       TypeParamsMap = new HashMap<String, TypeParameter>(); // flush old map
-      return (TypeParameter[]) list.toArray(new TypeParameter[0]);
+      return list.toArray(new TypeParameter[0]);
     }
   }
   
@@ -4812,7 +4812,7 @@ PARSER_END(Parser)
     )*
       RightAngledBracket()
     {
-      return (TypeParameter[]) list.toArray(new TypeParameter[0]);
+      return list.toArray(new TypeParameter[0]);
     }
   }
   

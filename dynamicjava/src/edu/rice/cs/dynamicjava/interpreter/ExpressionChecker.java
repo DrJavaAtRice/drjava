@@ -75,6 +75,7 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import java.util.*;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
@@ -512,7 +513,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       
       // TODO: Check accessibility of method
       checkThrownExceptions(inv.thrown(), node);
-      node.setArguments(IterUtil.asList(inv.args()));
+      node.setArguments(CollectUtil.makeList(inv.args()));
       setMethod(node, inv.method());
       if (!inv.method().isStatic()) {
         setDJClass(node, t.ofClass());
@@ -578,7 +579,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       // TODO: Check accessibility of method
       checkThrownExceptions(inv.thrown(), node);
       node.setExpression(inv.object());
-      node.setArguments(IterUtil.asList(inv.args()));
+      node.setArguments(CollectUtil.makeList(inv.args()));
       setMethod(node, inv.method());
       Type result = ts.capture(inv.returnType());
       debug.logValue("Type of method call " + node.getMethodName(), ts.wrap(result));
@@ -619,7 +620,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       TypeSystem.MethodInvocation inv = ts.lookupMethod(obj, node.getMethodName(), targs, args);
       // TODO: Check accessibility of method
       checkThrownExceptions(inv.thrown(), node);
-      node.setArguments(IterUtil.asList(inv.args()));
+      node.setArguments(CollectUtil.makeList(inv.args()));
       setMethod(node, inv.method());
       setDJClass(node, context.getThis());
       Type result = ts.capture(inv.returnType());
@@ -657,7 +658,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       TypeSystem.MethodInvocation inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args);
       // TODO: Check accessibility of method
       checkThrownExceptions(inv.thrown(), node);
-      node.setArguments(IterUtil.asList(inv.args()));
+      node.setArguments(CollectUtil.makeList(inv.args()));
       setMethod(node, inv.method());
       Type result = ts.capture(inv.returnType());
       debug.logValue("Type of method call " + node.getMethodName(), ts.wrap(result));
@@ -763,7 +764,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
       // TODO: Check accessibility of constructor
       checkThrownExceptions(inv.thrown(), node);
-      node.setArguments(IterUtil.asList(inv.args()));
+      node.setArguments(CollectUtil.makeList(inv.args()));
       setConstructor(node, inv.constructor());
       return setType(node, t);
     }
@@ -802,7 +803,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
         TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
         // TODO: Check accessibility of constructor
         checkThrownExceptions(inv.thrown(), node);
-        node.setArguments(IterUtil.asList(inv.args()));
+        node.setArguments(CollectUtil.makeList(inv.args()));
       }
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
@@ -854,7 +855,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
         TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
         // TODO: Check accessibility of constructor
         checkThrownExceptions(inv.thrown(), node);
-        node.setArguments(IterUtil.asList(inv.args()));
+        node.setArguments(CollectUtil.makeList(inv.args()));
         setConstructor(node, inv.constructor());
         return setType(node, t);
       }
@@ -908,7 +909,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
         TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
         // TODO: Check accessibility of constructor
         checkThrownExceptions(inv.thrown(), node);
-        node.setArguments(IterUtil.asList(inv.args()));
+        node.setArguments(CollectUtil.makeList(inv.args()));
       }
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);

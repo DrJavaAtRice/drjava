@@ -1310,7 +1310,7 @@ public class TreeCompiler {
     
     private RuntimeBindings bindArgs(RuntimeBindings parent, List<FormalParameter> params,
                                      Object[] args) {
-      return new RuntimeBindings(parent, extractVars(params), IterUtil.make(args));
+      return new RuntimeBindings(parent, extractVars(params), IterUtil.asIterable(args));
     }
     
     private Object evaluateExpression(Expression exp, RuntimeBindings bindings) throws Throwable {

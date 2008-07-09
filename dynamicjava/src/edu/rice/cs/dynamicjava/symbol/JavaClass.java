@@ -63,24 +63,24 @@ public class JavaClass implements DJClass {
     Type superC = immediateSuperclass();
     Iterable<Type> superIs;
     if (_c.getInterfaces() == null) { superIs = IterUtil.empty(); }
-    else { superIs = IterUtil.mapSnapshot(IterUtil.make(_c.getInterfaces()), CLASS_AS_TYPE); }
+    else { superIs = IterUtil.mapSnapshot(IterUtil.asIterable(_c.getInterfaces()), CLASS_AS_TYPE); }
     return superC == null ? superIs : IterUtil.compose(superC, superIs);
   }
   
   public Iterable<DJField> declaredFields() {
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredFields()), CONVERT_FIELD);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredFields()), CONVERT_FIELD);
   }
   
   public Iterable<DJConstructor> declaredConstructors() {
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredConstructors()), CONVERT_CONSTRUCTOR);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredConstructors()), CONVERT_CONSTRUCTOR);
   }
   
   public Iterable<DJMethod> declaredMethods() {
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredMethods()), CONVERT_METHOD);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredMethods()), CONVERT_METHOD);
   }
   
   public Iterable<DJClass> declaredClasses() {
-    return IterUtil.mapSnapshot(IterUtil.make(_c.getDeclaredClasses()), CONVERT_CLASS);
+    return IterUtil.mapSnapshot(IterUtil.asIterable(_c.getDeclaredClasses()), CONVERT_CLASS);
   }
   
 
@@ -228,7 +228,7 @@ public class JavaClass implements DJClass {
     }
     
     public Iterable<Type> thrownTypes() {
-      return IterUtil.mapSnapshot(IterUtil.make(_k.getExceptionTypes()), CLASS_AS_TYPE);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(_k.getExceptionTypes()), CLASS_AS_TYPE);
     }
     
     public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
@@ -244,7 +244,7 @@ public class JavaClass implements DJClass {
       catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
       
       try {
-        return _k.newInstance(IterUtil.asArray(args, Object.class));
+        return _k.newInstance(IterUtil.toArray(args, Object.class));
       }
       catch (InvocationTargetException e) {
         throw new EvaluatorException(e.getCause(), CONSTRUCTOR_EXTRA_STACK);
@@ -286,7 +286,7 @@ public class JavaClass implements DJClass {
     public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
     public Iterable<LocalVariable> declaredParameters() { return _params.value(); }
     public Iterable<Type> thrownTypes() {
-      return IterUtil.mapSnapshot(IterUtil.make(_m.getExceptionTypes()), CLASS_AS_TYPE);
+      return IterUtil.mapSnapshot(IterUtil.asIterable(_m.getExceptionTypes()), CLASS_AS_TYPE);
     }
     
     public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, 
@@ -299,7 +299,7 @@ public class JavaClass implements DJClass {
       catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
       
       try {
-        return _m.invoke(receiver, IterUtil.asList(args).toArray());
+        return _m.invoke(receiver, IterUtil.toArray(args, Object.class));
       }
       catch (InvocationTargetException e) {
         throw new EvaluatorException(e.getCause(), METHOD_EXTRA_STACK);
