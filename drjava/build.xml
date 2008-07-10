@@ -672,6 +672,7 @@
       </manifest>
       <fileset dir="classes/lib" />
       <fileset dir="classes/base" />
+      <fileset file="lib/junit.jar" />
     </jar>
   </target>
 
@@ -697,6 +698,7 @@
       </manifest>
       <fileset dir="classes/lib-14" />
       <fileset dir="classes/base-14" />
+      <fileset file="lib/junit.jar" />
     </jar>
   </target>
 

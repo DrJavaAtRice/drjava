@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.compiler;
 
-import java.io.File;
+import java.io.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -80,10 +80,68 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 public class Javac160Compiler extends JavacCompiler {
 
   private final boolean _filterExe;
+  private File _tempJUnit = null;
+  private final String PREFIX = "drjava-junit";
+  private final String SUFFIX = ".jar";  
 
   public Javac160Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
     _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.0_04")) >= 0;
+    if (_filterExe) {
+      // if we need to filter out exe files from the classpath, we also need to
+      // extract junit.jar and create a temporary file
+      try {
+	// edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
+        // LOG.log("Filtering exe files from classpath.");
+        InputStream is = Javac160Compiler.class.getResourceAsStream("/junit.jar");
+	if (is!=null) {
+	  // LOG.log("\tjunit.jar found");
+	  _tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
+	  FileOutputStream fos = new FileOutputStream(_tempJUnit);
+	  int size = edu.rice.cs.plt.io.IOUtil.copyInputStream(is,fos);
+	  // LOG.log("\t"+size+" bytes written to "+_tempJUnit.getAbsolutePath());
+	}
+	else {
+	  // LOG.log("\tjunit.jar not found");
+	  if (_tempJUnit!=null) {
+	    _tempJUnit.delete();
+	    _tempJUnit = null;
+	    }
+	  }
+      }
+      catch(IOException ioe) {
+	if (_tempJUnit!=null) {
+	    _tempJUnit.delete();
+	    _tempJUnit = null;
+	}
+      }
+      // sometimes this file may be left behind, so create a shutdown hook
+      // that deletes temporary files matching our pattern
+      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+        public void run() {
+	  try {
+	    File temp = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);;
+  	    File[] toDelete = temp.getParentFile().listFiles(new FilenameFilter() {
+	      public boolean accept(File dir, String name) {
+	        if ((!name.startsWith(PREFIX)) || (!name.endsWith(SUFFIX))) return false;
+	        String rest = name.substring(PREFIX.length(), name.length()-SUFFIX.length());
+	        try {
+	          Integer i = new Integer(rest);
+		  // we could create an integer from the rest, this is one of our temporary files
+		  return true;
+	        }
+	        catch(NumberFormatException e) { /* couldn't convert, ignore this file */ }
+	        return false;
+	      }
+	    });
+	    for(File f: toDelete) {
+	      f.delete();
+	    }
+	  }
+	  catch(IOException ioe) { /* could not delete temporary files, ignore */ }
+	}
+      }));
+    }
   }
   
   public boolean isAvailable() {
@@ -118,15 +176,17 @@ public class Javac160Compiler extends JavacCompiler {
     debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
                                   "sourceVersion", "showWarnings" },
                               this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    List<File> filteredClassPath = new LinkedList<File>(classPath);
 
     if (_filterExe) {
       FileFilter filter = IOUtil.extensionFilePredicate("exe");
-      Iterator<? extends File> i = classPath.iterator();
+      Iterator<? extends File> i = filteredClassPath.iterator();
       while (i.hasNext()) {
-        if (filter.accept(i.next())) { i.remove(); }
+	if (filter.accept(i.next())) { i.remove(); }
       }
+      if (_tempJUnit!=null) { filteredClassPath.add(_tempJUnit); }
     }
-    Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    Context context = _createContext(filteredClassPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     new CompilerErrorListener(context, errors);
     
