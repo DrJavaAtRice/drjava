@@ -516,7 +516,7 @@ public abstract class StringOps {
     return sb.toString();
   }
   
-  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", true);
+  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", false);
   
   /** Escapes spaces ' ' with the sequence "\u001b ", and a single '\u001b' with a double.
     * It treats File.pathSeparatorChar (';' or ':'), ProcessChain.PROCESS_SEPARATOR_CHAR ('#'),

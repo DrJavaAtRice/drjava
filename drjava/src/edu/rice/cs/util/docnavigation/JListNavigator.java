@@ -216,15 +216,16 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     }
   }
   
-  /** Sets the specified document as selected.  Should only be called from event thread.
+  /** Sets the specified document as selected.  Only executes in event thread.
     * @param doc the document to select
     */
   public void setActiveDoc(ItemT doc) { 
+    assert EventQueue.isDispatchThread();
     boolean found;
-    synchronized(_model) {
-      if (_current == doc) return; // doc is already _current (the active doc)
-      found = _model.contains(doc);
-    }
+//    synchronized(_model) {
+    if (_current == doc) return; // doc is already _current (the active doc)
+    found = _model.contains(doc);
+//    }
     if (found) setSelectedValue(doc, true);   
 //        _current = doc;  // already done by ListSelectionEvent listener created in init()
 //    }

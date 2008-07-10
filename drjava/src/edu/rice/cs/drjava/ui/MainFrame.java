@@ -8009,18 +8009,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
                                         final boolean shouldHighlight, final boolean shouldAddToHistory) {
+    
+    assert duringInit() || EventQueue.isDispatchThread();
     if (shouldAddToHistory) addToBrowserHistory();
     
     boolean toSameDoc = _model.getActiveDocument().equals(doc);
     
     if (! toSameDoc) {
-      _model.setActiveDocument(doc);
+      _model.setActiveDocument(doc);  // blocks until active document is set internally
       _findReplace.updateFirstDocInSearch();
     }
     else _model.refreshActiveDocument();
-    
-    Runnable command = new Runnable() {  
-      public void run() {
+   
+    /* The commented out code caused the debugger to deadlock in some situations.  After frame initialization, this
+     * method is only called in event thread. */
+//    Runnable command = new Runnable() {  
+//      public void run() {
         // get the line number after the switch of documents was made
         int lineNumber = doc.getLineOfOffset(offset) + 1;
         
@@ -8056,13 +8060,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
         
 //        if (shouldAddToHistory) { addToBrowserHistory(); }    
-      }
-    };
+//      }
+//    };
     
     /* Comment by mgricken: If ! toSameDoc, the _currentDefPane hasn't been created yet for a new document.   
      * Consequently, we need to use EventQueue.invokeLater if ! toSameDoc. */
-    /* if (toSameDoc) Utilities.invokeLater(command);  
-     else */ EventQueue.invokeLater(command);
+//    if (toSameDoc) Utilities.invokeLater(command);  
+//    else EventQueue.invokeLater(command);
   }
   
   /** Listens to events from the debugger. */

@@ -459,7 +459,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   private final int DELAY_INTERVAL = 10;
   private volatile int delayCount = DELAY_INTERVAL;
   
-  /** Called when the repl prints to System.out.  Includes a delay to prevent flooding the interactions document.
+  /** Called when the repl prints to System.out.  Includes a delay to prevent flooding the interactions document.  This
+    * method can safely be called from outside the event thread.
     * @param s String to print
     */
   public void replSystemOutPrint(final String s) {
@@ -475,7 +476,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     else delayCount--;   
   }
   
-  /** Called when the repl prints to System.err.  Includes a delay to prevent flooding the interactions document.
+  /** Called when the repl prints to System.err.  Includes a delay to prevent flooding the interactions document.  This
+    * method can safely be called from outside the event thread.
     * @param s String to print 
     */
   public void replSystemErrPrint(final String s) {
@@ -491,7 +493,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       else delayCount--;
   }
   
-  /** Returns a line of text entered by the user at the equivalent of System.in. */
+  /** Returns a line of text entered by the user at the equivalent of System.in.  Only executes in the event thread. */
   public String getConsoleInput() { return _inputListener.getConsoleInput(); }
   
   /** Sets the listener for any type of single-source input event. The listener can only be changed with the 

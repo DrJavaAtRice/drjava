@@ -56,7 +56,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
   
   
 //  inherits _log from GlobalModelTestCase 
-//  public static Log _log = new Log("Debug.txt", true);
+//  public static Log _log = new Log("Debug.txt", false);
   
   /** Tests that the sourcepath config option properly adds files to the search directories. */
   public void XXXtestDebugSourcepath() throws Exception {

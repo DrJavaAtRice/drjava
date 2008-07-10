@@ -222,7 +222,7 @@ public class LogTest extends MultiThreadedTestCase {
   
   private static final int NUM_THREADS = 50;
   private static final int DELAY = 100;
-  // private static final Log ltl = new Log("logtest.txt", true);
+  // private static final Log ltl = new Log("logtest.txt", false);
   
   /** Attempts to test Log's behavior when called concurrently from several sources.  Spawns NUM_THREADS LogTestThreads 
     * (see above)that wait a random number between 0 and DELAY milliseconds and then log a message.  The function tests

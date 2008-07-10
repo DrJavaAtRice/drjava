@@ -243,5 +243,5 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** The name of the client property that determines whether a change is model- or user-initiated. */
   public static final String MODEL_INITIATED_PROPERTY_NAME = "ModelInitiated";
   
-//   public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("browser.txt", true);
+//   public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("browser.txt", false);
 }
