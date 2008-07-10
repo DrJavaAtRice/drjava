@@ -182,10 +182,10 @@ public class AboutDialog extends JDialog implements ActionListener {
     final JPanel panel = new JPanel(new BorderLayout());
 
     final StringBuilder sb = new StringBuilder("DrJava Version : ");
+    sb.append(Version.getVersionString());
+    sb.append("\nDrJava Build Time: ");
     sb.append(Version.getBuildTimeString());
-    sb.append("\nDrJava Revision: ");
-    sb.append(Version.getRevisionNumber());
-    sb.append("\n\nDrJava Configuration file: ");
+    sb.append("\n\nDrJava Configuration File: ");
     sb.append(DrJava.getPropertiesFile().getAbsolutePath());
     sb.append("\n\nUsed memory: about ");
     sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));

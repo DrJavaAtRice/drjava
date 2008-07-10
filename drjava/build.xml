@@ -166,7 +166,7 @@
     <filter token="DEVELOPMENT" value="${development-value}" />
     <filter token="DATE" value="${DSTAMP}" />
     <filter token="TIME" value="${TSTAMP}" />
-    <filter token="REVISION" value="${REVSTAMP}" />
+    <filter token="REVISION" value="${svn-revision}" />
     <echo message="Processing ${code-status-source}" />
     <copy file="${code-status-source}" tofile="${code-status-target}" filtering="yes" />
     <echo message="Processing ${version-source}" />

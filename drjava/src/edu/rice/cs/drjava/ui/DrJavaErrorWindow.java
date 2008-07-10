@@ -309,10 +309,10 @@ public class DrJavaErrorWindow extends JDialog {
     final StringBuilder b = new StringBuilder();
     b.append("System Properties:\n");
     b.append("DrJava Version ");
-    b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
+    b.append(edu.rice.cs.drjava.Version.getVersionString());
     b.append('\n');
-    b.append("DrJava Revision ");
-    b.append(edu.rice.cs.drjava.Version.getRevisionNumber());
+    b.append("DrJava Build Time ");
+    b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
     b.append("\n\n");
     java.util.Properties props = System.getProperties();
 //    int size = props.size();

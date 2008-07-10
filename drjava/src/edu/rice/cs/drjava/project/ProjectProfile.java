@@ -239,7 +239,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   public void write(OutputStream os) throws IOException {    
     XMLConfig xc = new XMLConfig();
-    xc.set("drjava.version", edu.rice.cs.drjava.Version.getBuildTimeString()+"-"+edu.rice.cs.drjava.Version.getRevisionNumber());
+    xc.set("drjava.version", edu.rice.cs.drjava.Version.getVersionString());
     String path = FileOps.stringMakeRelativeTo(_projectRoot, _projectFile);
     path = replace(path, File.separator, "/");
     xc.set("drjava/project.root", path);
@@ -426,7 +426,7 @@ public class ProjectProfile implements ProjectFileIR {
   public void writeOld(Writer fw) throws IOException { 
     assert (_projectRoot != null);
     // write opening comment line
-    fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString() + ", revision " + Version.getRevisionNumber());
+    fw.write(";; DrJava project file, written by build " + Version.getVersionString());
     fw.write("\n;; files in the source tree are relative to: " + _projectRoot.getCanonicalPath());
     fw.write("\n;; other files with relative paths are rooted at (the parent of) this project file");
     

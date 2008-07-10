@@ -54,7 +54,7 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
   public void testXMLParse() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String xml = 
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"+
-      "<drjava version=\""+edu.rice.cs.drjava.Version.getBuildTimeString()+"-"+edu.rice.cs.drjava.Version.getRevisionNumber()+"\">\n"+
+      "<drjava version=\""+edu.rice.cs.drjava.Version.getVersionString()+"\">\n"+
       "  <project root=\"src\" build=\"classes\" work=\"\" main=\"src/edu/rice/cs/drjava/DrJava.java\">\n"+
       "    <createjar file=\"drjava-15.jar\" flags=\"3\"/>\n"+
       "    <source>\n"+
