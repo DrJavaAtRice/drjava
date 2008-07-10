@@ -102,7 +102,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * those documented in {@link ExpressionChecker}, the following are set:<ul>
  * <li>VARIABLE on all {@link VariableDeclaration}s and {@link FormalParameter}s</li>
  * <li>TYPE_VARIABLE on all {@link TypeParameter}s</li>
- * <li>ERASED_TYPE on all {@link CatchBlock}s</li>
+ * <li>ERASED_TYPE on all {@link CatchStatement}s, {@link VariableDeclaration}s, and
+ *     {@link MethodDeclaration}s</li>
  * <li>DJClASS on class declarations</li>
  * </ul>
  */
@@ -270,12 +271,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       Type initT = checkType(node.getInitializer());
       LocalVariable v = new LocalVariable(node.getName(), initT, node.isFinal());
       setVariable(node, v);
+      setErasedType(node, ts.erasedClass(initT));
       return new LocalContext(context, v);
     }
     else {
       Type t = checkTypeName(node.getType());
       LocalVariable v = new LocalVariable(node.getName(), t, node.isFinal());
       setVariable(node, v);
+      setErasedType(node, ts.erasedClass(t));
       TypeContext newContext = new LocalContext(context, v);
       
       if (node.getInitializer() != null) {
@@ -345,7 +348,9 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     TypeContext sigContext = new FunctionSignatureContext(context, f);
     ExpressionChecker sigChecker = new ExpressionChecker(sigContext, opt);
     sigChecker.setTypeParameterBounds(tparams);
-    node.getReturnType().acceptVisitor(sigChecker);
+
+    Type returnT = node.getReturnType().acceptVisitor(sigChecker);
+    setErasedType(node, ts.erasedClass(returnT));
     for (FormalParameter p : node.getParameters()) {
       Type t = p.getType().acceptVisitor(sigChecker);
       setVariable(p, new LocalVariable(p.getName(), t, p.isFinal()));

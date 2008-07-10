@@ -139,7 +139,7 @@ public class NodeProperties {
     }
     
 
-    /** A Thunk<Class<?>> representing the erased type of an expression */
+    /** A Thunk<Class<?>> representing the erased type of certain expressions and statements. */
     public final static String ERASED_TYPE = "erasedType";
 
     @SuppressWarnings("unchecked")

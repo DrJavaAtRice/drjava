@@ -50,7 +50,8 @@ public class LocalFunction implements Function {
     RuntimeBindings bodyBindings = new RuntimeBindings(bindings, declaredParameters(), args);
     try {
       _ast.getBody().acceptVisitor(new StatementEvaluator(bodyBindings, options));
-      return null;
+      // if there was no return, return null or an appropriate zero primitive
+      return SymbolUtil.initialValue(NodeProperties.getErasedType(_ast).value());
     }
     catch (StatementEvaluator.ReturnException e) {
       return e.value().unwrap(null);

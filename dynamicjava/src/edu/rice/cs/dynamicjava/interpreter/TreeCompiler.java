@@ -1245,7 +1245,7 @@ public class TreeCompiler {
     public Object evaluateMethod(String key, RuntimeBindings bindings, Object[] args) throws Throwable {
       MethodDeclaration decl = _methods.get(key);
       RuntimeBindings methodBindings = bindArgs(bindings, decl.getParameters(), args);
-      return evaluateBlock(decl.getBody(), methodBindings);
+      return evaluateBlock(decl.getBody(), NodeProperties.getErasedType(decl).value(), methodBindings);
     }
     
     /**
@@ -1284,7 +1284,7 @@ public class TreeCompiler {
       throws Throwable {
       ConstructorDeclaration decl = _constructors.get(key);
       RuntimeBindings constructorBindings = bindArgs(bindings, decl.getParameters(), args);
-      evaluateBlock(new BlockStatement(decl.getStatements()), constructorBindings);
+      evaluateBlock(new BlockStatement(decl.getStatements()), void.class, constructorBindings);
     }
     
     /**
@@ -1294,7 +1294,7 @@ public class TreeCompiler {
      */
     public void evaluateInitializer(String key, RuntimeBindings bindings) throws Throwable {
       Initializer decl = _initializers.get(key);
-      evaluateBlock(decl.getBlock(), bindings);
+      evaluateBlock(decl.getBlock(), void.class, bindings);
     }
     
     /**
@@ -1323,10 +1323,12 @@ public class TreeCompiler {
       }
     }
     
-    private Object evaluateBlock(BlockStatement block, RuntimeBindings bindings) throws Throwable {
+    private Object evaluateBlock(BlockStatement block, Class<?> returnType,
+                                 RuntimeBindings bindings) throws Throwable {
       try {
         block.acceptVisitor(new StatementEvaluator(bindings, _opt));
-        return null;
+        // if we didn't return, produce null or a zero primitive
+        return SymbolUtil.initialValue(returnType);
       }
       catch (StatementEvaluator.ReturnException e) {
         return e.value().unwrap(null);

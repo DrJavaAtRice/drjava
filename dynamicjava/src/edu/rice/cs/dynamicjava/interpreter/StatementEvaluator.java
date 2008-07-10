@@ -16,6 +16,7 @@ import koala.dynamicjava.tree.visitor.*;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.LocalVariable;
 import edu.rice.cs.dynamicjava.symbol.TypeSystem;
+import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
 
 import static koala.dynamicjava.interpreter.NodeProperties.*;
 
@@ -81,7 +82,10 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
   @Override public Result visit(MethodDeclaration node) { return new Result(_bindings); }
 
   @Override public Result visit(VariableDeclaration node) {
-    RuntimeBindings newB = new RuntimeBindings(_bindings, getVariable(node), null);
+    // even when an initializer is present, there may be a reference to the uninitialized
+    // variable in the initializer
+    Object init = SymbolUtil.initialValue(getErasedType(node).value());
+    RuntimeBindings newB = new RuntimeBindings(_bindings, getVariable(node), init);
     if (node.getInitializer() != null) {
       newB.set(getVariable(node), new ExpressionEvaluator(newB, _opt).value(node.getInitializer()));
     }

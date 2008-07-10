@@ -184,6 +184,26 @@ public class SymbolUtil {
     };
   }
   
+  /**
+   * Get the initial (zero) value of a field with the given class.  May be an array or primitive;
+   * if void, the result is {@code null}.
+   */
+  public static Object initialValue(Class<?> c) {
+    if (c.isPrimitive()) {
+      if (c.equals(boolean.class)) { return Boolean.FALSE; }
+      else if (c.equals(int.class)) { return Integer.valueOf(0); }
+      else if (c.equals(double.class)) { return Double.valueOf(0.0); }
+      else if (c.equals(char.class)) { return Character.valueOf('\u0000'); }
+      else if (c.equals(void.class)) { return null; }
+      else if (c.equals(long.class)) { return Long.valueOf(0l); }
+      else if (c.equals(byte.class)) { return Byte.valueOf((byte) 0); }
+      else if (c.equals(short.class)) { return Short.valueOf((short) 0); }
+      else if (c.equals(float.class)) { return Float.valueOf(0.0f); }
+      else { throw new IllegalArgumentException("Unrecognized primitive: " + c); }
+    }
+    else { return null; }
+  }
+  
   public static Iterable<Type> declaredParameterTypes(Function f) {
     return IterUtil.map(f.declaredParameters(), TYPE_OF_VARIABLE);
   }

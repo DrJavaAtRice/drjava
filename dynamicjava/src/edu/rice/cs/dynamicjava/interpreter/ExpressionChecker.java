@@ -103,7 +103,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * <li>CONVERTED_TYPE on any {@code CastExpression} subexpressions that require runtime conversion</li>
  * <li>CHECKED_TYPE on any {@code CastExpression} subexpressions, {@code FieldAccess}es, or 
  *     {@code MethodCall}s that require runtime checking</li>
- * <li>ERASED_TYPE on all {@code CatchBlock}s, {@code ArrayAllocation}s, and {@code ArrayInitializer}s,
+ * <li>ERASED_TYPE on all {@code ArrayAllocation}s, and {@code ArrayInitializer}s,
  *     and the nested type of {@code TypeExpression}s and {@code InstanceofExpression}s</li>
  * <li>LEFT_EXPRESSION on assignments, increments, and decrements that access the left expression in
  *     order to evaluate the right expression</li>

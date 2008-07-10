@@ -17,6 +17,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
  * Checks the members of a class declaration.
+ * The following are set:<ul>
+ * <li>ERASED_TYPE on all {@link MethodDeclaration}s</li>
+ * </ul>
  */
 public class ClassMemberChecker extends AbstractVisitor<Void> {
   
@@ -73,7 +76,9 @@ public class ClassMemberChecker extends AbstractVisitor<Void> {
     TypeContext sigContext = new FunctionSignatureContext(_context, m);
     ExpressionChecker sigChecker = new ExpressionChecker(sigContext, _opt);
     sigChecker.setTypeParameterBounds(tparams);
-    node.getReturnType().acceptVisitor(sigChecker);
+    
+    Type returnT = node.getReturnType().acceptVisitor(sigChecker);
+    setErasedType(node, _opt.typeSystem().erasedClass(returnT));
     for (FormalParameter param : node.getParameters()) {
       Type t = param.getType().acceptVisitor(sigChecker);
       setVariable(param, new LocalVariable(param.getName(), t, param.isFinal()));
