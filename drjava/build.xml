@@ -161,25 +161,6 @@
   <property name="version-source" value="${src-working-dir}/Version.orig" />
   <property name="version-target" value="${src-working-dir}/Version.java" />
 
-  <!-- Retrieves the current revision using the svn command. Contrary
-       to resolve-svn-revision, this removes the line separator at the end. -->
-  <target name="get-revision">
-    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" output="svn-info.txt">
-      <arg value="info" />
-    </exec>
-    <loadfile property="REVSTAMP" srcfile="svn-info.txt">
-      <filterchain>
-        <linecontains>
-          <contains value="Last Changed Rev: " />
-        </linecontains>
-        <replacestring from="Last Changed Rev: " to="" />
-        <striplinebreaks/>
-      </filterchain>
-    </loadfile>
-    <delete file="svn-info.txt" />
-    <echo message="Revision is ${REVSTAMP}." />
-  </target>
-
   <target name="generate-source" depends="resolve-development-value, resolve-version-tag" 
           description="Generate the CodeStatus and Version source files">
     <filter token="DEVELOPMENT" value="${development-value}" />
@@ -1084,12 +1065,12 @@
     <delete dir="${version-tag}" />
   </target>
   
-  <target name="jar-app" depends="assert-jar-exists, resolve-version-tag">
+  <target name="jar-app" depends="jar-14, assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.jar" />
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
   </target>
 
-  <target name="mac-app" depends="assert-jar-exists, resolve-version-tag">
+  <target name="mac-app" depends="jar-14, assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}-osx.tar.gz" />
     <property name="mac-app-dir" value="${version-tag}/osx" />
     <mkdir dir="${mac-app-dir}" />
@@ -1109,9 +1090,9 @@
     </tar>
   </target>
   
-  <target name="windows-app" depends="assert-jar-exists, assert-launch4j-exists, resolve-version-tag">
+  <target name="windows-app" depends="jar-14, assert-jar-exists, assert-launch4j-exists, resolve-version-tag">
     <!-- launch4j task, used to create the Windows executable -->
-    <echo message="Creating ${version-tag}-windows.zip" />
+    <echo message="Creating ${version-tag}.exe" />
     <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask">
       <classpath>
         <pathelement location="${launch4j-home}/launch4j.jar" />
@@ -1126,8 +1107,6 @@
     </copy>
     <copy file="${ant.project.name}.jar" todir="${windows-app-dir}" />
     <launch4j configfile="${windows-app-dir}/launch4j-config.xml" />
-    <zip destfile="${version-tag}-windows.zip" basedir="${windows-app-dir}"
-         includes="${readable-project-name}.exe" />
   </target>
 
   <target name="src-zip" depends="resolve-version-tag" unless="skip-tag">
@@ -1357,7 +1336,7 @@
               value="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" />
   </target>
   
-  <target name="resolve-version-tag" depends="get-revision">
+  <target name="resolve-version-tag" depends="resolve-svn-revision">
     <!-- Get a timestamp based on GMT, rather than local time -->
     <tstamp>
       <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
@@ -1365,10 +1344,10 @@
       <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
     </tstamp>
     <property name="version-tag"
-              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}-r${REVSTAMP}" />
+              value="${ant.project.name}${tag-append}-${DSTAMP}-r${svn-revision}" />
   </target>  
   
-  <!-- Sets is-modified if "svn status" has non-empty output.  Runs svn in svn-working-dir. -->
+  <!-- Sets is-modified if "svn status" has non-empty output. -->
   <target name="resolve-is-modified" depends="clean">
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" outputproperty="svn-status">
       <arg value="status" />
@@ -1380,7 +1359,7 @@
     </condition>
   </target>
   
-  <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info".  Runs svn in svn-working-dir. -->
+  <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
@@ -1391,6 +1370,7 @@
           <contains value="Last Changed Rev: " />
         </linecontains>
         <replacestring from="Last Changed Rev: " to="" />
+        <striplinebreaks/>
       </filterchain>
     </loadfile>
     <delete file="svn-info.txt" />
