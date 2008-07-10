@@ -38,6 +38,7 @@ package edu.rice.cs.drjava;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.io.IOUtil;
 
 import java.awt.*;
@@ -63,9 +64,10 @@ public final class ConfigFileTest extends DrJavaTestCase {
     File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
     IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);
     DrJava.setPropertiesFile(propsFile.getAbsolutePath());
-    DrJava._initConfig();
-    FileConfiguration config = DrJava.getConfig();
+    Utilities.invokeAndWait(new Runnable() { public void run() { DrJava._initConfig(); } });
+    Utilities.clearEventQueue();
     
+    FileConfiguration config = DrJava.getConfig();
     assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
     assertEquals("custom history size", 1, config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
     //Tests if a user can put a default value in the .drjava file

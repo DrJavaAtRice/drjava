@@ -313,7 +313,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
   
   /** Tests that an interactions history can be loaded in as a script. */
-  public void testScriptLoading() throws IOException, OperationCanceledException {
+  public void testScriptLoading() throws Exception {
     assertTrue(_model instanceof TestInteractionsModel);
     final TestInteractionsModel model = (TestInteractionsModel)_model;
     // Set up a sample history
@@ -325,6 +325,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     History history = new History(5);
     history.add(line1);
     history.add(line2);
+    
     history.writeToFile(new FileSaveSelector() {
       public File getFile() { return temp; }
       public boolean warnFileOpen(File f) { return true; }
@@ -335,7 +336,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // Load the history as a script
     final InteractionsScriptModel ism = model.loadHistoryAsScript(new FileOpenSelector() {
       public File[] getFiles() {
-        return new File[] {temp};
+        return new File[] { temp };
       }
     });
     final InteractionsDocument doc = model.getDocument();
@@ -379,15 +380,15 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Go back to the second line and execute it
-    ism.nextInteraction();
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.nextInteraction(); } });
     Utilities.clearEventQueue();
-    Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction(); } });
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+    model._logInteractionStart();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { ism.executeInteraction(); } 
+    });
+    model._waitInteractionDone();
+
     assertEquals("Should have \"executed\" the second interaction.", line2, model.toEval);
-    // pretend the call completed
-    Utilities.invokeAndWait(new Runnable() { public void run() { model.replReturnedVoid(); } });
-    Utilities.clearEventQueue();
     
     // Should not be able to get the next interaction, since we're at the end
     assertTrue("Should have no next", !ism.hasNextInteraction());
@@ -410,23 +411,22 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
     Utilities.clearEventQueue();
-//    System.err.println("Interaction is '" + doc.getCurrentInteraction() + "'");
+    System.err.println("Interaction is '" + doc.getCurrentInteraction() + "'");
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Should have no more previous
-    assertTrue("Should have no previous", ! ism.hasPrevInteraction());
+    assertFalse("Should have no previous", ism.hasPrevInteraction());
     
+    System.err.println("Current interaction for line 428 is " + doc.getCurrentInteraction());
+    System.err.println("line1 = '" + line1 + "'");
+    model._logInteractionStart();
     // Now execute the first interaction
-    Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction(); } });
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
-//    System.err.println("line1 = '" + line1 + "'");
-//    System.err.println("model.toEval = '" + model.toEval + "'");
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction();  } });
+    model._waitInteractionDone();
+
+    System.err.println("model.toEval = '" + model.toEval + "'");
       
     assertEquals("Should have \"executed\" the first interaction.", line1, model.toEval);
-    // pretend the call completed
-    Utilities.invokeAndWait(new Runnable() { public void run() { model.replReturnedVoid(); } });
-    Utilities.clearEventQueue();
     
     // Get Previous should return the most recent (first) interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
@@ -471,27 +471,32 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
   
   /** Tests that the interactions history is stored correctly. See bug # 992455 */
-  public void testInteractionsHistoryStoredCorrectly() throws EditDocumentException {
+  public void testInteractionsHistoryStoredCorrectly() throws Exception {
     final Object _lock = new Object();
     final String code = "public class A {\n";
     
-    final InteractionsDocument doc = _model.getDocument();
+    _model = new BadSyntaxInteractionsModel(_adapter);  // replaces model created by setUp()
+    final BadSyntaxInteractionsModel model = (BadSyntaxInteractionsModel) _model;
+    
+    final InteractionsDocument doc = model.getDocument();
     
     // Insert text and evaluate
+    model._logInteractionStart();
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
-        _model.interpretCurrentInteraction();
+        model.setSyntaxErrorStrings("Encountered Unexpected \"<EOF>\"", "public class A {\n");
+        model.interpretCurrentInteraction();
       }
     });
-    Utilities.clearEventQueue();
+    model._waitInteractionDone();
     
     //Simulate result
-    _model.replReturnedSyntaxError("Encountered Unexpected \"<EOF>\"", "public class A {\n", -1, -1, -1, -1);
+//    _model.replReturnedSyntaxError("Encountered Unexpected \"<EOF>\"", "public class A {\n", -1, -1, -1, -1);
     
     String expected = "public class A {\n" + "\n";  // last term was StringOps.EOL but Swing uses '\n' for newLIne
     String result = doc.getCurrentInteraction();
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
 //    System.err.println("expected = '" + expected + "' length = " + expected.length());
 //    System.err.println("result = '" + result + "' length = " + result.length());
     assertEquals("Current interaction should still be there - should not have interpreted", expected, result);
@@ -499,16 +504,15 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertEquals("History should be empty", 0, h.size());
     
     final String code1 = "}\n";
-    
+    model.disableSyntaxError();
+    model._logInteractionStart();
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         doc.insertText(doc.getLength(), code1, InteractionsDocument.DEFAULT_STYLE);
         _model.interpretCurrentInteraction();
-        _model.replReturnedVoid();
       }
     });
-    
-    Utilities.clearEventQueue();
+    model._waitInteractionDone();
     
     assertEquals("Current interaction should not be there - should have interpreted", "", doc.getCurrentInteraction());
     assertEquals("History should contain one interaction", 1, h.size());
@@ -519,15 +523,37 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     String toEval = null;
     String addedClass = null;
     
+    private volatile boolean _interactionDone = false;
+    private final Object _interactionLock = new Object();
+    
+    public void _logInteractionStart() { _interactionDone = false; }
+    
+    public void _waitInteractionDone() throws InterruptedException { 
+      synchronized(_interactionLock) { 
+        while (! _interactionDone) _interactionLock.wait(); }
+    }
+    
     /** Constructs a new InteractionsModel. */
     public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
       super(adapter, new File(System.getProperty("user.dir")), 1000, 25);
     }
     
-    /** Set the toEval field but suppress interpretation. */
-    protected void _interpret(String toEval) { this.toEval = toEval; }
+    /** Sets toEval field and simulates successful interpretation. */
+    protected void _interpret(String toEval) {
+      System.err.println("interpret setting toEval to " + toEval);
+      this.toEval = toEval; 
+      replReturnedVoid(); // imitate completed call
+    }
     
+    protected void _notifyInteractionEnded() { 
+      _log.log("_notifyInteractionEnded called.");
+      synchronized(_interactionLock) {
+        _interactionDone = true;
+        _interactionLock.notify();
+      }
+    }
+        
     public String getVariableToString(String var) {
       fail("cannot getVariableToString in a test");
       return null;
@@ -545,7 +571,6 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _resetInterpreter(File wd) { fail("cannot reset interpreter in a test"); }
     
     public void _notifyInteractionStarted() { }
-    protected void _notifyInteractionEnded() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
@@ -556,6 +581,32 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifySlaveJVMUsed() { }
     public ConsoleDocument getConsoleDocument() { return null; }
   }
+  
+  /** This test model can simulate a syntax error in interpretation. */
+  private static class BadSyntaxInteractionsModel extends TestInteractionsModel {
+    
+    private String errorString1, errorString2;
+    private boolean errorPresent = false;
+    
+    BadSyntaxInteractionsModel(InteractionsDJDocument adapter) { super(adapter); }
+    
+    protected void setSyntaxErrorStrings(String s1, String s2) { 
+      errorString1 = s1; 
+      errorString2 = s2; 
+      errorPresent = true;
+    }
+    
+    protected void disableSyntaxError() { errorPresent = false; }
+    
+    /** Simulates a syntax error in interpretation. */
+    protected void _interpret(String toEval) {
+      System.err.println("interpret setting toEval to " + toEval);
+      this.toEval = toEval; 
+      if (errorPresent) replReturnedSyntaxError(errorString1, errorString2, -1, -1, -1, -1); // imitate return with syntax error
+      else replReturnedVoid();  // imitate successful return
+    }
+  }
+
   
   /** This test model includes a slave JVM, just like a DefaultGlobalModel.  It must be disposed before it is
     * deallocated to kill the slave JVM.   TODO: the mutation in this class is disgusting -- Corky  2 June 06.
