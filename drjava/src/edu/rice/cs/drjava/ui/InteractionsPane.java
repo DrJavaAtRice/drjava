@@ -64,7 +64,7 @@ import edu.rice.cs.drjava.model.repl.*;
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
   
   /** The custom keymap for the interactions pane. */
-  protected Keymap _keymap;
+  final protected Keymap _keymap;
   
   /** Whether to draw text as antialiased. */
   private boolean _antiAliasText = false;
@@ -245,7 +245,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     assert EventQueue.isDispatchThread();
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
-      setCaretPos(_doc.getCurrentLocation());    // FIX: not atomic; needs to be done as part of indentLines
+      setCaretPos(_doc.getCurrentLocation());    
     }
     catch (OperationCanceledException oce) { throw new UnexpectedException(oce); }
   }

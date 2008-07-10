@@ -83,12 +83,20 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       public void run() {
         // Have to add an undoable edit listener for Undo to work
         doc.addUndoableEditListener(new UndoableEditListener() {
-          public void undoableEditHappened(UndoableEditEvent e) { doc.getUndoManager().addEdit(e.getEdit()); }
+          public void undoableEditHappened(UndoableEditEvent e) { 
+//            System.err.println("undoableEditHappened(" + e + ") called");
+            doc.getUndoManager().addEdit(e.getEdit()); 
+          }
         });
       }
     });
     
-    TestListener listener = new TestListener() { public void undoableEditHappened() { undoableEditCount++; } };
+    TestListener listener = new TestListener() { 
+      public void undoableEditHappened() { 
+        undoableEditCount++; 
+//        System.err.println("undoableEditHappened call propagated to listener");
+      } 
+    };
     
     _model.addListener(listener);
     
@@ -97,6 +105,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //        Utilities.clearEventQueue();
     _model.removeListener(listener);
     listener.assertUndoableEditCount(1);
+    
+    fail("Dump printed output");
     
     _log.log("testUndoEventsOccur() completed");
     

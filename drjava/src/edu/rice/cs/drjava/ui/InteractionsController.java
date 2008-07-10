@@ -73,6 +73,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
@@ -410,9 +411,17 @@ public class InteractionsController extends AbstractConsoleController {
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), moveDownAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), moveDownAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask), historyNextAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), historyReverseSearchAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, java.awt.Event.SHIFT_MASK),
-                                historyForwardSearchAction);
+//    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), historyReverseSearchAction);
+//    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, java.awt.Event.SHIFT_MASK),
+//                                historyForwardSearchAction);
+    
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), indentKeyActionTab);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, java.awt.Event.SHIFT_MASK), indentKeyActionLine);
+
+    // Potential additions: actions must be copied from DefinitionsPane
+//    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), indentKeyActionCurly);
+//    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), indentKeyActionOpenCurly);
+//    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(':'), indentKeyActionColon);
     
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.
@@ -659,6 +668,18 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
+  /** Indents the selected text. */
+  AbstractAction indentKeyActionTab = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) { _pane.indent(); }
+  };
+   
+  /** Indents in preparation for typing next line */
+  AbstractAction indentKeyActionLine = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) { 
+      _doc.append("\n", null);  // null style
+      _pane.indent(Indenter.IndentReason.ENTER_KEY_PRESS); }
+  };
+ 
   /** A box that can be inserted into the interactions pane for separate input.  Do not confuse with 
     * edu.rice.cs.util.swing.InputBox. */
   private static class InputBox extends JTextArea {
