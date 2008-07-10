@@ -147,7 +147,9 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
     else {
       try {
         Method getIterator = iterable.getClass().getMethod("iterator");
-        iter = (Iterator<?>) getIterator.invoke(iterable, getIterator, node);
+        try { getIterator.setAccessible(true); }
+        catch (SecurityException e) { /* made a best attempt */ }
+        iter = (Iterator<?>) getIterator.invoke(iterable);
       }
       catch (NoSuchMethodException e) { throw new RuntimeException(e); }
       catch (IllegalAccessException e) { throw new RuntimeException(e); }
