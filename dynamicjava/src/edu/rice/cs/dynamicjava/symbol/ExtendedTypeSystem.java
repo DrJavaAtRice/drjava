@@ -198,12 +198,14 @@ public class ExtendedTypeSystem extends TypeSystem {
    * (in terms of {@link isEqual}), transitive relation.
    */
   public boolean isSubtype(Type subT, Type superT) {
-    return isSubtype(subT, superT, new RecursionStack2<Type, Type>());
+    //debug.logStart(new String[]{"subT", "superT"}, subT, superT);
+    boolean result = isSubtype(subT, superT, new RecursionStack2<Type, Type>());
+    //debug.logEnd("result", result);
+    return result;
   }
   
   private boolean isSubtype(final Type subT, final Type superT, final RecursionStack2<Type, Type> stack) {
-    //debug.logStart();
-    //debug.logValues(new String[]{"subT", "superT"}, subT, superT); try {
+    //debug.logStart(new String[]{"subT", "superT"}, subT, superT); try {
             
     if (subT.equals(superT)) { return true; } // what follows assumes the types are not syntactically equal
     
@@ -319,7 +321,10 @@ public class ExtendedTypeSystem extends TypeSystem {
           public Boolean defaultCase(Type superT) { return false; }
           
           @Override public Boolean forArrayType(ArrayType superT) {
-            if (isPrimitive(subT.ofType())) { return false; }
+            if (isPrimitive(subT.ofType())) {
+              // types may be inequal if one is vararg and the other is not
+              return subT.ofType().equals(superT.ofType());
+            }
             else { return isSubtype(subT.ofType(), superT.ofType(), stack); }
           }
           
@@ -445,14 +450,15 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   public boolean isPrimitiveConvertible(Type t) {
     return isPrimitive(t) ||
-      isSubtype(t, BOOLEAN_CLASS) || 
-      isSubtype(t, CHARACTER_CLASS) ||
-      isSubtype(t, BYTE_CLASS) ||
-      isSubtype(t, SHORT_CLASS) ||
-      isSubtype(t, INTEGER_CLASS) ||
-      isSubtype(t, LONG_CLASS) ||
-      isSubtype(t, FLOAT_CLASS) ||
-      isSubtype(t, DOUBLE_CLASS);
+      (!isSubtype(t, NULL) &&
+       (isSubtype(t, BOOLEAN_CLASS) || 
+        isSubtype(t, CHARACTER_CLASS) ||
+        isSubtype(t, BYTE_CLASS) ||
+        isSubtype(t, SHORT_CLASS) ||
+        isSubtype(t, INTEGER_CLASS) ||
+        isSubtype(t, LONG_CLASS) ||
+        isSubtype(t, FLOAT_CLASS) ||
+        isSubtype(t, DOUBLE_CLASS)));
   }
   
   
@@ -1121,7 +1127,9 @@ public class ExtendedTypeSystem extends TypeSystem {
     Type t = NodeProperties.getType(e);
     if (isPrimitive(t)) { return e; }
     // Note: The spec is not clear about whether a *subtype* (such as a variable) can
-    //       be unboxed.  We allow it here, because that seems like the correct approach.
+    //       be unboxed.  We allow it here unless the type is null, because that seems
+    //       like the correct approach.
+    else if (isSubtype(t, NULL)) { throw new UnsupportedConversionException(); }
     else if (isSubtype(t, BOOLEAN_CLASS)) { return unbox(e, "booleanValue"); }
     else if (isSubtype(t, CHARACTER_CLASS)) { return unbox(e, "charValue"); }
     else if (isSubtype(t, BYTE_CLASS)) { return unbox(e, "byteValue"); }
@@ -2610,7 +2618,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     @Override public boolean matchesWithVarargs() {
       if (_varargParam instanceof VarargArrayType) {
         boxArgs();
-        if (matches()) {
+        if (super.matches()) {
           ArrayType arrayT = (ArrayType) substitute((ArrayType) _varargParam, _tparams, _targs);
           Type elementT = arrayT.ofType();
           Iterable<Expression> boxedVarargArgs = EMPTY_EXPRESSION_ITERABLE;

@@ -187,7 +187,7 @@ public class ArrayAllocation extends PrimaryExpression {
       if (initialization != null) {
         TypeName et;
         if (dimension > 1)
-          et = new ArrayTypeName(t, dimension-1, t.getFilename(), t.getBeginLine(), t.getBeginColumn(), endLine, endColumn);
+          et = new ArrayTypeName(t, dimension-1, false, t.getFilename(), t.getBeginLine(), t.getBeginColumn(), endLine, endColumn);
         else
           et = t; 
 

@@ -78,7 +78,7 @@ public class TreeUtilities {
       result = new VoidTypeName(fn, bl, bc, el, ec);
     } else if (c.isArray()) {
       result = new ArrayTypeName(classToTypeName(c.getComponentType(), fn, bl, bc, el, ec),
-                             1, fn, bl, bc, el, ec);
+                                 1, false, fn, bl, bc, el, ec);
     } else {
       List<IdentifierToken> ids = new ArrayList<IdentifierToken>(1);
       ids.add(new Identifier(c.getName()));

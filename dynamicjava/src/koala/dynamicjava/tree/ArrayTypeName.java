@@ -48,14 +48,16 @@ public class ArrayTypeName extends TypeName {
    */
   private TypeName elementType;
   
+  private boolean vararg;
+  
   /**
    * Initializes the type
    * @param et    the element type
    * @param dim   the dimension of the arrays represented by this type (> 0)
    * @exception IllegalArgumentException if et is null or dim < 1
    */
-  public ArrayTypeName(TypeName et, int dim) {
-    this(et, dim, null, 0, 0, 0, 0);
+  public ArrayTypeName(TypeName et, int dim, boolean varg) {
+    this(et, dim, varg, null, 0, 0, 0, 0);
   }
   
   /**
@@ -69,13 +71,14 @@ public class ArrayTypeName extends TypeName {
    * @param ec    the end column
    * @exception IllegalArgumentException if et is null or dim < 1
    */
-  public ArrayTypeName(TypeName et, int dim, String fn, int bl, int bc, int el, int ec) {
+  public ArrayTypeName(TypeName et, int dim, boolean varg, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
     if (et == null) throw new IllegalArgumentException("et == null");
     if (dim < 1)    throw new IllegalArgumentException("dim < 1");
     
-    elementType = (dim > 1) ? new ArrayTypeName(et, dim - 1, fn, bl, bc, el, ec) : et;
+    elementType = (dim > 1) ? new ArrayTypeName(et, dim - 1, false, fn, bl, bc, el, ec) : et;
+    vararg = varg;
   }
   
   /**
@@ -94,6 +97,8 @@ public class ArrayTypeName extends TypeName {
     
     firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
   }
+  
+  public boolean isVararg() { return vararg; }
   
   /**
    * Allows a visitor to traverse the tree

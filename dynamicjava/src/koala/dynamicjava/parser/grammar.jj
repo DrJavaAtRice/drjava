@@ -171,10 +171,10 @@ public class Parser {
     
     // If the field is an array, create an array type node
     if (dim > 0) {
-      typ = new ArrayTypeName(typ, dim,
-                          filename,
-                          typ.getBeginLine(), typ.getBeginColumn(),
-                          typ.getEndLine(),   typ.getEndColumn());
+      typ = new ArrayTypeName(typ, dim, false,
+                              filename,
+                              typ.getBeginLine(), typ.getBeginColumn(),
+                              typ.getEndLine(), typ.getEndColumn());
     }
     
     return new FieldDeclaration(flags, typ, name.image, exp,
@@ -212,10 +212,10 @@ public class Parser {
     
     // If the variable contains an array, create an array type node
     if (dim > 0) {
-      typ = new ArrayTypeName(typ, dim,
-                          filename,
-                          typ.getBeginLine(), typ.getBeginColumn(),
-                          typ.getEndLine(),   typ.getEndColumn());
+      typ = new ArrayTypeName(typ, dim, false,
+                              filename,
+                              typ.getBeginLine(), typ.getBeginColumn(),
+                              typ.getEndLine(), typ.getEndColumn());
     }
     
     return new VariableDeclaration(isFinal, typ, name.image, exp,
@@ -1757,10 +1757,10 @@ PARSER_END(Parser)
             bc = typ.getBeginColumn();
           }
           if (dim > 0) {
-            typ = new ArrayTypeName(typ, dim,
-                                filename,
-                                typ.getBeginLine(), typ.getBeginColumn(),
-                                typ.getEndLine(),   typ.getEndColumn());
+            typ = new ArrayTypeName(typ, dim, false,
+                                    filename,
+                                    typ.getBeginLine(), typ.getBeginColumn(),
+                                    typ.getEndLine(), typ.getEndColumn());
           }
           if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
           
@@ -1842,10 +1842,10 @@ PARSER_END(Parser)
       [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
       {
         if (dim > 0) {
-          typ = new ArrayTypeName(typ, dim,
-                              filename,
-                              typ.getBeginLine(), typ.getBeginColumn(),
-                              typ.getEndLine(),   typ.getEndColumn());
+          typ = new ArrayTypeName(typ, dim, false,
+                                  filename,
+                                  typ.getBeginLine(), typ.getBeginColumn(),
+                                  typ.getEndLine(), typ.getEndColumn());
         }
         return new FormalParameter(f != null, typ, id.image,
                                    filename,
@@ -1875,10 +1875,10 @@ PARSER_END(Parser)
       [ f="final" ] typ=type() <VAR_ARGS> id=<IDENTIFIER>
       {
         // convert the type of the formal parameter to be an array
-        typ = new ArrayTypeName(typ, 1,
-                            filename,
-                            typ.getBeginLine(), typ.getBeginColumn(),
-                            typ.getEndLine(),   typ.getEndColumn());
+        typ = new ArrayTypeName(typ, 1, true,
+                                filename,
+                                typ.getBeginLine(), typ.getBeginColumn(),
+                                typ.getEndLine(),   typ.getEndColumn());
         return new FormalParameter(f != null, typ, id.image,
                                    filename,
                                    (f != null) ? f.beginLine   : typ.getBeginLine(),
@@ -1887,7 +1887,7 @@ PARSER_END(Parser)
       }
     }
     catch(ParseException pe) {
-      _throwParseException(pe, "Invalid variable arguments formal parameter");
+      _throwParseException(pe, "Invalid varargs formal parameter");
     }
   }
   
@@ -4110,10 +4110,10 @@ PARSER_END(Parser)
       if (dim == 0) {
         return rt;
       } else {
-        return new ArrayTypeName(rt, dim,
-                             filename,
-                             rt.getBeginLine(), rt.getBeginColumn(),
-                             t.endLine,         t.endColumn);
+        return new ArrayTypeName(rt, dim, false,
+                                 filename,
+                                 rt.getBeginLine(), rt.getBeginColumn(),
+                                 t.endLine, t.endColumn);
       }
     }
   }

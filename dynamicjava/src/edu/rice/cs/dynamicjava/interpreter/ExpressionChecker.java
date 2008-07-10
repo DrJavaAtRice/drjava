@@ -1766,7 +1766,9 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
    */
   @Override public Type visit(ArrayTypeName node) {
     Type elementType = node.getElementType().acceptVisitor(this);
-    return setType(node, new SimpleArrayType(elementType));
+    Type arrayT = node.isVararg() ? new VarargArrayType(elementType) :
+                                    new SimpleArrayType(elementType);
+    return setType(node, arrayT);
   }
 
 }

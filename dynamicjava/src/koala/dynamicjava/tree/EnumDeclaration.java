@@ -114,7 +114,7 @@ public class EnumDeclaration extends ClassDeclaration {
     int accessFlags  = java.lang.reflect.Modifier.PRIVATE | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
 
     ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
-    TypeName valuesType = new ArrayTypeName(enumType, 1);
+    TypeName valuesType = new ArrayTypeName(enumType, 1, false);
     List<Expression> sizes = new LinkedList<Expression>();
     sizes.add(new IntegerLiteral(String.valueOf(consts_names.length)));
     List<Expression> cells = new LinkedList<Expression>();

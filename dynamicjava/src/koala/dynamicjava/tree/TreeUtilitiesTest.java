@@ -70,7 +70,7 @@ public class TreeUtilitiesTest extends TestCase {
                    equals(TreeUtilities.classToTypeName(boolean.class)));
     assertEquals("",true,new VoidTypeName().
                    equals(TreeUtilities.classToTypeName(void.class)));
-    assertEquals("",true,new ArrayTypeName(new IntTypeName(),1).
+    assertEquals("",true,new ArrayTypeName(new IntTypeName(),1, false).
                    equals(TreeUtilities.classToTypeName(int[].class)));
     assertEquals("",true,new ReferenceTypeName(Integer.class.getName()).
                    equals(TreeUtilities.classToTypeName(Integer.class)));
