@@ -77,7 +77,9 @@ public final class IndentTest extends DrJavaTestCase {
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     _doc = new DefinitionsDocument(_notifier);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel); } 
+    });
   }
   
   /** Builds the suite of tests for Indent.class.

@@ -61,10 +61,15 @@ public final class ConfigFileTest extends DrJavaTestCase {
   
   /** Creates a custom properties file, tells DrJava to use it, and checks that it is being used. */
   public void testCustomConfigFile() throws IOException {
-    File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
+    final File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
     IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);
-    DrJava.setPropertiesFile(propsFile.getAbsolutePath());
-    Utilities.invokeAndWait(new Runnable() { public void run() { DrJava._initConfig(); } });
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        DrJava.setPropertiesFile(propsFile.getAbsolutePath());
+        DrJava._initConfig(); 
+      } 
+    });
+    Utilities.clearEventQueue();
     Utilities.clearEventQueue();
     
     FileConfiguration config = DrJava.getConfig();
