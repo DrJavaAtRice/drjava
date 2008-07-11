@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.junit;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -233,7 +234,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
     
-//    System.err.println("junitOpenDefDocs(" + lod + "," + allTests + ")");
+//    Utilities.show("junitOpenDefDocs(" + lod + "," + allTests + ")");
     
     // Check_testInProgress flag
     if (_testInProgress) return;
@@ -241,11 +242,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
     
+//    Utilities.show("Retrieved JUnit error model");
     if (_model.hasOutOfSyncDocuments(lod) || _model.hasModifiedDocuments(lod)) {
       /* hasOutOfSyncDocments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
-//      System.err.println("Out of sync documents exist");
+//      Utilities.show("Out of sync documents exist");
       
       CompilerListener testAfterCompile = new DummyCompilerListener() {
         @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
@@ -284,8 +286,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
+    
     File buildDir = _model.getBuildDirectory();
-//    System.err.println("Build directory is " + buildDir);
+//    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
     
     /** Open java source files */
     HashSet<String> openDocFiles = new HashSet<String>();
@@ -437,10 +440,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
     // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
-    
+//    Utilities.show("Preparing to synchronize");
     synchronized(_compilerModel.getCompilerLock()) {
       /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
       List<String> tests;
+//      Utilities.show("Finding test classes");
       try { tests = _jvm.findTestClasses(classNames, files); }
       catch(IOException e) { throw new UnexpectedException(e); }
       
@@ -449,16 +453,22 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         return;
       }
       
-     try {  /** Run the junit test suite that has already been set up on the slave JVM */
+      try {  /** Run the junit test suite that has already been set up on the slave JVM */
         _testInProgress = true;
-        
-        // notify listeners that JUnit testing has finally started!
-//        Utilities.invokeLater(new Runnable() { public void run() { 
-          _notifier.junitStarted(); 
-//        } });
-        
-        _jvm.runTestSuite();
-        
+//        System.err.println("Spawning test thread");
+        new Thread(new Runnable() {
+          public void run() { 
+            try {
+//              Utilities.show("Starting JUnit");
+              _notifier.junitStarted(); 
+              _jvm.runTestSuite();
+            }
+            catch(RemoteException e) { 
+              /* System.err.println("Caught " + e); */
+              throw new UnexpectedException(e); 
+            }
+          }
+        }).start();
       }
       catch(Exception e) {
         // Probably a java.rmi.UnmarshalException caused by the interruption of unit testing.

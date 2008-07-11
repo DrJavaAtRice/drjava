@@ -86,7 +86,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class JPDADebugger implements Debugger {
   
   /** A log for recording messages in a file. */
-  private static final Log _log = new Log("GlobalModelTest.txt", false);
+  private static final Log _log = new Log("GlobalModel.txt", true);
   
   private static final int OBJECT_COLLECTED_TRIES = 5;
   
@@ -189,7 +189,7 @@ public class JPDADebugger implements Debugger {
   public boolean isReady() { return _vm != null; }
   
   /** Attaches the debugger to the Interactions JVM to prepare for debugging.  Only runs in event thread. */
-  public synchronized void startUp() throws DebugException {
+  public /* synchronized */ void startUp() throws DebugException {
     assert EventQueue.isDispatchThread();
     if (! isReady()) {
       _eventHandlerError = null;
@@ -201,15 +201,13 @@ public class JPDADebugger implements Debugger {
       try { _attachToVM(); }
       catch(DebugException e1) {  // We sometimes see ConnectExceptions stating that the connection was refused
         try { 
-          // TODO: holding a lock (this) while sleeping. try to release lock? (mgricken)
           try { Thread.sleep(100); } // Give any temporary connection problems a chance to resolve
           catch (InterruptedException e) { /* ignore */ }
           _attachToVM(); 
           error.log("Two attempts required for debugger to attach to slave JVM");
         }
         catch(DebugException e2) {
-          // TODO: holding a lock (this) while sleeping. try to release lock? (mgricken)
-          try { Thread.sleep(100); } // Give any temporary connection problems a chance to resolve
+          try { Thread.sleep(500); } // Give any temporary connection problems a chance to resolve
           catch (InterruptedException e) { /* ignore */ }
           _attachToVM();
           error.log("Three attempts required for debugger to attach to slave JVM");
@@ -225,12 +223,8 @@ public class JPDADebugger implements Debugger {
       EventHandlerThread eventHandler = new EventHandlerThread(this, _vm);
       eventHandler.start();
       
-      /* Move the following command to the end of the event queue so that it is done outside outside the readLock
-       * held when this method is called from an InteractionsListener. */
-      EventQueue.invokeLater(new Runnable() {
-        public void run() { _model.getInteractionsModel().addListener(_watchListener); }
-      });
-      
+      _model.getInteractionsModel().addListener(_watchListener);
+
       // re-set breakpoints that have already been set
       Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_model.getBreakpointManager().getRegions());
       _model.getBreakpointManager().clearRegions();
@@ -251,7 +245,8 @@ public class JPDADebugger implements Debugger {
   /** Disconnects the debugger from the Interactions JVM and cleans up any state.
     * @throws IllegalStateException if debugger is not ready
     */
-  public synchronized void shutdown() {
+  public /* synchronized */ void shutdown() {
+    assert EventQueue.isDispatchThread();
     if (isReady()) {
       Runnable command = new Runnable() { public void run() { _model.getInteractionsModel().removeListener(_watchListener); } };
       
@@ -285,7 +280,8 @@ public class JPDADebugger implements Debugger {
     * @throws IllegalStateException if debugger is not ready
     * @throws IllegalArgumentException if threadData is null or not suspended
     */
-  public synchronized void setCurrentThread(DebugThreadData threadData) throws DebugException {
+  public /* synchronized */ void setCurrentThread(DebugThreadData threadData) throws DebugException {
+    assert EventQueue.isDispatchThread();
     _ensureReady();
     
     if (threadData == null) {
@@ -357,25 +353,29 @@ public class JPDADebugger implements Debugger {
   }
   
   /** Returns whether the debugger currently has any suspended threads. */
-  public synchronized boolean hasSuspendedThreads() throws DebugException {
+  public /* synchronized */ boolean hasSuspendedThreads() throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) return false;
     return _suspendedThreads.size() > 0;
   }
   
   /** Returns whether the debugger's current thread is suspended. */
-  public synchronized boolean isCurrentThreadSuspended() throws DebugException {
+  public /* synchronized */ boolean isCurrentThreadSuspended() throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) return false;
-    return hasSuspendedThreads() && !hasRunningThread();
+    return hasSuspendedThreads() && ! hasRunningThread();
   }
   
   /** Returns whether the thread the debugger is tracking is now running. */
-  public synchronized boolean hasRunningThread() throws DebugException {
+  public /* synchronized */ boolean hasRunningThread() throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) return false;
     return _runningThread != null;
   }
   
   /** Resumes the thread currently being debugged, copying back all variables from the current debug interpreter. */
-  public synchronized void resume() throws DebugException {
+  public /* synchronized */ void resume() throws DebugException {
+    assert EventQueue.isDispatchThread();
     _ensureReady();
     _resumeHelper(false);
   }
@@ -383,14 +383,16 @@ public class JPDADebugger implements Debugger {
   /** Resumes the given thread, copying back any variables from its associated debug interpreter.
     * @param threadData Thread to resume
     */
-  public synchronized void resume(DebugThreadData threadData) throws DebugException {
+  public /* synchronized */ void resume(DebugThreadData threadData) throws DebugException {
+    assert EventQueue.isDispatchThread();
     _ensureReady();
     ThreadReference thread = _suspendedThreads.remove(threadData.getUniqueID());
     _resumeThread(thread, false);
   }
   
   /** Steps the execution of the currently loaded document. */
-  public synchronized void step(StepType type) throws DebugException {
+  public /* synchronized */ void step(StepType type) throws DebugException {
+    assert EventQueue.isDispatchThread();
     _ensureReady();
     _stepHelper(type, true);
   }
@@ -398,28 +400,32 @@ public class JPDADebugger implements Debugger {
   /** Adds a watch on the given field or variable.
     * @param field the name of the field we will watch
     */
-  public synchronized void addWatch(String field) throws DebugException {
+  public /* synchronized */ void addWatch(String field) throws DebugException {
     // _ensureReady();
-    
+    assert EventQueue.isDispatchThread();
     final DebugWatchData w = new DebugWatchData(field);
     _watches.add(w);
     _updateWatches();
     
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.watchSet(w); } });
+//    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.watchSet(w); 
+//    } });
   }
   
   /** Removes any watches on the given field or variable.
    * Has no effect if the given field is not being watched.
    * @param field the name of the field we will watch
    */
-  public synchronized void removeWatch(String field) throws DebugException {
+  public /* synchronized */ void removeWatch(String field) throws DebugException {
     // _ensureReady();
-    
+    assert EventQueue.isDispatchThread();
     for (int i=0; i < _watches.size(); i++) {
       final DebugWatchData watch = _watches.get(i);
       if (watch.getName().equals(field)) {
         _watches.remove(i);
-        Utilities.invokeLater(new Runnable() { public void run() { _notifier.watchRemoved(watch); } });
+//        Utilities.invokeLater(new Runnable() { public void run() { 
+          _notifier.watchRemoved(watch); 
+//        } });
       }
     }
   }
@@ -427,21 +433,23 @@ public class JPDADebugger implements Debugger {
   /** Removes the watch at the given index.
    * @param index Index of the watch to remove
    */
-  public synchronized void removeWatch(int index) throws DebugException {
+  public /* synchronized */ void removeWatch(int index) throws DebugException {
     // _ensureReady();
-    
+    assert EventQueue.isDispatchThread();
     if (index < _watches.size()) {
       final DebugWatchData watch = _watches.get(index);
       _watches.remove(index);
-      Utilities.invokeLater(new Runnable() { public void run() { _notifier.watchRemoved(watch); } });
+//      Utilities.invokeLater(new Runnable() { public void run() { 
+        _notifier.watchRemoved(watch); 
+//      } });
     }
   }
   
   /** Removes all watches on existing fields and variables.
    */
-  public synchronized void removeAllWatches() throws DebugException {
+  public /* synchronized */ void removeAllWatches() throws DebugException {
     // _ensureReady();
-    
+    assert EventQueue.isDispatchThread();
     while (_watches.size() > 0) {
       removeWatch( _watches.get(0).getName());
     }
@@ -450,7 +458,8 @@ public class JPDADebugger implements Debugger {
   /** Enable or disable the specified breakpoint.
    * @param breakpoint breakpoint to change
    */
-  public synchronized void notifyBreakpointChange(Breakpoint breakpoint) {
+  public /* synchronized */ void notifyBreakpointChange(Breakpoint breakpoint) {
+    assert EventQueue.isDispatchThread();
     _model.getBreakpointManager().changeRegion(breakpoint, new Lambda<Object, Breakpoint>() {
       public Object apply(Breakpoint bp) {
         // change has already been made, just notify all listeners
@@ -466,8 +475,9 @@ public class JPDADebugger implements Debugger {
     * @param isEnabled  {@code true} if this breakpoint should be enabled
     * TODO: check synchronization; why no read lock on doc?
     */
-  public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
+  public /* synchronized */ void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
+        assert EventQueue.isDispatchThread();
     // ensure that offset is at line start and falls within the document
     offset = doc._getLineStartPos(offset);
     if (offset < 0 || offset > doc.getLength()) return;
@@ -489,7 +499,8 @@ public class JPDADebugger implements Debugger {
   /** Sets a breakpoint.
     * @param breakpoint The new breakpoint to set
     */
-  public synchronized void setBreakpoint(final Breakpoint breakpoint) throws DebugException {
+  public /* synchronized */ void setBreakpoint(final Breakpoint breakpoint) throws DebugException {
+    assert EventQueue.isDispatchThread();
     breakpoint.getDocument().checkIfClassFileInSync();
     
     _model.getBreakpointManager().addRegion(breakpoint);
@@ -498,7 +509,8 @@ public class JPDADebugger implements Debugger {
   /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
     * @param bp The breakpoint to remove.
     */
-  public synchronized void removeBreakpoint(Breakpoint bp) throws DebugException {
+  public /* synchronized */ void removeBreakpoint(Breakpoint bp) throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (!(bp instanceof JPDABreakpoint)) { throw new IllegalArgumentException("Unsupported breakpoint"); }
     else {
       JPDABreakpoint breakpoint = (JPDABreakpoint) bp;
@@ -534,7 +546,8 @@ public class JPDADebugger implements Debugger {
   }
   
   /** Returns a list of all threads being tracked by the debugger. Does not return any threads known to be dead. */
-  public synchronized Vector<DebugThreadData> getCurrentThreadData() throws DebugException {
+  public /* synchronized */ Vector<DebugThreadData> getCurrentThreadData() throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) { return new Vector<DebugThreadData>(); }
     Iterable<ThreadReference> listThreads;
     try { listThreads = _vm.allThreads(); }
@@ -558,7 +571,8 @@ public class JPDADebugger implements Debugger {
    * are no suspended threads
    * TO DO: Config option for hiding DrJava subset of stack trace
    */
-  public synchronized Vector<DebugStackData> getCurrentStackFrameData() throws DebugException {
+  public /* synchronized */ Vector<DebugStackData> getCurrentStackFrameData() throws DebugException {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) return new Vector<DebugStackData>();
     
     if (_runningThread != null || _suspendedThreads.size() <= 0) {
@@ -589,6 +603,7 @@ public class JPDADebugger implements Debugger {
     * made to avoid the deadlock described in [ 1696060 ] Debugger Infinite Loop.
     */
   public OpenDefinitionsDocument preloadDocument(Location location) {
+    assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = null;
     
     // No stored doc, look on the source root set (later, also the sourcepath)
@@ -625,7 +640,8 @@ public class JPDADebugger implements Debugger {
     * @param stackData Stack data containing location to display
     * @throws DebugException if current thread is not suspended
     */
-  public synchronized void scrollToSource(DebugStackData stackData) throws DebugException {
+  public /* synchronized */ void scrollToSource(DebugStackData stackData) throws DebugException {
+    assert EventQueue.isDispatchThread();
     _ensureReady();
     if (_runningThread != null) {
       throw new DebugException("Cannot scroll to source unless thread is suspended.");
@@ -660,7 +676,7 @@ public class JPDADebugger implements Debugger {
   /** Scrolls to the source of the given breakpoint.
     * @param bp the breakpoint
     */
-  public synchronized void scrollToSource(Breakpoint bp) {
+  public /* synchronized */ void scrollToSource(Breakpoint bp) {
     openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), false);
   }
   
@@ -670,7 +686,8 @@ public class JPDADebugger implements Debugger {
     * @param className  The name of the class the breakpoint's in
     * @return the Breakpoint corresponding to the line and className, or null if there is no such breakpoint.
     */
-  public synchronized Breakpoint getBreakpoint(int line, String className) {
+  public /* synchronized */ Breakpoint getBreakpoint(int line, String className) {
+    assert EventQueue.isDispatchThread();
     for (int i = 0; i < _model.getBreakpointManager().getRegions().size(); i++) {
       Breakpoint bp = _model.getBreakpointManager().getRegions().get(i);
       if ((bp.getLineNumber() == line) && (bp.getClassName().equals(className))) {
@@ -727,11 +744,12 @@ public class JPDADebugger implements Debugger {
     _eventHandlerError = t;
   }
   
+  private volatile Runnable _command = null;
   
-  /** Handles the details of attaching to the interpreterJVM. Assume lock is already held. */
+  /** Handles the details of attaching to the interpreterJVM. Only runs in the event thread. */
   private void _attachToVM() throws DebugException {
-    // Blocks until the interpreter has registered if hasn't already.  Blocks all synchronized methods in this class.
-    _model.waitForInterpreter();
+    assert EventQueue.isDispatchThread();
+//    System.err.println("Debugger attaching to VM");
     
     // Get the connector
     AttachingConnector connector = _getAttachingConnector();
@@ -747,12 +765,16 @@ public class JPDADebugger implements Debugger {
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
     }
-    catch(Exception e) { throw new DebugException("Could not connect to VM: " + e); }
+    catch(Exception e) { 
+//      System.err.println("Could not connect to VM: " + e);
+      throw new DebugException("Could not connect to VM: " + e); 
+    }
     
     _interpreterJVM = (ObjectReference) _getStaticField(_getClass(InterpreterJVM.class.getName()), "ONLY");
+//    System.err.println("_interpreterm vm is " + _interpreterJVM);
   }
   
-  /** Returns an attaching connector to use for connecting to the interpreter JVM.  Assumes lock is already held. */
+  /** Returns an attaching connector to use for connecting to the interpreter JVM. */
   private AttachingConnector _getAttachingConnector() throws DebugException {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
     List<AttachingConnector> connectors = vmm.attachingConnectors();
@@ -775,13 +797,14 @@ public class JPDADebugger implements Debugger {
    *
    * @throws IllegalArgumentException if thread is not suspended.
    */
-  synchronized boolean setCurrentThread(ThreadReference thread) {
+  /* synchronized */ boolean setCurrentThread(ThreadReference thread) {
+    assert EventQueue.isDispatchThread();
     if (! thread.isSuspended()) {
       throw new IllegalArgumentException("Thread must be suspended to set as current.  Given: " + thread);
     }
     
     try {
-      if ((_suspendedThreads.isEmpty() || !_suspendedThreads.contains(thread.uniqueID())) &&
+      if ((_suspendedThreads.isEmpty() || ! _suspendedThreads.contains(thread.uniqueID())) &&
           (thread.frameCount() > 0)) {
         _suspendedThreads.push(thread);
         return true;
@@ -805,7 +828,8 @@ public class JPDADebugger implements Debugger {
     * If custom class loaders are in use, multiple copies of the class
     * may be loaded, so all are returned.
     */
-  synchronized Vector<ReferenceType> getReferenceTypes(String className, int lineNumber) {
+  /* synchronized */ Vector<ReferenceType> getReferenceTypes(String className, int lineNumber) {
+    assert EventQueue.isDispatchThread();
     // Get all classes that match this name
     List<ReferenceType> classes;
     
@@ -1027,14 +1051,15 @@ public class JPDADebugger implements Debugger {
     * on the request.
     * @param request The BreakPointRequest reached by the debugger
     */
-  synchronized void reachedBreakpoint(BreakpointRequest request) {
+  /* synchronized */ void reachedBreakpoint(BreakpointRequest request) {
 //    Utilities.showDebug("JPDADebugger.reachedBreakPoint(" + request + ") called");
+    assert EventQueue.isDispatchThread();
     Object property = request.getProperty("debugAction");
     if (property != null && (property instanceof JPDABreakpoint)) {
       final JPDABreakpoint breakpoint = (JPDABreakpoint) property;
       printMessage("Breakpoint hit in class " + breakpoint.getClassName() + "  [line " + breakpoint.getLineNumber() + "]");
       
-      Utilities.invokeLater(new Runnable() { public void run() { _notifier.breakpointReached(breakpoint); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.breakpointReached(breakpoint); } });
     }
     else {
       // A breakpoint we didn't set??
@@ -1066,6 +1091,7 @@ public class JPDADebugger implements Debugger {
   
   /** Scroll to the location specified by location.  Assumes lock on this is already held. */
   private void scrollToSource(Location location, boolean shouldHighlight) {
+    assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = preloadDocument(location);
     openAndScroll(doc, location, shouldHighlight);
   }
@@ -1085,13 +1111,15 @@ public class JPDADebugger implements Debugger {
     * @param line the line number to display
     * @param className the name of the appropriate class
     */
-  private void openAndScroll(final OpenDefinitionsDocument doc, final int line, String className, final boolean shouldHighlight) {
+  private void openAndScroll(final OpenDefinitionsDocument doc, final int line, String className, 
+                             final boolean shouldHighlight) {
+    assert EventQueue.isDispatchThread();
     // Open and scroll if doc was found
     if (doc != null) { 
       doc.checkIfClassFileInSync();
       // change UI if in sync in MainFrame listener
       
-      Utilities.invokeLater(new Runnable() { public void run() { _notifier.threadLocationUpdated(doc, line, shouldHighlight); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadLocationUpdated(doc, line, shouldHighlight); } });
     }
     else printMessage("  (Source for " + className + " not found.)");
   }
@@ -1134,7 +1162,8 @@ public class JPDADebugger implements Debugger {
   
   /** Updates the stored value of each watched field and variable. Synchronization is necessary because this method is 
     * called from unsynchronized listeners. */
-  private synchronized void _updateWatches() {
+  private /* synchronized */ void _updateWatches() {
+    assert EventQueue.isDispatchThread();
     if (! isReady()) return;
     
     for (DebugWatchData w : _watches) {
@@ -1348,14 +1377,13 @@ public class JPDADebugger implements Debugger {
   /** Notifies all listeners that the current thread has been suspended. Synchronization is necessary because it is 
     * called from unsynchronized listeners and other classes (in same package). 
     */
-  synchronized void currThreadSuspended() {
+  /* synchronized */ void currThreadSuspended() {
+    assert EventQueue.isDispatchThread();
     try {
       _dumpVariablesIntoInterpreterAndSwitch();
       _switchToSuspendedThread();
     }
-    catch(DebugException de) {
-      throw new UnexpectedException(de);
-    }
+    catch(DebugException de) { throw new UnexpectedException(de); }
   }
   
   /** Calls the real switchToSuspendedThread, telling it to updateWatches. This is what is usually called. */
@@ -1377,9 +1405,7 @@ public class JPDADebugger implements Debugger {
     _notifier.currThreadSet(new JPDAThreadData(currThread));
     
     try {
-      if (currThread.frameCount() > 0) {
-        scrollToSource(currThread.frame(0).location());
-      }
+      if (currThread.frameCount() > 0) scrollToSource(currThread.frame(0).location());
     }
     catch (IncompatibleThreadStateException itse) {
       throw new UnexpectedException(itse);
@@ -1470,7 +1496,7 @@ public class JPDADebugger implements Debugger {
     */
   private void _currThreadResumed() throws DebugException {
     _log.log(this + " is executing _currThreadResumed()");
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.currThreadResumed(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.currThreadResumed(); } });
   }
   
   /** Switches the current interpreter to the one corresponding to threadRef.  Assumes lock on this is already held.
@@ -1484,13 +1510,16 @@ public class JPDADebugger implements Debugger {
   
   /** Not synchronized because invokeLater is asynchronous. */
   void threadStarted() {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.threadStarted(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadStarted(); } });
   }
   
   /** Notifies all listeners that the current thread has died.  updateThreads is set to true if the threads and stack
     * tables need to be updated, false if there are no suspended threads
     */
-  synchronized void currThreadDied() throws DebugException {
+  /* synchronized */ void currThreadDied() throws DebugException {
+    assert EventQueue.isDispatchThread();
+//    Utilities.invokeLater(new Runnable() {
+//      public void run() {
     printMessage("The current thread has finished.");
     _runningThread = null;
     
@@ -1512,28 +1541,30 @@ public class JPDADebugger implements Debugger {
       // there are suspended threads on the stack
       _switchToSuspendedThread();
     }
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.currThreadDied(); } });
+    _notifier.currThreadDied();
+//      }
+//    });
   }
   
   void nonCurrThreadDied() {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonCurrThreadDied(); } }); 
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.nonCurrThreadDied(); } }); 
   }
   
   /** Notifies all listeners that the debugger has shut down. updateThreads is set to true if the threads and stack 
     * tables need to be updated, false if there are no suspended threads
     */
   void notifyDebuggerShutdown() {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.debuggerShutdown(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.debuggerShutdown(); } });
   }
   
   /** Notifies all listeners that the debugger has started. */
   void notifyDebuggerStarted() {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.debuggerStarted(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.debuggerStarted(); } });
   }
   
   /** Notifies all listeners that a step has been requested. */
   void notifyStepRequested() {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.stepRequested(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.stepRequested(); } });
   }
   
   /** Invoke the given method, and handle any errors that may arise.  Note that the result
@@ -1658,5 +1689,4 @@ public class JPDADebugger implements Debugger {
     
     public boolean isEmpty() { return empty(); }
   }
-  
 }

@@ -62,9 +62,6 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /** Sets whether to allow private access. */
   public void setPrivateAccessible(boolean allow) throws RemoteException;
   
-  
-  
-  
   /** Adds a named Interpreter to the list.
    * @param name the unique name for the interpreter
    * @throws IllegalArgumentException if the name is not unique

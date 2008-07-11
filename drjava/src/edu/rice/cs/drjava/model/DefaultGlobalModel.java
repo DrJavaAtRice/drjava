@@ -523,9 +523,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           // prevent listener from running twice
           // Restart debugger if it was previously enabled and is now off
           if (wasDebuggerEnabled && (! getDebugger().isReady())) {
+//            System.err.println("Trying to start debugger");
             try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
           }
-          
           // Load the proper text into the interactions document
           iDoc.clearCurrentInput();
           iDoc.append("java " + className, null);

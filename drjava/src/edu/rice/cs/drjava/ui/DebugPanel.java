@@ -552,12 +552,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   private void _selectCurrentThread() {
     if (_threadInPopup.isSuspended()) {
-      try {
-        _debugger.setCurrentThread(_threadInPopup);
-      }
-      catch(DebugException de) {
-        _frame._showDebugError(de);
-      }
+      try { _debugger.setCurrentThread(_threadInPopup); }
+      catch(DebugException de) { _frame._showDebugError(de); }
     }
   }
 

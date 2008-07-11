@@ -44,6 +44,8 @@ import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
+import java.awt.EventQueue;
+import java.io.*;
 import java.util.Vector;
 import java.util.List;
 import javax.swing.text.BadLocationException;
@@ -67,6 +69,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     throws DebugException {
     
     super(manager, doc, offset);
+    assert EventQueue.isDispatchThread();
     _doc = doc;
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
@@ -76,9 +79,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
       _startPos = doc.createPosition(doc._getLineStartPos(offset));
       _endPos = doc.createPosition(doc._getLineEndPos(offset));
     }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
     
     if ((_manager != null) && (_manager.isReady())) {
       // the debugger is on, so initialize now
@@ -118,9 +119,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
         _requests.add(request);
       }
     }
-    catch (AbsentInformationException aie) {
-      throw new DebugException("Could not find line number: " + aie);
-    }
+    catch (AbsentInformationException aie) { throw new DebugException("Could not find line number: " + aie); }
   }
   
   /** Accessor for the offset of this breakpoint's start position
@@ -182,6 +181,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled) {
+    assert EventQueue.isDispatchThread();
     boolean old = _isEnabled;
     super.setEnabled(isEnabled);
     try {

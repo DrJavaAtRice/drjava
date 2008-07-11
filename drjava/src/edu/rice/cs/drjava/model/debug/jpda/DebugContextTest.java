@@ -107,14 +107,14 @@ public final class DebugContextTest extends JPDADebugTestCase {
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // doesn't fire
 
-    synchronized(_debugger) {
+//    synchronized(_debugger) {
       // Add _tempDir to our sourcepath
       Utilities.invokeAndWait(new Runnable() { 
         public void run() { 
           DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
         }
       });
-    }
+//    }
 
     // Step to next line
     synchronized(_notifierLock) {

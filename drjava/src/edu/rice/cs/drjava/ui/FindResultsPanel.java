@@ -203,7 +203,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     // find the first available color, or choose "None"
     int smallestIndex = 0;
     int smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
-    for(_lastIndex=0; _lastIndex<OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
+    for(_lastIndex = 0; _lastIndex<OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
       if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex]<smallestUsage) {
         smallestIndex = _lastIndex;
         smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];

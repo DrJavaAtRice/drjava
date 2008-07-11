@@ -356,16 +356,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Runs the JUnit test suite already cached in the Interpreter JVM.
     * @return false if no test suite is cached; true otherwise
     */
-  public boolean runTestSuite() throws RemoteException {
-    return _interpreterJVM().runTestSuite();
+  public boolean runTestSuite() throws RemoteException { 
+//    System.err.println("Calling _interpreterJVM().runTestSuite()");
+    return _interpreterJVM().runTestSuite(); 
   }
   
   /** Called if JUnit is invoked on a non TestCase class.  Forwards from the other JVM to the local JUnit model.
     * @param isTestAll whether or not it was a use of the test all button
     */
-  public void nonTestCase(boolean isTestAll) throws RemoteException {
-    _junitModel.nonTestCase(isTestAll);
-  }
+  public void nonTestCase(boolean isTestAll) throws RemoteException { _junitModel.nonTestCase(isTestAll); }
   
   /** Called if the slave JVM encounters an illegal class file in testing.  Forwards from
     * the other JVM to the local JUnit model.

@@ -83,18 +83,7 @@ public abstract class AbstractDJPane extends JTextPane
       * document--not any GUI classes.
       * @param e the event fired by the caret position change
       */
-    public void caretUpdate(CaretEvent e) { 
-      
-      DJDocument doc = getDJDocument();  // The Swing Document interface has no provision for synchronization
-//      if (doc.indentInProgress()) return;
-//      doc.acquireReadLock();
-//      try { 
-//      synchronized(doc.getReduced()) { 
-        matchUpdate(e.getDot()); 
-//      } 
-//      }
-//      finally { doc.releaseReadLock(); }
-    }
+    public void caretUpdate(CaretEvent e) { matchUpdate(e.getDot()); }
   };
   
   

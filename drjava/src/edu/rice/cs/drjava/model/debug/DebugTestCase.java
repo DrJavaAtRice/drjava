@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.debug;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.io.*;
 
@@ -357,7 +359,12 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   
   /** Sets the current debugger thread to the specified thread t.*/
   protected void _doSetCurrentThread(final DebugThreadData t) throws DebugException {
-    _debugger.setCurrentThread(t);
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { 
+        try {_debugger.setCurrentThread(t); }
+        catch(DebugException e) { throw new UnexpectedException(e); }
+      } 
+    });
   }
   
   /** Resumes the debugger asynchronously so as to avoid getting notified before we start waiting for notifies. */

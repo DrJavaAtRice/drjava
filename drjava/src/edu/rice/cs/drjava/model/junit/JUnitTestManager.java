@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.tuple.Pair;
@@ -127,16 +128,18 @@ public class JUnitTestManager {
     return _testClassNames;
   }
   
-  /** Runs the pending test suite set up by the preceding call to findTestClasses
+  /** Runs the pending test suite set up by the preceding call to findTestClasses.  Runs in a single auxiliary thread,
+    * so no need for explicit synchronization.
     * @return false if no test suite (even an empty one) has been set up
     */
   public /* synchronized */ boolean runTestSuite() {
     
     if (_testClassNames == null || _testClassNames.isEmpty()) return false;
     
-//    new ScrollableDialog(null, "runTestSuite() in SlaveJVM called", "", "").show();
+//    Utilities.show("runTestSuite() in SlaveJVM called");
     
     try {
+//      System.err.println("Calling _testRunner.runSuite(...)");
       TestResult result = _testRunner.runSuite(_suite);
       
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];

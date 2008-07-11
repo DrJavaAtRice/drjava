@@ -75,9 +75,6 @@ public class ErrorCaretListener implements CaretListener {
   
   /** Update the highlight appropriately. */
   public void updateHighlight(final int curPos) {
-//    assert EventQueue.isDispatchThread();  // violated during undo in DefinitionsPaneTest
-//    Utilities.invokeLater(new Runnable() { 
-//      public void run() { 
     ErrorPanel panel = _frame.getSelectedErrorPanel();
     if (panel == null) {
       // no error panel is currently selected
@@ -85,7 +82,7 @@ public class ErrorCaretListener implements CaretListener {
     }
     CompilerErrorModel model =  panel.getErrorModel();
     
-    if (!model.hasErrorsWithPositions(_openDoc)) return;
+    if (! model.hasErrorsWithPositions(_openDoc)) return;
     
 //    Utilities.showDebug("ErrorCaretListener.updateHighlight invoked");
     

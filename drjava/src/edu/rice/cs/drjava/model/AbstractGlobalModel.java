@@ -173,7 +173,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", true);
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -1044,23 +1044,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Toogle the specified bookmark in the active document.
     * @param pos1 first selection position
     * @param pos2 second selection position */
-  public void toggleBookmark(int pos1, int pos2) { 
-//    final OpenDefinitionsDocument doc = getActiveDocument();
-//    doc.acquireReadLock();
-//    try { 
-      _toggleBookmark(pos1, pos2); 
-//    }
-//    finally { doc.releaseReadLock(); }
-  }
+  public void toggleBookmark(int pos1, int pos2) { _toggleBookmark(pos1, pos2); }
   
   /** Raw version of toggleBookmark.  ASSUMES that read lock is already held
     * @param pos1 first selection position
     * @param pos2 second selection position */
   public void _toggleBookmark(int pos1, int pos2) {
 //    Utilities.show("AGM.toggleBookmark called");
-    final OpenDefinitionsDocument doc = getActiveDocument();
-//    assert doc.isReadLocked();
+    assert EventQueue.isDispatchThread();
     
+    final OpenDefinitionsDocument doc = getActiveDocument();
+
     int startSel = Math.min(pos1, pos2);
     int endSel = Math.max(pos1, pos2);
     try {

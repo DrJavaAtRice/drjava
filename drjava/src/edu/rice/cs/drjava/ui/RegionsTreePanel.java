@@ -320,13 +320,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
-  protected void performDefaultAction() {
-  }
+  protected void performDefaultAction() { }
   
   /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JComponent[] makeButtons() {        
-    return new JComponent[0];    
-  }
+  protected JComponent[] makeButtons() {  return new JComponent[0];  }
   
   /** Creates the buttons for controlling the regions. */
   private void _setupButtonPanel() {
@@ -399,7 +396,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   /** Go to region. */
   protected void goToRegion() {
     ArrayList<R> r = getSelectedRegions();
-    if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
+    if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), true);
   }
   
   /** Add a region to the tree. Must be executed in event thread.

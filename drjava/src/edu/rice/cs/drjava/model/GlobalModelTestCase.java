@@ -72,7 +72,7 @@ import java.util.List;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  protected static final Log _log  = new Log("GlobalModel.txt", false);
+  protected static final Log _log  = new Log("GlobalModel.txt", true);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -129,6 +129,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
     _log.log("Tearing down " + this);
+//    System.err.println("Tearing down " + this);
     _model.dispose();
 
     /*boolean ret =*/ IOUtil.deleteOnExitRecursively(_tempDir);
@@ -139,6 +140,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     super.tearDown();
     _log.log("Completed tear down of " + this);
+//    System.err.println("Completed tear down of " + this);
   }
 
   /** Clear all old text and insert the given text. */

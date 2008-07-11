@@ -411,20 +411,20 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
     Utilities.clearEventQueue();
-    System.err.println("Interaction is '" + doc.getCurrentInteraction() + "'");
+//    System.err.println("Interaction is '" + doc.getCurrentInteraction() + "'");
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Should have no more previous
     assertFalse("Should have no previous", ism.hasPrevInteraction());
     
-    System.err.println("Current interaction for line 428 is " + doc.getCurrentInteraction());
-    System.err.println("line1 = '" + line1 + "'");
+//    System.err.println("Current interaction for line 428 is " + doc.getCurrentInteraction());
+//    System.err.println("line1 = '" + line1 + "'");
     model._logInteractionStart();
     // Now execute the first interaction
     Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction();  } });
     model._waitInteractionDone();
 
-    System.err.println("model.toEval = '" + model.toEval + "'");
+//    System.err.println("model.toEval = '" + model.toEval + "'");
       
     assertEquals("Should have \"executed\" the first interaction.", line1, model.toEval);
     
@@ -541,7 +541,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     /** Sets toEval field and simulates successful interpretation. */
     protected void _interpret(String toEval) {
-      System.err.println("interpret setting toEval to " + toEval);
+//      System.err.println("interpret setting toEval to " + toEval);
       this.toEval = toEval; 
       replReturnedVoid(); // imitate completed call
     }
@@ -600,7 +600,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     /** Simulates a syntax error in interpretation. */
     protected void _interpret(String toEval) {
-      System.err.println("interpret setting toEval to " + toEval);
+//      System.err.println("interpret setting toEval to " + toEval);
       this.toEval = toEval; 
       if (errorPresent) replReturnedSyntaxError(errorString1, errorString2, -1, -1, -1, -1); // imitate return with syntax error
       else replReturnedVoid();  // imitate successful return
