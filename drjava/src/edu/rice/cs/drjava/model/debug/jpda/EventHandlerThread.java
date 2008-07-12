@@ -65,7 +65,7 @@ public class EventHandlerThread extends Thread {
   private volatile boolean _connected;
   
   /** A log for recording messages in a file. */
-  private static final Log _log = new Log("GlobalModel.txt", true);
+  private static final Log _log = new Log("GlobalModel.txt", false);
   
   /** Creates a new EventHandlerThread to listen to events from the given debugger and virtual machine.  Calling
     * this Thread's start() method causes it to begin listenting.

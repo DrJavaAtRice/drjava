@@ -59,7 +59,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   private static Log _log = new Log("MasterSlave.txt", false);
   
   /** Whether or not to print debugging output. */
-  static final boolean printMessages = true;
+  static final boolean printMessages = false;
   
   private static final String ELSPETH_ERROR_TEXT = 
     "import junit.framework.TestCase;" +
@@ -415,7 +415,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   // Commented out because MultiThreadedTestCase objects to the RemoteException thrown by auxiliary unit testing thread
   // after resetInteractions kills the slave JVM.
   /** Tests that an infinite loop in a test case can be aborted by clicking the Reset button. */
-  public void xtestInfiniteLoop() throws Exception {
+  public void testInfiniteLoop() throws Exception {
     if (printMessages) System.out.println("----testInfiniteLoop-----");
 //    Utilities.show("Running testInfiniteLoop");
     
@@ -452,7 +452,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //      System.err.println("Starting JUnit");
       doc.startJUnit();
       listener.waitJUnitDone();
-      fail("slave JVM should throw an exception because testing is interrupted by resetting interactions");
+      // auxiliary thread silently swallows the exception and terminates.
+//      fail("slave JVM should throw an exception because testing is interrupted by resetting interactions");
     }
     catch (Exception e) { /* Expected behavior for this test */ }
 
@@ -463,7 +464,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.out.println("after test");
     listener.assertJUnitStartCount(1);
     _model.removeListener(listener);
-    listener.assertJUnitEndCount(1);
+    listener.assertJUnitEndCount(0);  // Testing was aborted before test end
 //    System.err.println("Reached Test End");
     _log.log("testInfiniteLoop completed");
   }

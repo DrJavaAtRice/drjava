@@ -86,7 +86,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class JPDADebugger implements Debugger {
   
   /** A log for recording messages in a file. */
-  private static final Log _log = new Log("GlobalModel.txt", true);
+  private static final Log _log = new Log("GlobalModel.txt", false);
   
   private static final int OBJECT_COLLECTED_TRIES = 5;
   

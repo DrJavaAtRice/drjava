@@ -285,7 +285,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
     * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
-  private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
+  private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
     
     File buildDir = _model.getBuildDirectory();
 //    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
@@ -461,18 +461,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             try {
 //              Utilities.show("Starting JUnit");
               _notifier.junitStarted(); 
-              _jvm.runTestSuite();
+              boolean testsPresent = _jvm.runTestSuite();  // The false boolean return value could be changed to an exception.
+              if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
             }
-            catch(RemoteException e) { 
-              /* System.err.println("Caught " + e); */
-              throw new UnexpectedException(e); 
+            catch(RemoteException e) { // Unit testing was aborted; cleanup
+              EventQueue.invokeLater(new Runnable() { public void run() { nonTestCase(allTests); } });
             }
           }
         }).start();
       }
       catch(Exception e) {
-        // Probably a java.rmi.UnmarshalException caused by the interruption of unit testing.
-        // Swallow the exception and proceed.
         _notifier.junitEnded();  // balances junitStarted()
         _testInProgress = false;
         throw new UnexpectedException(e);
