@@ -153,14 +153,7 @@ public class FindReplaceMachine {
   
   public void setFirstDoc(OpenDefinitionsDocument firstDoc) { _firstDoc = firstDoc; }
   
-  public void setPosition(int pos) {
-//    System.err.println("Setting position " + pos + " in doc [" + _doc.getText() + "]");
-//    assert (pos >= 0) && (pos <= _doc.getLength());
-    //try { //_current = _doc.createPosition(pos);
-    _current = pos;
-    //}
-    //catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-  }
+  public void setPosition(int pos) { _current = pos; }
   
   /** Gets the character offset to which this machine is currently pointing. */
   public int getCurrentOffset() { //return _current.getOffset(); 

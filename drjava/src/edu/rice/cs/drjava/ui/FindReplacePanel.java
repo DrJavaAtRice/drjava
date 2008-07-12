@@ -752,12 +752,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
   }
   
-  /** Perfroms the "find next" command.  Package visibility to accommodate calls from MainFrame. */
+  /** Performs the "find next" command.  Package visibility to accommodate calls from MainFrame. */
   void findNext() {
     _frame.updateStatusField("Finding Next");
     _machine.setSearchBackwards(false);
     _findLabelBot.setText("Next");
-    _doFind();
+    _doFind();  // updates position stored in machine before starting
   }
   
   /** Called when user the activates "find previous" command.  Package visibility to accommodate calls from MainFrame. */
@@ -836,7 +836,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     if (_findField.getText().length() > 0) {
       
       
-//      _updateMachine();
+      _updateMachine();
       final String findWord = _findField.getText();
       _machine.setFindWord(findWord);
       _machine.setReplaceWord(_replaceField.getText());

@@ -110,9 +110,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
   /** Ensures that Histories are bound to 500 entries. */
   public void testHistoryIsBounded() {
-    int maxLength = 500;
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength));
-
+    final int maxLength = 500;
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength)); }
+    });
+    Utilities.clearEventQueue();
+    
     int i;
     for (i = 0; i < maxLength + 100; i++) {
       _history.add("testing " + i);
@@ -128,11 +131,11 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   /** Tests that the history size can be updated, both through the config framework and the setMaxSize method.
    */
   public void testLiveUpdateOfHistoryMaxSize() {
-    int maxLength = 20;
-    FileConfiguration config = DrJava.getConfig();
-    config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
-    
-    Utilities.clearEventQueue();
+    final int maxLength = 20;
+    final FileConfiguration config = DrJava.getConfig();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20)); }
+    });
     Utilities.clearEventQueue();
 
     for (int i = 0; i < maxLength; i++) {
@@ -143,7 +146,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     
 //    System.err.println("Setting HISTORY_MAX_SIZE to 10");
 
-    config.setSetting(HISTORY_MAX_SIZE, 10);
+    Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
     Utilities.clearEventQueue();
     
     assertEquals("History size should be 10", 10, _history.size());
@@ -154,7 +157,9 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.setMaxSize(0);
     assertEquals("History size should be 0", 0, _history.size());
 
-    config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(-1));
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(-1)); }
+    });
 
     Utilities.clearEventQueue();
     assertEquals("History size should still be 0", 0, _history.size());
@@ -162,9 +167,11 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
   /** Tests the getHistoryAsString() method. */
   public void testGetHistoryAsString() {
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20));
-
+    final FileConfiguration config = DrJava.getConfig();
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
     Utilities.clearEventQueue();
+
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());
 
     String newLine = StringOps.EOL;
