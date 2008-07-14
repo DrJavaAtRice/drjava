@@ -8561,7 +8561,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             // the interaction ended and there was an error
             // check that this error is different than the last one (second to last may be null):
             final String secondToLastError = im.getSecondToLastError();
-            if ((secondToLastError!=null) &&
+            if ((secondToLastError!=null) ||
                 (!lastError.equals(secondToLastError))) {
               // this aborts the auto-importing if the same class comes up twice in a row
               if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
