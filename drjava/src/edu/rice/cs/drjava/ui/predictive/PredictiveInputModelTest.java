@@ -1070,4 +1070,37 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals("[^F].*F.*", pim.getMask());
     assertEquals(1, pim.getMatchingItems().size());
   }
+
+  public void testFragmentLineNumStrategy() {
+    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
+                                                                        new PredictiveInputModel.FragmentLineNumStrategy<String>(),
+                                                                        "Frame",
+                                                                        "JFrame",
+                                                                        "Window",
+                                                                        "JWindow",
+                                                                        "Test");
+    pim.setMask("");
+    assertEquals(5, pim.getMatchingItems().size());
+    assertTrue(pim.getMatchingItems().contains("Frame"));
+    assertTrue(pim.getMatchingItems().contains("JFrame"));
+    assertTrue(pim.getMatchingItems().contains("Window"));
+    assertTrue(pim.getMatchingItems().contains("JWindow"));
+    assertTrue(pim.getMatchingItems().contains("Test"));
+
+    pim.setMask("f");
+    assertEquals(2, pim.getMatchingItems().size());
+    assertTrue(pim.getMatchingItems().contains("Frame"));
+    assertTrue(pim.getMatchingItems().contains("JFrame"));
+  }
+
+  public void testJavaAPIFragmentLineNumStrategy() {
+    final String base = edu.rice.cs.drjava.DrJava.
+      getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVADOC_1_5_LINK) + "/";
+    final String stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
+    final String suffix = "/allclasses-1.5.html";
+    List<edu.rice.cs.drjava.ui.MainFrame.JavaAPIListEntry> l = edu.rice.cs.drjava.ui.MainFrame._generateJavaAPIList(base,
+                                                                                                                    stripPrefix,
+                                                                                                                    suffix);
+    assertTrue(l.size()>0);
+  }
 }

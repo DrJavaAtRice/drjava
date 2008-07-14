@@ -1469,7 +1469,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Wrapper class for the "Open Javadoc" and "Auto Import" dialog list entries.
     * Provides the ability to have the same class name in there multiple times in different packages.
     */
-  private static class JavaAPIListEntry extends ClassNameAndPackageEntry {
+  public static class JavaAPIListEntry extends ClassNameAndPackageEntry {
     private final String str, fullStr;
     private final URL url;
     public JavaAPIListEntry(String s, String full, URL u) {
@@ -1560,6 +1560,50 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       generateJavaAPIList();
     }
   }
+
+  /** Generate Java API class list. */
+  public static List<JavaAPIListEntry> _generateJavaAPIList(String base,
+                                                            String stripPrefix,
+                                                            String suffix) {
+    // TODO: put this in an AsyncTask
+    List<JavaAPIListEntry> l = new ArrayList<JavaAPIListEntry>();
+    try {
+      URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
+      InputStream urls = url.openStream();
+      InputStreamReader is = null;
+      BufferedReader br = null;
+      try {
+        is = new InputStreamReader(urls);
+        br = new BufferedReader(is);
+        String line = br.readLine();
+        while(line != null) {
+          final String aText = "<a href=\"";
+          int aPos = line.toLowerCase().indexOf(aText);
+          int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
+          if ((aPos>=0) && (aEndPos>=0)) {
+            String link = line.substring(aPos+aText.length(), aEndPos);
+            String fullClassName = link.substring(stripPrefix.length()).replace('/', '.');
+            String simpleClassName = fullClassName;
+            int lastDot = fullClassName.lastIndexOf('.');
+            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
+            try {
+              URL pageURL = new URL(base + link + ".html");
+              l.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
+            }
+            catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+          }
+          line = br.readLine();
+        }
+      }
+      finally {
+        if (br!=null) { br.close(); }
+        if (is!=null) { is.close(); }
+        if (urls!=null) { urls.close(); }
+      }
+    }
+    catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }
+    return l;
+  }
   
   /** Generate Java API class list. */
   public void generateJavaAPIList() {
@@ -1618,43 +1662,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // no valid Javadoc URL
         return;
       }
-      // TODO: put this in an AsyncTask
-      try {
-        _javaAPIList = new ArrayList<JavaAPIListEntry>();
-        URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
-        InputStream urls = url.openStream();
-        InputStreamReader is = null;
-        BufferedReader br = null;
-        try {
-          is = new InputStreamReader(urls);
-          br = new BufferedReader(is);
-          String line = br.readLine();
-          while(line != null) {
-            final String aText = "<a href=\"";
-            int aPos = line.toLowerCase().indexOf(aText);
-            int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
-            if ((aPos>=0) && (aEndPos>=0)) {
-              String link = line.substring(aPos+aText.length(), aEndPos);
-              String fullClassName = link.substring(stripPrefix.length()).replace('/', '.');
-              String simpleClassName = fullClassName;
-              int lastDot = fullClassName.lastIndexOf('.');
-              if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
-              try {
-                URL pageURL = new URL(base + link + ".html");
-                _javaAPIList.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
-              }
-              catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
-            }
-            line = br.readLine();
-          }
-        }
-        finally {
-          if (br!=null) { br.close(); }
-          if (is!=null) { is.close(); }
-          if (urls!=null) { urls.close(); }
-        }
-      }
-      catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }
+      _javaAPIList = _generateJavaAPIList(base, stripPrefix, suffix);
       if (_javaAPIList.size()==0) { _javaAPIList = null; }
     }
   }

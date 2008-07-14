@@ -684,6 +684,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     if (vis) {
       edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
       setOwnerEnabled(false);
+      selectStrategy();
       _textField.requestFocus();
       toFront();
     }
