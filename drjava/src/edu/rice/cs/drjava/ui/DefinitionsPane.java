@@ -139,7 +139,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
   
-  /** Updates match highlights.  Only runs in the event thread except in some unit tests. Should it acquireReadLock? */
+  /** Updates match highlights.  Only runs in the event thread except in some unit tests. */
   protected void matchUpdate(int offset) { 
     _doc.setCurrentLocation(offset);  
     _removePreviousHighlight();

@@ -97,16 +97,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   public void tearDown() throws Exception {
-    super.tearDown();
-//    Utilities.invokeAndWait(new Runnable() {
+//    Utilities.invokeLater(new Runnable() {
 //      public void run() {
-    _frame.dispose();             // disposes GUI elements of _frame
-    _frame.getModel().dispose();  // explicitly kills the slave JVM
-    _frame = null;
+        _frame.dispose();             // disposes GUI elements of _frame
+        _frame.getModel().dispose();  // explicitly kills the slave JVM
+        _frame = null;
+        /* try { */ MainFrameTest.super.tearDown(); /* } */
+//        catch(Exception e) { throw new UnexpectedException(e); }
 //      }
 //    });
-//    
-    
   }
   
   JButton _but;
@@ -125,19 +124,25 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testCreateManualToobarButton completed");
   }
   
-  /** Tests that the current location of a document is equal to the caret location after documents are switched. */
+  /** Tests that the current location of a document is equal to the caret Position after switching to another document and back. */
   public void testDocLocationAfterSwitch() throws BadLocationException {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
-    doc.insertString(0, "abcd", null);
-    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(3); } }); 
-    Utilities.clearEventQueue();  // Empty the event queue of any asynchronous tasks
+    final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
+    setDocText(doc.getDocument(), "abcd");
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        doc.setCurrentLocation(3); 
+        pane.setCaretPosition(3);  // The caret is not affected by setCurrentLocation
+      } 
+    }); 
     
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
+    assertEquals("Location of cursor in old document", 3, pane.getCaretPosition());
     
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
     final OpenDefinitionsDocument oldDoc = doc;
+    final DefinitionsPane oldPane = pane;
     final OpenDefinitionsDocument newDoc = model.newFile();
     
     // Current pane should be new doc, pos 0
@@ -150,13 +155,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     // Switch back to old document
     model.setActiveNextDocument(); 
+    Utilities.clearEventQueue();
     assertEquals("Next active doc", oldDoc, model.getActiveDocument());
-    
+
+   
     // Current pane should be old doc, pos 3
     curPane = _frame.getCurrentDefPane();
     curDoc = curPane.getOpenDefDocument();//.getDocument();
+    assertEquals("Next active pane", oldPane, curPane);
     assertEquals("Current document is old document", oldDoc, curDoc);
-    assertEquals("Location of old document", 3, curDoc.getCurrentLocation());
+    assertEquals("Location of caret in old document", 3, curPane.getCaretPosition());
     _log.log("testDocLocationAfterSwitch completed");
   }
   

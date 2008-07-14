@@ -49,6 +49,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
 import java.awt.dnd.*;
 import java.awt.datatransfer.*;
 import edu.rice.cs.drjava.DrJavaRoot;
@@ -83,7 +84,18 @@ public abstract class AbstractDJPane extends JTextPane
       * document--not any GUI classes.
       * @param e the event fired by the caret position change
       */
-    public void caretUpdate(CaretEvent e) { matchUpdate(e.getDot()); }
+    public void caretUpdate(CaretEvent ce) { 
+      _removePreviousHighlight();
+      
+      int offset = ce.getDot();
+      if (offset < 1) return;
+      DJDocument doc = getDJDocument();
+      try { 
+        char prevChar = doc.getText(offset - 1, 1).charAt(0);
+        if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);  
+      }
+      catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
+    }
   };
   
   

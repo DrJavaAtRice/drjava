@@ -162,8 +162,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetting(); } });
   }
   
-  /** In the event thread, notifies listeners that the interpreter is ready. */
-  public void _notifyInterpreterReady(final File wd) { 
+  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
+    * thread. */
+  public void _notifyInterpreterReady(final File wd) {  
 //    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }

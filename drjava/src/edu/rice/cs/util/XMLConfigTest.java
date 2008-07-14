@@ -138,65 +138,76 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar", "abc");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set("foo/fum", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <fum>def</fum>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"  <fum>def</fum>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("foo/fum"));
   }
   public void testSetNodeOverwrite() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar", "abc");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set("foo/bar", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+ "<foo>"+NL+
+                             "  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("foo/bar"));
     
     xc.set("foo", "xyz");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>xyz</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>xyz</foo>"+NL),
+                 xc.toString());
     assertEquals("xyz", xc.get("foo"));
   }
   public void testSetAttrFromEmpty() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo.bar", "abc");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+
+                             "<foo bar=\"abc\"/>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo.bar"));
     
     xc.set("foo/fum.fee", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\">"+NL+"  <fum fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+
+                             "<foo bar=\"abc\">"+NL+"  <fum fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("foo/fum.fee"));
   }
   public void testSetAttrOverwrite() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo.bar", "abc");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+
+                             "<foo bar=\"abc\"/>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo.bar"));
     
     xc.set("foo.bar", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"def\"/>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+
+                             "<foo bar=\"def\"/>"+NL), xc.toString());
     assertEquals("def", xc.get("foo.bar"));
   }
   public void testSetNodeNoOverwrite() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar", "abc", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set("foo/bar", "def", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
     List<String> r = xc.getMultiple("foo/bar");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
@@ -206,12 +217,14 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar.fee", "abc", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar fee=\"abc\"/>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar.fee"));
     
     xc.set("foo/bar.fee", "def", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"  <bar fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar fee=\"abc\"/>"+NL+"  <bar fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
     List<String> r = xc.getMultiple("foo/bar.fee");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
@@ -221,22 +234,26 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = new XMLConfig();
     Node n = xc.set("foo/bar", "abc", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set(".fuz", "def", n, false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar fuz=\"def\">abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     n = xc.set("fum", "", n.getParentNode(), false);
     
     if (System.getProperty("java.version").startsWith("1.5")) {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum></fum>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL+"  <fum></fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     else {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum/>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL+"  <fum/>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     assertEquals("", xc.get("foo/fum"));
@@ -245,13 +262,17 @@ public class XMLConfigTest extends TestCase {
     xc.set("file", "test2.txt", n, false);
     
     if (System.getProperty("java.version").startsWith("1.5")) {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
-                                 + "  <fum><file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL
+                                 + "  <fum><file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+
+                               "  </fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     else {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
-                                 + "  <fum>"+NL+"    <file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>" + NL +
+                               "  <bar fuz=\"def\">abc</bar>" + NL
+                                 + "  <fum>"+NL + "    <file>test1.txt</file>" + NL + "    <file>test2.txt</file>" +
+                               NL+"  </fum>"+NL + "</foo>"+NL),
                    xc.toString());
     }
     List<String> r = xc.getMultiple("foo/fum/file");
@@ -261,36 +282,39 @@ public class XMLConfigTest extends TestCase {
   }
   
   public void testMultipleNodes() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <bar>ghi</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar>abc</bar>\n"
+                                       + "  <bar>ghi</bar>\n"
+                                       + "  <fum fee=\"xyz\">def</fum>\n"
+                                       + "</foo>"));
     List<String> r = xc.getMultiple("foo/bar");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
     assertEquals("ghi", r.get(1));
   }
   public void testMultipleNodesAttr() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar fuz=\"aaa\">abc</bar>\n"
-                                                    + "  <bar fuz=\"bbb\">ghi</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar fuz=\"aaa\">abc</bar>\n"
+                                       + "  <bar fuz=\"bbb\">ghi</bar>\n"
+                                       + "  <fum fee=\"xyz\">def</fum>\n"
+                                       + "</foo>"));
     List<String> r = xc.getMultiple("foo/bar.fuz");
     assertEquals(2, r.size());
     assertEquals("aaa", r.get(0));
     assertEquals("bbb", r.get(1));
   }
   public void testNodesStarEnd() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <bar>ghi</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar>abc</bar>\n"
+                                       + "  <bar>ghi</bar>\n"
+                                       + "  <fum fee=\"xyz\">def</fum>\n"
+                                       + "</foo>"));
     List<String> r = xc.getMultiple("foo/*");
     assertEquals(3, r.size());
     assertEquals("abc", r.get(0));
@@ -298,12 +322,13 @@ public class XMLConfigTest extends TestCase {
     assertEquals("def", r.get(2));
   }
   public void testNodesStarMiddle() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar fee=\"xxx\" fuz=\"aaa\">abc</bar>\n"
-                                                    + "  <bar fee=\"yyy\" fuz=\"bbb\">ghi</bar>\n"
-                                                    + "  <fum fee=\"zzz\" fuz=\"ccc\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar fee=\"xxx\" fuz=\"aaa\">abc</bar>\n"
+                                       + "  <bar fee=\"yyy\" fuz=\"bbb\">ghi</bar>\n"
+                                       + "  <fum fee=\"zzz\" fuz=\"ccc\">def</fum>\n"
+                                       + "</foo>"));
     List<String> r = xc.getMultiple("foo/*.fee");
     assertEquals(3, r.size());
     assertEquals("xxx", r.get(0));
@@ -328,11 +353,12 @@ public class XMLConfigTest extends TestCase {
     assertEquals(3, r.size());
   }
   public void testAttrsStarEnd() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar>abc</bar>\n"
+                                       + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
+                                       + "</foo>"));
     List<String> r = xc.getMultiple("foo.*");
     assertEquals(1, r.size());
     assertEquals("foo.a", r.get(0));
@@ -344,11 +370,12 @@ public class XMLConfigTest extends TestCase {
     assertEquals("zzz", r.get(2));
   }
   public void testNodeStarAttrsStar() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar flubb=\"mno\">abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar flubb=\"mno\">abc</bar>\n"
+                                       + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
+                                       + "</foo>"));
     List<String> r = xc.getMultiple("*.*");
     assertEquals(1, r.size());
     assertEquals("foo.a", r.get(0));
@@ -362,22 +389,23 @@ public class XMLConfigTest extends TestCase {
   }
   
   public void getNodePath1() throws Exception {
-    XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                                    +"  <threadcheck:def>\n"
-                                                    +"    <invariant>\n"
-                                                    +"      <name type=\"only\" value=\"childclass1\"/>\n"
-                                                    +"    </invariant>\n"
-                                                    +"    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                                    +"  </threadcheck:def>\n"
-                                                    +"  <threadcheck:def>\n"
-                                                    +"    <invariant>\n"
-                                                    +"      <name type=\"only\" value=\"childclass-method1\"/>\n"
-                                                    +"    </invariant>\n"
-                                                    +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
-                                                    +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
-                                                    +"  </threadcheck:def>\n"
-                                                    +"</concutest>"));
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +"  <threadcheck:def>\n"
+                                       +"    <invariant>\n"
+                                       +"      <name type=\"only\" value=\"childclass1\"/>\n"
+                                       +"    </invariant>\n"
+                                       +"    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"  </threadcheck:def>\n"
+                                       +"  <threadcheck:def>\n"
+                                       +"    <invariant>\n"
+                                       +"      <name type=\"only\" value=\"childclass-method1\"/>\n"
+                                       +"    </invariant>\n"
+                                       +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
+                                       +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
+                                       +"  </threadcheck:def>\n"
+                                       +"</concutest>"));
     assertEquals("Path of null is wrong", "", XMLConfig.getNodePath(null));
     
     List<Node> roots = xc.getNodes("concutest");
@@ -392,20 +420,25 @@ public class XMLConfigTest extends TestCase {
       List<Node> invs = xc.getNodes("invariant", def);
       Assert.assertEquals(1, invs.size());
       Node inv = invs.get(0);
-      assertEquals("Path of "+inv.getNodeName()+" is wrong", "concutest/threadcheck:def/invariant", XMLConfig.getNodePath(inv));
+      assertEquals("Path of "+inv.getNodeName()+" is wrong", "concutest/threadcheck:def/invariant", 
+                   XMLConfig.getNodePath(inv));
       List<Node> annots = xc.getNodes("*", inv);
       Assert.assertEquals(1, annots.size());
-      assertEquals("Path of "+annots.get(0).getNodeName()+" is wrong", "concutest/threadcheck:def/invariant/name", XMLConfig.getNodePath(annots.get(0)));
+      assertEquals("Path of "+annots.get(0).getNodeName()+" is wrong", "concutest/threadcheck:def/invariant/name", 
+                   XMLConfig.getNodePath(annots.get(0)));
       List<Node> classes = xc.getNodes("class", def);
       List<Node> methods = xc.getNodes("method", def);
-      Assert.assertTrue("There must be at least one class or method per definition", (classes.size()+methods.size()>0));
+      Assert.assertTrue("There must be at least one class or method per definition", 
+                        classes.size() + methods.size() > 0);
       List<Node> all = xc.getNodes("*", def);
       Assert.assertEquals(0, all.size()-invs.size()-classes.size()-methods.size());
       for(Node target: classes) {
-        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/class", XMLConfig.getNodePath(target));
+        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/class", 
+                     XMLConfig.getNodePath(target));
       }
       for(Node target: methods) {
-        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/method", XMLConfig.getNodePath(target));
+        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/method", 
+                     XMLConfig.getNodePath(target));
       }
     }
   }
@@ -487,12 +520,14 @@ public class XMLConfigTest extends TestCase {
     xcParent.set("foo/bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
 
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
     
     xc.set("fum", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <fum>def</fum>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"  <fum>def</fum>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("fum"));
   }
   public void testSetNodeOverwriteDelegate() throws Exception {
@@ -500,17 +535,20 @@ public class XMLConfigTest extends TestCase {
     xcParent.set("foo/bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
 
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
     
     xc.set("bar", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("bar"));
     
     xcParent.set("foo", "xyz");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>xyz</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>xyz</foo>"+NL),
+                 xc.toString());
     assertEquals("xyz", xcParent.get("foo"));
   }
   public void testSetAttrFromEmptyDelegate() throws Exception {
@@ -518,12 +556,14 @@ public class XMLConfigTest extends TestCase {
     xcParent.set("foo.bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));    
 
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL),
+                 xc.toString());
     assertEquals("abc", xc.get(".bar"));
     
     xc.set("fum.fee", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\">"+NL+"  <fum fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\">"+NL+
+                             "  <fum fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("fum.fee"));
   }
   public void testSetAttrOverwriteDelegate() throws Exception {
@@ -531,12 +571,14 @@ public class XMLConfigTest extends TestCase {
     xcParent.set("foo.bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
 
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL),
+                 xc.toString());
     assertEquals("abc", xc.get(".bar"));
     
     xc.set(".bar", "def");
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"def\"/>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"def\"/>"+NL),
+                 xc.toString());
     assertEquals("def", xc.get(".bar"));
   }
   public void testSetNodeNoOverwriteDelegate() throws Exception {
@@ -544,12 +586,14 @@ public class XMLConfigTest extends TestCase {
     xcParent.set("foo/bar", "abc", false);
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
     
     xc.set("bar", "def", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
     List<String> r = xc.getMultiple("bar");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
@@ -560,12 +604,14 @@ public class XMLConfigTest extends TestCase {
     xcParent.set("foo/bar.fee", "abc", false);
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar fee=\"abc\"/>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar.fee"));
     
     xc.set("bar.fee", "def", false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"  <bar fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar fee=\"abc\"/>"+NL+"  <bar fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
     List<String> r = xc.getMultiple("bar.fee");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
@@ -576,22 +622,26 @@ public class XMLConfigTest extends TestCase {
     Node n = xcParent.set("foo/bar", "abc", false);
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
     
     xc.set(".fuz", "def", n, false);
     
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"</foo>"+NL), xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                             "  <bar fuz=\"def\">abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
     
     n = xc.set("fum", "", n.getParentNode(), false);
     
     if (System.getProperty("java.version").startsWith("1.5")) {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum></fum>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL+"  <fum></fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     else {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum/>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL+"  <fum/>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     assertEquals("", xc.get("fum"));
@@ -600,13 +650,17 @@ public class XMLConfigTest extends TestCase {
     xc.set("file", "test2.txt", n, false);
     
     if (System.getProperty("java.version").startsWith("1.5")) {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
-                                 + "  <fum><file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL
+                                 + "  <fum><file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+
+                               NL+"</foo>"+NL),
                    xc.toString());
     }
     else {
-      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
-                                 + "  <fum>"+NL+"    <file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL),
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
+                               "  <bar fuz=\"def\">abc</bar>"+NL
+                                 + "  <fum>"+NL+"    <file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+
+                               "  </fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     List<String> r = xc.getMultiple("fum/file");
@@ -616,12 +670,13 @@ public class XMLConfigTest extends TestCase {
   }
   
   public void testMultipleNodesDelegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <bar>ghi</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar>abc</bar>\n"
+                                       + "  <bar>ghi</bar>\n"
+                                       + "  <fum fee=\"xyz\">def</fum>\n"
+                                       + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     List<String> r = xc.getMultiple("bar");
     assertEquals(2, r.size());
@@ -629,12 +684,12 @@ public class XMLConfigTest extends TestCase {
     assertEquals("ghi", r.get(1));
   }
   public void testMultipleNodesAttrDelegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar fuz=\"aaa\">abc</bar>\n"
-                                                    + "  <bar fuz=\"bbb\">ghi</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar fuz=\"aaa\">abc</bar>\n"
+                                       + "  <bar fuz=\"bbb\">ghi</bar>\n"
+                                       + "  <fum fee=\"xyz\">def</fum>\n"
+                                       + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
 
     List<String> r = xc.getMultiple("bar.fuz");
@@ -643,12 +698,12 @@ public class XMLConfigTest extends TestCase {
     assertEquals("bbb", r.get(1));
   }
   public void testNodesStarEndDelegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <bar>ghi</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar>abc</bar>\n"
+                                       + "  <bar>ghi</bar>\n"
+                                       + "  <fum fee=\"xyz\">def</fum>\n"
+                                       + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     List<String> r = xc.getMultiple("*");
     assertEquals(3, r.size());
@@ -657,12 +712,13 @@ public class XMLConfigTest extends TestCase {
     assertEquals("def", r.get(2));
   }
   public void testNodesStarMiddleDelegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\"><fum>\n"
-                                                    + "  <bar fee=\"xxx\" fuz=\"aaa\">abc</bar>\n"
-                                                    + "  <bar fee=\"yyy\" fuz=\"bbb\">ghi</bar>\n"
-                                                    + "  <fum fee=\"zzz\" fuz=\"ccc\">def</fum>\n"
-                                                    + "</fum></foo>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">" +
+                                     "<fum>\n" 
+                                       + "  <bar fee=\"xxx\" fuz=\"aaa\">abc</bar>\n"
+                                       + "  <bar fee=\"yyy\" fuz=\"bbb\">ghi</bar>\n"
+                                       + "  <fum fee=\"zzz\" fuz=\"ccc\">def</fum>\n"
+                                       + "</fum></foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     List<String> r = xc.getMultiple("fum/*.fee");
     assertEquals(3, r.size());
@@ -679,21 +735,22 @@ public class XMLConfigTest extends TestCase {
     assertEquals("zzz", r.get(4));
     assertEquals("ccc", r.get(5));
     
-    xcParent = new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo><flub>\n"
-                                          + "  <foo/>\n"
-                                          + "  <fee/>\n"
-                                          + "  <fum foz=\"abc\"/>"
-                                          + "</flub></foo>"));
+    xcParent = 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo><flub>\n"
+                                       + "  <foo/>\n"
+                                       + "  <fee/>\n"
+                                       + "  <fum foz=\"abc\"/>"
+                                       + "</flub></foo>"));
     xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     r = xc.getMultiple("flub/*");
     assertEquals(3, r.size());
   }
   public void testAttrsStarEndDelegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
-                                                    + "</foo>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
+                                       + "  <bar>abc</bar>\n"
+                                       + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
+                                       + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     List<String> r = xc.getMultiple(".*");
     assertEquals(1, r.size());
@@ -706,11 +763,12 @@ public class XMLConfigTest extends TestCase {
     assertEquals("zzz", r.get(2));
   }
   public void testNodeStarAttrsStarDelegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><middle><foo a=\"foo.a\">\n"
-                                                    + "  <bar flubb=\"mno\">abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
-                                                    + "</foo></middle>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><middle>" +
+                                     "<foo a=\"foo.a\">\n"
+                                       + "  <bar flubb=\"mno\">abc</bar>\n"
+                                       + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
+                                       + "</foo></middle>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("middle").get(0));
     List<String> r = xc.getMultiple("*.*");
     assertEquals(1, r.size());
@@ -725,22 +783,23 @@ public class XMLConfigTest extends TestCase {
   }
   
   public void getNodePath1Delegate() throws Exception {
-    XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo><concutest>\n"
-                                                    +"  <threadcheck:def>\n"
-                                                    +"    <invariant>\n"
-                                                    +"      <name type=\"only\" value=\"childclass1\"/>\n"
-                                                    +"    </invariant>\n"
-                                                    +"    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                                    +"  </threadcheck:def>\n"
-                                                    +"  <threadcheck:def>\n"
-                                                    +"    <invariant>\n"
-                                                    +"      <name type=\"only\" value=\"childclass-method1\"/>\n"
-                                                    +"    </invariant>\n"
-                                                    +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
-                                                    +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
-                                                    +"  </threadcheck:def>\n"
-                                                    +"</concutest></foo>"));
+    XMLConfig xcParent = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo><concutest>\n"
+                                       +"  <threadcheck:def>\n"
+                                       +"    <invariant>\n"
+                                       +"      <name type=\"only\" value=\"childclass1\"/>\n"
+                                       +"    </invariant>\n"
+                                       +"    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"  </threadcheck:def>\n"
+                                       +"  <threadcheck:def>\n"
+                                       +"    <invariant>\n"
+                                       +"      <name type=\"only\" value=\"childclass-method1\"/>\n"
+                                       +"    </invariant>\n"
+                                       +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
+                                       +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
+                                       +"  </threadcheck:def>\n"
+                                       +"</concutest></foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     assertEquals("Path of null is wrong", "", XMLConfig.getNodePath(null));
     
@@ -756,20 +815,25 @@ public class XMLConfigTest extends TestCase {
       List<Node> invs = xc.getNodes("invariant", def);
       Assert.assertEquals(1, invs.size());
       Node inv = invs.get(0);
-      assertEquals("Path of "+inv.getNodeName()+" is wrong", "concutest/threadcheck:def/invariant", XMLConfig.getNodePath(inv));
+      assertEquals("Path of "+inv.getNodeName()+" is wrong", "concutest/threadcheck:def/invariant", 
+                   XMLConfig.getNodePath(inv));
       List<Node> annots = xc.getNodes("*", inv);
       Assert.assertEquals(1, annots.size());
-      assertEquals("Path of "+annots.get(0).getNodeName()+" is wrong", "concutest/threadcheck:def/invariant/name", XMLConfig.getNodePath(annots.get(0)));
+      assertEquals("Path of "+annots.get(0).getNodeName()+" is wrong", "concutest/threadcheck:def/invariant/name", 
+                   XMLConfig.getNodePath(annots.get(0)));
       List<Node> classes = xc.getNodes("class", def);
       List<Node> methods = xc.getNodes("method", def);
-      Assert.assertTrue("There must be at least one class or method per definition", (classes.size()+methods.size()>0));
+      Assert.assertTrue("There must be at least one class or method per definition", 
+                        classes.size() + methods.size() > 0);
       List<Node> all = xc.getNodes("*", def);
       Assert.assertEquals(0, all.size()-invs.size()-classes.size()-methods.size());
       for(Node target: classes) {
-        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/class", XMLConfig.getNodePath(target));
+        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/class", 
+                     XMLConfig.getNodePath(target));
       }
       for(Node target: methods) {
-        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/method", XMLConfig.getNodePath(target));
+        assertEquals("Path of "+target.getNodeName()+" is wrong", "concutest/threadcheck:def/method", 
+                     XMLConfig.getNodePath(target));
       }
     }
   }

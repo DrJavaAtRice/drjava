@@ -77,9 +77,7 @@ public final class IndentTest extends DrJavaTestCase {
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     _doc = new DefinitionsDocument(_notifier);
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel); } 
-    });
+    setConfigSetting(OptionConstants.INDENT_LEVEL, indentLevel);
   }
   
   /** Builds the suite of tests for Indent.class.
@@ -94,7 +92,11 @@ public final class IndentTest extends DrJavaTestCase {
  
   /** Convenience method that performs _doc._indentLines in the event thread. */
   private void safeIndentLines(final int startSel, final int endSel) {
-    Utilities.invokeAndWait(new Runnable() { public void run() { _doc.indentLines(startSel, endSel); } });
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        _doc.indentLines(startSel, endSel); 
+      } 
+    });
   }
   
   /** Regression test for comment portion of indent tree. */
@@ -1124,17 +1126,25 @@ public final class IndentTest extends DrJavaTestCase {
       "                5}\n" +
       "};\n";
     
-    _doc.insertString(0, text, null);
+    setDocText(_doc, text);
     
     _assertContents(text, _doc);
     safeIndentLines(0, _doc.getLength());
+    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
     _assertContents(indentedBefore, _doc);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, 8);
+//    System.err.println("Changing INDENT_LEVEL option constant to 8");
+    setConfigSetting(OptionConstants.INDENT_LEVEL, 8);
     
     Utilities.clearEventQueue();
     Utilities.clearEventQueue();
 //    System.err.println("level is " + DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL));
+//    System.err.println("doc = " + _doc);
     safeIndentLines(0, _doc.getLength());
+        
+    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
+//    System.err.println("Performing failing assertion");
     _assertContents(indentedAfter, _doc);
   }
   

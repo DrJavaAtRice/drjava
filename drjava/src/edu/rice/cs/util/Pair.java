@@ -52,16 +52,9 @@ import java.io.Serializable;
     _second = second;
   }
 
-  public T getFirst() {
-    return _first;
-  }
+  public T getFirst() { return _first; }
 
-  public U getSecond() {
-    return _second;
-  }
+  public U getSecond() { return _second; }
   
-  public String toString() {
-    return "(" + getFirst().toString() + ", " + getSecond().toString() + ")"; 
-  }
-    
+  public String toString() { return "(" + getFirst().toString() + ", " + getSecond().toString() + ")"; } 
 }

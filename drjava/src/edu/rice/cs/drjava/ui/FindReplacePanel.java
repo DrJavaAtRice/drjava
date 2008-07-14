@@ -663,10 +663,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       
       EventQueue.invokeLater(new Runnable() {
         public void run() {
-          Toolkit.getDefaultToolkit().beep();
+          if (count > 0) _frame.showFindResultsPanel(panel);
+          else { 
+            Toolkit.getDefaultToolkit().beep();
+            panel.freeResources(); 
+          }
           _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
-          if (count>0)  _frame.showFindResultsPanel(panel);
-          else { panel.freeResources(); }
         }
       });
     }
@@ -834,8 +836,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private void _doFind() {
     
     if (_findField.getText().length() > 0) {
-      
-      
+
       _updateMachine();
       final String findWord = _findField.getText();
       _machine.setFindWord(findWord);

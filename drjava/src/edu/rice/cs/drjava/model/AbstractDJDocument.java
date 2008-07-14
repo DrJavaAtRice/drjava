@@ -119,15 +119,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * purposes. */
   protected volatile int _currentLocation = 0;
   
-  /* The fields _queryCache and _offsetToQueries function as an extension of the reduced model.
+  /* The fields _queryCache, _offsetToQueries, and _cacheModified function as an extension of the reduced model.
    * Hence _reduced should be the lock object for operations on these two structures. 
    * This data structure caches calls to the reduced model to speed up indent performance. Must be cleared every time 
    * the document is changed.  Use by calling _checkCache, _storeInCache, and _clearCache.
    */
   private final HashMap<Query, Object> _queryCache;
-  
+
   /** Records the set of queries (as a list) for each offset. */
   private final SortedMap<Integer, List<Query>> _offsetToQueries = new TreeMap<Integer, List<Query>>();
+  
+  /** Records whether the cache has been modified since it was last cleared. */
+  private volatile boolean _cacheModified = false;
   
   /** Initial number of elements in _queryCache. */
   private static final int INIT_CACHE_SIZE = 0x10000;  // 16**4 = 16384 
@@ -160,11 +163,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Constructor used to build a new document with an existing indenter.  Used in tests and super calls from 
-    * Definitions*/
-  protected AbstractDJDocument(Indenter indent) { 
-    _indenter = indent;
+    * DefinitionsDocument and interactions documents. */
+  protected AbstractDJDocument(Indenter indenter) { 
+    _indenter = indenter;
     _queryCache = new HashMap<Query, Object>(INIT_CACHE_SIZE);
     _initNewIndenter();
+//     System.err.println("AbstractDJDocument constructor with indent level " + indenter.getIndentLevel() + " invoked on " + this);
   }
   
   //-------- METHODS ---------//
@@ -193,6 +197,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   protected void _removeIndenter() {
+//    System.err.println("REMOVE INDENTER called");
     DrJava.getConfig().removeOptionListener(INDENT_LEVEL, _listener1);
     DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
@@ -202,16 +207,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     // Create the indenter from the config values
     
     final Indenter indenter = _indenter;
-    
+//    System.err.println("Installing Indent Option Listener for " + this);
     _listener1 = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-        indenter.buildTree(oce.value.intValue());
+//        System.err.println("Changing INDENT_LEVEL for " + this + " to " + oce.value);
+        indenter.buildTree(oce.value);
       }
     };
     
     _listener2 = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
-        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
+//        System.err.println("Reconfiguring indenter to use AUTO_CLOSE_COMMENTS = " + oce.value);
+        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL));
       }
     };
     
@@ -433,27 +440,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   protected abstract void _styleChanged(); 
   
-  /** Clears the memozing cache of queries with offset >= than specified value.  Should be called every time the 
-    * document is modified. */
-  protected void _clearCache(int offset) {
-    if (_queryCache == null) return;
-//    synchronized(_reduced) {
-      if (offset <= 0) {
-        _queryCache.clear();
-        _offsetToQueries.clear();
-        return;
-      }
-      
-      Integer[] deadOffsets = _offsetToQueries.tailMap(offset).keySet().toArray(new Integer[0]);
-      for (int i: deadOffsets) {
-        for (Query query: _offsetToQueries.get(i)) {
-          _queryCache.remove(query);  // remove query entry from cache
-        }
-        _offsetToQueries.remove(i);   // remove query bucket for i from offsetToQueries table
-      }
-//    }
-  }
-  
+
   /** Add a character to the underlying reduced model. ASSUMEs _reduced lock is already held!
     * @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
@@ -955,8 +942,33 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    synchronized(_reduced) {
       _queryCache.put(query, answer);
       _addToOffsetsToQueries(query, offset);
+      _cacheModified = true;
 //    }
   }
+  
+    /** Clears the memozing cache of queries with offset >= than specified value.  Should be called every time the 
+    * document is modified. */
+  protected void _clearCache(int offset) {
+    if (_queryCache == null || ! _cacheModified) return;
+    _cacheModified = false;
+    
+//    synchronized(_reduced) {
+      if (offset <= 0) {
+        _queryCache.clear();
+        _offsetToQueries.clear();
+        return;
+      }
+      
+      Integer[] deadOffsets = _offsetToQueries.tailMap(offset).keySet().toArray(new Integer[0]);
+      for (int i: deadOffsets) {
+        for (Query query: _offsetToQueries.get(i)) {
+          _queryCache.remove(query);  // remove query entry from cache
+        }
+        _offsetToQueries.remove(i);   // remove query bucket for i from offsetToQueries table
+      }
+//    }
+  }
+  
   
   /** Add <query,offset> pair to _offsetToQueries map. Assumes lock on _queryCache is already held. */
   private void _addToOffsetsToQueries(final Query query, final int offset) {

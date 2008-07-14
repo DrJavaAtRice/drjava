@@ -106,28 +106,30 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
-  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title,
-                          String searchString, boolean searchAll, final boolean matchCase,
-                          final boolean wholeWord, final boolean noComments, final boolean noTestCases,
-                          WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
+  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, String title, 
+                          String searchString, boolean searchAll, boolean matchCase, boolean wholeWord, 
+                          boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
+                          FindReplacePanel findReplace) {
     super(frame, title);
-    _regionManager = rm;
-    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
-      public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
-      public void regionChanged(MovingDocumentRegion r) { 
-        regionRemoved(r);
-        regionAdded(r);
-      }
-      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
-    });
+    _regionManager = regionManager;
     _searchString = searchString;
-    _searchAll = searchAll;
-    _matchCase = matchCase;
-    _wholeWord = wholeWord;
-    _noComments = noComments;
-    _noTestCases = noTestCases;
-    _doc = doc;
-    _findReplace = findReplace;
+    _searchAll    = searchAll;
+    _matchCase    = matchCase;
+    _wholeWord    = wholeWord;
+    _noComments   = noComments;
+    _noTestCases  = noTestCases;
+    _doc          = doc;
+    _findReplace  = findReplace;
+    
+    // The following code was moved into rmListener defined in MainFrame
+//    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+//      public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
+//      public void regionChanged(MovingDocumentRegion r) { 
+//        regionRemoved(r);
+//        regionAdded(r);
+//      }
+//      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
+//    });
     
     OptionListener<Color> temp;
     Pair<Option<Color>, OptionListener<Color>> pair;

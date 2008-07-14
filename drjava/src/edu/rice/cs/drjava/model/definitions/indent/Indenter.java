@@ -45,7 +45,12 @@ import edu.rice.cs.drjava.config.OptionConstants;
   */
 public class Indenter {
   
-  public Indenter(int indentLevel) { buildTree(indentLevel); }
+  public Indenter(int indentLevel) { 
+    _indentLevel = indentLevel;
+    buildTree(indentLevel); 
+  }
+  
+  protected int _indentLevel;
   
   /** Enumeration of reasons why indentation may be preformed. */
   public enum IndentReason {
@@ -61,6 +66,8 @@ public class Indenter {
   
   /** Root of decision tree. */
   protected IndentRule _topRule;
+  
+  public int getIndentLevel() { return _indentLevel; }
   
   /** Builds the decision tree for indentation.
     * For now, this method needs to be called every time the size of one indent level is being changed!

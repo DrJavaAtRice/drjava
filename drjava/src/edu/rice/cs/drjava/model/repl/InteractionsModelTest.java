@@ -131,6 +131,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       } 
     });
     Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
     assertEquals("string being interpreted", code, model.toEval);
   }
   

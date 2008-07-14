@@ -36,7 +36,13 @@
 
 package edu.rice.cs.drjava;
 
+import javax.swing.text.BadLocationException;
+
 import junit.framework.TestCase;
+
+import edu.rice.cs.drjava.config.Option;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Test case class for all DrJava test cases. DrJava test cases should extend this class, potentially override setUp()
@@ -65,15 +71,13 @@ public class DrJavaTestCase extends TestCase {
     assert newName != null;
 //    if (newName != null) {
 //      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
-    Utilities.invokeLater(new Runnable() {
+    Utilities.invokeAndWait(new Runnable() {
       public void run() {
         DrJava.setPropertiesFile(newName);  // spawns change updates which should run in event thread
 //        Utilities.clearEventQueue();
         DrJava._initConfig();               // spawns change updates which should run in event thread
-//        Utilities.clearEventQueue();
       }
     });
-//    }
   }
   
   /** Clean up for every test case.  Only used in unit tests.  Added because Windows would intermittently throw
@@ -83,5 +87,23 @@ public class DrJavaTestCase extends TestCase {
   protected void tearDown() throws Exception { 
     DrJava.cleanUp();  
     super.tearDown();
+  }
+
+  protected <T> void setConfigSetting(final Option<T> op, final T value) {
+    Utilities.invokeAndWait(new Runnable() { public void run() { DrJava.getConfig().setSetting(op, value); } });
+  }
+  
+    /** Clears the text of the _doc field and sets it to the given string. */
+  protected static final void setDocText(final AbstractDJDocument doc, final String text) {
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          doc.clear();
+          doc._insertString(0, text, null);
+        }
+        catch(BadLocationException e) { throw new UnexpectedException(e); }
+      }
+    });
+    Utilities.clearEventQueue();  // make sure that all listener actions triggered by this document update have completed
   }
 }

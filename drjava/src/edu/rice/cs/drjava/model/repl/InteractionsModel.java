@@ -738,14 +738,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (! _waitingForFirstInterpreter) {
       Utilities.invokeLater(new Runnable() {
         public void run() {
-//          _document.acquireWriteLock();
-//          try {
           _document.reset(generateBanner(wd));
           _document.setInProgress(false);
           _pane.setCaretPosition(_document.getLength());
-//              _caretInit();
-//          }
-//          finally { _document.releaseWriteLock(); }
           _notifyInterpreterReady(wd);
         }
       });

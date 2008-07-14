@@ -70,6 +70,7 @@ public class ErrorCaretListener implements CaretListener {
    */
   public void caretUpdate(final CaretEvent evt) {
     // Now we can assume at least one error.
+    if (_frame.getSelectedErrorPanel() == null) return;
     updateHighlight(evt.getDot()); // invokeLater unnecessary here; this method runs in the event thread!
   }
   

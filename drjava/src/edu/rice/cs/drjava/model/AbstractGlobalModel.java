@@ -1991,8 +1991,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private void quit(boolean force) {
 //    _log.log("quit(" + force + ") called");
     try {
-      if (! force && ! closeAllFilesOnQuit()) return;
-      
+      if (! force && ! closeAllFilesOnQuit()) {
+        refreshActiveDocument();  // Ensure that DrJava is in a consistent state.
+        return;
+      }
       /* [ 1478796 ] DrJava Does Not Shut Down With Project Open. On HP tc1100 and Toshiba Portege tablet PCs, there
        * appears to be a problem in a shutdown hook, presumably the RMI shutdown hook. Shutdown hooks get executed in 
        * Runtime.exit (to which System.exit delegates), and if a shutdown hook does not complete, the VM does not shut
