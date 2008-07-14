@@ -116,7 +116,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         model.interpretCurrentInteraction();
-        model.replReturnedVoid(); // pretend call completed
+//        model.replReturnedVoid(); // pretend call completed
       } 
     });
     Utilities.clearEventQueue();
@@ -127,7 +127,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       public void run() { 
         doc.append(code, InteractionsDocument.DEFAULT_STYLE); // spawns an event queue task
         model.interpretCurrentInteraction();
-        model.replReturnedVoid(); 
+//        model.replReturnedVoid(); 
       } 
     });
     Utilities.clearEventQueue();
