@@ -1826,7 +1826,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       if (length > 0) _clearCache(offset);    // Selectively clear the query cache
       
-      InsertCommand doCommand = new InsertCommand(offset, str);
+      Runnable doCommand = (length == 0) ? new CharInsertCommand(offset, str.charAt(0)) : new InsertCommand(offset, str);
       RemoveCommand undoCommand = new UninsertCommand(offset, length);
       
       // add the undo/redo
@@ -1947,7 +1947,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     /** Inserts chars in reduced model and moves location to end of insert; cache has already been cleared. */
     public void run() {
       
-//      System.err.println("Inserting '" + _text + "' at offset " + _offset);
       _reduced.move(_offset - _currentLocation);  
       int len = _text.length();
       // loop over string, inserting characters into reduced model
@@ -1956,7 +1955,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         _addCharToReducedModel(curChar);
       }
       _currentLocation = _offset + len;  // update _currentLocation to match effects on the reduced model
-      _styleChanged();
+//      _styleChanged();
 //      if (getClass() ==  InsertCommand.class) 
 //        System.err.println("Inserted '" + _text + "' loc is now " + _currentLocation);
     }
@@ -1973,6 +1972,26 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       EventQueue.invokeLater(new Runnable() { public void run() { _setCurrentLocation(_offset); } });
     }
   }
+  
+  protected class CharInsertCommand implements Runnable {
+    protected final int _offset;
+    protected final char _ch;
+    
+    public CharInsertCommand(final int offset, final char ch) {
+      _offset = offset;
+      _ch = ch;
+    }
+    
+    /** Inserts chars in reduced model and moves location to end of insert; cache has already been cleared. */
+    public void run() {
+      
+      _reduced.move(_offset - _currentLocation);  
+     
+      _addCharToReducedModel(_ch);
+      _currentLocation = _offset + 1;  // update _currentLocation to match effects on the reduced model
+//      _styleChanged();
+    }
+  }
       
   protected class RemoveCommand implements Runnable {
     protected final int _offset;
@@ -1987,7 +2006,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     public void run() {
       _setCurrentLocation(_offset);
       _reduced.delete(_length);    
-      _styleChanged(); 
+//      _styleChanged(); 
     }
   }
 

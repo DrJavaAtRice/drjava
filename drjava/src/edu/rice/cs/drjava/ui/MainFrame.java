@@ -71,6 +71,8 @@ import edu.rice.cs.drjava.RemoteControlClient;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -86,8 +88,6 @@ import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
-import edu.rice.cs.drjava.model.ClipboardHistoryModel;
-import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.project.*;
 
 import edu.rice.cs.plt.tuple.Pair;
@@ -151,6 +151,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** The currently displayed DefinitionsPane. */
   private volatile DefinitionsPane _currentDefPane;
+  
+  /** The currently displayed DefinitionsDocument. */
+  private volatile DefinitionsDocument _currentDefDoc;
   
   /** The filename currently being displayed. */
   private volatile String _fileTitle = "";
@@ -3184,7 +3187,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // DefinitionsPane
     _recentDocFrame = new RecentDocFrame(this);
-    _recentDocFrame.pokeDocument(_model.getActiveDocument());
+    OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
+    _recentDocFrame.pokeDocument(activeDoc);
+    _currentDefDoc = activeDoc.getDocument();
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
     _currentDefPane.notifyActive();
     
@@ -4473,7 +4478,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.openProject(projectFile);
       if (_mainListener.someFilesNotFound()) _model.setProjectChanged(true);
       _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
-      _model.addToBrowserHistory();
+      addToBrowserHistory();
     }
     catch(MalformedProjectFileException e) {
       _showProjectFileParseError(e); // add to an error adapter
@@ -4898,13 +4903,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         File fileToDelete;
         try {
           fileToDelete = _model.getActiveDocument().getFile();
-        } catch (FileMovedException fme) {
-          return _saveAs();
-        }
+        } 
+        catch (FileMovedException fme) { return _saveAs(); }
         boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
         /** Delete the old file if save was successful. */
         // TODO: what if delete() fails? (mgricken)
-        if (toReturn && !_model.getActiveDocument().getFile().equals(fileToDelete)) fileToDelete.delete();
+        if (toReturn && ! _model.getActiveDocument().getFile().equals(fileToDelete)) fileToDelete.delete();
         /** this highlights the document in the navigator */
         _model.setActiveDocument(_model.getActiveDocument());
         return toReturn;
@@ -6856,15 +6860,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // The following method only runs in the event thread because it is called from DefinitionsPane
     public void caretUpdate(final CaretEvent ce) {
-      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
+//      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
       int offset = ce.getDot();
       try { 
-        if (offset == _offset + 1 && doc.getText(_offset, 1).charAt(0) != '\n') {
+        if (offset == _offset + 1 && _currentDefDoc.getText(_offset, 1).charAt(0) != '\n') {
           _col += 1;
           _offset += 1;
         }
         else {
-          Element root = doc.getDefaultRootElement();
+          Element root = _currentDefDoc.getDefaultRootElement();
           int line = root.getElementIndex(offset); 
           _line = line + 1;     // line numbers are 1-based
           _col = offset - root.getElement(line).getStartOffset();
@@ -6872,7 +6876,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       catch(BadLocationException e) { /* do nothing; should never happen */ }
       finally { 
-//        doc.releaseReadLock();
         _offset = offset;
         updateLocation(_line, _col);
       }
@@ -6880,17 +6883,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // This method appears safe outside the event thread
     public void updateLocation() {
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
-//      doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
-//      try { 
-      _line = doc.getCurrentLine();
-      _col = doc.getCurrentCol(); 
-//      }
-//      finally { doc.releaseReadLock(); }
+//      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      _line = _currentDefDoc.getCurrentLine();
+      _col = _currentDefDoc.getCurrentCol(); 
       updateLocation(_line, _col);
     }
     
-    private void updateLocation(int line, int col) { // Not run in event thread because setText is thread safe.
+    private void updateLocation(int line, int col) { // Can run outside the event thread because setText is thread safe.
       _currLocationField.setText(line + ":" + col +" \t");  // Space before "\t" required on Mac to avoid obscuring
 //  Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //      _model.getParsingControl().delay();
@@ -7482,9 +7481,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     pane.addFocusListener(new LastFocusListener());
     
     // Add to a scroll pane
-    final JScrollPane scroll = new BorderlessScrollPane(pane,
-                                                        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    final JScrollPane scroll = 
+      new BorderlessScrollPane(pane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     
@@ -7552,10 +7551,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
 //    Utilities.showDebug("_switchDefScrollPane called");
 //    Utilities.showDebug("Right before getting the scrollPane");
-    OpenDefinitionsDocument doc = _model.getActiveDocument();
-    JScrollPane scroll = _defScrollPanes.get(doc);
+    OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
+    _currentDefDoc = activeDoc.getDocument();
+    JScrollPane scroll = _defScrollPanes.get(activeDoc);
     
-    if (scroll == null) scroll = _createDefScrollPane(doc);
+    if (scroll == null) scroll = _createDefScrollPane(activeDoc);
     // Fix OS X scrollbar bug before switching
     
     _reenableScrollBar();
@@ -9211,8 +9211,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   public void removeTab(final Component c) {
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {  
+ 
     if (_tabbedPane.getTabCount() > 1) {
 //      if (_tabbedPane.getSelectedIndex() == _tabbedPane.getTabCount() - 1)
 //        _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() - 1);

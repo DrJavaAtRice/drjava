@@ -201,15 +201,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   protected void _styleChanged() {    
-//    acquireWriteLock();
-//    try {
+    
       int length = getLength() - _currentLocation;
       
       //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
       DocumentEvent evt = new DefaultDocumentEvent(_currentLocation, length, DocumentEvent.EventType.CHANGE);
       fireChangedUpdate(evt);
-//    }
-//    finally { releaseWriteLock(); }
   } 
    
 //  /** Returns whether this document is currently untitled
