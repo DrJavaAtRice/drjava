@@ -60,6 +60,14 @@ public final class IOUtil {
   /** Prevents instance creation */
   private IOUtil() {}
   
+  /** A factory for Files based on a String filename. */
+  public static final Lambda<String, File> FILE_FACTORY = new FileFactory();
+  
+  private static class FileFactory implements Lambda<String, File>, Serializable {
+    private FileFactory() {}
+    public File value(String name) { return new File(name); }
+  };
+  
   /**
    * Make a best attempt at evaluating {@link File#getAbsoluteFile()}.  In the event of a
    * {@link SecurityException}, the result is just {@code f}.  (Clients <em>cannot</em>
@@ -854,13 +862,9 @@ public final class IOUtil {
      */
     StringTokenizer tokenizer = new StringTokenizer(path, File.pathSeparator);
     Iterable<String> filenames = IterUtil.snapshot(IterUtil.asIterator(tokenizer));
-    return IterUtil.map(filenames, STRING_TO_FILE);
+    return IterUtil.map(filenames, FILE_FACTORY);
   }
       
-  private static final Lambda<String, File> STRING_TO_FILE = new Lambda<String, File>() {
-    public File value(String arg) { return new File(arg); }
-  };
-  
   /** Produce a path string from a list of files.  Filenames in the result are delimited
     * by the system-dependent path separator character (':' in Unix, ';' in Windows).
     */
