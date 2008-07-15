@@ -213,7 +213,7 @@ Developed by:   Java Programming Languages Team
  <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).</para></formalpara>
  <para>To search for a term, type it in the Find text field and click "Find Next" or "Find Previous" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next" or "Find Previous", and then click "Replace".  The "Replace/Find Next", "Replace/FindPrevious"  and "Replace All" buttons help to speed up this process.</para>
  <para>The "Find All" button accumulates all occurrences and displays them in a new, separate pane labeled "Find: word", where "word" is replaced with the search string. You can keep as many "Find All" panes open as you like. The panes keep the occurrences sorted by document and line number and allow you to jump to the source location with the "Go to" button, bookmark an occurrence using the "Bookmark" button, or to remove an occurrence from the list with the "Remove" button. Occurrences can also be underlined with different colors to make them easier to find in the Definitions pane.</para>
- <para>There are also four checkboxes to customize each search: "Match Case","Search All Documents", "Whole Word", and "No Comments/Strings".  Unchecking the first box will return case-insensitive results, checking the second box will tell DrJava to search through all of the open documents in sequence, checking the third box will ignore partial matches (i.e. it will ignore "hello" if the search text is "lo"), and checking the last box ignores instances found within comments and strings.</para>
+ <para>There are also four checkboxes to customize each search: "Match Case","Search All Documents", "Whole Word", "No Comments/Strings", and "No Test Cases".  Unchecking the first box will return case-insensitive results, checking the second box will tell DrJava to search through all of the open documents in sequence, checking the third box will ignore partial matches (i.e. it will ignore "hello" if the search text is "lo"), and checking the last box ignores instances found within comments and strings. Checking the "No Test Case" box will cause Java to ignore matches in files with test cases. Currently, this is being determined by examining the file name: If the file name ends with "Test.java", it is considered a test case and will be skilled.</para>
  <para>Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.
 DrJava can also search across more than one line of text (i.e. the search string can include line breaks). For detailed instructions on its usage, see the "Find and Replace" section in the Quickstart documents under the Help menu.</para>
 
@@ -264,6 +264,13 @@ DrJava can also search across more than one line of text (i.e. the search string
       <formalpara><title>RegEx</title>
       <para>This matching strategy allows you to enter Perl-style regular expressions (as implemented by the java.util.regex package), and the list will contain all the items that match the regular expression. As an example, the regular expression ".*" will display all items, while "[a-m].*" will display all that begin with the letters 'A' through 'M'.</para></formalpara>
    </section>
+
+    <section id="detachable-panes">
+      <title>Detachable Tabbed Panes</title>
+      <para>For a long time, the Interactions Pane, the Console Pane, Find/Replace, and the Compiler and JUnit Panes were always attached to the bottom of the DrJava main frame. Users who desire the Definitions Pane to be as large as possible, or users with multi-monitor displays, may wish to use the new "Detach Tabbed Panes" option in the "Edit" menu.</para>
+      <para>When this option is enabled, the tabbed panes will be detached from the bottom of the main frame and displayed freely floating in their own window. The window position is saved, so it's possible to create a nice layout, quit DrJava, and have the same layout restored when DrJava is started again. Another nice side-effect is that all panes can display a lot more items without the need for scrolling. To re-attach the tabbed panes to the DrJava main frame again, simply disable the "Detach Tabbed Panes" option again.</para>
+      <para>The panes in the free-floating window otherwise behave exactly the same as when they are attached. It's just a different screen layout.</para>
+    </section>
 
   </chapter>
   
@@ -442,8 +449,29 @@ Welcome to DrJava.
   <title>Tiger Features</title>
   <para>DrJava provides support for Tiger (JDK 1.5) features in the interactions pane. These include enum types, static import, for each statements, methods with variable arguments, generics, and autoboxing. Note that you must be running Java 2, version 1.5.0 or later to use 1.5 features in the Interactions Pane. Also, DrJava does not currently type check generics, so while they may be used in the interactions pane without a syntax error, we do not yet provide full support for type checking of generics.</para>
       </formalpara>
-  </chapter>
 
+    <section id="interactions-pane-auto-import">
+      <title>Auto-Import in Interactions Pane</title>
+      <para>When you use a class name in the Interactions Pane that is not yet known, probably because the class or its package have not been imported yet, DrJava displays an error:</para>
+      <programlisting>Welcome to DrJava.  Working directory is /Users/Shared/drjava
+&gt; File f
+Static Error: Undefined class 'File'</programlisting>
+      <para>At this time, DrJava will open a <link linkend="predictive-input">predictive input dialog</link> populated with all Java API classes. The initial suggestion is a class that matches the unknown class as closely as possible. After choosing the desired class, DrJava will import that class and re-execute the line that caused the error:</para>
+      <programlisting>Welcome to DrJava.  Working directory is /Users/Shared/drjava
+&gt; File f
+Static Error: Undefined class 'File'
+&gt; import java.io.File; // auto-import
+File f
+&gt; </programlisting>
+     <para>In the predictive input dialog, there is also a checkbox that allows you to import the entire package that contains the selected class, e.g. java.io.* instead of just java.io.File:</para>
+      <programlisting>Welcome to DrJava.  Working directory is /Users/Shared/drjava
+&gt; File f
+Static Error: Undefined class 'File'
+&gt; import java.io.*; // auto-import
+File f
+&gt; </programlisting>
+    </section>
+  </chapter>
 
 
   <!-- Chapter: Integrated Compiler -->
@@ -779,8 +807,12 @@ learning tool.</para>
  <para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (e.g. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.  You cannot enter expressions that need to be evaluated into the watch table.  For example, "s.length" is not a valid watch entry.  Type expressions like these into the Interactions Pane to see their values.</para>
       </formalpara>
     </section>
-  </chapter>
 
+    <section id="detachable-debugger">
+      <title>Detachable Debug Panel</title>
+      <para>TODO</para>
+    </section>
+  </chapter>
 
   <!-- Chapter: Javadoc Integration -->
   <chapter id="javadoc">
@@ -872,6 +904,59 @@ public class Student {
  <para>If you have access to the Java API javadoc pages, DrJava allows you to quickly open a javadoc page for a class: With the "Open Java API Javadoc" item in the Tools menu (bound to <keycode>Shift+F6</keycode>), you can open a <link linkend="predictive-input">predictive input dialog</link> populated with all Java API classes. After you have selected a class, DrJava will try to open the corresponding javadoc page in a browser.</para>
  <para>The "Open Java API Javadoc for Word Under Cursor" feature, also in the Tools menu and bound to <keycode>Ctrl+Shift+F6</keycode>, looks at the word the cursor is on and uses it as a starting point for the search. If there is a unique match, then DrJava will open the javadoc page immediately; otherwise this feature works just like "Open Java API Javadoc".</para>
  <para>Note that this feature requires access to the Java API javadoc pages, e.g. on the internet. DrJava will use the version and location set in the "Javadoc" portion of the "Preferences" dialog (see <link linkend="configuration">Configuring DrJava</link>) and access that location the first time this feature is used during a DrJava session. You can use Java API javadoc pages on your local system by entering a URL beginning with "file://" followed by the directory the allclasses-frame.html file is in. You may also have to set the right values for the "Web Browser" and "Web Browser Command" settings in the "Resource Locations" portion of the "Preferences" dialog.</para>
+ <para>TODO: Fully qualified</para>
+    </section>
+
+  </chapter>
+
+
+  <!-- Chapter: External Processes -->
+  <chapter id="ext-process">
+    <title>External Process Facility</title>
+    <para>DrJava includes an interface to execute external command line programs and supply them with values from inside the DrJava editor.</para>
+
+    <section id="ext-process-execute">
+      <title>Executing External Processes</title>
+      <para>TODO</para>
+
+      <formalpara>
+        <title>Simple Programs</title>
+        <para>TODO</para>
+      </formalpara>
+    </section>
+
+    <section id="ext-process-follow">
+      <title>Follow File</title>
+      <para>TODO</para>
+    </section>
+
+  </chapter>
+
+
+  <!-- Chapter: Other Dialogs -->
+  <chapter id="other-dialogs">
+    <title>Other Dialogs</title>
+    <para>There are several other dialogs in DrJava that you may encounter.</para>
+
+    <section id="other-dialogs-new-version">
+      <title>Check for New Version</title>
+      <para>TODO</para>
+
+      <formalpara>
+        <title>Check for ...(type of new version)</title>
+        <para>TODO</para>
+      </formalpara>
+    </section>
+
+
+    <section id="other-dialogs-survey">
+      <title>Send System Information to DrJava Developers</title>
+      <para>TODO</para>
+
+      <formalpara>
+        <title>Never ask me again</title>
+        <para>TODO</para>
+      </formalpara>
     </section>
 
   </chapter>
