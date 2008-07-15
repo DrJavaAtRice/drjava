@@ -91,11 +91,8 @@ public abstract class TabbedPanel extends JPanel
   }
 
   /** Defines the action that takes place upon clicking the close button. */
-  private final ActionListener _closeListener =
-    new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
-      _close();
-    }
+  private final ActionListener _closeListener = new ActionListener() {
+    public void actionPerformed(ActionEvent e) { _close(); }
   };
 
   /** Visibly closes the panel and removes it from the frame. */
@@ -103,6 +100,8 @@ public abstract class TabbedPanel extends JPanel
      _displayed = false;
      _frame.removeTab(this);
   }
+   
+  public void addCloseListener(ActionListener l) { _closeButton.addActionListener(l); }
 
   public void setVisible(boolean b) {
     super.setVisible(b);

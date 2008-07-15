@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.awt.EventQueue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +87,9 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     * @param index the index at which the DocumentRegion was inserted
     */
   
-  public synchronized void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) {
+  public void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) {
+    
+    assert EventQueue.isDispatchThread();
     
 //    Utilities.show("addBrowserRegion(" + r + ") called with regions = " + _regions + " and current = " + _current);
     if (_current != null) {

@@ -617,7 +617,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     boolean syntaxException;
     
     private volatile boolean _interactionDone = false;
-    private final Object _interactionLock = new Object();
+    private final Object _interactionLock = new Object();  // distinct from _interactionLock in InteractionsModel
     
     public void _logInteractionStart() { _interactionDone = false; }
     

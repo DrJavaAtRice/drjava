@@ -40,11 +40,10 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 
-/** 
- * Common button that can be instantiated to create close buttons with 
- * any ActionListener to notify, or not, if you so choose.
- * @version $Id$
- */
+/** Common button that can be instantiated to create close buttons with  any ActionListener to notify, or not, if you
+  * so choose.
+  * @version $Id$
+  */
 public class CommonCloseButton extends JButton {
 
   public CommonCloseButton() {

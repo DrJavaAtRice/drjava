@@ -75,7 +75,7 @@ public class ProjectProfile implements ProjectFileIR {
   /* Private fields */
   
   private List<DocFile> _sourceFiles = new LinkedList<DocFile>();
-  private List<DocFile> _auxFiles = new LinkedList<DocFile>();
+  private List<DocFile> _auxiliaryFiles = new LinkedList<DocFile>();
   private List<DocFile> _excludedFiles = new ArrayList<DocFile>();
   private List<String> _collapsedPaths = new ArrayList<String>();
   
@@ -122,7 +122,7 @@ public class ProjectProfile implements ProjectFileIR {
   public DocFile[] getSourceFiles() { return _sourceFiles.toArray(new DocFile[_sourceFiles.size()]); }
     
   /** @return an array full of all the aux files (project outside source tree) in this project. */
-  public DocFile[] getAuxiliaryFiles() { return _auxFiles.toArray(new DocFile[_auxFiles.size()]); }
+  public DocFile[] getAuxiliaryFiles() { return _auxiliaryFiles.toArray(new DocFile[_auxiliaryFiles.size()]); }
   
   /** @return an array chock partially full of most of the excluded files */
   public DocFile[] getExcludedFiles() { return _excludedFiles.toArray(new DocFile[_excludedFiles.size()]); }
@@ -178,7 +178,7 @@ public class ProjectProfile implements ProjectFileIR {
     }
   }
   
-  public void addAuxiliaryFile(DocFile df) { _auxFiles.add(df); }
+  public void addAuxiliaryFile(DocFile df) { _auxiliaryFiles.add(df); }
     
   public void addAuxiliaryFile(DocumentInfoGetter getter) {
     if (! getter.isUntitled()) {
@@ -214,7 +214,7 @@ public class ProjectProfile implements ProjectFileIR {
     for (File f : cpf) { _classPathFiles.add(f); }
   }
   public void setCollapsedPaths(List<String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
-  public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = new LinkedList<DocFile>(af); }
+  public void setAuxiliaryFiles(List<DocFile> af) { _auxiliaryFiles = new LinkedList<DocFile>(af); }
   public void setExcludedFiles(List<DocFile> ef) { _excludedFiles = new ArrayList<DocFile>(ef); }
   
   /** Assumes that root.getParentFile != null */
@@ -298,18 +298,18 @@ public class ProjectProfile implements ProjectFileIR {
       }
     }
     xc.createNode("drjava/project/included");
-    if (!_auxFiles.isEmpty()) {
+    if (!_auxiliaryFiles.isEmpty()) {
       if (active==null) {
-        for(DocFile df: _auxFiles) {
+        for(DocFile df: _auxiliaryFiles) {
           if(df.isActive()) {
             active = df;
             break; //Assert that there is only one active document in the project
           }
         }
         // move active document to the front of the list
-        if (active!=null) { _auxFiles.remove(active); _auxFiles.add(0,active); }
+        if (active != null) { _auxiliaryFiles.remove(active); _auxiliaryFiles.add(0,active); }
       }
-      for(DocFile df: _auxFiles) {
+      for(DocFile df: _auxiliaryFiles) {
         path = df.getAbsolutePath();
         path = replace(path, File.separator, "/");
         Pair<Integer,Integer> pSel = df.getSelection();
@@ -462,9 +462,9 @@ public class ProjectProfile implements ProjectFileIR {
     else fw.write("\n;; no source files");
     
     // write aux files
-    if (!_auxFiles.isEmpty()) {
+    if (!_auxiliaryFiles.isEmpty()) {
       fw.write("\n(auxiliary");
-      for(DocFile df: _auxFiles) { fw.write("\n" + encodeDocFileAbsolute(df, "  ")); }
+      for(DocFile df: _auxiliaryFiles) { fw.write("\n" + encodeDocFileAbsolute(df, "  ")); }
       fw.write(")"); // close the auxiliary expression
     }
     else fw.write("\n;; no aux files");

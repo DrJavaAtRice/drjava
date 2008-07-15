@@ -571,7 +571,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     else return "";
   }
   
-  
   class ProjectFileGroupingState implements FileGroupingState {
     
     volatile File _projRoot;
@@ -580,8 +579,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _workDir;
     volatile File _projectFile;
     final File[] _projectFiles;
-    volatile Vector<File> _auxFiles;
-    volatile Vector<File> _excludedFiles;
+    volatile Vector<File> _auxFiles;            // distinct from _auxiliaryFiles in ProjectProfile
+    private volatile Vector<File> _exclFiles;   // distinct from _excludedFiles in ProjectProile and CompilerErrorPanel
     volatile Iterable<File> _projExtraClassPath;
     private boolean _isProjectChanged = false;
     volatile File _createJarFile;
@@ -605,8 +604,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _projectFiles = srcFiles;
       _auxFiles = new Vector<File>(auxFiles.length);
       for(File f: auxFiles) { _auxFiles.add(f); }
-      _excludedFiles = new Vector<File>(excludedFiles.length);
-      for(File f: excludedFiles) { _excludedFiles.add(f); }
+      _exclFiles = new Vector<File>(excludedFiles.length);
+      for(File f: excludedFiles) { _exclFiles.add(f); }
       _projExtraClassPath = cp;
       
       if (_projectFiles != null) try {  for (File file : _projectFiles) { _projFilePaths.add( file.getCanonicalPath()); } }
@@ -689,50 +688,47 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Adds File f to end of _auxFiles vector. */
     public void addAuxFile(File f) {
       synchronized(_auxFiles) {
-        if (_auxFiles.add(f)) {
-          setProjectChanged(true);
-        }
-        setProjectChanged(true);
+        if (_auxFiles.add(f)) setProjectChanged(true);
+//        setProjectChanged(true);  // This statement makes no sense; _auxFiles was not changed
       }
     }
     
     /** Removes File file from _auxFiles list. */
     public void remAuxFile(File file) {
-      synchronized(_auxFiles) { _auxFiles.remove(file); }
-      setProjectChanged(true);
+      synchronized(_auxFiles) { 
+        if (_auxFiles.remove(file)) setProjectChanged(true);
+      }
     }
     
     public void addExcludedFile(File f) {
       if(f == null) return;
       if (isAlreadyOpen(f)) return; // can't add files to the black list that are currently open
-      synchronized(_excludedFiles) {
-        if (_excludedFiles.add(f)) {
-          setProjectChanged(true);
-        }
-        setProjectChanged(true);
+      synchronized(_exclFiles) {
+        if (_exclFiles.add(f)) setProjectChanged(true);
+//        setProjectChanged(true);  // This line makes no sense; _excludedFiles was not changed
       }
     }
     
     public void removeExcludedFile(File f) {
-      synchronized(_excludedFiles) {
-        for(int i = 0;i<_excludedFiles.size();i++) {
+      synchronized(_exclFiles) {
+        for(int i = 0;i<_exclFiles.size();i++) {
           try {
-            if(_excludedFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath()))
-              _excludedFiles.remove(i);
+            if(_exclFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath())) {
+              _exclFiles.remove(i);
+              setProjectChanged(true);
+            }
           }
           catch(IOException e) {}
         }
       }
     }
     
-    public File[] getExcludedFiles() {
-      return _excludedFiles.toArray(new File[_excludedFiles.size()]);
-    }
+    public File[] getExclFiles() { return _exclFiles.toArray(new File[_exclFiles.size()]); }
     
     public void setExcludedFiles(File[] fs) {
       if(fs == null) return;
-      synchronized(_excludedFiles) {
-        _excludedFiles.clear();
+      synchronized(_exclFiles) {
+        _exclFiles.clear();
         for(File f: fs) { addExcludedFile(f); }
         setProjectChanged(true);
       }
@@ -782,8 +778,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { path = f.getCanonicalPath();}
       catch(IOException ioe) { return false; }
       
-      synchronized(_excludedFiles) {
-        for (File file : _excludedFiles) {
+      synchronized(_exclFiles) {
+        for (File file : _exclFiles) {
           try { if (file.getCanonicalPath().equals(path)) return true; }
           catch(IOException ioe) { /* ignore file */ }
         }
@@ -946,7 +942,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
     public boolean isExcludedFile(File f) { return false; }
-    public File[] getExcludedFiles() { return null; }
+    public File[] getExclFiles() { return null; }
     public void addExcludedFile(File f) {}
     public void removeExcludedFile(File f) {}
     public void setExcludedFiles(File[] fs) {}
@@ -1569,8 +1565,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     builder.setAutoRefreshStatus(_state.getAutoRefreshStatus());
     
     //add excluded files
-    File[] exclFiles = _state.getExcludedFiles();
-    for(File f: exclFiles) { builder.addExcludedFile(f); }
+    for(File f: _state.getExclFiles()) { builder.addExcludedFile(f); }
     
     return builder;
   }
@@ -1894,7 +1889,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /* If all files are being closed, create a new file before starting in order to have a potentially active file
      * that is not in the list of closing files. */
-    if (docs.size() == getOpenDefinitionsDocumentsSize()) newFile();
+    if (docs.size() == getDocumentCount()) newFile();
     
     /* Set the active document to the document just after the last document or the document just before the first 
      * document in docs.  The new file created above (if necessary) does not appear in docs. */
@@ -2132,6 +2127,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return getPrevDocument(prevdoc);
   }
   
+  /** @return the size of the collection of OpenDefinitionsDocuments */
   public int getDocumentCount() { return _documentsRepos.size(); }
   
   /** Returns a new collection of all documents currently open for editing.  This is equivalent to the results of 
@@ -2145,11 +2141,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return docs;
     }
   }
+  
   /* Returns a sorted (by time of insertion) collection of all open documents. */
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
-  
-  /** @return the size of the collection of OpenDefinitionsDocuments */
-  public int getOpenDefinitionsDocumentsSize() { synchronized(_documentsRepos) { return _documentsRepos.size(); } }
   
   /** @return true if all open documents are in sync with their primary class files. */
   public boolean hasOutOfSyncDocuments() { return hasOutOfSyncDocuments(getOpenDefinitionsDocuments()); }
@@ -2294,14 +2288,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Return an array of the files excluded from the current project */
-  public File[] getExcludedFiles() {
-    return _state.getExcludedFiles();
-  }
+  public File[] getExclFiles() { return _state.getExclFiles(); }
   
   /** Sets the array of files excluded from the current project */
-  public void setExcludedFiles(File[] fs) {
-    _state.setExcludedFiles(fs);
-  }
+  public void setExcludedFiles(File[] fs) { _state.setExcludedFiles(fs); }
   
   /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. */
   public Iterable<File> getSourceRootSet() {
@@ -2406,26 +2396,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Add the current location to the browser history.  Aborts if not run in event thread. */
   public void addToBrowserHistory() {
     final OpenDefinitionsDocument doc = getActiveDocument();
-    assert doc != null;
+    assert doc != null && EventQueue.isDispatchThread();
     
-//    Utilities.invokeLater(new Runnable() { 
-//      public void run() {   
-        Position startPos = null;  // required by javac
-        Position endPos = null;    // required by javac
-        File file = FileOps.NULL_FILE;  // required by javac
-        try {
-          int pos = doc.getCurrentLocation();
-          startPos = doc.createPosition(pos);
-          endPos = doc.createPosition(doc._getLineEndPos(pos));
-//          file = doc.getFile();
-        }
-//        catch (FileMovedException fme) { /* ignore */ }
-        catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-        
+    Position startPos = null;  // required by javac
+    Position endPos = null;    // required by javac
+    File file = FileOps.NULL_FILE;  // required by javac
+    try {
+      int pos = doc.getCurrentLocation();
+      startPos = doc.createPosition(pos);
+      endPos = doc.createPosition(doc._getLineEndPos(pos));
+    }
+    
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    
 //        Utilities.show("Adding (" + doc + ", " + startPos + ", " + endPos + ") to browser history");
-        _browserHistoryManager.addBrowserRegion(new BrowserDocumentRegion(doc, startPos, endPos), _notifier);
-//      }
-//    });
+    _browserHistoryManager.addBrowserRegion(new BrowserDocumentRegion(doc, startPos, endPos), _notifier);
   }
   
   /** throws an UnsupportedOperationException */
@@ -2536,13 +2521,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (f.exists()) return f;
       else throw new FileMovedException(f, "This document's file has been moved or deleted.");
     }
-    /** Sets the file for this openDefinitionsDocument. */
-    public void setFile(final File file) {  
-      synchronized(this) { // ensures that _file and _timestamp are consistent
-        _file = file;
-        if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
-        else _timestamp = 0L;
-      }
+    
+    /** Sets the file for this openDefinitionsDocument.  Synch ensures that _file and _timestamp are consistent. */
+    public synchronized void setFile(final File file) {
+      _file = file;
+      if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
+      else _timestamp = 0L;
     }
     
     /** Returns the timestamp. */
@@ -2557,12 +2541,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getCachedClassFile() { return _classFile; }
     
     /** Whenever this document has been saved, this method should be called to update its "isModified" information. */
-    public void resetModification() {
-      synchronized(this) {
-        getDocument().resetModification();
-        File f = _file; 
-        if (! AbstractGlobalModel.isUntitled(f)) _timestamp = f.lastModified();
-      }
+    public synchronized void resetModification() {
+      getDocument().resetModification();
+      File f = _file; 
+      if (! AbstractGlobalModel.isUntitled(f)) _timestamp = f.lastModified();
     }
     
     /** @return The parent directory; should be in canonical form. */
@@ -2571,12 +2553,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Sets the parent directory of the document only if it is "Untitled"
       * @param pd The parent directory
       */
-    public void setParentDirectory(File pd) {
-      synchronized(this) {
-        if (! AbstractGlobalModel.isUntitled(_file))
-          throw new IllegalArgumentException("The parent directory can only be set for untitled documents");
-        _parentDir = pd;  
-      }
+    public synchronized void setParentDirectory(File pd) {
+      if (! AbstractGlobalModel.isUntitled(_file))
+        throw new IllegalArgumentException("The parent directory can only be set for untitled documents");
+      _parentDir = pd;  
     }
     
     public int getInitialVerticalScroll()   { return _initVScroll; }
@@ -3967,13 +3947,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Returns whether there is currently only one open document which is untitled and unchanged. */
   private boolean _hasOneEmptyDocument() {
-    return getOpenDefinitionsDocumentsSize() == 1 && _activeDocument.isUntitled() &&
+    return getDocumentCount() == 1 && _activeDocument.isUntitled() &&
       ! _activeDocument.isModifiedSinceSave();
   }
   
   /** Creates a new document if there are currently no documents open. */
   private void _ensureNotEmpty() {
-    if (getOpenDefinitionsDocumentsSize() == 0) newFile(getMasterWorkingDirectory());
+    if (getDocumentCount() == 0) newFile(getMasterWorkingDirectory());
   }
   
   /** Makes sure that none of the documents in the list are active.

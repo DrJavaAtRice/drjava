@@ -216,7 +216,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _extraClassPathList.setValue(cp);
 
     cp = new Vector<File>();
-    for(File f: _model.getExcludedFiles()) { cp.add(f); }
+    for(File f: _model.getExclFiles()) { cp.add(f); }
     _excludedFilesList.setValue(cp);
     _applyButton.setEnabled(false);
   }

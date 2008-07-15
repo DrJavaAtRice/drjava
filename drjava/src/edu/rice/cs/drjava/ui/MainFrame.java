@@ -1094,7 +1094,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _showFindReplaceTab(boolean showDetachedWindow) {
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
-    final boolean wasDisplayed = _findReplace.isDisplayed();
+    final boolean wasDisplayed = isDisplayed(_findReplace);
     showTab(_findReplace, showDetachedWindow);
     if (!wasDisplayed) {
       _findReplace.beginListeningTo(_currentDefPane);
@@ -1265,9 +1265,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             }
             else if (docChanged) {
               // defer executing this code until after active document switch (if any) is complete
-              EventQueue.invokeLater(new Runnable() {
-                public void run() { addToBrowserHistory(); }
-              });
+              addToBrowserHistory();
             }
           }
           hourglassOff();
@@ -1419,7 +1417,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        if (docChanged) { addToBrowserHistory(); }
         _model.setActiveDocument(pim.getCurrentItem().doc);
         if (docChanged) { // defer executing this code until after active document switch is complete
-          EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+          addToBrowserHistory();
         }
       }
     }
@@ -1433,7 +1431,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //          if (docChanged) { addToBrowserHistory(); }
           _model.setActiveDocument(pim.getCurrentItem().doc);
           if (docChanged) { // defer executing this code until after active document switch is complete
-            EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+            addToBrowserHistory();
           }
         }
       }
@@ -2251,7 +2249,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
       // defer executing this code until after active document switch (if any) is complete
-      EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+      addToBrowserHistory();
     }
   };
   
@@ -2265,7 +2263,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
       // defer executing this code until after active document switch (if any) is complete
-      EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+      addToBrowserHistory();
     }
   };
   
@@ -2503,15 +2501,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//    odd.acquireReadLock();
-//    try { 
     _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
-//    }
-//    finally { odd.releaseReadLock(); }
   }
   
   /** Add the current location to the browser history. */
-  public void addToBrowserHistory() { _model.addToBrowserHistory(); }
+  public void addToBrowserHistory() { 
+    EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } }); 
+  }
   
   /** Create a new find results tab.
     * @param rm the region manager that will contain the regions
@@ -2559,11 +2555,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         highlights.remove(r);
         // close the panel and dispose of its MainFrame resources when all regions have been removed.
         if (rm.getDocuments().size() == 0) {
-          _findResults.remove(pair);
-          _tabs.remove(panel);
-          panel._close(); // "this" listener is disposed as part of rm, which is disposed by this call
+          panel._close(); // _close removes the panel from _tabs and pair from _findResults
         }
       }
+    });
+    
+    // attach a listener to the panel that removes pair from _findResults when the panel is closed
+    panel.addCloseListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) { _findResults.remove(pair); }
     });
 
     _tabs.addLast(panel);
@@ -3857,7 +3856,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "\tsep=\"<separator between files>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
-        for(File f: _model.getExcludedFiles()) { l.add(f); }
+        for(File f: _model.getExclFiles()) { l.add(f); }
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -4264,40 +4263,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private void _installNewDocumentListener(final OpenDefinitionsDocument d) {
     d.addDocumentListener(new DocumentUIListener() {
-      public void changedUpdate(DocumentEvent e) { 
-        
-        // Commented out because the only attributes that affect the status of buttons are inserts and removes
-//        Utilities.invokeLater(new Runnable() {
-//          public void run() {
-//            OpenDefinitionsDocument doc = _model.getActiveDocument();
-//            if (doc.isModifiedSinceSave()) {
-//              _saveAction.setEnabled(true);
-//              if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
-//                _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//              updateStatusField();
-//            }
-//          }
-//        });
-      }
+      public void changedUpdate(DocumentEvent e) {  }
       public void insertUpdate(DocumentEvent e) {
-//        Utilities.invokeLater(new Runnable() {
-//          public void run() {
         _saveAction.setEnabled(true);
         if (isDebuggerEnabled() && _debugPanel.getStatusText().equals(""))
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//            updateStatusField();  // file title not changed by insert operation
-//          }
-//        });
       }
       public void removeUpdate(DocumentEvent e) {
-//        Utilities.invokeLater(new Runnable() {
-//          public void run() {
         _saveAction.setEnabled(true);
         if (isDebuggerEnabled() && _debugPanel.getStatusText().equals(""))
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//            updateStatusField();  // file title not changed by remove operation
-//          }
-//        });
       }
     });
   }
@@ -4498,7 +4473,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.openProject(projectFile);
       if (_mainListener.someFilesNotFound()) _model.setProjectChanged(true);
       _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
-      EventQueue.invokeLater(new Runnable() { public void run() { _model.addToBrowserHistory(); } });
+      _model.addToBrowserHistory();
     }
     catch(MalformedProjectFileException e) {
       _showProjectFileParseError(e); // add to an error adapter
@@ -7469,6 +7444,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  private static boolean isDisplayed(TabbedPanel p) { return p != null && p.isDisplayed(); }
+  
   /** Create new DefinitionsPane and JScrollPane for an open definitions document.  Package private for testing purposes.
     * @param doc The open definitions document to wrap
     * @return JScrollPane containing a DefinitionsPane for the given document.
@@ -7487,20 +7464,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
       private void updateUI() {
-//        EventQueue.invokeLater(new Runnable() {
-//          public void run() {
-        // revalidateLineNums();
-        if (_breakpointsPanel != null && _breakpointsPanel.isDisplayed()) { _breakpointsPanel.repaint(); }
-        if (_bookmarksPanel != null && _bookmarksPanel.isDisplayed()) { _bookmarksPanel.repaint(); }
-        // The following loop is unacceptable in a listener that is fired on every editing keystroke; it 
-        // was replaced by caching the selected tab
-//        for(Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
-//          FindResultsPanel panel = pair.first();
-//                  if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
-//        } 
+        if (isDisplayed(_breakpointsPanel)) { _breakpointsPanel.repaint(); }
+        if (isDisplayed(_bookmarksPanel)) { _bookmarksPanel.repaint(); }
+
         Component c = _tabbedPane.getSelectedComponent();
         if (c != null) c.repaint();
-//        });
       }
       public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }
@@ -8521,7 +8489,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       catch (IOException e) { _showIOError(e); }
       
       // Change Find/Replace to the new defpane
-      if (_findReplace.isDisplayed()) {
+      if (isDisplayed(_findReplace)) {
         _findReplace.stopListening();
         _findReplace.beginListeningTo(_currentDefPane);
         //uninstallFindReplaceDialog(_findReplace);
@@ -9245,18 +9213,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void removeTab(final Component c) {
 //    Utilities.invokeLater(new Runnable() {
 //      public void run() {  
-    if(_tabbedPane.getTabCount() > 1) {
-      if(_tabbedPane.getSelectedIndex() == _tabbedPane.getTabCount() - 1)
-        _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() - 1);
-//      else
-//        _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() + 1);
-      
+    if (_tabbedPane.getTabCount() > 1) {
+//      if (_tabbedPane.getSelectedIndex() == _tabbedPane.getTabCount() - 1)
+//        _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() - 1);
+
       _tabbedPane.remove(c);
       ((TabbedPanel)c).setDisplayed(false);
     }
     _currentDefPane.requestFocusInWindow();
-//      }
-//    });
   }
   
   /** Shows the components passed in the appropriate place in the tabbedPane depending on the position of
@@ -9280,7 +9244,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             tp.repaint();
             break;
           }
-          else if (tp.isDisplayed()) numVisible++;
+          else if (isDisplayed(tp)) numVisible++;
         }
       };
       

@@ -159,7 +159,7 @@ public interface FileGroupingState {
   public boolean isExcludedFile(File f);
   
   /** Return an array of the files excluded from the current project */
-  public File[] getExcludedFiles();
+  public File[] getExclFiles();
   
   /** Remove the specified file from the files excluded from the current project */
   public void removeExcludedFile(File f);

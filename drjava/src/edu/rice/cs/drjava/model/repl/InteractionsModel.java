@@ -510,16 +510,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Changes the input listener. Takes in the old listener to ensure that the owner
     * of the original listener is aware that it is being changed. It is therefore
     * important NOT to include a public accessor to the input listener on the model.
+    * Only used in a single thread in unit tests, so synchronization is unnecessary.
     * @param oldListener the listener that was installed
     * @param newListener the listener to be installed
     */
   public void changeInputListener(InputListener oldListener, InputListener newListener) {
     // synchronize to prevent concurrent modifications to the listener
-    synchronized(NoInputListener.ONLY) {
-      if (_inputListener == oldListener) _inputListener = newListener;
-      else
-        throw new IllegalArgumentException("The given old listener is not installed!");      
-    }
+//    synchronized(NoInputListener.ONLY) {
+    if (_inputListener == oldListener) _inputListener = newListener;
+    else
+      throw new IllegalArgumentException("The given old listener is not installed!");      
+//  }
   }
   
   /** Performs the common behavior when an interaction ends. Subclasses might want to additionally notify listeners 
