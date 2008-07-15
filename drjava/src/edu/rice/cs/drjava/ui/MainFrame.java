@@ -247,10 +247,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private final Timer _debugStepTimer;
   
-  /** The current highlight displaying the location of the debugger's thread,
+  /** The current highlight displaying the current location, used for Find All and the of the debugger's thread,
     * if there is one.  If there is none, this is null.
     */
-  private volatile HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
+  private volatile HighlightManager.HighlightInfo _currentLocationHighlight = null;
   
   /** Table to map breakpoints to their corresponding highlight objects. */
   private final Hashtable<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
@@ -2506,7 +2506,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Add the current location to the browser history. */
   public void addToBrowserHistory() { 
-    EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } }); 
+    EventQueue.invokeLater(new Runnable() { public void run() { _model.addToBrowserHistory(); } }); 
   }
   
   /** Create a new find results tab.
@@ -5630,7 +5630,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void debuggerResume() throws DebugException {
     if (isDebuggerReady()) {
       _model.getDebugger().resume();
-      _removeThreadLocationHighlight();
+      removeCurrentLocationHighlight();
     }
   }
   
@@ -7847,10 +7847,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Removes the current highlight. */
-  private void _removeThreadLocationHighlight() {
-    if (_currentThreadLocationHighlight != null) {
-      _currentThreadLocationHighlight.remove();
-      _currentThreadLocationHighlight = null;
+  public void removeCurrentLocationHighlight() {
+    if (_currentLocationHighlight != null) {
+      _currentLocationHighlight.remove();
+      _currentLocationHighlight = null;
     }
   }
   
@@ -7903,7 +7903,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //         _disableStepTimer();
 //         Debugger manager = _model.getDebugger();
 //         manager.clearCurrentStepRequest();
-//         _removeThreadLocationHighlight();
+//         removeCurrentLocationHighlight();
 //         }
     
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -8016,12 +8016,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
         
         if (shouldHighlight) {
-          _removeThreadLocationHighlight();
+          removeCurrentLocationHighlight();
           int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
           if (startOffset > -1) {
             int endOffset = doc._getLineEndPos(startOffset);
             if (endOffset > -1) {
-              _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
+              _currentLocationHighlight = _currentDefPane.getHighlightManager().
                 addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
             }
           }
@@ -8059,7 +8059,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _disableStepTimer();
       
       hideDebugger();
-      _removeThreadLocationHighlight();
+      removeCurrentLocationHighlight();
     }
     
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
@@ -8077,7 +8077,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Must be executed in the event thread. */
     public void currThreadResumed() {
       _setThreadDependentDebugMenuItems(false);
-      _removeThreadLocationHighlight();
+      removeCurrentLocationHighlight();
     }    
     
     /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
@@ -8101,7 +8101,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             // no more suspended threads, resume default debugger state
             // all thread dependent debug menu items are disabled
             _setThreadDependentDebugMenuItems(false);
-            _removeThreadLocationHighlight();
+            removeCurrentLocationHighlight();
             // Make sure we're at the prompt
             // (This should really be fixed in InteractionsController, not here.)
             _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt

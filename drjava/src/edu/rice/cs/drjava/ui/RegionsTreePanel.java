@@ -396,7 +396,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   /** Go to region. */
   protected void goToRegion() {
     ArrayList<R> r = getSelectedRegions();
-    if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), true);
+    if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
   }
   
   /** Add a region to the tree. Must be executed in event thread.

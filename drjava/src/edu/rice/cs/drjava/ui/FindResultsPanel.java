@@ -290,6 +290,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Remove the selected regions. */
   private void _remove() {
+    _frame.removeCurrentLocationHighlight();
     startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
     finishChanging();
@@ -318,9 +319,20 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     return acts;
   }
   
+  /** Go to region. */
+  protected void goToRegion() {
+    ArrayList<MovingDocumentRegion> r = getSelectedRegions();
+    // we highlight the current location using the teal band
+    if (r.size() == 1) {
+      _frame.removeCurrentLocationHighlight();
+      _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), true);
+    }
+  }
+  
   /** Close the pane. */
   public void _close() {
     super._close();
+    _frame.removeCurrentLocationHighlight();
     freeResources();
   }
   
