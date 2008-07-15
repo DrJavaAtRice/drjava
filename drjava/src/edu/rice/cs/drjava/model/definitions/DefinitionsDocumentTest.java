@@ -2157,4 +2157,281 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
     assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
   }
+  
+  protected final String PUBLIC_CIE_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public class C {" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String PUBLIC_CEI_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public class C {" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String PUBLIC_ICE_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public interface I {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String PUBLIC_IEC_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public interface I {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String PUBLIC_ECI_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public enum E {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "}" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "}" + NEWLINE;
+  
+  protected final String PUBLIC_EIC_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public enum E {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "}" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  // public after non-public
+  protected final String I_PUBLIC_CE_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "public class C {" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String E_PUBLIC_CI_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "public class C {" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String C_PUBLIC_IE_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "public interface I {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String E_PUBLIC_IC_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "public interface I {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String C_PUBLIC_EI_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "public enum E {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "}" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "}" + NEWLINE;
+  
+  protected final String I_PUBLIC_EC_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "public enum E {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "}" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "}" + NEWLINE;
+  
+  // no public class
+  protected final String CIE_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "class C {" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String CEI_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "class C {" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String ICE_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "interface I {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String IEC_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "public interface I {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static enum NestedE { }" + NEWLINE +
+    "}" + NEWLINE +
+    "enum E { }" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  protected final String ECI_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "enum E {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "}" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "}" + NEWLINE;
+  
+  protected final String EIC_TEXT =
+    "/*bof*/package temp;" + NEWLINE +
+    "" + NEWLINE +
+    "enum E {" + NEWLINE +
+    "  public static class NestedC { }" + NEWLINE +
+    "  public static interface NestedI { }" + NEWLINE +
+    "}" + NEWLINE +
+    "interface I { }" + NEWLINE +
+    "class C { }" + NEWLINE +
+    "}" + NEWLINE;
+
+  /** Test getMainClassName. */
+  public void testgetMainClassName() throws BadLocationException, ClassNameNotFoundException {
+    _doc.insertString(0, PUBLIC_CIE_TEXT, null);
+    assertEquals("C", _doc.getMainClassName());
+    _doc.remove(0, PUBLIC_CIE_TEXT.length());
+
+    _doc.insertString(0, PUBLIC_CEI_TEXT, null);
+    assertEquals("C", _doc.getMainClassName());
+    _doc.remove(0, PUBLIC_CEI_TEXT.length());
+
+    _doc.insertString(0, PUBLIC_ICE_TEXT, null);
+    assertEquals("I", _doc.getMainClassName());
+    _doc.remove(0, PUBLIC_ICE_TEXT.length());
+
+    _doc.insertString(0, PUBLIC_IEC_TEXT, null);
+    assertEquals("I", _doc.getMainClassName());
+    _doc.remove(0, PUBLIC_IEC_TEXT.length());
+
+    _doc.insertString(0, PUBLIC_ECI_TEXT, null);
+    assertEquals("E", _doc.getMainClassName());
+    _doc.remove(0, PUBLIC_ECI_TEXT.length());
+
+    _doc.insertString(0, PUBLIC_EIC_TEXT, null);
+    assertEquals("E", _doc.getMainClassName());
+    _doc.remove(0, PUBLIC_EIC_TEXT.length());
+
+    // public after non-public
+    _doc.insertString(0, I_PUBLIC_CE_TEXT, null);
+    assertEquals("C", _doc.getMainClassName());
+    _doc.remove(0, I_PUBLIC_CE_TEXT.length());
+
+    _doc.insertString(0, E_PUBLIC_CI_TEXT, null);
+    assertEquals("C", _doc.getMainClassName());
+    _doc.remove(0, E_PUBLIC_CI_TEXT.length());
+
+    _doc.insertString(0, C_PUBLIC_IE_TEXT, null);
+    assertEquals("I", _doc.getMainClassName());
+    _doc.remove(0, C_PUBLIC_IE_TEXT.length());
+
+    _doc.insertString(0, E_PUBLIC_IC_TEXT, null);
+    assertEquals("I", _doc.getMainClassName());
+    _doc.remove(0, E_PUBLIC_IC_TEXT.length());
+
+    _doc.insertString(0, C_PUBLIC_EI_TEXT, null);
+    assertEquals("E", _doc.getMainClassName());
+    _doc.remove(0, C_PUBLIC_EI_TEXT.length());
+
+    _doc.insertString(0, I_PUBLIC_EC_TEXT, null);
+    assertEquals("E", _doc.getMainClassName());
+    _doc.remove(0, I_PUBLIC_EC_TEXT.length());
+    
+    // no public class
+    _doc.insertString(0, CIE_TEXT, null);
+    assertEquals("C", _doc.getMainClassName());
+    _doc.remove(0, CIE_TEXT.length());
+
+    _doc.insertString(0, CEI_TEXT, null);
+    assertEquals("C", _doc.getMainClassName());
+    _doc.remove(0, CEI_TEXT.length());
+
+    _doc.insertString(0, ICE_TEXT, null);
+    assertEquals("I", _doc.getMainClassName());
+    _doc.remove(0, ICE_TEXT.length());
+
+    _doc.insertString(0, IEC_TEXT, null);
+    assertEquals("I", _doc.getMainClassName());
+    _doc.remove(0, IEC_TEXT.length());
+
+    _doc.insertString(0, ECI_TEXT, null);
+    assertEquals("E", _doc.getMainClassName());
+    _doc.remove(0, ECI_TEXT.length());
+
+    _doc.insertString(0, EIC_TEXT, null);
+    assertEquals("E", _doc.getMainClassName());
+    _doc.remove(0, EIC_TEXT.length());
+  }
 }

@@ -1058,16 +1058,38 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    }
   }
   
-  /** Gets the name of first class/interface decclared in file among the definitions anchored at:
+  /** Gets the name of first class/interface/enum declared in file among the definitions anchored at:
     * @param indexOfClass  index in this of a top-level occurrence of class 
     * @param indexOfInterface  index in this of a top-level occurrence of interface
+    * @param indexOfEnum index in this of a top-level occurrence of enum
     */
-  private String getFirstClassName(int indexOfClass, int indexOfInterface) throws ClassNameNotFoundException {
+  private String getFirstClassName(int indexOfClass, int indexOfInterface,
+                                   int indexOfEnum) throws ClassNameNotFoundException {
     
-    if ((indexOfClass == -1) && (indexOfInterface == -1)) throw ClassNameNotFoundException.DEFAULT;
-    if ((indexOfInterface == -1) || (indexOfClass != -1 && indexOfClass < indexOfInterface)) 
-      return getNextIdentifier(indexOfClass + "class".length());
-    return getNextIdentifier(indexOfInterface + "interface".length());
+    if ((indexOfClass == -1) && (indexOfInterface == -1) && (indexOfEnum == -1)) throw ClassNameNotFoundException.DEFAULT;
+    
+    // should we convert this to a sorted queue or something like that?
+    // should we have to extend this past three keywords, it will get rather hard to maintain
+    if ((indexOfEnum == -1) || 
+        ((indexOfClass != -1) && (indexOfClass < indexOfEnum)) ||
+        ((indexOfInterface != -1) && (indexOfInterface < indexOfEnum))) {
+      // either "enum" not found, or "enum" found after "class" or "interface"
+      // "enum" is irrelevant
+      // we know that at least one of indexOfClass and indexOfInterface is != -1
+      if ((indexOfInterface == -1) ||
+          ((indexOfClass != -1) && (indexOfClass < indexOfInterface))) {
+        // either "interface" not found, or "interface" found after "class"
+        return getNextIdentifier(indexOfClass + "class".length());
+      }
+      else {
+        // "interface" found, and found before "class"
+        return getNextIdentifier(indexOfInterface + "interface".length());
+      }
+    }
+    else {
+      // "enum" found, and found before "class" and "interface"
+      return getNextIdentifier(indexOfEnum + "enum".length());
+    }    
   }
   
   /** Gets the name of the document's main class: the document's only public class/interface or 
@@ -1083,9 +1105,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
         final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
         final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
+        final int indexOfEnum = _findKeywordAtToplevel("enum", text, 0);
         final int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
         
-        if (indexOfPublic == -1)  return getFirstClassName(indexOfClass, indexOfInterface);
+        if (indexOfPublic == -1)  return getFirstClassName(indexOfClass, indexOfInterface, indexOfEnum);
         
 //        _log.log("text =\n" + text);
 //        _log.log("indexOfClass = " + indexOfClass + "; indexOfPublic = " + indexOfPublic);
@@ -1099,9 +1122,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
         int indexOfPublicInterface = _findKeywordAtToplevel("interface", subText, afterPublic); // relative offset
         if (indexOfPublicInterface != -1) indexOfPublicInterface += afterPublic;
+        int indexOfPublicEnum = _findKeywordAtToplevel("enum", subText, afterPublic); // relative offset
+        if (indexOfPublicEnum != -1) indexOfPublicEnum += afterPublic;
 //        _log.log("indexOfPublicClass = " + indexOfPublicClass + " indexOfPublicInterface = " + indexOfPublicInterface);
         
-        return getFirstClassName(indexOfPublicClass, indexOfPublicInterface);
+        return getFirstClassName(indexOfPublicClass, indexOfPublicInterface, indexOfPublicEnum);
         
       }
       finally { 
