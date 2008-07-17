@@ -156,7 +156,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       String matchText = _matchText(from);
       
       if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
-      else _mainFrame.updateStatusField();
+      else updateStatusField();
     }
     
     // if this wasn't a close brace, check for an open brace
@@ -169,7 +169,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         to = to + from;
         _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      }  
+      }
+      updateStatusField();
     }
   }
   

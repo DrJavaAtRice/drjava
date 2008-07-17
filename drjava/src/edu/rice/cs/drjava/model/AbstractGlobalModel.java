@@ -1629,8 +1629,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(projChanged);
   }
   
-  /** Parses the given project file and loads it int the document navigator and resets interactions pane. Assumes
-    * preceding project if any has already been closed.
+  /** Parses the given project file and loads it into the document navigator and resets interactions pane. Assumes
+    * preceding project, if any, has already been closed.
     *
     * @param projectFile The project file to parse
     */
@@ -1821,7 +1821,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void autoRefreshProject() { openNewFilesInProject(); }
   
   /** Performs any needed operations on the model after project files have been closed.  This method is not 
-    * responsible for closing any filesl both the files in the project and the project file have already been 
+    * responsible for closing any files; both the files in the project and the project file have already been 
     * closed (by MainFrame._closeProject()).  Resets interations unless suppressReset is true.
     */
   public void closeProject(boolean suppressReset) {

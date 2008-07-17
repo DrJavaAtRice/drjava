@@ -93,7 +93,7 @@ public abstract class AbstractDJPane extends JTextPane
       try { 
         char prevChar = doc.getText(offset - 1, 1).charAt(0);
         if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);
-        updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
+        else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
         
       }
       catch(BadLocationException e) { DrJavaErrorHandler.record(e); }

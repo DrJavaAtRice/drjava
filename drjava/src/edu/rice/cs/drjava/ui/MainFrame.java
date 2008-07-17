@@ -4514,11 +4514,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  boolean _closeProject() {
-    _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
-    _autoImportClassList = new ArrayList<JavaAPIListEntry>(); // reset auto-import list
-    return _closeProject(false);
-  }
+  boolean _closeProject() { return _closeProject(false); }
   
   
   /** Closes project when DrJava is not in the process of quitting.
@@ -4535,9 +4531,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return true if the project is closed, false if cancelled
     */
   boolean _closeProject(boolean quitting) {
+    _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
+    _autoImportClassList = new ArrayList<JavaAPIListEntry>(); // reset auto-import list
+    
     if (_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
 //      System.err.println("projDocs = " + projDocs);
+      _cleanUpDebugger();
       boolean couldClose = _model.closeFiles(projDocs);
       if (! couldClose) return false;
       
@@ -4557,7 +4557,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _saveProjectAsAction.setEnabled(false);
       _exportProjectInOldFormatAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
-//      _junitProjectAction.setEnabled(false);
       _jarProjectAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
 //      _compileOpenProjectAction.setEnabled(false);
@@ -5259,11 +5258,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     config.setSetting(DOC_LIST_WIDTH, Integer.valueOf(_docSplitPane.getDividerLocation()));
   }
   
-  private void _cleanUpForCompile() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
+  private void _cleanUpDebugger() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
   
   private void _compile() {
     // now works with multiple files
-    _cleanUpForCompile();
+    _cleanUpDebugger();
     hourglassOn();
     try {
 //      final OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -5276,7 +5275,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _compileFolder() {
-    _cleanUpForCompile();
+    _cleanUpDebugger();
     hourglassOn();
     try {
       OpenDefinitionsDocument d;
@@ -5302,7 +5301,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _compileProject() { 
-    _cleanUpForCompile();
+    _cleanUpDebugger();
 //    new Thread("Compile All") {
 //      public void run() {
     hourglassOn();
@@ -5316,7 +5315,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _compileAll() {
-    _cleanUpForCompile();
+    _cleanUpDebugger();
     hourglassOn();
     try { _model.getCompilerModel().compileAll(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
