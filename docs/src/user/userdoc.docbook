@@ -185,7 +185,9 @@ Developed by:   Java Programming Languages Team
  <title>Auto-Completion</title>
  <para>DrJava supports a very limited notion of auto-completion that is nonetheless useful. This feature is accessible as "Auto-Complete Word Under Cursor" in the Edit menu, and it is also bound to the keyboard shortcut <keycode>Ctrl-Shift-Space</keycode> by default. When invoked, DrJava will look at the word to the left of the cursor and attempt to auto-complete it, based on a list of documents currently open. If there is no unique auto-completion match, DrJava displays a <link linkend="predictive-input">predictive input dialog</link> with the auto-completion candidates.</para></formalpara>
  <para>When a project is open, DrJava can also be configured to scan all class files after a compile to obtain the auto-completion information (see <link linkend="configuration">Configuring DrJava</link>). With that option set, DrJava can auto-complete the names of all classes in your project, even those of inner classes.</para>
- <para>Please note that auto-completion currently only works for class names, is limited to user class names (i.e. it does not auto-complete Java API class names), and completely ignores all context except for the word to the left of the cursor (i.e. it may generate code that does not compile).</para>
+ <para>On the "Auto-Complete Word Under Cursor" diaog, there is a checkbox labeled "Java API". If this is checked, then DrJava will also use the class names from the Standard Java API as suggestions for auto-completion. If it is disabled, only class names from your own source files are used.</para>
+ <para>Next to the "OK" button is the "Fully Qualified" button. If the class "Integer" is selected, and the user presses "OK", DrJava will auto-complete the word to "Integer". If, however, "Fully Qualified" is used to close the dialog, DrJava will enter the entire fully qualified class name, "java.lang.Integer" in this case.</para>
+ <para>Please note that auto-completion currently only works for class names, and completely ignores all context except for the word to the left of the cursor (i.e. it may generate code that does not compile).</para>
 
       <formalpara>
  <title>Clipboard History</title>
@@ -810,7 +812,8 @@ learning tool.</para>
 
     <section id="detachable-debugger">
       <title>Detachable Debug Panel</title>
-      <para>TODO</para>
+      <para>When the Debug Panel is visible, it is normally attached to DrJava's main frame and displayed just above the bottom panes, and below the editor pane. To conserve screen space or make better use of dual monitors, the Debug Panel can also be detached.</para>
+      <para>To do this, click on the "Detach Debugger" menu item in the "Debug" menu and make sure that a checkmark appears next to "Detach Debugger". All debugger controls are now displayed in a separate window called "Debugger". To re-attach the "Debugger" window to DrJava's main frame, remove the checkmark next to "Detach Debugger" or close the "Debugger" window.</para>
     </section>
   </chapter>
 
@@ -903,8 +906,7 @@ public class Student {
  <title>Java API Javadoc</title>
  <para>If you have access to the Java API javadoc pages, DrJava allows you to quickly open a javadoc page for a class: With the "Open Java API Javadoc" item in the Tools menu (bound to <keycode>Shift+F6</keycode>), you can open a <link linkend="predictive-input">predictive input dialog</link> populated with all Java API classes. After you have selected a class, DrJava will try to open the corresponding javadoc page in a browser.</para>
  <para>The "Open Java API Javadoc for Word Under Cursor" feature, also in the Tools menu and bound to <keycode>Ctrl+Shift+F6</keycode>, looks at the word the cursor is on and uses it as a starting point for the search. If there is a unique match, then DrJava will open the javadoc page immediately; otherwise this feature works just like "Open Java API Javadoc".</para>
- <para>Note that this feature requires access to the Java API javadoc pages, e.g. on the internet. DrJava will use the version and location set in the "Javadoc" portion of the "Preferences" dialog (see <link linkend="configuration">Configuring DrJava</link>) and access that location the first time this feature is used during a DrJava session. You can use Java API javadoc pages on your local system by entering a URL beginning with "file://" followed by the directory the allclasses-frame.html file is in. You may also have to set the right values for the "Web Browser" and "Web Browser Command" settings in the "Resource Locations" portion of the "Preferences" dialog.</para>
- <para>TODO: Fully qualified</para>
+ <para>Note that this feature requires access to the Java API javadoc pages, e.g. on the internet. DrJava will use the version and location set for "Java Version for 'Open Java API Javadoc'" in the "Javadoc" pane of the "Preferences" dialog (see <link linkend="configuration">Configuring DrJava</link>) and access that location the first time this feature is used during a DrJava session. You can use Java API javadoc pages on your local system by entering a URL beginning with "file://" followed by the directory the allclasses-frame.html file is in. You may also have to set the right values for the "Web Browser" and "Web Browser Command" settings in the "Resource Locations" portion of the "Preferences" dialog.</para>
     </section>
 
   </chapter>
@@ -927,11 +929,17 @@ public class Student {
 
     <section id="ext-process-follow">
       <title>Follow File</title>
-      <para>TODO</para>
+      <para>Using the "Follow File" option in the "Tools" menu, the user can
+	open a text file in one of the panes on the bottom of DrJava's main
+	frame and keep an eye on how it changes. DrJava checks every once in
+	a while (by default every 300 milliseconds) if the file has changed
+	and updates the display accordingly. The time between the updates
+	and how many lines are displayed (by default only the last 100) can
+	be controlled on the "Miscellaneous" pane of the "Preferences" frame
+	(see <link linkend="configuration">Configuring DrJava</link>).</para>
     </section>
 
   </chapter>
-
 
   <!-- Chapter: Other Dialogs -->
   <chapter id="other-dialogs">
@@ -940,23 +948,60 @@ public class Student {
 
     <section id="other-dialogs-new-version">
       <title>Check for New Version</title>
-      <para>TODO</para>
+      <para>The DrJava development team works year-around to improve DrJava.
+	To make it easier for users to determine whether there is a newer
+	version available, DrJava now periodically polls the website for
+	the latest version (by default, this is done once a week). If
+	a new version is found, the user can press the "Download" button
+	to be taken directly to the web page with the latest version
+	of DrJava.</para>
+     <para>The "Check for New Version" dialog appears automatically
+	when DrJava is started and a new version is found, but the user can
+	perform a manual check by selecting "Check for New Version" in
+	the "Help" menu.</para>
 
       <formalpara>
-        <title>Check for ...(type of new version)</title>
-        <para>TODO</para>
-      </formalpara>
+        <title>Check for (type of new version)</title>
+        <para>The DrJava developers release different kinds of versions:
+	Stable versions, which should not cause major problems; beta versions,
+	which are stable but not yet well tested; and development versions,
+	which contain new features or changes that may be problematic.</para>
+        </formalpara>
+	<para>By default, DrJava will only notify the user of new stable
+	or beta versions, but this setting can be changed by picking a
+	different "Check for" condition -- the user can check for stable versions
+	only, or be interested in all kinds of versions.</para>
     </section>
 
 
     <section id="other-dialogs-survey">
       <title>Send System Information to DrJava Developers</title>
-      <para>TODO</para>
-
+      <para>It is tremendously helpful for the DrJava developers to
+	know what operating systems and versions of Java are being
+	used. To get a better overview, DrJava now includes a simple
+	and completely anonymous survey.</para>
+      <para>This survey transmits only the version number of DrJava
+	that is being used, the name and version of the operating
+	system, and the version and vendor of Java that is being
+	used. This information can in no way be traced back to
+	anyone's computer.</para>
+      <para>Every few months, DrJava will ask the user if these
+	pieces of information may be sent to the DrJava developers.</para>
+      <para>When DrJava notices that the user's system has changed
+	or that a new version of DrJava is being used, it may also
+	ask the user to participate in the survey. This usually
+	happens automatically when DrJava starts, but the user
+	can also elect to send information by using the "Send System
+	Information" item in the "Help" menu (multiple submissions
+	will be ignored).</para>
       <formalpara>
         <title>Never ask me again</title>
-        <para>TODO</para>
+        <para>If you do not want to be bothered again by this
+	question, you can check the "Never ask me again" checkbox
+	on the dialog, and DrJava will not ask you to participate
+	in the survey anymore.</para>
       </formalpara>
+      <para>Thank you for helping us make DrJava better!</para>
     </section>
 
   </chapter>
