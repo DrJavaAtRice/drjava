@@ -797,7 +797,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _interactionsModel.replReturnedVoid();
       throw new UnexpectedException("MainJVM.interpret() called when InterpreterJVM was busy!");
     }
-    
   }
   
   /** InteractionsModel which does not react to events. */

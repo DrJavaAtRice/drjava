@@ -212,32 +212,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Updates status fields in the main frame (title bar, selected file name) when document is modified. */
   protected void updateStatusField() { /* do nothing; this is an interactions pane. */ }
   
-//  /** Returns the list of prompts. Used for tests. */
-//  List<Integer> getPromptList() {  return _listOfPrompt; }  // NOT USED
-  
-//  /** Resets the list of prompts. Called when the interactions pane is reset. */  // NOT USED
-//  public void resetPrompts() {
-////    System.err.println("Clearing prompt list");
-//    _listOfPrompt.clear(); 
-//  }
-  
-  // NOT USED
-//  /** Adds the position to the list of prompt positions. package private for tests. Does not necessarily run in
-//    * event thread. _listOfPrompt is a Vector which is thread safe. */
-//  void addToPromptList(int pos) {
-//    if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
-//  }
-  
-//  /** Returns true if the two locations do not have a prompt between them. */  // NOT USED
-//  private boolean _notCrossesPrompt(int to, int from) {
-////    DrJava.consoleErr().println("To: " + to + " , From: " + from);
-//    boolean toReturn = true;
-//    for (Integer prompt : _listOfPrompt) {
-//      toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));      
-//    }
-//    return toReturn;
-//  }
-  
   /** Indent the given selection, for the given reason, in the current document.  Should only run in the event queuel
     * @param selStart - the selection start
     * @param selEnd - the selection end

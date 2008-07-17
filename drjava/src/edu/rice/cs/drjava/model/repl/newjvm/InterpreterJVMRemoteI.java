@@ -42,12 +42,9 @@ import java.io.File;
 
 import edu.rice.cs.util.newjvm.*;
 
-/**
- * This interface specifies the methods that the interpreter JVM exposes
- * for the MainJVM to call.
- *
- * @version $Id$
- */
+/** This interface specifies the methods that the interpreter JVM exposes for the MainJVM to call.
+  * @version $Id$
+  */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   public List<String> findTestClasses(List<String> classNames, List<File> files)
@@ -85,7 +82,6 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     * with an interaction
     */
   public boolean setToDefaultInterpreter() throws RemoteException;
-  
   
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVMRemoteI via
     * the interpretResult method.

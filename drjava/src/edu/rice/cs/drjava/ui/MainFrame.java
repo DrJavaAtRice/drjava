@@ -4102,7 +4102,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     updateStatusField("Toggling Debugger Mode");
     
     try { 
-      if (isDebuggerEnabled()) debugger.shutdown();
+      if (isDebuggerReady()) debugger.shutdown();
       else {
         // Turn on debugger
         hourglassOn();
@@ -5259,7 +5259,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     config.setSetting(DOC_LIST_WIDTH, Integer.valueOf(_docSplitPane.getDividerLocation()));
   }
   
-  private void _cleanUpForCompile() { if (isDebuggerEnabled()) _model.getDebugger().shutdown(); }
+  private void _cleanUpForCompile() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
   
   private void _compile() {
     // now works with multiple files
@@ -7864,7 +7864,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * Must be executed in event thread.
     */
   private void _updateDebugStatus() {
-    if (! isDebuggerEnabled()) return;
+    if (! isDebuggerReady()) return;
     
     // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getClassFileInSync()) {
@@ -8094,7 +8094,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
       
-      if (isDebuggerEnabled()) {
+      if (isDebuggerReady()) {
         try {
           if (!_model.getDebugger().hasSuspendedThreads()) {
             // no more suspended threads, resume default debugger state
@@ -8114,7 +8114,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void currThreadSet(DebugThreadData dtd) { }
     public void regionAdded(final Breakpoint bp) { }
-    public void breakpointReached(Breakpoint bp) { }
+    public void breakpointReached(Breakpoint bp) { showTab(_interactionsContainer, true); }
     public void regionChanged(Breakpoint bp) {  }
     public void regionRemoved(final Breakpoint bp) { }    
     public void watchSet(final DebugWatchData w) { }

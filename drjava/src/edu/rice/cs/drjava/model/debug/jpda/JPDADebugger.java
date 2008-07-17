@@ -990,7 +990,7 @@ public class JPDADebugger implements Debugger {
     catch(DebugException e) { throw new UnexpectedException(e); }
     
     // Must resume the correct number of times
-    for (int i=suspendCount; i>0; i--) thread.resume();
+    for (int i = suspendCount; i>0; i--) thread.resume();
     
     // Notify listeners of a resume
     
@@ -1068,7 +1068,7 @@ public class JPDADebugger implements Debugger {
   
   // Not currently used
 //  /** Takes the location of event e, opens the document corresponding to its class and centers the definition pane's
-//    * view on the appropriate line number.  Assumes lock on this is already held.
+//    * view on the appropriate line number.
 //    * @param e LocatableEvent containing location to display
 //    */
 //  private void scrollToSource(LocatableEvent e) {
