@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.text.*;
 import java.awt.*;
 import javax.swing.event.DocumentEvent;
-// TODO: Check synchronization.
 import java.util.ArrayList;
 
 import edu.rice.cs.drjava.DrJava;
@@ -49,18 +48,16 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentInterface;
 
-/**
- * This view class renders text on the screen using the reduced model info.
- * By extending WrappedPlainView, we only have to override the parts we want to.
- * Here we only override drawUnselectedText. We may want to override
- * drawSelectedText at some point. As of 2002/06/17, we now extend PlainView because
- * WrappedPlainView was causing bugs related to resizing the viewport of the
- * definitions scroll pane.
- *
- * @version $Id$
- */
+/** This view class renders text on the screen using the reduced model info.  By extending WrappedPlainView, we only
+  * have to override the parts we want to. Here we only override drawUnselectedText. We may want to override
+  * drawSelectedText at some point. As of 2002/06/17, we now extend PlainView because WrappedPlainView was causing 
+  * bugs related to resizing the viewport of the definitions scroll pane.
+  *
+  * @version $Id$
+  */
 public class ColoringView extends PlainView implements OptionConstants {
   
   public static Color COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
@@ -156,12 +153,8 @@ public class ColoringView extends PlainView implements OptionConstants {
     
     final AbstractDJDocument _doc = (AbstractDJDocument) doc;
     
-    /* It is not clear if swing only calls this method doc read locked.  So we lock for safety's sake. */
-//    _doc.acquireReadLock();
-//    try {
-    
     ArrayList<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
-    if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
+    if (stats.size() < 1) throw new UnexpectedException("GetHighlightStatus returned nothing!");
     
     for (HighlightStatus stat: stats) {
       int location = stat.getLocation();
@@ -170,16 +163,12 @@ public class ColoringView extends PlainView implements OptionConstants {
       // If this highlight status extends past p1, end at p1
       if (location + length > end) length = end - stat.getLocation();
       
-      if (! (_doc instanceof InteractionsDJDocument) || 
-          ! ((InteractionsDJDocument)_doc).setColoring((start + end)/2, g))      
+      if (! (_doc instanceof InteractionsDJDocument) || ! ((InteractionsDJDocument)_doc).setColoring((start + end)/2, g))      
         setFormattingForState(g, stat.getState());
       Segment text = getLineBuffer(); 
       _doc.getText(location, length, text);
       x = Utilities.drawTabbedText(text, x, y, g, this, location);  // updates x on each iteration
     }
-//    }
-//    finally { _doc.releaseReadLock(); }
-    //DrJava.consoleErr().println("returning x: " + x);
     return  x;
   }
   
@@ -193,12 +182,12 @@ public class ColoringView extends PlainView implements OptionConstants {
     * @throws BadLocationException
     */
   protected int drawSelectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
-    /*
-     DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
-     " doclen=" + _doc.getLength() +" x="+x+" y="+y);
-     */
+
+//    DrJava.consoleErr().
+//      println("drawSelected: " + p0 + "-" + p1 + " doclen=" + _doc.getLength() + " x=" + x + " y=" + y);
+
     EditDocumentInterface doc = (EditDocumentInterface) getDocument();
-    if (doc instanceof InteractionsDJDocument) ((InteractionsDJDocument)doc).setBoldFonts(end,g);
+    if (doc instanceof InteractionsDJDocument) ((InteractionsDJDocument)doc).setBoldFonts(end, g);
     
     return  super.drawSelectedText(g, x, y, start, end);
   }

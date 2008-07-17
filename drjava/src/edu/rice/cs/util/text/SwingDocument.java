@@ -236,39 +236,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   public void print() { throw new UnsupportedOperationException("Printing not supported"); }
   
   public Pageable getPageable() { throw new UnsupportedOperationException("Printing not supported"); }
-  
-  /* Locking operations */
-  
-//  /* Swing-style readLock(). Must be renamed because inherited writeLock is final. */
-//  public /* synchronized */ void acquireReadLock() {
-////    if (! Utilities.TEST_MODE && ! EventQueue.isDispatchThread()) 
-////      DrJavaErrorHandler.log("acquireReadLock() invoked from outside the event thread");
-////    readLock();
-////    _lockState++;
-//  }
-//  
-//  /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
-//  public /* synchronized */ void releaseReadLock() {
-////    readUnlock();
-////    _lockState--;
-//  }
-//  
-//  /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
-//  public void acquireWriteLock() {
-////    if (! Utilities.TEST_MODE && ! EventQueue.isDispatchThread()) 
-////      DrJavaErrorHandler.log("acquireWriteLock() invoked from outside the event thread");
-////    writeLock();  
-//  }
-//  
-//  /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
-//  public void releaseWriteLock() { /* writeUnlock(); */ }
-//  
-//  /** Returns true iff a thread holds a read lock or this thread holds a write lock. */
-//  public boolean isReadLocked() { return true; /* _lockState != UNREADLOCKED || isWriteLocked();*/}
-//  
-//  /** Returns true iff this thread holds a write lock. */
-//  public boolean isWriteLocked() { return true; /* getCurrentWriter() == Thread.currentThread(); */}
-  
+
   /** Performs the default behavior for createPosition in DefaultStyledDocument. */
   public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }
 }

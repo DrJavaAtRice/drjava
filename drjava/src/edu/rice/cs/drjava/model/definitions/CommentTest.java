@@ -51,7 +51,6 @@ import javax.swing.text.BadLocationException;
 public final class CommentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
   private Integer _indentLevel = Integer.valueOf(2);
-//  private Integer configIndent;
   private GlobalEventNotifier _notifier;
 
   /** Resents configuration settings and sets up the indent level so that we

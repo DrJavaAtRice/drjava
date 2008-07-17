@@ -169,10 +169,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         to = to + from;
         _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      }
-      _mainFrame.updateStatusField();         
+      }  
     }
   }
+  
+  /** Updates status fields in the main frame (title bar, selected file name) when document is modified. */
+  protected void updateStatusField() { _mainFrame.updateStatusField(); }
   
   /* Returns the text of the line where a matching open brace exists whenever the cursor is at a closing brace */
   private String _matchText(int braceIndex) {

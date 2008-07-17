@@ -92,12 +92,13 @@ public abstract class AbstractDJPane extends JTextPane
       DJDocument doc = getDJDocument();
       try { 
         char prevChar = doc.getText(offset - 1, 1).charAt(0);
-        if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);  
+        if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);
+        updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
+        
       }
       catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
     }
   };
-  
   
   /** Our current paren/brace/bracket matching highlight. */
   protected volatile HighlightManager.HighlightInfo _matchHighlight = null;
@@ -132,6 +133,9 @@ public abstract class AbstractDJPane extends JTextPane
     * @param offset the new offset of the caret
     */
   protected abstract void matchUpdate(int offset);
+  
+  /** Updates status fields in the main frame (title bar, selected file name) when document is modified. */
+  protected abstract void updateStatusField();
 
   /** Removes the previous highlight so document is cleared when caret position changes.  Assumes ReadLock is already
     * held.  Can be executed from outside the event thread. */

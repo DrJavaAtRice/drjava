@@ -1869,34 +1869,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   
-//  /** Inserts a string of text into the document.  Custom processing of the insert (e.g., updating the reduced model)
-//    * is not done here;  it is done in {@link #insertUpdate}.
-//    */
-//  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-//    
-//    acquireWriteLock();
-//    try {
-//      clearCache(offset);         // Selectively clear the query cache; unnecessary: done in insertUpdate
-//      super.insertString(offset, str, a);
-//    }
-//    finally { releaseWriteLock(); }
-//  }
-  
-//  /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
-//    * in {@link #removeUpdate}.
-//    */
-//  public void remove(final int offset, final int len) throws BadLocationException {
-//    
-//    acquireWriteLock();
-//    try {
-//      clearCache();            // Selectively clear the query cache; unnecessary: done in removeUpdate.
-//      super.remove(offset, len);
-//    }
-//    finally { releaseWriteLock(); }  
-//  }
-  
-  
-  
+
   /** Returns the byte image (as written to a file) of this document. */
   public byte[] getBytes() { return getText().getBytes(); }
   
@@ -1923,7 +1896,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return ch1 == '/' && (ch2 == '/' || ch2 == '*');
   }
   
-  
   //Two abstract methods to delegate to the undo manager, if one exists.
   protected abstract int startCompoundEdit();
   protected abstract void endCompoundEdit(int i);
@@ -1949,13 +1921,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       _reduced.move(_offset - _currentLocation);  
       int len = _text.length();
+      
       // loop over string, inserting characters into reduced model
-      for (int i = 0; i < len; i++) {
-        char curChar = _text.charAt(i);
-        _addCharToReducedModel(curChar);
-      }
+      for (int i = 0; i < len; i++) _addCharToReducedModel(_text.charAt(i));
+
       _currentLocation = _offset + len;  // update _currentLocation to match effects on the reduced model
-      _styleChanged();
+      _styleChanged();  // update the color highlighting of the remainder of the document
+      
 //      if (getClass() ==  InsertCommand.class) 
 //        System.err.println("Inserted '" + _text + "' loc is now " + _currentLocation);
     }

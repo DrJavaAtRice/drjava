@@ -9700,7 +9700,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           if (_autoImportPackageCheckbox.isSelected()) {
             int lastDot = text.lastIndexOf('.');
-            if (lastDot > 0) text = text.substring(0,lastDot+1)+"*";
+            if (lastDot > 0) text = text.substring(0, lastDot + 1) + "*";
           }
           final InteractionsModel im = _model.getInteractionsModel();
           // get the last line (the one that caused the error) and remove it from the history

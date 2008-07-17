@@ -209,6 +209,9 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
   }
   
+  /** Updates status fields in the main frame (title bar, selected file name) when document is modified. */
+  protected void updateStatusField() { /* do nothing; this is an interactions pane. */ }
+  
 //  /** Returns the list of prompts. Used for tests. */
 //  List<Integer> getPromptList() {  return _listOfPrompt; }  // NOT USED
   
