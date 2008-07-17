@@ -712,7 +712,7 @@
     <echo message="Generating javadocs" />
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
-    <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc"
+    <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="256M"
              access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
       <classpath>
         <pathelement location="${java15-tools}" />
