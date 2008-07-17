@@ -66,9 +66,6 @@ public interface EditDocumentInterface /* extends ReadersWritersLocking, Seriali
     */
   public void insertText(int offs, String str, String style);
   
-  /** Inserts a string into "this" exactly like insertText except that it assumes the WriteLock is already held. */
-  public void _insertText(int offs, String str, String style);
-  
   /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
     * @param offs Offset into the document
     * @param str String to be inserted
@@ -78,18 +75,12 @@ public interface EditDocumentInterface /* extends ReadersWritersLocking, Seriali
     */
   public void forceInsertText(int offs, String str, String style);
   
-  /** Inserts a string into "this" exactly like forceInsertText except that it assumes the WriteLock is already held. */
-  public void _forceInsertText(int offs, String str, String style);
-  
   /** Removes a portion of the document, if the edit condition allows it.
     * @param offs Offset to start deleting from
     * @param len Number of characters to remove
     * @throws EditDocumentException if the offset or length are illegal
     */
   public void removeText(int offs, int len);
-  
-  /** Removes a portion of the document, if the edit condition allows it, as above.  Assumes that WriteLock is held. */
-  public void _removeText(int offs, int len);
   
   /** Removes a portion of the document, regardless of the edit condition.
     * @param offs Offset to start deleting from

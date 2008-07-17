@@ -36,6 +36,7 @@
 
 package edu.rice.cs.util.text;
 
+import java.awt.EventQueue;
 import java.awt.print.*;
 
 import edu.rice.cs.drjava.model.print.DrJavaBook;
@@ -147,40 +148,33 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
 //    releaseWriteLock();
   }
   
-  /** Resets the document to a clean state. */
+  /** Resets the document to a clean state. Only runs in the event thread. */
   public void reset(String banner) {
-//    acquireWriteLock();
+    assert EventQueue.isDispatchThread();
     try {
       forceRemoveText(0, _document.getLength());
-      _forceInsertText(0, banner, DEFAULT_STYLE);
+      forceInsertText(0, banner, DEFAULT_STYLE);
       _promptPos = banner.length();
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
   }
   
   /** Prints a prompt for a new input. */
   public void insertPrompt() {
-//    acquireWriteLock();
     try {
       int len = _document.getLength();
       // Update _promptPos before updating _document because insertText runs insertUpdate to adjust caret
       _promptPos = len + _prompt.length();
-      _forceInsertText(len, _prompt, DEFAULT_STYLE); // need forceAppend!
+      forceInsertText(len, _prompt, DEFAULT_STYLE); // need forceAppend!
       _document.setHasPrompt(true);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }
-//    finally { releaseWriteLock(); }
   }
   
   /** Disables the prompt in this document. */
   public void disablePrompt() {
-//    acquireWriteLock();
-//    try {
     _document.setHasPrompt(false);
     _promptPos = _document.getLength();
-//    }
-//    finally { releaseWriteLock(); }
   }
   
   /** Inserts a new line at the given position.
@@ -222,7 +216,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
       int pos = _getPositionBeforePrompt();
 //      System.err.println("_promptPos before update = " + _promptPos);
       _promptPos = _promptPos + text.length();
-      _forceInsertText(pos, text, style);
+      forceInsertText(pos, text, style);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
 //    finally { releaseWriteLock(); }
@@ -235,16 +229,6 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @throws EditDocumentException if the offset is illegal
     */
   public void insertText(int offs, String str, String style) throws EditDocumentException {
-//    acquireWriteLock();
-//    try { 
-    _insertText(offs, str, style); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Inserts a string into the document at the given offset and named style, if the edit condition allows it., as
-    * above.  Assumes WriteLock is held. */
-  public void _insertText(int offs, String str, String style) throws EditDocumentException {
     if (offs < _promptPos) _beep.run();
     else {
       _addToStyleLists(offs, str, style);
@@ -258,13 +242,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @throws EditDocumentException if the offset is illegal
     */
   public void append(String str, String style) throws EditDocumentException {
-//    acquireWriteLock();
-//    try {
+//    assert EventQueue.isDispatchThread();
     int offs = _document.getLength();
     _addToStyleLists(offs, str, style);
-    _document._insertText(offs, str, style);
-//    }
-//    finally { releaseWriteLock(); }
+    _document.insertText(offs, str, style);
   }
   
   /** Inserts a string into the document at the given offset and  style, regardless of the edit condition.
@@ -273,21 +254,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @param style Name of the style to use.  Must have been added using addStyle.
     * @throws EditDocumentException if the offset is illegal
     */
-  public void forceInsertText(int offs, String str, String style) throws EditDocumentException {
-//    acquireWriteLock();
-//    try { 
-      _forceInsertText(offs, str, style); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Inserts a string into the document exactly like forceInsertText above except that it assumes the WriteLock
-    * is already held.
-    */
-  public void _forceInsertText(int offs, String str, String style) throws EditDocumentException {      
+  public void forceInsertText(int offs, String str, String style) throws EditDocumentException {      
     _addToStyleLists(offs, str, style);
 //    System.err.println("Inserting text '" + str + "' at position " + offs);
-    _document._forceInsertText(offs, str, style);
+    _document.forceInsertText(offs, str, style);
   }
   
   /** Adds style specifier to _stylelists. Assumes that ReadLock or WriteLock is already held. */
@@ -302,17 +272,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @throws EditDocumentException if the offset or length are illegal
     */
   public void removeText(int offs, int len) throws EditDocumentException {
-//    acquireWriteLock();
-//    try { 
-      _removeText(offs, len); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Removes a portion of the document, if the edit condition allows it, as above.  Assumes that WriteLock is held. */
-  public void _removeText(int offs, int len) throws EditDocumentException {
     if (offs < _promptPos) _beep.run();
-    else _document._removeText(offs, len);
+    else _document.removeText(offs, len);
   }
   
   /** Removes a portion of the document, regardless of the edit condition.

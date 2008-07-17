@@ -99,7 +99,7 @@ public class DrJavaTestCase extends TestCase {
       public void run() {
         try {
           doc.clear();
-          doc._insertString(0, text, null);
+          doc.insertString(0, text, null);
         }
         catch(BadLocationException e) { throw new UnexpectedException(e); }
       }

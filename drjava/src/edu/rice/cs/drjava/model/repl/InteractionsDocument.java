@@ -127,7 +127,6 @@ public class InteractionsDocument extends ConsoleDocument {
   
   /** Resets the document to a clean state.  Does not reset the history. */
   public void reset(String banner) {
-//    acquireWriteLock();
     try {
 //      System.err.println("Resetting the interactions document with banner '" + banner + "'");
       // Clear interactions document
@@ -141,7 +140,6 @@ public class InteractionsDocument extends ConsoleDocument {
       setInProgress(false);  // redundant? also done in InteractionsDocument.interpreterReady(...)
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
   }
   
   /** Replaces any text entered past the prompt with the current item in the history. Assumes that WriteLock is 

@@ -290,21 +290,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * of the tabification functionality that the document contains no tabs, but we want to allow the user to override 
     * this functionality.
     */
-  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException { 
-    
-//    acquireWriteLock();
-//    try { 
-    _insertString(offset, str, a); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Raw version of insertString.  Assumes write lock is already held. */
-  public void _insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-//    assert isWriteLocked();
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
     if (_tabsRemoved) str = _removeTabs(str);
     _setModifiedSinceSave();
-    super._insertString(offset, str, a);
+    super.insertString(offset, str, a);
   }
     
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
@@ -549,7 +538,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    Utilities.show("Uncomment line at location " + _currentLocation);
 //    Utilities.show("Preceding char = '" + getText().charAt(_currentLocation - 1) + "'");
 //    Utilities.show("Line = \n" + getText(_currentLocation, getLineEndPos(_currentLocation) - _currentLocation + 1));
-    int pos1 = _getText().indexOf("//", _currentLocation);  // TODO: get text of current line instead of whole document
+    int pos1 = getText().indexOf("//", _currentLocation);  // TODO: get text of current line instead of whole document
     int pos2 = _getFirstNonWSCharPos(_currentLocation, true);
 //    Utilities.show("Pos1 = " + pos1 + " Pos2 = " + pos2);
     if (pos1 != pos2) return NO_COMMENT_OFFSET;
@@ -911,7 +900,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     Reader r;
 //    acquireReadLock();
 //    try { 
-    r = new StringReader(_getText()); // getText() is cheap if document is not resident
+    r = new StringReader(getText()); // getText() is cheap if document is not resident
 //    }  
 //    finally { releaseReadLock(); }
     try { return new Parser(r).packageDeclaration().getName(); }
@@ -1102,7 +1091,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       try {
         _setCurrentLocation(0);
-        final String text = _getText();  // getText() is cheap if document is not resident
+        final String text = getText();  // getText() is cheap if document is not resident
         
         final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
         final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
@@ -1210,7 +1199,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int index = _getFirstNonWSCharPos(startPos);
       if (index == -1) throw new IllegalStateException("No identifier found");
       
-      String text = _getText();
+      String text = getText();
       int length = text.length(); 
       int endIndex = length; //just in case no whitespace at end of file
       

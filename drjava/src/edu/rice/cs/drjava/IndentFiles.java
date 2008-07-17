@@ -112,7 +112,7 @@ public class IndentFiles {
         DefinitionsDocument doc = new DefinitionsDocument(indenter, new GlobalEventNotifier());
 //        doc.acquireWriteLock();
 //        try {
-        doc._insertString(0, fileContents, null); // (no attributes)
+        doc.insertString(0, fileContents, null); // (no attributes)
         int docLen = doc.getLength();
         doc.indentLines(0, docLen);
         fileContents = doc.getText();

@@ -36,10 +36,12 @@
 
 package edu.rice.cs.util.text;
 
-import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
-import edu.rice.cs.drjava.DrJavaTestCase;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Tests ConsoleDocument.
   * @version $Id$
@@ -112,7 +114,7 @@ public class ConsoleDocumentTest extends DrJavaTestCase {
     assertEquals("forceRemove should be accepted", "iitia2", _doc.getText());
     _doc.append("THE END", (String) null);
     assertEquals("forceRemove should be accepted", "iitia2THE END", _doc.getText());
-    _doc.reset("");
+    Utilities.invokeAndWait(new Runnable() { public void run() { _doc.reset(""); } });
     assertEquals("promptPos reset when doc is reset", 0, _doc.getPromptPos());
     _doc.setEditCondition(new DocumentEditCondition());
     _doc.append("THE END", null);

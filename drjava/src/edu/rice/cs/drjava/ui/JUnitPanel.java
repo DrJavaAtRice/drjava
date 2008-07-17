@@ -264,14 +264,14 @@ public class JUnitPanel extends ErrorPanel {
         // Insert the classname if it has changed
         if (! className.equals(_runningTestName)) {
           _runningTestName = className;
-          doc._insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
+          doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
           len = doc.getLength();
         }
         
         // Insert the test name, remembering its position
-        doc._insertString(len, "    ", NORMAL_ATTRIBUTES);
+        doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
         len = doc.getLength();
-        doc._insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
+        doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
         Position pos = doc.createPosition(len);
         _runningTestNamePositions.put(fullName, pos);
         setCaretPosition(len);

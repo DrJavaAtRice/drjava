@@ -135,20 +135,16 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @throws EditDocumentException if the offset is illegal
     */
   public void insertText(int offs, String str, String style) {
-//    acquireWriteLock();
-//    try { 
-      _insertText(offs, str, style); 
-//    }
-//    finally { releaseWriteLock(); }
+    if (_condition.canInsertText(offs)) forceInsertText(offs, str, style); 
   }
   
-  /** Behaves exactly like insertText except for assuming that WriteLock is already held. */
-  public void _insertText(int offs, String str, String style) {
-    if (_condition.canInsertText(offs)) _forceInsertText(offs, str, style); 
-  }
-  
-  /** Behaves exactly like forceInsertText except for assuming that WriteLock is already held. */
-  public void _forceInsertText(int offs, String str, String style) {
+  /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
+    * @param offs Offset into the document
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
+  public void forceInsertText(int offs, String str, String style) {
     int len = getLength();
     if ((offs < 0) || (offs > len)) {
       String msg = "Offset " + offs + " passed to SwingDocument.forceInsertText is out of bounds [0, " + len + "]";
@@ -160,33 +156,11 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new EditDocumentException(e); }  // should never happen
   }
   
-  /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
-    * @param offs Offset into the document
-    * @param str String to be inserted
-    * @param style Name of the style to use.  Must have been added using addStyle.
-    * @throws EditDocumentException if the offset is illegal
-    */
-  public void forceInsertText(int offs, String str, String style) {
-//    acquireWriteLock();
-//    try { 
-    _forceInsertText(offs, str, style); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
+ /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
     * which sees a null style name.
     */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
-//    acquireWriteLock();  // locking is used to make the test and modification atomic
-//    try { 
-      _insertString(offs, str, set); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Raw version of insertString.  Assumes write lock is already held. */
-  public void _insertString(int offs, String str, AttributeSet set) throws BadLocationException {
+//    assert EventQueue.isDispatchThread();
     if (_condition.canInsertText(offs)) super.insertString(offs, str, set);
   }
   
@@ -196,15 +170,6 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @throws EditDocumentException if the offset or length are illegal
     */
   public void removeText(int offs, int len) {
-//    acquireWriteLock();  // locking is used to make the test and modification atomic
-//    try { 
-    _removeText(offs, len); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Removes a portion of the document, if the edit condition allows it, as above.  Assume sthat WriteLock is held */
-  public void _removeText(int offs, int len) {
     if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); 
   }
   
@@ -241,17 +206,8 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
   
-   /** Gets the document text; this method is threadsafe. */
-  public String getText() {
-//    acquireReadLock();
-//    try { 
-      return _getText(); 
-//    }
-//    finally { releaseReadLock(); }
-  }
-  
-  /** Raw version of getText() that assumes the ReadLock is already held. */
-  public String _getText() { 
+  /** Gets the document text; this method is threadsafe. */
+  public String getText() { 
     try { return getText(0, getLength()); }  // calls method defined in DefaultStyledDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible if read lock is already held
   }
@@ -261,18 +217,10 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     try { return getText(pos, len); }  // calls method defined in DefaultStyledDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
+  
   /** Appends given string with specified attributes to end of this document. */
   public void append(String str, AttributeSet set) {
-//    acquireWriteLock();
-//    try { 
-    _append(str, set); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
-  
-  /** Same as append above except that it assumes the Write Lock is already held. */
-  public void _append(String str, AttributeSet set) {
-    try { _insertString(getLength(), str, set); }
+    try { insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
   }
   

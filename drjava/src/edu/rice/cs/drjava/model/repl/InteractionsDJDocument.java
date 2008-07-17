@@ -238,7 +238,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   public void appendExceptionResult(String message, String styleName) {
     // Note that there is similar code in InteractionsDocument.  Something should be refactored.
 //    acquireWriteLock();
-    try { _insertText(getLength(), message + "\n", styleName); }
+    try { insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
 //    finally { releaseWriteLock(); }
   } 

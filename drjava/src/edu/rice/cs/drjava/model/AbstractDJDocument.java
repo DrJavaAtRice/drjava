@@ -658,7 +658,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int i;  // index of for loop below
     int braceBalance = 0;
     
-    String text = _getText();
+    String text = getText();
 //    try {      
 //    synchronized(_reduced) {
       final int origPos = _currentLocation;
@@ -1770,7 +1770,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (len != tab) {
         // Only add or remove the difference
         int diff = tab - len;
-        if (diff > 0) _insertString(firstNonWSPos, getBlankString(diff), null);
+        if (diff > 0) insertString(firstNonWSPos, getBlankString(diff), null);
         else remove(firstNonWSPos + diff, -diff);
       }
       /* else do nothing */ 
@@ -1796,7 +1796,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       // Remove the whole prefix, then add the new one
       remove(startPos, len);
-      _insertString(startPos, tab, null);
+      insertString(startPos, tab, null);
     }
     catch (BadLocationException e) {
       // Should never see a bad location
@@ -1898,7 +1898,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   
   /** Returns the byte image (as written to a file) of this document. */
-  public byte[] getBytes() { return _getText().getBytes(); }
+  public byte[] getBytes() { return getText().getBytes(); }
   
   public void clear() {
 //    acquireWriteLock();
