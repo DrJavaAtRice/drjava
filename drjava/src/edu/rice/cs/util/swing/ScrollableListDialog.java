@@ -347,17 +347,14 @@ public class ScrollableListDialog<T> extends JDialog {
   /** Return a list of the selected items. */
   public List<T> getSelectedItems() {
     ArrayList<T> l = new ArrayList<T>();
-    for(int i: list.getSelectedIndices()) {
-      l.add(listItems.get(i));
-    }
+    for (int i: list.getSelectedIndices())  l.add(listItems.get(i));
+
     return l;
   }
   
-  /**
-   * A simple main method for testing purposes.
-   * 
-   * @param args Not used.
-   */
+  /** A simple main method for testing purposes.
+    * @param args Not used.
+    */
   public static void main(String args[]) {
     final List<String> data = new java.util.ArrayList<String>();
     data.add("how");

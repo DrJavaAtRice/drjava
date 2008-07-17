@@ -8031,8 +8031,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocusInWindow();
 //          System.err.println("Showing Interactions Tab" );
-          // following line disabled to avoid switching to interactions when browsing findall results
-//          showTab(_interactionsContainer); 
+//          showTab(_interactionsContainer); // Note: disabled to avoid switching to interactions when browsing findall results
           _updateDebugStatus();
         }
       }

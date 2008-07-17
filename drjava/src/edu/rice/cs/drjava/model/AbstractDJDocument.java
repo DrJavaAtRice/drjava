@@ -1955,7 +1955,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         _addCharToReducedModel(curChar);
       }
       _currentLocation = _offset + len;  // update _currentLocation to match effects on the reduced model
-//      _styleChanged();
+      _styleChanged();
 //      if (getClass() ==  InsertCommand.class) 
 //        System.err.println("Inserted '" + _text + "' loc is now " + _currentLocation);
     }
@@ -1989,7 +1989,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
      
       _addCharToReducedModel(_ch);
       _currentLocation = _offset + 1;  // update _currentLocation to match effects on the reduced model
-//      _styleChanged();
+      _styleChanged();
     }
   }
       
@@ -2006,7 +2006,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     public void run() {
       _setCurrentLocation(_offset);
       _reduced.delete(_length);    
-//      _styleChanged(); 
+      _styleChanged(); 
     }
   }
 

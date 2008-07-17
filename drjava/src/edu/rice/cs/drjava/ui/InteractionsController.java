@@ -158,7 +158,7 @@ public class InteractionsController extends AbstractConsoleController {
       _box = new InputBox();  // FIX: move _box inside run as final local variable
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
-      EventQueue.invokeLater(new Runnable() {
+      EventQueue.invokeLater(new Runnable() {  // why EventQueue.invokeLater?
         public void run() { 
           
           // These commands only run in the event thread

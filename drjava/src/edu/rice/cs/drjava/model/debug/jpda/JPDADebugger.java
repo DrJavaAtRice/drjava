@@ -250,16 +250,15 @@ public class JPDADebugger implements Debugger {
     if (isReady()) {
       Runnable command = new Runnable() { public void run() { _model.getInteractionsModel().removeListener(_watchListener); } };
       
-      /* Use SwingUtilities.invokeLater rather than Utilities.invokeLater because we want to defer executing this
-       * code after pending events (that may involve the _watchListener) */
+      /* Use EventQueue rather than Utilities because we want to defer executing this
+       * code after pending events (that may involve the _watchListener). 
+       */
       EventQueue.invokeLater(command);
       
       _removeAllDebugInterpreters();
       
       try { _vm.dispose(); }
-      catch (VMDisconnectedException vmde) {
-        //VM was shutdown prematurely
-      }
+      catch (VMDisconnectedException vmde) { /* VM was shutdown prematurely */ }
       finally {
         _model.getInteractionsModel().setToDefaultInterpreter();
         _vm = null;

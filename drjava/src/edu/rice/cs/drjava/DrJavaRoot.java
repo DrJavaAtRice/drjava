@@ -164,7 +164,7 @@ public class DrJavaRoot {
       // false means "do not jump to the line number that may be specified, just open the file"
       _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, false);
       
-      /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
+      /* This call on invokeLater only runs in the main thread, so we use EventQueue rather than Utilities.
        * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
        * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
        * specifying a file (ex: java -jar drjava.jar somefile.java)

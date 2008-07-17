@@ -200,6 +200,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     else return _odd;
   }
   
+  /** Recolors the rest of the document based on the change that triggered this call. */
   protected void _styleChanged() {    
     
       int length = getLength() - _currentLocation;
