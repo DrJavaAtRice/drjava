@@ -352,25 +352,6 @@
 
   </target>
 
-             <!-- >-->
-
-  <target name="findbugs" depends="assert-findbugs-exists, compile-15"
-	      description="Generate a findbugs report in findbugs.html (after compiling)">
-    <delete file="${basedir}/findbugs.html" />
-    <findbugs home="${findbugs-home}" output="html" jvmargs="-Xmx512M" failOnError="true"
-              outputFile="findbugs.html" timeout="1800000"
-         	  excludeFilter="${basedir}/lib/buildlib/findbugs-filter.xml">
-      <auxclasspath>
-        <pathelement location="${java15-tools}" />
-        <fileset refid="libs" />
-        <pathelement location="lib/buildlib/junit.jar" />
-      </auxclasspath>
-      <sourcepath path="src" />
-      <class location="classes/base" />
-      <class location="classes/test" />
-    </findbugs>
-  </target>        
-
 
   <!-- ***************
        Testing Targets
@@ -768,6 +749,25 @@
   </target>
   
   
+  <target name="findbugs" depends="assert-findbugs-exists, compile-15"
+	      description="Generate a findbugs report in findbugs.html (after compiling)">
+    <delete file="docs/findbugs.html" />
+    <mkdir dir="docs" />
+    <findbugs home="${findbugs-home}" output="html" jvmargs="-Xmx512M" failOnError="true"
+              outputFile="docs/findbugs.html" timeout="1800000"
+              excludeFilter="lib/buildlib/findbugs-filter.xml">
+      <auxclasspath>
+        <pathelement location="${java15-tools}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+      </auxclasspath>
+      <sourcepath path="src" />
+      <class location="classes/base" />
+      <class location="classes/test" />
+    </findbugs>
+  </target>        
+
+
   <target name="benchmark" depends="benchmark-current, benchmark-previous, benchmark-report"
           description="Generate a test performance report">
   </target>
@@ -954,7 +954,7 @@
         <include name="*.jar" />
         <include name="*.zip" />
         <include name="*.tar.gz" />
-		<include name="findbugs.html" />
+        <include name="*.exe" />
       </fileset>
     </delete>
 	
