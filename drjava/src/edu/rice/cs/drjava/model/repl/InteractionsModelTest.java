@@ -114,6 +114,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   
   /** Tests that the correct text is returned when interpreting. */
   public void testInterpretCurrentInteraction() throws Exception {
+    _log.log("testInterpretCurrentInteraction started");
     assertTrue(_model instanceof TestInteractionsModel);
     final TestInteractionsModel model = (TestInteractionsModel) _model;
     final InteractionsDocument doc = model.getDocument();
@@ -143,6 +144,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
 
     Utilities.clearEventQueue();
     assertEquals("string being interpreted", code, model.toEval);
+    _log.log("testInterpretCurrentInteraction ended");
   }
   
   public void testInterpretCurrentInteractionWithIncompleteInput() throws EditDocumentException, InterruptedException,
@@ -155,6 +157,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertReplThrewContinuationException("(1+2");
     assertReplThrewSyntaxException("(1+2;");
     assertReplThrewContinuationException("for (;;");
+    _log.log("testInterpretCurrentInteractionWithIncompleteInput ended");
   }
   
   /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
@@ -169,16 +172,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       }
     });
     Utilities.clearEventQueue();
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() {
-        model._logInteractionStart();
-        model.interpretCurrentInteraction();
-        _log.log("Waiting for InteractionDone()");
-      }
-    });
-    Utilities.clearEventQueue();
     model._logInteractionStart();
+    model.interpretCurrentInteraction();
+    Utilities.clearEventQueue();
+    _log.log("Waiting for InteractionDone()");
     model._waitInteractionDone();
+
     Utilities.clearEventQueue();
     assertTrue("Code '" + code + "' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
@@ -209,6 +208,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   
   /** Tests that "java Classname [args]" runs the class's main method, with simple delimited arguments. */
   public void testInterpretJavaArguments() {
+    _log.log("testInterpretJavaArguments started");
     // java Foo a b c
     // Foo.main(new String[]{"a", "b", "c"});
     _assertMainTransformation("java Foo a b c", "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
@@ -228,6 +228,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // java Foo /home/user/file
     // Foo.main("/home/user/file");
     _assertMainTransformation("java Foo /home/user/file", "Foo.main(new String[]{\"/home/user/file\"});");
+    _log.log("testInterpretJavaArguments ended");
   }
   
   /** Tests that escaped characters just return the character itself.  Escaped whitespace is considered a character, 
@@ -236,6 +237,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     * not currently enforcing any behavior for a simple implementation using a StreamTokenizer
     */
   public void testInterpretJavaEscapedArgs() {
+    _log.log("testInterpretJavaEscapedArgs started");
     // java Foo \j
     // Foo.main(new String[]{"j"});
     _assertMainTransformation("java Foo \\j", "Foo.main(new String[]{\"j\"});");
@@ -248,12 +250,14 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // java Foo a\ b
     // Foo.main(new String[]{"a b"});
     _assertMainTransformation("java Foo a\\ b", "Foo.main(new String[]{\"a b\"});");
+    _log.log("testInterpretJavaEscapedArgs ended");
   }
   
   /** Tests that within a quote, everything is correctly escaped.
     * (Special characters are passed to the program correctly.)
     */
   public void testInterpretJavaQuotedEscapedArgs() {
+    _log.log("testInterpretJavaQuotedEscapedArgs started");
     // java Foo "a \" b"
     // Foo.main(new String[]{"a \" b"});
     _assertMainTransformation("java Foo \"a \\\" b\"", "Foo.main(new String[]{\"a \\\" b\"});");
@@ -268,29 +272,25 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _assertMainTransformation("java Foo \"\\\" \\d\"", "Foo.main(new String[]{\"\\\" \\\\d\"});");
     // java Foo "\n"
     // Foo.main(new String[]{"\n"});
-    /*    _assertMainTransformation("java Foo \"\\n\"",
-     "Foo.main(new String[]{\"\\n\"});");
+    /*    _assertMainTransformation("java Foo \"\\n\"", "Foo.main(new String[]{\"\\n\"});");
      // java Foo "\t"
      // Foo.main(new String[]{"\t"});
-     _assertMainTransformation("java Foo \"\\t\"",
-     "Foo.main(new String[]{\"\\t\"});");
+     _assertMainTransformation("java Foo \"\\t\"", "Foo.main(new String[]{\"\\t\"});");
      // java Foo "\r"
      // Foo.main(new String[]{"\r"});
-     _assertMainTransformation("java Foo \"\\r\"",
-     "Foo.main(new String[]{\"\\r\"});");
+     _assertMainTransformation("java Foo \"\\r\"", "Foo.main(new String[]{\"\\r\"});");
      // java Foo "\f"
      // Foo.main(new String[]{"\f"});
-     _assertMainTransformation("java Foo \"\\f\"",
-     "Foo.main(new String[]{\"\\f\"});");
+     _assertMainTransformation("java Foo \"\\f\"", "Foo.main(new String[]{\"\\f\"});");
      // java Foo "\b"
      // Foo.main(new String[]{"\b"});
-     _assertMainTransformation("java Foo \"\\b\"",
-     "Foo.main(new String[]{\"\\b\"});"); */
+     _assertMainTransformation("java Foo \"\\b\"", "Foo.main(new String[]{\"\\b\"});"); */
+    _log.log("testInterpretJavaQuotedEscapedArgs started");
   }
   
   /** Tests that single quotes can be used as argument delimiters. */
   public void testInterpretJavaSingleQuotedArgs() {
-    
+    _log.log("testInterpretJavaSingleQuotedArgs started");
     // java Foo 'asdf'
     _assertMainTransformation("java Foo 'asdf'", "Foo.main(new String[]{\"asdf\"});");
     
@@ -299,6 +299,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     // java Foo 'a b'c
     _assertMainTransformation("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
+     _log.log("testInterpretJavaSingleQuotedArgs ended");
   }
   
   //public void testLoadHistory();
@@ -307,6 +308,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   
   /** Tests that a debug port can be generated. */
   public void testDebugPort() throws IOException {
+     _log.log("testDebugPort started");
     int port = _model.getDebugPort();
     assertTrue("generated debug port", port != -1);
     
@@ -323,10 +325,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // Port should stay -1 after setting it
     _model.setDebugPort(-1);
     assertEquals("debug port should be -1", -1, _model.getDebugPort());
+    _log.log("testDebugPort ended");
   }
   
   /** Tests that an interactions history can be loaded in as a script. */
   public void testScriptLoading() throws Exception {
+    _log.log("testScriptLoading started");
     assertTrue(_model instanceof TestInteractionsModel);
     final TestInteractionsModel model = (TestInteractionsModel)_model;
     // Set up a sample history
@@ -438,8 +442,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction();  } });
     model._waitInteractionDone();
 
-//    System.err.println("model.toEval = '" + model.toEval + "'");
-      
+//    System.err.println("model.toEval = '" + model.toEval + "'");  
     assertEquals("Should have \"executed\" the first interaction.", line1, model.toEval);
     
     // Get Previous should return the most recent (first) interaction
@@ -454,13 +457,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       ism.prevInteraction();
       fail("Should not have been able to get previous interaction!");
     }
-    catch (IllegalStateException ise) {
-      // good, continue
-    }
+    catch (IllegalStateException ise) { /* good, continue */ }
+    _log.log("testScriptLoading ended");
   }
   
   /** Tests that setting and changing an input listener works correctly. */
   public void testSetChangeInputListener() {
+    _log.log("testSetChangeInputListener started");
     InputListener listener1 = new InputListener() {
       public String getConsoleInput() { return "input1"; }
     };
@@ -482,10 +485,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertEquals("First input listener should return correct input", "input1", _model.getConsoleInput());
     _model.changeInputListener(listener1, listener2);
     assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
+    _log.log("testSetChangeInputListener ended");
   }
   
   /** Tests that the interactions history is stored correctly. See bug # 992455 */
   public void testInteractionsHistoryStoredCorrectly() throws Exception {
+    _log.log("testInteractionsHistoryStoredCorrectly started");
     final Object _lock = new Object();
     final String code = "public class A {\n";
     
@@ -530,6 +535,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     assertEquals("Current interaction should not be there - should have interpreted", "", doc.getCurrentInteraction());
     assertEquals("History should contain one interaction", 1, h.size());
+    _log.log("testInteractionsHistoryStoredCorrectly ended");
   }
   
   /** A generic InteractionsModel for testing purposes.  (Used here and in InteractionsPaneTest.) */
