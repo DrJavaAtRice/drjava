@@ -103,7 +103,8 @@ public abstract class AbstractDJPane extends JTextPane
   /** Our current paren/brace/bracket matching highlight. */
   protected volatile HighlightManager.HighlightInfo _matchHighlight = null;
   
-  protected final SwingDocument NULL_DOCUMENT = new SwingDocument();
+  protected static final SwingDocument NULL_DOCUMENT = new SwingDocument();
+  
   
   //--------- CONSTRUCTOR ----------
   

@@ -1561,7 +1561,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       generateJavaAPIList();
     }
   }
-
+  
   /** Generate Java API class list. */
   public static List<JavaAPIListEntry> _generateJavaAPIList(String base,
                                                             String stripPrefix,
@@ -2567,7 +2567,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     panel.addCloseListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) { _findResults.remove(pair); }
     });
-
+    
     _tabs.addLast(panel);
     panel.getMainPanel().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }
@@ -4502,7 +4502,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
     _recentProjectManager.updateOpenFiles(projectFile);
   }
-
+  
   private void _openProjectUpdate() {
     if (_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
@@ -7478,7 +7478,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       private void updateUI() {
         if (isDisplayed(_breakpointsPanel)) { _breakpointsPanel.repaint(); }
         if (isDisplayed(_bookmarksPanel)) { _bookmarksPanel.repaint(); }
-
+        
         Component c = _tabbedPane.getSelectedComponent();
         if (c != null) c.repaint();
       }
@@ -8007,7 +8007,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                         final boolean shouldHighlight, final boolean shouldAddToHistory) {
     
     assert duringInit() || EventQueue.isDispatchThread();
-         
+    
     if (shouldAddToHistory) addToBrowserHistory();
     final boolean toSameDoc = _model.getActiveDocument().equals(doc);
     
@@ -8827,7 +8827,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void interpreterResetting() {
       assert duringInit() || EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread
-
+      
       _junitAction.setEnabled(false);
       _junitAllAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
@@ -8841,7 +8841,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void interpreterReady(File wd) {
       assert duringInit() || EventQueue.isDispatchThread();
-
+      
       interactionEnded();
       _runAction.setEnabled(true);
       _runProjectAction.setEnabled(_model.isProjectActive());
@@ -9015,7 +9015,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + 
         " cannot be loaded.\n "
         + "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
-
+      
       JOptionPane.showMessageDialog(MainFrame.this, message,
                                     "Testing works only on valid class files",
                                     JOptionPane.ERROR_MESSAGE);
@@ -9044,7 +9044,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String text,fname;
       OpenDefinitionsDocument lastActive = _model.getActiveDocument();
       if (lastActive != doc) _model.setActiveDocument(doc);
-
+      
       boolean notFound = false;
       try {
         File file = doc.getFile();
@@ -9203,11 +9203,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   public void removeTab(final Component c) {
- 
+    
     if (_tabbedPane.getTabCount() > 1) {
 //      if (_tabbedPane.getSelectedIndex() == _tabbedPane.getTabCount() - 1)
 //        _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() - 1);
-
+      
       _tabbedPane.remove(c);
       ((TabbedPanel)c).setDisplayed(false);
     }
@@ -9241,7 +9241,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _tabbedPane.setSelectedComponent(c);
       c.requestFocusInWindow();
-
+      
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
     }
     finally {
@@ -9250,15 +9250,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
   }
-  
-//  /** Sets the location of the main divider.  Not currently used. */
-//    private void _setDividerLocation() {
-//    int divLocation = _mainSplit.getHeight() -
-//    _mainSplit.getDividerSize() -
-//    (int)_tabbedPane.getMinimumSize().getHeight();
-//    if (_mainSplit.getDividerLocation() > divLocation)
-//    _mainSplit.setDividerLocation(divLocation);
-//    }
   
   /** Warns the user that the current file is open and query them if they wish to save over the currently open file. */
   private boolean _warnFileOpen(File f) {
@@ -9298,14 +9289,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _junitProjectAction.setEnabled(_model.isProjectActive());
     _junitErrorPanel.reset();
   }
-       
+  
   /* Pops up a message and cleans up after unit testing has been interrupted. */
   private void _junitInterrupted(final UnexpectedException e) {
     try {
-    _showJUnitInterrupted(e);
-    removeTab(_junitErrorPanel);
-    _resetJUnit();
-    _model.refreshActiveDocument();
+      _showJUnitInterrupted(e);
+      removeTab(_junitErrorPanel);
+      _resetJUnit();
+      _model.refreshActiveDocument();
     }
     finally { hourglassOff(); }
   }
@@ -9461,10 +9452,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     MainFrame.setPopupLoc(popup, (popup.getOwner() != null) ? popup.getOwner() : this);
   }
   
-  /** Sets the location of the popup in a consistant way.  If the popup has an owner, the popup is centered over the
-    * owner.  If the popup has no owner(owner == null), the popup is centered over the first monitor.  In either case,
-    * the popup is moved and scaled if any part of it is not on the screen.  This method should be called for all popups
-    * to maintain consistancy.
+  /** Determines the location of the popup using a simple, uniform protocol.  If the popup has an owner, the popup is 
+    * centered over the owner.  If the popup has no owner(owner == null), the popup is centered over the first monitor.
+    * In either case, the popup is moved and scaled if any part of it is not on the screen.  This method should be 
+    * called for all popups to maintain uniformity in the DrJava UI.
     * @param popup the popup window
     * @param owner the parent component for the popup
     */
@@ -9473,7 +9464,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     Point ownerLoc = null;
     Dimension ownerSize = null;
-    if ((owner != null) && (owner.isVisible())) {
+    if (owner != null && owner.isVisible()) {
       ownerLoc = owner.getLocation();
       ownerSize = owner.getSize();
     }
@@ -9555,7 +9546,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
   
   /** User dropped something on the component. */
-  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+  public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
+    assert EventQueue.isDispatchThread();
     try {
       Transferable tr = dropTargetDropEvent.getTransferable();
       if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
@@ -9702,11 +9694,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             if (lastDot > 0) text = text.substring(0, lastDot + 1) + "*";
           }
           final InteractionsModel im = _model.getInteractionsModel();
-          // get the last line (the one that caused the error) and remove it from the history
+          // Get the last line (the one that caused the error) and remove it from the history
           String lastLine = im.removeLastFromHistory();
-          // import the selected class...
+          // Import the selected class...
           String importLine = "import " + text + "; // auto-import";
-          // ...and try to do the last line again
+          // ... and try to do the last line again
           final String code = importLine + ((lastLine != null)  ?  ("\n" + lastLine)  : "");
           EventQueue.invokeLater(new Runnable() { 
             public void run() { // interpret with the added import
@@ -9749,7 +9741,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void setOwnerEnabled(boolean b) { if (b) hourglassOff(); else hourglassOn(); }
         protected JComponent[] makeOptions() { return new JComponent[] { _autoImportPackageCheckbox }; }
       }; 
-      // putting one dummy entry in the list; it will be changed later anyway
+      // Put one dummy entry in the list; it will be changed later anyway
       if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
         _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
       }
@@ -9892,15 +9884,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param toFrontAction action to be performed after the window has been moved to the front again
     * @param closeAction action to be performed when the window is closing
     * @return window listener */
-  public synchronized void installModalWindowAdapter(final Window w,
-                                                     final Lambda<Void,WindowEvent> toFrontAction,
-                                                     final Lambda<Void,WindowEvent> closeAction) {
+  public void installModalWindowAdapter(final Window w, final Lambda<Void,WindowEvent> toFrontAction,
+                                        final Lambda<Void,WindowEvent> closeAction) {
+    assert EventQueue.isDispatchThread();
+    
     if (_modalWindowAdapters.containsKey(w)) { // already installed
       return;
     }
     
     WindowAdapter wa;
-    if (_modalWindowAdapterOwner==null) {
+    if (_modalWindowAdapterOwner == null) {
       // modal listener is available, claim it
       _modalWindowAdapterOwner = w;
       // create a window adapter performs the specified actions after delegating to the modal window adapter
@@ -9924,10 +9917,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       };
     }
     else {
-      // modal listener is already owned by another window
-      // create a window adapter that just performs the closeAction.
-      // it does not perform the toFrontAction, since that can lead to
-      // two windows bouncing back and forth, both trying to stay on top.
+      /* The modal listener is already owned by another window.  The code block creates a window adapter that performs 
+       * closeActions but not toFrontActions because the latter could generate an endless loop with this window 
+       * competing with the modal listener window to stay on top.
+       */
       wa = new WindowAdapter() {
         public void windowDeactivated(WindowEvent we) { }
         public void windowIconified(WindowEvent we) { }
@@ -9944,7 +9937,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Removes the modal window adapter.
     * @param w window releasing the modal window adapter 
     */
-  public synchronized void removeModalWindowAdapter(Window w) {
+  public /* synchronized */ void removeModalWindowAdapter(Window w) {
+    assert EventQueue.isDispatchThread();
     if (! _modalWindowAdapters.containsKey(w)) { // the specified window does not have a modal windowadapter
       return;
     }

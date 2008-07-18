@@ -119,18 +119,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * purposes. */
   protected volatile int _currentLocation = 0;
   
-  /* The fields _queryCache, _offsetToQueries, and _cacheModified function as an extension of the reduced model.
-   * Hence _reduced should be the lock object for operations on these two structures. 
-   * This data structure caches calls to the reduced model to speed up indent performance. Must be cleared every time 
-   * the document is changed.  Use by calling _checkCache, _storeInCache, and _clearCache.
+  /* The fields _queryCache, _offsetToQueries, and _cacheModified function as an extension of the reduced model. 
+   * When enabled in blockIndent, this data structure caches calls to the reduced model to speed up indent performance.
+   * Must be cleared every time the document is changed.  Use by calling _checkCache, _storeInCache, and _clearCache.
+   * When _queryCache = null, the cache is disabled.
    */
-  private final HashMap<Query, Object> _queryCache;
+  private volatile HashMap<Query, Object> _queryCache;
 
   /** Records the set of queries (as a list) for each offset. */
-  private final SortedMap<Integer, List<Query>> _offsetToQueries = new TreeMap<Integer, List<Query>>();
-  
-  /** Records whether the cache has been modified since it was last cleared. */
-  private volatile boolean _cacheModified = false;
+  private volatile SortedMap<Integer, List<Query>> _offsetToQueries;
   
   /** Initial number of elements in _queryCache. */
   private static final int INIT_CACHE_SIZE = 0x10000;  // 16**4 = 16384 
@@ -166,7 +163,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * DefinitionsDocument and interactions documents. */
   protected AbstractDJDocument(Indenter indenter) { 
     _indenter = indenter;
-    _queryCache = new HashMap<Query, Object>(INIT_CACHE_SIZE);
+    _queryCache = null;
+    _offsetToQueries = null;
     _initNewIndenter();
 //     System.err.println("AbstractDJDocument constructor with indent level " + indenter.getIndentLevel() + " invoked on " + this);
   }
@@ -939,18 +937,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   protected void _storeInCache(final Query query, final Object answer, final int offset) {
     if (_queryCache == null) return;
-//    synchronized(_reduced) {
-      _queryCache.put(query, answer);
-      _addToOffsetsToQueries(query, offset);
-      _cacheModified = true;
-//    }
+    _queryCache.put(query, answer);
+    _addToOffsetsToQueries(query, offset);
   }
   
-    /** Clears the memozing cache of queries with offset >= than specified value.  Should be called every time the 
-    * document is modified. */
+  /** Clears the memozing cache of queries with offset >= than specified value.  Should be called every time the 
+    * document is modified. 
+    */
   protected void _clearCache(int offset) {
-    if (_queryCache == null || ! _cacheModified) return;
-    _cacheModified = false;
+    if (_queryCache == null) return;
     
 //    synchronized(_reduced) {
       if (offset <= 0) {
@@ -1046,6 +1041,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   private void _indentBlock(final int start, final int end, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException, BadLocationException {
     
+    // Set up the query cache;
+    _queryCache = new HashMap<Query, Object>(INIT_CACHE_SIZE);
+    _offsetToQueries = new TreeMap<Integer, List<Query>>();
+    
     // Keep marker at the end. This Position will be the correct endpoint no matter how we change 
     // the doc doing the indentLine calls.
     final Position endPos = this.createUnwrappedPosition(end);
@@ -1073,6 +1072,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       walker += _reduced.getDistToNextNewline() + 1;
 //      _indentInProgress = false;
     }
+    
+    // disable the query cache
+    _queryCache = null;
+    _offsetToQueries = null;
   }
   
   /** Indents a line using the Indenter.  Public ONLY for testing purposes. Assumes writeLock is already held.*/
@@ -1825,7 +1828,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       final String str = getText(offset, length);
       
       if (length > 0) _clearCache(offset);    // Selectively clear the query cache
-      
+
       Runnable doCommand = (length == 1) ? new CharInsertCommand(offset, str.charAt(0)) : new InsertCommand(offset, str);
       RemoveCommand undoCommand = new UninsertCommand(offset, length);
       
