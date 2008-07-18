@@ -1826,7 +1826,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       if (length > 0) _clearCache(offset);    // Selectively clear the query cache
       
-      Runnable doCommand = (length == 0) ? new CharInsertCommand(offset, str.charAt(0)) : new InsertCommand(offset, str);
+      Runnable doCommand = (length == 1) ? new CharInsertCommand(offset, str.charAt(0)) : new InsertCommand(offset, str);
       RemoveCommand undoCommand = new UninsertCommand(offset, length);
       
       // add the undo/redo

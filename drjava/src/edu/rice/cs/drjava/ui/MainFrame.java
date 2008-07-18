@@ -4458,7 +4458,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       try {
         hourglassOn();
         // make sure there are no open projects
-        if (!_model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file);
+        if (! _model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file);
       }
       catch(Exception e) { e.printStackTrace(System.out); }
       finally { hourglassOff(); } 
@@ -4476,6 +4476,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     try {
       _mainListener.resetFNFCount();
       _model.openProject(projectFile);
+      _setUpProjectButtons(projectFile);
+      _openProjectUpdate();
+      
       if (_mainListener.someFilesNotFound()) _model.setProjectChanged(true);
       _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
       addToBrowserHistory();
@@ -4494,6 +4497,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  private void _setUpProjectButtons(File projectFile) {
+    _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);
+    _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
+    _recentProjectManager.updateOpenFiles(projectFile);
+  }
+
   private void _openProjectUpdate() {
     if (_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
@@ -4508,7 +4517,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _jarProjectAction.setEnabled(true);
       if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
       _autoRefreshAction.setEnabled(true);
+      _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
+      _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
+      _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
       _resetNavigatorPane();
+      _model.refreshActiveDocument();
 //      _compileButton.setToolTipText("<html>Compile all documents in the project.source tree<br>" +
 //      "Auxiliary and external files are excluded.</html>");
     }
@@ -4968,24 +4981,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _saveChooser.setMultiSelectionEnabled(false);
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {      
-      File pf = _saveChooser.getSelectedFile();  // project file
-      if ((pf==null) || (pf.exists() && !_verifyOverwrite())) { return; }
+      File projectFile = _saveChooser.getSelectedFile();
+      if (projectFile == null || (projectFile.exists() && ! _verifyOverwrite())) { return; }
       
-      String fileName = pf.getName();
+      String fileName = projectFile.getName();
       // ensure that saved file has extesion ".xml"
       if (! fileName.endsWith(".xml")) {
         int lastIndex = fileName.lastIndexOf(".");
-        if (lastIndex == -1) pf = new File (pf.getAbsolutePath() + ".xml");
-        else pf = new File(fileName.substring(0, lastIndex) + ".xml");
+        if (lastIndex == -1) projectFile = new File (projectFile.getAbsolutePath() + ".xml");
+        else projectFile = new File(fileName.substring(0, lastIndex) + ".xml");
       }
       
-      _model.createNewProject(pf); // sets model to a new FileGroupingState for project file pf
+      _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
 //      ppf.saveSettings();  // Saves new project profile in global model
       _editProject();  // edits the properties of the new FileGroupingState
       try { _model.configNewProject(); }  // configures the new project in the model
       catch(IOException e) { throw new UnexpectedException(e); }
-      _currentProjFile = pf;
+      _setUpProjectButtons(projectFile);
+      _currentProjFile = projectFile;
     }
   }
   
@@ -8708,19 +8722,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-      try {
-        _restoreJUnitActionsEnabled();
-        _junitErrorPanel.reset();
-        _model.refreshActiveDocument();
-      }
-      finally { 
-//            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
-//            hourglassOff(); 
-      }
-//        }
-//      });
+      _restoreJUnitActionsEnabled();
+      _junitErrorPanel.reset();
+      _model.refreshActiveDocument();
     }
     
     /** Fire just before javadoc asynchronous thread is started. Only runs in the event thread. */
@@ -8894,7 +8898,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             break;
           case JOptionPane.CLOSED_OPTION:
           case JOptionPane.NO_OPTION:  // abort unit testing
-            _model.getJUnitModel().nonTestCase(true);  // cleans up
+//            _model.getJUnitModel().nonTestCase(true);  // cleans up
+            _junitInterrupted(new UnexpectedException("Unit testing cancelled by user"));
             break;
           default:
             throw new UnexpectedException("Invalid returnCode from showConfirmDialog: " + rc);
@@ -8989,13 +8994,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JOptionPane.showMessageDialog(MainFrame.this, message,
                                     "Test Only Executes JUnit test cases",
                                     JOptionPane.ERROR_MESSAGE);
+      DrJavaErrorHandler.record(new UnexpectedException("NonTestCase should not be called!"));
       // clean up as in JUnitEnded 
       try {
         showTab(_junitErrorPanel, true);
-        _junitAction.setEnabled(true);
-        _junitAllAction.setEnabled(true);
-        _junitProjectAction.setEnabled(_model.isProjectActive());
-        _junitErrorPanel.reset();
+        _resetJUnit();
       }
       finally { 
         hourglassOff();
@@ -9136,8 +9139,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void projectClosed() {
-//      Utilities.invokeAndWait(new Runnable() {  // Why the wait?
-//        public void run() {
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
@@ -9147,22 +9148,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
       _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
       projectRunnableChanged();
-//        }
-//      });
     }
     
+    /* Opens project from command line. */
     public void openProject(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
       projectRunnableChanged();
-      _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);
-      _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
-      _recentProjectManager.updateOpenFiles(projectFile);
+      _setUpProjectButtons(projectFile);
       open(files);
       _openProjectUpdate();
-      _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
-      _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
-      _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
-      _model.refreshActiveDocument();
     }
     
     public void projectRunnableChanged() {
@@ -9297,17 +9291,23 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                          options[1]);
     return (n == JOptionPane.YES_OPTION);
   }
-  
+  /* Resets the JUnit functions in main frame. */
+  private void _resetJUnit() {
+    _junitAction.setEnabled(true);
+    _junitAllAction.setEnabled(true);
+    _junitProjectAction.setEnabled(_model.isProjectActive());
+    _junitErrorPanel.reset();
+  }
+       
   /* Pops up a message and cleans up after unit testing has been interrupted. */
   private void _junitInterrupted(final UnexpectedException e) {
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {
+    try {
     _showJUnitInterrupted(e);
     removeTab(_junitErrorPanel);
+    _resetJUnit();
     _model.refreshActiveDocument();
-    hourglassOff();
-//      }
-//    });
+    }
+    finally { hourglassOff(); }
   }
   
   boolean isDebuggerReady() { return _showDebugger &&  _model.getDebugger().isReady(); }
@@ -9317,7 +9317,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Return the find replace dialog. Package protected for use in tests. */
   FindReplacePanel getFindReplaceDialog() { return _findReplace; }
   
-  /** Builds the Hashtables in KeyBindingManager that are used to keep track of key-bindings and allows for live 
+  /** Builds the Hashtables in KeyBindingManager that record key-bindings and support live 
     * updating, conflict resolution, and intelligent error messages (the ActionToNameMap).  
     * IMPORTANT: Don't use this way to put actions into the KeyBindingManager if the action is a menu item. It will 
     * already have been put in.  Putting in again will cause bug #803304 "Uncomment lines wont rebind".

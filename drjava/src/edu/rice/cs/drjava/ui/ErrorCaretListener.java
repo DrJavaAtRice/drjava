@@ -77,10 +77,8 @@ public class ErrorCaretListener implements CaretListener {
   /** Update the highlight appropriately. */
   public void updateHighlight(final int curPos) {
     ErrorPanel panel = _frame.getSelectedErrorPanel();
-    if (panel == null) {
-      // no error panel is currently selected
-      return;
-    }
+    if (panel == null) return;  // no error panel is currently selected
+    
     CompilerErrorModel model =  panel.getErrorModel();
     
     if (! model.hasErrorsWithPositions(_openDoc)) return;
@@ -97,18 +95,13 @@ public class ErrorCaretListener implements CaretListener {
         // No need to move the caret since it's already here!
         _highlightErrorInSource(model.getPosition(error));
       }
-      
       // Select item wants the CompilerError
       errorListPane.selectItem(error);
     }
-//      }
-//    });
   }
   
   /** Hides the error highlight in the document. */
-  public void removeHighlight() {
-    Utilities.invokeLater(new Runnable() { public void run() { _definitionsPane.removeErrorHighlight(); } });
-  }
+  public void removeHighlight() { _definitionsPane.removeErrorHighlight(); }
 
   /** Highlights the given error in the source.  Only runs in event thread.
    *  @param pos the position of the error

@@ -449,23 +449,22 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.logJUnitStart();
     try {
-//      System.err.println("Starting JUnit");
+      System.err.println("Starting JUnit");
       doc.startJUnit();
       listener.waitJUnitDone();
       // auxiliary thread silently swallows the exception and terminates.
-//      fail("slave JVM should throw an exception because testing is interrupted by resetting interactions");
     }
-    catch (Exception e) { /* Expected behavior for this test */ }
-
+    catch (Exception e) { fail("Aborting unit testing runs recovery code in testing thread; no exception is thrown"); }
+    
     listener.waitResetDone();  // reset should occur when test suite is started
         
-//    System.err.println("ResetDone");
+    System.err.println("ResetDone");
     
     if (printMessages) System.out.println("after test");
     listener.assertJUnitStartCount(1);
     _model.removeListener(listener);
-    listener.assertJUnitEndCount(0);  // Testing was aborted before test end
-//    System.err.println("Reached Test End");
+    listener.assertJUnitEndCount(1);  // Testing was aborted after junitStarted(); junitEnded called in recovery code
+    System.err.println("Reached Test End");
     _log.log("testInfiniteLoop completed");
   }
   

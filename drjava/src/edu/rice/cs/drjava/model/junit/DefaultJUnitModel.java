@@ -453,32 +453,27 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         return;
       }
       
-      try {  /** Run the junit test suite that has already been set up on the slave JVM */
-        _testInProgress = true;
+      /** Run the junit test suite that has already been set up on the slave JVM */
+      _testInProgress = true;
 //        System.err.println("Spawning test thread");
-        new Thread(new Runnable() {
-          public void run() { 
-            try {
+      new Thread(new Runnable() {
+        public void run() { 
+          try {
 //              Utilities.show("Starting JUnit");
-              _notifier.junitStarted(); 
-              boolean testsPresent = _jvm.runTestSuite();  // The false boolean return value could be changed to an exception.
-              if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
-            }
-            catch(RemoteException e) { // Unit testing was aborted; cleanup
-              EventQueue.invokeLater(new Runnable() { public void run() { nonTestCase(allTests); } });
-            }
+            _notifier.junitStarted(); 
+            boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
+            if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
           }
-        }).start();
-      }
-      catch(Exception e) {
-        _notifier.junitEnded();  // balances junitStarted()
-        _testInProgress = false;
-        throw new UnexpectedException(e);
-      }
+          catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOf already called in junitStarted
+            _notifier.junitEnded();  // balances junitStarted()
+            _testInProgress = false;
+          }
+        }
+      }).start();
     }
   }
   
-  //-------------------------------- Helpers --------------------------------//
+//-------------------------------- Helpers --------------------------------//
   
   private String getCanonicalPath(File f) throws IOException {
     if (f == null) return "";
@@ -554,8 +549,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady() {
+    if (! _testInProgress) return;
     
-    if (! _testInProgress) return; 
     JUnitError[] errors = new JUnitError[1];
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);

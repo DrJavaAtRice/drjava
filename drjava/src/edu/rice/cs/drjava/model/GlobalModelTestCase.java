@@ -979,7 +979,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public void waitResetDone() throws InterruptedException {
-      synchronized(_resetLock) { while (! _resetDone)  _resetLock.wait(); }
+      synchronized(_resetLock) { 
+        while (! _resetDone)  _resetLock.wait(); 
+      }
     }
     
     public int getLastExitStatus() { return _lastExitStatus; }
