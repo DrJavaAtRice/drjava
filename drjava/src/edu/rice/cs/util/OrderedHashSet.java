@@ -68,7 +68,7 @@ public class OrderedHashSet<Type> implements Collection<Type> {
   }
   
   public boolean equals(Object o) { 
-    if ((o == null) || o.getClass() != getClass()) return false;
+    if (o == null || o.getClass() != getClass()) return false;
     return order.equals(elements());
   }
   

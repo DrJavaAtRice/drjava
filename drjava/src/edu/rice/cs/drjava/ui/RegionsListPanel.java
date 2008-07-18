@@ -363,8 +363,6 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     public RegionListUserObj(R r) { _region = r; }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
-//      _region.getDocument().acquireReadLock();
-//      try {
         sb.append(_region.getDocument().toString());
         sb.append(':');
         sb.append(lineNumber());
@@ -373,18 +371,16 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
           int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
           sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
-//      } 
-//      finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
-    public boolean equals(Object other) {
-      if ((other == null) || !(other instanceof RegionListUserObj)) { return false; }
-      @SuppressWarnings("unchecked") RegionListUserObj<R> o = (RegionListUserObj<R>)other;
-      return (o.region().getDocument().equals(region().getDocument())) &&
-        (o.region().getStartOffset()==region().getStartOffset()) &&
-        (o.region().getEndOffset()==region().getEndOffset());
-    }
-    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
+//    public boolean equals(Object other) {
+//      if ((other == null) || ! (other instanceof RegionListUserObj)) { return false; }
+//      @SuppressWarnings("unchecked") RegionListUserObj<R> o = (RegionListUserObj<R>)other;
+//      return (o.region().getDocument().equals(region().getDocument())) &&
+//        (o.region().getStartOffset()==region().getStartOffset()) &&
+//        (o.region().getEndOffset()==region().getEndOffset());
+//    }
+//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
   
   

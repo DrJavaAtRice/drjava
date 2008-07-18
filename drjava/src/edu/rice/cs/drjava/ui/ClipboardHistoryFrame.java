@@ -411,10 +411,10 @@ public class ClipboardHistoryFrame extends SwingFrame {
     }
     public String getFull() { return full; }
     public String toString() { return display; }
-    public boolean equals(Object o) {
-      if (o == null || getClass() != o.getClass()) return false;
-      return full.equals(((ListItem)o).full);
-    }
-    public int hashCode() { return  (full != null ? full.hashCode() : 0); }
+//    public boolean equals(Object o) {
+//      if (o == null || getClass() != o.getClass()) return false;
+//      return full.equals(((ListItem)o).full);
+//    }
+//    public int hashCode() { return  (full != null ? full.hashCode() : 0); }
   }
 }

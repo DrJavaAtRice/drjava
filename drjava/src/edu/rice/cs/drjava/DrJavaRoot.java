@@ -164,18 +164,18 @@ public class DrJavaRoot {
       // false means "do not jump to the line number that may be specified, just open the file"
       _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, false);
       
-      /* This call on invokeLater only runs in the main thread, so we use EventQueue rather than Utilities.
-       * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
-       * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
-       * specifying a file (ex: java -jar drjava.jar somefile.java)
+      /* We use EventQueue.invokeLater rather than Utilities.invokeLater to ensure all files have been loaded and
+       * added to the fileview before the MainFrame is set visible.  When this was not done, we occasionally encountered
+       * a NullPointerException on start up when specifying a file (ex: java -jar drjava.jar somefile.java)
        */
-      EventQueue.invokeLater(new Runnable(){ public void run(){ 
-        _mainFrame.start();
-        if (anyLineNumbersSpecified) {
-          // this time, we do want to jump to the line number
-          _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
-        }
-      } });
+      EventQueue.invokeLater(new Runnable(){ 
+        public void run(){ 
+          _mainFrame.start();
+          if (anyLineNumbersSpecified) { // this time, we do want to jump to the line number
+            _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
+          }
+        } 
+      });
       
       // redirect stdout to DrJava's console
       System.setOut(new PrintStream(new OutputStreamRedirector() {
@@ -198,8 +198,6 @@ public class DrJavaRoot {
       System.out.println("error thrown");
       new DrJavaErrorHandler().handle(t);
     }
-//      }
-//    });
   }
   
   /** Handle the list of files specified on the command line.  Feature request #509701.

@@ -59,8 +59,12 @@ public abstract class FileOps {
   
   private static Log _log = new Log("FileOpsTest.txt", false);
   
-  static public abstract class NoFile extends File {
-    public NoFile(String name) { super(name); }
+  /** A singleton null file class. */
+  static public class NullFile extends File {
+    
+    public static NullFile ONLY = new NullFile();
+    
+    private NullFile() { super(""); }
     public boolean canRead() { return false; }
     public boolean canWrite() { return false; }
     public int compareTo(File f) { return (f == this) ? 0 : -1; }
@@ -68,6 +72,8 @@ public abstract class FileOps {
     public boolean delete() { return false; }
     public void deleteOnExit() {}
     public boolean equals(Object o) { return o == this; }
+    public boolean exists() { return false; }
+    public int hashCode() { return getClass().hashCode(); }
     public File getAbsoluteFile() { return this; }
     public String getAbsolutePath() { return ""; }
     public File getCanonicalFile() { return this; }
@@ -76,7 +82,6 @@ public abstract class FileOps {
     public String getParent() { return null; }
     public File getParentFile() { return null; }
     public String getPath() { return ""; }
-    public int hashCode() { return getClass().hashCode(); }
     public boolean isAbsolute() { return false; }
     public boolean isDirectory() { return false; }
     public boolean isFile() { return false; }
@@ -99,10 +104,7 @@ public abstract class FileOps {
   };
   
   /** Special sentinal file used in FileOption and test classes among others. */
-  public static final File NULL_FILE = new NoFile("") { public boolean exists() { return false; } };
-  
-//  /** Special File object corresponding to a dummy file. Simliar to NULL_FILE but exists() returns false. */
-//  public static final File NULL_FILE = new NoFile("") { public boolean exists() { return false; } };
+  public static final File NULL_FILE = NullFile.ONLY;
   
   /** @deprecated For a best-attempt canonical file, use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.
     *             (for example, {@code IOUtil.attemptCanonicalFile(new File(path))})

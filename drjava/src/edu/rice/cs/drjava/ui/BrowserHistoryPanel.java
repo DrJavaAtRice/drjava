@@ -280,14 +280,14 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
 //      finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
-    public boolean equals(Object other) {
-      if (other == null || other.getClass() != this.getClass()) return false;
-      @SuppressWarnings("unchecked") BrowserHistoryListUserObj o = (BrowserHistoryListUserObj)other;
-      return (o.region().getDocument().equals(region().getDocument())) &&
-        (o.region().getStartOffset()==region().getStartOffset()) &&
-        (o.region().getEndOffset()==region().getEndOffset());
-    }
-    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
+//    public boolean equals(Object other) {
+//      if (other == null || other.getClass() != this.getClass()) return false;
+//      @SuppressWarnings("unchecked") BrowserHistoryListUserObj o = (BrowserHistoryListUserObj)other;
+//      return (o.region().getDocument().equals(region().getDocument())) &&
+//        (o.region().getStartOffset()==region().getStartOffset()) &&
+//        (o.region().getEndOffset()==region().getEndOffset());
+//    }
+//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
 }
 

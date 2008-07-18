@@ -44,7 +44,6 @@ import java.io.Serializable;
 public class NullFile extends File implements Serializable {
   
   private static volatile int ct = 0;
-  
   private final String _lexiName;
 
   public NullFile() { 
@@ -68,6 +67,5 @@ public class NullFile extends File implements Serializable {
   public boolean equals(Object o) {
     if (o == null || o.getClass() != getClass()) return false;
     return o == this;
-  }
-    
+  } 
 }

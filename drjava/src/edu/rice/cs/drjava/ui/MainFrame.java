@@ -1161,15 +1161,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public int compareTo(ClassNameAndPackageEntry other) {
       int res = getClassName().toLowerCase().compareTo(other.getClassName().toLowerCase());
-      if (res!=0) { return res; }
+      if (res != 0) { return res; }
       return getFullPackage().toLowerCase().compareTo(other.getFullPackage().toLowerCase());
     }
+    // WARNING: this relation is finer grained that the equivalance relation induced by compareTo above
     public boolean equals(Object other) {
-      if (other==null) { return false; }
+      if (other == null) { return false; }
       if (! (other instanceof ClassNameAndPackageEntry)) return false;
       ClassNameAndPackageEntry o = (ClassNameAndPackageEntry)other;
-      return ((getClassName().equals(o.getClassName())) &&
-              (getFullPackage().equals(o.getFullPackage())));
+      return (getClassName().equals(o.getClassName()) && getFullPackage().equals(o.getFullPackage()));
     }
     public int hashCode() { return hash(getClassName().hashCode(), getFullPackage().hashCode()); }
   }
@@ -1187,12 +1187,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       str = s;
     }
     public String getFullPackage() {
-      if (fullPackage!=null) { return fullPackage; }
+      if (fullPackage != null) { return fullPackage; }
       fullPackage = "";
       if (doc!=null) {
         try {
           fullPackage = doc.getPackageName();
-          if (fullPackage.length()>0) { fullPackage += '.'; }
+          if (fullPackage.length() > 0) { fullPackage += '.'; }
         }
         catch(Exception e) { fullPackage = ""; }
       }
@@ -4817,12 +4817,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _showFileMovedError(fme);
     }
     catch (BadLocationException e) {
-      _showError(e, "Print Error",
-                 "An error occured while preparing the print preview.");
+      _showError(e, "Print Error", "An error occured while preparing the print preview.");
     }
     catch (IllegalStateException e) {
-      _showError(e, "Print Error",
-                 "An error occured while preparing the print preview.");
+      _showError(e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
   
@@ -4832,8 +4830,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new PreviewConsoleFrame(_model, this, false);
     }
     catch (IllegalStateException e) {
-      _showError(e, "Print Error",
-                 "An error occured while preparing the print preview.");
+      _showError(e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
   
@@ -4843,8 +4840,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new PreviewConsoleFrame(_model, this, true);
     }
     catch (IllegalStateException e) {
-      _showError(e, "Print Error",
-                 "An error occured while preparing the print preview.");
+      _showError(e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
   
@@ -4858,8 +4854,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private void _closeAll() {
     updateStatusField("Closing All Files");
-    if (!_model.isProjectActive() || _model.isProjectActive() && _closeProject())    
-      _model.closeAllFiles();
+    if (!_model.isProjectActive() || _model.isProjectActive() && _closeProject())  _model.closeAllFiles();
   }
   
   private boolean _save() {
@@ -4898,8 +4893,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     updateStatusField("Saving File Under New Name");
     try {
       boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
-      /** this highlights the document in the navigator */
-      _model.setActiveDocument(_model.getActiveDocument());
+      _model.setActiveDocument(_model.getActiveDocument());  // highlights the document in the navigator
       return toReturn;
     }
     catch (IOException ioe) {
@@ -4913,9 +4907,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (!_model.getActiveDocument().fileExists()) return _saveAs();
       else {
         File fileToDelete;
-        try {
-          fileToDelete = _model.getActiveDocument().getFile();
-        } 
+        try { fileToDelete = _model.getActiveDocument().getFile(); } 
         catch (FileMovedException fme) { return _saveAs(); }
         boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
         /** Delete the old file if save was successful. */
