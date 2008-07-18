@@ -90,12 +90,11 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         addRegion(bp); 
       }
       
-      /**
-       * Called when a breakpoint is changed.
-       * Removes the breakpoint from the tree of breakpoints.
-       * @param bp the breakpoint
-       * @param index the index of the breakpoint
-       */
+      /** Called when a breakpoint is changed.
+        * Removes the breakpoint from the tree of breakpoints.
+        * @param bp the breakpoint
+        * @param index the index of the breakpoint
+        */
       public void regionChanged(final Breakpoint bp) {
         // Only change GUI from event-dispatching thread
         Runnable doCommand = new Runnable() {
@@ -107,7 +106,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
             // Find the document node for this region
             Enumeration documents = _regionRootNode.children();
             boolean found = false;
-            while ((!found) && (documents.hasMoreElements())) {
+            while (! found && documents.hasMoreElements()) {
               DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
               if (doc.getUserObject().equals(regDocNode.getUserObject())) {
                 // Find the correct line start offset node for this breakpoint
@@ -258,8 +257,6 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     public BreakpointRegionTreeUserObj (Breakpoint bp) { super(bp); }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
-//      _region.getDocument().acquireReadLock();
-//      try {
       sb.append(lineNumber());
       try {
         if (!_region.isEnabled()) { sb.append(" (disabled)"); }
@@ -267,20 +264,18 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
         sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
       } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
-//      } 
-//      finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
-    public boolean equals(Object other) {
-      
-      if (other == null || other.getClass() != this.getClass()) return false; 
-      @SuppressWarnings("unchecked") 
-      BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj) other;
-      return (o.region().getDocument().equals(region().getDocument())) &&
-        (o.region().getStartOffset()==region().getStartOffset()) &&
-        (o.region().getEndOffset()==region().getEndOffset()) &&
-        (o.region().isEnabled()==region().isEnabled());
-    }
-    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
+//    public boolean equals(Object other) {
+//      
+//      if (other == null || other.getClass() != this.getClass()) return false; 
+//      @SuppressWarnings("unchecked") 
+//      BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj) other;
+//      return (o.region().getDocument().equals(region().getDocument())) &&
+//        (o.region().getStartOffset()==region().getStartOffset()) &&
+//        (o.region().getEndOffset()==region().getEndOffset()) &&
+//        (o.region().isEnabled()==region().isEnabled());
+//    }
+//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
 }

@@ -202,18 +202,18 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   protected void _setupView() {
     KeyStroke beginLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE);
     _pane.addActionForKeyStroke(beginLineKey, gotoPromptPosAction);
-    _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(beginLineKey),
+    _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(beginLineKey),
                                 selectToPromptPosAction);
     KeyStroke endLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE);
     _pane.addActionForKeyStroke(endLineKey, gotoEndAction);
-    _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(endLineKey),
+    _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(endLineKey),
                                 selectToEndAction);
 
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE,
                                          new OptionListener<KeyStroke>() {
       public void optionChanged(OptionEvent<KeyStroke> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoPromptPosAction);
-        _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(oe.value),
+        _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(oe.value),
                                     selectToPromptPosAction);
      }
     });
@@ -221,7 +221,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
                                          new OptionListener<KeyStroke>() {
       public void optionChanged(OptionEvent<KeyStroke> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoEndAction);
-        _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(oe.value),
+        _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(oe.value),
                                     selectToEndAction);
      }
     });

@@ -420,7 +420,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
     final KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
-    final Action a = KeyBindingManager.Singleton.get(ks);
+    final Action a = KeyBindingManager.ONLY.get(ks);
     
     final KeyEvent e = new KeyEvent(defPane, PRESSED, 0, ks.getModifiers(), ks.getKeyCode(), UNDEFINED);
     

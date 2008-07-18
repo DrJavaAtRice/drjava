@@ -50,7 +50,7 @@ import java.awt.event.*;
   */
 public class KeyBindingManager {
   
-  public static final KeyBindingManager Singleton = new KeyBindingManager();
+  public static final KeyBindingManager ONLY = new KeyBindingManager();
 
   private KeyBindingManager() {   }
   

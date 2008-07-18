@@ -2601,15 +2601,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Cuts from the caret to the end of the current line to the clipboard. */
   protected final Action _cutLineAction = new AbstractAction("Cut Line") {
     public void actionPerformed(ActionEvent ae) {
-      ActionMap _actionMap = _currentDefPane.getActionMap();
+      ActionMap actionMap = _currentDefPane.getActionMap();
       int oldCol = _model.getActiveDocument().getCurrentCol();
-      _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
+      actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
       // if oldCol is equal to the current column, then selectionEndLine did
       // nothing, so we're at the end of the line and should remove the newline
       // character
       if (oldCol == _model.getActiveDocument().getCurrentCol()) {
         // Puts newline character on the clipboard also, not just content as before.
-        _actionMap.get(DefaultEditorKit.selectionForwardAction).actionPerformed(ae);
+        actionMap.get(DefaultEditorKit.selectionForwardAction).actionPerformed(ae);
         cutAction.actionPerformed(ae);
       }
       else cutAction.actionPerformed(ae);
@@ -2619,9 +2619,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Deletes text from the caret to the end of the current line. */
   protected final Action _clearLineAction = new AbstractAction("Clear Line") {
     public void actionPerformed(ActionEvent ae) {
-      ActionMap _actionMap = _currentDefPane.getActionMap();
-      _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
-      _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
+      ActionMap actionMap = _currentDefPane.getActionMap();
+      actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
+      actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
     }
   };
   
@@ -3197,8 +3197,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     
     // set up key-bindings
-    KeyBindingManager.Singleton.setMainFrame(this);
-    KeyBindingManager.Singleton.setActionMap(_currentDefPane.getActionMap());
+    KeyBindingManager.ONLY.setMainFrame(this);
+    KeyBindingManager.ONLY.setActionMap(_currentDefPane.getActionMap());
     _setUpKeyBindingMaps();
     
     _posListener.updateLocation();
@@ -3464,7 +3464,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // If any errors occurred while parsing config file, show them
     _showConfigException();
     
-    KeyBindingManager.Singleton.setShouldCheckConflict(false);
+    KeyBindingManager.ONLY.setShouldCheckConflict(false);
     
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
@@ -6180,9 +6180,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // key in the config file.
     // Also check that the keystroke isn't the NULL_KEYSTROKE, which
     //  can strangely be triggered by certain keys in Windows.
-    KeyBindingManager.Singleton.put(opt, a, item, item.getText());
+    KeyBindingManager.ONLY.put(opt, a, item, item.getText());
     if (ks != KeyStrokeOption.NULL_KEYSTROKE &&
-        KeyBindingManager.Singleton.get(ks) == a) {
+        KeyBindingManager.ONLY.get(ks) == a) {
       item.setAccelerator(ks);
       //KeyBindingManager.Singleton.addListener(opt, item);
     }
@@ -8720,7 +8720,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitEnded() {
       assert EventQueue.isDispatchThread();
-      // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
       _restoreJUnitActionsEnabled();
       _junitErrorPanel.reset();
@@ -8732,19 +8731,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       assert EventQueue.isDispatchThread();
       
-//      // Only change GUI from event-dispatching thread
-//      Runnable command = new Runnable() {
-//        public void run() {
-//          // if we don't lock edits, our error highlighting might break
       hourglassOn();
       
       showTab(_javadocErrorPanel, true);
       _javadocErrorPanel.setJavadocInProgress();
       _javadocAllAction.setEnabled(false);
       _javadocCurrentAction.setEnabled(false);
-//        }
-//      };
-//      Utilities.invokeLater(command);
     }
     
     
@@ -8801,8 +8793,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE && 
           MainFrame.this.isVisible()) {
         // Synchronously pop up a dialog box concerning restarting the JVM.
-//        Utilities.invokeAndWait(new Runnable() {  
-//          public void run() {
         String msg = "The interactions window was terminated by a call " +
           "to System.exit(" + status + ").\n" +
           "The interactions window will now be restarted.";
@@ -8817,8 +8807,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
           DrJava.getConfig().setSetting(INTERACTIONS_EXIT_PROMPT, Boolean.FALSE);
         }
-//          }
-//        });
       }
     }
     
@@ -8826,8 +8814,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void interpreterResetting() {
       assert duringInit() || EventQueue.isDispatchThread();
-      // Only change GUI from event-dispatching thread
-      
       _junitAction.setEnabled(false);
       _junitAllAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
@@ -8884,8 +8870,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _compileAll();
       }
       else { // pop up a window to ask if all open files should be compiled before testing
-//        Utilities.invokeLater(new Runnable() {  
-//          public void run() {
         String title = "Must Compile All Source Files to Run Unit Tests";
         String msg = "To unit test all documents, you must first compile all out of sync source files.\n" + 
           "Would you like to compile all files and run the specified test?";
@@ -8904,20 +8888,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           default:
             throw new UnexpectedException("Invalid returnCode from showConfirmDialog: " + rc);
         }
-//          }
-//        });
       }
     }
     
     public void saveBeforeJavadoc() {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       _saveAllBeforeProceeding
         ("To run Javadoc, you must first save ALL modified files.\n" +
          "Would you like to save and then run Javadoc?", ALWAYS_SAVE_BEFORE_JAVADOC,
          "Always save before running Javadoc");
-//        }
-//      });
     }
     
     /** Helper method shared by all "saveBeforeX" methods.  In JUnit tests, YES option is automatically selected
@@ -9308,62 +9286,57 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Return the find replace dialog. Package protected for use in tests. */
   FindReplacePanel getFindReplaceDialog() { return _findReplace; }
   
-  /** Builds the Hashtables in KeyBindingManager that record key-bindings and support live 
-    * updating, conflict resolution, and intelligent error messages (the ActionToNameMap).  
-    * IMPORTANT: Don't use this way to put actions into the KeyBindingManager if the action is a menu item. It will 
-    * already have been put in.  Putting in again will cause bug #803304 "Uncomment lines wont rebind".
+  /** Builds the Hashtables in KeyBindingManager that record key-bindings and support live updating, conflict 
+    * resolution, and intelligent error messages (the ActionToNameMap).  IMPORTANT: Don't use this mechanism to put
+    * an action into the KeyBindingManager if the action is a menu item because menu actions are already included.
+    * Putting in again will cause bug #803304 "Uncomment lines wont rebind".
     */
   private void _setUpKeyBindingMaps() {
-    final ActionMap _actionMap = _currentDefPane.getActionMap();
+    final ActionMap actionMap = _currentDefPane.getActionMap();
+    final KeyBindingManager kbm = KeyBindingManager.ONLY;
     
-    KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction), null, "Backward");
-    KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD, DefaultEditorKit.selectionBackwardAction);
+    kbm.put(KEY_BACKWARD, actionMap.get(DefaultEditorKit.backwardAction), null, "Backward");
+    kbm.addShiftAction(KEY_BACKWARD, DefaultEditorKit.selectionBackwardAction);
     
-    KeyBindingManager.Singleton.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, 
-                                    "Begin Document");
-    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT, DefaultEditorKit.selectionBeginAction);
+    kbm.put(KEY_BEGIN_DOCUMENT, actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
+    kbm.addShiftAction(KEY_BEGIN_DOCUMENT, DefaultEditorKit.selectionBeginAction);
     
-//    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, 
-//                                    "Begin Line");
-    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _beginLineAction, null, "Begin Line");
-//    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
-//                                               DefaultEditorKit.selectionBeginLineAction);
-    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE, _selectionBeginLineAction);
+//    kbm.put(KEY_BEGIN_LINE, actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
+    kbm.put(KEY_BEGIN_LINE, _beginLineAction, null, "Begin Line");
+//    kbm.addShiftAction(KEY_BEGIN_LINE, DefaultEditorKit.selectionBeginLineAction);
+    kbm.addShiftAction(KEY_BEGIN_LINE, _selectionBeginLineAction);
     
-    KeyBindingManager.Singleton.
-      put(KEY_PREVIOUS_WORD, _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
-    KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD, DefaultEditorKit.selectionPreviousWordAction);
+    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
+    kbm.addShiftAction(KEY_PREVIOUS_WORD, DefaultEditorKit.selectionPreviousWordAction);
     
-    KeyBindingManager.Singleton.put(KEY_DOWN, _actionMap.get(DefaultEditorKit.downAction), null, "Down");
-    KeyBindingManager.Singleton.addShiftAction(KEY_DOWN, DefaultEditorKit.selectionDownAction);
+    kbm.put(KEY_DOWN, actionMap.get(DefaultEditorKit.downAction), null, "Down");
+    kbm.addShiftAction(KEY_DOWN, DefaultEditorKit.selectionDownAction);
     
-    KeyBindingManager.Singleton.put(KEY_END_DOCUMENT, _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
-    KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT, DefaultEditorKit.selectionEndAction);
+    kbm.put(KEY_END_DOCUMENT, actionMap.get(DefaultEditorKit.endAction), null, "End Document");
+    kbm.addShiftAction(KEY_END_DOCUMENT, DefaultEditorKit.selectionEndAction);
     
-    KeyBindingManager.Singleton.put(KEY_END_LINE, _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
-    KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE, DefaultEditorKit.selectionEndLineAction);
+    kbm.put(KEY_END_LINE, actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
+    kbm.addShiftAction(KEY_END_LINE, DefaultEditorKit.selectionEndLineAction);
     
-    KeyBindingManager.Singleton.put(KEY_NEXT_WORD, _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
-    KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD, DefaultEditorKit.selectionNextWordAction);
+    kbm.put(KEY_NEXT_WORD, actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
+    kbm.addShiftAction(KEY_NEXT_WORD, DefaultEditorKit.selectionNextWordAction);
     
-    KeyBindingManager.Singleton.put(KEY_FORWARD, _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
-    KeyBindingManager.Singleton.addShiftAction(KEY_FORWARD, DefaultEditorKit.selectionForwardAction);
+    kbm.put(KEY_FORWARD, actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
+    kbm.addShiftAction(KEY_FORWARD, DefaultEditorKit.selectionForwardAction);
     
-    KeyBindingManager.Singleton.put(KEY_UP, _actionMap.get(DefaultEditorKit.upAction), null, "Up");
-    KeyBindingManager.Singleton.addShiftAction(KEY_UP, DefaultEditorKit.selectionUpAction);
+    kbm.put(KEY_UP, actionMap.get(DefaultEditorKit.upAction), null, "Up");
+    kbm.addShiftAction(KEY_UP, DefaultEditorKit.selectionUpAction);
     
-//    KeyBindingManager.Singleton.put(KEY_NEXT_RECENT_DOCUMENT, _nextRecentDocAction, null, "Next Recent Document");
-//    KeyBindingManager.Singleton.put(KEY_PREV_RECENT_DOCUMENT, _prevRecentDocAction, null, "Previous Recent Document");
+//    kbm.put(KEY_NEXT_RECENT_DOCUMENT, _nextRecentDocAction, null, "Next Recent Document");
+//    kbm.put(KEY_PREV_RECENT_DOCUMENT, _prevRecentDocAction, null, "Previous Recent Document");
     
     // These last methods have no default selection methods
-    KeyBindingManager.Singleton.put(KEY_PAGE_DOWN, _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
-    KeyBindingManager.Singleton.put(KEY_PAGE_UP, _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
-    KeyBindingManager.Singleton.put(KEY_CUT_LINE, _cutLineAction, null, "Cut Line");
-    KeyBindingManager.Singleton.put(KEY_CLEAR_LINE, _clearLineAction, null, "Clear Line");
-    KeyBindingManager.Singleton.
-      put(KEY_SHIFT_DELETE_PREVIOUS, _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
-    KeyBindingManager.Singleton.
-      put(KEY_SHIFT_DELETE_NEXT, _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
+    kbm.put(KEY_PAGE_DOWN, actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
+    kbm.put(KEY_PAGE_UP, actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
+    kbm.put(KEY_CUT_LINE, _cutLineAction, null, "Cut Line");
+    kbm.put(KEY_CLEAR_LINE, _clearLineAction, null, "Clear Line");
+    kbm.put(KEY_SHIFT_DELETE_PREVIOUS, actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
+    kbm.put(KEY_SHIFT_DELETE_NEXT, actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
   }
   
   /** @param listener The ComponentListener to add to the open documents list

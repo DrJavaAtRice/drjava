@@ -726,7 +726,7 @@ public class ConfigFrame extends SwingFrame {
     KeyStrokeData tmpKsd;
     KeyStrokeOptionComponent tmpKsoc;
 
-    Enumeration e = KeyBindingManager.Singleton.getKeyStrokeData();
+    Enumeration e = KeyBindingManager.ONLY.getKeyStrokeData();
     while (e.hasMoreElements()) {
       tmpKsd = (KeyStrokeData) e.nextElement();
       if (tmpKsd.getOption() != null) {

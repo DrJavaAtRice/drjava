@@ -77,21 +77,23 @@ import edu.rice.cs.drjava.config.OptionConstants;
   * @version $Id$
   */
 public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
+
+  protected final RegionManager<MovingDocumentRegion> _regionManager;
+  protected final String _searchString;
+  protected final boolean _searchAll;
+  protected final boolean _matchCase;
+  protected final boolean _wholeWord;
+  protected final boolean _noComments;
+  protected final boolean _noTestCases;
+  protected final WeakReference<OpenDefinitionsDocument> _doc;
+  protected final FindReplacePanel _findReplace;
+  
   protected JButton _findAgainButton;
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
   protected JButton _removeButton;
   protected JComboBox _colorBox;
-  protected RegionManager<MovingDocumentRegion> _regionManager;
   protected int _lastIndex;
-  protected String _searchString;
-  protected boolean _searchAll;
-  protected boolean _matchCase;
-  protected boolean _wholeWord;
-  protected boolean _noComments;
-  protected boolean _noTestCases;
-  protected WeakReference<OpenDefinitionsDocument> _doc;
-  protected FindReplacePanel _findReplace;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
   private LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
@@ -131,46 +133,47 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 //      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
 //    });
     
-    OptionListener<Color> temp;
-    Pair<Option<Color>, OptionListener<Color>> pair;
     for(int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
-      temp = new FindResultsColorOptionListener(i);
-      pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], temp);
+      final OptionListener<Color> listener = new FindResultsColorOptionListener(i);
+      final Pair<Option<Color>, OptionListener<Color>> pair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], listener);
       _colorOptionListeners.add(pair);
-      DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], temp);
+      DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], listener);
     }
   }
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer {
-    private Color m_c = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
-    private DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
-    private final Dimension preferredSize = new Dimension(0, 20);    
+    private Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
+    private DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
+    private final Dimension _size = new Dimension(0, 20);  
+    private final CompoundBorder _compoundBorder = 
+      new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black));
     
     public ColorComboRenderer() {
       super();
-      setBackground(m_c);
-      setBorder(new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black)));
+      setBackground(_color);
+      setBorder(_compoundBorder);
     }
     
     public Component getListCellRendererComponent(JList list, Object value, int row, boolean sel, boolean hasFocus) {
       JComponent renderer;
       if (value instanceof Color) {
-        m_c = (Color) value;
+        _color = (Color) value;
         renderer = this;
       }
       else {
-        JLabel l = (JLabel) defaultRenderer.getListCellRendererComponent(list, value, row, sel, hasFocus);
+        JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, value, row, sel, hasFocus);
         l.setHorizontalAlignment(JLabel.CENTER);
         renderer = l;
       }
       // Taken out because this is a 1.5 method; not sure if it's necessary
-      renderer.setPreferredSize(preferredSize);
+      renderer.setPreferredSize(_size);
       return renderer;
     }
     
     public void paint(Graphics g) {
-      setBackground(m_c);
-      setBorder(new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black)));
+      setBackground(_color);
+      setBorder(_compoundBorder);
       super.paint(g);
     }
   }
@@ -205,8 +208,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     // find the first available color, or choose "None"
     int smallestIndex = 0;
     int smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
-    for(_lastIndex = 0; _lastIndex<OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
-      if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex]<smallestUsage) {
+    for(_lastIndex = 0; _lastIndex < OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
+      if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex] < smallestUsage) {
         smallestIndex = _lastIndex;
         smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
       }
@@ -214,7 +217,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _lastIndex = smallestIndex;
     ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     _colorBox = new JComboBox();    
-    for(int i=0; i<OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
+    for (int i=0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
     }
     _colorBox.addItem("None");
@@ -235,7 +238,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
                                                   DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
       }
     });
-    _colorBox.setMaximumRowCount(OptionConstants.FIND_RESULTS_COLORS.length+1);
+    _colorBox.setMaximumRowCount(OptionConstants.FIND_RESULTS_COLORS.length + 1);
     _colorBox.addPopupMenuListener(new PopupMenuListener() {
       public void popupMenuCanceled(PopupMenuEvent e) { _colorBox.revalidate(); }
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { _colorBox.revalidate(); }
@@ -371,15 +374,15 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       super(r);
       _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
     }
-    public boolean equals(Object other) {
-      if (other == null || other.getClass() != this.getClass()) return false;
-      @SuppressWarnings("unchecked") FindResultsRegionTreeUserObj o = (FindResultsRegionTreeUserObj)other;
-      return (o.region().getDocument().equals(region().getDocument()) &&
-              (o.region().getStartOffset() == region().getStartOffset()) &&
-              (o.region().getEndOffset() == region().getEndOffset()) &&
-              (o._lineNumber == this._lineNumber));
-    }
-    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
+//    public boolean equals(Object other) {
+//      if (other == null || other.getClass() != this.getClass()) return false;
+//      @SuppressWarnings("unchecked") FindResultsRegionTreeUserObj o = (FindResultsRegionTreeUserObj)other;
+//      return (o.region().getDocument().equals(region().getDocument()) &&
+//              (o.region().getStartOffset() == region().getStartOffset()) &&
+//              (o.region().getEndOffset() == region().getEndOffset()) &&
+//              (o._lineNumber == this._lineNumber));
+//    }
+//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
     
     public String toString() {
       final StringBuilder sb = new StringBuilder();
