@@ -240,9 +240,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     for(int i=0; i<_listModel.size(); ++i) {
       @SuppressWarnings("unchecked") 
       RegionListUserObj<BrowserDocumentRegion> userObj = (RegionListUserObj<BrowserDocumentRegion>)_listModel.get(i);
-      if (userObj.region()==r) {
-        return userObj;
-      }
+      if (userObj.region() == r) return userObj;
     }
     return null;
   }

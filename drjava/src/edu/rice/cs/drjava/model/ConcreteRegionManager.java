@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -54,6 +55,8 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.StringOps;
@@ -70,8 +73,11 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   /** The domain of the _regions.  This field can be extracted from _regions so it is provided to improve performance
     * Primitive operations are thread-safe. 
     */
-  private volatile Set<OpenDefinitionsDocument> _documents = 
-    Collections.synchronizedSet(new HashSet<OpenDefinitionsDocument>());
+  private volatile Set<OpenDefinitionsDocument> _documents = new HashSet<OpenDefinitionsDocument>();
+  
+  /* The MutableTreeNode corresponding to each document in this region. */
+  private volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> treeNodes = 
+    new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
   
   private volatile R _current = null;
   
@@ -85,7 +91,6 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   
   private static final SortedSet<Object> EMPTY_SET = new TreeSet<Object>();
   
-  
   /*  Convinces the type checker to accept EMPTY_SET as a set of R. */
   @SuppressWarnings("unchecked")
   private <T> T emptySet() { return (T) EMPTY_SET; }
@@ -96,6 +101,10 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
     return (T) new DocumentRegion(odd, start, end);
   }
+  
+  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc) { return treeNodes.get(doc); }
+  
+  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode node) { treeNodes.put(doc, node); }
   
   private SortedSet<R> getHeadSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());

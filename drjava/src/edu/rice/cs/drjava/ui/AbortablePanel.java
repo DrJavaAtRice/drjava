@@ -127,8 +127,7 @@ public abstract class AbortablePanel extends TabbedPanel {
   protected abstract void abortActionPerformed(ActionEvent e);
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
-  protected void updateButtons() {
-  }  
+  protected void updateButtons() { }  
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
   protected JComponent[] makeButtons() {

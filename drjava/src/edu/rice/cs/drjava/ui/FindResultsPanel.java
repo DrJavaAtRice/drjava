@@ -78,7 +78,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
   */
 public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 
-  protected final RegionManager<MovingDocumentRegion> _regionManager;
+  // The following field has been hoisted into RegionsTreePanel
+//  protected final RegionManager<MovingDocumentRegion> _regionManager;
   protected final String _searchString;
   protected final boolean _searchAll;
   protected final boolean _matchCase;
@@ -112,8 +113,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
                           String searchString, boolean searchAll, boolean matchCase, boolean wholeWord, 
                           boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
                           FindReplacePanel findReplace) {
-    super(frame, title);
-    _regionManager = regionManager;
+    super(frame, title, regionManager);
+//    _regionManager = regionManager;
     _searchString = searchString;
     _searchAll    = searchAll;
     _matchCase    = matchCase;
@@ -265,7 +266,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     else if (_doc != null) { odd = _doc.get(); }
     if (odd != null) {
       _regionManager.clearRegions();
-      _regionRootNode.removeAllChildren();
+      _rootNode.removeAllChildren();
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord,
                            _noComments, _noTestCases, odd, _regionManager, this);
     }
@@ -302,10 +303,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   /** Update button state and text. */
-  protected void updateButtons() {
+  protected void _updateButtons() {
     ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
     OpenDefinitionsDocument odd = null;
-    if (_doc!=null) { odd = _doc.get(); }
+    if (_doc != null) { odd = _doc.get(); }
     _findAgainButton.setEnabled((odd!=null) || _searchAll);
     _goToButton.setEnabled(regs.size()==1);
     _bookmarkButton.setEnabled(regs.size()>0);

@@ -55,6 +55,7 @@ import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.IDocumentRegion;
+import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -72,10 +73,11 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 public abstract class RegionsTreePanel<R extends IDocumentRegion> extends TabbedPanel {
   protected JPanel _leftPane;
   
-  protected DefaultMutableTreeNode _regionRootNode;
+  protected DefaultMutableTreeNode _rootNode;
   protected DefaultTreeModel _regTreeModel;
   protected JTree _regTree;
   protected String _title;
+  protected RegionManager<R> _regionManager;
   
   protected JPopupMenu _regionPopupMenu;
   
@@ -83,6 +85,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   protected final MainFrame _frame;
   
   protected JPanel _buttonPanel;
+  protected long _lastFocusTime;  // the last time in milliseconds that requestFocusInWindow() was executed
+  protected long _lastUpdateTime; // the last time in milliseconds that _updateButtons() was executed
+  
+  public static final long UPDATE_THRESHOLD = 5000L; // threshold used to determine how often "this" should be updated
   
   protected DefaultTreeCellRenderer dtcr;
   
@@ -96,15 +102,16 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     * @param frame the MainFrame
     * @param title title of the pane
     */
-  public RegionsTreePanel(MainFrame frame, String title) {
+  public RegionsTreePanel(MainFrame frame, String title, RegionManager<R> regionManager) {
     super(frame, title);
     _title = title;
-    this.setLayout(new BorderLayout());
+    _regionManager = regionManager;
+    setLayout(new BorderLayout());
     
     _frame = frame;
     _model = frame.getModel();
     
-    this.removeAll(); // override the behavior of TabbedPanel
+    removeAll(); // override the behavior of TabbedPanel
     
     _changeState = DEFAULT_STATE;
     
@@ -118,6 +125,9 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     this.add(_leftPane, BorderLayout.CENTER);
     
     _buttonPanel = new JPanel(new BorderLayout());
+    _lastFocusTime = System.currentTimeMillis();
+    _lastUpdateTime = _lastFocusTime;
+    
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
     updateButtons();
@@ -145,40 +155,36 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   }
   
   /** Set the default state again. Not equipped to handle rapid changes. */
-  public void finishChanging() {
-    _changeState.switchStateTo(DEFAULT_STATE);
-  }
+  public void finishChanging() { _changeState.switchStateTo(DEFAULT_STATE); }
   
-  /** Update the tree.
-   */
+  /** Update the tree. This method adds significant overhead to displaying RegionsTreePanels.  We need to make it more
+    * efficient. */
   public boolean requestFocusInWindow() {
-    // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
-      public void run() {
-        // Update all tree nodes
-        Enumeration documents = _regionRootNode.children();
-        boolean found = false;
-        while ((!found) && (documents.hasMoreElements())) {
-          DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();          
-          // Find the correct start offset node for this region
-          Enumeration existingRegions = doc.children();
-          while (existingRegions.hasMoreElements()) {
-            DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
-            _regTreeModel.nodeChanged(existing);
-          }
-          _regTreeModel.nodeChanged(doc);
+    assert EventQueue.isDispatchThread();
+    long newTime = System.currentTimeMillis();
+    if (newTime - _lastFocusTime > UPDATE_THRESHOLD) {
+      _lastFocusTime = newTime;
+      // Update all tree nodes
+      Enumeration docNodes = _rootNode.children();
+      while (docNodes.hasMoreElements()) {
+        DefaultMutableTreeNode docNode = (DefaultMutableTreeNode)docNodes.nextElement();          
+        // Find the correct start offset node for this region
+        Enumeration regionNodes = docNode.children();
+        while (regionNodes.hasMoreElements()) {
+          DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
+          _regTreeModel.nodeChanged(regionNode);
         }
-        updateButtons();
+        _regTreeModel.nodeChanged(docNode);
       }
-    };
-    Utilities.invokeLater(doCommand);
+    }
+    updateButtons();
     return super.requestFocusInWindow();
   }
   
   /** Creates the region tree. */
   private void _setupRegionTree() {
-    _regionRootNode = new DefaultMutableTreeNode(_title);
-    _regTreeModel = new DefaultTreeModel(_regionRootNode);
+    _rootNode = new DefaultMutableTreeNode(_title);
+    _regTreeModel = new DefaultTreeModel(_rootNode);
     _regTree = new RegionTree(_regTreeModel);
     _regTree.setEditable(false);
     _regTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
@@ -206,8 +212,17 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     ToolTipManager.sharedInstance().registerComponent(_regTree);
   }
   
-  /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
-  protected void updateButtons() { }
+  /** Update button state and text. _updateButtons should be overridden if additional buttons are added besides "Go To",
+    * "Remove" and "Remove All". */
+  protected void updateButtons() { 
+    long newTime = System.currentTimeMillis();
+    if (newTime - _lastUpdateTime > UPDATE_THRESHOLD) {
+      _lastUpdateTime = newTime;
+      _updateButtons();
+    }
+  }
+  
+  protected void _updateButtons() { }
   
   /** Expand all tree nodes. */
   public void expandAll() {
@@ -275,25 +290,28 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       String tooltip = null;
       if (DrJava.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
         if (leaf) {
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+          Object o = node.getUserObject();
+          
           if (node.getUserObject() instanceof RegionTreeUserObj) {
-            @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)(node.getUserObject())).region();
+            @SuppressWarnings("unchecked")
+            RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) o;
+            R r = userObject.region();
             
             OpenDefinitionsDocument doc = r.getDocument();
-//            doc.acquireReadLock();
             try {
-              int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
+              int lnr = doc.getLineOfOffset(r.getStartOffset()) + 1;
               int startOffset = doc._getOffset(lnr - 3);
-              if (startOffset<0) { startOffset = 0; }
+              if (startOffset < 0) { startOffset = 0; }
               int endOffset = doc._getOffset(lnr + 3);
-              if (endOffset<0) { endOffset = doc.getLength() - 1; }
+              if (endOffset < 0) { endOffset = doc.getLength() - 1; }
               
               // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
-              String s = doc.getText(startOffset, endOffset-startOffset);
+              String s = doc.getText(startOffset, endOffset - startOffset);
               
               // this highlights the actual region in red
               int rStart = r.getStartOffset()-startOffset;
-              if (rStart<0) { rStart = 0; }
+              if (rStart < 0) { rStart = 0; }
               int rEnd = r.getEndOffset()-startOffset;
               if (rEnd > s.length()) { rEnd = s.length(); }
               if ((rStart <= s.length()) && (rEnd >= rStart)) {
@@ -385,7 +403,8 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       for (TreePath path: paths) {
         if (path != null && path.getPathCount() == 3) {
           DefaultMutableTreeNode lineNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-          @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>) lineNode.getUserObject()).region();
+          @SuppressWarnings("unchecked") 
+          R r = ((RegionTreeUserObj<R>) lineNode.getUserObject()).region();
           regs.add(r);
         }
       }
@@ -403,148 +422,110 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     * @param r the region
     */
   public void addRegion(final R r) {
-    File file = r.getDocument().getRawFile();
-//    try { name = r.getDocument().getQualifiedClassName(); }
-//    catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
+    OpenDefinitionsDocument doc = r.getDocument();
+    File file = doc.getRawFile();
     
-    DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
+    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
+    if (docNode == null) {
+      // No matching document node was found, so create one
+      docNode = new DefaultMutableTreeNode(file);
+      _regTreeModel.insertNodeInto(docNode, _rootNode, _rootNode.getChildCount());
+      _regionManager.setTreeNode(doc, docNode);
+    }
     
-    // Look for matching document node
-    // Raw type here due to Swing's use of raw types.
-    Enumeration documents = _regionRootNode.children();
-    boolean done = false;
-    while (! done && (documents.hasMoreElements())) {
-      DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-      if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-        
-        // Create a new region in this node
-        // Sort regions by start offset.
-        // Raw type here due to Swing's use of raw types.
-        Enumeration existingRegions = doc.children();
-        while (existingRegions.hasMoreElements()) {
-          DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
-          
-          // if start offset of indexed regions is less than new region, continue
-          int ofs = r.getStartOffset();
-          if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset() == ofs) {
-            _changeState.scrollPathToVisible(new TreePath(existing));
-            _changeState.setLastAdded(existing);
-            done = true;
-            break;
-          }
-          else if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset() > ofs) {
-            
-            // else, add to the list
-            DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
-            _regTreeModel.insertNodeInto(newRegion, doc, doc.getIndex(existing));
-
-            // Make sure this node is visible
-            _changeState.scrollPathToVisible(new TreePath(newRegion.getPath()));
-            _changeState.setLastAdded(newRegion);
-            done = true;
-            break;
-          }
-        }
-        if (done) { break; }
-        
-        // if none are greater, add at the end
-        DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
-        _regTreeModel.insertNodeInto(newRegion, doc, doc.getChildCount());
-        
-        // Make sure this node is visible
-        _changeState.scrollPathToVisible(new TreePath(newRegion.getPath()));
-        _changeState.setLastAdded(newRegion);
-        done = true;
+    @SuppressWarnings("unchecked")
+    Enumeration<DefaultMutableTreeNode> regionNodes = (Enumeration<DefaultMutableTreeNode>) docNode.children();
+    
+    // Create a new region node in this document node list, where regions are sorted by start offset.
+    int offset = r.getStartOffset();
+    
+    for (int index = 0; true ; index++) {  // infinite loop incrementing index on each iteration
+  
+      if (! regionNodes.hasMoreElements()) { // exhausted all elements; insert new region node at end
+        insertNewRegionNode(r, docNode, index);
         break;
       }
-    }
-    
-    if (! done) {
-      // No matching document node was found, so create one
-      _regTreeModel.insertNodeInto(regDocNode, _regionRootNode, _regionRootNode.getChildCount());
-      DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
-      _regTreeModel.insertNodeInto(newRegion, regDocNode, regDocNode.getChildCount());
+      DefaultMutableTreeNode node = regionNodes.nextElement();
       
-      // Make visible
-      _changeState.scrollPathToVisible(new TreePath(newRegion.getPath()));
-      _changeState.setLastAdded(newRegion);
-    }
-    
+      @SuppressWarnings("unchecked")
+      RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) node.getUserObject();
+      R nodeRegion = userObject.region();
+      int nodeOffset = nodeRegion.getStartOffset();
+      
+      if (nodeOffset == offset) {
+        // region with same start offset already exists
+        if (nodeRegion.getEndOffset() == r.getEndOffset()) {
+          // silently suppress inserting region; can this happen?  Caller should suppress it.
+          _changeState.scrollPathToVisible(new TreePath(node));
+          _changeState.setLastAdded(node);
+          break;
+        }
+        else { // new region is distinct from nodeRegion
+          insertNewRegionNode(r, docNode, index);
+          break;
+        }
+      }
+      else if (nodeOffset > offset) {
+        insertNewRegionNode(r, docNode, index);
+        break;
+      }
+    }    
     _changeState.updateButtons();
   }
+  
+  private void insertNewRegionNode(R r, DefaultMutableTreeNode docNode, int pos) {
+    // else, add to the list
+    DefaultMutableTreeNode newRegionNode = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
+    _regTreeModel.insertNodeInto(newRegionNode, docNode, pos);
+    
+    // Establish link to TreeNode from region r
+    r.setTreeNode(newRegionNode);
+    
+    // Make sure this node is visible
+    _changeState.scrollPathToVisible(new TreePath(newRegionNode.getPath()));
+    _changeState.setLastAdded(newRegionNode);
+  }       
   
   /** Remove a region from the tree. Must be executed in event thread.
     * @param r the region
     */
   public void removeRegion(final R r) {
-    // Only change GUI from event-dispatching thread
+    assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
-    Runnable doCommand = new Runnable() {
-      public void run() {
-        File file = r.getDocument().getRawFile();
-        
-        DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
-        
-        // Find the document node for this region
-        Enumeration documents = _regionRootNode.children();
-        boolean found = false;
-        while (! found && documents.hasMoreElements()) {
-          DefaultMutableTreeNode doc = (DefaultMutableTreeNode) documents.nextElement();
-          if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-            // Find the correct start offset node for this region
-            Enumeration existingRegions = doc.children();
-            while (existingRegions.hasMoreElements()) {
-              DefaultMutableTreeNode existing = (DefaultMutableTreeNode) existingRegions.nextElement();
-              if (((RegionTreeUserObj) existing.getUserObject()).region().getStartOffset() == r.getStartOffset()) {
-                _regTreeModel.removeNodeFromParent(existing);
-                // notify
-                if (doc.getChildCount() == 0) {
-                  // this document has no more regions, remove it
-                  _regTreeModel.removeNodeFromParent(doc);
-                }
-                found = true;
-                break;
-              }
-            }
-          }
-        }
-        _changeState.updateButtons();
-      }
-    };
-    Utilities.invokeLater(doCommand);
+
+    DefaultMutableTreeNode regionNode = r.getTreeNode();
+    OpenDefinitionsDocument doc = r.getDocument();
+    
+//    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
+    DefaultMutableTreeNode parent = (DefaultMutableTreeNode) regionNode.getParent();  // TreeNode for document
+    _regTreeModel.removeNodeFromParent(regionNode);
+    
+    // check for empty subtree for this document (rooted at parent)
+    if (parent.getChildCount() == 0)
+      // this document has no more regions, remove it
+      _regTreeModel.removeNodeFromParent(parent);
+    
+    _changeState.updateButtons();
   }
   
-  /** Remove all regions for this document from the tree. Must be executed in event thread. */
+  /** Remove all regions for the given document from the tree. Must be executed in event thread. */
   public void removeRegions(final OpenDefinitionsDocument odd) {
+    assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
-    // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
-      public void run() {
-        File file = odd.getRawFile();
-        
-        DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
-        
-        // Find the document node for this region
-        Enumeration documents = _regionRootNode.children();
-        while (documents.hasMoreElements()) {
-          DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-          if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-            while(doc.getChildCount()>0) {
-              DefaultMutableTreeNode existing = (DefaultMutableTreeNode)doc.getFirstChild();
-              @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)existing.getUserObject()).region();
-              _regTreeModel.removeNodeFromParent(existing);
-            }
-            _regTreeModel.removeNodeFromParent(doc);
-          }
-        }
-        _changeState.updateButtons();
-      }
-    };
-    Utilities.invokeLater(doCommand);
+    
+    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(odd);
+    
+    // Find the document node for this region
+
+    while(docNode.getChildCount() > 0) {
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)docNode.getFirstChild();
+      _regTreeModel.removeNodeFromParent(node);
+    }
+    _regTreeModel.removeNodeFromParent(docNode);
+    _changeState.updateButtons();
   }
   
-  /** Mouse adapter for the region tree.
-   */
+  /** Mouse adapter for the region tree. */
   protected class RegionMouseAdapter extends RightClickMouseAdapter {
     protected void _popupAction(MouseEvent e) {
       int x = e.getX();
@@ -566,14 +547,11 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Factory method to create user objects put in the tree.
     * If subclasses extend RegionTreeUserObj, they need to override this method. */
-  protected RegionTreeUserObj<R> makeRegionTreeUserObj(R r) {
-    return new RegionTreeUserObj<R>(r);
-  }
+  protected RegionTreeUserObj<R> makeRegionTreeUserObj(R r) { return new RegionTreeUserObj<R>(r); }
   
   protected class RegionTree extends JTree {
-    public RegionTree(DefaultTreeModel s) {
-      super(s);
-    }
+    
+    public RegionTree(DefaultTreeModel s) { super(s); }  // narrows type of construction argument
     
     public void setForeground(Color c) {
       super.setForeground(c);
@@ -589,7 +567,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
   protected static class RegionTreeUserObj<R extends IDocumentRegion> {
     protected R _region;
-    public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset())+1; }
+    public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1; }
     public R region() { return _region; }
     public RegionTreeUserObj(R r) { _region = r; }
     public String toString() {
@@ -602,14 +580,6 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
       return sb.toString();
     }
-//    public boolean equals(Object other) {
-//      if ((other==null) || !(other instanceof RegionTreeUserObj)) { return false; }
-//      @SuppressWarnings("unchecked") RegionTreeUserObj<R> o = (RegionTreeUserObj<R>)other;
-//      return (o.region().getDocument().equals(region().getDocument())) &&
-//        (o.region().getStartOffset()==region().getStartOffset()) &&
-//        (o.region().getEndOffset()==region().getEndOffset());
-//    }
-//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
   
   /** State pattern for improving performance during rapid updates. */

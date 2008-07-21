@@ -50,6 +50,7 @@ import java.awt.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
+import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -71,9 +72,9 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
    *  This is swing view class and hence should only be accessed from the event-handling thread.
    *  @param frame the MainFrame
    */
-  public BookmarksPanel(MainFrame frame) {
-    super(frame, "Bookmarks");
-    _model.getBookmarkManager().addListener(new RegionManagerListener<OrderedDocumentRegion>() {      
+  public BookmarksPanel(MainFrame frame, RegionManager<OrderedDocumentRegion> bookmarkManager) {
+    super(frame, "Bookmarks", bookmarkManager);
+    _regionManager.addListener(new RegionManagerListener<OrderedDocumentRegion>() {      
       public void regionAdded(OrderedDocumentRegion r) { addRegion(r); }
       public void regionChanged(OrderedDocumentRegion r) { 
         regionRemoved(r);
@@ -100,9 +101,7 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
         startChanging();
-        for (OrderedDocumentRegion r: getSelectedRegions()) {
-          _model.getBookmarkManager().removeRegion(r);
-        }
+        for (OrderedDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
         finishChanging();
       }
     };
@@ -111,7 +110,7 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
         startChanging();
-        _model.getBookmarkManager().clearRegions();
+        _regionManager.clearRegions();
         finishChanging();
       }
     };
@@ -127,11 +126,11 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
   }
 
   /** Update button state and text. */
-  protected void updateButtons() {
+  protected void _updateButtons() {
     ArrayList<OrderedDocumentRegion> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size()==1);
     _removeButton.setEnabled(regs.size()>0);
-    _removeAllButton.setEnabled(_regionRootNode != null && _regionRootNode.getDepth() > 0);
+    _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
   }
   
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
@@ -141,7 +140,7 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
         
       new AbstractAction("Remove") {
         public void actionPerformed(ActionEvent e) {
-          for (OrderedDocumentRegion r: getSelectedRegions()) _model.getBookmarkManager().removeRegion(r);
+          for (OrderedDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
         }
       }
     };

@@ -52,6 +52,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.*;
@@ -78,9 +79,9 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     *  This is swing view class and hence should only be accessed from the event-handling thread.
     *  @param frame the MainFrame
     */
-  public BreakpointsPanel(MainFrame frame) {
-    super(frame, "Breakpoints");
-    _model.getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
+  public BreakpointsPanel(MainFrame frame, RegionManager<Breakpoint> breakpointManager) {
+    super(frame, "Breakpoints", breakpointManager);
+    _regionManager.addListener(new RegionManagerListener<Breakpoint>() {
       /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
         *  Must be executed in event thread.
         *  @param bp the breakpoint
@@ -96,39 +97,40 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         * @param index the index of the breakpoint
         */
       public void regionChanged(final Breakpoint bp) {
-        // Only change GUI from event-dispatching thread
-        Runnable doCommand = new Runnable() {
-          public void run() {
-            File file = bp.getDocument().getRawFile();
-            
-            DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
-            
-            // Find the document node for this region
-            Enumeration documents = _regionRootNode.children();
-            boolean found = false;
-            while (! found && documents.hasMoreElements()) {
-              DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-              if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-                // Find the correct line start offset node for this breakpoint
-                Enumeration existingRegions = doc.children();
-                while (existingRegions.hasMoreElements()) {
-                  DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
-                  @SuppressWarnings("unchecked") 
-                  RegionTreeUserObj<Breakpoint> uo = (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
-                  if (uo.region().getStartOffset()==bp.getStartOffset()) {
-                    Breakpoint r = uo.region();
-                    r.setEnabled(bp.isEnabled());
-                    ((DefaultTreeModel)_regTree.getModel()).nodeChanged(existing);
-                    found = true;
-                    break;
-                  }
-                }
-              }
-            }
-            updateButtons();
-          }
-        };
-        Utilities.invokeLater(doCommand);
+        assert EventQueue.isDispatchThread();
+//        Runnable doCommand = new Runnable() {
+//          public void run() {
+        File file = bp.getDocument().getRawFile();
+        
+        DefaultMutableTreeNode regNode = bp.getTreeNode();
+        ((DefaultTreeModel)_regTree.getModel()).nodeChanged(regNode);
+        
+//            // Find the document node for this region
+//            Enumeration documents = _regionRootNode.children();
+//            boolean found = false;
+//            while (! found && documents.hasMoreElements()) {
+//              DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+//              if (doc.getUserObject().equals(regDocNode.getUserObject())) {
+//                // Find the correct line start offset node for this breakpoint
+//                Enumeration existingRegions = doc.children();
+//                while (existingRegions.hasMoreElements()) {
+//                  DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
+//                  @SuppressWarnings("unchecked") 
+//                  RegionTreeUserObj<Breakpoint> uo = (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
+//                  if (uo.region().getStartOffset() == bp.getStartOffset()) {
+//                    Breakpoint r = uo.region();
+//                    r.setEnabled(bp.isEnabled());
+//                    ((DefaultTreeModel)_regTree.getModel()).nodeChanged(existing);
+//                    found = true;
+//                    break;
+//                  }
+//                }
+//              }
+//            }
+//            updateButtons();
+//          }
+//        };
+//        Utilities.invokeLater(doCommand);
       }
       
       /** Called when a breakpoint is removed from a document.
@@ -164,9 +166,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
         startChanging();
-        for (Breakpoint bp: getSelectedRegions()) {
-          _model.getBreakpointManager().removeRegion(bp);
-        }
+        for (Breakpoint bp: getSelectedRegions()) _regionManager.removeRegion(bp);
         finishChanging();
       }
     };
@@ -175,7 +175,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
         startChanging();
-        _model.getBreakpointManager().clearRegions();
+        _regionManager.clearRegions();
         finishChanging();
       }
     };
@@ -192,17 +192,17 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   }
   
   /** Update button state and text. */
-  protected void updateButtons() {
+  protected void _updateButtons() {
     ArrayList<Breakpoint> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size() == 1);
     _removeButton.setEnabled(regs.size() > 0);
-    _removeAllButton.setEnabled(_regionRootNode != null && _regionRootNode.getDepth() > 0);
+    _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
     _enableDisableButton.setEnabled(regs.size()>0);
     if (regs.size() > 0) {
       if (regs.get(0).isEnabled()) _enableDisableButton.setText("Disable");
       else _enableDisableButton.setText("Enable");
     }
-    _removeAllButton.setEnabled(_regionRootNode != null && _regionRootNode.getDepth() > 0);
+    _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
   }
   
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
@@ -214,7 +214,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            for (Breakpoint bp: getSelectedRegions()) _model.getBreakpointManager().removeRegion(bp);
+            for (Breakpoint bp: getSelectedRegions()) _regionManager .removeRegion(bp);
           }
         }
     };
@@ -235,7 +235,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     if (bps.size()>0) {
       final boolean newState = !bps.get(0).isEnabled();
       for (Breakpoint bp: bps) {
-        _model.getBreakpointManager().changeRegion(bp, new Lambda<Object, Breakpoint>() {
+        _regionManager.changeRegion(bp, new Lambda<Object, Breakpoint>() {
           public Object apply(Breakpoint bp) {
             bp.setEnabled(newState);
             return null;

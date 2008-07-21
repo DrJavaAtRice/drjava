@@ -2984,7 +2984,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     if (_showDebugger) {
       _debugPanel = new DebugPanel(this);
-      _breakpointsPanel = new BreakpointsPanel(this);
+      _breakpointsPanel = new BreakpointsPanel(this, _model.getBreakpointManager());
     }
     else {
       _debugPanel = null;
@@ -3021,7 +3021,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
     
-    _bookmarksPanel = new BookmarksPanel(this);
+    _bookmarksPanel = new BookmarksPanel(this, _model.getBookmarkManager());
     
     // Initialize the status bar
     _setUpStatusBar();

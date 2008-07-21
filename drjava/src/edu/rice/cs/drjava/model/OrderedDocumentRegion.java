@@ -42,7 +42,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import java.io.File;
 
-/** Interface supported by all document regions using in search results, bookmarks, and breakpoints (e.g., region 
+/** Interface supported by all document regions used in search results, bookmarks, and breakpoints (e.g., region 
   * classes other than DummyDocumentRegion and BrowserDocumentRegion).  OrderedDocumentRegions are presumed to
   * contain three fields: an OpenDefinitionsDocument, a start Postion, and an end Position, where Positions 
   * refers to javax.swing.text.Position.  They are presumed to be ordered by first by document (using some form

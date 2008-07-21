@@ -50,6 +50,7 @@ import java.util.Vector;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
 
 import com.sun.jdi.*;
@@ -88,6 +89,14 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
       _initializeRequests(refTypes);
       setEnabled(isEnabled);
     }
+  }
+  
+  public void setTreeNode(DefaultMutableTreeNode node) { 
+    throw new UnsupportedOperationException("JPDA Breakpoint does not support setTreeNode");
+  }
+  
+  public DefaultMutableTreeNode getTreeNode() {
+    throw new UnsupportedOperationException("JPDA Breakpoint does not support getTreeNode");
   }
   
   /** Creates appropriate EventRequests from the EventRequestManager and stores them in the _requests field.

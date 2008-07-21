@@ -37,6 +37,8 @@
 package edu.rice.cs.drjava.model;
 
 import javax.swing.text.Position;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
 /** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
@@ -50,6 +52,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   protected final File _file;                      // file for this region
   protected final Position _startPosition;         // start position for this region
   protected final Position _endPosition;           // final position for this region
+  protected volatile DefaultMutableTreeNode _treeNode;
   
   /** Create a new simple document region.
     * @param doc document that contains this region
@@ -65,7 +68,12 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
     _file = doc.getRawFile();  // don't check the validity of _file here
     _startPosition = sp;
     _endPosition = ep;
+    _treeNode = null;
   }
+  
+  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
+  
+  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
 
 //  /** Structural equality method that copes with null!  This method should be a member of class Object. */
 //  public static boolean equals(Object o1, Object o2) { 

@@ -37,9 +37,13 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.util.Lambda;
+
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Vector;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 
 /** Interface for a region manager.  Region ordering (as in DocumentRegion) is not required, but it facilitates 
   * efficient implementation.
@@ -118,4 +122,10 @@ public interface RegionManager<R extends IDocumentRegion> {
 
   /** Removes all listeners from this notifier.  */
   public void removeAllListeners();
+  
+  /** @return the corresponding MutableTreeNode. */
+  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc);
+  
+  /** Sets the MutableTreeNode corresponding to this region. */
+  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode n);
 }

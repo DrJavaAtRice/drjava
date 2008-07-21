@@ -40,6 +40,8 @@ import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
 /** Interface supported by all bona fide document regions (e.g., region classes other than DummyDocumentRegion). */
@@ -51,4 +53,9 @@ public interface IDocumentRegion extends Region {
   public Position getStartPosition();
   /** @return the end offset */
   public Position getEndPosition();
+  /** @return the corresponding MutableTreeNode. */
+  public DefaultMutableTreeNode getTreeNode();
+  /** Sets the MutableTreeNode corresponding to this region. */
+  public void setTreeNode(DefaultMutableTreeNode n);
 }
+

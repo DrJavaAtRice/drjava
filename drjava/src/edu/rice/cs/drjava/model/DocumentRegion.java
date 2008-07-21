@@ -40,6 +40,8 @@ import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
 import static edu.rice.cs.util.HashUtilities.hash;
@@ -52,6 +54,7 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   protected final File _file;
   protected volatile Position _startPosition; 
   protected volatile Position _endPosition;
+  protected volatile DefaultMutableTreeNode _treeNode;
   
   /** Create a new simple document region using offsets.
     * @param doc document that contains this region, which cannot be null
@@ -71,6 +74,10 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     _startPosition = sp;
     _endPosition = ep;
   }
+  
+  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
+  
+  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
   
   private static Position createPosition(OpenDefinitionsDocument doc, int i) {
     try { return doc.createPosition(i); }
