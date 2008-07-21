@@ -577,7 +577,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       // Set of documents that have been reverted in the process of "find all"
 //      HashSet<OpenDefinitionsDocument> reverted = new HashSet<OpenDefinitionsDocument>();
       
-      panel.startChanging();
+//      panel.startChanging();
       for (FindResult fr: results) {
 //        if (reverted.contains(fr.getDocument())) {
 //          // skipping document because we have previously noticed that it has been modified,
@@ -659,7 +659,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         catch (FileMovedException fme) { throw new UnexpectedException(fme); }
         catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       }
-      panel.finishChanging();
+//      panel.finishChanging();
       
       EventQueue.invokeLater(new Runnable() {
         public void run() {

@@ -2550,16 +2550,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
-        panel.removeRegion(r);
+//        panel.removeRegion(r);  // Responsibility of the panel
 //        Utilities.show("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
 //        Utilities.show("The retrieved highlight is " + highlight);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
+        // The following is the  responsibility of the panel?
         // close the panel and dispose of its MainFrame resources when all regions have been removed.
-        if (rm.getDocuments().size() == 0) {
-          panel._close(); // _close removes the panel from _tabs and pair from _findResults
-        }
+//        if (rm.getDocuments().size() == 0) {
+//          panel._close(); // _close removes the panel from _tabs and pair from _findResults
+//        }
       }
     });
     

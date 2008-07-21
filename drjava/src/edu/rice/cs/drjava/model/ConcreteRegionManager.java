@@ -55,8 +55,8 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.SwingUtilities;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
+//import javax.swing.tree.DefaultMutableTreeNode;
+//import javax.swing.tree.MutableTreeNode;
 
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.StringOps;
@@ -74,10 +74,6 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     * Primitive operations are thread-safe. 
     */
   private volatile Set<OpenDefinitionsDocument> _documents = new HashSet<OpenDefinitionsDocument>();
-  
-  /* The MutableTreeNode corresponding to each document in this region. */
-  private volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> treeNodes = 
-    new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
   
   private volatile R _current = null;
   
@@ -102,9 +98,9 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     return (T) new DocumentRegion(odd, start, end);
   }
   
-  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc) { return treeNodes.get(doc); }
-  
-  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode node) { treeNodes.put(doc, node); }
+//  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc) { return _treeNodes.get(doc); }
+//  
+//  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode node) { _treeNodes.put(doc, node); }
   
   private SortedSet<R> getHeadSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());
@@ -247,21 +243,14 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     
     // only notify if the region was actually added
     if (wasRemoved) _notifyRegionRemoved(region);
-//      // notify
-//      Utilities.invokeLater(new Runnable() { public void run() {
-//        _lock.startRead();
-//        try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-//        finally { _lock.endRead(); }
-//      } });
-//    }
   }
   
   private void _notifyRegionRemoved(final R region) {
-    Utilities.invokeLater(new Runnable() { public void run() {
+//    Utilities.invokeLater(new Runnable() { public void run() {
       _lock.startRead();
       try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
       finally { _lock.endRead(); }
-    } });
+//    } });
   }
   
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
@@ -286,7 +275,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   }
     
   private void _notifyRegionsRemoved(final Collection<R> regions) {
-     Utilities.invokeLater(new Runnable() { public void run() {
+//     Utilities.invokeLater(new Runnable() { public void run() {
         _lock.startRead();
         try {
           for (RegionManagerListener<R> l: _listeners) { 
@@ -294,7 +283,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
           } 
         } 
         finally { _lock.endRead(); }
-      } });
+//      } });
   }
   
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */

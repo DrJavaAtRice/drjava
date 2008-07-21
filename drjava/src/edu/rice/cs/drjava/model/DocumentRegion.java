@@ -75,9 +75,9 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     _endPosition = ep;
   }
   
-  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
-  
-  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
+//  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
+//  
+//  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
   
   private static Position createPosition(OpenDefinitionsDocument doc, int i) {
     try { return doc.createPosition(i); }

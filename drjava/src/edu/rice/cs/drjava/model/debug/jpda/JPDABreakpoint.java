@@ -91,13 +91,13 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     }
   }
   
-  public void setTreeNode(DefaultMutableTreeNode node) { 
-    throw new UnsupportedOperationException("JPDA Breakpoint does not support setTreeNode");
-  }
-  
-  public DefaultMutableTreeNode getTreeNode() {
-    throw new UnsupportedOperationException("JPDA Breakpoint does not support getTreeNode");
-  }
+//  public void setTreeNode(DefaultMutableTreeNode node) { 
+//    throw new UnsupportedOperationException("JPDA Breakpoint does not support setTreeNode");
+//  }
+//  
+//  public DefaultMutableTreeNode getTreeNode() {
+//    throw new UnsupportedOperationException("JPDA Breakpoint does not support getTreeNode");
+//  }
   
   /** Creates appropriate EventRequests from the EventRequestManager and stores them in the _requests field.
     * @param refTypes  All (identical) ReferenceTypes to which this action applies.  (There may be multiples if a custom

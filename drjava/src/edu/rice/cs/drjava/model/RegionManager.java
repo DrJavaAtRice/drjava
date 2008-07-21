@@ -123,9 +123,9 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** Removes all listeners from this notifier.  */
   public void removeAllListeners();
   
-  /** @return the corresponding MutableTreeNode. */
-  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc);
-  
-  /** Sets the MutableTreeNode corresponding to this region. */
-  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode n);
+//  /** @return the corresponding MutableTreeNode. */
+//  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc);
+//  
+//  /** Sets the MutableTreeNode corresponding to this region. */
+//  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode n);
 }

@@ -302,8 +302,8 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     */
   public void removeRegion(final R r) {
     // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
-      public void run() {
+//    Runnable doCommand = new Runnable() {
+//      public void run() {
 //        String name = "";
 //        try {
 //          name = r.getDocument().getQualifiedClassName();
@@ -321,9 +321,9 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
         }
         
         updateButtons();
-      }
-    };
-    Utilities.invokeLater(doCommand);
+//      }
+//    };
+//    Utilities.invokeLater(doCommand);
   }
   
   /** Remove all regions for this document from the tree. Must be executed in event thread. */

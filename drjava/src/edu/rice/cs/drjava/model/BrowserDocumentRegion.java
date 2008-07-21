@@ -71,9 +71,9 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
     _treeNode = null;
   }
   
-  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
-  
-  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
+//  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
+//  
+//  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
 
 //  /** Structural equality method that copes with null!  This method should be a member of class Object. */
 //  public static boolean equals(Object o1, Object o2) { 

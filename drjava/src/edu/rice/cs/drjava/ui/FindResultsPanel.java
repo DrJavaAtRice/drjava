@@ -260,15 +260,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Find again. */
   private void _findAgain() {
-    updateButtons();
+    _updateButtons();   // force an update buttons operation
     OpenDefinitionsDocument odd = null;
     if (_searchAll) odd = _model.getActiveDocument();
     else if (_doc != null) { odd = _doc.get(); }
     if (odd != null) {
       _regionManager.clearRegions();
       _rootNode.removeAllChildren();
-      _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord,
-                           _noComments, _noTestCases, odd, _regionManager, this);
+      System.err.println("Root has been cleared");
+      _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
+                           _regionManager, this);
+      requestFocusInWindow();
     }
   }
   
@@ -307,10 +309,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
     OpenDefinitionsDocument odd = null;
     if (_doc != null) { odd = _doc.get(); }
-    _findAgainButton.setEnabled((odd!=null) || _searchAll);
-    _goToButton.setEnabled(regs.size()==1);
-    _bookmarkButton.setEnabled(regs.size()>0);
-    _removeButton.setEnabled(regs.size()>0);
+    _findAgainButton.setEnabled(odd != null || _searchAll);
+    _goToButton.setEnabled(regs.size() == 1);
+    _bookmarkButton.setEnabled(regs.size() > 0);
+    _removeButton.setEnabled(regs.size() > 0);
   }
   
   /** Makes popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
@@ -344,10 +346,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   public void freeResources() {
     _regionManager.clearRegions();
     _model.disposeFindResultsManager(_regionManager);
+    _docToTreeNode.clear();
+    _regionToTreeNode.clear();
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }
-    if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
+    if (_lastIndex < OptionConstants.FIND_RESULTS_COLORS.length) {
       --DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     }
   }

@@ -102,7 +102,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
 //          public void run() {
         File file = bp.getDocument().getRawFile();
         
-        DefaultMutableTreeNode regNode = bp.getTreeNode();
+        DefaultMutableTreeNode regNode = _regionToTreeNode.get(bp);
         ((DefaultTreeModel)_regTree.getModel()).nodeChanged(regNode);
         
 //            // Find the document node for this region

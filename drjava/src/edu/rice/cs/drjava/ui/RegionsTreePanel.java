@@ -36,11 +36,15 @@
 
 package edu.rice.cs.drjava.ui;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.font.*;
+import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Enumeration;
-import java.io.*;
+import java.util.HashMap;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -49,9 +53,6 @@ import javax.swing.table.*;
 import javax.swing.text.*;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicToolTipUI;
-import java.awt.event.*;
-import java.awt.font.*;
-import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.IDocumentRegion;
@@ -96,6 +97,14 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   protected final IChangeState DEFAULT_STATE = new DefaultState();
   protected final IChangeState CHANGING_STATE = new ChangingState();
   protected IChangeState _changeState = DEFAULT_STATE;
+  
+  /* A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
+  protected volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> _docToTreeNode = 
+    new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
+  
+  /* A table mapping each region entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
+  protected volatile HashMap<R, DefaultMutableTreeNode> _regionToTreeNode = 
+    new HashMap<R, DefaultMutableTreeNode>();
   
   /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
     * from the event thread.
@@ -215,11 +224,11 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   /** Update button state and text. _updateButtons should be overridden if additional buttons are added besides "Go To",
     * "Remove" and "Remove All". */
   protected void updateButtons() { 
-    long newTime = System.currentTimeMillis();
-    if (newTime - _lastUpdateTime > UPDATE_THRESHOLD) {
-      _lastUpdateTime = newTime;
+//    long newTime = System.currentTimeMillis();
+//    if (newTime - _lastUpdateTime > UPDATE_THRESHOLD) {
+//      _lastUpdateTime = newTime;
       _updateButtons();
-    }
+//    }
   }
   
   protected void _updateButtons() { }
@@ -425,12 +434,13 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     OpenDefinitionsDocument doc = r.getDocument();
     File file = doc.getRawFile();
     
-    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
+    DefaultMutableTreeNode docNode = _docToTreeNode.get(doc);
     if (docNode == null) {
       // No matching document node was found, so create one
       docNode = new DefaultMutableTreeNode(file);
       _regTreeModel.insertNodeInto(docNode, _rootNode, _rootNode.getChildCount());
-      _regionManager.setTreeNode(doc, docNode);
+      // Create link from doc to docNode
+      _docToTreeNode.put(doc, docNode);
     }
     
     @SuppressWarnings("unchecked")
@@ -478,8 +488,8 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     DefaultMutableTreeNode newRegionNode = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
     _regTreeModel.insertNodeInto(newRegionNode, docNode, pos);
     
-    // Establish link to TreeNode from region r
-    r.setTreeNode(newRegionNode);
+    // Create link from region r to newRegionNode
+    _regionToTreeNode.put(r, newRegionNode);
     
     // Make sure this node is visible
     _changeState.scrollPathToVisible(new TreePath(newRegionNode.getPath()));
@@ -492,18 +502,22 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   public void removeRegion(final R r) {
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
-
-    DefaultMutableTreeNode regionNode = r.getTreeNode();
-    OpenDefinitionsDocument doc = r.getDocument();
+    DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
+    
+    _regionManager.removeRegion(r);
+    _regionToTreeNode.remove(r);
     
 //    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode) regionNode.getParent();  // TreeNode for document
     _regTreeModel.removeNodeFromParent(regionNode);
     
     // check for empty subtree for this document (rooted at parent)
-    if (parent.getChildCount() == 0)
+    if (parent.getChildCount() == 0) {
       // this document has no more regions, remove it
+      OpenDefinitionsDocument doc = r.getDocument();  // r must not have bee disposed above
+      _docToTreeNode.remove(doc);
       _regTreeModel.removeNodeFromParent(parent);
+    }
     
     _changeState.updateButtons();
   }
@@ -513,7 +527,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
     
-    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(odd);
+    DefaultMutableTreeNode docNode = _docToTreeNode.get(odd);
     
     // Find the document node for this region
 
@@ -522,6 +536,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _regTreeModel.removeNodeFromParent(node);
     }
     _regTreeModel.removeNodeFromParent(docNode);
+    _regionManager.removeRegions(odd);
     _changeState.updateButtons();
   }
   

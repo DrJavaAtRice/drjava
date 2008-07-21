@@ -53,9 +53,9 @@ public interface IDocumentRegion extends Region {
   public Position getStartPosition();
   /** @return the end offset */
   public Position getEndPosition();
-  /** @return the corresponding MutableTreeNode. */
-  public DefaultMutableTreeNode getTreeNode();
-  /** Sets the MutableTreeNode corresponding to this region. */
-  public void setTreeNode(DefaultMutableTreeNode n);
+//  /** @return the corresponding MutableTreeNode. */
+//  public DefaultMutableTreeNode getTreeNode();
+//  /** Sets the MutableTreeNode corresponding to this region. */
+//  public void setTreeNode(DefaultMutableTreeNode n);
 }
 
