@@ -298,7 +298,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _remove() {
     _frame.removeCurrentLocationHighlight();
     startChanging();
-    for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
+    for (MovingDocumentRegion r: getSelectedRegions()) {
+      removeRegion(r); // removes r from region manager and the panel node for r from the tree model
+    }
     finishChanging();
     if (_regionManager.getDocuments().size() == 0) { _close(); }
     updateButtons();

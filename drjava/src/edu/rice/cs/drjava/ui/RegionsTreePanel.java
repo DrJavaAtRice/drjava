@@ -89,7 +89,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   protected long _lastFocusTime;  // the last time in milliseconds that requestFocusInWindow() was executed
   protected long _lastUpdateTime; // the last time in milliseconds that _updateButtons() was executed
   
-  public static final long UPDATE_THRESHOLD = 5000L; // threshold used to determine how often "this" should be updated
+  public static final long UPDATE_THRESHOLD = 10000L; // threshold used to determine how often "this" should be updated
   
   protected DefaultTreeCellRenderer dtcr;
   
@@ -171,19 +171,20 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   public boolean requestFocusInWindow() {
     assert EventQueue.isDispatchThread();
     long newTime = System.currentTimeMillis();
-    if (newTime - _lastFocusTime > UPDATE_THRESHOLD) {
+    if (newTime - _lastFocusTime > UPDATE_THRESHOLD && _frame._changedSinceTabUpdate) {
       _lastFocusTime = newTime;
+      _frame._changedSinceTabUpdate = false;
       // Update all tree nodes
       Enumeration docNodes = _rootNode.children();
       while (docNodes.hasMoreElements()) {
-        DefaultMutableTreeNode docNode = (DefaultMutableTreeNode)docNodes.nextElement();          
+        DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
         // Find the correct start offset node for this region
         Enumeration regionNodes = docNode.children();
         while (regionNodes.hasMoreElements()) {
           DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
           _regTreeModel.nodeChanged(regionNode);
         }
-        _regTreeModel.nodeChanged(docNode);
+        _regTreeModel.nodeChanged(docNode);  // file name may have changed
       }
     }
     updateButtons();

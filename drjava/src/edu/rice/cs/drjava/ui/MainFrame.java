@@ -261,6 +261,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Table to map bookmarks to their corresponding highlight objects. */
   private final Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
+  /** Whether any document has changed since tabbed panels have been updated. */
+  public volatile boolean _changedSinceTabUpdate = false;
+  
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
   
@@ -7474,6 +7477,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         
         Component c = _tabbedPane.getSelectedComponent();
         if (c != null) c.repaint();
+        _changedSinceTabUpdate = true;
       }
       public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }
@@ -8669,16 +8673,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread
       // new ScrollableDialog(null, "junitClassesStarted called in MainFrame", "", "").show();
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-//          new ScrollableDialog(null, "Ready for hourglassOn in junitClassesStarted", "", "").show();
-//          hourglassOn();
       showTab(_junitErrorPanel, true);
       _junitErrorPanel.setJUnitInProgress();
       // _junitAction.setEnabled(false);
       // _junitAllAction.setEnabled(false);
-//        } // no hourglassOff here because junitClasses does not perform hourglassOn
-//      });
     }
     
     //public void junitRunning() { }
@@ -8701,9 +8699,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").
 //        show();
-      // syncUI...?
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError); // this does nothing!
       _junitErrorPanel.progressStep(succeeded);
       _model.refreshActiveDocument();
@@ -8731,7 +8726,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _javadocAllAction.setEnabled(false);
       _javadocCurrentAction.setEnabled(false);
     }
-    
     
     public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
       // Only change GUI from event-dispatching thread
