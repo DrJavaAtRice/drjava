@@ -76,7 +76,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   protected DefaultMutableTreeNode _rootNode;
   protected DefaultTreeModel _regTreeModel;
-  protected JTree _regTree;
+  public JTree _regTree;
   protected String _title;
   protected RegionManager<R> _regionManager;
   
@@ -86,10 +86,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   protected final MainFrame _frame;
   
   protected JPanel _buttonPanel;
-  protected long _lastFocusTime;  // the last time in milliseconds that requestFocusInWindow() was executed
-  protected long _lastUpdateTime; // the last time in milliseconds that _updateButtons() was executed
   
-  public static final long UPDATE_THRESHOLD = 10000L; // threshold used to determine how often "this" should be updated
+  protected long _lastUpdateTime; // the last time in milliseconds that updatePanel was executed
+  private boolean _updatePending = false;
+  public static final long UPDATE_DELAY = 5000L; // threshold used to determine how often "this" should be updated
   
   protected DefaultTreeCellRenderer dtcr;
   
@@ -134,8 +134,8 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     this.add(_leftPane, BorderLayout.CENTER);
     
     _buttonPanel = new JPanel(new BorderLayout());
-    _lastFocusTime = System.currentTimeMillis();
-    _lastUpdateTime = _lastFocusTime;
+
+    _lastUpdateTime = System.currentTimeMillis();
     
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
@@ -170,23 +170,45 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     * efficient. */
   public boolean requestFocusInWindow() {
     assert EventQueue.isDispatchThread();
-    long newTime = System.currentTimeMillis();
-    if (newTime - _lastFocusTime > UPDATE_THRESHOLD && _frame._changedSinceTabUpdate) {
-      _lastFocusTime = newTime;
-      _frame._changedSinceTabUpdate = false;
-      // Update all tree nodes
-      Enumeration docNodes = _rootNode.children();
-      while (docNodes.hasMoreElements()) {
-        DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
-        // Find the correct start offset node for this region
-        Enumeration regionNodes = docNode.children();
-        while (regionNodes.hasMoreElements()) {
-          DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
-          _regTreeModel.nodeChanged(regionNode);
+    _updatePanel();
+    updateButtons();
+    return super.requestFocusInWindow();
+  }
+  
+  private void _updatePanel() {
+    if (_frame._changed && System.currentTimeMillis() - _lastUpdateTime > UPDATE_DELAY && ! _updatePending) {
+      _updatePending = true;
+      EventQueue.invokeLater(new Runnable() { 
+        public void run() {
+          // Update all tree nodes
+          updatePanel();  // sets _lastUpdateTime
+          _updatePending = false;
+          _frame._changed = false;
         }
-        _regTreeModel.nodeChanged(docNode);  // file name may have changed
-      }
+      });
     }
+  }
+  
+  /** Forces this panel to be completely updated. */
+  protected void updatePanel() {
+    Enumeration docNodes = _rootNode.children();
+    while (docNodes.hasMoreElements()) {
+      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
+      // Find the correct start offset node for this region
+      Enumeration regionNodes = docNode.children();
+      while (regionNodes.hasMoreElements()) {
+        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
+        _regTreeModel.nodeChanged(regionNode);
+      }
+      _regTreeModel.nodeChanged(docNode);  // file name may have changed
+      _lastUpdateTime = System.currentTimeMillis();
+      _frame._changed = false;
+    }
+  }
+  
+  /** Forces the panel to be updated and requests focus in this panel. */
+  protected boolean _requestFocusInWindow() {
+    updatePanel();
     updateButtons();
     return super.requestFocusInWindow();
   }
@@ -223,14 +245,9 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   }
   
   /** Update button state and text. _updateButtons should be overridden if additional buttons are added besides "Go To",
-    * "Remove" and "Remove All". */
-  protected void updateButtons() { 
-//    long newTime = System.currentTimeMillis();
-//    if (newTime - _lastUpdateTime > UPDATE_THRESHOLD) {
-//      _lastUpdateTime = newTime;
-      _updateButtons();
-//    }
-  }
+    * "Remove" and "Remove All". 
+    */
+  protected void updateButtons() { _updateButtons(); }
   
   protected void _updateButtons() { }
   

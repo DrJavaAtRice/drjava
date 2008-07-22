@@ -237,12 +237,8 @@ public class InteractionsController extends AbstractConsoleController {
     public void interactionErrorOccurred(int offset, int length) { }    
     
     public void interpreterResetting() {
-      Utilities.invokeLater(new Runnable() { 
-        public void run() { 
-          _interactionsDJDocument.clearColoring();
-//          _pane.resetPrompts();  // NOT USED
-        }
-      });
+      assert EventQueue.isDispatchThread(); 
+      _interactionsDJDocument.clearColoring();
     }
     
     public void interpreterReady(File wd) { }

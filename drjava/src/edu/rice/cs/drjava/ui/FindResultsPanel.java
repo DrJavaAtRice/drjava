@@ -265,12 +265,19 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     if (_searchAll) odd = _model.getActiveDocument();
     else if (_doc != null) { odd = _doc.get(); }
     if (odd != null) {
+
       _regionManager.clearRegions();
+      assert _rootNode == _regTreeModel.getRoot();
       _rootNode.removeAllChildren();
-      System.err.println("Root has been cleared");
+      _docToTreeNode.clear();
+      _regionToTreeNode.clear();
+      _regTreeModel.nodeStructureChanged(_rootNode);
+      _requestFocusInWindow();
+      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
                            _regionManager, this);
-      requestFocusInWindow();
+      _regTree.scrollRowToVisible(0);  // Select the first document in the new panel
+      _requestFocusInWindow();
     }
   }
   
@@ -280,12 +287,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _frame._bookmarksPanel.startChanging();
     for (final MovingDocumentRegion r: getSelectedRegions()) {
       if (! _model.getBookmarkManager().contains(r)) {
-//        try {
-          OrderedDocumentRegion newR = 
-            new DocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
-          _model.getBookmarkManager().addRegion(newR);
-//        }
-//        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
+        OrderedDocumentRegion newR = 
+          new DocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
+        _model.getBookmarkManager().addRegion(newR);
       }
     }
     _frame._bookmarksPanel.finishChanging();

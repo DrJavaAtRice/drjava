@@ -675,7 +675,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
     if (_antiAliasText && g instanceof Graphics2D) {
-      Graphics2D g2d = (Graphics2D)g;
+      Graphics2D g2d = (Graphics2D) g;
       g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
     super.paintComponent(g);

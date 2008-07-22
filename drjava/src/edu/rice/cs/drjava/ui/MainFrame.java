@@ -88,6 +88,7 @@ import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
+import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
 
 import edu.rice.cs.plt.tuple.Pair;
@@ -262,7 +263,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
   /** Whether any document has changed since tabbed panels have been updated. */
-  public volatile boolean _changedSinceTabUpdate = false;
+  public volatile boolean _changed = false;
   
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
@@ -3913,7 +3914,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                                          "Optional attributes:\n"+
                                                                          "\tline=\"<line number to display>") {
       public void update(PropertyMaps pm) {
-        if (_attributes.get("file")!=null) {
+        if (_attributes.get("file") != null) {
           final String dir = StringOps.
             unescapeFileName(StringOps.replaceVariables(DEF_DIR, pm, PropertyMaps.GET_CURRENT));
           final String fil = StringOps.
@@ -3986,14 +3987,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final DirectoryChooser dc = new DirectoryChooser(this);
     /* The following code fragement was moved to the event thread because setSelectedFile occasionally generates an 
      * ArrayOutOfBoundsException otherwise. */
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {
     dc.setSelectedFile(workDir);
     dc.setApproveButtonText("Select");
     dc.setDialogTitle("Open Folder");
     dc.setAccessory(_openRecursiveCheckBox);
-//      }
-//    });
     return dc;
   }
 //  
@@ -6363,8 +6360,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     OptionListener<Integer> externalSavedCountListener =
       new OptionListener<Integer>() {
       public void optionChanged(final OptionEvent<Integer> oce) {
-//        Utilities.invokeLater(new Runnable() {
-//          public void run() {
         extMenu.removeAll();
         extMenu.add(execItem);
         extMenu.addSeparator();
@@ -6393,8 +6388,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (oce.value>0) { extMenu.addSeparator(); }
         extMenu.add(_editExternalProcessesAction);
         _editExternalProcessesAction.setEnabled(true); // always keep enabled, because it allows import
-//          }
-//        });
       }
     };
     DrJava.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
@@ -6976,7 +6969,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         clearStatusMessage();
         
         if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
-          // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
+          // Use EventQueue because this action must execute AFTER all pending events in the event queue
 //        System.err.println("Interactions Container Selected");
           _interactionsContainer.setVisible(true);  // kluge to overcome subtle focus bug
           EventQueue.invokeLater(new Runnable() { 
@@ -6984,7 +6977,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           });
         }
         else if (_tabbedPane.getSelectedIndex() == CONSOLE_TAB) {
-          // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
+          // Use EventQueue because this action must execute AFTER all pending events in the event queue
 //          System.err.println("Console Scroll Selected");
           EventQueue.invokeLater(new Runnable() { public void run() { _consoleScroll.requestFocusInWindow(); } });
         }
@@ -7452,6 +7445,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  private long _lastTabUpdate = 0;
+  private boolean _tabUpdatePending = false;
+  public static long UPDATE_DELAY = 1000L;  // update delay threshold in milliseconds
+  
+  /** Updates the tabbed panel if the time delay threshold has been exceeeded and no such update is already pending. */
+  public void updateTabbedPane() {
+    final Component c = _tabbedPane.getSelectedComponent();
+    if (c != null && ! _tabUpdatePending && System.currentTimeMillis() - _lastTabUpdate > UPDATE_DELAY) {
+      _tabUpdatePending = true;
+      EventQueue.invokeLater(new Runnable() {
+        public void run() {
+          c.repaint();
+          _lastTabUpdate = System.currentTimeMillis();
+          _tabUpdatePending = false;
+        }
+      });
+    }
+  }
+  
   private static boolean isDisplayed(TabbedPanel p) { return p != null && p.isDisplayed(); }
   
   /** Create new DefinitionsPane and JScrollPane for an open definitions document.  Package private for testing purposes.
@@ -7475,9 +7487,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (isDisplayed(_breakpointsPanel)) { _breakpointsPanel.repaint(); }
         if (isDisplayed(_bookmarksPanel)) { _bookmarksPanel.repaint(); }
         
-        Component c = _tabbedPane.getSelectedComponent();
-        if (c != null) c.repaint();
-        _changedSinceTabUpdate = true;
+        updateTabbedPane();
+        _changed = true;
       }
       public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }
@@ -7892,38 +7903,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ensures that the interactions pane is not editable during an interaction. */
   protected void _disableInteractionsPane() {
-    // Only change GUI from event-dispatching thread
-//    Runnable command = new Runnable() {
-//      public void run() {
+    assert EventQueue.isDispatchThread();
     _interactionsPane.setEditable(false);
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     
     if (_interactionsScriptController != null) _interactionsScriptController.setActionsDisabled();
-//      }
-//    };
-//    Utilities.invokeLater(command);
   }
   
   /** Ensures that the interactions pane is editable after an interaction completes. */
   protected void _enableInteractionsPane() {
-    // Only change GUI from event-dispatching thread
-//    Runnable command = new Runnable() {
-//      public void run() {
-//         if (isDebuggerReady()) {
-//         _disableStepTimer();
-//         Debugger manager = _model.getDebugger();
-//         manager.clearCurrentStepRequest();
-//         removeCurrentLocationHighlight();
-//         }
     
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     _interactionsPane.setEditable(true);
     _interactionsController.moveToEnd();
     if (_interactionsPane.hasFocus()) _interactionsPane.getCaret().setVisible(true);
     if (_interactionsScriptController != null) _interactionsScriptController.setActionsEnabled();
-//      }
-//    };
-//    Utilities.invokeLater(command);
   }
   
   /** Comment current selection using wing commenting.  public for testing purposes only. Runs in event thread. */
@@ -8266,10 +8260,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void newFileCreated(final OpenDefinitionsDocument doc) {
-//      Utilities.invokeLater(new Runnable() { public void run() { 
       _createDefScrollPane(doc);
       PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
-//      } });
     }
     
     private volatile int _fnfCount = 0;
@@ -8363,8 +8355,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void fileSaved(final OpenDefinitionsDocument doc) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       doc.documentSaved();  // used to update the document cache
       _saveAction.setEnabled(false);
       _renameAction.setEnabled(true);
@@ -8383,15 +8373,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       // Check class file sync status, in case file was renamed
       _updateDebugStatus();
-//        }
-//      });
     }
     
     public void fileOpened(final OpenDefinitionsDocument doc) { 
-//      Utilities.invokeLater(new Runnable() { public void run() { 
       _fileOpened(doc);
-      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
-//      } });  
+      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate(); 
     }
     
     private void _fileOpened(final OpenDefinitionsDocument doc) {
@@ -8410,11 +8396,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     /** NOTE: Makes certain that this action occurs in the event dispatching thread */
-    public void fileClosed(final OpenDefinitionsDocument doc) {      
-//      Utilities.invokeLater(new Runnable() { public void run() { 
-      _fileClosed(doc); 
-//      } });
-    }
+    public void fileClosed(final OpenDefinitionsDocument doc) { _fileClosed(doc); }
     
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc) {
@@ -8429,16 +8411,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void fileReverted(OpenDefinitionsDocument doc) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       updateStatusField();
       _saveAction.setEnabled(false);
       _currentDefPane.resetUndo();
       _currentDefPane.hasWarnedAboutModified(false);
       _currentDefPane.setPositionAndScroll(0);
       _updateDebugStatus();
-//        }
-//      });
     }
     
     public void undoableEditHappened() {    
@@ -8449,8 +8427,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void activeDocumentRefreshed(final OpenDefinitionsDocument active) {
       assert EventQueue.isDispatchThread();
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
 //          System.err.println("activeDocumentRefreshed");
       _recentDocFrame.pokeDocument(active);
       _refreshDefScrollPane();
@@ -8467,8 +8443,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
 //      Utilities.show("MainFrame Listener: ActiveDocument changed to " + active);
       // code that accesses the GUI must run in the event-dispatching thread. 
-//      Utilities.invokeLater(new Runnable() {  // invokeAndWait can create occasional deadlocks.
-//        public void run() {
       _recentDocFrame.pokeDocument(active);
       _switchDefScrollPane();  // Updates _currentDefPane
       
@@ -8587,14 +8561,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       *        interactionEnded event will be fired)
       */
     public void interpreterChanged(final boolean inProgress) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       _runAction.setEnabled(! inProgress);
       _runProjectAction.setEnabled(! inProgress);
       if (inProgress) _disableInteractionsPane();
       else _enableInteractionsPane();
-//        }
-//      });
     }
     
     public void compileStarted() {
@@ -8606,25 +8576,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void compileEnded(File workDir, final List<? extends File> excludedFiles) {
       assert EventQueue.isDispatchThread();    
-      // Only change GUI from event-dispatching thread
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-//          try {
+
       _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
       if (isDebuggerReady()) {
 //              _model.getActiveDocument().checkIfClassFileInSync();
         
         _updateDebugStatus();
       }
-//          }
-//          finally { hourglassOff(); }
       if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && 
           (_model.getBuildDirectory() != null)) {
         _scanClassFiles();
       }
       _model.refreshActiveDocument();
-//        }
-//      });
     }
     
     /** Called if a compilation is aborted. */
@@ -8688,11 +8651,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitTestStarted(final String name) {
       assert EventQueue.isDispatchThread();
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() { 
-      _junitErrorPanel.getErrorListPane().testStarted(name); /* this does nothing! */ 
-//        }
-//      });          
+      _junitErrorPanel.getErrorListPane().testStarted(name); /* this does nothing! */         
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
@@ -8702,8 +8661,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError); // this does nothing!
       _junitErrorPanel.progressStep(succeeded);
       _model.refreshActiveDocument();
-//        }
-//      });
     }
     
     public void junitEnded() {
@@ -8751,8 +8708,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           className = "";
         }
         try {
-          String fileName = (allDocs || className.equals("")) ?
-            "index.html" : (className + ".html");
+          String fileName = (allDocs || className.equals("")) ? "index.html" : (className + ".html");
           File index = new File(destDir, fileName);
           URL address = FileOps.toURL(index.getAbsoluteFile());
           

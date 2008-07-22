@@ -102,15 +102,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       _replaceAction.setEnabled(false);
       _replaceFindNextAction.setEnabled(false);
       _replaceFindPreviousAction.setEnabled(false);
       _machine.positionChanged();
       _caretChanged = true;
-//        }
-//      });
     }
   };
   
@@ -467,22 +463,17 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void removeUpdate(DocumentEvent e) { _updateHelper(); }
       
       private void _updateHelper() {
-//        Utilities.invokeLater(new Runnable() {
-//          public void run() {
 //            _machine.makeCurrentOffsetStart();
-            updateFirstDocInSearch();
-            _replaceAction.setEnabled(false);
-            _replaceFindNextAction.setEnabled(false);
-            _replaceFindPreviousAction.setEnabled(false);
-            _machine.positionChanged();
-            if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
-            else                                 _replaceAllAction.setEnabled(true);
-            updateUI();
-//          }
-//        });
+        updateFirstDocInSearch();
+        _replaceAction.setEnabled(false);
+        _replaceFindNextAction.setEnabled(false);
+        _replaceFindPreviousAction.setEnabled(false);
+        _machine.positionChanged();
+        if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
+        else                                 _replaceAllAction.setEnabled(true);
+        updateUI();
       }
     });  
-    
   }
   
   /** Focuses the find/replace dialog in the window, placing the focus on the _findField, and selecting all the text.*/
@@ -514,6 +505,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                                     this);
     findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, panel);
+    panel._regTree.scrollRowToVisible(0);
   }
   
   /** Performs "find all" with the specified options. */

@@ -98,39 +98,11 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         */
       public void regionChanged(final Breakpoint bp) {
         assert EventQueue.isDispatchThread();
-//        Runnable doCommand = new Runnable() {
-//          public void run() {
+
         File file = bp.getDocument().getRawFile();
         
         DefaultMutableTreeNode regNode = _regionToTreeNode.get(bp);
         ((DefaultTreeModel)_regTree.getModel()).nodeChanged(regNode);
-        
-//            // Find the document node for this region
-//            Enumeration documents = _regionRootNode.children();
-//            boolean found = false;
-//            while (! found && documents.hasMoreElements()) {
-//              DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-//              if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-//                // Find the correct line start offset node for this breakpoint
-//                Enumeration existingRegions = doc.children();
-//                while (existingRegions.hasMoreElements()) {
-//                  DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
-//                  @SuppressWarnings("unchecked") 
-//                  RegionTreeUserObj<Breakpoint> uo = (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
-//                  if (uo.region().getStartOffset() == bp.getStartOffset()) {
-//                    Breakpoint r = uo.region();
-//                    r.setEnabled(bp.isEnabled());
-//                    ((DefaultTreeModel)_regTree.getModel()).nodeChanged(existing);
-//                    found = true;
-//                    break;
-//                  }
-//                }
-//              }
-//            }
-//            updateButtons();
-//          }
-//        };
-//        Utilities.invokeLater(doCommand);
       }
       
       /** Called when a breakpoint is removed from a document.

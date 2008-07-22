@@ -1672,8 +1672,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final String projfilepath = projectRoot.getCanonicalPath();
     
     // Get the list of documents that are still open
-//    final List<OpenDefinitionsDocument> oldDocs = getOpenDefinitionsDocuments();
-//    final FileGroupingState oldState = _state;
     
 //    Utilities.showDebug("openProject called with file " + projectFile);
     
@@ -1714,7 +1712,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       auxFiles, excludedFiles, projectClassPaths, createJarFile, 
                                                       createJarFlags, autoRefresh));
     
-    resetInteractions(getWorkingDirectory());  // Shutdown debugger and reset interactions pane in new working directory
+    resetInteractions(getWorkingDirectory());  // Reset interactions pane in new working directory
     
     ArrayList<DocFile> projFiles = new ArrayList<DocFile>();
     DocFile active = null;
@@ -1747,8 +1745,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // But all other files open at time this project is loaded are eligible for inclusion in the new project.  
     
     if (! projDocs.isEmpty())
-//      Utilities.invokeAndWait(new SRunnable() {
-//      public void run() {
     for (OpenDefinitionsDocument d: projDocs) {
       try {
         final String path = fixPathForNavigator(d.getFile().getCanonicalPath());
@@ -1756,8 +1752,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       catch(IOException e) { /* Do nothing */ }
     }
-//      }
-//    });
     
 //    Utilities.showDebug("Preparing to refresh navigator GUI");
     // call on the GUI to finish up by opening the files and making necessary gui component changes
@@ -1936,11 +1930,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // if the document was an auxiliary file, remove it from the list
     if (doc.isAuxiliaryFile()) { removeAuxiliaryFile(doc); }
     
-//    Utilities.invokeLater (new SRunnable() {
-//      public void run() { 
-        _documentNavigator.removeDocument(doc); 
-//      }   // this operation must run in event thread
-//    });
+    _documentNavigator.removeDocument(doc);
+    
     _notifier.fileClosed(doc);
     doc.close();
     return true;
@@ -2581,11 +2572,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         try {
           _notifier.documentNotFound(this, _file);
           final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
-//          Utilities.invokeLater(new SRunnable() { // formerly invokeAndWait(...)  Why?
-//            public void run() { 
-              _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); 
-//            }
-//          });
+          _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); 
+
           return _cacheAdapter.getDocument();
         }
         catch(Throwable t) { throw new UnexpectedException(t); }
@@ -3838,18 +3826,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param doc the document to add to the navigator
     */
   protected void addDocToNavigator(final OpenDefinitionsDocument doc) {
-//    assert EventQueue.isDispatchThread();
-//    Utilities.invokeLater(new SRunnable() {
-//      public void run() {
-        try {
-          if (doc.isUntitled()) _documentNavigator.addDocument(doc);
-          else {
-            String path = doc.getFile().getCanonicalPath();
-            _documentNavigator.addDocument(doc, fixPathForNavigator(path));
-          }
-        }
-        catch(IOException e) { _documentNavigator.addDocument(doc); }
-//      }});
+    try {
+      if (doc.isUntitled()) _documentNavigator.addDocument(doc);
+      else {
+        String path = doc.getFile().getCanonicalPath();
+        _documentNavigator.addDocument(doc, fixPathForNavigator(path));
+      }
+    }
+    catch(IOException e) { _documentNavigator.addDocument(doc); }
     synchronized(_documentsRepos) { _documentsRepos.put(doc.getRawFile(), doc); }
   }
   
@@ -3871,14 +3855,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private void _completeOpenFile(OpenDefinitionsDocument d) {
     addDocToNavigator(d);
     addDocToClassPath(d);
-//    Utilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
     
     try {
       File f = d.getFile();
-      if (! inProject(f) && inProjectPath(d)) {
-        setProjectChanged(true);
-      }
-    } catch(FileMovedException fme) {
+      if (! inProject(f) && inProjectPath(d)) setProjectChanged(true);
+    } 
+    catch(FileMovedException fme) {
       /** project is not modified in this case */
     }
     

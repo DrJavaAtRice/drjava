@@ -947,23 +947,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   protected void _clearCache(int offset) {
     if (_queryCache == null) return;
     
-//    synchronized(_reduced) {
       if (offset <= 0) {
         _queryCache.clear();
         _offsetToQueries.clear();
         return;
       }
-      
+      // The Integer[] copy of the key set is required to avoid ConcurrentModifiationExceptions.  Ugh!
       Integer[] deadOffsets = _offsetToQueries.tailMap(offset).keySet().toArray(new Integer[0]);
       for (int i: deadOffsets) {
-        for (Query query: _offsetToQueries.get(i)) {
-          _queryCache.remove(query);  // remove query entry from cache
-        }
+        for (Query query: _offsetToQueries.get(i)) _queryCache.remove(query);  // remove query entry from cache
         _offsetToQueries.remove(i);   // remove query bucket for i from offsetToQueries table
       }
-//    }
   }
-  
   
   /** Add <query,offset> pair to _offsetToQueries map. Assumes lock on _queryCache is already held. */
   private void _addToOffsetsToQueries(final Query query, final int offset) {
@@ -1807,13 +1802,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
   
-  
   /** Updates document structure as a result of text insertion. This happens after the text has actually been inserted.
     * Here we update the reduced model (using an {@link AbstractDJDocument.InsertCommand InsertCommand}) and store 
     * information for how to undo/redo the reduced model changes inside the {@link 
     * javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
     * NOTE: an exclusive read lock on the document is already held when this code runs.
-    *
     * @see edu.rice.cs.drjava.model.AbstractDJDocument.InsertCommand
     * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
     * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
