@@ -42,6 +42,8 @@ import java.awt.dnd.*;
 import java.awt.datatransfer.*;
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
@@ -70,6 +72,9 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 
+import com.jgoodies.looks.plastic.PlasticLookAndFeel;
+import com.jgoodies.looks.plastic.PlasticTheme;
+
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -87,6 +92,8 @@ public class DrJavaRoot {
   
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
+  
+  public static final String PLASTIC_THEMES_PACKAGE = "com.jgoodies.looks.plastic.theme";
   
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
@@ -127,10 +134,43 @@ public class DrJavaRoot {
      */
 //    Utilities.invokeAndWait(new Runnable() {
 //      public void run() {
+    
+    /*
+     * Set the LookAndFeel for this session. If using a Plastic LAF, the theme must be set before setting the LAF.
+     */
     try {
       String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
       String currLAFName = UIManager.getLookAndFeel().getClass().getName();
-      if (! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
+      String failureMessage =
+        "DrJava could not load the configured theme for the Plastic Look and Feel.\n" +
+        "If you've manually edited your configuration file, try \n" +
+        "removing the key \"plastic.theme\" and restarting DrJava.\n" +
+        "In the meantime, the system default Look and Feel will be used.\n";
+      String failureTitle = "Theme not found";
+      if(Utilities.isPlasticLaf(configLAFName)) {
+        String themeName = PLASTIC_THEMES_PACKAGE + "." + DrJava.getConfig().getSetting(PLASTIC_THEMES);
+        try {
+          PlasticTheme theme = (PlasticTheme) Class.forName(themeName).getConstructor(new Class<?>[]{}).newInstance();
+          PlasticLookAndFeel.setPlasticTheme(theme);
+          PlasticLookAndFeel.setTabStyle(PlasticLookAndFeel.TAB_STYLE_METAL_VALUE);
+          com.jgoodies.looks.Options.setPopupDropShadowEnabled(true);
+          if(! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
+        } catch(NoSuchMethodException nsmex) {
+          JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
+        } catch(SecurityException sex) {
+          JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
+        } catch(InstantiationException iex) {
+          JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
+        } catch(IllegalAccessException iaex) {
+          JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
+        } catch(IllegalArgumentException iaex) {
+          JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
+        } catch(InvocationTargetException itex) {
+          JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
+        }
+      } else if (! configLAFName.equals(currLAFName)) {
+        UIManager.setLookAndFeel(configLAFName);
+      }
       
       // The MainFrame *must* be constructed after the compiler setup process has
       // occurred; otherwise, the list of compilers in the UI will be wrong.

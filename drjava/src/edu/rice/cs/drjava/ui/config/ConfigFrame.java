@@ -469,6 +469,9 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL, "Look and Feel", this,
                                                               "Changes the general appearance of DrJava."));
 
+    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.PLASTIC_THEMES, "Plastic Theme", this,
+                                                              "Pick the theme to be used by the Plastic family of Look and Feels"));
+
     //ToolbarOptionComponent is a degenerate option component
     addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons", this,
                                                   "How to display the toolbar buttons."));

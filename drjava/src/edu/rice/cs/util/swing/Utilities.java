@@ -54,6 +54,8 @@ public class Utilities {
   /** True if the program is run in non-interactive test mode. */
   public static volatile boolean TEST_MODE = false;
   
+  public static final String JGOODIES_PACKAGE = "com.jgoodies.looks";
+  
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
     * event thread to be run asynchronously after all events already on the queue have been processed.
     */
@@ -154,5 +156,17 @@ public class Utilities {
     return new AbstractAction(newName) {
       public void actionPerformed(ActionEvent ae) { delegate.actionPerformed(ae); }
     };
+  }
+  
+  /** @return whether the current LookAndFeel is a Plastic (i.e. JGoodies) LookAndFeel */
+  public static boolean isPlasticLaf() {
+    LookAndFeel laf = UIManager.getLookAndFeel();
+    return laf != null && laf.getClass().getName().startsWith(JGOODIES_PACKAGE);
+  }
+  
+  /** @return whether a given LookAndFeel name is a Plastic (i.e. JGoodies) LookAndFeel
+    * @param name the fully-qualified classname of the LookAndFeel */
+  public static boolean isPlasticLaf(String name) {
+    return name != null && name.startsWith(JGOODIES_PACKAGE);
   }
 }

@@ -232,6 +232,14 @@ public interface OptionConstants {
   
   /** Class that allows the look and feels to be initialized properly. */
   static class LookAndFeels {
+    private static String[][] _registerLAFs = {
+      {"Plastic 3D", "com.jgoodies.looks.plastic.Plastic3DLookAndFeel"},
+      {"Plastic XP", "com.jgoodies.looks.plastic.PlasticXPLookAndFeel"},
+      {"Plastic Windows", "com.jgoodies.looks.windows.Plastic3DLookAndFeel"},
+      {"Plastic", "com.jgoodies.looks.plastic.PlasticLookAndFeel"}
+    };
+    
+    private static boolean _registered = false;
     
     /** Return the look-and-feel to use by default */
     public static String getDefaultLookAndFeel() {
@@ -247,6 +255,16 @@ public interface OptionConstants {
       * @return the list of available look-and-feel classnames
       */
     public static ArrayList<String> getLookAndFeels() {
+      if(!_registered) {
+        for(String[] newLaf : _registerLAFs) {
+          try {
+            Class.forName(newLaf[1]);
+          } catch(ClassNotFoundException ex) {
+            continue;
+          }
+          UIManager.installLookAndFeel(newLaf[0], newLaf[1]);
+        }
+      }
       ArrayList<String> lookAndFeels = new ArrayList<String>();
       LookAndFeelInfo[] lafis = UIManager.getInstalledLookAndFeels();
       if (lafis != null) {
@@ -263,6 +281,34 @@ public interface OptionConstants {
         }
       }
       return lookAndFeels;
+    }
+  }
+  
+  public static final ForcedChoiceOption PLASTIC_THEMES =
+    new ForcedChoiceOption("plastic.theme", PlasticThemes.getDefaultTheme(), PlasticThemes.getThemes());
+  
+  /* TODO: This theme list is current as of JGoodies Looks 2.1. 
+   *       We could automatically update this list by enumerating types in the
+   *       com.jgoodies.looks.themes package, and excluding abstract classes.
+   */
+  static class PlasticThemes {
+    public static ArrayList<String> getThemes() {
+      ArrayList<String> al = new ArrayList<String>();
+      String[] themes = new String[] {
+        "BrownSugar", "DarkStar",
+        "SkyBlue", "SkyGreen", "SkyKrupp", "SkyPink", "SkyRed", "SkyYellow",
+        "DesertBluer", "DesertBlue", "DesertGreen", "DesertRed", "DesertYellow",
+        "ExperienceBlue", "ExperienceGreen", "LightGray", "Silver",
+        "ExperienceRoyale"
+      };
+      for(String theme : themes) {
+        al.add(theme);
+      }
+      return al;
+    }
+    
+    public static String getDefaultTheme() {
+      return "DesertBlue";
     }
   }
   

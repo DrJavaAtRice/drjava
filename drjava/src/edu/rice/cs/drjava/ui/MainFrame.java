@@ -3066,6 +3066,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.addFocusListener(_focusListenerForRecentDocs);
     _tabbedPane.addKeyListener(_historyListener);    // TODO: can this code be moved to the MainFrame keymap?
     
+    if(Utilities.isPlasticLaf()) {
+      _tabbedPane.putClientProperty(com.jgoodies.looks.Options.EMBEDDED_TABS_KEY,
+                                    Boolean.TRUE);
+    }
+    
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     
     _docSplitPane = 
@@ -6153,6 +6158,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_showDebugger) _menuBar.add(_debugMenu);
     _menuBar.add(_languageLevelMenu);
     _menuBar.add(_helpMenu);
+    // Plastic-specific style hints
+    if(Utilities.isPlasticLaf()) {
+      _menuBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY, com.jgoodies.looks.HeaderStyle.BOTH);
+    }
     setJMenuBar(_menuBar);
   }
   
@@ -6706,6 +6715,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Correct the vertical height of the buttons.
     _fixToolbarHeights();
+    
+    // Plastic-specific style hints
+    if(Utilities.isPlasticLaf()) {
+      _toolBar.putClientProperty("JToolBar.isRollover", Boolean.TRUE);
+      _toolBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY,
+                                 com.jgoodies.looks.HeaderStyle.BOTH);
+    }
     
     getContentPane().add(_toolBar, BorderLayout.NORTH);
 //    _updateToolBarVisible();  // created a visible GUI component during  initialization!
