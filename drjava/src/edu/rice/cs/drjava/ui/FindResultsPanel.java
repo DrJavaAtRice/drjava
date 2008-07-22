@@ -309,7 +309,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
 //    finishChanging();
     if (_regionManager.getDocuments().size() == 0) { _close(); }
-    System.err.println("Scrolling to row " + row);
+//    System.err.println("Scrolling to row " + row);
     _regTree.setSelectionRow(row);
     _regTree.scrollRowToVisible(row);
     _requestFocusInWindow();
