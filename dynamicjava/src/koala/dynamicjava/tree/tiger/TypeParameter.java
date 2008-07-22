@@ -71,10 +71,6 @@ public class TypeParameter extends ReferenceTypeName {
 
   public List<ReferenceTypeName> getInterfaceBounds() { return _interfaceBounds; }
 
-  public String getRepresentation(){
-    return _bound.getRepresentation(); // coerce to bound's type
-  }
-
   public String getName(){
     return super.getRepresentation();
   }

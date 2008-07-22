@@ -56,13 +56,18 @@ public class ParserTest extends TestCase {
     super(name);
   }
   
-  public void verifyOutput( String inputString, List<Node> expectedAST ) throws ParseException {
+  public static void verifyOutput( String inputString, List<Node> expectedAST ) throws ParseException {
     List<Node> ast = new Parser(new StringReader(inputString)).parseStream();
     assertEquals( "Parsed input AST does not match expected output AST", 
-                   ast,
-                   expectedAST );
+                   expectedAST,
+                   ast );
 
-  }  
+  }
+  
+  public static void verifyExprOutput(String inputString, Expression expectedAST) throws ParseException {
+    List<Node> expected = Collections.<Node>singletonList(new ExpressionStatement(expectedAST, false));
+    verifyOutput(inputString, expected);
+  }
   
   public void verifyError(String inputString, List<Node> expectedAST,
                           int startLine, int startColumn, 
@@ -157,16 +162,16 @@ public class ParserTest extends TestCase {
   
   public void testLabeledStatement() throws ParseException {
     
-    expectedAST.add(new LabeledStatement("v", new SimpleAllocation(new ReferenceTypeName("Object"), null)));
+    expectedAST.add(new LabeledStatement("v", new ExpressionStatement(new SimpleAllocation(new ReferenceTypeName("Object"), null), true)));
     
     verifyOutput("v : new Object();", expectedAST);
   } 
   
   public void testBlock() throws ParseException {
     List<Node> stmts = new LinkedList<Node> ();
-    stmts.add(new SimpleAssignExpression(new AmbiguousName("i"),new IntegerLiteral("3")));
-    stmts.add(new SimpleAssignExpression(new AmbiguousName("v"),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
-    stmts.add(new PostDecrement(new AmbiguousName("i")));
+    stmts.add(new ExpressionStatement(new SimpleAssignExpression(new AmbiguousName("i"),new IntegerLiteral("3")), true));
+    stmts.add(new ExpressionStatement(new SimpleAssignExpression(new AmbiguousName("v"),new SimpleAllocation(new ReferenceTypeName("Vector"), null)), true));
+    stmts.add(new ExpressionStatement(new PostDecrement(new AmbiguousName("i")), true));
     expectedAST.add(new BlockStatement(stmts));
     
     verifyOutput("{ (i=3); (v = new Vector()); (i)--; }", expectedAST);
@@ -174,10 +179,10 @@ public class ParserTest extends TestCase {
   
   public void testBlockWithEmptyStatements() throws ParseException {
     List<Node> stmts = new LinkedList<Node> ();
-    stmts.add(new SimpleAssignExpression(new AmbiguousName("i"),new IntegerLiteral("3")));
+    stmts.add(new ExpressionStatement(new SimpleAssignExpression(new AmbiguousName("i"),new IntegerLiteral("3")), true));
     stmts.add(new EmptyStatement());
-    stmts.add(new SimpleAssignExpression(new AmbiguousName("v"),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
-    stmts.add(new PostDecrement(new AmbiguousName("i")));
+    stmts.add(new ExpressionStatement(new SimpleAssignExpression(new AmbiguousName("v"),new SimpleAllocation(new ReferenceTypeName("Vector"), null)), true));
+    stmts.add(new ExpressionStatement(new PostDecrement(new AmbiguousName("i")), true));
     stmts.add(new EmptyStatement());
     expectedAST.add(new BlockStatement(stmts));
 
@@ -190,14 +195,14 @@ public class ParserTest extends TestCase {
   }
   
   public void testStatementExpression() throws ParseException {
-    expectedAST.add(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1));
+    expectedAST.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), true));
     verifyOutput("o.m();", expectedAST);
   }  
   
   public void testStatementExpression2() throws ParseException {
     List<Expression> args = new LinkedList<Expression> ();
     args.add(new IntegerLiteral("0"));
-    expectedAST.add(new ObjectMethodCall(new SimpleAllocation(new ReferenceTypeName("Integer"), args), "intValue", null, "", -1, -1, -1, -1));
+    expectedAST.add(new ExpressionStatement(new ObjectMethodCall(new SimpleAllocation(new ReferenceTypeName("Integer"), args), "intValue", null, "", -1, -1, -1, -1), true));
     verifyOutput("(new Integer(0)).intValue();", expectedAST);
   }
   
@@ -205,7 +210,7 @@ public class ParserTest extends TestCase {
     List<SwitchBlock> cases = new LinkedList<SwitchBlock>();
     
     List<Node> stmts1 = new LinkedList<Node> ();
-    stmts1.add(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1));
+    stmts1.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), true));
     stmts1.add(new BreakStatement(null));
                  
     List<Node> stmts2 = new LinkedList<Node>();
@@ -234,7 +239,7 @@ public class ParserTest extends TestCase {
     
     expectedAST.add(new IfThenElseStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), 
                                             new BlockStatement(stmts), 
-                                            new IfThenStatement(new BooleanLiteral(true),new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1))));
+                                            new IfThenStatement(new BooleanLiteral(true),new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), true))));
     verifyOutput("if (o.m()) { ; } else if (true) o.m();", expectedAST);
   }
   
@@ -251,7 +256,7 @@ public class ParserTest extends TestCase {
     args.add(new StringLiteral("\"Infinite Loop\""));
     
     List<Node> stmts = new LinkedList<Node> ();
-    stmts.add(new ObjectMethodCall(new AmbiguousName("System", "out"), "println", args, "", -1, -1, -1, -1));
+    stmts.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("System", "out"), "println", args, "", -1, -1, -1, -1), true));
     
     expectedAST.add(new WhileStatement(new BooleanLiteral(true),new BlockStatement(stmts)));
     verifyOutput("while (true) { System.out.println(\"Infinite Loop\"); }", expectedAST);
@@ -259,7 +264,7 @@ public class ParserTest extends TestCase {
   
   public void testDoStatement() throws ParseException {
     List<Node> stmts = new LinkedList<Node> ();
-    stmts.add(new PostDecrement(new AmbiguousName("i")));
+    stmts.add(new ExpressionStatement(new PostDecrement(new AmbiguousName("i")), true));
     stmts.add(new EmptyStatement());
        
     expectedAST.add(new DoStatement(new GreaterOrEqualExpression(new AmbiguousName("i"), new IntegerLiteral("0")), new BlockStatement(stmts)));
@@ -274,15 +279,15 @@ public class ParserTest extends TestCase {
     init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
     
     List<Node> updt = new LinkedList<Node> ();
-    updt.add(new PostIncrement(new AmbiguousName("i")));
+    updt.add(new ExpressionStatement(new PostIncrement(new AmbiguousName("i")), true));
     
     List<Node> stmts = new LinkedList<Node> ();
     stmts.add(new EmptyStatement());
     stmts.add(new EmptyStatement());
-    stmts.add(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1));
+    stmts.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), true));
     
     expectedAST.add(new ForStatement(init,
-                                     new LessExpression(new AmbiguousName("i"),new ObjectMethodCall(null, "sizeof", args, "", -1, -1, -1, -1)),
+                                     new LessExpression(new AmbiguousName("i"),new SimpleMethodCall("sizeof", args, "", -1, -1, -1, -1)),
                                      updt,
                                      new BlockStatement(stmts)));
     verifyOutput("for( int i = 0; (i)<(sizeof(something)); (i)++ ){ ; ; o.m(); } ", expectedAST);
@@ -311,8 +316,8 @@ public class ParserTest extends TestCase {
   public void testSynchronizedStatement() throws ParseException {
     List<Node> stmts = new LinkedList<Node>();
     stmts.add(new EmptyStatement());
-    stmts.add(new PostIncrement(new AmbiguousName("i")));
-    stmts.add(new ObjectMethodCall(new AmbiguousName("lock"), "release", null, "", -1, -1, -1, -1));
+    stmts.add(new ExpressionStatement(new PostIncrement(new AmbiguousName("i")), true));
+    stmts.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("lock"), "release", null, "", -1, -1, -1, -1), true));
     stmts.add(new EmptyStatement());
     
     expectedAST.add(new SynchronizedStatement(new AmbiguousName("mutex"),
@@ -356,77 +361,79 @@ public class ParserTest extends TestCase {
     verifyOutput(" try{ throw new RuntimeException(); } catch (IOException ioe ){  ; ; throw ioe; }", expectedAST);                 
   }
   
+  /* * * EXPRESSIONS: * * */
+  
   
   public void testConditionalExpression() throws ParseException {
-    expectedAST.add(new ConditionalExpression(new BooleanLiteral(true), new BooleanLiteral(false), new BooleanLiteral(true)));
+    Expression expected = new ConditionalExpression(new BooleanLiteral(true), new BooleanLiteral(false), new BooleanLiteral(true));
     
-    verifyOutput( "((true)?(false):(true))", expectedAST);
+    verifyExprOutput( "((true)?(false):(true))", expected);
   }
   
   public void testInstanceOfExpression() throws ParseException {
-    expectedAST.add(new InstanceOfExpression(new AmbiguousName("v"), new ReferenceTypeName("String")));
-    verifyOutput( "((v) instanceof String)", expectedAST);
+    Expression expected = new InstanceOfExpression(new AmbiguousName("v"), new ReferenceTypeName("String"));
+    verifyExprOutput( "((v) instanceof String)", expected);
   }
   
   public void testCastExpression() throws ParseException {
-    expectedAST.add(new CastExpression(new ReferenceTypeName("String"), new SimpleAllocation(new ReferenceTypeName("Object"), null)));
-    verifyOutput( "((String) (new Object()))", expectedAST);
+    Expression expected = new CastExpression(new ReferenceTypeName("String"), new SimpleAllocation(new ReferenceTypeName("Object"), null));
+    verifyExprOutput( "((String) (new Object()))", expected);
   }
   
   public void testQualifiedCastExpression() throws ParseException {
-    expectedAST.add(new CastExpression(new ReferenceTypeName("java.lang.String"), new SimpleAllocation(new ReferenceTypeName("java.lang.Object"), null)));
-    verifyOutput( "((java.lang.String) (new java.lang.Object()))", expectedAST);
+    Expression expected = new CastExpression(new ReferenceTypeName("java.lang.String"), new SimpleAllocation(new ReferenceTypeName("java.lang.Object"), null));
+    verifyExprOutput( "((java.lang.String) (new java.lang.Object()))", expected);
   }
   
   public void testBinaryOpExpression() throws ParseException {
-    expectedAST.add(new ShiftLeftExpression(new AmbiguousName("i"), new IntegerLiteral("5")));
+    Expression expected = new ShiftLeftExpression(new AmbiguousName("i"), new IntegerLiteral("5"));
 
-    verifyOutput( " (i) << (5) ", expectedAST);
+    verifyExprOutput( " (i) << (5) ", expected);
   }
   
   public void testNormalAssignment() throws ParseException {
-    expectedAST.add(new SimpleAssignExpression(new AmbiguousName("i"), new IntegerLiteral("3")));
+    Expression expected = new SimpleAssignExpression(new AmbiguousName("i"), new IntegerLiteral("3"));
     
-    verifyOutput( " (i = 3) ", expectedAST);
+    verifyExprOutput( " (i = 3) ", expected);
   }
   
   public void testCompoundAssignment() throws ParseException {
-    expectedAST.add(new ExclusiveOrAssignExpression(new AmbiguousName("i"), new AmbiguousName("j")));
+    Expression expected = new ExclusiveOrAssignExpression(new AmbiguousName("i"), new AmbiguousName("j"));
     
-    verifyOutput( " (i ^= j) ", expectedAST);
+    verifyExprOutput( " (i ^= j) ", expected);
   }
   
   public void testPreIncrementExpression() throws ParseException {
-    expectedAST.add(new PreIncrement(new AmbiguousName("x")));
+    Expression expected = new PreIncrement(new AmbiguousName("x"));
     
-    verifyOutput( "++(x)", expectedAST);
+    verifyExprOutput( "++(x)", expected);
   }
   
   public void testPostDecrementExpression() throws ParseException {
-    expectedAST.add(new PostDecrement(new AmbiguousName("l")));
+    Expression expected = new PostDecrement(new AmbiguousName("l"));
     
-    verifyOutput( "(l)--", expectedAST);
+    verifyExprOutput( "(l)--", expected);
   }
   
   public void testIntegerLiteral() throws ParseException {
-    expectedAST.add(new IntegerLiteral("3593"));
+    Expression expected = new IntegerLiteral("3593");
     
-    verifyOutput( "3593", expectedAST);
+    verifyExprOutput( "3593", expected);
   }
   
   public void testStringLiteral() throws ParseException {
-    expectedAST.add(new StringLiteral("\"big time\""));
+    Expression expected = new StringLiteral("\"big time\"");
     
-    verifyOutput( " \"big time\" ", expectedAST);
+    verifyExprOutput( " \"big time\" ", expected);
   }
   
   public void testArrayAllocationExpression() throws ParseException {
     List<Expression> sizes = new LinkedList<Expression> ();
     sizes.add(new AmbiguousName("foo"));
     
-    expectedAST.add(new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(sizes, 1, null, -1, -1)));
+    Expression expected = new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(sizes, 1, null, -1, -1));
     
-    verifyOutput( "new int[foo]", expectedAST);
+    verifyExprOutput( "new int[foo]", expected);
   }
   
   public void testArrayAllocationExpression2() throws ParseException {
@@ -436,26 +443,26 @@ public class ParserTest extends TestCase {
     cells.add(new IntegerLiteral("2"));
     cells.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(new LinkedList<Expression>(), 1, new ArrayInitializer(cells), -1, -1)));
+    Expression expected = new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(new LinkedList<Expression>(), 1, new ArrayInitializer(cells), -1, -1));
 
-    verifyOutput( "new int[]{ 0,1,2,3 }", expectedAST);
+    verifyExprOutput( "new int[]{ 0,1,2,3 }", expected);
   }
   
   public void testInstanceAllocationExpression() throws ParseException {
     List<Expression> args = new LinkedList<Expression> ();
     args.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new SimpleAllocation(new ReferenceTypeName("C"), args)); 
+    Expression expected = new SimpleAllocation(new ReferenceTypeName("C"), args); 
                                          
-    verifyOutput( " new C(3) ", expectedAST);
+    verifyExprOutput( " new C(3) ", expected);
   }
   
   public void testInnerInstanceAllocationExpression() throws ParseException {
     List<Expression> args = new LinkedList<Expression>();
     args.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new InnerAllocation(new AmbiguousName("list"), "Iterator", null, args)); 
-    verifyOutput( "list.new Iterator(3)", expectedAST);
+    Expression expected = new InnerAllocation(new AmbiguousName("list"), "Iterator", null, args); 
+    verifyExprOutput( "list.new Iterator(3)", expected);
   }
   
   public void testAnonymousInnerClass() throws ParseException {
@@ -464,23 +471,23 @@ public class ParserTest extends TestCase {
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<? extends ReferenceTypeName> excepts = new LinkedList<ReferenceTypeName>();
     List<Node> stmts = new LinkedList<Node>();
-    stmts.add(new ObjectMethodCall(new AmbiguousName("o"), "n", null, "", -1, -1, -1, -1));
+    stmts.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("o"), "n", null, "", -1, -1, -1, -1), true));
     BlockStatement body = new BlockStatement(stmts);
     
     members.add(new MethodDeclaration(accessFlags, new VoidTypeName(), "m", params, excepts, body));
     
-    expectedAST.add(new AnonymousAllocation(new ReferenceTypeName("C"), null, members)); 
-    verifyOutput(" new C() { void m() { o.n(); } }", expectedAST);
+    Expression expected = new AnonymousAllocation(new ReferenceTypeName("C"), null, members); 
+    verifyExprOutput(" new C() { void m() { o.n(); } }", expected);
   }
   
   public void testName() throws ParseException {
-    expectedAST.add( new AmbiguousName("g"));
-    verifyOutput("g", expectedAST);
+    Expression expected = new AmbiguousName("g");
+    verifyExprOutput("g", expected);
   }
   
   public void testQualifiedNameClassField() throws ParseException {
-    expectedAST.add( new TypeExpression(new ReferenceTypeName("java.awt.event.ActionEvent")));
-    verifyOutput("java.awt.event.ActionEvent.class", expectedAST);
+    Expression expected =  new TypeExpression(new ReferenceTypeName("java.awt.event.ActionEvent"));
+    verifyExprOutput("java.awt.event.ActionEvent.class", expected);
   }
   
   public void testQualifiedNameClass() throws ParseException {
@@ -491,8 +498,8 @@ public class ParserTest extends TestCase {
     idnt.add(new Identifier("event"));
     idnt.add(new Identifier("ActionEvent"));
     
-    expectedAST.add(new ObjectFieldAccess(new AmbiguousName(idnt), "x"));
-    verifyOutput("X.java.awt.event.ActionEvent.x", expectedAST);
+    Expression expected = new ObjectFieldAccess(new AmbiguousName(idnt), "x");
+    verifyExprOutput("X.java.awt.event.ActionEvent.x", expected);
   }
   
   public void testQualifiedNameFieldAccess() throws ParseException {
@@ -502,35 +509,35 @@ public class ParserTest extends TestCase {
     idnt.add(new Identifier("event"));
     idnt.add(new Identifier("ActionEvent"));
 
-    expectedAST.add(new ObjectFieldAccess(new AmbiguousName(idnt), "x"));
-    verifyOutput("java.awt.event.ActionEvent.x", expectedAST);
+    Expression expected = new ObjectFieldAccess(new AmbiguousName(idnt), "x");
+    verifyExprOutput("java.awt.event.ActionEvent.x", expected);
   }
   
   public void testDotThis() throws ParseException {
     List<IdentifierToken> ident = new LinkedList<IdentifierToken>();
     ident.add(new Identifier("List"));
-    expectedAST.add(new ThisExpression(ident, null, -1, -1, -1, -1));
-    verifyOutput("List.this", expectedAST);
+    Expression expected = new ThisExpression(ident, null, -1, -1, -1, -1);
+    verifyExprOutput("List.this", expected);
   }
   
   public void testDotClass() throws ParseException {
-    expectedAST.add(new TypeExpression(new ReferenceTypeName("List")));
-    verifyOutput("List.class", expectedAST);
+    Expression expected = new TypeExpression(new ReferenceTypeName("List"));
+    verifyExprOutput("List.class", expected);
   }
   
   public void testArrayAccess() throws ParseException {
-    expectedAST.add(new ArrayAccess(new AmbiguousName("v"), new IntegerLiteral("5")));
-    verifyOutput("v[5]", expectedAST);
+    Expression expected = new ArrayAccess(new AmbiguousName("v"), new IntegerLiteral("5"));
+    verifyExprOutput("v[5]", expected);
   }
   
   public void testMemberAccess()  throws ParseException {
-    expectedAST.add(new ObjectFieldAccess(new AmbiguousName("r"), "f"));
-    verifyOutput("r.f", expectedAST);
+    Expression expected = new ObjectFieldAccess(new AmbiguousName("r"), "f");
+    verifyExprOutput("r.f", expected);
   }
   
   public void testSuperMemberAccess()  throws ParseException {
-    expectedAST.add(new SuperFieldAccess("d"));
-    verifyOutput("super.d", expectedAST);
+    Expression expected = new SuperFieldAccess("d");
+    verifyExprOutput("super.d", expected);
   }
   
   public void testMethodInvocation() throws ParseException {
@@ -538,15 +545,15 @@ public class ParserTest extends TestCase {
     args.add(new SimpleAllocation(new ReferenceTypeName("Object"), null));
     args.add(new IntegerLiteral("5"));
     args.add(new BooleanLiteral(false));
-    expectedAST.add(new ObjectMethodCall(new AmbiguousName("e"),"meth", args, null, -1, -1, -1, -1));
-    verifyOutput("e.meth(new Object(), 5, false)", expectedAST);
+    Expression expected = new ObjectMethodCall(new AmbiguousName("e"),"meth", args, null, -1, -1, -1, -1);
+    verifyExprOutput("e.meth(new Object(), 5, false)", expected);
   }
   
   public void testImplicitMethodInvocation() throws ParseException {
     List<Expression> args = new LinkedList<Expression>();
     args.add(new IntegerLiteral("5"));
-    expectedAST.add(new ObjectMethodCall(null,"meth", args, null, -1, -1, -1, -1));
-    verifyOutput("meth(5)", expectedAST);
+    Expression expected = new SimpleMethodCall("meth", args, null, -1, -1, -1, -1);
+    verifyExprOutput("meth(5)", expected);
   }  
 
   

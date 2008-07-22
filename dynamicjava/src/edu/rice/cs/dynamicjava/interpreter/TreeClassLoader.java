@@ -15,15 +15,22 @@ import edu.rice.cs.plt.iter.IterUtil;
 public class TreeClassLoader extends ClassLoader {
   
   private final Options _opt;
+  // trees that have been declared but not yet loaded
+  private final Map<String, TreeClass> _registeredTrees;
   private final Map<String, TreeCompiler.EvaluationAdapter> _adapters;
   
   public TreeClassLoader(ClassLoader parent, Options opt) {
-    super(makeParent(parent));
+    this(parent, opt, new HashMap<String, TreeClass>());
+  }
+  
+  private TreeClassLoader(ClassLoader parent, Options opt, Map<String, TreeClass> registeredTrees) {
+    super(makeParent(parent, registeredTrees.keySet()));
     _opt = opt;
+    _registeredTrees = registeredTrees;
     _adapters = new HashMap<String, TreeCompiler.EvaluationAdapter>();
   }
   
-  private static ClassLoader makeParent(ClassLoader p) {
+  private static ClassLoader makeParent(ClassLoader p, Iterable<String> registeredNames) {
     // Classes that must be loaded by the implementation's class loader
     // (the compiled tree classes need to be able to refer to these classes
     // and be talking about the ones that are loaded in the implementation code):
@@ -39,14 +46,24 @@ public class TreeClassLoader extends ClassLoader {
     ClassLoader implementationLoader =
       new ShadowingClassLoader(TreeClassLoader.class.getClassLoader(), false,
                                includes, true);
-    return new ComposedClassLoader(implementationLoader, p);
+    // Allow shadowing by hiding parent classes redefined here
+    ClassLoader parentLoader = new ShadowingClassLoader(p, true, registeredNames, true);
+    return new ComposedClassLoader(implementationLoader, parentLoader);
   }
   
-  public Class<?> loadTree(TreeClass treeClass) {
-    TreeCompiler compiler = new TreeCompiler(treeClass, _opt);
-    byte[] bytes = compiler.bytecode();
-    _adapters.put(treeClass.fullName(), compiler.evaluationAdapter());
-    return defineClass(treeClass.fullName(), bytes, 0, bytes.length);
+  public void registerTree(TreeClass treeClass) {
+    _registeredTrees.put(treeClass.fullName(), treeClass);
+  }
+
+  protected Class<?> findClass(String name) throws ClassNotFoundException {
+    TreeClass treeClass = _registeredTrees.get(name);
+    if (treeClass == null) { throw new ClassNotFoundException(); }
+    else {
+      TreeCompiler compiler = new TreeCompiler(treeClass, _opt);
+      byte[] bytes = compiler.bytecode();
+      _adapters.put(name, compiler.evaluationAdapter());
+      return defineClass(name, bytes, 0, bytes.length);
+    }
   }
   
   public TreeCompiler.EvaluationAdapter getAdapter(String className) {

@@ -31,6 +31,13 @@ public class JavaClass implements DJClass {
   
   public JavaClass(Class<?> c) { _c = c; }
   
+  public String packageName() {
+    String name = _c.getName();
+    int dot = name.lastIndexOf('.');
+    if (dot == -1) { return ""; }
+    else { return name.substring(0, dot); }
+  }
+  
   /** Produces the binary name for the given class (as in {@link Class#getName}) */
   public String fullName() { return _c.getName(); }
   
@@ -153,7 +160,7 @@ public class JavaClass implements DJClass {
             throw new WrappedException(new EvaluatorException(new NullPointerException()));
           }
           try { _f.setAccessible(true); }
-          catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
+          catch (SecurityException e) { debug.log(e); /* ignore -- we can't relax accessibility */ }
           try { return _f.get(receiver); }
           catch (IllegalAccessException e) {
             // should have been caught by static analysis
@@ -170,7 +177,7 @@ public class JavaClass implements DJClass {
             throw new WrappedException(new EvaluatorException(new NullPointerException()));
           }
           try { _f.setAccessible(true); }
-          catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
+          catch (SecurityException e) { debug.log(e); /* ignore -- we can't relax accessibility */ }
           try { _f.set(receiver, o); }
           catch (IllegalAccessException e) {
             // should have been caught by static analysis
@@ -241,7 +248,7 @@ public class JavaClass implements DJClass {
       }
       
       try { _k.setAccessible(true); }
-      catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
+      catch (SecurityException e) { debug.log(e); /* ignore -- we can't relax accessibility */ }
       
       try {
         return _k.newInstance(IterUtil.toArray(args, Object.class));
@@ -296,7 +303,7 @@ public class JavaClass implements DJClass {
       }
       
       try { _m.setAccessible(true); }
-      catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
+      catch (SecurityException e) { debug.log(e); /* ignore -- we can't relax accessibility */ }
       
       try {
         return _m.invoke(receiver, IterUtil.toArray(args, Object.class));

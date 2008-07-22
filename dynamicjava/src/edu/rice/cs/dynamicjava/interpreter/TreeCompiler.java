@@ -208,6 +208,11 @@ public class TreeCompiler {
       members = ((AnonymousInnerAllocation) ast).getMembers();
     }
     
+    // Promote default access to public -- a reference may logically appear in the same
+    // package but, due to implementation constraints, be loaded by a different class loader.
+    // In that situation, default access isn't permitted at run time.
+    accessFlags = defaultToPublicAccess(accessFlags);
+    
     String classSig = null;
     if (_java5) {
       TypeParameter[] paramAsts;
@@ -397,7 +402,7 @@ public class TreeCompiler {
   
   private void compileConstructor(ConstructorDeclaration ast, Type extendsT) {
     DJClass outerC = SymbolUtil.dynamicOuterClass(_treeClass);
-    Type outerT = SymbolUtil.thisType(outerC);
+    Type outerT = (outerC == null) ? null : SymbolUtil.thisType(outerC);
     List<FormalParameter> params = ast.getParameters();
     List<? extends ReferenceTypeName> exceptions = ast.getExceptions();
     String firstArgDescriptor = (outerT == null) ? RUNTIME_BINDINGS_DESCRIPTOR : typeDescriptor(outerT);
@@ -422,7 +427,11 @@ public class TreeCompiler {
       methodSig = sigBuilder.toString();
     }
     
-    MethodVisitor mv = _classWriter.visitMethod(ast.getAccessFlags(), "<init>", methodDescriptor,
+    // Promote default access to protected -- a subclass may logically appear in the same
+    // package but, due to implementation constraints, be loaded by a different class loader.
+    // In that situation, default access isn't permitted at run time.
+    int access = defaultToProtectedAccess(ast.getAccessFlags());
+    MethodVisitor mv = _classWriter.visitMethod(access, "<init>", methodDescriptor,
                                                 methodSig, extractClassNames(exceptions));
 
     String key = methodDescriptor;
@@ -511,7 +520,7 @@ public class TreeCompiler {
           mv.visitMethodInsn(INVOKEVIRTUAL, EVALUATION_ADAPTER_NAME, "evaluateConstructorCallArg",
                              EVALUATE_CONSTRUCTOR_CALL_ARG_DESCRIPTOR);
           stack.adjust(-4);
-          emitUnbox(mv, paramT, stack);
+          emitConvert(mv, paramT, stack);
         }
         else { emitConstant(mv, val, stack); }
         i++;
@@ -624,13 +633,9 @@ public class TreeCompiler {
       stack.adjust(-3);
       
       stack.mark();
-      emitUnbox(mv, returnT, stack);
+      emitConvert(mv, returnT, stack);
       _opt.typeSystem().erase(returnT).apply(new TypeAbstractVisitor_void() {
-        @Override public void forClassType(ClassType t) {
-          // The bytecode verifier requires this cast
-          mv.visitTypeInsn(CHECKCAST, className(t.ofClass()));
-          mv.visitInsn(ARETURN);
-        }
+        @Override public void forClassType(ClassType t) { mv.visitInsn(ARETURN); }
         @Override public void forPrimitiveType(PrimitiveType t) { mv.visitInsn(IRETURN); }
         @Override public void forLongType(LongType t) { mv.visitInsn(LRETURN); }
         @Override public void forFloatType(FloatType t) { mv.visitInsn(FRETURN); }
@@ -674,7 +679,7 @@ public class TreeCompiler {
                              EVALUATE_EXPRESSION_DESCRIPTOR);
           stack.adjust(-2);
           
-          emitUnbox(mv, t, stack);
+          emitConvert(mv, t, stack);
           if (isStatic) {
             mv.visitFieldInsn(PUTSTATIC, _name, ast.getName(), typeDescriptor(t));
           }
@@ -827,7 +832,7 @@ public class TreeCompiler {
         mv.visitMethodInsn(INVOKEVIRTUAL, EVALUATION_ADAPTER_NAME, "evaluateExpression",
                            EVALUATE_EXPRESSION_DESCRIPTOR);
         stack.adjust(-2);
-        emitUnbox(mv, paramT, stack);
+        emitConvert(mv, paramT, stack);
       }
       else { emitConstant(mv, val, stack); }
       i++;
@@ -916,11 +921,14 @@ public class TreeCompiler {
     });
   }
   
-  /** Convert the value on the stack to the given type, unboxing if necessary. */
-  private void emitUnbox(final MethodVisitor mv, Type expectedT, final StackSizeTracker stack) {
-    expectedT.apply(new TypeAbstractVisitor_void() {
-      @Override public void defaultCase(Type t) { /* do nothing */ }
-      
+  /** Convert the value on the stack to the given type, casting or unboxing if necessary. */
+  private void emitConvert(final MethodVisitor mv, Type expectedT, final StackSizeTracker stack) {
+    _opt.typeSystem().erase(expectedT).apply(new TypeAbstractVisitor_void() {
+      @Override public void forClassType(ClassType t) {
+        if (!t.equals(TypeSystem.OBJECT)) {
+          mv.visitTypeInsn(CHECKCAST, className(t.ofClass()));
+        }
+      }
       @Override public void forBooleanType(BooleanType t) {
         generateUnboxingCode(1, "java/lang/Boolean", "booleanValue", "Z");
       }
@@ -945,7 +953,6 @@ public class TreeCompiler {
       @Override public void forDoubleType(DoubleType t) {
         generateUnboxingCode(2, "java/lang/Double", "doubleValue", "D");
       }
-
       private void generateUnboxingCode(int size, String className, String methodName,
                                         String primDescriptor) {
         // The bytecode verifier requires this cast
@@ -953,7 +960,6 @@ public class TreeCompiler {
         mv.visitMethodInsn(INVOKEVIRTUAL, className, methodName, "()" + primDescriptor);
         stack.adjust(-1+size);
       }
-      
     });
   }
   
@@ -1156,6 +1162,24 @@ public class TreeCompiler {
       }
     }
     return result;
+  }
+  
+  /** If the given access flags has default access, set it to public. */
+  private static int defaultToPublicAccess(int accessFlags) {
+    if (!Modifier.isPublic(accessFlags) && !Modifier.isProtected(accessFlags) &&
+        !Modifier.isPrivate(accessFlags)) {
+      accessFlags |= Modifier.PUBLIC;
+    }
+    return accessFlags;
+  }
+  
+  /** If the given access flags has default access, set it to protected. */
+  private static int defaultToProtectedAccess(int accessFlags) {
+    if (!Modifier.isPublic(accessFlags) && !Modifier.isProtected(accessFlags) &&
+        !Modifier.isPrivate(accessFlags)) {
+      accessFlags |= Modifier.PROTECTED;
+    }
+    return accessFlags;
   }
   
   

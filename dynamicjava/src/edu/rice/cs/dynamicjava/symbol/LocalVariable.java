@@ -22,5 +22,7 @@ public class LocalVariable implements Variable {
   
   public boolean isFinal() { return _isFinal; }
   
-  public String toString() { return "LocalVariable(" + _name + ")@" + Integer.toHexString(hashCode()); }
+  public String toString() {
+    return "LocalVariable(" + _name + ": " + _type + ")@" + Integer.toHexString(hashCode());
+  }
 }

@@ -1928,9 +1928,8 @@ PARSER_END(Parser)
    */
   ConstructorDeclaration constructorDeclaration() :
   {
-    Token                 t = null;
     ModifierFlags         mf;
-    int                   flag = 0;
+    int                   flags = 0;
     Token                 id;
     TypeParameter[]   typeParameters = null;
     List<FormalParameter> params;
@@ -1959,23 +1958,29 @@ PARSER_END(Parser)
       )*
         e="}"
       {
-        if(mf !=null) //Modifiers not allowed in a constructor declaration
+        if (mf !=null) {
+          //Modifiers not allowed in a constructor declaration
           checkModifiers(mf.accessFlags, Modifier.STATIC | Modifier.FINAL | Modifier.NATIVE | Modifier.ABSTRACT
                            | Modifier.SYNCHRONIZED | Modifier.TRANSIENT | Modifier.VOLATILE);
-        if (t == null) {
+          flags = mf.accessFlags;
+          bl = mf.beginLine;
+          bc = mf.beginColumn;
+        }
+        else if (typeParameters != null && typeParameters.length > 0) {
+          bl = typeParameters[0].getBeginLine();
+          bc = typeParameters[0].getBeginColumn();
+        }
+        else {
           bl = id.beginLine;
           bc = id.beginColumn;
-        } else {
-          bl = t.beginLine;
-          bc = t.beginColumn;
         }
-        if(lastFormalParameterIsVarArgs) flag |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
-        if (typeParameters == null){
-          return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts,
+        if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080
+        if (typeParameters == null) {
+          return new ConstructorDeclaration(flags, id.image, params, exceptions, ci, stmts,
                                             filename, bl, bc, e.endLine, e.endColumn);
         } else {
           GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
-          return new PolymorphicConstructorDeclaration(flag, id.image, params,
+          return new PolymorphicConstructorDeclaration(flags, id.image, params,
                                                        exceptions, ci, stmts,
                                                        filename, bl, bc, e.endLine, e.endColumn, typeParameters);
         }

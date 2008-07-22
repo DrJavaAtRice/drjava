@@ -314,6 +314,8 @@ public class TopLevelContext implements TypeContext {
   
   /* MISC CONTEXTUAL INFORMATION */
   
+  public String getPackage() { return _currentPackage; }
+  
   /** Return a full name for a class with the given name declared here. */
   public String makeClassName(String n) { return _currentPackage.equals("") ? n : _currentPackage + "." + n; }
   

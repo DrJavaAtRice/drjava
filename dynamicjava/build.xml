@@ -189,6 +189,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench.jar" />
         <pathelement location="classes/base" />
       </classpath>
       <compilerarg value="-Xlint" />
@@ -294,6 +295,7 @@
         <pathelement location="${java14-runtime}" />
         <pathelement location="${clover-jar}" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench.jar" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
         <pathelement location="classes/test-14" />
@@ -372,6 +374,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
@@ -391,6 +394,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
@@ -410,6 +414,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
@@ -503,6 +508,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench.jar" />
       </classpath>
       <link href="http://java.sun.com/j2se/1.5/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />

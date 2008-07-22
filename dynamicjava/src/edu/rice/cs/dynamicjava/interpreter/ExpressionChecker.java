@@ -113,8 +113,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * <li>DJCLASS on {@code AnonymousAllocation}s, {@code AnonymousInnerAllocation}s,
  *     {@code ThisExpression}s, {@code SuperMethodCall}s, {@code SuperFieldAccess}es, and 
  *     non-static {@code SimpleMethodCall}s and {@code SimpleFieldAccess}es.</li>
- * <li>CONSTRUCTOR on all allocations: {@code SimpleAllocation}s, {@code InnerAllocation}s,
- *     {@code AnonymousAllocation}s, and {@code AnonymousInnerAllocation}s</li>
+ * <li>CONSTRUCTOR on {@code ConstructorCall}s and all allocations: {@code SimpleAllocation}s,
+ *     {@code InnerAllocation}s, {@code AnonymousAllocation}s, and {@code AnonymousInnerAllocation}s</li>
  * <li>FIELD on all {@code FieldAccess}es</li>
  * <li>METHOD on all {@code MethodCall}s</li>
  * <li>VARIABLE on all {@code VariableAccess}es, {@code VariableDeclarations}, and {@code FormalParameters}</li>
@@ -479,15 +479,14 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
    */
   @Override public Type visit(SimpleMethodCall node) {
     Iterable<? extends Expression> args = IterUtil.empty();
-    if (node.getArguments() != null) { args = node.getArguments(); }
-    for (Expression e : args) { e.acceptVisitor(this); }
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
     
     Iterable<Type> targs = IterUtil.empty();
     
     ClassType t;
     if (context.localFunctionExists(node.getMethodName(), ts)) {
       Iterable<LocalFunction> matches = context.getLocalFunctions(node.getMethodName(), ts);
-      t = ts.makeClassType(new FunctionWrapperClass(matches));
+      t = ts.makeClassType(new FunctionWrapperClass(context.getPackage(), matches));
     }
     else {
       try {
@@ -565,8 +564,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     Type receiverT = receiver.acceptVisitor(this);
     
     Iterable<? extends Expression> args = IterUtil.empty();
-    if (node.getArguments() != null) { args = node.getArguments(); }
-    for (Expression e : args) { e.acceptVisitor(this); }
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
     
     Iterable<Type> targs = IterUtil.empty();
     if (node instanceof PolymorphicObjectMethodCall) {
@@ -606,8 +604,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     }
 
     Iterable<? extends Expression> args = IterUtil.empty();
-    if (node.getArguments() != null) { args = node.getArguments(); }
-    for (Expression e : args) { e.acceptVisitor(this); }
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
     
     Iterable<Type> targs = IterUtil.empty();
     if (node instanceof PolymorphicSuperMethodCall) {
@@ -645,8 +642,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     Type t = node.getMethodType().acceptVisitor(this);
     
     Iterable<? extends Expression> args = IterUtil.empty();
-    if (node.getArguments() != null) { args = node.getArguments(); }
-    for (Expression e : args) { e.acceptVisitor(this); }
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
     
     Iterable<Type> targs = IterUtil.empty();
     if (node instanceof PolymorphicStaticMethodCall) {
@@ -752,8 +748,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     }
     
     Iterable<? extends Expression> args = IterUtil.empty();
-    if (node.getArguments() != null) { args = node.getArguments(); }
-    for (Expression e : args) { e.acceptVisitor(this); }
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
     
     Iterable<Type> targs = IterUtil.empty();
     if (node instanceof PolymorphicSimpleAllocation) {
@@ -789,8 +784,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     }
     
     Iterable<? extends Expression> args = IterUtil.empty();
-    if (node.getArguments() != null) { args = node.getArguments(); }
-    for (Expression e : args) { e.acceptVisitor(this); }
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
     
     Iterable<Type> targs = IterUtil.empty();
     if (node instanceof PolymorphicAnonymousAllocation) {
@@ -843,8 +837,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       }
       
       Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); }
-      for (Expression e : args) { e.acceptVisitor(this); }
+      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicInnerAllocation) {
@@ -897,8 +890,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       setSuperType(node, t);
       
       Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); }
-      for (Expression e : args) { e.acceptVisitor(this); }
+      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicAnonymousInnerAllocation) {
@@ -936,6 +928,52 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     return setType(node, ts.makeClassType(c));
   }
   
+  /**
+   * Visits a ConstructorCall.
+   * @return  The type of this or super.
+   */
+  @Override public Type visit(ConstructorCall node) {
+    if (node.getExpression() != null) {
+      throw new IllegalArgumentException("Qualified constructor call not implemented");
+    }
+    
+    Iterable<? extends Expression> args = IterUtil.empty();
+    if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+    
+    // TODO: implement explict type arguments in constructor calls
+    Iterable<Type> targs = IterUtil.empty();
+    
+    Type result;
+    if (node.isSuper()) { result = context.getSuperType(ts); }
+    else { result = SymbolUtil.thisType(context.getThis()); }
+    if (result == null) {
+      throw new IllegalArgumentException("Can't check a ConstructorCall in this context");
+    }
+    
+    try {
+      TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(result, targs, args);
+      
+      // TODO: Check accessibility of constructor
+      // Note that super constructor calls *have to* be accessible, even if accessibility
+      // checking is turned off -- a call to a private constructor cannot be compiled
+      // in a way that it will run successfully (since constructor calls are the only code
+      // that is directly compiled rather than being interpreted, we don't have this problem
+      // elsewhere)
+      checkThrownExceptions(inv.thrown(), node);
+      node.setArguments(CollectUtil.makeList(inv.args()));
+      setConstructor(node, inv.constructor());
+      return setType(node, result);
+    }
+    catch (InvalidTypeArgumentException e) {
+      throw new ExecutionError("type.argument", node);
+    }
+    catch (TypeSystemException e) {
+      setErrorStrings(node, ts.userRepresentation(result), nodeTypesString(args));
+      throw new ExecutionError("no.such.constructor", node);
+    }
+  }
+  
+  /** Verify that the thrown exceptions are expected in this context. */
   private void checkThrownExceptions(Iterable<? extends Type> thrownTypes, Node node) {
     Iterable<Type> allowed = IterUtil.compose(TypeSystem.RUNTIME_EXCEPTION,
                                               context.getDeclaredThrownTypes());
@@ -1770,5 +1808,5 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
                                     new SimpleArrayType(elementType);
     return setType(node, arrayT);
   }
-
+  
 }

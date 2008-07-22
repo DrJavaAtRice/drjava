@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import java.math.BigInteger;
+
 /**
  * This class represents the integer literal nodes of the syntax tree
  *
@@ -66,9 +68,18 @@ public class IntegerLiteral extends Literal {
   private static Integer parse(String s) {
     int radix = 10;
     int start = 0;
+    boolean negate = false;
     if (s.startsWith("0x")) { radix = 16; start += 2; }
     else if (s.startsWith("0") && s.length() > 1) { radix = 8; start++; }
-    return Integer.valueOf(s.substring(start), radix);
+    else if (s.startsWith("-")) { start++; negate = true; }
+    // BigInteger can parse hex numbers representing negative ints; Integer can't
+    BigInteger val = new BigInteger(s.substring(start), radix);
+    if (negate) { val = val.negate(); }
+    int result = val.intValue();
+    if (val.bitLength() > 32 || (radix == 10 && !val.equals(BigInteger.valueOf(result)))) {
+      throw new NumberFormatException("Literal is out of range");
+    }
+    return result;
   }
   
 }

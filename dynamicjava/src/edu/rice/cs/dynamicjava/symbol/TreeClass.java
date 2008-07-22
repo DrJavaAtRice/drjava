@@ -24,6 +24,8 @@ import edu.rice.cs.dynamicjava.interpreter.TreeClassLoader;
 import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** <p>A DJClass wrapper for a parsed class or interface declaration.</p>
   * <p>A DJClass object must be available before any types can be created in terms of the class.
   * Thus all class declarations introduced in some scope must have corresponding DJClasses before 
@@ -67,13 +69,19 @@ public class TreeClass implements DJClass {
     if (_ast instanceof TypeDeclaration) { _accessFlags = ((TypeDeclaration) _ast).getAccessFlags(); }
     else { _accessFlags = 0; }
     _loaded = LazyThunk.make(new Thunk<Class<?>>() {
-      public Class<?> value() { return loader.loadTree(TreeClass.this); }
+      public Class<?> value() {
+        try { return loader.loadClass(_fullName); }
+        catch (ClassNotFoundException e) { throw new RuntimeException("Error loading class", e); }
+        // LinkageError indicates there's something wrong with the compiled class
+        catch (LinkageError e) { throw new RuntimeException("Error loading class", e); }
+      }
     });
     _constructors = new LinkedList<TreeConstructor>();
     _fields = new LinkedList<TreeField>();
     _methods = new LinkedList<TreeMethod>();
     _classes = new LinkedList<TreeClass>();
     _opt = opt;
+    loader.registerTree(this);
     extractMembers(loader);
   }
   
@@ -126,6 +134,12 @@ public class TreeClass implements DJClass {
   }
   
   public Node declaration() { return _ast; }
+  
+  public String packageName() {
+    int dot = _fullName.lastIndexOf('.');
+    if (dot == -1) { return ""; }
+    else { return _fullName.substring(0, dot); }
+  }
   
   /** Produces the binary name for the given class (as in {@link Class#getName}) */
   public String fullName() { return _fullName; }
@@ -246,6 +260,9 @@ public class TreeClass implements DJClass {
               return candidate;
             }
           }
+          // error: can't find it
+          debug.logValues(new String[]{"name", "candidates"},
+                          TreeField.this.declaredName(), c.declaredFields());
           throw new RuntimeException("Can't find field in loaded class");
         }
       });
@@ -277,6 +294,8 @@ public class TreeClass implements DJClass {
               return candidate;
             }
           }
+          // error: can't find it
+          debug.logValues(new String[]{"params", "candidates"}, params, c.declaredConstructors());
           throw new RuntimeException("Can't find constructor in loaded class");
         }
       });
@@ -341,6 +360,9 @@ public class TreeClass implements DJClass {
               return candidate;
             }
           }
+          // error: can't find it
+          debug.logValues(new String[]{"name", "params", "candidates"},
+                          TreeMethod.this.declaredName(), params, c.declaredMethods());
           throw new RuntimeException("Can't find method in loaded class");
         }
       });
@@ -386,12 +408,17 @@ public class TreeClass implements DJClass {
     else { return Access.PACKAGE; }
   }
   
-  /** Non-static because it depends on _opt. */
+  /**
+   * Assumes the classes corresponding to the types of the local variables can be loaded.
+   * Non-static because it depends on _opt.
+   */
   private boolean paramsMatch(Iterable<LocalVariable> p1, Iterable<LocalVariable> p2) {
     if (IterUtil.sizeOf(p1) == IterUtil.sizeOf(p2)) {
       TypeSystem ts = _opt.typeSystem();
       for (Pair<LocalVariable, LocalVariable> vars : IterUtil.zip(p1, p2)) {
-        if (!ts.erase(vars.first().type()).equals(ts.erase(vars.second().type()))) {
+        Thunk<Class<?>> c1 = ts.erasedClass(vars.first().type());
+        Thunk<Class<?>> c2 = ts.erasedClass(vars.second().type());
+        if (!c1.value().equals(c2.value())) {
           return false;
         }
       }

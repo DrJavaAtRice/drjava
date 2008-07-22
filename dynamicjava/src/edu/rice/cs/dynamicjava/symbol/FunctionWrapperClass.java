@@ -23,10 +23,12 @@ public class FunctionWrapperClass implements DJClass {
   private static final Iterator<Integer> ID_COUNTER =
     new SequenceIterator<Integer>(1, LambdaUtil.INCREMENT_INT);
   
+  private final String _packageName;
   private final Iterable<DJMethod> _methods;
   private final String _name;
   
-  public FunctionWrapperClass(Iterable<? extends LocalFunction> functions) {
+  public FunctionWrapperClass(String packageName, Iterable<? extends LocalFunction> functions) {
+    _packageName = packageName;
     _methods = IterUtil.mapSnapshot(functions, FUNCTION_AS_METHOD);
     _name = "Overload" + ID_COUNTER.next();
   }
@@ -36,10 +38,12 @@ public class FunctionWrapperClass implements DJClass {
     public DJMethod value(LocalFunction f) { return new FunctionWrapperMethod(f); }
   };
   
+  public String packageName() { return _packageName; }
   
   /** Produces the binary name for the given class (as in {@link Class#getName}) */
   public String fullName() {
-    return FunctionWrapperClass.class.getName() + "$" + _name;
+    // TODO: use the context to get this name instaed
+    return _packageName + ".$" + _name;
   }
   
   public boolean isAnonymous() { return false; }
@@ -59,7 +63,7 @@ public class FunctionWrapperClass implements DJClass {
   public boolean hasRuntimeBindingsParams() { return false; }
   
   /** The class that declares this class, or {@code null} if this is declared at a top-level or local scope */
-  public DJClass declaringClass() { return SymbolUtil.wrapClass(FunctionWrapperClass.class); }
+  public DJClass declaringClass() { return null; }
   
   /** List all type variables declared by this class */
   public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }

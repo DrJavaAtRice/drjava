@@ -6,6 +6,8 @@ import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 /** Represents a class declaration. */
 public interface DJClass {
   
+  public String packageName();
+  
   /** Produces the binary name for the given class (as in {@link Class#getName}) */
   public String fullName();
   

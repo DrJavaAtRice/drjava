@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import java.math.BigInteger;
+
 /**
  * This class represents the long literal nodes of the syntax tree
  *
@@ -55,7 +57,7 @@ public class LongLiteral extends Literal {
    */
   public LongLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
     super(rep,
-          parse(rep.substring(0, rep.length())), //corrected bug, was rep.length()-1
+          parse(rep.substring(0, rep.length())),
           long.class,
           fn, bl, bc, el, ec);
   }
@@ -66,11 +68,20 @@ public class LongLiteral extends Literal {
   private static Long parse(String s) {
     int radix = 10;
     int start = 0;
+    boolean negate = false;
     int end = s.length();
     if (s.endsWith("l") || s.endsWith("L")) { end--; }
     if (s.startsWith("0x")) { radix = 16; start += 2; }
     else if (s.startsWith("0") && s.length() > 1) { radix = 8; start++; }
-    return Long.valueOf(s.substring(start, end), radix);
+    else if (s.startsWith("-")) { start++; negate = true; }
+    // BigInteger can parse hex numbers representing negative longs; Long can't
+    BigInteger val = new BigInteger(s.substring(start, end), radix);
+    if (negate) { val = val.negate(); }
+    long result = val.longValue();
+    if (val.bitLength() > 64 || (radix == 10 && !val.equals(BigInteger.valueOf(result)))) {
+      throw new NumberFormatException("Literal is out of range");
+    }
+    return result;
   }
   
 }

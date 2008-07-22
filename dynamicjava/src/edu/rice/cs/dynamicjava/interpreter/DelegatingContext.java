@@ -178,6 +178,10 @@ public abstract class DelegatingContext implements TypeContext {
   
   /* MISC CONTEXTUAL INFORMATION */
   
+  public String getPackage() {
+    return _next.getPackage();
+  }
+  
   /** Return a full name for a class with the given name declared here. */
   public String makeClassName(String n) {
     return _next.makeClassName(n);

@@ -27,6 +27,14 @@ public class SymbolUtil {
     return result;
   }
   
+  /** Produce the first element of the class's {@code outerClassChain()}. */
+  public static DJClass outermostClass(DJClass c) {
+    DJClass result = c;
+    DJClass outer = c.declaringClass();
+    while (outer != null) { result = outer; outer = outer.declaringClass(); }
+    return result;
+  }
+  
   /**
    * Determine whether {@code inner} is non-statically nested within {@code outer}.  This is the
    * case iff {@code outer} appears in {@code inner}'s outer class chain, and the next class
