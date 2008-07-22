@@ -261,15 +261,13 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   }
     
   private void _notifyRegionsRemoved(final Collection<R> regions) {
-//     Utilities.invokeLater(new Runnable() { public void run() {
-        _lock.startRead();
-        try {
-          for (RegionManagerListener<R> l: _listeners) { 
-            for (R r: regions) { l.regionRemoved(r); }
-          } 
-        } 
-        finally { _lock.endRead(); }
-//      } });
+    _lock.startRead();
+    try {
+      for (RegionManagerListener<R> l: _listeners) { 
+        for (R r: regions) { l.regionRemoved(r); }
+      } 
+    } 
+    finally { _lock.endRead(); }
   }
   
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
@@ -298,15 +296,6 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     _documents.clear();
     // Notify all listeners for this manager that all regions have been removed
     _notifyRegionsRemoved(regions);
-//    Utilities.invokeLater(new Runnable() { public void run() {
-//      _lock.startRead();
-//      try {
-//        for (RegionManagerListener<R> l: _listeners) { 
-//          for (R r: regions) { l.regionRemoved(r); }
-//        }
-//      } 
-//      finally { _lock.endRead(); }
-//    } });
   }
   
   /** Set the current region. 

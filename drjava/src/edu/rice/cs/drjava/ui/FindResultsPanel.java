@@ -273,10 +273,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _regionToTreeNode.clear();
       _regTreeModel.nodeStructureChanged(_rootNode);
       _requestFocusInWindow();
-      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
+//      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
                            _regionManager, this);
-      _regTree.scrollRowToVisible(0);  // Select the first document in the new panel
+      _regTree.scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }
   }
@@ -284,7 +284,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {
     updateButtons();
-    _frame._bookmarksPanel.startChanging();
+//    _frame._bookmarksPanel.startChanging();
     for (final MovingDocumentRegion r: getSelectedRegions()) {
       if (! _model.getBookmarkManager().contains(r)) {
         OrderedDocumentRegion newR = 
@@ -292,7 +292,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
         _model.getBookmarkManager().addRegion(newR);
       }
     }
-    _frame._bookmarksPanel.finishChanging();
+//    _frame._bookmarksPanel.finishChanging();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
@@ -300,14 +300,19 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Remove the selected regions. */
   private void _remove() {
+    int[] rows = _regTree.getSelectionRows();
+    int row = (rows.length > 0) ? rows[0] : 0;
     _frame.removeCurrentLocationHighlight();
-    startChanging();
+//    startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) {
       removeRegion(r); // removes r from region manager and the panel node for r from the tree model
     }
-    finishChanging();
+//    finishChanging();
     if (_regionManager.getDocuments().size() == 0) { _close(); }
-    updateButtons();
+    System.err.println("Scrolling to row " + row);
+    _regTree.setSelectionRow(row);
+    _regTree.scrollRowToVisible(row);
+    _requestFocusInWindow();
   }
   
   /** Update button state and text. */

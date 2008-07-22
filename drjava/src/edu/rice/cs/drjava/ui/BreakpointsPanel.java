@@ -137,18 +137,18 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
-        startChanging();
+//        startChanging();
         for (Breakpoint bp: getSelectedRegions()) _regionManager.removeRegion(bp);
-        finishChanging();
+//        finishChanging();
       }
     };
     _removeButton = new JButton(removeAction);
     
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
-        startChanging();
+//        startChanging();
         _regionManager.clearRegions();
-        finishChanging();
+//        finishChanging();
       }
     };
     _removeAllButton = new JButton(removeAllAction);

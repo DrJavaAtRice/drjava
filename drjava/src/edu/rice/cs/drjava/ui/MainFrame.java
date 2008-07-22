@@ -263,7 +263,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
   /** Whether any document has changed since tabbed panels have been updated. */
-  public volatile boolean _changed = false;
+  private volatile boolean _changed = false;
   
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
@@ -652,6 +652,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public final void actionPerformed(ActionEvent ae) { _save(); }
   };
   
+  /** Returns the changed status of the MainFrame. */
+  public boolean changed() { return _changed; }
+  
+  /** Resets the changed status of the MainFrame. */
+  public void resetChanged() { _changed = false; }
+    
   /** Ensures that pack() is run in the event thread. Only used in test code */
   public void pack() {
     Utilities.invokeAndWait(new Runnable() { public void run() { packHelp(); } });
@@ -9739,7 +9745,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         panel.setVisible(true);
         showTab(panel, true);
         _tabbedPane.setSelectedComponent(panel);
-        // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+        // Use EventQueue.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
       }
     }

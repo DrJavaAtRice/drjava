@@ -95,7 +95,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
-  protected final IChangeState CHANGING_STATE = new ChangingState();
+//  protected final IChangeState CHANGING_STATE = new ChangingState();
   protected IChangeState _changeState = DEFAULT_STATE;
   
   /* A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
@@ -157,14 +157,14 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     updateButtons();
   }
   
-  /** Set the state to handle rapid changes. When a lot of changes are about to be made,
-    * this state should be set to postpone some actions until the changes are finished. */
-  public void startChanging() {
-    _changeState.switchStateTo(CHANGING_STATE);
-  }
+//  /** Set the state to handle rapid changes. When a lot of changes are about to be made,
+//    * this state should be set to postpone some actions until the changes are finished. */
+//  public void startChanging() {
+//    _changeState.switchStateTo(CHANGING_STATE);
+//  }
   
-  /** Set the default state again. Not equipped to handle rapid changes. */
-  public void finishChanging() { _changeState.switchStateTo(DEFAULT_STATE); }
+//  /** Set the default state again. Not equipped to handle rapid changes. */
+//  public void finishChanging() { _changeState.switchStateTo(DEFAULT_STATE); }
   
   /** Update the tree. This method adds significant overhead to displaying RegionsTreePanels.  We need to make it more
     * efficient. */
@@ -176,14 +176,14 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   }
   
   private void _updatePanel() {
-    if (_frame._changed && System.currentTimeMillis() - _lastUpdateTime > UPDATE_DELAY && ! _updatePending) {
+    if (_frame.changed() && System.currentTimeMillis() - _lastUpdateTime > UPDATE_DELAY && ! _updatePending) {
       _updatePending = true;
       EventQueue.invokeLater(new Runnable() { 
         public void run() {
           // Update all tree nodes
           updatePanel();  // sets _lastUpdateTime
           _updatePending = false;
-          _frame._changed = false;
+          _frame.resetChanged();
         }
       });
     }
@@ -191,19 +191,21 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Forces this panel to be completely updated. */
   protected void updatePanel() {
-    Enumeration docNodes = _rootNode.children();
-    while (docNodes.hasMoreElements()) {
-      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
-      // Find the correct start offset node for this region
-      Enumeration regionNodes = docNode.children();
-      while (regionNodes.hasMoreElements()) {
-        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
-        _regTreeModel.nodeChanged(regionNode);
-      }
-      _regTreeModel.nodeChanged(docNode);  // file name may have changed
-      _lastUpdateTime = System.currentTimeMillis();
-      _frame._changed = false;
-    }
+//    Enumeration docNodes = _rootNode.children();
+//    while (docNodes.hasMoreElements()) {
+//      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
+//      // Find the correct start offset node for this region
+//      Enumeration regionNodes = docNode.children();
+//      while (regionNodes.hasMoreElements()) {
+//        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
+//        _regTreeModel.nodeChanged(regionNode);
+//      }
+    revalidate();
+    repaint();
+//      _regTreeModel.nodeChanged(docNode);  // file name may have changed
+    _lastUpdateTime = System.currentTimeMillis();
+    _frame.resetChanged();
+//    }
   }
   
   /** Forces the panel to be updated and requests focus in this panel. */
@@ -425,7 +427,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     */
   protected ArrayList<R> getSelectedRegions() {
     ArrayList<R> regs = new ArrayList<R>();
-    TreePath[] paths = _regTree.getSelectionPaths();
+    TreePath[] paths = _regTree.getSelectionPaths();  // Why not use getMin/MaxSelectionRow
     if (paths != null) {
       for (TreePath path: paths) {
         if (path != null && path.getPathCount() == 3) {
