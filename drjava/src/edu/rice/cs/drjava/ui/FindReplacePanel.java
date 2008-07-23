@@ -505,6 +505,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                                     this);
     findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, panel);
+    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel._regTree.scrollRowToVisible(0);
   }
   
@@ -752,6 +753,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setSearchBackwards(false);
     _findLabelBot.setText("Next");
     _doFind();  // updates position stored in machine before starting
+    _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
   }
   
   /** Called when user the activates "find previous" command.  Package visibility to accommodate calls from MainFrame. */
@@ -760,6 +762,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setSearchBackwards(true);
     _findLabelBot.setText("Prev");
     _doFind();
+    _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
   }
   
   private void _replace() {

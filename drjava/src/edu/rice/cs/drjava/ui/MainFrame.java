@@ -50,6 +50,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +58,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.net.URL;
@@ -5081,16 +5081,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     return map;
   }
-  /** Gets the information to be save for a project document.
+  /** Gets the information to be saved for a project document.
     * Implementation may change if the scroll/selection information is later stored in a place other than the
     * definitions pane.  Hopefully this info will eventually be backed up in the OpenDefinitionsDocument in which 
     * case all this code should be refactored into the model's _saveProject method
     */
   private DocumentInfoGetter _makeInfoGetter(final OpenDefinitionsDocument doc) {
     JScrollPane s = _defScrollPanes.get(doc);
-    if (s == null) {
-      s = _createDefScrollPane(doc);
-    }
+    if (s == null) s = _createDefScrollPane(doc);
+
     final JScrollPane scroller = s;
     final DefinitionsPane pane = _currentDefPane; // rhs was (DefinitionsPane)scroller.getViewport().getView();
     return new DocumentInfoGetter() {
@@ -8417,11 +8416,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     
-    /** NOTE: Makes certain that this action occurs in the event dispatching thread */
     public void fileClosed(final OpenDefinitionsDocument doc) { _fileClosed(doc); }
     
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc) {
+//      assert EventQueue.isDispatchThread();
       _recentDocFrame.closeDocument(doc);
       _removeErrorListener(doc);
       JScrollPane jsp = _defScrollPanes.get(doc);
@@ -8457,8 +8456,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
       focusOnLastFocusOwner();
-//        }
-//      });
     }
     
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
@@ -8520,62 +8517,44 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void focusOnDefinitionsPane() { _currentDefPane.requestFocusInWindow(); }
     
     public void interactionStarted() {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
       _disableInteractionsPane();
       _runAction.setEnabled(false);
       _runProjectAction.setEnabled(false);
-//        }
-//      });
     }
     
     public void interactionEnded() {
+      assert EventQueue.isDispatchThread();  // overkill; this method is a listener invocation wrapped in invokeLater
       final InteractionsModel im = _model.getInteractionsModel();
-      // a strange NullPointerException was reported in this method ([ 1938268 ])
-      // just making sure that all references are non-null
-      if (im != null) {
-        final String lastError = im.getLastError();
-        final edu.rice.cs.drjava.config.FileConfiguration config = DrJava.getConfig();
-        if ((config != null) &&
-            (config.getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED))) {
-          if (lastError != null) {
-            // the interaction ended and there was an error
-            // check that this error is different than the last one (second to last may be null):
-            final String secondToLastError = im.getSecondToLastError();
-            if ((secondToLastError!=null) ||
-                (!lastError.equals(secondToLastError))) {
-              // this aborts the auto-importing if the same class comes up twice in a row
-              if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
-                // it was an "undefined class" exception
-                // show auto-import dialog
-                String undefinedClassName = lastError.substring(lastError.indexOf('\'')+1,
-                                                                lastError.lastIndexOf('\''));
-                _showAutoImportDialog(undefinedClassName);
-              }
-              else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
-                askToIncreaseSlaveMaxHeap();
-              }
+      final String lastError = im.getLastError();
+      final edu.rice.cs.drjava.config.FileConfiguration config = DrJava.getConfig();
+      if (config != null && config.getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
+        if (lastError != null) {
+          // the interaction ended and there was an error
+          // check that this error is different than the last one (second to last may be null):
+          final String secondToLastError = im.getSecondToLastError();
+          if (secondToLastError != null || ! lastError.equals(secondToLastError)) {
+            // this aborts the auto-importing if the same class comes up twice in a row
+            if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
+              // it was an "undefined class" exception
+              // show auto-import dialog
+              String undefinedClassName = lastError.substring(lastError.indexOf('\'') + 1, lastError.lastIndexOf('\''));
+              _showAutoImportDialog(undefinedClassName);
+            }
+            else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
+              askToIncreaseSlaveMaxHeap();
             }
           }
         }
-        else {
-          // reset the last errors, so the dialog works again if it is re-enabled
-          im.resetLastErrors();
-        }
       }
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
+      else im.resetLastErrors(); // reset the last errors, so the dialog works again if it is re-enabled
+      
       _enableInteractionsPane();
       _runAction.setEnabled(true);
       _runProjectAction.setEnabled(_model.isProjectActive());
-//        }
-//      });
     }
-    
+  
     public void interactionErrorOccurred(final int offset, final int length) {
-//      Utilities.invokeLater(new Runnable() { public void run() { 
       _interactionsPane.highlightError(offset, length); 
-//      } });
     }
     
     /** Called when the active interpreter is changed.
@@ -8619,8 +8598,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void activeCompilerChanged() {
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-        // use Java API Javadoc of the same version as the compiler
-        // compiler was changed, rebuild list
+        // The Java API Javadoc version must match the compiler.  Since compiler was changed, we rebuild the API list
         _javaAPIList = null;
         generateJavaAPIList();
       }
@@ -8628,13 +8606,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void runStarted(final OpenDefinitionsDocument doc) {
       // Only change GUI from event-dispatching AbstractDJDocument
-      EventQueue.invokeLater(new Runnable() {
-        public void run() {
-          // Switch to the interactions pane to show results.
-          showTab(_interactionsContainer, true);
-          _lastFocusOwner = _interactionsContainer;
-        }
-      });
+      assert EventQueue.isDispatchThread();
+      
+      // Switch to the interactions pane to show results.
+      showTab(_interactionsContainer, true);
+      _lastFocusOwner = _interactionsContainer;
     }
     /** Only runs in event thread. */
     public void junitStarted() {
@@ -8799,14 +8775,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _junitAction.setEnabled(true);
       _junitAllAction.setEnabled(true);
       _junitProjectAction.setEnabled(_model.isProjectActive());
-// This action should not be enabled until the slave JVM is used          
+      // This action should not be enabled until the slave JVM is used          
 //          _resetInteractionsAction.setEnabled(true);
       if (_showDebugger) _toggleDebuggerAction.setEnabled(true);
       
-//           Moved this line here from interpreterResetting since
-//           it was possible to get an InputBox in InteractionsController
-//           between interpreterResetting and interpreterReady.
-//           Fixes bug #917054 "Interactions Reset Bug".
+    /* This line was moved here from interpreterResetting because it was possible to get an InputBox in 
+     * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 
+     * "Interactions Reset Bug". */
       _interactionsController.interruptConsoleInput();
     }
     

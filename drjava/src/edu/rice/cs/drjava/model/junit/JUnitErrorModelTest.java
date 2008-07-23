@@ -301,9 +301,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //        doc2.startCompile();
     
     listener.waitCompileDone();
-    listener.runJUnit(doc1);
+    _log.log("Testing the first document");
+    listener.runJUnit(doc1); //  waits until JUnit is done
     
-    listener.assertJUnitStartCount(1);
+    _log.log("First document test should be complete");
+    listener.assertJUnitStartCount(1);  
     
     _m = _model.getJUnitModel().getJUnitErrorModel();
     
@@ -316,8 +318,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
+    _log.log("Testing the second document");
     listener.runJUnit(doc2);
-    
+    _log.log("Second document testing should be complete");
     
     listener.assertJUnitStartCount(2);
     

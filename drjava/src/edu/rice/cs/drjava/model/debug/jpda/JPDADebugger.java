@@ -785,18 +785,13 @@ public class JPDADebugger implements Debugger {
     return connector;
   }
   
-  /** Sets the debugger's currently active thread.
-   * This method assumes that the given thread is already suspended.
-   * Returns true if this actually changed the suspended thread
-   * by pushing it onto the stack of suspended threads.  Returns
-   * false if this thread was already selected.
-   *
-   * The return value fixes a bug that occurs if the user steps
-   * into a breakpoint.
-   *
-   * @throws IllegalArgumentException if thread is not suspended.
-   */
-  /* synchronized */ boolean setCurrentThread(ThreadReference thread) {
+  /** Sets the debugger's currently active thread. This method assumes that the given thread is already suspended.
+    * Returns true if this actually changed the suspended thread by pushing it onto the stack of suspended threads.  
+    * Returns false if this thread was already selected.  The return value fixes a bug that occurs if the user steps
+    * into a breakpoint.
+    * @throws IllegalArgumentException if thread is not suspended.
+    */
+  boolean setCurrentThread(ThreadReference thread) {
     assert EventQueue.isDispatchThread();
     if (! thread.isSuspended()) {
       throw new IllegalArgumentException("Thread must be suspended to set as current.  Given: " + thread);
@@ -1507,7 +1502,6 @@ public class JPDADebugger implements Debugger {
     _model.getInteractionsModel().setActiveInterpreter(threadName, prompt);
   }
   
-  /** Not synchronized because invokeLater is asynchronous. */
   void threadStarted() {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadStarted(); } });
   }
@@ -1515,10 +1509,8 @@ public class JPDADebugger implements Debugger {
   /** Notifies all listeners that the current thread has died.  updateThreads is set to true if the threads and stack
     * tables need to be updated, false if there are no suspended threads
     */
-  /* synchronized */ void currThreadDied() throws DebugException {
+ void currThreadDied() throws DebugException {
     assert EventQueue.isDispatchThread();
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {
     printMessage("The current thread has finished.");
     _runningThread = null;
     
@@ -1541,8 +1533,6 @@ public class JPDADebugger implements Debugger {
       _switchToSuspendedThread();
     }
     _notifier.currThreadDied();
-//      }
-//    });
   }
   
   void nonCurrThreadDied() {

@@ -258,6 +258,7 @@ public class DrJavaRoot {
   }
   
   private static void _openCommandLineFiles(final MainFrame mf, String[] filesToOpen, int len, boolean jump) {
+    assert EventQueue.isDispatchThread();
 //    Utilities.showDebug("Files to open: " + Arrays.toString(filesToOpen));
     anyLineNumbersSpecified = false;
     for (int i = 0; i < len; i++) {
@@ -273,9 +274,7 @@ public class DrJavaRoot {
           lineNo = Integer.valueOf(currFileName.substring(pathSepIndex+1));
           anyLineNumbersSpecified = true;
         }
-        catch(NumberFormatException nfe) {
-          lineNo = -1;
-        }
+        catch(NumberFormatException nfe) { lineNo = -1; }
         currFileName = currFileName.substring(0,pathSepIndex);
       }
       
@@ -286,22 +285,14 @@ public class DrJavaRoot {
         public File[] getFiles() { return new File[] {file}; }
       };
       try {
-        if (isProjectFile) {
-          mf.openProject(command);
-        }
-        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-          MainFrame.openExtProcessFile(file);
-        }
+        if (isProjectFile) mf.openProject(command);
+        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) MainFrame.openExtProcessFile(file);
         else {
-          if (jump && (lineNo>=0)) {
-            // if a line number has been specified, open the file using MainFrame.open,
-            // then use invokeLater to run MainFrame._jumpToLine.
-            // note: this can only be done after MainFrame.start() has been called.
+          if (jump && (lineNo >= 0)) {
+            /* if a line number has been specified, open the file using MainFrame.open and jump to lineNo using 
+             * MainFrame._jumpToLine.  Note: this can only be done after MainFrame.start() has been called. */
             mf.open(command);
-            final int l = lineNo;
-            edu.rice.cs.util.swing.Utilities.invokeLater(new Runnable() { 
-              public void run() { mf._jumpToLine(l); }
-            });
+            mf._jumpToLine(lineNo); 
           }
           else {
             // without line number, use the model's openFile.

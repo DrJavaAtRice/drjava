@@ -72,7 +72,7 @@ import java.util.List;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  protected static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -1202,6 +1202,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileEndCount = 0;
       activeCompilerChangedCount = 0;
     }
+    
     @Override public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");
       synchronized(this) { junitStartCount++; }
@@ -1225,17 +1226,20 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     @Override public void nonTestCase(boolean isTestAll) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
+      _log.log("nonTestCase() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void classFileError(ClassFileError e) {
       if (printMessages) System.out.println("listener.classFileError, e="+e);
       synchronized(this) { classFileErrorCount++; }
+      _log.log("classFileError() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void junitEnded() {
       //assertJUnitSuiteStartedCount(1);
       if (printMessages) System.out.println("junitEnded event!");
       synchronized(this) { junitEndCount++; }
+      _log.log("junitEnded() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
   }

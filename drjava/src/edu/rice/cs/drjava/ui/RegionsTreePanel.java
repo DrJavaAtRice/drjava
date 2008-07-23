@@ -200,12 +200,14 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
 //        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
 //        _regTreeModel.nodeChanged(regionNode);
 //      }
+//      _regTreeModel.nodeChanged(docNode);  // file name may have changed
+//    }
+    
     revalidate();
     repaint();
-//      _regTreeModel.nodeChanged(docNode);  // file name may have changed
+
     _lastUpdateTime = System.currentTimeMillis();
     _frame.resetChanged();
-//    }
   }
   
   /** Forces the panel to be updated and requests focus in this panel. */

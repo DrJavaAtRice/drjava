@@ -114,7 +114,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   
   
   /** Checks that System.exit is handled appropriately from interactions pane. */
-  public void xtestExitInteractions() throws EditDocumentException, InterruptedException {
+  public void testExitInteractions() throws EditDocumentException, InterruptedException {
     InteractionListener listener = new InteractionListener() {
       
 //      public void consoleReset() { consoleResetCount++; }
@@ -143,7 +143,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
     * file in another directory can be both accessed and extended if it is on the "extra.classpath" config option.
     */
-  public void xtestInteractionsCanSeeCompiledClasses() throws BadLocationException, EditDocumentException,
+  public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -185,7 +185,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     * variable with an identical name (but a lowercase first letter).  Catches SF bug #689026 ("DynamicJava can't handle
     * certain variable names")
     */
-  public void xtestInteractionsVariableWithLowercaseClassName() throws BadLocationException, EditDocumentException,
+  public void testInteractionsVariableWithLowercaseClassName() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     // Compile a test file
     OpenDefinitionsDocument doc1 = setupDocument("public class DrJavaTestClass {}");
@@ -198,7 +198,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Checks that updating a class and recompiling it is visible from the REPL. */
-  public void xtestInteractionsCanSeeChangedClass() throws BadLocationException, EditDocumentException,
+  public void testInteractionsCanSeeChangedClass() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
@@ -217,7 +217,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Checks that an anonymous inner class can be defined in the repl! */
-  public void xtestInteractionsDefineAnonymousInnerClass() throws BadLocationException, EditDocumentException,
+  public void testInteractionsDefineAnonymousInnerClass() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     final String interface_text = "public interface I { int getValue(); }";
     final File file = createFile("I.java");
@@ -235,7 +235,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("testInteractionsDefineAnonymousInnerClass() completed");
   }
   
-  public void xtestGetSourceRootDefaultPackage() throws BadLocationException, IOException {
+  public void testGetSourceRootDefaultPackage() throws BadLocationException, IOException {
     
     // Get source root (current directory only)
     Iterable<File> roots = _model.getSourceRootSet();
@@ -267,7 +267,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("testGetSourceRootDefaultPackage() completed");
   }
   
-  public void xtestGetSourceRootPackageThreeDeepValid() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageThreeDeepValid() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -295,7 +295,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Tests that getSourceRoot works with a relative path when a package name is present. */
-  public void xtestGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
     File subdir = makeCanonical(new File(baseTempDir, "a"));
@@ -322,7 +322,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("testGetSourceRootPackageThreeDeepValidRelative() completed");
   }
   
-  public void xtestGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -347,7 +347,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("testGetSourceRootPackageThreeDeepInvalid() completed");
   }
   
-  public void xtestGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -372,7 +372,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   
-  public void xtestGetMultipleSourceRootsDefaultPackage() throws BadLocationException, IOException {
+  public void testGetMultipleSourceRootsDefaultPackage() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -419,7 +419,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Creates a new class, compiles it and then checks that the REPL can see it. */
-  public void xtestInteractionsLiveUpdateClassPath() throws BadLocationException, EditDocumentException,
+  public void testInteractionsLiveUpdateClassPath() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
@@ -462,7 +462,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Tests that the appropriate event is fired when the model's interpreter changes.*/
-  public void xtestSwitchInterpreters() {
+  public void testSwitchInterpreters() {
     TestListener listener = new TestListener() {
       public void interpreterChanged(boolean inProgress) {
         assertTrue("should not be in progress", !inProgress);
@@ -489,7 +489,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("testSwitchInterpreters() completed");
   }
   
-  public void xtestRunMainMethod() throws Exception {
+  public void testRunMainMethod() throws Exception {
     File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
     File file = makeCanonical(new File(dir, "Foo.java"));
@@ -520,7 +520,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("testRunMainMethod() completed");
   }
   
-  public void xtestBookmark() throws Exception {
+  public void testBookmark() throws Exception {
     File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
     final File file = makeCanonical(new File(dir, "Foo.java"));
@@ -533,20 +533,20 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       }
     });
     assertEquals("Should be 0 bookmarks", 0, _model.getBookmarkManager().getRegions().size());
-    _model.toggleBookmark(3,3);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(3,3); } });
     Vector<OrderedDocumentRegion> bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 1 bookmarks", 1, bms.size());
     assertEquals("Start offset should be 0", 0, bms.get(0).getStartOffset());
     assertEquals("End offset should be "+FOO_CLASS.indexOf('\n'), FOO_CLASS.indexOf('\n'), bms.get(0).getEndOffset());
-    _model.toggleBookmark(3,3);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(3,3); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 0 bookmarks", 0, bms.size());
-    _model.toggleBookmark(3,6);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(3,6); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 1 bookmarks", 1, bms.size());
     assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
     assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
-    _model.toggleBookmark(12,8);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(12,8); } });
     bms = _model.getBookmarkManager().getRegions();
     // Note: bms is sorted by increasing (startOffset, endOffset)
     assertEquals("Should be 2 bookmarks", 2, bms.size());
@@ -554,7 +554,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
     assertEquals("Start offset should be 8", 8, bms.get(1).getStartOffset());
     assertEquals("End offset should be 12", 12, bms.get(1).getEndOffset());
-    _model.toggleBookmark(5,10);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(5,10); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 3 bookmarks", 3, bms.size());
     assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
@@ -563,19 +563,19 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("End offset should be 10", 10, bms.get(1).getEndOffset());
     assertEquals("Start offset should be 8", 8, bms.get(2).getStartOffset());
     assertEquals("End offset should be 12", 12, bms.get(2).getEndOffset());
-    _model.toggleBookmark(8,12);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(8,12); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 2 bookmarks", 2, bms.size());
     assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
     assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
     assertEquals("Start offset should be 5", 5, bms.get(1).getStartOffset());
     assertEquals("End offset should be 10", 10, bms.get(1).getEndOffset());
-    _model.toggleBookmark(3,6);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(3,6); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 1 bookmarks", 1, bms.size());
     assertEquals("Start offset should be 5", 5, bms.get(0).getStartOffset());
     assertEquals("End offset should be 10", 10, bms.get(0).getEndOffset());
-    _model.toggleBookmark(10,5);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(10,5); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 0 bookmarks", 0, bms.size());
   }

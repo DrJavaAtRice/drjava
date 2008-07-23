@@ -44,8 +44,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
 
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.io.IOUtil;
@@ -64,6 +65,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   * @version $Id$
   */
 public class JUnitTestManager {
+  
+  protected static final Log _log = new Log("/Users/cork/drjava/drjava/GlobalModel.txt", false);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
@@ -95,7 +98,8 @@ public class JUnitTestManager {
     * @param files the files corresponding to classNames
     */
   public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
-    debug.logStart(new String[]{"classNames", "files"}, classNames, files);
+//    debug.logStart(new String[]{"classNames", "files"}, classNames, files);
+    _log.log("findTestClasses(" + classNames + ", " + files + ")");
     
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
@@ -124,7 +128,8 @@ public class JUnitTestManager {
       }
     }
     
-    debug.logEnd("result", _testClassNames);
+//    debug.logEnd("result", _testClassNames);
+    _log.log("returning: " + _testClassNames);
     return _testClassNames;
   }
   
@@ -133,6 +138,8 @@ public class JUnitTestManager {
     * @return false if no test suite (even an empty one) has been set up
     */
   public /* synchronized */ boolean runTestSuite() {
+    
+    _log.log("runTestSuite() called");
     
     if (_testClassNames == null || _testClassNames.isEmpty()) return false;
     
@@ -161,23 +168,25 @@ public class JUnitTestManager {
         i++;
       }
 //      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
-      
+      _reset();
       _jmc.testSuiteEnded(errors);
     }
     catch(Exception e) { 
       JUnitError[] errors = new JUnitError[1];
-      errors[0] = new JUnitError(null, -1, -1, e.getMessage(),
-                                 false, "", "", StringOps.getStackTrace(e));
+      errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", StringOps.getStackTrace(e));
+      _reset();
       _jmc.testSuiteEnded(errors);
 //      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
-      
     }
-    finally {
-      _suite = null;
-      _testClassNames = null;
-      _testFiles = null;
-    }
+    _log.log("Exiting runTestSuite()");
     return true;
+  }
+  
+  private void _reset() {
+    _suite = null;
+    _testClassNames = null;
+    _testFiles = null;
+    _log.log("test manager state reset");
   }
   
   /** Determines if the given class is a junit Test.

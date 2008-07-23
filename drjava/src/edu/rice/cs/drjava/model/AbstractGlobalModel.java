@@ -1932,7 +1932,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     _documentNavigator.removeDocument(doc);
     
-    _notifier.fileClosed(doc);
+//    Utilities.invokeLater(new Runnable() { 
+//      public void run() { 
+        _notifier.fileClosed(doc); 
+//      } 
+//    });
     doc.close();
     return true;
   }
