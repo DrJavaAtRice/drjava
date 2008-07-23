@@ -6718,7 +6718,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
-      _toolBar.putClientProperty("JToolBar.isRollover", Boolean.TRUE);
+      _toolBar.putClientProperty("JToolBar.isRollover", Boolean.FALSE);
       _toolBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY,
                                  com.jgoodies.looks.HeaderStyle.BOTH);
     }
