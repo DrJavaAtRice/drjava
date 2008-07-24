@@ -66,9 +66,6 @@ public class MovingDocumentRegion extends DocumentRegion {
   public String getString() { 
     StringBuilder result = new StringBuilder(120);
     result.append(_stringSuspension.eval()); 
-    int length = result.length();
-//    if (length < 120) result.append(AbstractDJDocument.getBlankString(120 - length));
-//    result.setLength(120);  // pads on right with null characters
     return result.toString();
   }
   

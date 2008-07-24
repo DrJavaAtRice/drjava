@@ -377,7 +377,6 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
               tooltip = "<html><pre>"+s+"</pre></html>";
             }
             catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
-//            finally { doc.releaseReadLock(); }
             setText(node.getUserObject().toString());
             renderer = this;
           }

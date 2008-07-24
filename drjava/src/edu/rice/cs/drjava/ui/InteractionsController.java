@@ -587,12 +587,8 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction historyForwardSearchAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-//        _doc.acquireReadLock();  // may be overkill
-//        try {
         _doc.forwardSearchInteractionsInHistory();
         moveToEnd();
-//        }
-//        finally { _doc.releaseReadLock(); }
       }
     }
   };

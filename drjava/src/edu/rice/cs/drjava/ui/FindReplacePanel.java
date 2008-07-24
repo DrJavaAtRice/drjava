@@ -602,6 +602,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
               try {
                 int endSel = endPos.getOffset();
                 int startSel = startPos.getOffset();
+                if (endSel == startSel) return "";  // excerpt has been deleted by editing
                 int excerptEndSel = doc._getLineEndPos(endSel);
                 int excerptStartSel = doc._getLineStartPos(startSel);
                 
@@ -632,6 +633,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //              // trim the end
 //              s = s.trim();
                 
+                if (s.length() == 0) return s;  // isEmpty() only available in Java 6.0
                 int trimLeftCt = text.indexOf(s.charAt(0));
                 int trimRightCt = text.length() - sLength;
                 // bound startRed and endRed
@@ -648,7 +650,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                 sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
                 sb.append("</font>");
                 sb.append(StringOps.encodeHTML(s.substring(endRed)));
-//                sb.append(StringOps.encodeHTML(AbstractDJDocument.getBlankString(120 - sLength)));
+                sb.append(StringOps.encodeHTML(AbstractDJDocument.getBlankString(120 - sLength)));  // move getBank to StringOps
                 return sb.toString();
               }
               catch(BadLocationException e) { return "***BadLocationException in StringSuspension.eval()***"; }

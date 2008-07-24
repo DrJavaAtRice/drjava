@@ -2326,13 +2326,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//      odd.acquireReadLock();
       try {
         int pos = odd._findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-//      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2340,13 +2338,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//      odd.acquireReadLock();
       try {
         int pos = odd._findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
-//      finally { odd.releaseReadLock(); }
     }
   };
   
@@ -7441,7 +7437,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile Object _updateLock = new Object();
   private Component _lastUpdatedComponent = null;
   private boolean _tabUpdatePending = false;
-  public static long UPDATE_DELAY = 1000L;  // update delay threshold in milliseconds
+  public static long UPDATE_DELAY = 3000L;  // update delay threshold in milliseconds
   
   /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  The update is immediate if the
     * selected component has changed since the last call or _tabUpdatePending is false. */
@@ -7997,6 +7993,30 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     scrollToDocumentAndOffset(doc, offset, shouldHighlight, true);
   }
   
+  public void goToRegionAndHighlight(final IDocumentRegion r) {
+    addToBrowserHistory();
+    OpenDefinitionsDocument doc = r.getDocument();
+    boolean toSameDoc = doc == _model.getActiveDocument();
+    Runnable command = new Runnable() {
+      public void run() {
+        _currentLocationHighlight = _currentDefPane.getHighlightManager().
+          addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.THREAD_PAINTER);
+        _currentDefPane.centerViewOnOffset(r.getStartOffset());
+        _currentDefPane.requestFocusInWindow();
+      }
+    };
+      
+    if (! toSameDoc) {
+      _model.setActiveDocument(doc);    // queues event actions
+      _findReplace.updateFirstDocInSearch();
+      EventQueue.invokeLater(command);  // postpone running command until queued event actions complete.
+    }
+    else {
+      _model.refreshActiveDocument();
+      command.run();
+    }
+  }
+    
   /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
     * @param doc Document to display
     * @param offset Offset to display

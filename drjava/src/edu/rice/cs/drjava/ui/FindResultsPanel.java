@@ -58,13 +58,14 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 
-import edu.rice.cs.drjava.model.RegionManagerListener;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.RegionManager;
+import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.tuple.Pair;
@@ -342,7 +343,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     // we highlight the current location using the teal band
     if (r.size() == 1) {
       _frame.removeCurrentLocationHighlight();
-      _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), true);
+      _frame.goToRegionAndHighlight(r.get(0));
     }
   }
   
@@ -367,8 +368,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  /** Factory method to create user objects put in the tree.
-    * If subclasses extend RegionTreeUserObj, they need to override this method. */
+  /** Factory method to create user objects in tree nodes.  If subclasses extend RegionTreeUserObj, they must override
+    * this method. */
   protected RegionTreeUserObj<MovingDocumentRegion> makeRegionTreeUserObj(MovingDocumentRegion r) {
     return new FindResultsRegionTreeUserObj(r);
   }
@@ -390,23 +391,18 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       super(r);
       _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
     }
-//    public boolean equals(Object other) {
-//      if (other == null || other.getClass() != this.getClass()) return false;
-//      @SuppressWarnings("unchecked") FindResultsRegionTreeUserObj o = (FindResultsRegionTreeUserObj)other;
-//      return (o.region().getDocument().equals(region().getDocument()) &&
-//              (o.region().getStartOffset() == region().getStartOffset()) &&
-//              (o.region().getEndOffset() == region().getEndOffset()) &&
-//              (o._lineNumber == this._lineNumber));
-//    }
-//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
-    
+
     public String toString() {
-      final StringBuilder sb = new StringBuilder();
-      sb.append("<html>");
+      final String textFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN).toString();
+      final String numFont = DrJava.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS).toString();
+      final StringBuilder sb = new StringBuilder(120);
+      sb.append("<html><pre><font face=\"sanserif\">");
       sb.append(lineNumber());
       sb.append(": ");
-      sb.append(_region.getString());
-      sb.append("</html>");
+      String text = _region.getString();
+      sb.append(text);
+      sb.append(AbstractDJDocument.getBlankString(120 - text.length()));
+      sb.append("</pre></html>");
       return sb.toString();
     }
   }

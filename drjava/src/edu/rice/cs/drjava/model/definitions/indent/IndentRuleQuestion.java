@@ -98,30 +98,16 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   }
   
   /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
-  boolean testApplyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-//    doc.acquireReadLock();
-//    try { 
-      return applyRule(doc, reason); 
-//    }
-//    finally { doc.releaseReadLock(); }
-  }
+  boolean testApplyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { return applyRule(doc, reason); }
   
   /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
   boolean testApplyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
-//    doc.acquireReadLock();
-//    try { 
     return applyRule(doc, pos, reason); 
-//    }
-//    finally { doc.releaseReadLock(); }
   }
   
   /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
   public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-//    doc.acquireWriteLock();
-//    try { 
     return indentLine(doc, reason); 
-//    }
-//    finally { doc.releaseWriteLock(); }
   }
 }
 

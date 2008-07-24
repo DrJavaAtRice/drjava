@@ -171,8 +171,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   //-------- METHODS ---------//
   
-  /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from SwingDocument. */
-  
 //  /** Returns a new indenter.  Assumes writeLock is held. */
 //  protected abstract Indenter makeNewIndenter(int indentLevel);
   

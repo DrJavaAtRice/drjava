@@ -300,22 +300,12 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
     * @throws EditDocumentException if the offset or length are illegal
     */
-  public String getText() {
-//    acquireReadLock();
-//    try { 
-    return _document.getDocText(0, getLength()); 
-//    }
-//    finally { releaseReadLock(); }
-  }
+  public String getText() { return _document.getDocText(0, getLength()); }
   
   /** Returns the string that the user has entered at the current prompt. May contain newline characters. */
   public String getCurrentInput() {
-//    acquireReadLock();
-//    try {
       try { return getDocText(_promptPos, _document.getLength() - _promptPos); }
       catch (EditDocumentException e) { throw new UnexpectedException(e); }
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Clears the current input text. */
