@@ -593,7 +593,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     listener.waitDocChanged();
     DefinitionsPane p1 = _frame.getCurrentDefPane();
     p1.addFinalizationListener(fl);
-    System.err.println("Listener attached to DefintionsPane@" + p1.hashCode());
+//    System.err.println("Listener attached to DefintionsPane@" + p1.hashCode());
     assertEquals("Doc1 setup correctly", d1, p1.getOpenDefDocument());
 
     listener.reset();
@@ -602,7 +602,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     listener.waitDocChanged();
     DefinitionsPane p2 = _frame.getCurrentDefPane();
     p2.addFinalizationListener(fl);
-    System.err.println("Listener attached to DefintionsPane@" + p2.hashCode());
+//    System.err.println("Listener attached to DefintionsPane@" + p2.hashCode());
     assertEquals("Doc2 setup correctly", d2, p2.getOpenDefDocument());
     
     listener.reset();
@@ -611,7 +611,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     listener.waitDocChanged();
     DefinitionsPane p3 = _frame.getCurrentDefPane();
     p3.addFinalizationListener(fl);
-    System.err.println("Listener attached to DefintionsPane@" + p3.hashCode()); 
+//    System.err.println("Listener attached to DefintionsPane@" + p3.hashCode()); 
     assertEquals("Doc3 setup correctly", d3, p3.getOpenDefDocument());
        
     listener.reset();
@@ -620,7 +620,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     listener.waitDocChanged();
     DefinitionsPane p4 = _frame.getCurrentDefPane();
     p4.addFinalizationListener(fl);
-    System.err.println("Listener attached to DefintionsPane@" + p4.hashCode());
+//    System.err.println("Listener attached to DefintionsPane@" + p4.hashCode());
     assertEquals("Doc4 setup correctly", d4, p4.getOpenDefDocument());
         
     listener.reset();
@@ -629,7 +629,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     listener.waitDocChanged();
     DefinitionsPane p5 = _frame.getCurrentDefPane();
     p5.addFinalizationListener(fl);
-    System.err.println("Listener attached to DefintionsPane@" + p5.hashCode()); 
+//    System.err.println("Listener attached to DefintionsPane@" + p5.hashCode()); 
     assertEquals("Doc5 setup correctly", d5, p5.getOpenDefDocument());   
     
     listener.reset();
@@ -638,7 +638,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     listener.waitDocChanged();
     DefinitionsPane p6 = _frame.getCurrentDefPane();
     p6.addFinalizationListener(fl);
-    System.err.println("Listener attached to DefintionsPane@" + p6.hashCode()); 
+//    System.err.println("Listener attached to DefintionsPane@" + p6.hashCode()); 
     assertEquals("Doc6 setup correctly", d6, p6.getOpenDefDocument()); 
     
     // all the panes have a listener, so lets close all files

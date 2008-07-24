@@ -369,11 +369,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() {
-//    acquireReadLock();
-//    try { 
     return getDefaultRootElement().getElementIndex(_currentLocation) + 1; 
-//    } // line indices are 1-based
-//    finally { releaseReadLock(); }
   }
   
   /** Returns the offset corresponding to the first character of the given line number, or -1 if the lineNum is not
@@ -1283,8 +1279,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Factory method for created WrappedPositions. Stores the created Position instance so it can be linked to a 
     * different DefinitionsDocument later. 
     */
-  public Position createPosition(int offs) throws BadLocationException {
-    WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offs));
+  public Position createPosition(final int offset) throws BadLocationException {
+    /* The following attempt to defer document loading did not work because offset became stale.  Postions must be
+     * created eagerly. */
+//    WrappedPosition wp = new WrappedPosition(new LazyPosition(new Suspension<Position>() {
+//      public Position eval() {
+//        try { return createUnwrappedPosition(offset); }
+//        catch(BadLocationException e) { throw new UnexpectedException(e); }
+//      }
+//    }));
+    WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offset));
     synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); 
       _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));

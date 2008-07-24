@@ -484,7 +484,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       int numWarnings = getErrorModel().getNumWarnings();     
       
       if (!getErrorModel().hasOnlyWarnings()) {
-        numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
+        //failureName = error or test (for compilation and JUnit testing respectively)
+        numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   
         if (numCompErrs > 1) numErrMsg.append("s");
         if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");          
       }
@@ -507,9 +508,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return "";
     }
       
-    /**
-     * Gets the message to title the block containing only warnings.
-     */
+    /** Gets the message to title the block containing only warnings. */
     protected String _getWarningTitle() {
       CompilerErrorModel cem = getErrorModel();
       if (cem.getNumWarnings() > 1) return "--------------\n** Warnings **\n--------------\n";

@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.plt.debug.DebugUtil;
 
@@ -415,10 +416,9 @@ public class DrJava {
                                     "Could Not Save Changes",
                                     JOptionPane.ERROR_MESSAGE);
       // log this error
-      DrJavaErrorHandler.record(new edu.rice.cs.util.UnexpectedException(e,
-                                                                         "Could not save the location of tools.jar in \n" +
-                                                                         "the '.drjava' file in your home directory. \n" +
-                                                                         "Another process may be using the file.\n\n"));
+      DrJavaErrorHandler.record(new UnexpectedException(e, "Could not save the location of tools.jar in \n" +
+                                                        "the '.drjava' file in your home directory. \n" +
+                                                        "Another process may be using the file.\n\n"));
     }
   }
   

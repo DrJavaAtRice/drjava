@@ -124,7 +124,6 @@ import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
-
 import static edu.rice.cs.util.HashUtilities.hash;
 
 /** DrJava's main window. */
@@ -164,7 +163,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public final JTabbedPane _tabbedPane;
   private final DetachedFrame _tabbedPanesFrame;
   public volatile Component _lastFocusOwner;
-  
   private final CompilerErrorPanel _compilerErrorPanel;
   private final InteractionsPane _consolePane;
   private final JScrollPane _consoleScroll;  // redirects focus to embedded _consolePane
@@ -251,7 +249,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private final Timer _debugStepTimer;
   
-  /** The current highlight displaying the current location, used for Find All and the of the debugger's thread,
+  /** The current highlight displaying the current location, used for FindAll and the of the debugger's thread,
     * if there is one.  If there is none, this is null.
     */
   private volatile HighlightManager.HighlightInfo _currentLocationHighlight = null;
@@ -262,8 +260,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Table to map bookmarks to their corresponding highlight objects. */
   private final Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
-  /** Whether any document has changed since tabbed panels have been updated. */
-  private volatile boolean _changed = false;
+  /** The timestamp for the last change to any document. */
+  private volatile long _lastChangeTime = 0;
   
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
@@ -361,10 +359,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String text = "File " + oldFile.getAbsolutePath() +
         "\ncould not be found on disk!  It was probably moved\n" +
         "or deleted.  Would you like to save it in a new file?";
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             text,
-                                             "File Moved or Deleted",
-                                             JOptionPane.YES_NO_OPTION);
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "File Moved or Deleted", JOptionPane.YES_NO_OPTION);
       return (rc == JOptionPane.YES_OPTION);
     }
   };
@@ -376,14 +371,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public boolean verifyOverwrite() { return _verifyOverwrite(); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
   };
-  
-  /** Returns the file to save to the model (command pattern). 
-    private final FileSaveSelector _renameSelector = new FileSaveSelector() {
-    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
-    public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite() { return _verifyOverwrite(); }
-    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
-    }; */
   
   /** Provides the view's contribution to the Javadoc interaction. */
   private final JavadocDialog _javadocSelector = new JavadocDialog(this);
@@ -416,6 +403,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     public void actionPerformed(ActionEvent ae) { _moveAllToAuxiliary(); }
   };
+  
   private final Action _removeAllAuxiliaryAction = new AbstractAction("Do Not Include Any With Project") {
     { putValue(Action.SHORT_DESCRIPTION, "Do not open these documents next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAllAuxiliary(); }
@@ -653,10 +641,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   /** Returns the changed status of the MainFrame. */
-  public boolean changed() { return _changed; }
-  
-  /** Resets the changed status of the MainFrame. */
-  public void resetChanged() { _changed = false; }
+  public long getLastChangeTime() { return _lastChangeTime; }
     
   /** Ensures that pack() is run in the event thread. Only used in test code */
   public void pack() {
@@ -1374,9 +1359,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void _gotoFileUnderCursor() {
 //    Utilities.show("Calling gotoFileUnderCursor()");
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//    odd.acquireReadLock();
     String mask = "";
-//    try {
     int loc = getCurrentDefPane().getCaretPosition();
     String s = odd.getText();
     // find start
@@ -1397,8 +1380,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if ((start>=0) && (end<s.length())) {
       mask = s.substring(start, end + 1);
     }
-//    }
-//    finally { odd.releaseReadLock(); }
     gotoFileMatchingMask(mask);
   }
   
@@ -1704,9 +1685,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PredictiveInputModel<JavaAPIListEntry> pim =
       new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), _javaAPIList);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//    odd.acquireReadLock();
     String mask = "";
-//    try {
     int loc = getCurrentDefPane().getCaretPosition();
     String s = odd.getText();
     // find start
@@ -1728,8 +1707,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       mask = s.substring(start, end + 1);
       pim.setMask(mask);
     }
-//    }
-//    finally { odd.releaseReadLock(); }
     
 //    Utilities.show("Matching items are: " + pim.getMatchingItems());
     
@@ -2172,7 +2149,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _doResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
-    
     _model.getInteractionsModel().enableRestart();
     // Lots of work, so use another thread
     new Thread(new Runnable() { 
@@ -2399,10 +2375,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that calls the ConfigFrame to edit preferences.  Only runs in the event thread. */
   private final Action _editPreferencesAction = new AbstractAction("Preferences ...") {
     public void actionPerformed(ActionEvent ae) {
-      // Create frame if we haven't yet
-//      if (_configFrame == null) {
-//        _configFrame = new ConfigFrame(MainFrame.this);
-//      }
+
       _configFrame.setUp();
       setPopupLoc(_configFrame);
       _configFrame.setVisible(true);
@@ -3067,8 +3040,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.addKeyListener(_historyListener);    // TODO: can this code be moved to the MainFrame keymap?
     
     if(Utilities.isPlasticLaf()) {
-      _tabbedPane.putClientProperty(com.jgoodies.looks.Options.EMBEDDED_TABS_KEY,
-                                    Boolean.TRUE);
+      _tabbedPane.putClientProperty(com.jgoodies.looks.Options.EMBEDDED_TABS_KEY, Boolean.TRUE);
     }
     
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
@@ -7466,23 +7438,39 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  private long _lastTabUpdate = 0;
+  private volatile Object _updateLock = new Object();
+  private Component _lastUpdatedComponent = null;
   private boolean _tabUpdatePending = false;
   public static long UPDATE_DELAY = 1000L;  // update delay threshold in milliseconds
   
-  /** Updates the tabbed panel if the time delay threshold has been exceeeded and no such update is already pending. */
+  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  The update is immediate if the
+    * selected component has changed since the last call or _tabUpdatePending is false. */
   public void updateTabbedPane() {
-    final Component c = _tabbedPane.getSelectedComponent();
-    if (c != null && ! _tabUpdatePending && System.currentTimeMillis() - _lastTabUpdate > UPDATE_DELAY) {
-      _tabUpdatePending = true;
-      EventQueue.invokeLater(new Runnable() {
-        public void run() {
-          c.repaint();
-          _lastTabUpdate = System.currentTimeMillis();
-          _tabUpdatePending = false;
-        }
-      });
+    final JComponent c = (JComponent) _tabbedPane.getSelectedComponent();
+    synchronized(_updateLock) {
+      if (c == null || (_tabUpdatePending && c == _lastUpdatedComponent)) return;
     }
+    _tabUpdatePending = true;
+    Thread updater = new Thread(new Runnable() {
+      public void run() {
+        synchronized(_updateLock) { 
+          try { _updateLock.wait(UPDATE_DELAY); } 
+          catch(InterruptedException e) { /* fall through */ }
+        }
+        EventQueue.invokeLater(new Runnable() { 
+          public void run() {
+            synchronized(_updateLock) { 
+              _tabUpdatePending = false;
+              _lastUpdatedComponent = c;
+            }
+//            System.err.println("Repainting " + c);
+            c.revalidate();
+            c.repaint();
+          }
+        });
+      }
+    });
+    updater.start();
   }
   
   private static boolean isDisplayed(TabbedPanel p) { return p != null && p.isDisplayed(); }
@@ -7509,7 +7497,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (isDisplayed(_bookmarksPanel)) { _bookmarksPanel.repaint(); }
         
         updateTabbedPane();
-        _changed = true;
+        _lastChangeTime = System.currentTimeMillis();  // TODO: what about changes to file names?
       }
       public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }

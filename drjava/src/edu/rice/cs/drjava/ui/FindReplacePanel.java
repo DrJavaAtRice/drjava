@@ -50,6 +50,7 @@ import javax.swing.text.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FindReplaceMachine;
@@ -60,13 +61,14 @@ import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;
 
+import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.StringSuspension;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.Lambda;
-import edu.rice.cs.util.StringOps;
 
 /** The tabbed panel that handles requests for finding and replacing text.
   * @version $Id$
@@ -495,11 +497,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     String title = searchStr;
     OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
     boolean searchAll = _machine.getSearchAllDocuments();
-    if (title.length() > 10) { title = title.substring(0,10) + "..."; }
-    title = "Find: " + title;
+    StringBuilder tabLabel = new StringBuilder("Find: ");
+    if (title.length() <= 10) tabLabel.append(title);
+    else tabLabel.append(title.substring(0,10)).append("...");
     RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
     FindResultsPanel panel = 
-      _frame.createFindResultsPanel(rm, title, searchStr, searchAll, _machine.getMatchCase(), 
+      _frame.createFindResultsPanel(rm, tabLabel.toString(), searchStr, searchAll, _machine.getMatchCase(), 
                                     _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
                                     _ignoreTestCases.isSelected(), new WeakReference<OpenDefinitionsDocument>(startDoc),
                                     this);
@@ -586,67 +589,73 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         if (_model.getActiveDocument() != doc) _model.setActiveDocument(doc);
         else _model.refreshActiveDocument();
         
-        final StringBuilder sb = new StringBuilder();
-        int endSel = fr.getFoundOffset();
-        int startSel = endSel - searchLen;
+        int end = fr.getFoundOffset();
+        int start = end - searchLen;
         try {
-          final Position startPos = doc.createPosition(startSel);
-          final Position endPos = doc.createPosition(endSel);
+          final Position startPos = doc.createPosition(start);
+          final Position endPos = doc.createPosition(end);
           
-          // create excerpt string
+          // lazily create excerpt string
           
-          // The following were commented out because they require doc to be loaded as a Definitions (Swing) Document,
-          // but results processing presumes this access in many places
-          int excerptEndSel = doc._getLineEndPos(endSel);
-          int excerptStartSel = doc._getLineStartPos(startSel);
-// Text only alternative to preceding two statements commented out          
-//          String text = doc.getText();
-//          final int len = text.length();
-//          int i = endSel;
-//          while (i < len && text.charAt(i) != '\n') ++i;
-//          final int excerptEndSel = i;
-//          
-//          i = startSel;
-//          while (i >= 0 && text.charAt(i) != '\n') --i; // the end of the line
-//          final int excerptStartSel = i + 1;              // either 0 or the beginning of the line
+          StringSuspension ss = new StringSuspension() {
+            public String eval() {
+              try {
+                int endSel = endPos.getOffset();
+                int startSel = startPos.getOffset();
+                int excerptEndSel = doc._getLineEndPos(endSel);
+                int excerptStartSel = doc._getLineStartPos(startSel);
+                
+                int length = Math.min(120, excerptEndSel - excerptStartSel);
+                
+                // this highlights the actual region in red
+                int startRed = startSel - excerptStartSel;
+                int endRed = endSel - excerptStartSel;
+                
+                String text = doc.getText(excerptStartSel, length);
+                String s = text.trim();  // trims both front and end
+                int sLength = s.length();
+                
+                // We need a global invariant concerning non-displayable characters.  Why filter them here but not elsewhere?
+//              // change control characters and ones that may not be displayed to spaces
+//              for (int j = 0; j < s.length(); ++j) {
+//                sb.append((s.charAt(j) < ' ' || s.charAt(j) > 127) ? ' ' :  s.charAt(j));
+//              }
+//              s = sb.toString();
+//              
+//              trim the front
+//                for (int j = 0; j < s.length(); ++j) {
+//                if (! Character.isWhitespace(s.charAt(j))) break;
+//                --startRed;
+//                --endRed;
+//              }
+//              
+//              // trim the end
+//              s = s.trim();
+                
+                int trimLeftCt = text.indexOf(s.charAt(0));
+                int trimRightCt = text.length() - sLength;
+                // bound startRed and endRed
+                startRed = startRed - trimLeftCt;  // offset in s rather than in text
+                endRed = endRed - trimRightCt;
+                if (startRed < 0) { startRed = 0; }
+                if (startRed > sLength) { startRed = sLength; }
+                if (endRed < startRed) { endRed = startRed; }
+                if (endRed > sLength) { endRed = sLength; }
+                
+                // create the excerpt string
+                StringBuilder sb = new StringBuilder(StringOps.encodeHTML(s.substring(0, startRed)));
+                sb.append("<font color=#ff0000>");
+                sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
+                sb.append("</font>");
+                sb.append(StringOps.encodeHTML(s.substring(endRed)));
+//                sb.append(StringOps.encodeHTML(AbstractDJDocument.getBlankString(120 - sLength)));
+                return sb.toString();
+              }
+              catch(BadLocationException e) { return "***BadLocationException in StringSuspension.eval()***"; }
+            }
+          };
           
-          int length = Math.min(120, excerptEndSel - excerptStartSel);
-          
-          // this highlights the actual region in red
-          int startRed = startSel - excerptStartSel;
-          int endRed = endSel - excerptStartSel;
-          String s = doc.getText(excerptStartSel, length);
-          
-          // change control characters and ones that may not be displayed to spaces
-          for (int j = 0; j < s.length(); ++j) {
-            sb.append((s.charAt(j) < ' ' || s.charAt(j) > 127) ? ' ' :  s.charAt(j));
-          }
-          s = sb.toString();
-          
-          // trim the front
-          for (int j = 0; j < s.length(); ++j) {
-            if (! Character.isWhitespace(s.charAt(j))) break;
-            --startRed;
-            --endRed;
-          }
-          
-          // trim the end
-          s = s.trim();
-          
-          // bound startRed and endRed
-          if (startRed < 0) { startRed = 0; }
-          if (startRed > s.length()) { startRed = s.length(); }
-          if (endRed < startRed) { endRed = startRed; }
-          if (endRed > s.length()) { endRed = s.length(); }
-          
-          // create the excerpt string
-          sb.setLength(0);
-          sb.append(StringOps.encodeHTML(s.substring(0, startRed)));
-          sb.append("<font color=#ff0000>");
-          sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
-          sb.append("</font>");
-          sb.append(StringOps.encodeHTML(s.substring(endRed)));
-          rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, sb.toString()));
+          rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, ss));
 //          rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, s));
         }
         catch (FileMovedException fme) { throw new UnexpectedException(fme); }

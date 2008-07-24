@@ -449,7 +449,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.logJUnitStart();
     try {
-      System.err.println("Starting JUnit");
+//      System.err.println("Starting JUnit");
       doc.startJUnit();
       listener.waitJUnitDone();
       // auxiliary thread silently swallows the exception and terminates.
@@ -458,13 +458,13 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.waitResetDone();  // reset should occur when test suite is started
         
-    System.err.println("ResetDone");
+//    System.err.println("ResetDone");
     
     if (printMessages) System.out.println("after test");
     listener.assertJUnitStartCount(1);
     _model.removeListener(listener);
     listener.assertJUnitEndCount(1);  // Testing was aborted after junitStarted(); junitEnded called in recovery code
-    System.err.println("Reached Test End");
+//    System.err.println("Reached Test End");
     _log.log("testInfiniteLoop completed");
   }
   

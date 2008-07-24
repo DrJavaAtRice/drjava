@@ -36,16 +36,11 @@
 
 package edu.rice.cs.util;
 
-/**
- * This lambda interface is a generic version of the scheme lambda.
- * It is meant to be instantiated anonymously within methods to exploit
- * the closure of the method and abstract pieces of code.
- */
+/** This lambda interface is a generic unary version Scheme lambda abstraction.  It can be instantiated anonymously 
+  * within methods to exploit the closure of the method and abstract pieces of code.
+  */
 public interface Lambda<Out,In> {
 
-    /**
-     * Runs the desired code given the parameter specified
-     */
+    /** Runs the desired code given the parameter specified. */
     public Out apply(In param);
-
 }

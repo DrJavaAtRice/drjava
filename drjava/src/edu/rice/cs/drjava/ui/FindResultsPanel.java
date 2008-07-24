@@ -420,7 +420,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _colorBox.removeItemAt(_index);
       _colorBox.insertItemAt(oce.value, _index);
       _colorBox.setSelectedIndex(pos);
-      if (pos==_index) {
+      if (pos == _index) {
         _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, DefinitionsPane.FIND_RESULTS_PAINTERS[_index]);
       }
     }

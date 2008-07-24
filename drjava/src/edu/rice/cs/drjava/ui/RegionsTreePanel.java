@@ -62,13 +62,12 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.swing.Utilities;
 
-/** Panel for displaying regions in a tree sorted by class name and line number.  This class is a swing class that
-  * should only be accessed from the event thread.
+/** Panel for displaying regions in a tree sorted by class name and line number.  Only accessed from event thread.
   * @version $Id$
   */
 public abstract class RegionsTreePanel<R extends IDocumentRegion> extends TabbedPanel {
@@ -87,24 +86,35 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   protected JPanel _buttonPanel;
   
-  protected long _lastUpdateTime; // the last time in milliseconds that updatePanel was executed
-  private boolean _updatePending = false;
-  public static final long UPDATE_DELAY = 5000L; // threshold used to determine how often "this" should be updated
-  
   protected DefaultTreeCellRenderer dtcr;
+  
+  /* _ */
+  
+  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
+    * the list of regions for its document. If _cachedDoc is null, the other cached values are invalid. */
+  protected OpenDefinitionsDocument _cachedDoc = null;
+  protected DefaultMutableTreeNode _cachedDocNode = null;
+  protected int _cachedRegionIndex = 0;
+  protected int _cachedStartOffset = 0;
   
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
 //  protected final IChangeState CHANGING_STATE = new ChangingState();
   protected IChangeState _changeState = DEFAULT_STATE;
   
-  /* A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
+  /** A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> _docToTreeNode = 
     new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
   
-  /* A table mapping each region entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
+  /** A table mapping each region entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile HashMap<R, DefaultMutableTreeNode> _regionToTreeNode = 
     new HashMap<R, DefaultMutableTreeNode>();
+  
+  /** State variable used to control the granular updating of the tabbed panel. */
+  private volatile long _lastChangeTime;
+  private volatile Object _updateLock = new Object();
+  private volatile boolean _updatePending = false;
+  public static final long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
   
   /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
     * from the event thread.
@@ -135,7 +145,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     
     _buttonPanel = new JPanel(new BorderLayout());
 
-    _lastUpdateTime = System.currentTimeMillis();
+    _lastChangeTime = _frame.getLastChangeTime();
     
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
@@ -171,43 +181,53 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   public boolean requestFocusInWindow() {
     assert EventQueue.isDispatchThread();
     _updatePanel();
-    updateButtons();
     return super.requestFocusInWindow();
   }
-  
+
+  /** Updates the tabbed panel if the time delay threshold has been exceeeded and no such update is already pending. */
   private void _updatePanel() {
-    if (_frame.changed() && System.currentTimeMillis() - _lastUpdateTime > UPDATE_DELAY && ! _updatePending) {
-      _updatePending = true;
-      EventQueue.invokeLater(new Runnable() { 
-        public void run() {
-          // Update all tree nodes
-          updatePanel();  // sets _lastUpdateTime
-          _updatePending = false;
-          _frame.resetChanged();
-        }
-      });
+    synchronized(_updateLock) { 
+      if (_updatePending || _lastChangeTime == _frame.getLastChangeTime()) return; 
+    }
+    Thread updater = new Thread(new Runnable() {
+      public void run() {
+        try { _updateLock.wait(UPDATE_DELAY); }
+        catch(InterruptedException e) { /* fall through */ }
+        EventQueue.invokeLater(new Runnable() { 
+          public void run() {
+            updatePanel();  // resets _tabUpdatePending and _lastChangeTime
+            updateButtons();
+          }
+        });
+      }
+    });
+    updater.start();
+  }
+  
+  protected void traversePanel() {
+    Enumeration docNodes = _rootNode.children();
+    while (docNodes.hasMoreElements()) {
+      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
+      // Find the correct start offset node for this region
+      Enumeration regionNodes = docNode.children();
+      while (regionNodes.hasMoreElements()) {
+        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
+        _regTreeModel.nodeChanged(regionNode);
+      }
+      _regTreeModel.nodeChanged(docNode);  // file name may have changed
     }
   }
   
   /** Forces this panel to be completely updated. */
   protected void updatePanel() {
-//    Enumeration docNodes = _rootNode.children();
-//    while (docNodes.hasMoreElements()) {
-//      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
-//      // Find the correct start offset node for this region
-//      Enumeration regionNodes = docNode.children();
-//      while (regionNodes.hasMoreElements()) {
-//        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
-//        _regTreeModel.nodeChanged(regionNode);
-//      }
-//      _regTreeModel.nodeChanged(docNode);  // file name may have changed
-//    }
-    
-    revalidate();
-    repaint();
 
-    _lastUpdateTime = System.currentTimeMillis();
-    _frame.resetChanged();
+    synchronized(_updateLock) { 
+      _updatePending = false; 
+      _lastChangeTime = _frame.getLastChangeTime();
+    }
+    revalidate();
+//    traversePanel();
+    repaint();
   }
   
   /** Forces the panel to be updated and requests focus in this panel. */
@@ -341,9 +361,9 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
               String s = doc.getText(startOffset, endOffset - startOffset);
               
               // this highlights the actual region in red
-              int rStart = r.getStartOffset()-startOffset;
+              int rStart = r.getStartOffset() - startOffset;
               if (rStart < 0) { rStart = 0; }
-              int rEnd = r.getEndOffset()-startOffset;
+              int rEnd = r.getEndOffset() - startOffset;
               if (rEnd > s.length()) { rEnd = s.length(); }
               if ((rStart <= s.length()) && (rEnd >= rStart)) {
                 String t1 = StringOps.encodeHTML(s.substring(0, rStart));
@@ -453,60 +473,84 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     * @param r the region
     */
   public void addRegion(final R r) {
+    try {
+//    System.err.println("Adding region '" + r + "'");
+    DefaultMutableTreeNode docNode;
     OpenDefinitionsDocument doc = r.getDocument();
-    File file = doc.getRawFile();
     
-    DefaultMutableTreeNode docNode = _docToTreeNode.get(doc);
-    if (docNode == null) {
-      // No matching document node was found, so create one
-      docNode = new DefaultMutableTreeNode(file);
-      _regTreeModel.insertNodeInto(docNode, _rootNode, _rootNode.getChildCount());
-      // Create link from doc to docNode
-      _docToTreeNode.put(doc, docNode);
+    if (doc == _cachedDoc) docNode = _cachedDocNode;
+    else {
+      docNode = _docToTreeNode.get(doc);
+      if (docNode == null) {
+        // No matching document node was found, so create one
+        docNode = new DefaultMutableTreeNode(doc.getRawFile());
+        _regTreeModel.insertNodeInto(docNode, _rootNode, _rootNode.getChildCount());
+        // Create link from doc to docNode
+        _docToTreeNode.put(doc, docNode);
+        _cachedDoc = doc;
+        _cachedDocNode = docNode;
+        _cachedStartOffset = -1;  // a sentinel value guaranteed to be less than r.getStartOffset()
+        _cachedRegionIndex = -1;  // The next region in this document will have index 0
+      }
     }
     
-    @SuppressWarnings("unchecked")
-    Enumeration<DefaultMutableTreeNode> regionNodes = (Enumeration<DefaultMutableTreeNode>) docNode.children();
-    
-    // Create a new region node in this document node list, where regions are sorted by start offset.
-    int offset = r.getStartOffset();
-    
-    for (int index = 0; true ; index++) {  // infinite loop incrementing index on each iteration
-  
-      if (! regionNodes.hasMoreElements()) { // exhausted all elements; insert new region node at end
-        insertNewRegionNode(r, docNode, index);
-        break;
-      }
-      DefaultMutableTreeNode node = regionNodes.nextElement();
-      
+    if (doc == _cachedDoc & r.getStartOffset() >= _cachedStartOffset) { // insert new region after previous insert
+      _cachedRegionIndex++;
+      _cachedStartOffset = r.getStartOffset();
+      insertNewRegionNode(r, docNode, _cachedRegionIndex);
+    }
+    else {
       @SuppressWarnings("unchecked")
-      RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) node.getUserObject();
-      R nodeRegion = userObject.region();
-      int nodeOffset = nodeRegion.getStartOffset();
+      Enumeration<DefaultMutableTreeNode> regionNodes = (Enumeration<DefaultMutableTreeNode>) docNode.children();
       
-      if (nodeOffset == offset) {
-        // region with same start offset already exists
-        if (nodeRegion.getEndOffset() == r.getEndOffset()) {
-          // silently suppress inserting region; can this happen?  Caller should suppress it.
-          _changeState.scrollPathToVisible(new TreePath(node));
-          _changeState.setLastAdded(node);
-          break;
-        }
-        else { // new region is distinct from nodeRegion
+      // Create a new region node in this document node list, where regions are sorted by start offset.
+      int startOffset = r.getStartOffset();
+      for (int index = 0; true ; index++) {  // infinite loop incrementing index on each iteration
+        
+        if (! regionNodes.hasMoreElements()) { // exhausted all elements; insert new region node at end
+//          System.err.println("inserting " + r + " at end, unaided by caching");
           insertNewRegionNode(r, docNode, index);
+          _cachedDoc = doc;
+          _cachedDocNode = docNode;
+          _cachedRegionIndex = index;
+          _cachedStartOffset = startOffset;
+          break;
+        }
+        DefaultMutableTreeNode node = regionNodes.nextElement();
+        
+        @SuppressWarnings("unchecked")
+        RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) node.getUserObject();
+        R nodeRegion = userObject.region();
+        int nodeOffset = nodeRegion.getStartOffset();
+        
+//        if (nodeOffset == startOffset) {
+//          // region with same start offset already exists
+//          if (nodeRegion.getEndOffset() == r.getEndOffset()) {
+//            // silently suppress inserting region; can this happen?  Caller should suppress it.
+//            _changeState.scrollPathToVisible(new TreePath(node));
+//            _changeState.setLastAdded(node);
+//            break;
+//          }
+//          else { // new region is distinct from nodeRegion
+//            insertNewRegionNode(r, docNode, index);
+//            break;
+//          }
+//        }
+//        else 
+        if (nodeOffset >= startOffset) {
+          insertNewRegionNode(r, docNode, index);
+          _cachedDoc = null;  // insertion was not at the end of the region list for doc
           break;
         }
       }
-      else if (nodeOffset > offset) {
-        insertNewRegionNode(r, docNode, index);
-        break;
-      }
-    }    
+    }
     _changeState.updateButtons();
   }
-  
+  catch(Exception e) { DrJavaErrorHandler.record(e); throw new UnexpectedException(e); }
+  }
+
   private void insertNewRegionNode(R r, DefaultMutableTreeNode docNode, int pos) {
-    // else, add to the list
+//    System.err.println("insertNewRegionNode(" + r + ", " + docNode + ", " + pos + ")");
     DefaultMutableTreeNode newRegionNode = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
     _regTreeModel.insertNodeInto(newRegionNode, docNode, pos);
     
@@ -601,7 +645,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     }
   }
   
-  /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
+  /** Class that is embedded in each leaf node. The toString() method determines what's displayed in the tree. */
   protected static class RegionTreeUserObj<R extends IDocumentRegion> {
     protected R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1; }

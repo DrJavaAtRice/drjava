@@ -41,18 +41,19 @@ import java.lang.ref.WeakReference;
 import javax.swing.text.Position;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.StringSuspension;
 
-/** Class for a document region that can move with changes in the document; its text, however, remains constant.
+/** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip
  * @version $Id$Region
  */
 public class MovingDocumentRegion extends DocumentRegion {
-  protected final String _string;
+  protected final StringSuspension _stringSuspension;
   
   /** Create a new moving document region. */
-  public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, String s) {
+  public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, StringSuspension ss) {
     super(doc, sp, ep);
     assert doc != null;
-    _string = s;
+    _stringSuspension = ss;
   }
   
   /** @return the document, or null if it hasn't been established yet */
@@ -62,7 +63,14 @@ public class MovingDocumentRegion extends DocumentRegion {
   public File getFile() { return _file; }
   
   /** @return the string it was assigned */
-  public String getString() { return _string; }
+  public String getString() { 
+    StringBuilder result = new StringBuilder(120);
+    result.append(_stringSuspension.eval()); 
+    int length = result.length();
+//    if (length < 120) result.append(AbstractDJDocument.getBlankString(120 - length));
+//    result.setLength(120);  // pads on right with null characters
+    return result.toString();
+  }
   
   /** @return true if objects a and b are equal; null values are handled correctly. */
   public static boolean equals(Object a, Object b) {

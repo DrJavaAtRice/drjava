@@ -368,7 +368,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
         sb.append(lineNumber());
         try {
           sb.append(": ");
-          int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
+          int length = Math.min(120, _region.getEndOffset() - _region.getStartOffset());
           sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
       return sb.toString();
