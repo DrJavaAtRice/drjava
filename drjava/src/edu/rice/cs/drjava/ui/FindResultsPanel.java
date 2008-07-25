@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui;
 import java.util.Vector;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -301,17 +302,24 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Remove the selected regions. */
   private void _remove() {
+
     int[] rows = _regTree.getSelectionRows();
-    int row = (rows.length > 0) ? rows[0] : 0;
+//    System.err.println("_remove() called with rows " + Arrays.toString(rows));
+    int len = rows.length;
+    int row = (len > 0) ? rows[len - 1] + 1 : 0;
+//    _regTree.setSelectionRow(row);
     _frame.removeCurrentLocationHighlight();
 //    startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) {
       removeRegion(r); // removes r from region manager and the panel node for r from the tree model
     }
 //    finishChanging();
-    if (_regionManager.getDocuments().size() == 0) { _close(); }
+    if (_regionManager.getDocuments().size() == 0) { 
+      _close();
+      return;
+    }
 //    System.err.println("Scrolling to row " + row);
-    _regTree.setSelectionRow(row);
+//    _regTree.setSelectionRow(row);
     _regTree.scrollRowToVisible(row);
     _requestFocusInWindow();
   }
@@ -396,13 +404,13 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       final String textFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN).toString();
       final String numFont = DrJava.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS).toString();
       final StringBuilder sb = new StringBuilder(120);
-      sb.append("<html><pre><font face=\"sanserif\">");
+//      sb.append("<html><pre><font face=\"sanserif\">");
       sb.append(lineNumber());
       sb.append(": ");
       String text = _region.getString();
       sb.append(text);
-      sb.append(AbstractDJDocument.getBlankString(120 - text.length()));
-      sb.append("</pre></html>");
+//      sb.append(StringOps.getBlankString(120 - text.length()));
+//      sb.append("</pre></html>");
       return sb.toString();
     }
   }

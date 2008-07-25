@@ -212,9 +212,9 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       Enumeration regionNodes = docNode.children();
       while (regionNodes.hasMoreElements()) {
         DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
-        _regTreeModel.nodeChanged(regionNode);
+        _regTreeModel.reload(regionNode);
       }
-      _regTreeModel.nodeChanged(docNode);  // file name may have changed
+      _regTreeModel.reload(docNode);  // file name may have changed
     }
   }
   
@@ -225,9 +225,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _updatePending = false; 
       _lastChangeTime = _frame.getLastChangeTime();
     }
-    revalidate();
 //    traversePanel();
-    repaint();
+    _regTreeModel.reload();
+    expandTree();
+//    repaint();
   }
   
   /** Forces the panel to be updated and requests focus in this panel. */
@@ -551,6 +552,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   private void insertNewRegionNode(R r, DefaultMutableTreeNode docNode, int pos) {
 //    System.err.println("insertNewRegionNode(" + r + ", " + docNode + ", " + pos + ")");
     DefaultMutableTreeNode newRegionNode = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
+    
     _regTreeModel.insertNodeInto(newRegionNode, docNode, pos);
     
     // Create link from region r to newRegionNode
@@ -561,6 +563,11 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     _changeState.setLastAdded(newRegionNode);
   }       
   
+  public void expandTree() {
+    int ct = _regTree.getRowCount();
+    for (int i = 0; i < ct; i++) _regTree.expandRow(i);
+  }
+    
   /** Remove a region from the tree. Must be executed in event thread.
     * @param r the region
     */
@@ -568,7 +575,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
-    
+    if (r == null) throw new UnexpectedException("Region node for region " + r + " is null");
     _regionManager.removeRegion(r);
     _regionToTreeNode.remove(r);
     
@@ -583,7 +590,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _docToTreeNode.remove(doc);
       _regTreeModel.removeNodeFromParent(parent);
     }
-    
+//    expandTree();
     _changeState.updateButtons();
   }
   

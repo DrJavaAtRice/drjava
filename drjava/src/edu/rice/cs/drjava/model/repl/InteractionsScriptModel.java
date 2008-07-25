@@ -156,11 +156,7 @@ public class InteractionsScriptModel /* implements Serializable */ {
 
   /** @return true iff this script has another interaction to perform. */
   public boolean hasNextInteraction() {
-//    _doc.acquireReadLock();
-//    try { 
     return _currentInteraction < _interactions.size() - 1; 
-//    }  // what if _passedCurrent == true?
-//    finally { _doc.releaseReadLock(); }
   }
 
 //  /** @return true iff this script has a current interaction to perform. Not currently used.  No sync required because

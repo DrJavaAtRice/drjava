@@ -358,13 +358,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
-//    acquireReadLock();
-//    try {
       Element root = getDefaultRootElement();
       int line = root.getElementIndex(_currentLocation);
       return _currentLocation - root.getElement(line).getStartOffset();
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Return the current line of the cursor position.  Uses a 1-based index. */
@@ -550,10 +546,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (line < 0) return;
     int actualLine = 1;
     
-//    acquireReadLock();
     int len = getLength();
-//    try {
-//    synchronized(_reduced) {
       _setCurrentLocation(0);
       for (int i = 1; (i < line) && (_currentLocation < len); i++) {
         dist = _reduced.getDistToNextNewline();
@@ -565,9 +558,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       _cachedLocation = _currentLocation;
       _cachedPrevLineLoc = _getLineStartPos(_currentLocation);
       _cachedNextLineLoc = _getLineEndPos(_currentLocation);
-//    }
-//    }
-//    finally { releaseReadLock(); }
   }  
   
   /** Assumes that read lock is already held. */
@@ -670,14 +660,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param qual true to find the fully qualified class name
     * @return name of the enclosing named class or interface
     */
-  public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, 
-    ClassNameNotFoundException {  
-    
-//    acquireReadLock();
-//    try { 
-      return _getEnclosingClassName(pos, qual); 
-//    }
-//    finally{ releaseReadLock(); }
+  public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException {
+      return _getEnclosingClassName(pos, qual);
   }
   
   /** Searches backwards to find the name of the enclosing named class or interface. NB: ignores comments. Assumes that read
@@ -731,12 +715,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           }
         }
       }
-//        if (oldLog) System.err.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//        if (oldLog) System.err.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+", new="+newPos+" `" +
-//          text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
+
       while (classPos != -1 || interPos != -1 || newPos != -1) {
         if (newPos != -1) {
-//            if (oldLog) System.err.println("\tanonymous inner class! newPos = "+newPos);
           classPos = -1;
           interPos = -1;
           break;
@@ -750,8 +731,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           newPos = -1;
           // see if there's a ) closer by
           closeParenPos = _findPrevNonWSCharPos(curPos);
-//            if (closeParenPos!=ERROR_INDEX (-1)) if (oldLog) System.err.println("nonWS before curPos = " + closeParenPos + 
-//              " `"+text.charAt(closeParenPos)+"`");
           if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
             // yes, find the matching (
             int openParenPos = _findPrevEnclosingBrace(closeParenPos, '(', ')');
@@ -762,9 +741,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               if (! _isAnonymousInnerClass(newPos, curPos)) newPos = -1;
             }
           }
-//            if (oldLog) System.err.println("curPos=" +curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//            if (oldLog) System.err.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+
-//              text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
         }
         else {
           // either class or interface found first            
@@ -792,8 +768,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       else break; // neither class nor interface found (exiting loop if qual == true)
     } while(qual);
-//    }
-//    finally { releaseReadLock(); }
     
     // chop off '$' at the end.
     if (name.length() > 0) name = name.substring(0, name.length() - 1);
@@ -893,12 +867,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * returns "" as the package name.
     */
   public String getPackageName() {
+    // assert EventQueue.isDispatchThread();
     Reader r;
-//    acquireReadLock();
-//    try { 
     r = new StringReader(getText()); // getText() is cheap if document is not resident
-//    }  
-//    finally { releaseReadLock(); }
     try { return new Parser(r).packageDeclaration().getName(); }
     catch (ParseException e) { return ""; }
     // addresses bug [ 1815387 ] Editor should discard parse errors for now
@@ -1001,7 +972,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
 //    acquireReadLock();
-//    synchronized(_reduced) {
       int oldPos = _currentLocation;
       try {
         _setCurrentLocation(pos);
@@ -1037,11 +1007,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-      finally { 
-        _setCurrentLocation(oldPos);
-//        releaseReadLock();
-      }
-//    }
+      finally { _setCurrentLocation(oldPos); }
   }
   
   /** Gets the name of first class/interface/enum declared in file among the definitions anchored at:
@@ -1082,7 +1048,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * first top level class if document contains no public classes or interfaces. */
   public String getMainClassName() throws ClassNameNotFoundException {
 //    acquireReadLock();
-//    synchronized(_reduced) {
       final int oldPos = _currentLocation;
       
       try {
@@ -1115,11 +1080,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         return getFirstClassName(indexOfPublicClass, indexOfPublicInterface, indexOfPublicEnum);
         
       }
-      finally { 
-        _setCurrentLocation(oldPos);
-//        releaseReadLock();
-      }
-//    }
+      finally { _setCurrentLocation(oldPos); }
   }
   
   /** Gets the name of the top level class in this source file by finding the first declaration of a class or interface.

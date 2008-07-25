@@ -134,9 +134,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @param newPos the new position.
     */
   public void setPromptPos(int newPos) { 
-//    acquireWriteLock();
     _promptPos = newPos; 
-//    releaseWriteLock();
   }
   
   /** Sets a runnable action to use as a beep.
@@ -362,10 +360,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   
   /* Locking operations */
   
-//  /** Swing-style acquireReadLock(). */
+//  /** Swing-style readLock(). */
 //  public void acquireReadLock() { _document.acquireReadLock(); }
 //  
-//  /** Swing-style releaseReadLock(). */
+//  /** Swing-style readLock(). */
 //  public void releaseReadLock() { _document.releaseReadLock(); }
 //  
 //  /** Swing-style writeLock(). */

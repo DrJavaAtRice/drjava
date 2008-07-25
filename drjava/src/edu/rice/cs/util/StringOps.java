@@ -63,6 +63,56 @@ public abstract class StringOps {
   
   public static final String EOL = System.getProperty("line.separator");
   public static final String NEWLINE = "\n";
+   /** Defines blank[k] (k = 0,..,16) as a string consisting of k blanks */
+  private static final String blank0 = "";
+  private static final String blank1 = makeBlankString(1);
+  private static final String blank2 = makeBlankString(2);
+  private static final String blank3 = makeBlankString(3);
+  private static final String blank4 = makeBlankString(4);
+  private static final String blank5 = makeBlankString(5);
+  private static final String blank6 = makeBlankString(6);
+  private static final String blank7 = makeBlankString(7);
+  private static final String blank8 = makeBlankString(8);
+  private static final String blank9 = makeBlankString(9);
+  private static final String blank10 = makeBlankString(10);
+  private static final String blank11 = makeBlankString(11);
+  private static final String blank12 = makeBlankString(12);
+  private static final String blank13 = makeBlankString(13);
+  private static final String blank14 = makeBlankString(14);
+  private static final String blank15 = makeBlankString(15);
+  private static final String blank16 = makeBlankString(16);
+  
+  /** Gets a string consisting of n blanks.  The values for n <= 16 are stored in a switch table.*/
+  public static String getBlankString(int n) {
+    switch (n) {
+      case 0: return blank0;
+      case 1: return blank1;
+      case 2: return blank2;
+      case 3: return blank3;
+      case 4: return blank4;
+      case 5: return blank5;
+      case 6: return blank6;
+      case 7: return blank7;
+      case 8: return blank8;
+      case 9: return blank9;
+      case 10: return blank10;
+      case 11: return blank11;
+      case 12: return blank12;
+      case 13: return blank13;
+      case 14: return blank14;
+      case 15: return blank15;
+      case 16: return blank16;
+      default:
+        return makeBlankString(n);
+    }
+  }
+  
+  /** Constructs a new string containng n blanks.  Intended for small values of n (typically < 50). */
+  private static String makeBlankString(int n) {
+    StringBuilder buf = new StringBuilder();
+    for (int i = 0; i < n; i++) buf.append(' ');
+    return buf.toString();
+  }
   
   /** Takes theString fullString and replaces all instances of toReplace with replacement. 
     * TODO: deprecate and used corresponding String method added in Java 5.0. 
@@ -294,8 +344,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
-   */
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific. */
   public static String toString(int[] a) {
     if (a == null)
       return "null";
@@ -315,8 +364,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
-   */
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific. */
   public static String toString(short[] a) {
     if (a == null)
       return "null";
@@ -477,6 +525,29 @@ public abstract class StringOps {
     return s;
   }
 
+  /* Eliminates extra whitespace characters. */
+  public static String compress(String s) {
+    int len = s.length();
+    boolean inWSGap = false;
+    StringBuilder sb = new StringBuilder(len);
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+      if (Character.isWhitespace(ch)) {
+        if (! inWSGap) {
+          inWSGap = true;
+          sb.append(ch);
+        }
+      }
+      else {
+        inWSGap = false;
+        sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
+     
+
+      
   /** Return a string representing the approximate amount of memory specified in bytes.
     * @param l memory in bytes
     * @return string approximating the amount of memory

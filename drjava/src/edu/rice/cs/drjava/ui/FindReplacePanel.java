@@ -74,6 +74,17 @@ import edu.rice.cs.util.text.SwingDocument;
   * @version $Id$
   */
 class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
+
+  /* Other bracketing options:
+   *   solid circle u25CF or u26AB (fails)
+   *   half circles u25D6 (fails), u25D7
+   *   diamond u2666
+   *   block arrows  u25BA, u25C4
+   *   big block arrows u25B6, u25C0
+   *   enclosing wedges u25E4, u25E5
+   */
+  public static final char LEFT = '\u25CF'; 
+  public static final char RIGHT = '\u25CF'; 
   
   private JButton _findNextButton;
   private JButton _findPreviousButton;
@@ -497,19 +508,21 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     String title = searchStr;
     OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
     boolean searchAll = _machine.getSearchAllDocuments();
-    StringBuilder tabLabel = new StringBuilder("Find: ");
-    if (title.length() <= 10) tabLabel.append(title);
-    else tabLabel.append(title.substring(0,10)).append("...");
+//    StringBuilder tabLabel = new StringBuilder("Find: ");
+//    if (title.length() <= 10) tabLabel.append(title);
+//    else tabLabel.append(title.substring(0,10)).append("...");
+    String tabLabel = (title.length() <= 20) ? title : title.substring(0,20);
     RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
     FindResultsPanel panel = 
-      _frame.createFindResultsPanel(rm, tabLabel.toString(), searchStr, searchAll, _machine.getMatchCase(), 
+      _frame.createFindResultsPanel(rm, tabLabel, searchStr, searchAll, _machine.getMatchCase(), 
                                     _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
                                     _ignoreTestCases.isSelected(), new WeakReference<OpenDefinitionsDocument>(startDoc),
                                     this);
     findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, panel);
-    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
+//    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel._regTree.scrollRowToVisible(0);
+    panel.requestFocusInWindow();
   }
   
   /** Performs "find all" with the specified options. */
@@ -645,15 +658,18 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                 if (endRed > sLength) { endRed = sLength; }
                 
                 // create the excerpt string
-                StringBuilder sb = new StringBuilder(StringOps.encodeHTML(s.substring(0, startRed)));
-                sb.append("<font color=#ff0000>");
-                sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
-                sb.append("</font>");
-                sb.append(StringOps.encodeHTML(s.substring(endRed)));
-                sb.append(StringOps.encodeHTML(AbstractDJDocument.getBlankString(120 - sLength)));  // move getBank to StringOps
+                StringBuilder sb = new StringBuilder(StringOps.compress(s.substring(0, startRed)));
+//                sb.append("<font color=#ff0000>");
+                sb.append(LEFT);
+                sb.append(s.substring(startRed, endRed));
+//                sb.append("</font>");
+                sb.append(RIGHT);
+                sb.append(StringOps.compress(s.substring(endRed)));
+//                sb.append(StringOps.getBlankString(120 - sLength));  // move getBank to StringOps
                 return sb.toString();
+//                return StringOps.compress(s);
               }
-              catch(BadLocationException e) { return "***BadLocationException in StringSuspension.eval()***"; }
+              catch(BadLocationException e) { return "";  /* Ignore the exception. */ }
             }
           };
           

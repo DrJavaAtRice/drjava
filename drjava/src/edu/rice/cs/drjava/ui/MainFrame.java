@@ -2856,7 +2856,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public Icon getIcon(File f) {
       if (f == null) return _other;
       Icon ret = null;
-      if (!f.isDirectory()) {
+      if (! f.isDirectory()) {
         String name = f.getName().toLowerCase();
         if (name.endsWith(".java")) ret = _java;
         if (name.endsWith(".dj0")) ret = _dj0;
@@ -6600,8 +6600,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final JButton result = new UnfocusableButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
     result.setFont(buttonFont);
-    if (!useIcons) result.setIcon(null);
-    if (!useText && (result.getIcon() != null)) result.setText("");
+    if (! useIcons) result.setIcon(null);
+    if (! useText && (result.getIcon() != null)) result.setText("");
     return result;
   }
   
@@ -8000,9 +8000,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     boolean toSameDoc = doc == _model.getActiveDocument();
     Runnable command = new Runnable() {
       public void run() {
+        int startOffset = r.getStartOffset();
+        int endOffset = r.getEndOffset();
         _currentLocationHighlight = _currentDefPane.getHighlightManager().
-          addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.THREAD_PAINTER);
-        _currentDefPane.centerViewOnOffset(r.getStartOffset());
+          addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+        _currentDefPane.centerViewOnOffset(startOffset);
+        _currentDefPane.select(startOffset, endOffset);
         _currentDefPane.requestFocusInWindow();
       }
     };
@@ -9141,6 +9144,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _currentDefPane.requestFocusInWindow();
   }
   
+  public static final Icon FIND_ICON = getIcon("Find16.gif");
   /** Shows the components passed in the appropriate place in the tabbedPane depending on the position of
     * the component in the _tabs list.  Only runs in the event thread.
     * @param c the component to show in the tabbedPane
@@ -9156,7 +9160,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         int numVisible = 0;
         for (TabbedPanel tp: _tabs) {
           if (tp == c) {
-            _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);  // interactions, console always shown
+            Icon icon = (c instanceof FindResultsPanel) ? FIND_ICON : null;
+            _tabbedPane.insertTab(tp.getName(), icon, tp, null, numVisible + 2);  // interactions, console always shown
             tp.setVisible(true);
             tp.setDisplayed(true);
             tp.repaint();

@@ -121,16 +121,12 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   
   /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */
   public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
-//    acquireReadLock();
     synchronized(_stylesList) {
-//      try { 
         // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of return statement.
         @SuppressWarnings("unchecked")
         Pair<Pair<Integer, Integer>, String>[] result = 
           (Pair<Pair<Integer, Integer>, String>[]) (_stylesList.toArray(new Pair[0]));
         return result;
-//      }
-//      finally { releaseReadLock(); }
     }
   }
   
@@ -218,17 +214,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     * @return true iff the end of the current interaction is an open comment block
     */
   public boolean _inBlockComment() {
-//    acquireReadLock();
-//    try {
-//      synchronized(_reduced) {
-//        resetReducedModelLocation();
-//        ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
-//        boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
         boolean toReturn = _inBlockComment(getLength());
         return toReturn;
-//      }
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Inserts the given exception data into the document with the given style.
@@ -237,9 +224,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     */
   public void appendExceptionResult(String message, String styleName) {
     // Note that there is similar code in InteractionsDocument.  Something should be refactored.
-//    acquireWriteLock();
     try { insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-//    finally { releaseWriteLock(); }
   } 
 }
