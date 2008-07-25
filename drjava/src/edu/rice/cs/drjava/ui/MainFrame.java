@@ -3429,6 +3429,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    _projectPropertiesFrame = null;
     
     config.addOptionListener(LOOK_AND_FEEL, new ConfigOptionListeners.LookAndFeelListener(_configFrame));
+    config.addOptionListener(PLASTIC_THEMES, new ConfigOptionListeners.PlasticThemeListener(_configFrame));
     OptionListener<String> slaveJVMArgsListener = new ConfigOptionListeners.SlaveJVMArgsListener(_configFrame);
     config.addOptionListener(SLAVE_JVM_ARGS, slaveJVMArgsListener);
     _slaveJvmXmxListener = new ConfigOptionListeners.SlaveJVMXMXListener(_configFrame);

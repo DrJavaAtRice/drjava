@@ -941,8 +941,13 @@ public class ConfigFrame extends SwingFrame {
                          .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF,
                                                          "Warn to Restart to Change Look and Feel", this,
-                                                         "<html>Whether DrJava should warn the user that look and feel.<br>" +
-                                                         "(Changes will not be applied until DrJava is restarted.)</html>.", false)
+                                                         "<html>Whether DrJava should warn the user that look and feel<br>" +
+                                                         "changes will not be applied until DrJava is restarted.</html>.", false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_CHANGE_THEME,
+                                                         "Warn to Restart to Change Theme", this,
+                                                         "<html>Whether DrJava should warn the user that theme<br>" +
+                                                         "changes will not be applied until DrJava is restarted.</html>.", false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_PATH_CONTAINS_POUND,
                                                          "Warn if File's Path Contains a '#' Symbol", this,
