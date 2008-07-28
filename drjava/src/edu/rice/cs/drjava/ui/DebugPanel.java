@@ -738,21 +738,5 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
   
-  // Not used
-//  private class BPTree extends JTree {
-//    public BPTree(DefaultTreeModel s) { super(s); }
-//    
-//    public void setForeground(Color c) {
-//      super.setForeground(c);
-//      
-//      /* Line commented out because dctr could never be non-null. */
-////      if (dtcr != null) dtcr.setTextNonSelectionColor(c);
-//    }
-//    
-//    /* The follwoing method is commented out because dctr was always null. */
-////    public void setBackground(Color c) {
-////      super.setBackground(c);
-////      if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
-////    }
-//  }
+
 }

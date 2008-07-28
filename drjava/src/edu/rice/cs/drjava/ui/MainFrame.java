@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -255,10 +256,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile HighlightManager.HighlightInfo _currentLocationHighlight = null;
   
   /** Table to map breakpoints to their corresponding highlight objects. */
-  private final Hashtable<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
+  private final IdentityHashMap<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
   
   /** Table to map bookmarks to their corresponding highlight objects. */
-  private final Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
+  private final IdentityHashMap<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
   /** The timestamp for the last change to any document. */
   private volatile long _lastChangeTime = 0;
@@ -2520,7 +2521,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void regionAdded(MovingDocumentRegion r) {
         panel.addRegion(r);
         DefinitionsPane pane = getDefPaneGivenODD(r.getDocument());
-//        if (pane == null) Utilities.show("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
+        if (pane == null) System.err.println("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
         highlights.put(r, pane.getHighlightManager().
                          addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
       }
@@ -2529,15 +2530,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
-//        panel.removeRegion(r);  // Responsibility of the panel
+        panel.removeRegion(r);  // Removes panel if it becomes empty
 //        Utilities.show("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
 //        Utilities.show("The retrieved highlight is " + highlight);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
-        // The following is the  responsibility of the panel?
-        // close the panel and dispose of its MainFrame resources when all regions have been removed.
-//        if (rm.getDocuments().size() == 0) {
+        // The following is done in FindResultsPanel.removeRegion
+//        // close the panel and dispose of its MainFrame resources when all regions have been removed.
+//        if (rm.getDocuments().isEmpty()) {
 //          panel._close(); // _close removes the panel from _tabs and pair from _findResults
 //        }
       }
@@ -3409,8 +3410,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
     
     // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
-    _documentBreakpointHighlights = new Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
-    _documentBookmarkHighlights = new Hashtable<OrderedDocumentRegion, HighlightManager.HighlightInfo>();
+    _documentBreakpointHighlights = new IdentityHashMap<Breakpoint, HighlightManager.HighlightInfo>();
+    _documentBookmarkHighlights = new IdentityHashMap<OrderedDocumentRegion, HighlightManager.HighlightInfo>();
     
     // Initialize cached frames and dialogs 
     _configFrame = new ConfigFrame(this);
@@ -7440,8 +7441,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private boolean _tabUpdatePending = false;
   public static long UPDATE_DELAY = 3000L;  // update delay threshold in milliseconds
   
-  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  The update is immediate if the
-    * selected component has changed since the last call or _tabUpdatePending is false. */
+  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  The update is always performed
+    * if the selected component has changed since the last call or _tabUpdatePending is false. 
+    */
   public void updateTabbedPane() {
     final JComponent c = (JComponent) _tabbedPane.getSelectedComponent();
     synchronized(_updateLock) {

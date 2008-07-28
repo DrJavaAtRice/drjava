@@ -44,9 +44,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
-import static edu.rice.cs.util.HashUtilities.hash;
+//import static edu.rice.cs.util.HashUtilities.hash;
 
-/** Class for a simple document region that records positions rather than offsets.
+/** Class for a simple document region that records positions rather than offsets.  See the WARNING below about hashing
+  * on this type or its subtypes.
   * @version $Id$
   */
 public class DocumentRegion implements OrderedDocumentRegion, Comparable<OrderedDocumentRegion> {
@@ -119,13 +120,16 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     return end1 - end2;
   }
   
-  private int docHashCode() {
-    if (_doc == null) return 0;
-    return _doc.hashCode();
-  }
+//  private int docHashCode() {
+//    if (_doc == null) return 0;
+//    return _doc.hashCode();
+//  }
+  
+  /** WARNING: The hashCode function is left unchanged making it inconsisent with equality.  Hence, only Identity based 
+    * hash table should use this type as keys. */
       
-  /** This hash function is consistent with equality. */
-  public int hashCode() { return hash(docHashCode(), getStartOffset(), getEndOffset()); }
+//  /** This hash function is consistent with equality. */
+//  public int hashCode() { return hash(docHashCode(), getStartOffset(), getEndOffset()); }
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }

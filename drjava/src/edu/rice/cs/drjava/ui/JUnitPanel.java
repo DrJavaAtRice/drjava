@@ -258,7 +258,6 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       SwingDocument doc = getSwingDocument();
-//      doc.acquireWriteLock();
       try {
         int len = doc.getLength();
         // Insert the classname if it has changed
@@ -280,7 +279,6 @@ public class JUnitPanel extends ErrorPanel {
         // Inserting at end, shouldn't happen
         throw new UnexpectedException(ble);
       }
-//      finally { doc.releaseWriteLock(); }
     }
     
     /** Displays the results of a test that has finished. */
@@ -420,10 +418,9 @@ public class JUnitPanel extends ErrorPanel {
       _stackTextArea = new JTextArea();
       _stackTextArea.setEditable(false);
       _stackTextArea.setLineWrap(false);
-      JScrollPane scroll = new
-        BorderlessScrollPane(_stackTextArea,
-                             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      JScrollPane scroll = new BorderlessScrollPane(_stackTextArea,
+                                                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {

@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -107,8 +108,8 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
   
   /** A table mapping each region entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
-  protected volatile HashMap<R, DefaultMutableTreeNode> _regionToTreeNode = 
-    new HashMap<R, DefaultMutableTreeNode>();
+  protected volatile IdentityHashMap<R, DefaultMutableTreeNode> _regionToTreeNode = 
+    new IdentityHashMap<R, DefaultMutableTreeNode>();
   
   /** State variable used to control the granular updating of the tabbed panel. */
   private volatile long _lastChangeTime;
@@ -151,7 +152,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     this.add(_buttonPanel, BorderLayout.EAST);
     updateButtons();
     
-    // Setup the color listeners.
+    // Setup the color listeners.  Not clear what effect these listeners have given recent changes to the renderer.
     _setColors(_regTree);
   }
   
@@ -226,8 +227,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _lastChangeTime = _frame.getLastChangeTime();
     }
 //    traversePanel();
-    _regTreeModel.reload();
-    expandTree();
+//    _regTreeModel.reload();
+    revalidate();
+    repaint();
+//    expandTree();
 //    repaint();
   }
   
@@ -259,7 +262,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     // Region tree cell renderer
     dtcr = new RegionRenderer();
     dtcr.setOpaque(false);
-    _setColors(dtcr);
+//    _setColors(dtcr);
     _regTree.setCellRenderer(dtcr);
     
     _leftPane.add(new JScrollPane(_regTree));
@@ -314,29 +317,29 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   /** Adds config color support to DefaultTreeCellEditor. */
   class RegionRenderer extends DefaultTreeCellRenderer {
     
-    public void setBackground(Color c) {
-      this.setBackgroundNonSelectionColor(c);
-    }
-    
-    public void setForeground(Color c) {
-      this.setTextNonSelectionColor(c);
-    }
-    
-    private RegionRenderer() {
-      this.setTextSelectionColor(Color.black);
-      setLeafIcon(null);
-      setOpenIcon(null);
-      setClosedIcon(null);
-    }
+    /* The following methods were commented out to minimize changes to the DefaultCellRenderer to help support
+     * "reverse video highlighting" of selected nodes in the Plastic L&F family.
+     */
+//    public void setBackground(Color c) { setBackgroundNonSelectionColor(c); }
+//    
+//    public void setForeground(Color c) { setTextNonSelectionColor(c); }
+//    
+//    private RegionRenderer() {
+//      this.setTextSelectionColor(Color.black);
+//      setLeafIcon(null);
+//      setOpenIcon(null);
+//      setClosedIcon(null);
+//    }
     
     /** Overrides the default renderer component to use proper coloring. */
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean isExpanded, 
                                                   boolean leaf, int row, boolean hasFocus) {
-      Component renderer = super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, leaf, row, hasFocus);
+      /*Component renderer = */ super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, leaf, row, hasFocus);
+
+      // The following line was commented out as part of minimizing the changes to DefaultCellRenderer
+//      if (renderer instanceof JComponent) { ((JComponent) renderer).setOpaque(false); }
       
-      if (renderer instanceof JComponent) { ((JComponent) renderer).setOpaque(false); }
-      
-      _setColors(renderer);
+      _setColors(this);
       
       // set tooltip
       String tooltip = null;
@@ -379,12 +382,13 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
             }
             catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
             setText(node.getUserObject().toString());
-            renderer = this;
+            setIcon(null);
+//            renderer = this;
           }
         }
       }
       setToolTipText(tooltip);
-      return renderer;
+      return /* renderer */ this;
     }
   }
   
@@ -568,15 +572,15 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     for (int i = 0; i < ct; i++) _regTree.expandRow(i);
   }
     
-  /** Remove a region from the tree. Must be executed in event thread.
+  /** Remove a region from this panel. Must be executed in event thread.
     * @param r the region
     */
   public void removeRegion(final R r) {
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
-    if (r == null) throw new UnexpectedException("Region node for region " + r + " is null");
-    _regionManager.removeRegion(r);
+    if (regionNode == null) throw new UnexpectedException("Region node for region " + r + " is null");
+//    _regionManager.removeRegion(r);
     _regionToTreeNode.remove(r);
     
 //    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
@@ -692,8 +696,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     protected DefaultState() { }
   }
 
-  /** Rapid changing state, GUI changes are delayed until the state
-    * is switched back to DefaultState. */
+  /** Rapid changing state, GUI changes are delayed until the state is switched back to DefaultState. */
   protected class ChangingState implements IChangeState {
     private DefaultMutableTreeNode _lastAdded = null;
     public void scrollPathToVisible(TreePath tp) { }

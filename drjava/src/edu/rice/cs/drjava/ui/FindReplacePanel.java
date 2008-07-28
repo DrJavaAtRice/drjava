@@ -513,7 +513,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    else tabLabel.append(title.substring(0,10)).append("...");
     String tabLabel = (title.length() <= 20) ? title : title.substring(0,20);
     RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
-    FindResultsPanel panel = 
+    final FindResultsPanel panel = 
       _frame.createFindResultsPanel(rm, tabLabel, searchStr, searchAll, _machine.getMatchCase(), 
                                     _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
                                     _ignoreTestCases.isSelected(), new WeakReference<OpenDefinitionsDocument>(startDoc),
@@ -521,8 +521,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     findAll(searchStr, searchAll, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, panel);
 //    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
-    panel._regTree.scrollRowToVisible(0);
     panel.requestFocusInWindow();
+    EventQueue.invokeLater(new Runnable() { public void run() { panel._regTree.scrollRowToVisible(0); } });
   }
   
   /** Performs "find all" with the specified options. */
@@ -615,59 +615,45 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
               try {
                 int endSel = endPos.getOffset();
                 int startSel = startPos.getOffset();
-                if (endSel == startSel) return "";  // excerpt has been deleted by editing
-                int excerptEndSel = doc._getLineEndPos(endSel);
-                int excerptStartSel = doc._getLineStartPos(startSel);
+                int selLength = endSel - startSel;
+                if (selLength == 0) return "";  // excerpt has been deleted by prior editing
+                assert selLength > 0;
+               
+                int excerptEnd = doc._getLineEndPos(endSel);
+                int excerptStart = doc._getLineStartPos(startSel);
+                assert excerptStart <= startSel;
+
+                // the offsets within the excerpted string of the selection (figuratively in "Red")
+                int startRed = startSel - excerptStart;
+                int endRed = endSel - excerptStart;
                 
-                int length = Math.min(120, excerptEndSel - excerptStartSel);
+                int excerptLength = Math.min(120, excerptEnd - excerptStart);
+                String text = doc.getText(excerptStart, excerptLength);
                 
-                // this highlights the actual region in red
-                int startRed = startSel - excerptStartSel;
-                int endRed = endSel - excerptStartSel;
-                
-                String text = doc.getText(excerptStartSel, length);
-                String s = text.trim();  // trims both front and end
-                int sLength = s.length();
-                
-                // We need a global invariant concerning non-displayable characters.  Why filter them here but not elsewhere?
-//              // change control characters and ones that may not be displayed to spaces
-//              for (int j = 0; j < s.length(); ++j) {
-//                sb.append((s.charAt(j) < ' ' || s.charAt(j) > 127) ? ' ' :  s.charAt(j));
-//              }
-//              s = sb.toString();
-//              
-//              trim the front
-//                for (int j = 0; j < s.length(); ++j) {
-//                if (! Character.isWhitespace(s.charAt(j))) break;
-//                --startRed;
-//                --endRed;
-//              }
-//              
-//              // trim the end
-//              s = s.trim();
-                
-                if (s.length() == 0) return s;  // isEmpty() only available in Java 6.0
-                int trimLeftCt = text.indexOf(s.charAt(0));
-                int trimRightCt = text.length() - sLength;
-                // bound startRed and endRed
-                startRed = startRed - trimLeftCt;  // offset in s rather than in text
-                endRed = endRed - trimRightCt;
-                if (startRed < 0) { startRed = 0; }
-                if (startRed > sLength) { startRed = sLength; }
-                if (endRed < startRed) { endRed = startRed; }
-                if (endRed > sLength) { endRed = sLength; }
+                // Construct the matching string and compressed selection prefix and suffix strings within text
+                String prefix = StringOps.compress(text.substring(0, startRed));
+                String match, suffix;
+                if (excerptLength < startRed + selLength) { // selection extends beyond excerpt
+                  match = text.substring(startRed) + "...";
+                  suffix = "";
+                }
+                else {
+                  match = text.substring(startRed, endRed);
+                  suffix = StringOps.compress(text.substring(endRed, excerptLength));
+                }
+
+                // COMMENT: We need a global invariant concerning non-displayable characters.  
                 
                 // create the excerpt string
-                StringBuilder sb = new StringBuilder(StringOps.compress(s.substring(0, startRed)));
+                StringBuilder sb = new StringBuilder(prefix);
 //                sb.append("<font color=#ff0000>");
                 sb.append(LEFT);
-                sb.append(s.substring(startRed, endRed));
+                sb.append(match);
 //                sb.append("</font>");
                 sb.append(RIGHT);
-                sb.append(StringOps.compress(s.substring(endRed)));
+                sb.append(suffix);
 //                sb.append(StringOps.getBlankString(120 - sLength));  // move getBank to StringOps
                 return sb.toString();
-//                return StringOps.compress(s);
               }
               catch(BadLocationException e) { return "";  /* Ignore the exception. */ }
             }

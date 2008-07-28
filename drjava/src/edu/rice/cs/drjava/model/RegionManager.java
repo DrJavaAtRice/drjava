@@ -99,16 +99,9 @@ public interface RegionManager<R extends IDocumentRegion> {
 
   /** Tells the manager to remove all regions. */
   public void clearRegions();
-  
-  /** @return the current region or null if none selected */
-  public R getCurrentRegion();
-  
+
   /** @return the set of documents containing regions. */
   public Set<OpenDefinitionsDocument> getDocuments();
-  
-  /** Set the current region. 
-   *  @param region new current region */
-  public void setCurrentRegion(R region);
   
   /** Adds a listener to the notifier.
    *  @param listener a listener that reacts on events

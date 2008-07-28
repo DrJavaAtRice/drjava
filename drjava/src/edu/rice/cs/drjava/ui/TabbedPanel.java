@@ -50,12 +50,11 @@ import edu.rice.cs.drjava.DrJavaRoot;
   */
 public abstract class TabbedPanel extends JPanel 
   implements DropTargetListener{
-  // indicates whether this tab is displayed in the tabbed pane
+  /** indicates whether this tab is displayed in the tabbed pane. */
   protected boolean _displayed;
-  // button which removes this pane's tab
+  /** button which removes this pane's tab. */
   protected JButton _closeButton;
-  // panel that has _closeButton in the north so it can't be stretched
-  // vertically
+  // panel that has _closeButton in the north so it can't be stretched vertically
   protected JPanel _closePanel;
   // the panel that the subclasses of TabbedPanel can use
   protected JPanel _mainPanel;

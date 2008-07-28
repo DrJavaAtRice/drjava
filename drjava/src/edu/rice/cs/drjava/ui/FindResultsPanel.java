@@ -126,16 +126,6 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _doc          = doc;
     _findReplace  = findReplace;
     
-    // The following code was moved into rmListener defined in MainFrame
-//    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
-//      public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
-//      public void regionChanged(MovingDocumentRegion r) { 
-//        regionRemoved(r);
-//        regionAdded(r);
-//      }
-//      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
-//    });
-    
     for(int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       final OptionListener<Color> listener = new FindResultsColorOptionListener(i);
       final Pair<Option<Color>, OptionListener<Color>> pair = 
@@ -311,17 +301,21 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _frame.removeCurrentLocationHighlight();
 //    startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) {
-      removeRegion(r); // removes r from region manager and the panel node for r from the tree model
+      _regionManager.removeRegion(r); // removes r from region manager and the panel node for r from the tree model
     }
-//    finishChanging();
-    if (_regionManager.getDocuments().size() == 0) { 
-      _close();
-      return;
-    }
+
 //    System.err.println("Scrolling to row " + row);
 //    _regTree.setSelectionRow(row);
     _regTree.scrollRowToVisible(row);
     _requestFocusInWindow();
+  }
+  
+  /** Remove a region from this panel. If this panel is emptied, remove this.  Must be executed in event thread.
+    * @param r the region
+    */
+  public void removeRegion(final MovingDocumentRegion r) {
+    super.removeRegion(r);
+    if (_regionManager.getDocuments().isEmpty()) _close();
   }
   
   /** Update button state and text. */
@@ -355,7 +349,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  /** Close the pane. */
+  /** Close the panel. */
   public void _close() {
     super._close();
     _frame.removeCurrentLocationHighlight();

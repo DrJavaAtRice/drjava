@@ -266,8 +266,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Managers for find result regions. */
   protected final LinkedList<RegionManager<MovingDocumentRegion>> _findResultsManagers;
   
-  /** @return manager for find result regions. */
+  /** @return new copy of list of find results managers for find result regions. */
   public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
+    System.err.println("getFindResultsManager called; returning " + _findResultsManagers + ")");
     return new LinkedList<RegionManager<MovingDocumentRegion>>(_findResultsManagers);
   }
   
@@ -275,11 +276,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public RegionManager<MovingDocumentRegion> createFindResultsManager() {
     ConcreteRegionManager<MovingDocumentRegion> rm = new ConcreteRegionManager<MovingDocumentRegion>();
     _findResultsManagers.add(rm);
-    
-    // install new manager in all documents
-    for (final OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
-      doc.addFindResultsManager(rm);
-    }
+
     return rm;
   }
   
@@ -1905,7 +1902,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Closes an open definitions document, without prompting to save if the document has been changed.  Returns
     * whether the file was successfully closed. NOTE: This method should not be called unless it can be
     * absolutely known that the document being closed is not the active document. The closeFile() method in
-    * SingleDisplayModel ensures that a new active document is set, but closeFileWithoutPrompt is not.
+    * SingleDisplayModel ensures that a new active document is set, but closeFileWithoutPrompt does not.
     * @return true if the document was closed.
     */
   public boolean closeFileWithoutPrompt(final OpenDefinitionsDocument doc) {
@@ -2497,7 +2494,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _cacheAdapter = _cache.register(this, ddr);
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
       
-      _browserRegions = Collections.synchronizedSet(new HashSet<BrowserDocumentRegion>());
+      /* The following table is not affected by inconsistency between hashCode/equals in DocumentRegion, because
+       * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
+      _browserRegions = new HashSet<BrowserDocumentRegion>();
     }
     
     //------------ Getters and Setters -------------//
@@ -2966,7 +2965,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             }
           });
           resetModification();
-          if (!oldFile.equals(file)) {
+          if (! oldFile.equals(file)) {
             /* remove regions for this document */
             removeFromDebugger();
             getBreakpointManager().removeRegions(this);
@@ -3715,9 +3714,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDefaultRootElement().getElement(line).getStartOffset();
     }
     
-    /** Add a region manager for find results to this document.
-      * @param rm the global model's region manager */
-    public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.add(rm); }
+//    /** Add a region manager for find results to this document.
+//      * @param rm the global model's region manager */
+//    public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.add(rm); }
     
     /** Remove a manager for find results from this document.
       * @param rm the global model's region manager. */

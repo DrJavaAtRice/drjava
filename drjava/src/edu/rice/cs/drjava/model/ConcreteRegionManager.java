@@ -75,12 +75,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     */
   private volatile Set<OpenDefinitionsDocument> _documents = new HashSet<OpenDefinitionsDocument>();
   
-  private volatile R _current = null;
-  
   /* Depending on default constructor */
-  
-  /** @return the current region or null if none selected */
-  public R getCurrentRegion() { return _current; }
   
   /** @return the set of documents containing regions. */
   public Set<OpenDefinitionsDocument> getDocuments() { return _documents; }
@@ -204,7 +199,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
 //        Utilities.show("docRegions for document " + odd + " = " + _regions.get(odd));
     }
     
-    _current = region;
+//    _current = region;
 //      final int regionIndex = getIndexOf(region);
 //      final String stackTrace = StringOps.getStackTrace();
     
@@ -220,25 +215,23 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   }
   
   /** Remove the given IDocumentRegion from the manager.  If any document's regions are emptied, remove the document
-    * from the keys in _regions.
+    * from the keys in _regions.  Notification removes the panel node for the region.
     * @param region the IDocumentRegion to be removed.
     */
   public void removeRegion(final R region) {      
-    // if we're removing the current region, select a more recent region, if available
-    // if a more recent region is not available, select a less recent region, if available
-    // if a less recent region is not available either, set to null
-    final R current = _current; // so we can verify if _current got changed
     
     OpenDefinitionsDocument doc = region.getDocument();
     SortedSet<R> docRegions = _regions.get(doc);
+//    System.err.println("ODD for region " + region + " = " + doc);
+    System.err.println("doc regions for " + doc + " = " + docRegions);
     if (docRegions == null) return;  // since region is not stored in this region manager, exit!
     final boolean wasRemoved = docRegions.remove(region);  // remove the region from the manager
     if (docRegions.isEmpty()) {
       _documents.remove(doc);
       _regions.remove(doc);
     }
-    
-    // only notify if the region was actually added
+
+    // only notify if the region was actually removed
     if (wasRemoved) _notifyRegionRemoved(region);
   }
   
@@ -251,24 +244,28 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
   public void removeRegions(final OpenDefinitionsDocument doc) {
     assert doc != null;
+    System.err.println("Removing ODD " + doc + " in " + this);
     boolean found = _documents.remove(doc);
     if (found) {
+      System.err.println("Removing document regions for " + doc + " in " + this);
       final SortedSet<R> regions = _regions.get(doc);
+      // The following ugly line of code is dictated by the "fail fast" semantics of Java iterators and erasure generics
+      for (Object r: regions.toArray()) { removeRegion((R) r); }  
       // notify all listeners for all regions
-      _notifyRegionsRemoved(regions);
-      _regions.remove(doc);
+//      _notifyRegionsRemoved(regions);
+//      _regions.remove(doc); // done automatically when last region r in doc is removed
     }
   }
     
-  private void _notifyRegionsRemoved(final Collection<R> regions) {
-    _lock.startRead();
-    try {
-      for (RegionManagerListener<R> l: _listeners) { 
-        for (R r: regions) { l.regionRemoved(r); }
-      } 
-    } 
-    finally { _lock.endRead(); }
-  }
+//  private void _notifyRegionsRemoved(final Collection<R> regions) {
+//    _lock.startRead();
+//    try {
+//      for (RegionManagerListener<R> l: _listeners) { 
+//        for (R r: regions) { l.regionRemoved(r); }
+//      } 
+//    } 
+//    finally { _lock.endRead(); }
+//  }
   
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
   public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
@@ -295,12 +292,12 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     _regions.clear();
     _documents.clear();
     // Notify all listeners for this manager that all regions have been removed
-    _notifyRegionsRemoved(regions);
+//    _notifyRegionsRemoved(regions);
   }
   
-  /** Set the current region. 
-    * @param region new current region */
-  public void setCurrentRegion(final R region) { _current = region; }
+//  /** Set the current region. 
+//    * @param region new current region */
+//  public void setCurrentRegion(final R region) { throw new UnsupportedOperation(); }
   
   /** Apply the given command to the specified region to change it.
     * @param region the region to find and change
