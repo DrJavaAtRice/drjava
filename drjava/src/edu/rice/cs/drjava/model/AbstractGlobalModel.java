@@ -268,7 +268,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return new copy of list of find results managers for find result regions. */
   public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
-    System.err.println("getFindResultsManager called; returning " + _findResultsManagers + ")");
+//    System.err.println("getFindResultsManager called; returning " + _findResultsManagers + ")");
     return new LinkedList<RegionManager<MovingDocumentRegion>>(_findResultsManagers);
   }
   

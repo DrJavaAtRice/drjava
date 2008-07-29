@@ -223,7 +223,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     OpenDefinitionsDocument doc = region.getDocument();
     SortedSet<R> docRegions = _regions.get(doc);
 //    System.err.println("ODD for region " + region + " = " + doc);
-    System.err.println("doc regions for " + doc + " = " + docRegions);
+//    System.err.println("doc regions for " + doc + " = " + docRegions);
     if (docRegions == null) return;  // since region is not stored in this region manager, exit!
     final boolean wasRemoved = docRegions.remove(region);  // remove the region from the manager
     if (docRegions.isEmpty()) {
@@ -242,12 +242,13 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   }
   
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
+  @SuppressWarnings("unchecked")
   public void removeRegions(final OpenDefinitionsDocument doc) {
     assert doc != null;
-    System.err.println("Removing ODD " + doc + " in " + this);
+//    System.err.println("Removing ODD " + doc + " in " + this);
     boolean found = _documents.remove(doc);
     if (found) {
-      System.err.println("Removing document regions for " + doc + " in " + this);
+//      System.err.println("Removing document regions for " + doc + " in " + this);
       final SortedSet<R> regions = _regions.get(doc);
       // The following ugly line of code is dictated by the "fail fast" semantics of Java iterators and erasure generics
       for (Object r: regions.toArray()) { removeRegion((R) r); }  

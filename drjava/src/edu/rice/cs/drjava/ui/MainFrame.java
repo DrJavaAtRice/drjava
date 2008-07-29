@@ -2521,7 +2521,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void regionAdded(MovingDocumentRegion r) {
         panel.addRegion(r);
         DefinitionsPane pane = getDefPaneGivenODD(r.getDocument());
-        if (pane == null) System.err.println("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
+//        if (pane == null) System.err.println("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
         highlights.put(r, pane.getHighlightManager().
                          addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
       }
