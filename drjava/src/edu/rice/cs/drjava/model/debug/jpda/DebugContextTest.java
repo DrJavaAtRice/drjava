@@ -37,7 +37,9 @@
 package edu.rice.cs.drjava.model.debug.jpda;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Vector;
+
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -68,7 +70,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Start up
     final OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
     final Vector<File> path = new Vector<File>();
-    path.addElement(_tempDir);  // directory where doc's file is saved
+    path.add(_tempDir);  // directory where doc's file is saved
 
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
@@ -474,7 +476,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
 
-    Vector<DebugWatchData> watches = _debugger.getWatches();
+    ArrayList<DebugWatchData> watches = _debugger.getWatches();
     assertEquals("watch name incorrect", "foo", watches.get(0).getName());
     assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
     assertEquals("watch name incorrect", "innerInnerFoo", watches.get(2).getName());
@@ -667,7 +669,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     Utilities.clearEventQueue();
     debugListener.assertWatchSetCount(5);
     
-    Vector<DebugWatchData> watches = _debugger.getWatches();
+    ArrayList<DebugWatchData> watches = _debugger.getWatches();
     assertEquals("watch name incorrect", "foo", watches.get(0).getName());
     assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
     assertEquals("watch name incorrect", "twoDeepFoo", watches.get(2).getName());
@@ -727,7 +729,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     debugListener.assertWatchSetCount(3);
 
     // Check watch values
-    Vector<DebugWatchData> watches = _debugger.getWatches();
+    ArrayList<DebugWatchData> watches = _debugger.getWatches();
     assertEquals("numArgs watch value incorrect", "1", watches.get(0).getValue());
     String argsWatch = watches.get(1).getValue();
     assertTrue("args watch value incorrect", argsWatch.indexOf("java.lang.String") != -1);

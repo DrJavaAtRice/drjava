@@ -36,7 +36,9 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import java.util.ArrayList;
 import java.util.Vector;
+
 import javax.swing.text.BadLocationException;
 
 /**
@@ -77,7 +79,7 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
     "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
     "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
 
-    Vector<String> actual = IndentRuleWithTrace.getTrace();
+    ArrayList<String> actual = IndentRuleWithTrace.getTrace();
 //    System.err.println("Trace is: " + actual);
     assertEquals("steps in trace", 4, actual.size());
     for(int x = 0; x < actual.size(); x++) {

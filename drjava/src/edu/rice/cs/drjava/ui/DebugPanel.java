@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.Vector;
+import java.util.ArrayList;
 
 import java.util.Enumeration;
 
@@ -89,9 +90,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JButton _stepOutButton;
   private JLabel _statusBar;
 
-  private Vector<DebugWatchData> _watches;
-  private Vector<DebugThreadData> _threads;
-  private Vector<DebugStackData> _stackFrames;
+  private ArrayList<DebugWatchData> _watches;
+  private ArrayList<DebugThreadData> _threads;
+  private ArrayList<DebugStackData> _stackFrames;
   
   /* The following field is commented out because it was never written (and hence always null). */
 //  private DefaultTreeCellRenderer dtcr;
@@ -107,9 +108,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _model = frame.getModel();
     _debugger = _model.getDebugger();
 
-    _watches = new Vector<DebugWatchData>();
-    _threads = new Vector<DebugThreadData>();
-    _stackFrames = new Vector<DebugStackData>();
+    _watches = new ArrayList<DebugWatchData>();
+    _threads = new ArrayList<DebugThreadData>();
+    _stackFrames = new ArrayList<DebugStackData>();
     _leftPane = new JTabbedPane();
     _rightPane = new JTabbedPane();
 
@@ -155,7 +156,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         _watches = _debugger.getWatches();
         
         if (_debugger.isCurrentThreadSuspended())  _stackFrames = _debugger.getCurrentStackFrameData();
-        else  _stackFrames = new Vector<DebugStackData>();
+        else  _stackFrames = new ArrayList<DebugStackData>();
         
         _threads = _debugger.getCurrentThreadData();
       }
@@ -166,9 +167,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     else {
       // Clean up if debugger dies
-      _watches = new Vector<DebugWatchData>();
-      _threads = new Vector<DebugThreadData>();
-      _stackFrames = new Vector<DebugStackData>();
+      _watches = new ArrayList<DebugWatchData>();
+      _threads = new ArrayList<DebugThreadData>();
+      _stackFrames = new ArrayList<DebugStackData>();
     }
 
     ((AbstractTableModel)_watchTable.getModel()).fireTableDataChanged();

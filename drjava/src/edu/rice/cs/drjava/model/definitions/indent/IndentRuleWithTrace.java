@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 // TODO: Check synchronization.
-import java.util.Vector;
+import java.util.ArrayList;
 import java.io.PrintStream;
 
 /** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
@@ -49,7 +49,7 @@ import java.io.PrintStream;
   */
 public abstract class IndentRuleWithTrace implements IndentRule {
 
-  private static Vector<String> trace = null;
+  private static ArrayList<String> trace = null;
   private static boolean startOver = true;
   private static boolean ruleTraceEnabled = false;
 
@@ -74,12 +74,12 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     IndentRuleWithTrace.ruleTraceEnabled = ruleTraceEnabled;
   }
 
-  static Vector<String> getTrace() { return trace; }
+  static ArrayList<String> getTrace() { return trace; }
 
   /** This rule just adds to the trace kept in trace */
   protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus) {
     if (ruleTraceEnabled) {
-      if (startOver) trace = new Vector<String>();
+      if (startOver) trace = new ArrayList<String>();
       startOver = terminus;
       trace.add(ruleName + " " + direction);
     }

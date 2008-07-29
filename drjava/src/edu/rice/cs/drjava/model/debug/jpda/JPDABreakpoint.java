@@ -46,8 +46,9 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 
 import java.awt.EventQueue;
 import java.io.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;

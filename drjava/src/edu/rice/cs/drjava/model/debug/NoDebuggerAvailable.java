@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /**
@@ -119,13 +119,13 @@ public class NoDebuggerAvailable implements Debugger {
   public void removeBreakpoint(Breakpoint breakpoint) { }
   
   /** Returns all currently watched fields and variables. */
-  public Vector<DebugWatchData> getWatches() { return new Vector<DebugWatchData>(); }
+  public ArrayList<DebugWatchData> getWatches() { return new ArrayList<DebugWatchData>(); }
   
   /** Returns a Vector of ThreadData or null if the vm is null. */
-  public Vector<DebugThreadData> getCurrentThreadData() { return new Vector<DebugThreadData>(); }
+  public ArrayList<DebugThreadData> getCurrentThreadData() { return new ArrayList<DebugThreadData>(); }
   
   /** Returns a Vector of StackData for the current thread or null if the current thread is null. */
-  public Vector<DebugStackData> getCurrentStackFrameData() { return new Vector<DebugStackData>(); }
+  public ArrayList<DebugStackData> getCurrentStackFrameData() { return new ArrayList<DebugStackData>(); }
   
   /** Adds a listener to this Debugger. */
   public void addListener(DebugListener listener) { }

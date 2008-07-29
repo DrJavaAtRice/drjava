@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.model.debug.jpda;
 
 import java.awt.EventQueue;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -47,7 +49,6 @@ import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.Arrays;
 import javax.swing.SwingUtilities;
 
 // DrJava stuff
@@ -108,7 +109,7 @@ public class JPDADebugger implements Debugger {
   private volatile EventRequestManager _eventManager;
   
   /** Vector of all current Watches. */
-  private final Vector<DebugWatchData> _watches = new Vector<DebugWatchData>();
+  private final ArrayList<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
   /** Keeps track of any DebugActions whose classes have not yet been loaded, so that EventRequests can be created when the correct
     * ClassPrepareEvent occurs.
@@ -226,7 +227,7 @@ public class JPDADebugger implements Debugger {
       _model.getInteractionsModel().addListener(_watchListener);
 
       // re-set breakpoints that have already been set
-      Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_model.getBreakpointManager().getRegions());
+      ArrayList<Breakpoint> oldBreakpoints = new ArrayList<Breakpoint>(_model.getBreakpointManager().getRegions());
       _model.getBreakpointManager().clearRegions();
       for (int i = 0; i < oldBreakpoints.size(); i++) {
         Breakpoint bp = oldBreakpoints.get(i);
@@ -539,23 +540,23 @@ public class JPDADebugger implements Debugger {
   }
   
   /** Returns all currently watched fields and variables. No synchronization required because _watches is final. */
-  public Vector<DebugWatchData> getWatches() throws DebugException {
+  public ArrayList<DebugWatchData> getWatches() throws DebugException {
     //_ensureReady();
     return _watches;
   }
   
   /** Returns a list of all threads being tracked by the debugger. Does not return any threads known to be dead. */
-  public /* synchronized */ Vector<DebugThreadData> getCurrentThreadData() throws DebugException {
+  public /* synchronized */ ArrayList<DebugThreadData> getCurrentThreadData() throws DebugException {
     assert EventQueue.isDispatchThread();
-    if (! isReady()) { return new Vector<DebugThreadData>(); }
+    if (! isReady()) { return new ArrayList<DebugThreadData>(); }
     Iterable<ThreadReference> listThreads;
     try { listThreads = _vm.allThreads(); }
     catch (VMDisconnectedException vmde) {
       // We're quitting, just pass back an empty Vector
-      return new Vector<DebugThreadData>();
+      return new ArrayList<DebugThreadData>();
     }
     
-    Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
+    ArrayList<DebugThreadData> threads = new ArrayList<DebugThreadData>();
     for (ThreadReference ref : listThreads) {
       try { threads.add(new JPDAThreadData(ref)); }
       catch (ObjectCollectedException e) {
@@ -570,9 +571,9 @@ public class JPDADebugger implements Debugger {
    * are no suspended threads
    * TO DO: Config option for hiding DrJava subset of stack trace
    */
-  public /* synchronized */ Vector<DebugStackData> getCurrentStackFrameData() throws DebugException {
+  public /* synchronized */ ArrayList<DebugStackData> getCurrentStackFrameData() throws DebugException {
     assert EventQueue.isDispatchThread();
-    if (! isReady()) return new Vector<DebugStackData>();
+    if (! isReady()) return new ArrayList<DebugStackData>();
     
     if (_runningThread != null || _suspendedThreads.size() <= 0) {
       throw new DebugException("No suspended thread to obtain stack frames.");
@@ -580,21 +581,21 @@ public class JPDADebugger implements Debugger {
     
     try {
       ThreadReference thread = _suspendedThreads.peek();
-      Vector<DebugStackData> frames = new Vector<DebugStackData>();
+      ArrayList<DebugStackData> frames = new ArrayList<DebugStackData>();
       for (StackFrame f : thread.frames()) { frames.add(new JPDAStackData(f)); }
       return frames;
     }
     catch (IncompatibleThreadStateException itse) {
       error.log("Unable to obtain stack frame.", itse);
-      return new Vector<DebugStackData>();
+      return new ArrayList<DebugStackData>();
     }
     catch (VMDisconnectedException vmde) {
       error.log("VMDisconnected when getting the current stack frame data.", vmde);
-      return new Vector<DebugStackData>();
+      return new ArrayList<DebugStackData>();
     }
     catch (InvalidStackFrameException isfe) {
       error.log("The stack frame requested is invalid.", isfe);
-      return new Vector<DebugStackData>();
+      return new ArrayList<DebugStackData>();
     }
   }
   

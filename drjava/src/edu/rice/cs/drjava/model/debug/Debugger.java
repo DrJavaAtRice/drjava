@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
@@ -131,13 +131,13 @@ public interface Debugger {
   public void removeBreakpoint(final Breakpoint breakpoint) throws DebugException;
   
   /** Returns all currently watched fields and variables. */
-  public Vector<DebugWatchData> getWatches() throws DebugException;
+  public ArrayList<DebugWatchData> getWatches() throws DebugException;
   
   /** Returns a Vector of ThreadData. */
-  public Vector<DebugThreadData> getCurrentThreadData() throws DebugException;
+  public ArrayList<DebugThreadData> getCurrentThreadData() throws DebugException;
   
   /** Returns a Vector of StackData for the current thread. */
-  public Vector<DebugStackData> getCurrentStackFrameData() throws DebugException;
+  public ArrayList<DebugStackData> getCurrentStackFrameData() throws DebugException;
   
   /** @return true if there are any threads in the program currently being
    * debugged which have been suspended (by the user or by hitting a breakpoint).
