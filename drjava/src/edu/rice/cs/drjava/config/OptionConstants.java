@@ -255,7 +255,7 @@ public interface OptionConstants {
       * @return the list of available look-and-feel classnames
       */
     public static ArrayList<String> getLookAndFeels() {
-      if(!_registered) {
+      if(!_registered && !PlatformFactory.ONLY.isMacPlatform()) {
         for(String[] newLaf : _registerLAFs) {
           try {
             Class.forName(newLaf[1]);
