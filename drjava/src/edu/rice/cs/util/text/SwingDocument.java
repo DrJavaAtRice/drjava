@@ -49,7 +49,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import static edu.rice.cs.util.text.AbstractDocumentInterface.*;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /** A swing implementation of the toolkit-independent EditDocumentInterface.  This document must use the readers/writers
   * locking protocol established in its superclasses.
@@ -69,7 +69,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
 //  protected volatile boolean _writeLocked = false;
   
   /** Maps names to attribute sets */
-  final protected Hashtable<String, AttributeSet> _styles;
+  final protected HashMap<String, AttributeSet> _styles;
   
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
@@ -82,7 +82,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Creates a new document adapter for a Swing StyledDocument. TODO: convert _styles and _condition to lazily 
     * initialized volatiles as soon as support for Java 1.4 is dropped and the double-check idiom is safe. */
   public SwingDocument() { 
-    _styles = new Hashtable<String, AttributeSet>();
+    _styles = new HashMap<String, AttributeSet>();
     _condition = new DocumentEditCondition();
   }
   

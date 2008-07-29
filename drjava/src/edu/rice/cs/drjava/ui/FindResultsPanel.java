@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.ui;
 
-import java.util.Vector;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -296,18 +295,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     int[] rows = _regTree.getSelectionRows();
 //    System.err.println("_remove() called with rows " + Arrays.toString(rows));
     int len = rows.length;
-    int row = (len > 0) ? rows[len - 1] + 1 : 0;
+    int row = (len > 0) ? rows[len - 1] : 0;
 //    _regTree.setSelectionRow(row);
     _frame.removeCurrentLocationHighlight();
 //    startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) {
       _regionManager.removeRegion(r); // removes r from region manager and the panel node for r from the tree model
     }
-
-//    System.err.println("Scrolling to row " + row);
-//    _regTree.setSelectionRow(row);
-    _regTree.scrollRowToVisible(row);
+    _regTree.setSelectionRow(row);
     _requestFocusInWindow();
+    _regTree.scrollRowToVisible(row);
+
   }
   
   /** Remove a region from this panel. If this panel is emptied, remove this.  Must be executed in event thread.

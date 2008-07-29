@@ -50,7 +50,7 @@ public interface Query {
     public boolean equals(Object other) {
       if (other == null || other.getClass() != this.getClass()) return false;
       Pos o = (Pos) other;
-      return o._pos == this._pos;
+      return o._pos == _pos;
     }
     
     public int hashCode() { return hash(getClass().hashCode(), _pos); }
@@ -72,9 +72,9 @@ public interface Query {
     }
     
     public boolean equals(Object other) {
-      if (other == null || other.getClass() != this.getClass()) return false;
+      if (other == null || other.getClass() != getClass()) return false;
       AbstractEnclosingBrace o = (AbstractEnclosingBrace) other;
-      return o._pos == this._pos && o._opening == this._opening && o._closing == this._closing;
+      return o._pos == _pos && o._opening == _opening && o._closing == _closing;
     }
     
     public int hashCode() { return hash(getClass().hashCode(), _pos, _opening, _closing); }

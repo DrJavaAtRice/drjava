@@ -51,8 +51,7 @@ import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
 
-// TODO: Check synchronization.
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -254,7 +253,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     protected Position[] _errorListPositions;
     
     /** Table mapping Positions in the error list to CompilerErrors. */
-    protected final Hashtable<Position, CompilerError> _errorTable = new Hashtable<Position, CompilerError>();
+    protected final HashMap<Position, CompilerError> _errorTable = new HashMap<Position, CompilerError>();
     
     // when we create a highlight we get back a tag we can use to remove it
     private HighlightManager.HighlightInfo _listHighlightTag = null;

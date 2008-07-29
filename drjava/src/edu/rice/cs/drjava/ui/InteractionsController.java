@@ -47,8 +47,8 @@ import java.awt.event.KeyEvent;
 
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -229,7 +229,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
-  private Vector<ConsoleStateListener> _consoleStateListeners;
+  private ArrayList<ConsoleStateListener> _consoleStateListeners;
   
   private InteractionsListener _viewListener = new InteractionsListener() {
     public void interactionStarted() { }
@@ -284,7 +284,7 @@ public class InteractionsController extends AbstractConsoleController {
     
     _inputCompletionCommand = _defaultInputCompletionCommand;
     _insertTextCommand = _defaultInsertTextCommand;
-    _consoleStateListeners = new Vector<ConsoleStateListener>();
+    _consoleStateListeners = new ArrayList<ConsoleStateListener>();
 //    _pane.addCaretListener(new CaretListener() {  // Update the cachedCaretPosition 
 //      public void caretUpdate(CaretEvent e) { 
 //        _log.log("Caret Event: " + e + " from source " + e.getSource());

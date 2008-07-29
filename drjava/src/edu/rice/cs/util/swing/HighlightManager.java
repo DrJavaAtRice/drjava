@@ -228,7 +228,7 @@ public class HighlightManager {
       */
     public boolean equals(Object o) {
       
-      if (o == null || ! (o instanceof HighlightInfo)) return false;
+      if (o == null || ! (o instanceof HighlightInfo)) return false;  // subclasses are defined
       
         
       HighlightInfo hi = (HighlightInfo)o;

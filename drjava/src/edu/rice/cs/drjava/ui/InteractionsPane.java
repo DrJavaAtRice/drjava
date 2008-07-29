@@ -47,7 +47,6 @@ import java.awt.datatransfer.*;
 
 import java.util.List;
 //import java.util.LinkedList;
-import java.util.Vector;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.UnexpectedException;

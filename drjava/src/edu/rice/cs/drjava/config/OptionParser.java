@@ -35,7 +35,7 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import java.util.Hashtable;
+import java.util.HashMap;
 /** The association of an OptionName with the ability to parse something to type T; the intended type 
   * parameterization is covariant: if U extends T, then OptionParser<U> extends OptionParser<T>.
   */
@@ -48,7 +48,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
   protected final T defaultValue;
   
   /** An inner hashtable that maps DefaultOptionMaps to value T's. Part of the magic inner workings of this package. */
-  final Hashtable<DefaultOptionMap,T> map = new Hashtable<DefaultOptionMap,T>();
+  final HashMap<DefaultOptionMap,T> map = new HashMap<DefaultOptionMap,T>();
   
   /** Constructor that takes in a name
     * @param name the name of this option (i.e. "indent.level");

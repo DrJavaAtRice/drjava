@@ -67,10 +67,10 @@ public class OrderedHashSet<Type> implements Collection<Type> {
     throw new UnsupportedOperationException("OrderedHashSet does not support this operation");
   }
   
-  public boolean equals(Object o) { 
-    if (o == null || o.getClass() != getClass()) return false;
-    return order.equals(elements());
-  }
+//  public boolean equals(Object o) { 
+//    if (o == null || o.getClass() != getClass()) return false;
+//    return order.equals(((OrderHashSet)o).order);
+//  }
   
   public int hashCode() { return order.hashCode(); }
   

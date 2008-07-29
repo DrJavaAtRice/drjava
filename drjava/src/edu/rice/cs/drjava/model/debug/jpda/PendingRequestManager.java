@@ -40,7 +40,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 import java.io.*;
@@ -54,11 +54,11 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 
 public class PendingRequestManager {
   private JPDADebugger _manager;
-  private Hashtable<String, Vector<DocumentDebugAction<?>>> _pendingActions;
+  private HashMap<String, Vector<DocumentDebugAction<?>>> _pendingActions;
   
   public PendingRequestManager(JPDADebugger manager) {
     _manager = manager;
-    _pendingActions = new Hashtable<String, Vector<DocumentDebugAction<?>>>();
+    _pendingActions = new HashMap<String, Vector<DocumentDebugAction<?>>>();
   }
   
   /** Called if a breakpoint is set before its class is prepared

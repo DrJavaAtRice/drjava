@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.HashMap;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
@@ -68,7 +68,7 @@ public class History implements OptionConstants, Serializable {
    */
   public static final String HISTORY_FORMAT_VERSION_2 = "// DrJava saved history v2" + StringOps.EOL;
 
-  private final Vector<String> _vector = new Vector<String>();
+  private final ArrayList<String> _vector = new ArrayList<String>();
   private volatile int _cursor = -1;
 
   /** A hashmap for edited entries in the history. */

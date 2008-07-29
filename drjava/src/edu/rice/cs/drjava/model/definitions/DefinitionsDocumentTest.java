@@ -53,7 +53,6 @@ import junit.framework.TestSuite;
 import javax.swing.text.BadLocationException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /** Tests the functionality of the definitions document.
   * @version $Id$

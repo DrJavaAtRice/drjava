@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
@@ -196,12 +196,12 @@ public interface GlobalModel extends ILoadDocuments {
     * @param f where to save the project
     * @param info Extra view-related information that should be included in the project file
     */
-  public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
+  public void saveProject(File f, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
   /**Reloads a project without writing to disk.
     * @param f project file; does not actually get touched
     */
-  public void reloadProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
+  public void reloadProject(File f, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
   /** Formats a string pathname for use in the document navigator. */
   public String fixPathForNavigator(String path) throws IOException;

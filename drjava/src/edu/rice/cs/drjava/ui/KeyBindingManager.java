@@ -55,8 +55,8 @@ public class KeyBindingManager {
   private KeyBindingManager() {   }
   
   // Key-binding configuration tables
-  private Hashtable<KeyStroke, KeyStrokeData> _keyToDataMap = new Hashtable<KeyStroke, KeyStrokeData>();
-  private Hashtable<Action, KeyStrokeData> _actionToDataMap = new Hashtable<Action, KeyStrokeData>();
+  private HashMap<KeyStroke, KeyStrokeData> _keyToDataMap = new HashMap<KeyStroke, KeyStrokeData>();
+  private HashMap<Action, KeyStrokeData> _actionToDataMap = new HashMap<Action, KeyStrokeData>();
 
   private MainFrame _mainFrame = null;
 
@@ -79,7 +79,7 @@ public class KeyBindingManager {
 
   public void setShouldCheckConflict (boolean bool) { _shouldCheckConflict = bool;  }
   
-  public Enumeration getKeyStrokeData() { return _actionToDataMap.elements(); }
+  public Collection<KeyStrokeData> getKeyStrokeData() { return _actionToDataMap.values(); }
 
   public void put(Option<KeyStroke> kso, Action a, JMenuItem jmi, String name)  {
     KeyStroke ks = DrJava.getConfig().getSetting(kso);
@@ -114,12 +114,6 @@ public class KeyBindingManager {
     if (ksd == null) return null;
     return ksd.getName();
   }
-
-// public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
-//    KeyStroke ks = DrJava.getConfig().getSetting(opt);
-//    Action a = _keyToActionMap.get(ks);
-//    DrJava.getConfig().addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));
-//  }
 
   /** Assigns the selection action with the given name to the combination of the shift key and the given key stroke
     * option.  Also adds new KeyStrokOptionListeners to the non-shifted Actions

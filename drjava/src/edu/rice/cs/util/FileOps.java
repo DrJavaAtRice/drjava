@@ -59,7 +59,10 @@ public abstract class FileOps {
   
   private static Log _log = new Log("FileOpsTest.txt", false);
   
-  /** A singleton null file class. */
+  /** A singleton null file class. There is a separate NullFile class in this package. TODO: merge these two classes.  
+    * This class is used for all NullFile.ONLY references while the other is used for distinct untitled documents.
+    * Both appear to define the same notion of equality. 
+    */
   static public class NullFile extends File {
     
     public static NullFile ONLY = new NullFile();

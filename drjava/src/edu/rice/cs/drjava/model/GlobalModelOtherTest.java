@@ -39,8 +39,9 @@ package edu.rice.cs.drjava.model;
 import java.io.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.event.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -534,7 +535,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     });
     assertEquals("Should be 0 bookmarks", 0, _model.getBookmarkManager().getRegions().size());
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(3,3); } });
-    Vector<OrderedDocumentRegion> bms = _model.getBookmarkManager().getRegions();
+    ArrayList<OrderedDocumentRegion> bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 1 bookmarks", 1, bms.size());
     assertEquals("Start offset should be 0", 0, bms.get(0).getStartOffset());
     assertEquals("End offset should be "+FOO_CLASS.indexOf('\n'), FOO_CLASS.indexOf('\n'), bms.get(0).getEndOffset());

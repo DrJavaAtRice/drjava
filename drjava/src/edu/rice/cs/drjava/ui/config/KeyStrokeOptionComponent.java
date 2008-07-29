@@ -43,7 +43,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Hashtable;
+import java.util.HashMap;
 import javax.swing.*;
 
 /**
@@ -54,8 +54,8 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
   private static final int DIALOG_HEIGHT = 185;
   /** TODO: should this be synchronized?
    */
-  public static final Hashtable<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
-    new Hashtable<KeyStroke, KeyStrokeOptionComponent>();
+  public static final HashMap<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
+    new HashMap<KeyStroke, KeyStrokeOptionComponent>();
   private JButton _button;
   private JPanel _panel;
   private static GetKeyDialog _getKeyDialog =  null;

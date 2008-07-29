@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -148,7 +148,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final ModelListener _mainListener; 
   
   /** Maps an OpenDefDoc to its JScrollPane.  Why doesn't OpenDefDoc contain a defScrollPane field? */
-  private final Hashtable<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
+  private final HashMap<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
   
   /** The currently displayed DefinitionsPane. */
   private volatile DefinitionsPane _currentDefPane;
@@ -1162,9 +1162,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     // WARNING: this relation is finer grained that the equivalance relation induced by compareTo above
     public boolean equals(Object other) {
-      if (other == null) { return false; }
-      if (! (other instanceof ClassNameAndPackageEntry)) return false;
-      ClassNameAndPackageEntry o = (ClassNameAndPackageEntry)other;
+      if (other == null || ! (other instanceof ClassNameAndPackageEntry)) return false;  // multiple subclasses defined
+      ClassNameAndPackageEntry o = (ClassNameAndPackageEntry) other;
       return (getClassName().equals(o.getClassName()) && getFullPackage().equals(o.getFullPackage()));
     }
     public int hashCode() { return hash(getClassName().hashCode(), getFullPackage().hashCode()); }
@@ -2511,7 +2510,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                         wholeWord, noComments, noTestCases, doc, findReplace);
     
     final Map<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
-      Collections.synchronizedMap(new TreeMap<MovingDocumentRegion, HighlightManager.HighlightInfo>());
+      new TreeMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     final Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
       new Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
@@ -3016,7 +3015,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
      * field ... */
     DefinitionsPane.setEditorKit(_model.getEditorKit());
     
-    _defScrollPanes = new Hashtable<OpenDefinitionsDocument, JScrollPane>();
+    _defScrollPanes = new HashMap<OpenDefinitionsDocument, JScrollPane>();
     
     /* Set up tabbed pane and navigation pane. */
     _tabbedPane = new JTabbedPane();
@@ -5042,9 +5041,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _model.setProjectChanged(false);
   }
   
-  public Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> gatherProjectDocInfo() {
-    Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> map =
-      new Hashtable<OpenDefinitionsDocument,DocumentInfoGetter>();
+  public HashMap<OpenDefinitionsDocument,DocumentInfoGetter> gatherProjectDocInfo() {
+    HashMap<OpenDefinitionsDocument,DocumentInfoGetter> map =
+      new HashMap<OpenDefinitionsDocument,DocumentInfoGetter>();
     List<OpenDefinitionsDocument> docs = _model.getProjectDocuments();
     for(OpenDefinitionsDocument doc: docs) {
       map.put(doc, _makeInfoGetter(doc));

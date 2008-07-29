@@ -239,7 +239,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     }
     
     for(String key: sorted) {
-      Vector<String> row = new Vector<String>();
+      Vector<String> row = new Vector<String>();  // Vector is mandated by interface to DefaultTableModel
       row.add(key);
       _varTableModel.get(category).addRow(row);
     }

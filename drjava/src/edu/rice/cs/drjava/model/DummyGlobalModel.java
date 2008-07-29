@@ -66,12 +66,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Vector;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
@@ -259,11 +258,11 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call configNewProject on a Dummy");
   }
   
-  public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
+  public void saveProject(File f, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
     throw new UnsupportedOperationException("Tried to call saveProject on a Dummy");
   }
   
-  public void reloadProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
+  public void reloadProject(File f, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
     throw new UnsupportedOperationException("Tried to call reloadProject on a Dummy");
   }
   

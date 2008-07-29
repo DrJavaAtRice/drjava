@@ -135,10 +135,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     _interpreterOptions = Options.DEFAULT;
     _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
-    _interpreters = Collections.synchronizedMap(new HashMap<String,Interpreter>());
-    _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
-    _environments =
-      Collections.synchronizedMap(new HashMap<String, Pair<TypeContext, RuntimeBindings>>());
+    _interpreters = new HashMap<String,Interpreter>();
+    _busyInterpreters = new HashSet<Interpreter>();
+    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
     _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
   

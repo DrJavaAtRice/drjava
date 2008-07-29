@@ -726,27 +726,17 @@ public class ConfigFrame extends SwingFrame {
     // using a treeset because it automatically sorts element upon insertion
     TreeSet<KeyStrokeOptionComponent> _comps = new TreeSet<KeyStrokeOptionComponent>();
 
-    KeyStrokeData tmpKsd;
-    KeyStrokeOptionComponent tmpKsoc;
+    KeyStrokeOptionComponent ksoc;
 
-    Enumeration e = KeyBindingManager.ONLY.getKeyStrokeData();
-    while (e.hasMoreElements()) {
-      tmpKsd = (KeyStrokeData) e.nextElement();
-      if (tmpKsd.getOption() != null) {
+    for (KeyStrokeData ksd: KeyBindingManager.ONLY.getKeyStrokeData()) {
+      if (ksd.getOption() != null) {
         // Get the tooltip, or default to its name, if none
-//        KeyStroke ks = tmpKsd.getKeyStroke();
-//        Action a = KeyBindingManager.Singleton.get(ks);
-        Action a = tmpKsd.getAction();
+        Action a = ksd.getAction();
         String desc = (String) a.getValue(Action.SHORT_DESCRIPTION);
-        if ((desc == null) || (desc.equals(""))) {
-          desc = tmpKsd.getName();
-        }
+        if (desc == null || desc.equals("")) desc = ksd.getName();
 
-        tmpKsoc = new KeyStrokeOptionComponent((KeyStrokeOption)tmpKsd.getOption(),
-                                               tmpKsd.getName(), this, desc);
-        if (tmpKsoc != null) {
-          _comps.add(tmpKsoc);
-        }
+        ksoc = new KeyStrokeOptionComponent((KeyStrokeOption)ksd.getOption(), ksd.getName(), this, desc);
+        if (ksoc != null) _comps.add(ksoc);
       }
     }
 

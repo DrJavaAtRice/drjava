@@ -91,9 +91,8 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
 //    return o1.equals(o2);
 //  }
   
-  /** Defines the equality relation on DocumentRegions.  This equivalence relation on allocated objects is finer
-    * grained than the equivalence relation induced by compareTo because it requires equality on Position objects, 
-    * not just equality of the current offsets of Positions. 
+  /** Defines the equality relation on DocumentRegions.  This equivalence relation is consistent with the equivalence
+    * relation induced by the compareTo method.
     */
   public final boolean equals(Object o) {
     if (o == null || ! (o instanceof IDocumentRegion)) return false;

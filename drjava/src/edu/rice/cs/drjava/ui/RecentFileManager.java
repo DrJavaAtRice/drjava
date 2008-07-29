@@ -106,7 +106,7 @@ public class RecentFileManager implements OptionConstants {
   
   /** Saves the current list of files to the config object. */
   public void saveRecentFiles() {
-    DrJava.getConfig().setSetting(_settingConfigConstant,_recentFiles);
+    DrJava.getConfig().setSetting(_settingConfigConstant, _recentFiles);
   }
   
   /** Updates the list after the given file has been opened. */

@@ -36,15 +36,15 @@
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.EmptyBorder;
-
 import java.awt.event.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Vector;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
@@ -212,10 +212,10 @@ public class ProjectPropertiesFrame extends SwingFrame {
     
     _autoRefreshComponent.setSelected(_getAutoRefreshStatus());
 
-    Vector<File> cp = new Vector<File>(CollectUtil.makeList(_model.getExtraClassPath()));
+    ArrayList<File> cp = new ArrayList<File>(CollectUtil.makeList(_model.getExtraClassPath()));
     _extraClassPathList.setValue(cp);
 
-    cp = new Vector<File>();
+    cp = new ArrayList<File>();
     for(File f: _model.getExclFiles()) { cp.add(f); }
     _excludedFilesList.setValue(cp);
     _applyButton.setEnabled(false);
@@ -245,7 +245,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     if (_mainDocumentSelector.getFileField().getText().equals("")) mc = FileOps.NULL_FILE;
     _model.setMainClass(mc);
 
-    Vector<File> extras = _extraClassPathList.getValue();
+    Vector<File> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
     _model.setExtraClassPath(IterUtil.snapshot(extras));
 
     _model.setAutoRefreshStatus(_autoRefreshComponent.isSelected());

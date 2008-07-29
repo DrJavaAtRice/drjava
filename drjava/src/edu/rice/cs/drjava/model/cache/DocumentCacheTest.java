@@ -46,7 +46,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 /** This used to extend GlobalModelTestCase, but now it extends just TestCase.  Perhaps it should be changed back. */
@@ -54,7 +54,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   
   private DefaultGlobalModel _model;
   private DocumentCache _cache;
-  private Hashtable<OpenDefinitionsDocument, DCacheAdapter> _adapterTable;
+  private HashMap<OpenDefinitionsDocument, DCacheAdapter> _adapterTable;
   
   private int _doc_made;
   private int _doc_saved;
@@ -70,7 +70,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     _cache = _model.getDocumentCache();
     _cache.setCacheSize(4);
-    _adapterTable = new Hashtable<OpenDefinitionsDocument, DCacheAdapter> ();
+    _adapterTable = new HashMap<OpenDefinitionsDocument, DCacheAdapter> ();
     _cache.addRegistrationListener(new DocumentCache.RegistrationListener() {
       public void registered(OpenDefinitionsDocument odd, DCacheAdapter a) {
         _adapterTable.put(odd, a);

@@ -62,8 +62,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -134,7 +134,6 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
-
 
 //import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.FileOpenSelector;
@@ -268,7 +267,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return new copy of list of find results managers for find result regions. */
   public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
-//    System.err.println("getFindResultsManager called; returning " + _findResultsManagers + ")");
     return new LinkedList<RegionManager<MovingDocumentRegion>>(_findResultsManagers);
   }
   
@@ -576,8 +574,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _workDir;
     volatile File _projectFile;
     final File[] _projectFiles;
-    volatile Vector<File> _auxFiles;            // distinct from _auxiliaryFiles in ProjectProfile
-    private volatile Vector<File> _exclFiles;   // distinct from _excludedFiles in ProjectProile and CompilerErrorPanel
+    volatile ArrayList<File> _auxFiles;            // distinct from _auxiliaryFiles in ProjectProfile
+    private volatile ArrayList<File> _exclFiles;   // distinct from _excludedFiles in ProjectProile and CompilerErrorPanel
     volatile Iterable<File> _projExtraClassPath;
     private boolean _isProjectChanged = false;
     volatile File _createJarFile;
@@ -599,9 +597,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _workDir = wd;
       _projectFile = project;
       _projectFiles = srcFiles;
-      _auxFiles = new Vector<File>(auxFiles.length);
+      _auxFiles = new ArrayList<File>(auxFiles.length);
       for(File f: auxFiles) { _auxFiles.add(f); }
-      _exclFiles = new Vector<File>(excludedFiles.length);
+      _exclFiles = new ArrayList<File>(excludedFiles.length);
       for(File f: excludedFiles) { _exclFiles.add(f); }
       _projExtraClassPath = cp;
       
@@ -1494,7 +1492,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param file where to save the project
     * @param info
     */
-  public ProjectProfile _makeProjectProfile(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) 
+  public ProjectProfile _makeProjectProfile(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) 
     throws IOException {    
     ProjectProfile builder = new ProjectProfile(file);
     
@@ -1570,7 +1568,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
     * @param file where to save the project
     */
-  public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+  public void saveProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     // if file is read-only, ask if it should be made writable
     if (file.exists() && !file.canWrite()) {
       File[] res = _notifier.filesReadOnly(new File[] {file});
@@ -1600,7 +1598,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
     * @param file where to save the project
     */
-  public void exportOldProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+  public void exportOldProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     ProjectProfile builder = _makeProjectProfile(file, info);
     
     // write to disk
@@ -1619,7 +1617,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getCreateJarFlags(), builder.getAutoRefreshStatus()));
   }
   
-  public void reloadProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+  public void reloadProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     boolean projChanged = isProjectChanged();
     ProjectProfile builder = _makeProjectProfile(file, info);
     _loadProject(builder);

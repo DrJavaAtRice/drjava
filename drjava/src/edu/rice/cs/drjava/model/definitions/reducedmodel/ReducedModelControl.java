@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import edu.rice.cs.util.UnexpectedException;
 

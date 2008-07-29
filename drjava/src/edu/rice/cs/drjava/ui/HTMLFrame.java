@@ -44,7 +44,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.net.*;
 import java.io.*;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -69,7 +69,7 @@ public class HTMLFrame extends SwingFrame {
   private JButton _backButton;
   private JButton _forwardButton;
   protected URL _baseURL;
-  private Vector<HyperlinkListener> _hyperlinkListeners;
+  private ArrayList<HyperlinkListener> _hyperlinkListeners;
   private boolean _linkError;
   private URL _lastURL;
   
@@ -218,7 +218,7 @@ public class HTMLFrame extends SwingFrame {
     cp.add(_closePanel, BorderLayout.SOUTH);
     
     _linkError = false;
-    _hyperlinkListeners = new Vector<HyperlinkListener>();
+    _hyperlinkListeners = new ArrayList<HyperlinkListener>();
     _hyperlinkListeners.add(_resetListener);
     _mainDocPane.addHyperlinkListener(_resetListener);
     

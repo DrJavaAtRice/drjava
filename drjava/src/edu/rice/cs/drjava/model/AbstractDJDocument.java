@@ -69,7 +69,6 @@ import java.util.SortedMap;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.Vector;
 import javax.swing.ProgressMonitor;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;

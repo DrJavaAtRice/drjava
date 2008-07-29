@@ -38,9 +38,9 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.util.Lambda;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
@@ -95,7 +95,7 @@ public interface RegionManager<R extends IDocumentRegion> {
   public SortedSet<R> getRegions(OpenDefinitionsDocument odd);
   
   /** @return a Vector<R> containing all the DocumentRegion objects in this mangager. */
-  public Vector<R> getRegions();
+  public ArrayList<R> getRegions();
 
   /** Tells the manager to remove all regions. */
   public void clearRegions();

@@ -642,7 +642,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     assertEquals("Doc6 setup correctly", d6, p6.getOpenDefDocument()); 
     
     // all the panes have a listener, so lets close all files
-    
+//    Utilities.show("Waiting to start");
     p1 = p2 = p3 = p4 = p5 = p6 = null;
     d1 = d2 = d3 = d4 = d5 = d6 = null;
 //    _model.newFile();  // create a new document and pane for the model to hold as active.
@@ -663,20 +663,16 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       System.gc();
       ct++; 
     }
-    while (ct < 10 && (_finalDocCt != 6 /* || _finalPaneCt != 6*/ ));
+    while (ct < 10 && (_finalDocCt != 6  /* || _finalPaneCt != 6 */));
     
     if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
                        (6 - _finalDocCt));
     
     if (ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
-    
-//    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
-    
-//    System.out.println("Foo");
-//    System.in.read();
+
     assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCt);
 //    assertEquals("all the panes should have been garbage collected", 6, _finalPaneCt);
-//    System.err.println("_finalPaneCt = " + _finalPaneCt);
+    System.out.println("_finalPaneCt = " + _finalPaneCt);
     
     _log.log("testDocumentPaneMemoryLeak completed");
   }

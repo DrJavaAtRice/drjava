@@ -42,14 +42,14 @@ import java.lang.reflect.Field;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.Event;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /** Class representing all configuration options with values of type KeyStroke.  Only runs in the event thread, so no
   * synchronization is necessary (or advisable).*/
 public class KeyStrokeOption extends Option<KeyStroke> {
   
   /** Storage for keystrokes.*/
-  static Hashtable<Integer, String> keys = new Hashtable<Integer, String>();
+  static HashMap<Integer, String> keys = new HashMap<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
   /** Standard constructor
     * @param key The name of this option.

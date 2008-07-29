@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import java.util.List;
 import java.util.LinkedList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import javax.swing.text.*;
 
 import edu.rice.cs.drjava.DrJava;
@@ -62,10 +62,10 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
   private long _lastDelay = System.currentTimeMillis();
   
   /** Last updates for the documents. */
-  private Hashtable<OpenDefinitionsDocument, Long> _lastUpdates = new Hashtable<OpenDefinitionsDocument, Long>();
-  
+  private HashMap<OpenDefinitionsDocument, Long> _lastUpdates = new HashMap<OpenDefinitionsDocument, Long>();
+
   /** Enclosing class names for the documents. */
-  private Hashtable<OpenDefinitionsDocument, String> _enclosingClassNames = new Hashtable<OpenDefinitionsDocument, String>();
+  private HashMap<OpenDefinitionsDocument, String> _enclosingClassNames = new HashMap<OpenDefinitionsDocument, String>();
   
   /** Flag to stop automatic updates. */
   private volatile boolean _running = false;

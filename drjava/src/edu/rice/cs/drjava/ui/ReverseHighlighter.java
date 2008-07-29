@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.text.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.awt.*;
 import javax.swing.plaf.*;
 import javax.swing.*;
@@ -53,9 +53,7 @@ import javax.swing.*;
 public class ReverseHighlighter extends DefaultHighlighter {
   
   /** Creates a new ReverseHighlighter object. */
-  public ReverseHighlighter() {
-    drawsLayeredHighlights = true;
-  }
+  public ReverseHighlighter() { drawsLayeredHighlights = true; }
   
   // ---- Highlighter methods ----------------------------------------------
   
@@ -65,10 +63,10 @@ public class ReverseHighlighter extends DefaultHighlighter {
    */
   public void paint(Graphics g) {
     // PENDING(prinz) - should cull ranges not visible
-    int len = highlights.size();
+    int len = _highlights.size();
     for (int i = 0; i < len; i++) {
-      HighlightInfo info = highlights.elementAt(i);
-      if (!(info instanceof LayeredHighlightInfo)) {
+      HighlightInfo info = _highlights.get(i);
+      if (! (info instanceof LayeredHighlightInfo)) {
         // Avoid allocing unless we need it.
         Rectangle a = component.getBounds();
         Insets insets = component.getInsets();
@@ -77,7 +75,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         a.width -= insets.left + insets.right;
         a.height -= insets.top + insets.bottom;
         for (; i < len; i++) {
-          info = highlights.elementAt(i);
+          info = _highlights.get(i);
           if (! (info instanceof LayeredHighlightInfo)) {
             Highlighter.HighlightPainter p = info.getPainter();
             p.paint(g, info.getStartOffset(), info.getEndOffset(),
@@ -120,40 +118,30 @@ public class ReverseHighlighter extends DefaultHighlighter {
     HighlightInfo i = (getDrawsLayeredHighlights() &&
                        (p instanceof LayeredHighlighter.LayerPainter)) ?
       new LayeredHighlightInfo() : new HighlightInfo();
-    i.painter = p;
+    i._painter = p;
     
     i.p0 = doc.createPosition(p0);
     i.p1 = doc.createPosition(p1);
     
-    int insertPos = highlights.size();
-    /*if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
-     // insert solid painters after the frame and underline painters
-     while (insertPos>0) {
-     HighlightInfo hli = highlights.elementAt( insertPos-1 );
-     if ((! (hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
-     (! (hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
-     break;
-     }
-     --insertPos;
-     }
-     }*/
+    int insertPos = _highlights.size();
+
     if (p instanceof DrJavaHighlightPainter) {
-      while (insertPos>0) {
-        HighlightInfo hli = highlights.elementAt( insertPos-1 );
+      while (insertPos > 0) {
+        HighlightInfo hli = _highlights.get( insertPos-1 );
         if (hli.getPainter() instanceof DrJavaHighlightPainter)
           --insertPos;
         else break;
       }
     } else if (p instanceof DefaultHighlightPainter) {
-      while (insertPos>0) {
-        HighlightInfo hli = highlights.elementAt( insertPos-1 );
+      while (insertPos > 0) {
+        HighlightInfo hli = _highlights.get( insertPos-1 );
         if (hli.getPainter() instanceof DefaultHighlightPainter)
           --insertPos;
         else break;
       }
     } else if (p instanceof DefaultFrameHighlightPainter) {
-      while (insertPos>0) {
-        HighlightInfo hli = highlights.elementAt( insertPos-1 );
+      while (insertPos > 0) {
+        HighlightInfo hli = _highlights.get( insertPos-1 );
         if (hli.getPainter() instanceof DefaultHighlightPainter || hli.getPainter() instanceof DefaultFrameHighlightPainter)
           --insertPos;
         else break;
@@ -161,7 +149,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     } else {
       insertPos = 0;
     }
-    highlights.add(insertPos, i);
+    _highlights.add(insertPos, i);
     //_log.log(p.toString() + ", pos: " + insertPos);
     safeDamageRange(p0, p1);
     return i;
@@ -182,7 +170,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       HighlightInfo info = (HighlightInfo) tag;
       safeDamageRange(info.p0, info.p1);
     }
-    highlights.removeElement(tag);
+    _highlights.remove(tag);
   }
   
   /** Removes all highlights.
@@ -190,7 +178,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   public void removeAllHighlights() {
     TextUI mapper = component.getUI();
     if (getDrawsLayeredHighlights()) {
-      int len = highlights.size();
+      int len = _highlights.size();
       if (len != 0) {
         int minX = 0;
         int minY = 0;
@@ -199,7 +187,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         int p0 = -1;
         int p1 = -1;
         for (int i = 0; i < len; i++) {
-          HighlightInfo hi = highlights.elementAt(i);
+          HighlightInfo hi = _highlights.get(i);
           if (hi instanceof LayeredHighlightInfo) {
             LayeredHighlightInfo info = (LayeredHighlightInfo)hi;
             minX = Math.min(minX, info.x);
@@ -226,16 +214,16 @@ public class ReverseHighlighter extends DefaultHighlighter {
             safeDamageRange(p0, p1);
           } catch (BadLocationException e) {}
         }
-        highlights.removeAllElements();
+        _highlights.clear();
       }
     }
     else if (mapper != null) {
-      int len = highlights.size();
+      int len = _highlights.size();
       if (len != 0) {
         int p0 = Integer.MAX_VALUE;
         int p1 = 0;
         for (int i = 0; i < len; i++) {
-          HighlightInfo info = highlights.elementAt(i);
+          HighlightInfo info = _highlights.get(i);
           p0 = Math.min(p0, info.p0.getOffset());
           p1 = Math.max(p1, info.p1.getOffset());
         }
@@ -243,7 +231,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
           safeDamageRange(p0, p1);
         } catch (BadLocationException e) {}
         
-        highlights.removeAllElements();
+        _highlights.clear();
       }
     }
   }
@@ -295,14 +283,15 @@ public class ReverseHighlighter extends DefaultHighlighter {
    * @see Highlighter#getHighlights
    */
   public Highlighter.Highlight[] getHighlights() {
-    int size = highlights.size();
+    int size = _highlights.size();
     if (size == 0) {
       return noHighlights;
     }
-    Highlighter.Highlight[] h = new Highlighter.Highlight[size];
-    highlights.copyInto(h);
+    Highlighter.Highlight[] h = _highlights.toArray(EMTPY_HIGHLIGHTS);
     return h;
   }
+  
+  private static final Highlight[] EMTPY_HIGHLIGHTS = new Highlighter.Highlight[0];
   
   /** When leaf Views (such as LabelView) are rendering they should
    * call into this method. If a highlight is in the given region it will
@@ -318,8 +307,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
   public void paintLayeredHighlights(Graphics g, int p0, int p1,
                                      Shape viewBounds,
                                      JTextComponent editor, View view) {
-    for (int counter = highlights.size() - 1; counter >= 0; counter--) {
-      Object tag = highlights.elementAt(counter);
+    for (int counter = _highlights.size() - 1; counter >= 0; counter--) {
+      Object tag = _highlights.get(counter);
       if (tag instanceof LayeredHighlightInfo) {
         LayeredHighlightInfo lhi = (LayeredHighlightInfo)tag;
         int start = lhi.getStartOffset();
@@ -364,7 +353,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   
   private final static Highlighter.Highlight[] noHighlights =
     new Highlighter.Highlight[0];
-  private Vector<HighlightInfo> highlights = new Vector<HighlightInfo>();  // Vector<HighlightInfo>
+  private ArrayList<HighlightInfo> _highlights = new ArrayList<HighlightInfo>();  // Vector<HighlightInfo>
   private JTextComponent component;
   private boolean drawsLayeredHighlights;
   private SafeDamager safeDamager = new SafeDamager();
@@ -372,26 +361,17 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Simple highlight painter that draws a rectangular box around text. */
   public static class DefaultFrameHighlightPainter extends LayeredHighlighter.LayerPainter {
     
-    /**
-     * Constructs a new highlight painter. If <code>c</code> is null,
-     * the JTextComponent will be queried for its selection color.
-     *
-     * @param c the color for the highlight
-     * @param t the thickness in pixels
-     */
+    /** Constructs a new highlight painter. If c is null, the JTextComponent will be queried for its selection color.
+      * @param c the color for the highlight
+      * @param t the thickness in pixels
+      */
     public DefaultFrameHighlightPainter(Color c, int t) {
       color = c;
       thickness = t;
     }
     
-    /**
-     * Returns the color of the highlight.
-     *
-     * @return the color
-     */
-    public Color getColor() {
-      return color;
-    }
+    /** @return the color of the highlight */
+    public Color getColor() { return color; }
     
     /** @return thickness in pixels */
     public int getThickness() { return thickness; }
@@ -399,7 +379,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     // --- HighlightPainter methods ---------------------------------------
     
     private void drawRectThick(Graphics g, int x, int y, int width, int height, int thick) {
-      if (thick<2) { g.drawRect(x, y, width, height); }
+      if (thick < 2) { g.drawRect(x, y, width, height); }
       else {
         g.fillRect(x, y,              width, thick);
         g.fillRect(x, y+height-thick, width, thick);
@@ -408,15 +388,13 @@ public class ReverseHighlighter extends DefaultHighlighter {
       }
     }
     
-    /**
-     * Paints a highlight.
-     *
-     * @param g the graphics context
-     * @param offs0 the starting model offset >= 0
-     * @param offs1 the ending model offset >= offs1
-     * @param bounds the bounding box for the highlight
-     * @param c the editor
-     */
+    /** Paints a highlight.
+      * @param g the graphics context
+      * @param offs0 the starting model offset >= 0
+      * @param offs1 the ending model offset >= offs1
+      * @param bounds the bounding box for the highlight
+      * @param c the editor
+      */
     public void paint(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c) {
       Rectangle alloc = bounds.getBounds();
       try {
@@ -428,81 +406,58 @@ public class ReverseHighlighter extends DefaultHighlighter {
         // --- render ---
         Color color = getColor();
         
-        if (color == null) {
-          g.setColor(c.getSelectionColor());
-        }
-        else {
-          g.setColor(color);
-        }
-        if (p0.y == p1.y) {
-          // same line, render a rectangle
+        if (color == null)  g.setColor(c.getSelectionColor());
+        else  g.setColor(color);
+
+        if (p0.y == p1.y) { // same line, render a rectangle
           Rectangle r = p0.union(p1);
           drawRectThick(g, r.x, r.y, r.width, r.height, thickness);
-        } else {
-          // different lines
+        } 
+        else { // different lines
           int p0ToMarginWidth = alloc.x + alloc.width - p0.x;
           drawRectThick(g, p0.x, p0.y, p0ToMarginWidth, p0.height, thickness);
-          if ((p0.y + p0.height) != p1.y) {
-            drawRectThick(g, alloc.x, p0.y + p0.height, alloc.width, 
-                          p1.y - (p0.y + p0.height), thickness);
-          }
+          if ((p0.y + p0.height) != p1.y)
+            drawRectThick(g, alloc.x, p0.y + p0.height, alloc.width, p1.y - (p0.y + p0.height), thickness);
           drawRectThick(g, alloc.x, p1.y, (p1.x - alloc.x), p1.height, thickness);
         }
-      } catch (BadLocationException e) {
-        // can't render
-      }
+      } 
+      catch (BadLocationException e) { /* can't render */ }
     }
     
     // --- LayerPainter methods ----------------------------
-    /**
-     * Paints a portion of a highlight.
-     *
-     * @param g the graphics context
-     * @param offs0 the starting model offset >= 0
-     * @param offs1 the ending model offset >= offs1
-     * @param bounds the bounding box of the view, which is not
-     *        necessarily the region to paint.
-     * @param c the editor
-     * @param view View painting for
-     * @return region drawing occured in
-     */
-    public Shape paintLayer(Graphics g, int offs0, int offs1,
-                            Shape bounds, JTextComponent c, View view) {
+    /** Paints a portion of a highlight.
+      * @param g the graphics context
+      * @param offs0 the starting model offset >= 0
+      * @param offs1 the ending model offset >= offs1
+      * @param bounds the bounding box of the view, which is not necessarily the region to paint.
+      * @param c the editor
+      * @param view View painting for
+      * @return region drawing occured in
+      */
+    public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
       Color color = getColor();
       
-      if (color == null) {
-        g.setColor(c.getSelectionColor());
-      }
-      else {
-        g.setColor(color);
-      }
-      if (offs0 == view.getStartOffset() &&
-          offs1 == view.getEndOffset()) {
-        // Contained in view, can just use bounds.
+      if (color == null) g.setColor(c.getSelectionColor());
+      else g.setColor(color);
+
+      if (offs0 == view.getStartOffset() && offs1 == view.getEndOffset()) { // Contained in view, can just use bounds.
         Rectangle alloc;
-        if (bounds instanceof Rectangle) {
-          alloc = (Rectangle)bounds;
-        }
-        else {
-          alloc = bounds.getBounds();
-        }
+        if (bounds instanceof Rectangle) alloc = (Rectangle)bounds;
+        else alloc = bounds.getBounds();
+
         drawRectThick(g, alloc.x, alloc.y, alloc.width, alloc.height, thickness);
         return alloc;
       }
-      else {
-        // Should only render part of View.
+      else { // Should only render part of View.
         try {
           // --- determine locations ---
-          Shape shape = view.modelToView(offs0, Position.Bias.Forward,
-                                         offs1,Position.Bias.Backward,
-                                         bounds);
-          Rectangle r = (shape instanceof Rectangle) ?
-            (Rectangle)shape : shape.getBounds();
+          Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1,Position.Bias.Backward, bounds);
+          Rectangle r = (shape instanceof Rectangle) ? (Rectangle)shape : shape.getBounds();
+          
           drawRectThick(g, r.x, r.y, r.width, r.height, thickness);
           return r;
-        } catch (BadLocationException e) {
-          // can't render
-        }
+        } 
+        catch (BadLocationException e) { /* can't render */ }
       }
       // Only if exception
       return null;
@@ -516,26 +471,17 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Simple highlight painter that underlines text. */
   public static class DefaultUnderlineHighlightPainter extends LayeredHighlighter.LayerPainter {
     
-    /**
-     * Constructs a new highlight painter. If <code>c</code> is null,
-     * the JTextComponent will be queried for its selection color.
-     *
-     * @param c the color for the highlight
-     * @param t the thickness in pixels
-     */
+    /** Constructs a new highlight painter. If c< is null, the JTextComponent will be queried for its selection color.
+      * @param c the color for the highlight
+      * @param t the thickness in pixels
+      */
     public DefaultUnderlineHighlightPainter(Color c, int t) {
       color = c;
       thickness = t;
     }
     
-    /**
-     * Returns the color of the highlight.
-     *
-     * @return the color
-     */
-    public Color getColor() {
-      return color;
-    }
+    /** @return the color of the highlight */
+    public Color getColor() { return color; }
     
     /** @return thickness in pixels */
     public int getThickness() { return thickness; }
@@ -546,15 +492,13 @@ public class ReverseHighlighter extends DefaultHighlighter {
       g.fillRect(x, y+height-thick, width, thick);
     }
     
-    /**
-     * Paints a highlight.
-     *
-     * @param g the graphics context
-     * @param offs0 the starting model offset >= 0
-     * @param offs1 the ending model offset >= offs1
-     * @param bounds the bounding box for the highlight
-     * @param c the editor
-     */
+    /** Paints a highlight.
+      * @param g the graphics context
+      * @param offs0 the starting model offset >= 0
+      * @param offs1 the ending model offset >= offs1
+      * @param bounds the bounding box for the highlight
+      * @param c the editor
+      */
     public void paint(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c) {
       Rectangle alloc = bounds.getBounds();
       try {
@@ -566,81 +510,57 @@ public class ReverseHighlighter extends DefaultHighlighter {
         // --- render ---
         Color color = getColor();
         
-        if (color == null) {
-          g.setColor(c.getSelectionColor());
-        }
-        else {
-          g.setColor(color);
-        }
-        if (p0.y == p1.y) {
-          // same line, render a rectangle
+        if (color == null) g.setColor(c.getSelectionColor());
+        else g.setColor(color);
+
+        if (p0.y == p1.y) { // same line, render a rectangle
           Rectangle r = p0.union(p1);
           drawUnderline(g, r.x, r.y, r.width, r.height, thickness);
-        } else {
-          // different lines
+        } 
+        else { // different lines
           int p0ToMarginWidth = alloc.x + alloc.width - p0.x;
           drawUnderline(g, p0.x, p0.y, p0ToMarginWidth, p0.height, thickness);
-          if ((p0.y + p0.height) != p1.y) {
-            drawUnderline(g, alloc.x, p0.y + p0.height, alloc.width, 
-                          p1.y - (p0.y + p0.height), thickness);
-          }
+          if ((p0.y + p0.height) != p1.y)
+            drawUnderline(g, alloc.x, p0.y + p0.height, alloc.width, p1.y - (p0.y + p0.height), thickness);
+
           drawUnderline(g, alloc.x, p1.y, (p1.x - alloc.x), p1.height, thickness);
         }
-      } catch (BadLocationException e) {
-        // can't render
-      }
+      } 
+      catch (BadLocationException e) { /* can't render */ }
     }
     
     // --- LayerPainter methods ----------------------------
-    /**
-     * Paints a portion of a highlight.
-     *
-     * @param g the graphics context
-     * @param offs0 the starting model offset >= 0
-     * @param offs1 the ending model offset >= offs1
-     * @param bounds the bounding box of the view, which is not
-     *        necessarily the region to paint.
-     * @param c the editor
-     * @param view View painting for
-     * @return region drawing occured in
-     */
-    public Shape paintLayer(Graphics g, int offs0, int offs1,
-                            Shape bounds, JTextComponent c, View view) {
+    /** Paints a portion of a highlight.
+      * @param g the graphics context
+      * @param offs0 the starting model offset >= 0
+      * @param offs1 the ending model offset >= offs1
+      * @param bounds the bounding box of the view, which is not necessarily the region to paint.
+      * @param c the editor
+      * @param view View painting for
+      * @return region drawing occured in
+      */
+    public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
       Color color = getColor();
       
-      if (color == null) {
-        g.setColor(c.getSelectionColor());
-      }
-      else {
-        g.setColor(color);
-      }
-      if (offs0 == view.getStartOffset() &&
-          offs1 == view.getEndOffset()) {
-        // Contained in view, can just use bounds.
+      if (color == null) g.setColor(c.getSelectionColor());
+      else g.setColor(color);
+
+      if (offs0 == view.getStartOffset() && offs1 == view.getEndOffset()) { // Contained in view, can just use bounds
         Rectangle alloc;
-        if (bounds instanceof Rectangle) {
-          alloc = (Rectangle)bounds;
-        }
-        else {
-          alloc = bounds.getBounds();
-        }
+        if (bounds instanceof Rectangle) alloc = (Rectangle)bounds;
+        else alloc = bounds.getBounds();
+
         drawUnderline(g, alloc.x, alloc.y, alloc.width, alloc.height, thickness);
         return alloc;
       }
-      else {
-        // Should only render part of View.
+      else { // Should only render part of View.
         try {
           // --- determine locations ---
-          Shape shape = view.modelToView(offs0, Position.Bias.Forward,
-                                         offs1,Position.Bias.Backward,
-                                         bounds);
-          Rectangle r = (shape instanceof Rectangle) ?
-            (Rectangle)shape : shape.getBounds();
+          Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1,Position.Bias.Backward, bounds);
+          Rectangle r = (shape instanceof Rectangle) ? (Rectangle)shape : shape.getBounds();
           drawUnderline(g, r.x, r.y, r.width, r.height, thickness);
           return r;
-        } catch (BadLocationException e) {
-          // can't render
-        }
+        } catch (BadLocationException e) { /* can't render */ }
       }
       // Only if exception
       return null;
@@ -652,33 +572,26 @@ public class ReverseHighlighter extends DefaultHighlighter {
   
   class HighlightInfo implements Highlighter.Highlight {
     
-    public int getStartOffset() {
-      return p0.getOffset();
-    }
-    
-    public int getEndOffset() {
-      return p1.getOffset();
-    }
-    
-    public Highlighter.HighlightPainter getPainter() {
-      return painter;
-    }
-    
     Position p0;
     Position p1;
-    Highlighter.HighlightPainter painter;
+    Highlighter.HighlightPainter _painter;
+    
+    public int getStartOffset() { return p0.getOffset(); }
+    
+    public int getEndOffset() { return p1.getOffset(); }
+    
+    public Highlighter.HighlightPainter getPainter() { return _painter; }
+    
+
   }
   
   
   /** This class is a wrapper for the DefaultHighlightPainter that allows us to tell whether a highlight was
-   * requested by DrJava or by Swing (as in selected text).
-   */
+    * requested by DrJava or by Swing (as in selected text).
+    */
   public static class DrJavaHighlightPainter extends DefaultHighlightPainter {
     
-    public DrJavaHighlightPainter(Color c) {
-      super(c);
-    }
-    
+    public DrJavaHighlightPainter(Color c) { super(c); }
   }
   
   
@@ -692,12 +605,9 @@ public class ReverseHighlighter extends DefaultHighlighter {
         return;
       
       Rectangle alloc;
-      if (bounds instanceof Rectangle) {
-        alloc = (Rectangle)bounds;
-      }
-      else {
-        alloc = bounds.getBounds();
-      }
+      if (bounds instanceof Rectangle) alloc = (Rectangle)bounds;
+      else alloc = bounds.getBounds();
+
       if (width == 0 || height == 0) {
         x = alloc.x;
         y = alloc.y;
@@ -715,18 +625,15 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
     
     /** Restricts the region based on the receivers offsets and messages the painter to paint the region.*/
-    void paintLayeredHighlights(Graphics g, int p0, int p1,
-                                Shape viewBounds, JTextComponent editor,
-                                View view) {
+    void paintLayeredHighlights(Graphics g, int p0, int p1, Shape viewBounds, JTextComponent editor, View view) {
       int start = getStartOffset();
       int end = getEndOffset();
       // Restrict the region to what we represent
       p0 = Math.max(start, p0);
       p1 = Math.min(end, p1);
-      // Paint the appropriate region using the painter and union
-      // the effected region with our bounds.
-      union(((LayeredHighlighter.LayerPainter)painter).paintLayer
-              (g, p0, p1, viewBounds, editor, view));
+      // Paint the appropriate region using the painter and union the effected region with our bounds.
+      LayeredHighlighter.LayerPainter lp = (LayeredHighlighter.LayerPainter) _painter;
+      union(lp.paintLayer(g, p0, p1, viewBounds, editor, view));
     }
     
     int x;
@@ -741,16 +648,15 @@ public class ReverseHighlighter extends DefaultHighlighter {
     * order in <code>run</code> call.
     */
   class SafeDamager implements Runnable {
-    private Vector<Position> p0 = new Vector<Position>(10);
-    private Vector<Position> p1 = new Vector<Position>(10);
+    private ArrayList<Position> p0 = new ArrayList<Position>(10);
+    private ArrayList<Position> p1 = new ArrayList<Position>(10);
     private Document lastDoc = null;
     
     /** Executes range(s) damage and cleans range queue. */
     public synchronized void run() {
       if (component != null) {
         TextUI mapper = component.getUI();
-        if (mapper != null && lastDoc == component.getDocument()) {
-          // the Document should be the same to properly display highlights
+        if (mapper != null && lastDoc == component.getDocument()) { // Doc must match to properly display highlights
           int len = p0.size();
           for (int i = 0; i < len; i++){
             mapper.damageRange(component, p0.get(i).getOffset(), p1.get(i).getOffset());
@@ -764,15 +670,9 @@ public class ReverseHighlighter extends DefaultHighlighter {
       lastDoc = null;
     }
     
-    /**
-     * Adds the range to be damaged into the range queue. If the
-     * range queue is empty (the first call or run() was already
-     * invoked) then adds this class instance into EventDispatch
-     * queue.
-     *
-     * The method also tracks if the current document changed or
-     * component is null. In this case it removes all ranges added
-     * before from range queue.
+    /** Adds range to be damaged to the range queue. If the range queue is empty (the first call or run() was already
+     * invoked) then adds this class instance into EventDispatch queue. The method also tracks if the current document
+     * changed or component is null. In this case it removes all ranges added before from range queue.
      */
     public synchronized void damageRange(Position pos0, Position pos1) {
       if (component == null) {

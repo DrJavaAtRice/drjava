@@ -64,8 +64,5 @@ public class NullFile extends File implements Serializable {
   public String getLexiName() { return ""; }
   
   /**  All distinct objects of type NullFile are unequal. */
-  public boolean equals(Object o) {
-    if (o == null || o.getClass() != getClass()) return false;
-    return o == this;
-  } 
+  public boolean equals(Object o) { return o == this; } 
 }

@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.util.swing.Utilities;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Vector;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?
@@ -64,8 +64,8 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** A hashtable that maps Configuration objects to a list of listeners for this particular option.  Part of the magic
     * inner workings of this package.
     */
-  final Hashtable<Configuration,Vector<OptionListener<T>>> listeners =
-    new Hashtable<Configuration,Vector<OptionListener<T>>>();
+  final HashMap<Configuration,Vector<OptionListener<T>>> listeners =
+    new HashMap<Configuration,Vector<OptionListener<T>>>();
   
   /** Constructor that takes in a name and default value
     * @param name the name of this option (eg. "indent.level");

@@ -46,13 +46,13 @@ public interface Tokens {
     protected String _rep;
     
     /** @param rep The string representation of this token */
-    public SExpToken(String rep) { _rep = rep; }
+    public SExpToken(String rep) { _rep = rep.intern(); }  // intern() supports use of == for equality testing
     
     /** @return the string representation of this token */
     public String getText() { return _rep; }
     
     public boolean equals(Object o) {
-      return (o != null && o.getClass() == getClass() && ((SExpToken)o)._rep.equals(_rep));
+      return (o != null && o.getClass() == getClass() && ((SExpToken)o)._rep == _rep);
     }
     
     public int hashCode() { return _rep.hashCode(); }

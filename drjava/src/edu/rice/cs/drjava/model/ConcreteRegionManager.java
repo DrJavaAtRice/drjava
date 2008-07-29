@@ -44,7 +44,6 @@ import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -52,7 +51,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import javax.swing.SwingUtilities;
 //import javax.swing.tree.DefaultMutableTreeNode;
@@ -67,8 +65,8 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   RegionManager<R> {
   
   /** Hashtable mapping documents to collections of regions.  Primitive operations are thread safe. */
-  private volatile Hashtable<OpenDefinitionsDocument, SortedSet<R>> _regions = 
-    new Hashtable<OpenDefinitionsDocument, SortedSet<R>>();
+  private volatile HashMap<OpenDefinitionsDocument, SortedSet<R>> _regions = 
+    new HashMap<OpenDefinitionsDocument, SortedSet<R>>();
   
   /** The domain of the _regions.  This field can be extracted from _regions so it is provided to improve performance
     * Primitive operations are thread-safe. 
@@ -92,10 +90,6 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
     return (T) new DocumentRegion(odd, start, end);
   }
-  
-//  public DefaultMutableTreeNode getTreeNode(OpenDefinitionsDocument doc) { return _treeNodes.get(doc); }
-//  
-//  public void setTreeNode(OpenDefinitionsDocument doc, DefaultMutableTreeNode node) { _treeNodes.put(doc, node); }
   
   private SortedSet<R> getHeadSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());
@@ -187,26 +181,20 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     SortedSet<R> docRegions = _regions.get(odd);
     if (docRegions == null) { // if necessary create a Hashtable entry for odd and insert it in the _documents set
       _documents.add(odd);
-      docRegions = Collections.synchronizedSortedSet(new TreeSet<R>()); 
+      docRegions = new TreeSet<R>(); 
       _regions.put(odd, docRegions);
     }
     
     // Check for duplicate region
-    final boolean alreadyContained = docRegions.contains(region);
-    if (!alreadyContained) { // region does not already exist in manager
+    final boolean alreadyPresent = docRegions.contains(region);
+    if (! alreadyPresent) {    // region does not already exist in manager
       docRegions.add(region);  // modifies docRegions, which is part of _regions
-//        Utilities.show("Region manager " + this + " added region " + region);
-//        Utilities.show("docRegions for document " + odd + " = " + _regions.get(odd));
     }
-    
-//    _current = region;
-//      final int regionIndex = getIndexOf(region);
-//      final String stackTrace = StringOps.getStackTrace();
     
     assert _documents.contains(odd);
     
     // only notify if the region was actually added
-    if (! alreadyContained) {
+    if (! alreadyPresent) {
       // notify.  invokeLater unnecessary if it only runs in the event thread
       _lock.startRead();
       try { for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); } } 
@@ -222,7 +210,6 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     
     OpenDefinitionsDocument doc = region.getDocument();
     SortedSet<R> docRegions = _regions.get(doc);
-//    System.err.println("ODD for region " + region + " = " + doc);
 //    System.err.println("doc regions for " + doc + " = " + docRegions);
     if (docRegions == null) return;  // since region is not stored in this region manager, exit!
     final boolean wasRemoved = docRegions.remove(region);  // remove the region from the manager
@@ -250,32 +237,17 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     if (found) {
 //      System.err.println("Removing document regions for " + doc + " in " + this);
       final SortedSet<R> regions = _regions.get(doc);
-      // The following ugly line of code is dictated by the "fail fast" semantics of Java iterators and erasure generics
-      for (Object r: regions.toArray()) { removeRegion((R) r); }  
-      // notify all listeners for all regions
-//      _notifyRegionsRemoved(regions);
-//      _regions.remove(doc); // done automatically when last region r in doc is removed
+      // The following ugly line of code is dictated by the "fail fast" semantics of Java iterators
+      while (! regions.isEmpty()) regions.remove(regions.first());
     }
   }
-    
-//  private void _notifyRegionsRemoved(final Collection<R> regions) {
-//    _lock.startRead();
-//    try {
-//      for (RegionManagerListener<R> l: _listeners) { 
-//        for (R r: regions) { l.regionRemoved(r); }
-//      } 
-//    } 
-//    finally { _lock.endRead(); }
-//  }
   
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
   public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
   
-  public Vector<R> getRegions() {
-    Vector<R> regions = new Vector<R>();
+  public ArrayList<R> getRegions() {
+    ArrayList<R> regions = new ArrayList<R>();
     for (OpenDefinitionsDocument odd: _documents) regions.addAll(_regions.get(odd));
-//      Utilities.show("in ConcreteRegionManager " + this + ",_documents = " + _documents);
-//      Utilities.show("getRegions returning: " + regions);
     return regions;
   }
   
@@ -288,7 +260,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   
   /** Tells the manager to remove all regions. */
   public void clearRegions() {
-    final Vector<R> regions = getRegions();
+    final ArrayList<R> regions = getRegions();
     // Remove all regions in this manager
     _regions.clear();
     _documents.clear();

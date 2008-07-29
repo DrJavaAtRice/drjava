@@ -75,10 +75,11 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     */
 //    public boolean contains(DocumentRegion r) { return _regionSet.contains(r); }
   
-  private boolean equals(BrowserDocumentRegion r1, BrowserDocumentRegion r2) {
-    return r1.getDocument() == r2.getDocument() && r1.getStartOffset() == r2.getStartOffset() &&
-      r1.getEndOffset() == r2.getEndOffset();
-  }
+  // Not used
+//  private boolean equals(BrowserDocumentRegion r1, BrowserDocumentRegion r2) {
+//    return r1.getDocument() == r2.getDocument() && r1.getStartOffset() == r2.getStartOffset() &&
+//      r1.getEndOffset() == r2.getEndOffset();
+//  }
 
   /** Add the supplied DocumentRegion r to the manager just above _current and set _current to refer to r.  Only runs
     * in event thread after initialization.  Notifies regionAdded listeners if _currentIndex is changed.  Assumes 
