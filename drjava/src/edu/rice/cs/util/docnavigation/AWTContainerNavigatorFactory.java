@@ -105,11 +105,9 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
   // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
   // long as it extends ItemT.
   private void migrateNavigatorItems(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
-    Enumeration<ItemT> enumerator =  parent.getDocuments();
-    while (enumerator.hasMoreElements()) {
-      ItemT navitem = enumerator.nextElement();
-      child.addDocument(navitem);
-    }
+    ArrayList<ItemT> docs =  parent.getDocuments();
+    for (ItemT item: docs) child.addDocument(item);
+
     parent.clear(); // Remove documents from old navigator (parent)
   }
   

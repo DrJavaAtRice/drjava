@@ -109,13 +109,13 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** Returns all the <code>IDocuments</code> in the collection in enumeration order.
     * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
     */
-  public Enumeration<ItemT> getDocuments();
+  public ArrayList<ItemT> getDocuments();
   
   /** Returns all the <code>IDocuments</code> contained in the specified bin.
     * @param binName name of bin
     * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
     */
-  public Enumeration<ItemT> getDocumentsInBin(String binName);
+  public ArrayList<ItemT> getDocumentsInBin(String binName);
   
   /** Tests to see if a given document is contained in this navigator.
     * @param doc the document to test for containment.

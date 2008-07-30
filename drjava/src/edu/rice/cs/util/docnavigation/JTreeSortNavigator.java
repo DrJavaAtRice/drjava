@@ -71,7 +71,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   private final BidirectionalHashMap<String, InnerNode<?, ItemT>> _path2node = new BidirectionalHashMap<String, InnerNode<?, ItemT>>();
   
   /** The collection of INavigationListeners listening to this JListNavigator */
-  private final Vector<INavigationListener<? super ItemT>> navListeners = new Vector<INavigationListener<? super ItemT>>();
+  private final ArrayList<INavigationListener<? super ItemT>> navListeners = new ArrayList<INavigationListener<? super ItemT>>();
   
   /** The renderer for this JTree. */
   private final CustomTreeCellRenderer _renderer;
@@ -475,9 +475,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * the returned structure.  Executes in any thread.
     * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
     */
-  public Enumeration<ItemT> getDocuments() {
+  public ArrayList<ItemT> getDocuments() {
     
-    final Vector<ItemT> list = new Vector<ItemT>(getDocumentCount()); // Use Vector because it implements an Enumeration
+    final ArrayList<ItemT> list = new ArrayList<ItemT>(getDocumentCount()); // Use Vector because it implements an Enumeration
     
     synchronized(_model) { // locks out mutation
       // e has a raw type because depthFirstEnumeration() has a raw type signature
@@ -490,15 +490,15 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         }
       }
     }
-    return list.elements();
+    return list;
   }
   
   /** Returns all the <code>IDocuments</code> contained in the specified bin.
     * @param binName name of bin
     * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
     */
-  public Enumeration<ItemT> getDocumentsInBin(String binName) {
-    final Vector<ItemT> list = new Vector<ItemT>();
+  public ArrayList<ItemT> getDocumentsInBin(String binName) {
+    final ArrayList<ItemT> list = new ArrayList<ItemT>();
     
     synchronized(_model) { // locks out mutation
       for(GroupNode<ItemT> gn: _roots) {
@@ -517,7 +517,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       }
     }
     
-    return list.elements();
+    return list;
   }
   
   /** Returns the number of <code>IDocuments</code> contained by this <code>IDocumentNavigator</code>

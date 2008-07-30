@@ -50,7 +50,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -4281,97 +4280,69 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   public void setStatusMessageColor(Color c) { _statusReport.setForeground(c); }
   
-  // Made package protected rather than private in order to facilitate the ProjectMenuTest.testSaveProject
-  void _moveToAuxiliary() {
-    // now works with multiple files
-    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
-    for (OpenDefinitionsDocument d: l) {
-      if (d != null) {
-        if (! d.isUntitled()) {
-          _model.addAuxiliaryFile(d);
-          try {
-            _model.getDocumentNavigator().
-              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
-            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
-            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
-          }
-          catch(IOException e) { /* do nothing */ }
+  /** Performs op on each document in docs and invalidates the various project file collection properties. */
+  private void _processDocs(Collection<OpenDefinitionsDocument> docs, Lambda<Void, OpenDefinitionsDocument> op) {
+    for (OpenDefinitionsDocument doc: docs) {
+      if (doc != null && ! doc.isUntitled()) {
+        op.apply(doc);
+        try {
+          String path = _model.fixPathForNavigator(doc.getFile().getCanonicalPath());
+          _model.getDocumentNavigator().refreshDocument(doc, path);
         }
+        catch(IOException e) { /* do nothing */ }
       }
     }
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
   }
-  
-  private void _removeAuxiliary() {
-    // now works with multiple files
     
-    for(OpenDefinitionsDocument d: _model.getDocumentNavigator().getSelectedDocuments()) {
-      // OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
-      if (d != null) {
-        if (! d.isUntitled()) {
-          _model.removeAuxiliaryFile(d);
-          try {
-            _model.getDocumentNavigator().
-              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
-            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
-            PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
-          }
-          catch(IOException e) { /* do nothing */ }
-        }
+  /* Converts the selected files to auxiliary files.  Access is ackage protected rather than private to support access
+   * by ProjectMenuTest.testSaveProject. 
+   */
+  void _moveToAuxiliary() {
+    Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
+      public Void apply(OpenDefinitionsDocument d) { 
+        _model.addAuxiliaryFile(d);
+        return null;
       }
-    }
+    };
+    _processDocs(_model.getDocumentNavigator().getSelectedDocuments(), op);
   }
   
+  /** Removes selected auxiliary files. */       
+  private void _removeAuxiliary() {
+     Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
+      public Void apply(OpenDefinitionsDocument d) { 
+        _model.removeAuxiliaryFile(d);
+        return null;
+      }
+    };
+    _processDocs(_model.getDocumentNavigator().getSelectedDocuments(), op);
+  }
+  
+  /** Converts all external files to auxiliary files. */
   void _moveAllToAuxiliary() {
     assert EventQueue.isDispatchThread();
-    // move all external files to auxiliary files
-    OpenDefinitionsDocument d;
-    Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().
-      getDocumentsInBin(_model.getExternalBinTitle());
-    while (e.hasMoreElements()) {
-      d = e.nextElement();
-      if (d != null) {
-        if (! d.isUntitled()) {
-          _model.addAuxiliaryFile(d);
-          try {
-            _model.getDocumentNavigator().
-              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-          }
-          catch(IOException ex) { /* do nothing */ }
-        }
+    Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
+      public Void apply(OpenDefinitionsDocument d) { 
+        _model.addAuxiliaryFile(d);
+        return null;
       }
-    }
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
-    _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument());
+    };
+    _processDocs(_model.getDocumentNavigator().getDocumentsInBin(_model.getExternalBinTitle()), op);
   }
   
+  /** Converts all auxiliary files to external files. */
   private void _removeAllAuxiliary() {
     assert EventQueue.isDispatchThread();
-    // move all auxiliary files to external files
-    OpenDefinitionsDocument d;
-    Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().
-      getDocumentsInBin(_model.getAuxiliaryBinTitle());
-    while (e.hasMoreElements()) {
-      d = e.nextElement();
-      if (d != null) {
-        if (! d.isUntitled()) {
-          _model.removeAuxiliaryFile(d);
-          try {
-            _model.getDocumentNavigator().
-              refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-          }
-          catch(IOException ex) { /* do nothing */ }
-        }
+    Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
+      public Void apply(OpenDefinitionsDocument d) { 
+        _model.removeAuxiliaryFile(d);
+        return null;
       }
-    }
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
-    
-    _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument());
+    };
+    _processDocs(_model.getDocumentNavigator().getDocumentsInBin(_model.getAuxiliaryBinTitle()), op);
   }
   
   private void _new() { 
@@ -4741,13 +4712,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private void _closeFolder() {
     OpenDefinitionsDocument d;
-    Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
+    ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
     
     if (_model.getDocumentNavigator().isGroupSelected()) {
-      while (e.hasMoreElements()) {
-        d = e.nextElement();
-        if (_model.getDocumentNavigator().isSelectedInGroup(d)) { l.add(d); }
+      for (OpenDefinitionsDocument doc: docs) {
+        if (_model.getDocumentNavigator().isSelectedInGroup(doc)) { l.add(doc); }
       }
       disableFindAgainOnClose(l); // disable "Find Again" for documents that are closed
       _model.closeFiles(l);
@@ -5265,12 +5235,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     hourglassOn();
     try {
       OpenDefinitionsDocument d;
-      Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
+      ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
       final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
       if (_model.getDocumentNavigator().isGroupSelected()) {
-        while (e.hasMoreElements()) {
-          d = e.nextElement();
-          if (_model.getDocumentNavigator().isSelectedInGroup(d)) l.add(d);
+        for (OpenDefinitionsDocument doc: docs) {
+          if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
         }
         
 //        new Thread("Compile Folder") {
@@ -5469,12 +5438,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _disableJUnitActions();
 //        hourglassOn();  // turned off when JUnitStarted event is fired
         if (_model.getDocumentNavigator().isGroupSelected()) {
-          Enumeration<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
+          ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
           final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-          while (docs.hasMoreElements()) {
-            OpenDefinitionsDocument doc = docs.nextElement();
-            if (_model.getDocumentNavigator().isSelectedInGroup(doc))
-              l.add(doc);
+          for (OpenDefinitionsDocument doc: docs) {
+            if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
           }
           try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
           catch(UnexpectedException e) { _junitInterrupted(e); }

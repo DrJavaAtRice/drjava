@@ -69,7 +69,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   private volatile CustomListCellRenderer _renderer;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
-  private final Vector<INavigationListener<? super ItemT>> navListeners = new Vector<INavigationListener<? super ItemT>>();
+  private final ArrayList<INavigationListener<? super ItemT>> navListeners = new ArrayList<INavigationListener<? super ItemT>>();
   
   /** Standard constructor. */
   public JListNavigator() { 
@@ -244,11 +244,13 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     * The class should be generic: DefaultListModel<T> { ... Enumeration<T> elements() {...} ... } instead of 
     * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
     */
-  public Enumeration<ItemT> getDocuments() { 
+  public ArrayList<ItemT> getDocuments() { 
     synchronized(_model) {
 //    Cast forced by lousy generic typing of DefaultListModel in Java 1.5
-      @SuppressWarnings("unchecked") Enumeration<ItemT> result = (Enumeration<ItemT>) _model.elements();
-      return result;  
+      @SuppressWarnings("unchecked") Enumeration<ItemT> items = (Enumeration<ItemT>) _model.elements();
+      ArrayList<ItemT> result = new ArrayList<ItemT>(_model.size());
+      while (items.hasMoreElements()) result.add(items.nextElement());
+      return result;                               
     }
   }
   
@@ -256,7 +258,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     * @param binName name of bin
     * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
     */
-  public Enumeration<ItemT> getDocumentsInBin(String binName) { return (new Vector<ItemT>()).elements(); }
+  public ArrayList<ItemT> getDocumentsInBin(String binName) { return new ArrayList<ItemT>(0); }
   
   /** @return the number of documents in the navigator. */
   public int getDocumentCount() { return _model.size(); }

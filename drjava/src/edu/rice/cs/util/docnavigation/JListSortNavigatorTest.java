@@ -92,9 +92,8 @@ public class JListSortNavigatorTest extends DrJavaTestCase {
     
     assertFalse("contains test 5", list.contains(new DummyINavigatorItem("item1")));
     
-    Enumeration<DummyINavigatorItem> docs = list.getDocuments();
-    DummyINavigatorItem[] docsArray = new DummyINavigatorItem[4];
-    for (int i = 0; i < 4; i++) docsArray[i] = docs.nextElement();
+    ArrayList<DummyINavigatorItem> docs = list.getDocuments();
+    DummyINavigatorItem[] docsArray = docs.toArray(new DummyINavigatorItem[0]);
     assertTrue("getDocuments test", Arrays.equals(docsArray, new DummyINavigatorItem[] {i1, i2, i3, i4}));
   }
   

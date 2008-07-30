@@ -44,7 +44,9 @@ import java.util.Enumeration;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class JTreeSortNavigatorTest extends DrJavaTestCase {
   
@@ -205,8 +207,8 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
         tree.addDocument(newItem, "folder3");
       }
     });
-    folder3 = (InnerNode)source.getChildAt(2);
-    LeafNode<?> newNode = (LeafNode<?>)folder3.getChildAt(0);
+    folder3 = (InnerNode) source.getChildAt(2);
+    LeafNode<?> newNode = (LeafNode<?>) folder3.getChildAt(0);
     
 //      tree.refreshDocument(newItem, "folder3")
     assertEquals("should have been renamed", newName, newNode.toString());
@@ -214,42 +216,41 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { tree.removeDocument(newItem); } });
   }
   
-  /** Test the enumeration of items based on top-level bins.
-   */
+  /** Test the enumeration of items based on top-level bins. */
   public void testGetDocumentsInBin() {
-    Enumeration<DummyINavigatorItem> e = tree.getDocumentsInBin(SOURCE_BIN_NAME);
+    Iterator<DummyINavigatorItem> items = tree.getDocumentsInBin(SOURCE_BIN_NAME).iterator();
     DummyINavigatorItem d;
-    assertTrue(SOURCE_BIN_NAME+" bin should not have 0 items", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(SOURCE_BIN_NAME + " bin should not have 0 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 1", i1, d);
-    assertTrue(SOURCE_BIN_NAME+" bin should not have 1 item", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(SOURCE_BIN_NAME + " bin should not have 1 item", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 2", i2, d);
-    assertTrue(SOURCE_BIN_NAME+" bin should not have 2 items", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(SOURCE_BIN_NAME + " bin should not have 2 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 3", i3, d);
-    assertTrue(SOURCE_BIN_NAME+" bin should not have 3 items", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(SOURCE_BIN_NAME + " bin should not have 3 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 4", i4, d);
-    assertFalse(SOURCE_BIN_NAME+" bin should not have 4 items", e.hasMoreElements());
+    assertFalse(SOURCE_BIN_NAME + " bin should not have 4 items", items.hasNext());
     
-    e = tree.getDocumentsInBin(EXTERNAL_BIN_NAME);
-    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 0 items", e.hasMoreElements());
-    d = e.nextElement();
+    items = tree.getDocumentsInBin(EXTERNAL_BIN_NAME).iterator();
+    assertTrue(EXTERNAL_BIN_NAME + " bin should not have 0 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 1", auxi1, d);
-    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 1 item", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(EXTERNAL_BIN_NAME + " bin should not have 1 item", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 2", auxi2, d);
-    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 2 items", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(EXTERNAL_BIN_NAME + " bin should not have 2 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 3", auxi3, d);
-    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 3 items", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(EXTERNAL_BIN_NAME + " bin should not have 3 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 4", auxi4, d);
-    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 4 items", e.hasMoreElements());
-    d = e.nextElement();
+    assertTrue(EXTERNAL_BIN_NAME + " bin should not have 4 items", items.hasNext());
+    d = items.next();
     assertEquals("Wrong item 5", auxi5, d);
-    assertFalse(EXTERNAL_BIN_NAME+" bin should not have 5 items", e.hasMoreElements());
+    assertFalse(EXTERNAL_BIN_NAME + " bin should not have 5 items", items.hasNext());
   }
   
   /** Test of getting the list of selected items.
@@ -333,7 +334,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
@@ -344,7 +345,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
@@ -355,7 +356,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
@@ -366,7 +367,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
@@ -377,7 +378,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
@@ -388,7 +389,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
@@ -399,7 +400,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
@@ -410,7 +411,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Only one top-level group should be selected", 1, s.size());
     assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
@@ -421,7 +422,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       s = tree.getNamesOfSelectedTopLevelGroup();
     }
     catch(GroupNotSelectedException e) {
-      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+      fail("getNamesOfSelectedTopLevelGroup threw " + e);
     }
     assertEquals("Two top-level groups should be selected", 2, s.size());
     assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
