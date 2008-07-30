@@ -39,8 +39,6 @@ package edu.rice.cs.drjava.ui;
 import java.util.Vector;
 import java.util.ArrayList;
 
-import java.util.Enumeration;
-
 import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.table.*;

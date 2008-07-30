@@ -1136,7 +1136,7 @@ public class ConfigFrame extends SwingFrame {
     public void resetToCurrent() {
       _panel.resetToCurrent();
 
-      Enumeration childNodes = this.children();
+      Enumeration childNodes = children();
       while (childNodes.hasMoreElements()) {
         ((PanelTreeNode)childNodes.nextElement()).resetToCurrent();
       }

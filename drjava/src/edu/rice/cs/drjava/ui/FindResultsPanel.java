@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.ui;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.io.File;
 import java.lang.ref.WeakReference;
 

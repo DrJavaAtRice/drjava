@@ -43,7 +43,6 @@ import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Enumeration;
 
 import javax.swing.*;
 import javax.swing.event.*;

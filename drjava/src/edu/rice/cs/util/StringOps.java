@@ -45,7 +45,6 @@ import java.text.DecimalFormat;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.util.Map;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.List;

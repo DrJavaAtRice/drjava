@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 import javax.swing.*;
 import javax.swing.event.*;

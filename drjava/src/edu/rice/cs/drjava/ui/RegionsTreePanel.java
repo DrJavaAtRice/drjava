@@ -339,7 +339,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       // The following line was commented out as part of minimizing the changes to DefaultCellRenderer
 //      if (renderer instanceof JComponent) { ((JComponent) renderer).setOpaque(false); }
       
-      _setColors(this);
+//      _setColors(this);
       
       // set tooltip
       String tooltip = null;

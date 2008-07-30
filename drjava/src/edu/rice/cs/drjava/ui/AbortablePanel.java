@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.ui;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Enumeration;
 import java.io.*;
 
 import javax.swing.*;
