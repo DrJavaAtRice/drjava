@@ -53,7 +53,7 @@
        Help Target
        *********** -->
   
-  <target name="help" description="Print general build script information">
+  <target name="help" depends="assert-fail" description="Print general build script information">
     <echo message="--------------------------------------------------------------------" />
     <echo message="${readable-project-name} Build Scripts" />
     <echo message="--------------------------------------------------------------------" />
@@ -102,8 +102,7 @@
           description="Compile all source files">
   </target>
   
-  <target name="do-compile" depends="assert-eclipse-exists, assert-drjava-src-exists, assert-15">
-  
+  <target name="do-compile" depends="assert-eclipse-exists, assert-drjava-src-exists, assert-15, assert-fail">
     <echo message="Compiling src directory to classes/base and classes/test" />
     <echo message="NOTE: The 'generate-source' target of the drjava build script is assumed to" />
     <echo message="have been run.  Otherwise, you may encounter unexpected compilation errors." />
@@ -829,7 +828,11 @@
       </condition>
     </fail>
   </target>
-    
+  
+  <target name="assert-fail">
+    <fail message="This build script is using an obsolete version of the source tree, and needs to be rewritten. Build the plugin inside eclipse."/>
+  </target>
+  
   <target name="assert-jar-exists">
     <available property="jar-exists" file="drjava-eclipse.jar" />
     <fail message="Can't find drjava-eclipse.jar" unless="jar-exists" />
@@ -845,7 +848,7 @@
     <fail message="${drjava-src} does not exist" unless="drjava-src-exists" />
   </target>
   
-  <target name="assert-eclipse-exists">
+  <target name="assert-eclipse-exists" depends="assert-fail">
     <available property="eclipse-exists" file="${eclipse-home}" />
     <fail message="${eclipse-home} does not exist" unless="eclipse-exists" />
   </target>

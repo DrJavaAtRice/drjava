@@ -1,5 +1,13 @@
 DrJava Plug-in for Eclipse Development Tips -----
 
+Building:
+ - The ant script currently is not configured to build the correct source tree,
+   so either update it to do so or build by hand, in Eclipse:
+     - Choose File->Export, and select "Deployable Features"
+     - Export the InteractionsPaneFeature project (you'll also need InteractionsPane
+       in the workspace) to an archive file or a directory
+     - Copy the contents of the plugins and features folders generated to your
+       Eclipse installation folder (usually "eclipse").
 
 How to run the plug-in tests:
 

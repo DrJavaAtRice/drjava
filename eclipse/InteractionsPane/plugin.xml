@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="DrJava"
+            id="edu.rice.cs.drjava">
+      </category>
+      <view
+            name="Interactions Pane"
+            icon="icons/drjava16.png"
+            category="edu.rice.cs.drjava"
+            class="edu.rice.cs.drjava.eclipse.views.InteractionsView"
+            id="edu.rice.cs.drjava.eclipse.views.InteractionsView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="edu.rice.cs.drjava.eclipse.DrJavaPerspective"
+            icon="icons/drjava16.png"
+            id="edu.rice.cs.drjava.eclipse.DrJavaPerspective"
+            name="DrJava">
+      </perspective>
+   </extension>
+</plugin>
