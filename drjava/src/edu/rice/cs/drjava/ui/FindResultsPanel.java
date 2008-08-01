@@ -395,13 +395,13 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       final String textFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN).toString();
       final String numFont = DrJava.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS).toString();
       final StringBuilder sb = new StringBuilder(120);
-//      sb.append("<html><pre><font face=\"sanserif\">");
+      sb.append("<html>");
       sb.append(lineNumber());
       sb.append(": ");
       String text = _region.getString();
       sb.append(text);
-//      sb.append(StringOps.getBlankString(120 - text.length()));
-//      sb.append("</pre></html>");
+      sb.append(StringOps.getBlankString(120 - text.length()));
+      sb.append("</html>");
       return sb.toString();
     }
   }

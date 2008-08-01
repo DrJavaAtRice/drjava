@@ -645,13 +645,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                 // COMMENT: We need a global invariant concerning non-displayable characters.  
                 
                 // create the excerpt string
-                StringBuilder sb = new StringBuilder(prefix);
-//                sb.append("<font color=#ff0000>");
-                sb.append(LEFT);
-                sb.append(match);
-//                sb.append("</font>");
-                sb.append(RIGHT);
-                sb.append(suffix);
+                StringBuilder sb = new StringBuilder(edu.rice.cs.plt.text.TextUtil.htmlEscape(prefix));
+                sb.append("<font color=#ff0000>");
+//                sb.append(LEFT);
+                sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(match));
+                sb.append("</font>");
+//                sb.append(RIGHT);
+                sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(suffix));
 //                sb.append(StringOps.getBlankString(120 - sLength));  // move getBank to StringOps
                 return sb.toString();
               }
