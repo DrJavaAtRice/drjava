@@ -46,65 +46,37 @@ public final class IndentHelperTest extends IndentRulesTestCase {
   
   /** Convenience method that wraps _doc.findPrevDelimiter calls in a read lock. */
   private int _findPrevDelimiter(int pos, char[] delimiters) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
-      return _doc._findPrevDelimiter(pos, delimiters); 
-//    }
-//    finally { _doc.releaseReadLock(); }
+    return _doc._findPrevDelimiter(pos, delimiters); 
   }
   
   /** Convenience method that wraps _doc.inParenPhrase calls in a read lock. */
   private boolean _inParenPhrase(int pos) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
-      return _doc._inParenPhrase(pos); 
-//    }
-//    finally { _doc.releaseReadLock(); }
+    return _doc._inParenPhrase(pos); 
   }
   
   /** Convenience method that wraps _doc.getIndentOfCurrStmt calls in a read lock. */
   private int _getIndentOfCurrStmt(int pos) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
-      return _doc._getIndentOfCurrStmt(pos); 
-//    }
-//    finally { _doc.releaseReadLock(); }
+    return _doc._getIndentOfCurrStmt(pos); 
   }
 
   /** Convenience method that wraps _doc.getLineStartPos calls in a read lock. */
   private int _getLineStartPos(int pos) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
-      return _doc._getLineStartPos(pos); 
-//    }
-//    finally { _doc.releaseReadLock(); }
+    return _doc._getLineStartPos(pos); 
   }
   
   /** Convenience method that wraps _doc.getLineEndPos calls in a read lock. */
   private int _getLineEndPos(int pos) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
     return _doc._getLineEndPos(pos); 
-//    }
-//    finally { _doc.releaseReadLock(); }
   }
   
   /** Convenience method that wraps _doc.getLineFirstCharPos calls in a read lock. */
   private int _getLineFirstCharPos(int pos) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
     return _doc._getLineFirstCharPos(pos); 
-//    }
-//    finally { _doc.releaseReadLock(); }
   }
   
     /** Convenience method that wraps _doc.getFirstNonWSCharPos calls in a read lock. */
   private int _getFirstNonWSCharPos(int pos) throws BadLocationException {
-//    _doc.acquireReadLock();
-//    try { 
     return _doc._getFirstNonWSCharPos(pos); 
-//    }
-//    finally { _doc.releaseReadLock(); }
   }
   
   /** Tests findPrevDelimiter() */

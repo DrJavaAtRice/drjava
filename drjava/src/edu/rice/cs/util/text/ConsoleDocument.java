@@ -108,11 +108,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Sets the string to use for the prompt.
     * @param prompt String to use for the prompt.
     */
-  public void setPrompt(String prompt) { 
-//    acquireWriteLock();  
-    _prompt = prompt;
-//    releaseWriteLock();
-  }
+  public void setPrompt(String prompt) { _prompt = prompt; }
   
   /** Returns the length of the prompt string. */
   public int getPromptLength() { return _prompt.length(); }
@@ -140,11 +136,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Sets a runnable action to use as a beep.
     * @param beep Runnable beep command
     */
-  public void setBeep(Runnable beep) { 
-//    acquireWriteLock();
-    _beep = beep; 
-//    releaseWriteLock();
-  }
+  public void setBeep(Runnable beep) { _beep = beep; }
   
   /** Resets the document to a clean state. Only runs in the event thread. */
   public void reset(String banner) {
@@ -180,7 +172,6 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void insertNewline(int pos) {
     // Correct the position if necessary
-//    acquireWriteLock();
     try {
       int len = _document.getLength();
       if (pos > len)  pos = len;
@@ -190,7 +181,6 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
       insertText(pos, newLine, DEFAULT_STYLE);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
   }
   
   /** Gets the position immediately before the prompt, or the doc length if there is no prompt. Assumes that ReadLock or
@@ -209,7 +199,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @param style name of style to format the string
     */
   public void insertBeforeLastPrompt(String text, String style) {
-//    acquireWriteLock();
+//    assert EventQueue.isDispatchThread();
     try {
       int pos = _getPositionBeforePrompt();
 //      System.err.println("_promptPos before update = " + _promptPos);
@@ -217,7 +207,6 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
       forceInsertText(pos, text, style);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-//    finally { releaseWriteLock(); }
   }
   
   /** Inserts a string into the document at the given offset and named style, if the edit condition allows it.
@@ -311,13 +300,11 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   
   /** Removes the text from the current prompt to the end of the document. */
   protected void _clearCurrentInputText() {
-//    acquireWriteLock();
     try {
       // Delete old value of current line
       removeText(_promptPos, _document.getLength() - _promptPos);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-//    finally { releaseWriteLock(); }
   }
   
   /* Returns the default style for a "console" document. */

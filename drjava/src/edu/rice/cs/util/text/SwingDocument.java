@@ -112,20 +112,12 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Provides an object which can determine whether an insert or remove edit should be applied, based on the inputs.
     * @param condition Object to determine legality of inputs
     */
-  public void setEditCondition(DocumentEditCondition condition) {
-//    acquireWriteLock();
-//    try { 
-    _condition = condition; 
-//    }
-//    finally { releaseWriteLock(); }
-  }
+  public void setEditCondition(DocumentEditCondition condition) { _condition = condition;  }
   
   /* Clears the document. */
   public void clear() {
-//    acquireWriteLock();
     try { remove(0, getLength()); }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
   }
   
   /** Inserts a string into the document at the given offset and style, if the edit condition allows it.
@@ -186,11 +178,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
-//    acquireWriteLock(); // locking is used to make the test and modification atomic
-//    try { 
     if (_condition.canRemoveText(offs))  super.remove(offs, len); 
-//    }
-//    finally { releaseWriteLock(); }
   }
   
 //  /** Returns the length of the document. */

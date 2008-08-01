@@ -396,13 +396,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       // Only indent if in code
 
-//      _doc.acquireWriteLock();  // reduced model lock unnecessary!
-//      try {
       _doc.setCurrentLocation(getCaretPosition());
       ReducedModelState state = _doc._getStateAtCurrent();
       if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
-//      }
-//      finally { _doc.releaseWriteLock(); }
     }
   }
 
@@ -940,7 +936,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
     
-//    _doc.acquireWriteLock();
     int len = _doc.getLength();
     if (len < _position || len < _selEnd) {
       // the document changed since we're set inactive
@@ -949,7 +944,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selStart = len;
       _selEnd = len;
     }
-//    try {
     if (_position == _selStart) {
       setCaretPosition(_selEnd);
       moveCaretPosition(_selStart);
@@ -960,8 +954,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       moveCaretPosition(_selEnd);
       _doc.setCurrentLocation(_selEnd);
     }
-//    }
-//    finally { _doc.releaseWriteLock(); }
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
     // Explicitly set scrollbar policies fixing bug #1445898 
@@ -1134,7 +1126,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
-//    _doc.acquireWriteLock();  // reduced lock unnecessary!
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();
@@ -1147,13 +1138,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       // pm = null, so cancel can't be pressed
       throw new UnexpectedException(oce);
     }
-//    catch (RuntimeException e) {
-//      /* Catches the exception to turn off the the hourglass and close the compound edit before throwing out to the
-//       * main frame. */
-//      endCompoundEdit();
-//      throw e;
-//    }
-//    finally { _doc.releaseWriteLock(); }
   }
     
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */

@@ -302,13 +302,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void remove(int offset, int len) throws BadLocationException {
     
     if (len == 0) return;
-    
-//    acquireWriteLock();
-//    try {
-      _setModifiedSinceSave();
-      super.remove(offset, len);
-//    }
-//    finally { releaseWriteLock(); }
+    _setModifiedSinceSave();
+    super.remove(offset, len);
   }
   
   /** Given a String, return a new String will all tabs converted to spaces.  Each tab is converted 
@@ -321,12 +316,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Resets the modification state of this document to be consistent with state of _undoManager.  Called whenever
     * an undo or redo is performed. */
   public void updateModifiedSinceSave() {
-//    acquireWriteLock();
-//    try {
     _isModifiedSinceSave = _undoManager.isModified();
     if (_odd != null) _odd.documentReset();
-//    }
-//    finally { releaseWriteLock(); }
   }
   
   /** Sets the modification state of this document to true and updates the state of the associated _odd. 
@@ -342,13 +333,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Resets the modification state of this document.  Used after a document has been saved or reverted. */
   public void resetModification() {
-//    acquireWriteLock();
-//    try {
-      _isModifiedSinceSave = false;
-      _undoManager.documentSaved();
-      if (_odd != null) _odd.documentReset();  // null test required for some unit tests
-//    }
-//    finally { releaseWriteLock(); }
+    _isModifiedSinceSave = false;
+    _undoManager.documentSaved();
+    if (_odd != null) _odd.documentReset();  // null test required for some unit tests
   }
   
   /** Determines if the document has been modified since the last save.
@@ -409,16 +396,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
     int toReturn = selEnd;
     if (selStart == selEnd) {
-//      acquireWriteLock(); 
-//      try {
-//      synchronized(_reduced) {
-        _setCurrentLocation(_getLineStartPos(selStart));
+      _setCurrentLocation(_getLineStartPos(selStart));
 //          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
-        _commentLine();
-        toReturn += WING_COMMENT_OFFSET;
-//      }
-//      }
-//      finally { releaseWriteLock(); }
+      _commentLine();
+      toReturn += WING_COMMENT_OFFSET;
     }
     else toReturn = commentBlock(selStart, selEnd);   
     _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
@@ -432,30 +413,26 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   private int commentBlock(final int start, final int end) {
     int afterCommentEnd = end;
-//    acquireWriteLock();
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc doing the
       // indentLine calls.
       final Position endPos = this.createUnwrappedPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = _getLineStartPos(start);
-//      synchronized(_reduced) {
-        while (walker < endPos.getOffset()) {
-          _setCurrentLocation(walker);  // Update cursor
-          
-          _commentLine();              // Comment out current line; must be atomic
-          afterCommentEnd += WING_COMMENT_OFFSET;
-
-          walker = walker + 2;         // Skip over inserted slashes; getDistToNewline(walker) = 0 if not advanced
-          _setCurrentLocation(walker);  // reset currentLocation to position past newline
-
-          // Adding 1 makes us point to the first character AFTER the next newline.
-          walker += _reduced.getDistToNextNewline() + 1;
-        }
-//      }
+      while (walker < endPos.getOffset()) {
+        _setCurrentLocation(walker);  // Update cursor
+        
+        _commentLine();              // Comment out current line; must be atomic
+        afterCommentEnd += WING_COMMENT_OFFSET;
+        
+        walker = walker + 2;         // Skip over inserted slashes; getDistToNewline(walker) = 0 if not advanced
+        _setCurrentLocation(walker);  // reset currentLocation to position past newline
+        
+        // Adding 1 makes us point to the first character AFTER the next newline.
+        walker += _reduced.getDistToNextNewline() + 1;
+      }
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
     return afterCommentEnd;
   }
   
@@ -477,16 +454,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
     int toReturn = selEnd;
     if (selStart == selEnd) {
-//      acquireWriteLock();
       try {
-//        synchronized(_reduced) {
-          _setCurrentLocation(_getLineStartPos(selStart));
-          _uncommentLine();  // accesses _reduced
-          toReturn -= WING_COMMENT_OFFSET;
-//        }
+        _setCurrentLocation(_getLineStartPos(selStart));
+        _uncommentLine();  // accesses _reduced
+        toReturn -= WING_COMMENT_OFFSET;
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
-//      finally { releaseWriteLock(); }
     }
     else  toReturn = uncommentBlock(selStart, selEnd);
     //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
@@ -500,7 +473,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   private int uncommentBlock(final int start, final int end) {
     int afterUncommentEnd = end;
-//    acquireWriteLock();
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc
       // doing the indentLine calls.
@@ -518,7 +490,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }           
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
     return afterUncommentEnd;
   }
   
@@ -971,7 +942,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @throws ClassNameNotFoundException if no enclosing class found
     */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
-//    acquireReadLock();
       int oldPos = _currentLocation;
       try {
         _setCurrentLocation(pos);
@@ -1047,7 +1017,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Gets the name of the document's main class: the document's only public class/interface or 
     * first top level class if document contains no public classes or interfaces. */
   public String getMainClassName() throws ClassNameNotFoundException {
-//    acquireReadLock();
       final int oldPos = _currentLocation;
       
       try {
@@ -1093,9 +1062,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos) throws ClassNameNotFoundException {
-    
-//    acquireReadLock();
-//    synchronized(_reduced) {
       int oldPos = _currentLocation;
       
       try {
@@ -1133,11 +1099,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       catch (IllegalStateException e) { throw new ClassNameNotFoundException("No top level class name found"); }
-      finally { 
-        _setCurrentLocation(oldPos);
-//        releaseReadLock();
-      }
-//    }
+      finally { _setCurrentLocation(oldPos); }
   }
   
   /** Finds the next identifier (following a non-whitespace character) in the document starting at start. Assumes that
@@ -1192,40 +1154,34 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
     
-//    acquireReadLock();
-//    synchronized(_reduced) {
-      int oldPos = _currentLocation;
-      int index = 0;
-//      try {
-      while (true) {
-        index = text.indexOf(keyword, index);
-        if (index == -1) break; // not found
-        else {
-          // found a match, check quality
-          _setCurrentLocation(textOffset + index);
-          
-          // check that the keyword is not in a comment and is followed by whitespace
-          int indexPastKeyword = index + keyword.length();
-          if (indexPastKeyword < text.length()) {
-            if (! _isShadowed() && Character.isWhitespace(text.charAt(indexPastKeyword))) {
-              // found a match but may not be at top level
-              if (! notInBlock(index)) index = -1; //in a paren phrase, gone too far
-              break;
-            }
-            else index++;  //move past so we can search again
-          }
-          else { // No space found past the keyword
-            index = -1;
+    int oldPos = _currentLocation;
+    int index = 0;
+    while (true) {
+      index = text.indexOf(keyword, index);
+      if (index == -1) break; // not found
+      else {
+        // found a match, check quality
+        _setCurrentLocation(textOffset + index);
+        
+        // check that the keyword is not in a comment and is followed by whitespace
+        int indexPastKeyword = index + keyword.length();
+        if (indexPastKeyword < text.length()) {
+          if (! _isShadowed() && Character.isWhitespace(text.charAt(indexPastKeyword))) {
+            // found a match but may not be at top level
+            if (! notInBlock(index)) index = -1; //in a paren phrase, gone too far
             break;
           }
+          else index++;  //move past so we can search again
+        }
+        else { // No space found past the keyword
+          index = -1;
+          break;
         }
       }
-      _setCurrentLocation(oldPos);
+    }
+    _setCurrentLocation(oldPos);
 //        _log.log("findKeyWord(" + keyword + ", ..., " + textOffset + ")");
-      return index;
-//      }
-//      finally { releaseReadLock(); }
-//    }
+    return index;
   }
   
   /** Wrapper for Position objects to allow relinking to a new Document. */

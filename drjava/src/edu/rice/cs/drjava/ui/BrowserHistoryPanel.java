@@ -248,8 +248,6 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     public BrowserHistoryListUserObj(BrowserDocumentRegion r) { super(r); }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
-//      _region.getDocument().acquireReadLock();
-//      try {
       sb.append("<html>");
       if (_region==_model.getBrowserHistoryManager().getCurrentRegion()) {
         sb.append("<font color=\"red\">");
@@ -266,8 +264,6 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
         sb.append("</font>");
       }
       sb.append("</html>");
-//      } 
-//      finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
 //    public boolean equals(Object other) {

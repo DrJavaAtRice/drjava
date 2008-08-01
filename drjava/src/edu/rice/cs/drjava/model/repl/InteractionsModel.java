@@ -515,12 +515,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param newListener the listener to be installed
     */
   public void changeInputListener(InputListener oldListener, InputListener newListener) {
-    // synchronize to prevent concurrent modifications to the listener
-//    synchronized(NoInputListener.ONLY) {
     if (_inputListener == oldListener) _inputListener = newListener;
     else
       throw new IllegalArgumentException("The given old listener is not installed!");      
-//  }
   }
   
   /** Performs the common behavior when an interaction ends. Subclasses might want to additionally notify listeners 
@@ -529,16 +526,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void _interactionIsOver() {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-//        _document.acquireWriteLock();
-//        try {
-          _document.addToHistory(_toAddToHistory);
-          _document.setInProgress(false);
-          _document.insertPrompt();
-//          int len = _document.getPromptLength();
-//          advanceCaret(len); 
-//        }
-//        finally { _document.releaseWriteLock(); }
-        // runs in event thread
+        _document.addToHistory(_toAddToHistory);
+        _document.setInProgress(false);
+        _document.insertPrompt();
         _notifyInteractionEnded();
       }
     });
@@ -649,16 +639,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting() {
-//    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + 
-//      _waitingForFirstInterpreter);
     if (! _waitingForFirstInterpreter) {
-//      _document.acquireWriteLock();
-//      try {
-        _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
-        _document.setInProgress(true);
-//      }
-//      finally { _document.releaseWriteLock(); }
-//      Utilities.showDebug("interpreter resetting in progress");
+      _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
+      _document.setInProgress(true);
       
       // Change to a new debug port to avoid conflicts
       try { _createNewDebugPort(); }

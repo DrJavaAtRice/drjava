@@ -114,7 +114,6 @@ public class InteractionsDocument extends ConsoleDocument {
   
   /** Sets the banner in an empty docuemnt. */
   public void setBanner(String banner) {
-//    acquireWriteLock();
     try {
       setPromptPos(0);
       insertText(0, banner, OBJECT_RETURN_STYLE);
@@ -122,7 +121,6 @@ public class InteractionsDocument extends ConsoleDocument {
       _history.moveEnd();
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
   }
   
   /** Resets the document to a clean state.  Does not reset the history. */
@@ -156,33 +154,15 @@ public class InteractionsDocument extends ConsoleDocument {
   public OptionListener<Integer> getHistoryOptionListener() { return _history.getHistoryOptionListener(); }
   
   /** Adds the given text to the history of commands. */
-  public void addToHistory(String text) { 
-//    acquireWriteLock();
-//    try { 
-    _history.add(text); 
-//    } 
-//    finally { releaseWriteLock(); }
-  }
+  public void addToHistory(String text) { _history.add(text); }
   
   /** Returns the last history item and then removes it, or returns null if the history is empty. */
-  public String removeLastFromHistory() {
-//    acquireWriteLock();
-//    try { 
-      return _history.removeLast(); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
+  public String removeLastFromHistory() { return _history.removeLast(); }
   
   /** Saves the unedited version of the current history to a file
     * @param selector File to save to
     */
-  public void saveHistory(FileSaveSelector selector) throws IOException {
-//    acquireReadLock();  // does not modify state of document including history
-//    try { 
-      _history.writeToFile(selector); 
-//    }
-//    finally { releaseReadLock(); }
-  }
+  public void saveHistory(FileSaveSelector selector) throws IOException { _history.writeToFile(selector); }
   
   /** Saves the edited version of the current history to a file
     * @param selector File to save to
@@ -192,71 +172,39 @@ public class InteractionsDocument extends ConsoleDocument {
     * interactions file.
     */
   public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
-//    acquireReadLock();  // does not modify state of document including history
-//    try { 
-      _history.writeToFile(selector, editedVersion); 
-//    }
-//    finally { releaseReadLock(); }
+    _history.writeToFile(selector, editedVersion); 
   }
   
   /** Returns the entire history as a single string.  Commands should be separated by semicolons. If an entire
     * command does not end in a semicolon, one is added.
     */
   public String getHistoryAsStringWithSemicolons() {
-//    acquireReadLock();
-//    try { 
-      return _history.getHistoryAsStringWithSemicolons(); 
-//    }
-//    finally { releaseReadLock(); }
+    return _history.getHistoryAsStringWithSemicolons(); 
   }
   
   /** Returns the entire history as a single string.  Commands should be separated by semicolons. */
   public String getHistoryAsString() { 
-//    acquireReadLock();
-//    try { 
     return _history.getHistoryAsString(); 
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Clears the history */
-  public void clearHistory() { 
-//    acquireWriteLock();
-//    try { 
-      _history.clear(); 
-//    }
-//    finally { releaseWriteLock(); }
-  }
+  public void clearHistory() { _history.clear(); }
   
-  public String lastEntry() { 
-//    acquireReadLock();
-//    try { 
-      return _history.lastEntry(); 
-//    }  // may throw a RuntimeException if no such entry
-//    finally { releaseReadLock(); }
-  }
+  public String lastEntry() { return _history.lastEntry(); }
   /** Puts the previous line from the history on the current line and moves the history back one line.
     * @param entry the current entry (perhaps edited from what is in history)
     */
   public void moveHistoryPrevious(String entry) {
-//    acquireWriteLock();
-//    try { 
-      _history.movePrevious(entry);
-      _replaceCurrentLineFromHistory();
-//    }
-//    finally { releaseWriteLock(); }
+    _history.movePrevious(entry);
+    _replaceCurrentLineFromHistory();
   }
   
   /** Puts the next line from the history on the current line and moves the history forward one line.
     * @param entry the current entry (perhaps edited from what is in history)
     */
   public void moveHistoryNext(String entry) {
-//    acquireWriteLock();
-//    try {
-      _history.moveNext(entry);
-      _replaceCurrentLineFromHistory();
-//    }
-//    finally { releaseWriteLock(); }
+    _history.moveNext(entry);
+    _replaceCurrentLineFromHistory();
   }
   
   /** Returns whether there is a previous command in the history.  Assumes that WriteLock is already held!*/
@@ -269,24 +217,16 @@ public class InteractionsDocument extends ConsoleDocument {
     * @param searchString the string to search for
     */
   public void reverseHistorySearch(String searchString) {
-//    acquireWriteLock();
-//    try {
     _history.reverseSearch(searchString);
     _replaceCurrentLineFromHistory();
-//    }
-//    finally { releaseWriteLock(); }
   }
   
   /** Forward searches the history for the given string.
     * @param searchString the string to search for
     */
   public void forwardHistorySearch(String searchString) {
-//    acquireWriteLock();
-//    try {   
     _history.forwardSearch(searchString);
     _replaceCurrentLineFromHistory();
-//    }
-//    finally { releaseWriteLock(); }
   }
   
   /** Gets the previous interaction in the history and replaces whatever is on the current interactions input
@@ -305,37 +245,25 @@ public class InteractionsDocument extends ConsoleDocument {
     * with this interaction.
     */
   public boolean recallNextInteractionInHistory() {
-//    acquireWriteLock();
-//    try {    
-      if (hasHistoryNext()) {
-        moveHistoryNext(getCurrentInteraction());
-        return true;
-      }
-      _beep.run();
-      return false;
-//    }
-//    finally { releaseWriteLock(); }
+    if (hasHistoryNext()) {
+      moveHistoryNext(getCurrentInteraction());
+      return true;
+    }
+    _beep.run();
+    return false;
   }
   
   
   /** Reverse searches the history for interactions that started with the current interaction. */
   public void reverseSearchInteractionsInHistory() {
-//    acquireWriteLock();
-//    try {   
-      if (hasHistoryPrevious()) reverseHistorySearch(getCurrentInteraction());
-      else _beep.run();
-//    }
-//    finally { releaseWriteLock(); }
+    if (hasHistoryPrevious()) reverseHistorySearch(getCurrentInteraction());
+    else _beep.run();
   }
   
   /** Forward searches the history for interactions that started with the current interaction. */
   public void forwardSearchInteractionsInHistory() {
-//    acquireWriteLock();
-//    try {   
-      if (hasHistoryNext()) forwardHistorySearch(getCurrentInteraction());
-      else _beep.run();
-//    }
-//    finally { releaseWriteLock(); }
+    if (hasHistoryNext()) forwardHistorySearch(getCurrentInteraction());
+    else _beep.run();
   }
   
   /** Inserts the given exception data into the document with the given style.
@@ -350,11 +278,8 @@ public class InteractionsDocument extends ConsoleDocument {
     // I'm commenting out, just to see when it appears
 //    if (message != null && (message.equals("Connection refused to host: 127.0.0.1; nested exception is: \n" +
 //                                           "\tjava.net.ConnectException: Connection refused: connect"))) return;
-    
-//    acquireWriteLock();
     try { append(message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-//    finally { releaseWriteLock(); }
   }
   
   public void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
@@ -376,12 +301,8 @@ public class InteractionsDocument extends ConsoleDocument {
   
   /** Clears the current input text and then moves to the end of the command history. */
   public void clearCurrentInteraction() {
-//    acquireWriteLock();
-//    try {
     super.clearCurrentInput();
     _history.moveEnd();
-//    }
-//    finally { releaseWriteLock(); }
   }  
   
   /** Returns the string that the user has entered at the current prompt. Forwards to getCurrentInput(). */

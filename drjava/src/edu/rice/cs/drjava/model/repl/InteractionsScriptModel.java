@@ -76,14 +76,10 @@ public class InteractionsScriptModel /* implements Serializable */ {
 
   /** Enters the next interaction into the interactions pane. Should only run in the event thread. */
   public void nextInteraction() {
-//    _doc.acquireWriteLock();
-//    try {
     if (! hasNextInteraction()) { throw new IllegalStateException("There is no next interaction!"); }
     _currentInteraction++;
     _showCurrentInteraction();
     _passedCurrent = false;
-//    }
-//    finally { _doc.releaseWriteLock(); }
   }
 
 //  /** Enters the current interaction into the interactions pane. */
@@ -103,16 +99,12 @@ public class InteractionsScriptModel /* implements Serializable */ {
 
   /** Enters the previous interaction into the interactions pane. Should only run in the event thread. */
   public void prevInteraction() {
-//    _doc.acquireWriteLock();
-//    try {
     if (! hasPrevInteraction()) throw new IllegalStateException("There is no previous interaction!");
 
     // Only move back if we haven't passed the current interaction
     if (! _passedCurrent)  _currentInteraction--;
     _showCurrentInteraction();
     _passedCurrent = false;
-//    }
-//    finally { _doc.releaseWriteLock(); }
   }
 
   /** Clears the current text at the prompt and shows the current interaction from the script.  Should only run in the
@@ -133,10 +125,8 @@ public class InteractionsScriptModel /* implements Serializable */ {
     * current interaction.
     */
   public void executeInteraction() {
-//    _doc.acquireWriteLock(); 
-//    try {
     _passedCurrent = true;
-    /* The following must use SwingUtilities rather than Utilities because this task must be placed at the end of the
+    /* The following must use EventQueue rather than Utilities because this task must be placed at the end of the
      * event queue, running the interpretCurrentInteraction call apart from this write locked section. In 
      * SimpleInteractionModel, the interpret method is called SYNCHRONOUSLY.  There is a faint chance of a race with
      * regard to the sequenceing of operations in the event queue.  There could already be operations that affect
@@ -144,8 +134,6 @@ public class InteractionsScriptModel /* implements Serializable */ {
      * asynchronously in SimpleInteractionsModel, then we could determine the current interaction within this write
      * locked section avoiding the race. */
     EventQueue.invokeLater(new Runnable() { public void run() { _model.interpretCurrentInteraction(); } });
-//    }
-//    finally { _doc.releaseWriteLock(); }
   }
 
 //  /** Ends the script.  Not currently used. */
@@ -166,12 +154,8 @@ public class InteractionsScriptModel /* implements Serializable */ {
 
   /** @return true iff this script has a previous interaction to perform. */
   public boolean hasPrevInteraction() {
-//    _doc.acquireReadLock();
-//    try {
     int index = _currentInteraction;
     if (_passedCurrent) index++; // We're passed the current, so the previous interaction is the current.
     return index > 0;
-//    }
-//    finally { _doc.releaseReadLock(); }
   }
 }

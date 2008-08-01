@@ -80,9 +80,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     * @param val new boolean value for _hasPrompt.
     */
   public void setHasPrompt(boolean val) { 
-//    acquireWriteLock();
     _hasPrompt = val;
-//    releaseWriteLock();
   }
   
   protected int startCompoundEdit() { return 0; /* Do nothing */ }

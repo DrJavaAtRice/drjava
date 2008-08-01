@@ -284,11 +284,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   AbstractAction newLineAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) { 
       ConsoleDocument doc = getConsoleDoc();
-//      doc.acquireWriteLock();
-//      try { 
       doc.insertNewline(_pane.getCaretPosition()); 
-//      }
-//      finally { doc.releaseWriteLock(); }
     }
   };
 
@@ -306,11 +302,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   AbstractAction selectToEndAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) { 
       ConsoleDocument doc = getConsoleDoc();
-//      doc.acquireReadLock();
-//      try { 
       _pane.moveCaretPosition(doc.getLength()); 
-//      }
-//      finally { doc.releaseReadLock(); }
     }
   };
 

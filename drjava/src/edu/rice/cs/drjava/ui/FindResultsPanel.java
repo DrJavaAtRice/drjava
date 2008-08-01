@@ -307,12 +307,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 
   }
   
-  /** Remove a region from this panel. If this panel is emptied, remove this.  Must be executed in event thread.
+  /** Remove a region from this panel.  If this panel is emptied, remove this.  Must be executed in event thread.
     * @param r the region
     */
   public void removeRegion(final MovingDocumentRegion r) {
     super.removeRegion(r);
-    if (_regionManager.getDocuments().isEmpty()) _close();
+    if (_regionManager.getDocuments().isEmpty()) _closePanel();
   }
   
   /** Update button state and text. */
@@ -346,16 +346,20 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  /** Close the panel. */
-  public void _close() {
-    super._close();
+  /** Destroys this panel and its contents. This is a much more comprehensive command than _closePanel (which is the
+    * _close operation inherited from RegionsTreePanel.  The latter merely removes the panel from the TabbedPane but 
+    * does not affect its contents, so panels like Find/Replace can be regenerated with their contents preserved.
+    */
+  protected void _close() {
+    _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
     _frame.removeCurrentLocationHighlight();
     freeResources();
   }
   
+  private void _closePanel() { super._close(); }
+  
   /** Free the resources; this can be used if the panel was never actually displayed. */
   public void freeResources() {
-    _regionManager.clearRegions();
     _model.disposeFindResultsManager(_regionManager);
     _docToTreeNode.clear();
     _regionToTreeNode.clear();

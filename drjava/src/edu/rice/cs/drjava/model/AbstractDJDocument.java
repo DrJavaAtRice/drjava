@@ -269,19 +269,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * with the same status into one. Perturbs _currentLocation.
     */
   public ArrayList<HighlightStatus> getHighlightStatus(int start, int end) {
-//    acquireReadLock();
-//    try { 
       return _getHighlightStatus(start, end); 
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
-    * with the same status into one.  ASSUMES that read lock is already held.  Perturbs _currentLocation.
+    * with the same status into one.  ONLY runs in the event thread.  Perturbs _currentLocation.
     */
   public ArrayList<HighlightStatus> _getHighlightStatus(int start, int end) {
     
-    // assert isReadLocked();
+    assert EventQueue.isDispatchThread();
     
     if (start == end) return new ArrayList<HighlightStatus>(0);
     ArrayList<HighlightStatus> v;
@@ -511,13 +507,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @return the relative distance forwards to the offset after the matching brace.
     */
   public int balanceForward() {
-//    acquireReadLock();
-//    try { 
-//    synchronized(_reduced) { 
-      return _balanceForward(); 
-//    } 
-//    }
-//    finally { releaseReadLock(); }  
+    return _balanceForward(); 
   }
   
   /** Raw version of balanceForward.  Assumes that read lock and reduced locks are already held. */
@@ -640,7 +630,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @return position of enclosing brace, or ERROR_INDEX (-1) if beginning of document is reached.
     */
   public int _findNextEnclosingBrace(final int pos, final char opening, final char closing) throws BadLocationException {
-    // assert isReadLocked();
+     assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.NextEnclosingBrace(pos, opening, closing);
@@ -655,8 +645,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int braceBalance = 0;
     
     String text = getText();
-//    try {      
-//    synchronized(_reduced) {
+
       final int origPos = _currentLocation;
       // Move reduced model to location pos
       _setCurrentLocation(pos);  // reduced model points to pos == reducedPos
@@ -687,14 +676,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       /* Invariant: same as for loop except that pos <= reducedPos <= i <= text.length() */
       
       _setCurrentLocation(origPos);    // Restore the state of the reduced model;
-//    }  // end synchronized
     
     if (i == text.length()) reducedPos = -1; // No matching char was found
     _storeInCache(key, reducedPos, reducedPos);
     // Return position of matching char or ERROR_INDEX (-1)     
     return reducedPos;  
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Searching backwards, finds the position of the first character that is one of the given delimiters.  Does
@@ -842,9 +828,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    * @return position of first non-whitespace character before pos OR ERROR_INDEX (-1) if no such char
 //    */
 //  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
-//    acquireReadLock();
-//    try { return _findPrevCharPos(pos, whitespace); }
-//    finally { releaseReadLock(); }
+//    return _findPrevCharPos(pos, whitespace); }
 //  }
   
   /** Finds the position of the first non-whitespace, non-comment character before pos.  Skips comments and all 
@@ -997,8 +981,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
-    
-//    acquireWriteLock();
+
     try {
       if (selStart == selEnd) {  // single line to indent
 //          Utilities.showDebug("selStart = " + selStart + " currentLocation = " + _currentLocation);
@@ -1016,7 +999,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       else _indentBlock(selStart, selEnd, reason, pm);
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); } 
     
     // Ends the compound edit.
     //endCompoundEdit(key);   //Changed to endLastCompoundEdit in connection with the FrenchKeyBoard Fix
@@ -1081,14 +1063,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param currPos A position on the current line
     */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
+//    assert EventQueue.isDispatchThread();
+    
     String prefix;
     int firstChar;
-//    acquireReadLock();
-//    try {
     firstChar = _getLineStartPos(currPos);
     prefix = getText(firstChar, currPos-firstChar);
-//    }
-//    finally { releaseReadLock(); }
     
     // Walk through string until we find a non-whitespace character
     int i;
@@ -1254,7 +1234,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _getLineStartPos(final int pos) {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     if (pos < 0 || pos > getLength()) return -1;
     // Check cache
@@ -1263,19 +1243,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     if (cached != null) return cached.intValue();
     
     int dist;
-//    synchronized(_reduced) {
-      final int oldPos = _currentLocation;
-      _setCurrentLocation(pos);
-      dist = _reduced.getDistToStart(0);
-      _setCurrentLocation(oldPos);
-//    }
-    
+
+    final int oldPos = _currentLocation;
+    _setCurrentLocation(pos);
+    dist = _reduced.getDistToStart(0);
+    _setCurrentLocation(oldPos);
+  
     int newPos = 0;
     if (dist >= 0)  newPos = pos - dist;
     _storeInCache(key, newPos, pos - 1);
     return newPos;  // may equal 0
-//    }
-//    finally { releaseReadLock(); }
   }
   
   /** Returns the absolute position of the end of the current line.  (At the next newline, or the end of the document.)
@@ -1819,10 +1796,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public byte[] getBytes() { return getText().getBytes(); }
   
   public void clear() {
-//    acquireWriteLock();
     try { remove(0, getLength()); }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { releaseWriteLock(); }
   }
   
   /** @return true if pos is the position of one of the chars in an occurrence of "//" or "/*" in text. */

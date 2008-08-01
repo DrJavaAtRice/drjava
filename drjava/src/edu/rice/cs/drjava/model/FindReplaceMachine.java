@@ -223,7 +223,6 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     if (! onMatch()) return false;
-//    _doc.acquireWriteLock();
     try {
 //      boolean atStart = false;
       int offset = getCurrentOffset();
@@ -244,7 +243,6 @@ public class FindReplaceMachine {
       return true;
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-//    finally { _doc.releaseWriteLock(); }
   }
   
   /** Replaces all occurences of the find word with the replace word in the current document of in all documents
@@ -356,9 +354,6 @@ public class FindReplaceMachine {
     */
   private int _processAllInCurrentDoc(Lambda<Void, FindResult> findAction) {
     
-//    _doc.acquireWriteLock();  // the contract stipulates no document modification!
-//    try {
-    
     if (_isForward) setPosition(0);
     else setPosition(_doc.getLength());
     
@@ -371,8 +366,6 @@ public class FindReplaceMachine {
       fr = findNext(false);           // find next match in current doc
     }
     return count;
-//    }
-//    finally { _doc.releaseWriteLock(); }
   }
   
   public FindResult findNext() { return findNext(_searchAllDocuments); }
@@ -522,9 +515,7 @@ public class FindReplaceMachine {
       try { 
         
 //      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
-        //doc.acquireReadLock(); 
         text = doc.getText(start, len);
-        //finally { doc.releaseReadLock(); }
         
         if (! _matchCase) {
           text = text.toLowerCase();
@@ -613,11 +604,7 @@ public class FindReplaceMachine {
         
         // find next match in _doc
         FindResult fr;
-//        _doc.acquireReadLock();
-//        try { 
         fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); 
-//        } 
-//        finally { _doc.releaseReadLock(); }
         
         if (fr.getFoundOffset() >= 0) return fr;
       }
@@ -627,11 +614,7 @@ public class FindReplaceMachine {
     }
     
     // No valid match found; perform wrapped search.  _findWrapped assumes acquireReadLock is held.
-//    startDoc.acquireReadLock();
-//    try { 
-    return _findWrapped(startDoc, start, len, true); 
-//    }  // last arg is true because searching all docs has wrapped
-//    finally { startDoc.releaseReadLock(); } 
+    return _findWrapped(startDoc, start, len, true);  // last arg is true because searching all docs has wrapped
   } 
   
   /** Determines whether the whole find word is found at the input position.  Assumes read lock or hourglass is
@@ -649,16 +632,12 @@ public class FindReplaceMachine {
     boolean leftOutOfBounds = false;
     boolean rightOutOfBounds = false;
     
-//    doc.acquireReadLock();
-//    try { 
-      try { leftOfMatch = doc.getText(leftLoc, 1).charAt(0); }
-      catch (BadLocationException e) { leftOutOfBounds = true; } 
-      catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
-      try { rightOfMatch = doc.getText(rightLoc, 1).charAt(0); }
-      catch (BadLocationException e) { rightOutOfBounds = true; } 
-      catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
-//    }
-//    finally { doc.releaseReadLock(); }      
+    try { leftOfMatch = doc.getText(leftLoc, 1).charAt(0); }
+    catch (BadLocationException e) { leftOutOfBounds = true; } 
+    catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
+    try { rightOfMatch = doc.getText(rightLoc, 1).charAt(0); }
+    catch (BadLocationException e) { rightOutOfBounds = true; } 
+    catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }    
     
     if (! leftOutOfBounds && ! rightOutOfBounds) return isDelimiter(rightOfMatch) && isDelimiter(leftOfMatch);
     if (! leftOutOfBounds) return isDelimiter(leftOfMatch);

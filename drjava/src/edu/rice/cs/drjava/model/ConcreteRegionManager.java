@@ -223,10 +223,20 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   }
   
   private void _notifyRegionRemoved(final R region) {
-      _lock.startRead();
-      try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-      finally { _lock.endRead(); }
+    _lock.startRead();
+    try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
+    finally { _lock.endRead(); }
   }
+  
+  private void _notifyRegionsRemoved(Collection<R> regions) {
+    _lock.startRead();
+    try { 
+      for (R r: regions) {
+        for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(r); } } 
+    }
+    finally { _lock.endRead(); }
+  }
+
   
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
   @SuppressWarnings("unchecked")
@@ -265,7 +275,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     _regions.clear();
     _documents.clear();
     // Notify all listeners for this manager that all regions have been removed
-//    _notifyRegionsRemoved(regions);
+    _notifyRegionsRemoved(regions);
   }
   
 //  /** Set the current region. 

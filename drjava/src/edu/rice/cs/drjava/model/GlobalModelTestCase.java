@@ -348,8 +348,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     listener.assertInteractionEndCount(1);
 
     // skip the right length for the newline
-//    interactionsDoc.acquireReadLock();
-//    try {
     final int resultsEndLocation = interactionsDoc.getLength() - newLineLen - interactionsDoc.getPrompt().length();
     
     final int resultsLen = resultsEndLocation - resultsStartLocation;
@@ -357,8 +355,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _log.log("Contents = '" + interactionsDoc.getDocText(0, resultsEndLocation+1) + "'");
     if (resultsLen <= 0) return "";
     return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
-//    }
-//    finally { interactionsDoc.releaseReadLock(); }
   }
 
   /** Appends the input string to the interactions pane and interprets it. */

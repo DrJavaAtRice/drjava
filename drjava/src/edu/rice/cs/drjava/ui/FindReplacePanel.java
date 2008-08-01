@@ -82,9 +82,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
    *   block arrows  u25BA, u25C4
    *   big block arrows u25B6, u25C0
    *   enclosing wedges u25E4, u25E5
+   *   small solid square u25FE
+   *   fisheye u25C9
    */
-  public static final char LEFT = '\u25CF'; 
-  public static final char RIGHT = '\u25CF'; 
+  public static final char LEFT = '\u25FE'; 
+  public static final char RIGHT = '\u25FE'; 
   
   private JButton _findNextButton;
   private JButton _findPreviousButton;
@@ -652,6 +654,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                 sb.append("</font>");
 //                sb.append(RIGHT);
                 sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(suffix));
+//                sb.append("</html>");
 //                sb.append(StringOps.getBlankString(120 - sLength));  // move getBank to StringOps
                 return sb.toString();
               }

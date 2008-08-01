@@ -152,16 +152,12 @@ public abstract class AbstractDJPane extends JTextPane
   public void setCaretPos(int pos) {
 //    System.err.println("setCaretPos(" + pos + ") called");
     DJDocument doc = getDJDocument();
-//    doc.acquireReadLock();
-//    try {
     int len = doc.getLength();
     if (pos > len) {
       setCaretPosition(len);
       return;
     }
     setCaretPosition(pos);
-//    }
-//    finally { doc.releaseReadLock(); }
   }
 
 // This block of code is used solely for debugging

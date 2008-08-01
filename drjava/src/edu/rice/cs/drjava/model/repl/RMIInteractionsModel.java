@@ -171,22 +171,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   private void _updateDocument(final String prompt, final boolean inProgress, boolean updatePrompt) {
     assert EventQueue.isDispatchThread();
     if (updatePrompt) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-//          _document.acquireWriteLock();
-//          try {
-          _document.setPrompt(prompt);
-          _document.insertNewline(_document.getLength());
-          _document.insertPrompt();
+      _document.setPrompt(prompt);
+      _document.insertNewline(_document.getLength());
+      _document.insertPrompt();
 //            int len = _document.getPromptLength();  
 //            advanceCaret(len);
-          _document.setInProgress(inProgress);
-          scrollToCaret();
-//          }
-//          finally { _document.releaseWriteLock(); }
-//        }
-//      });
-
+      _document.setInProgress(inProgress);
+      scrollToCaret();
     }   
   }
   

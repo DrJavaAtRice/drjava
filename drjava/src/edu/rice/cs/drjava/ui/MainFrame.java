@@ -47,6 +47,7 @@ import java.awt.dnd.*;
 import java.beans.*;
 
 import java.io.*;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1900,7 +1901,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-//            finally { odd.releaseWriteLock(); }
           }
           hourglassOff();
           return null;
@@ -2008,7 +2008,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PredictiveInputModel<ClassNameAndPackageEntry> pim = 
       new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-//    odd.acquireWriteLock();
     boolean uniqueMatch = true;
     try {
       String mask = "";
@@ -2068,7 +2067,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-//    finally { if (uniqueMatch) odd.releaseWriteLock(); }
   }
   
   /** Auto-completes word the cursor is on. */
@@ -2508,8 +2506,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final FindResultsPanel panel = new FindResultsPanel(this, rm, title, searchString, searchAll, matchCase,
                                                         wholeWord, noComments, noTestCases, doc, findReplace);
     
-    final Map<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
-      new TreeMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
+    final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
+      new IdentityHashMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     final Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
       new Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
@@ -6786,10 +6784,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _statusBar.add( fileNameAndMessagePanel, BorderLayout.CENTER );
 //    _statusBar.add( sbMessagePanel, BorderLayout.CENTER );
     _statusBar.add( _currLocationField, BorderLayout.EAST );
-    _statusBar.setBorder(
-                         new CompoundBorder(new EmptyBorder(2,2,2,2),
-                                            new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-                                                               new EmptyBorder(2,2,2,2))));
+    _statusBar.
+      setBorder(new CompoundBorder(new EmptyBorder(2,2,2,2),
+                                   new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(2,2,2,2))));
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
     
 //     //Adjust constraints for the fileName label so it's next to the left edge.

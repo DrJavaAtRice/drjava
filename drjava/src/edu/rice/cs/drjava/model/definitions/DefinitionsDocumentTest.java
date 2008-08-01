@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedToken;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -81,11 +82,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   /** Convenience method that wraps _doc.indentLines calls in a write lock. */
   private void indentLines(int selStart, int selEnd) {
-//    _doc.acquireWriteLock(); 
-//    try { 
-      _doc.indentLines(selStart, selEnd); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
+    _doc.indentLines(selStart, selEnd); 
   }
   
   /** Test insertion. */
@@ -1425,736 +1422,732 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "}/*eof*/" + NEWLINE;
   
   /** Test finding anonymous class index on document.
-   */
+    */
   public void testAnonymousClassIndex() throws BadLocationException, ClassNameNotFoundException {
-    _doc.insertString(0, NESTED_CLASSES_TEXT, null);
-    
-    String substr;
-    int exp, act;
-    substr = "{ /*Test$4*/";
-    exp = 4;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-    act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
-    assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
-    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          _doc.insertString(0, NESTED_CLASSES_TEXT, null);
+          
+          String substr;
+          int exp, act;
+          substr = "{ /*Test$4*/";
+          exp = 4;
+          act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
+          assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
+          
 //    SySystem.err.println(NESTED_CLASSES_TEXT);
-    substr = "{ /*Test$5*/";
-    exp = 5;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-      act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
-    assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
-    
-    substr = "{ /*Test$6*/";
-    exp = 6;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-    act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
-    assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
-    
-    substr = "{ /*Test$7*/";
-    exp = 7;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-      act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
-    assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
-    
-    substr = "{ /*Test$8*/";
-    exp = 8;
-//    _doc.acquireWriteLock();  // implicitly locks the _reduced model
-//    try { 
-    act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
-//    }
-//    finally { _doc.releaseWriteLock(); }
-    assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
+          substr = "{ /*Test$5*/";
+          exp = 5;
+          act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
+          assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
+          
+          substr = "{ /*Test$6*/";
+          exp = 6;
+          act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
+          assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
+          
+          substr = "{ /*Test$7*/";
+          exp = 7;
+          act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
+          assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
+          
+          substr = "{ /*Test$8*/";
+          exp = 8;
+          act = _doc._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr)); 
+          assertEquals("index at " + substr + " exp=`" + exp + "`, act=`" + act + "`", exp, act);
+        }
+        catch(BadLocationException e) { throw new UnexpectedException(e); }
+        catch(ClassNameNotFoundException e) { throw new UnexpectedException(e); }
+      }
+    });
   }
   
-  /** Test exact class name-finding on document.
-   */
+  /** Test exact class name-finding on document. */
   public void testExactClassName() throws BadLocationException, ClassNameNotFoundException {
-    _doc.insertString(0, NESTED_CLASSES_TEXT, null);
     
-    String substr, exp1, exp2, act1, act2;
-    substr = "private int i";
-    exp1   = "Temp.Test";    
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
     
-    substr = "= other.i";
-    exp1   = "Temp.Test";    
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "System.out.println(i)";
-    exp1   = "Temp.Test";    
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "System.currentTimeMillis";
-    exp1   = "Temp.Test$Interf";
-    exp2   = "Interf";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "Implementor implements Interf";
-    exp1   = "Temp.Test";    
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Implementor.act*/";
-    exp1   = "Temp.Test$Implementor";
-    exp2   = "Implementor";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Implementor$1*/";
-    exp1   = "Temp.Test$Implementor$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$Implementor$1\"";
-    exp1   = "Temp.Test$Implementor$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Implementor$1$1*/";
-    exp1   = "Temp.Test$Implementor$1$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$Implementor$1$1\"";
-    exp1   = "Temp.Test$Implementor$1$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Implementor$1$2*/";
-    exp1   = "Temp.Test$Implementor$1$2";
-    exp2   = "2";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-Implementor$1*/";
-    exp1   = "Temp.Test$Implementor$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-Implementor*/";
-    exp1   = "Temp.Test$Implementor";
-    exp2   = "Implementor";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*c-Implementor*/";
-    exp1   = "Temp.Test$Implementor";
-    exp2   = "Implementor";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Implementor$Inner*/";
-    exp1   = "Temp.Test$Implementor$Inner";
-    exp2   = "Inner";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-Implementor$Inner*/";
-    exp1   = "Temp.Test$Implementor$Inner";
-    exp2   = "Inner";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*anon()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$1*/";
-    exp1   = "Temp.Test$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$1$NamedInAnonymous*/";
-    exp1   = "Temp.Test$1$NamedInAnonymous";
-    exp2   = "NamedInAnonymous";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$1$NamedInAnonymous\"";
-    exp1   = "Temp.Test$1$NamedInAnonymous";
-    exp2   = "NamedInAnonymous";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-Test$1*/";
-    exp1   = "Temp.Test$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$1\"";
-    exp1   = "Temp.Test$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-anon()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$2*/";
-    exp1   = "Temp.Test$2";
-    exp2   = "2";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$2\"";
-    exp1   = "Temp.Test$2";
-    exp2   = "2";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$2$1*/";
-    exp1   = "Temp.Test$2$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$2$1\"";
-    exp1   = "Temp.Test$2$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$3*/";
-    exp1   = "Temp.Test$3";
-    exp2   = "3";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$3\"";
-    exp1   = "Temp.Test$3";
-    exp2   = "3";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "(true) { i = j; }";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "new Test(1)";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "class Foo";
-    exp1   = "";
-    exp2   = "";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "FooImplementor fimp";
-    exp1   = "Temp.Foo";
-    exp2   = "Foo";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Foo$FooInterf*/";
-    exp1   = "Temp.Foo$FooInterf";
-    exp2   = "FooInterf";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Foo$FooImplementor*/";
-    exp1   = "Temp.Foo$FooImplementor";
-    exp2   = "FooImplementor";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-Foo$FooImplementor*/";
-    exp1   = "Temp.Foo$FooImplementor";
-    exp2   = "FooImplementor";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Foo$FooImplementor$1*/";
-    exp1   = "Temp.Foo$FooImplementor$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Foo$FooImplementor$1\"";
-    exp1   = "Temp.Foo$FooImplementor$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Foo$FooImplementor$1$1*/";
-    exp1   = "Temp.Foo$FooImplementor$1$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Foo$FooImplementor$1$1\"";
-    exp1   = "Temp.Foo$FooImplementor$1$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Foo$FooImplementor$Inner*/";
-    exp1   = "Temp.Foo$FooImplementor$Inner";
-    exp2   = "Inner";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*eof*/";
-    exp1   = "";
-    exp2   = "";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*bof*/";
-    exp1   = "";
-    exp2   = "";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "public class Test";
-    exp1   = "";
-    exp2   = "";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*anon2()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$4*/";
-    exp1   = "Temp.Test$4";
-    exp2   = "4";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"parameter 1 = Test$4\"";
-    exp1   = "Temp.Test$4";
-    exp2   = "4";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$4$1*/";
-    exp1   = "Temp.Test$4$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$4$1\"";
-    exp1   = "Temp.Test$4$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*b-anon2()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$5*/";
-    exp1   = "Temp.Test$5";
-    exp2   = "5";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"parameter 2 = Test$5\"";
-    exp1   = "Temp.Test$5";
-    exp2   = "5";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*c-anon2()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$6*/";
-    exp1   = "Temp.Test$6";
-    exp2   = "6";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$6\"";
-    exp1   = "Temp.Test$6";
-    exp2   = "6";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*anon3()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$7*/";
-    exp1   = "Temp.Test$7";
-    exp2   = "7";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"doSomething\"";
-    exp1   = "Temp.Test$7$NamedClassAgain";
-    exp2   = "NamedClassAgain";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"parameter 3 = Test$7\"";
-    exp1   = "Temp.Test$7";
-    exp2   = "7";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$7$1*/";
-    exp1   = "Temp.Test$7$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$7$1\"";
-    exp1   = "Temp.Test$7$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*c-anon2()*/";
-    exp1   = "Temp.Test";
-    exp2   = "Test";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$8*/";
-    exp1   = "Temp.Test$8";
-    exp2   = "8";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$8\"";
-    exp1   = "Temp.Test$8";
-    exp2   = "8";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "abstract void feeDo()";
-    exp1   = "Temp.Fee";
-    exp2   = "Fee";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "class FeeConc extends Fee";
-    exp1   = "Temp.Fee";
-    exp2   = "Fee";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Fee$FeeConc*/";
-    exp1   = "Temp.Fee$FeeConc";
-    exp2   = "FeeConc";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"FeeConc/feeDo\"";
-    exp1   = "Temp.Fee$FeeConc";
-    exp2   = "FeeConc";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"FeeConc/feeAct\"";
-    exp1   = "Temp.Fee$FeeConc";
-    exp2   = "FeeConc";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"FeeConc/s\"";
-    exp1   = "Temp.Fee$FeeConc";
-    exp2   = "FeeConc";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"FeeConc/t\"";
-    exp1   = "Temp.Fee$FeeConc";
-    exp2   = "FeeConc";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"FeeConc/u\"";
-    exp1   = "Temp.Fee$FeeConc";
-    exp2   = "FeeConc";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Fee$1*/";
-    exp1   = "Temp.Fee$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Fee$1/feeDo\"";
-    exp1   = "Temp.Fee$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Fee$1/feeAct\"";
-    exp1   = "Temp.Fee$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Fee$1/s\"";
-    exp1   = "Temp.Fee$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Fee$1/t\"";
-    exp1   = "Temp.Fee$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Fee$1/u\"";
-    exp1   = "Temp.Fee$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$Outer$Middle$1*/";
-    exp1   = "Temp.Test$Outer$Middle$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$Outer$Middle$1\"";
-    exp1   = "Temp.Test$Outer$Middle$1";
-    exp2   = "1";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$9*/";
-    exp1   = "Temp.Test$9";
-    exp2   = "9";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$9\"";
-    exp1   = "Temp.Test$9";
-    exp2   = "9";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "/*Test$10*/";
-    exp1   = "Temp.Test$10";
-    exp2   = "10";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
-    
-    substr = "\"Test$10\"";
-    exp1   = "Temp.Test$10";
-    exp2   = "10";
-    act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
-    act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-    assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
-    assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          _doc.insertString(0, NESTED_CLASSES_TEXT, null);
+          String substr, exp1, exp2, act1, act2;
+          substr = "private int i";
+          exp1   = "Temp.Test";    
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "= other.i";
+          exp1   = "Temp.Test";    
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "System.out.println(i)";
+          exp1   = "Temp.Test";    
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "System.currentTimeMillis";
+          exp1   = "Temp.Test$Interf";
+          exp2   = "Interf";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "Implementor implements Interf";
+          exp1   = "Temp.Test";    
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Implementor.act*/";
+          exp1   = "Temp.Test$Implementor";
+          exp2   = "Implementor";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Implementor$1*/";
+          exp1   = "Temp.Test$Implementor$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$Implementor$1\"";
+          exp1   = "Temp.Test$Implementor$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Implementor$1$1*/";
+          exp1   = "Temp.Test$Implementor$1$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$Implementor$1$1\"";
+          exp1   = "Temp.Test$Implementor$1$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Implementor$1$2*/";
+          exp1   = "Temp.Test$Implementor$1$2";
+          exp2   = "2";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-Implementor$1*/";
+          exp1   = "Temp.Test$Implementor$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-Implementor*/";
+          exp1   = "Temp.Test$Implementor";
+          exp2   = "Implementor";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*c-Implementor*/";
+          exp1   = "Temp.Test$Implementor";
+          exp2   = "Implementor";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Implementor$Inner*/";
+          exp1   = "Temp.Test$Implementor$Inner";
+          exp2   = "Inner";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-Implementor$Inner*/";
+          exp1   = "Temp.Test$Implementor$Inner";
+          exp2   = "Inner";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*anon()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$1*/";
+          exp1   = "Temp.Test$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$1$NamedInAnonymous*/";
+          exp1   = "Temp.Test$1$NamedInAnonymous";
+          exp2   = "NamedInAnonymous";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$1$NamedInAnonymous\"";
+          exp1   = "Temp.Test$1$NamedInAnonymous";
+          exp2   = "NamedInAnonymous";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-Test$1*/";
+          exp1   = "Temp.Test$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$1\"";
+          exp1   = "Temp.Test$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-anon()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$2*/";
+          exp1   = "Temp.Test$2";
+          exp2   = "2";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$2\"";
+          exp1   = "Temp.Test$2";
+          exp2   = "2";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$2$1*/";
+          exp1   = "Temp.Test$2$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$2$1\"";
+          exp1   = "Temp.Test$2$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$3*/";
+          exp1   = "Temp.Test$3";
+          exp2   = "3";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$3\"";
+          exp1   = "Temp.Test$3";
+          exp2   = "3";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "(true) { i = j; }";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "new Test(1)";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "class Foo";
+          exp1   = "";
+          exp2   = "";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "FooImplementor fimp";
+          exp1   = "Temp.Foo";
+          exp2   = "Foo";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Foo$FooInterf*/";
+          exp1   = "Temp.Foo$FooInterf";
+          exp2   = "FooInterf";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Foo$FooImplementor*/";
+          exp1   = "Temp.Foo$FooImplementor";
+          exp2   = "FooImplementor";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-Foo$FooImplementor*/";
+          exp1   = "Temp.Foo$FooImplementor";
+          exp2   = "FooImplementor";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Foo$FooImplementor$1*/";
+          exp1   = "Temp.Foo$FooImplementor$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Foo$FooImplementor$1\"";
+          exp1   = "Temp.Foo$FooImplementor$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Foo$FooImplementor$1$1*/";
+          exp1   = "Temp.Foo$FooImplementor$1$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Foo$FooImplementor$1$1\"";
+          exp1   = "Temp.Foo$FooImplementor$1$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Foo$FooImplementor$Inner*/";
+          exp1   = "Temp.Foo$FooImplementor$Inner";
+          exp2   = "Inner";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*eof*/";
+          exp1   = "";
+          exp2   = "";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*bof*/";
+          exp1   = "";
+          exp2   = "";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "public class Test";
+          exp1   = "";
+          exp2   = "";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*anon2()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$4*/";
+          exp1   = "Temp.Test$4";
+          exp2   = "4";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"parameter 1 = Test$4\"";
+          exp1   = "Temp.Test$4";
+          exp2   = "4";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$4$1*/";
+          exp1   = "Temp.Test$4$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$4$1\"";
+          exp1   = "Temp.Test$4$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*b-anon2()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$5*/";
+          exp1   = "Temp.Test$5";
+          exp2   = "5";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"parameter 2 = Test$5\"";
+          exp1   = "Temp.Test$5";
+          exp2   = "5";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*c-anon2()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$6*/";
+          exp1   = "Temp.Test$6";
+          exp2   = "6";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$6\"";
+          exp1   = "Temp.Test$6";
+          exp2   = "6";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*anon3()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$7*/";
+          exp1   = "Temp.Test$7";
+          exp2   = "7";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"doSomething\"";
+          exp1   = "Temp.Test$7$NamedClassAgain";
+          exp2   = "NamedClassAgain";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"parameter 3 = Test$7\"";
+          exp1   = "Temp.Test$7";
+          exp2   = "7";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$7$1*/";
+          exp1   = "Temp.Test$7$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$7$1\"";
+          exp1   = "Temp.Test$7$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*c-anon2()*/";
+          exp1   = "Temp.Test";
+          exp2   = "Test";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$8*/";
+          exp1   = "Temp.Test$8";
+          exp2   = "8";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$8\"";
+          exp1   = "Temp.Test$8";
+          exp2   = "8";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "abstract void feeDo()";
+          exp1   = "Temp.Fee";
+          exp2   = "Fee";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "class FeeConc extends Fee";
+          exp1   = "Temp.Fee";
+          exp2   = "Fee";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Fee$FeeConc*/";
+          exp1   = "Temp.Fee$FeeConc";
+          exp2   = "FeeConc";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"FeeConc/feeDo\"";
+          exp1   = "Temp.Fee$FeeConc";
+          exp2   = "FeeConc";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"FeeConc/feeAct\"";
+          exp1   = "Temp.Fee$FeeConc";
+          exp2   = "FeeConc";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"FeeConc/s\"";
+          exp1   = "Temp.Fee$FeeConc";
+          exp2   = "FeeConc";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"FeeConc/t\"";
+          exp1   = "Temp.Fee$FeeConc";
+          exp2   = "FeeConc";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"FeeConc/u\"";
+          exp1   = "Temp.Fee$FeeConc";
+          exp2   = "FeeConc";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Fee$1*/";
+          exp1   = "Temp.Fee$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Fee$1/feeDo\"";
+          exp1   = "Temp.Fee$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Fee$1/feeAct\"";
+          exp1   = "Temp.Fee$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Fee$1/s\"";
+          exp1   = "Temp.Fee$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Fee$1/t\"";
+          exp1   = "Temp.Fee$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Fee$1/u\"";
+          exp1   = "Temp.Fee$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$Outer$Middle$1*/";
+          exp1   = "Temp.Test$Outer$Middle$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$Outer$Middle$1\"";
+          exp1   = "Temp.Test$Outer$Middle$1";
+          exp2   = "1";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$9*/";
+          exp1   = "Temp.Test$9";
+          exp2   = "9";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$9\"";
+          exp1   = "Temp.Test$9";
+          exp2   = "9";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "/*Test$10*/";
+          exp1   = "Temp.Test$10";
+          exp2   = "10";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+          
+          substr = "\"Test$10\"";
+          exp1   = "Temp.Test$10";
+          exp2   = "10";
+          act1   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+          act2   = _doc.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+          assertEquals("class name at " + substr + " exp=`" + exp1 + "`, act=`" + act1 + "`", exp1, act1);
+          assertEquals("class name at " + substr + " exp=`" + exp2 + "`, act=`" + act2 + "`", exp2, act2);
+        }
+        catch(BadLocationException e) { throw new UnexpectedException(e); }
+        catch(ClassNameNotFoundException e) { throw new UnexpectedException(e); }
+      }
+    });
   }
   
   protected final String PUBLIC_CIE_TEXT =
@@ -2167,7 +2160,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "interface I { }" + NEWLINE +
     "enum E { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String PUBLIC_CEI_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2178,7 +2171,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "enum E { }" + NEWLINE +
     "interface I { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String PUBLIC_ICE_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2189,7 +2182,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "class C { }" + NEWLINE +
     "enum E { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String PUBLIC_IEC_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2200,7 +2193,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "enum E { }" + NEWLINE +
     "class C { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String PUBLIC_ECI_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2222,7 +2215,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "interface I { }" + NEWLINE +
     "class C { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   // public after non-public
   protected final String I_PUBLIC_CE_TEXT =
     "/*bof*/package temp;" + NEWLINE +
@@ -2234,7 +2227,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "}" + NEWLINE +
     "enum E { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String E_PUBLIC_CI_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2245,7 +2238,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "}" + NEWLINE +
     "interface I { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String C_PUBLIC_IE_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2256,7 +2249,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "}" + NEWLINE +
     "enum E { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String E_PUBLIC_IC_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2267,7 +2260,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "}" + NEWLINE +
     "class C { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String C_PUBLIC_EI_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2301,7 +2294,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "interface I { }" + NEWLINE +
     "enum E { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String CEI_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2312,7 +2305,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "enum E { }" + NEWLINE +
     "interface I { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String ICE_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2323,7 +2316,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "class C { }" + NEWLINE +
     "enum E { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String IEC_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +
@@ -2334,7 +2327,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "enum E { }" + NEWLINE +
     "class C { }" + NEWLINE +
     "}" + NEWLINE;
-
+  
   protected final String ECI_TEXT =
     "/*bof*/package temp;" + NEWLINE +
     "" + NEWLINE +

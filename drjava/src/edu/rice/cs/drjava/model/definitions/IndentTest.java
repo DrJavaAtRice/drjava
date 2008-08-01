@@ -1400,24 +1400,16 @@ public final class IndentTest extends DrJavaTestCase {
   }
   
   private void _assertLineBraceInfo(int distance, String braceType) {
-//    _doc.acquireReadLock();
-//    try {
     BraceInfo info = _doc._getLineEnclosingBrace();
 //      System.err.println(info);
     assertEquals("line brace info: brace distance", distance, info.distance());
     assertEquals("line brace info: brace type", braceType, info.braceType());
-//    }
-//    finally { _doc.releaseReadLock(); }
   }
   
   private void _assertBraceInfo(int distance, String braceType) {
-//    _doc.acquireReadLock();
-//    try {
     BraceInfo info = _doc._getEnclosingBrace();
     assertEquals("line brace info: brace distance", distance, info.distance());
     assertEquals("line brace info: brace type", braceType, info.braceType());
-//    }
-//    finally { _doc.releaseReadLock(); }
   }
 //  /** Copies fromFile to toFile, assuming both files exist. */
 //  private void _copyFile(File fromFile, File toFile) throws IOException {

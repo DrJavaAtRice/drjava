@@ -3450,21 +3450,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Assumes read lock is already held. */    
     public int _getLineStartPos(int pos) { 
       DefinitionsDocument doc = getDocument();
-//      doc.acquireReadLock();
-//      try { 
       return doc._getLineStartPos(pos); 
-//      }
-//      finally { doc.releaseReadLock(); }
     }
     
     /** Assumes read lock is already held. */
     public int _getLineEndPos(int pos) { 
       DefinitionsDocument doc = getDocument();
-//      doc.acquireReadLock();
-//      try { 
-        return doc._getLineEndPos(pos); 
-//      }
-//      finally { doc.releaseReadLock(); }
+      return doc._getLineEndPos(pos); 
     }
     
     public int commentLines(int selStart, int selEnd) { return getDocument().commentLines(selStart, selEnd); }
@@ -3475,21 +3467,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void indentLines(int selStart, int selEnd) { 
       DefinitionsDocument doc = getDocument();
-//      doc.acquireWriteLock();
-//      try { 
       doc.indentLines(selStart, selEnd); 
-//      }
-//      finally { doc.releaseWriteLock(); }
     }
     
     public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
       throws OperationCanceledException {
       DefinitionsDocument doc = getDocument();
-//      doc.acquireWriteLock();
-//      try { 
       doc.indentLines(selStart, selEnd, reason, pm); 
-//      }
-//      finally { doc.releaseWriteLock(); }
     }
     
     public int getCurrentLine() { return getDocument().getCurrentLine(); }

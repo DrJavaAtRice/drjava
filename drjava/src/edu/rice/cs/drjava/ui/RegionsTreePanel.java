@@ -162,7 +162,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     new BackgroundColorListener(c);
   }
   
-  /** Close the pane. */
+  /** Close the panel. */
   protected void _close() {
     super._close();
     updateButtons();

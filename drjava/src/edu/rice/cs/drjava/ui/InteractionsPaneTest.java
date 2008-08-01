@@ -219,13 +219,8 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   
   /** Tests that the InteractionsPane cannot be edited before the prompt. */
   public void testCannotEditBeforePrompt() throws EditDocumentException {
-//    _doc.acquireWriteLock();
-    int origLength = 0;
-//    try {
-    origLength = _doc.getLength();
+    int origLength = _doc.getLength();
     _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
-//    }
-//    finally { _doc.releaseWriteLock(); }
     assertEquals("Document should not have changed.", origLength, _doc.getLength());
   }
   
@@ -425,11 +420,8 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 //    synchronized(_resetLock) { while (! _resetDone) _resetLock.wait(); }
 //    Utilities.clearEventQueue();
 // 
-//    _doc.acquireWriteLock();
-//    try {  // wait until the reset operation (which is queued ahead of us) has grabbed the WriteLock
-//      Utilities.invokeAndWait(new Runnable() { public void run() {  _size = _pane.getPromptList().size(); } });
-//    }
-//    finally { _doc.releaseWriteLock(); }
+//    // wait until the reset operation (which is queued ahead of us) has grabbed the WriteLock
+//    Utilities.invokeAndWait(new Runnable() { public void run() {  _size = _pane.getPromptList().size(); } });
 //      
 //    Utilities.clearEventQueue();
 ////    System.err.println("PromptList for pane " + _pane.hashCode() + " is " + _pane.getPromptList());
