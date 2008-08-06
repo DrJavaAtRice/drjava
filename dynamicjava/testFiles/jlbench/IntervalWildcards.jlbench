@@ -1,0 +1,103 @@
+class Box<T> {
+  private T _val;
+  public Box(T arg) { _val = arg; }
+  public T get() { return _val; }
+  public void set(T arg) { _val = arg; }
+}
+
+declaration {
+  Box<Object> o = new Box<Object>("xyz");
+  Box<String> s = new Box<String>("hi");
+  Box<Number> n = new Box<Number>(new Integer(12));
+  Box<Integer> i = new Box<Integer>(new Integer(3));
+  Box<Double> d = new Box<Double>(new Double(2.0));
+}
+
+/** Valid assignments to an interval wildcard. */
+test {
+  Box<? extends Number super Integer> b;
+  b = n;
+  b = i;
+}
+
+/** Invalid assignments to an interval wildcard. */
+static error {
+  Box<? extends Number super Integer> b;
+  b = s;
+}
+
+/** Invalid assignments to an interval wildcard. */
+static error {
+  Box<? extends Number super Integer> b;
+  b = o;
+}
+
+/** Invalid assignments to an interval wildcard. */
+static error {
+  Box<? extends Number super Integer> b;
+  b = d;
+}
+
+/** Invalid interval */
+static error {
+  Box<? extends Number super String> b;
+}
+
+/** Invalid interval */
+static error {
+  Box<? extends Box<Number> super Box<Integer>> b;
+}
+
+/** Subtyping with an interval wildcard */
+test {
+  Box<? extends Integer super Integer> b1 = i;
+  Box<? extends Number super Integer> b2 = b1;
+  Box<? extends Number> b3;
+  b3 = b1;
+  b3 = b2;
+  Box<? super Integer> b4;
+  b4 = b1;
+  b4 = b2;
+  Box<?> b5;
+  b5 = b1;
+  b5 = b2;
+  b5 = b3;
+  b5 = b4;
+  Box<? extends Object super Integer> b6;
+  b6 = b1;
+  b6 = b2;
+  b6 = b4;
+}
+
+/** Invalid interval-wildcard subtyping */
+static error {
+  Box<? extends Number> b1 = i;
+  Box<? extends Object super Integer> b2 = b1;
+}
+
+/** Invalid interval-wildcard subtyping */
+static error {
+  Box<? extends Integer super Integer> b1 = i;
+  Box<? extends Number super Integer> b2 = b1;
+  Box<? super Number> b3 = b2;
+}
+
+/** Capture for interval-bounded wildcards. */
+test {
+  Box<? extends Number super Integer> b = i;
+  Number num = b.get();
+  b.set(new Integer(23));
+  b.set(null);
+}
+
+/** Invalid use of interval-bounded wildcards. */
+static error {
+  Box<? extends Number super Integer> b = i;
+  Integer intgr = b.get();
+}
+
+/** Invalid use of interval-bounded wildcards. */
+static error {
+  Box<? extends Number super Integer> b = i;
+  b.set(new Double(2.0));
+}

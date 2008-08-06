@@ -37,6 +37,7 @@
 package koala.dynamicjava.tree.tiger;
 
 import java.util.*;
+import edu.rice.cs.plt.tuple.Option;
 
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.Visitor;
@@ -48,16 +49,16 @@ import koala.dynamicjava.tree.visitor.Visitor;
 
 public class HookTypeName extends ReferenceTypeName {
   
-  ReferenceTypeName hookedType;
-  boolean supered;
+  private final Option<TypeName> upperBound;
+  private final Option<TypeName> lowerBound;
   
   /**
    * Initializes the type
    * @param type the hooked type
    * @exception IllegalArgumentException if type is null
    */
-  public HookTypeName(ReferenceTypeName type, boolean supered) {
-    this(type, supered, null, 0, 0, 0, 0);
+  public HookTypeName(Option<TypeName> up, Option<TypeName> low) {
+    this(up, low, null, 0, 0, 0, 0);
   }
 
   /**
@@ -70,26 +71,19 @@ public class HookTypeName extends ReferenceTypeName {
    * @param ec    the end column
    * @exception IllegalArgumentException if type is null
    */
-  public HookTypeName(ReferenceTypeName type, boolean _supered, String fn, int bl, int bc, int el, int ec) {
-    super(Arrays.asList(new Identifier("?")), fn, bl, bc, el, ec);
+  public HookTypeName(Option<TypeName> up, Option<TypeName> low,
+                      String fn, int bl, int bc, int el, int ec) {
+    super("?");
 
-    if (type == null) throw new IllegalArgumentException("type == null");
-    hookedType = type;
-    supered = _supered;
+    if (up == null) throw new IllegalArgumentException("up == null");
+    if (low == null) throw new IllegalArgumentException("low == null");
+    upperBound = up;
+    lowerBound = low;
   }
 
-  /**
-   * Returns the representation of this type
-   */
-  public String getRepresentation() {
-    if(supered) return "java.lang.Object";
-    return hookedType.getRepresentation();
-  }
+  public Option<TypeName> getUpperBound() { return upperBound; }
+  public Option<TypeName> getLowerBound() { return lowerBound; }
   
-  public ReferenceTypeName getHookedType() { return hookedType; }
-  
-  public boolean isSupered() { return supered; }
-
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
@@ -105,6 +99,6 @@ public class HookTypeName extends ReferenceTypeName {
   }
 
   protected String toStringHelper() {
-   return getRepresentation();
+   return upperBound + " " + lowerBound;
   }
 }

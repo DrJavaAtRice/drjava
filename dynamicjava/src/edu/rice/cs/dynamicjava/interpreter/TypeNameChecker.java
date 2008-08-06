@@ -314,11 +314,30 @@ public class TypeNameChecker {
      * @return  The type of the TypeName
      */
     @Override public Type visit(HookTypeName node) {
-      Type bound = check(node.getHookedType());
-      if (node.isSupered()) {
-        return setType(node, new Wildcard(new BoundedSymbol(node, TypeSystem.OBJECT, bound)));
+      Type upper = TypeSystem.OBJECT;
+      if (node.getUpperBound().isSome()) {
+        upper = check(node.getUpperBound().unwrap());
+        if (!ts.isReference(upper)) {
+          setErrorStrings(node, ts.userRepresentation(upper));
+          throw new ExecutionError("wildcard.bound", node);
+        }
       }
-      else { return setType(node, new Wildcard(new BoundedSymbol(node, bound, TypeSystem.NULL))); }
+      
+      Type lower = TypeSystem.NULL;
+      if (node.getLowerBound().isSome()) {
+        lower = check(node.getLowerBound().unwrap());
+        if (!ts.isReference(lower)) {
+          setErrorStrings(node, ts.userRepresentation(lower));
+          throw new ExecutionError("wildcard.bound", node);
+        }
+      }
+
+      if (!ts.isSubtype(lower, upper)) {
+        setErrorStrings(node, ts.userRepresentation(upper), ts.userRepresentation(lower));
+        throw new ExecutionError("wildcard.bounds", node);
+      }
+      
+      return setType(node, new Wildcard(new BoundedSymbol(node, upper, lower)));
     }
     
     /**

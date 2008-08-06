@@ -13,6 +13,7 @@ PARSER_BEGIN(Parser)
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.io.File;
+import edu.rice.cs.plt.tuple.Option;
 
 import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.parser.wrapper.*;
@@ -4853,45 +4854,30 @@ PARSER_END(Parser)
   List<TypeName> TypeArguments() :
   {
     List<TypeName> typeArgs = new LinkedList<TypeName>();
-    ReferenceTypeName hookedType = new ReferenceTypeName("java.lang.Object");
-    TypeName temp = new HookTypeName(hookedType, false);
-    Token hook = null;
-    Token supered = null;
+    TypeName arg;
   }
   {
     <LESS>
-      (LOOKAHEAD("?") hook="?"
-         [("extends"|"super") hookedType = ReferenceTypeName()]
-         // added to support wildcards
-         |
-       ( temp = type()) // should be modified to not allow primitives
-         )
-    {
-      if(hook!= null)
-        temp = new HookTypeName(hookedType, (supered!=null));
-      typeArgs.add(temp);
-      
-    }
-    
+    arg = TypeArgument() { typeArgs.add(arg); }
+    ( <COMMA> arg = TypeArgument() { typeArgs.add(arg); } )*
+    RightAngledBracket() { return typeArgs; }
+  }
+  
+  TypeName TypeArgument() :
+  { Token hook; TypeName upper = null; TypeName lower = null; }
+  {
     (
-     <COMMA>
-     (LOOKAHEAD("?") hook="?"
-        [("extends"|"super") hookedType = ReferenceTypeName()]
-        |
-      (temp = type() ) // should be modified to not allow primitives
-        )
-       {
-      if(hook!= null)
-        temp = new HookTypeName(hookedType, (supered!=null));
-      typeArgs.add(temp);
-    }
-    )*
-      
-      RightAngledBracket()
-      
-    {
-      return typeArgs;
-    }
+      hook="?" ( "extends" upper = type() )? ( "super" lower = type() )?
+      {
+        int endLine = hook.endLine;
+        int endColumn = hook.endColumn;
+        if (upper != null) { endLine = upper.getEndLine(); endColumn = upper.getEndColumn(); }
+        if (lower != null) { endLine = lower.getEndLine(); endColumn = lower.getEndColumn(); }
+        return new HookTypeName(Option.wrap(upper), Option.wrap(lower), filename,
+                                hook.beginLine, hook.beginColumn, endLine, endColumn);
+      }
+    | upper = type() { return upper; }
+    )
   }
   
   Token RightAngledBracket() :
