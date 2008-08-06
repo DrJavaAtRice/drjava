@@ -189,7 +189,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench.jar" />
+        <pathelement location="lib/buildlib/jlbench-base-14.jar" />
         <pathelement location="classes/base" />
       </classpath>
       <compilerarg value="-Xlint" />
@@ -273,17 +273,14 @@
         <pathelement location="classes/lib-14" />
       </path>
     </pathconvert>
-    <!-- We must handle ReflectionAdapter15 separately, since it contains 5.0-specific code -->
-    <retroweaver srcdir="classes/base" destdir="classes/base-14" target="1.4" verify="no" />
-    <!-- COMMENTED OUT DUE TO A BUG IN RETROWEAVER - IT DOESN'T SEEM TO SUPPORT USING A FILESET
+    <!-- We must handle Java5Class separately, since it contains 5.0-specific code; but it must be converted
+         to conform to the modified interface -->
     <retroweaver destdir="classes/base-14" target="1.4" verify="yes" classpath="${retroweaver-base-classpath}">
-      <fileset dir="classes/base" />
-      <fileset dir="classes/base" excludes="koala/dynamicjava/interpreter/ReflectionAdapter15*.class" />
+      <fileset dir="classes/base" includes="**/*.class" excludes="edu/rice/cs/dynamicjava/symbol/Java5Class*.class" />
     </retroweaver>
-    <retroweaver destdir="classes/base-14" target="1.4" verify="no">
-      <fileset dir="classes/base" includes="koala/dynamicjava/interpreter/ReflectionAdapter15*.class" />
+    <retroweaver destdir="classes/base-14" target="1.4" verify="no" classpath="${retroweaver-base-classpath}">
+      <fileset dir="classes/base" includes="edu/rice/cs/dynamicjava/symbol/Java5Class*.class" />
     </retroweaver>
-    -->
     <copy todir="classes/base-14">
       <fileset dir="classes/base" excludes="**/*.class" />
     </copy>
@@ -295,7 +292,7 @@
         <pathelement location="${java14-runtime}" />
         <pathelement location="${clover-jar}" />
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench.jar" />
+        <pathelement location="lib/buildlib/jlbench-base-14.jar" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
         <pathelement location="classes/test-14" />
@@ -374,7 +371,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench.jar" />
+        <pathelement location="lib/buildlib/jlbench-base-14.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
@@ -394,7 +391,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench.jar" />
+        <pathelement location="lib/buildlib/jlbench-base-14.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
@@ -414,7 +411,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench.jar" />
+        <pathelement location="lib/buildlib/jlbench-base-14.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
@@ -508,7 +505,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench.jar" />
+        <pathelement location="lib/buildlib/jlbench-base-14.jar" />
       </classpath>
       <link href="http://java.sun.com/j2se/1.5/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />

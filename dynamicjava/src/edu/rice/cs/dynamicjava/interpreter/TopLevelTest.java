@@ -32,7 +32,7 @@ public class TopLevelTest {
   
   public static Test suite() throws IOException {
     Iterable<String> excludes = IterUtil.asIterable(notYetSupported);
-    ZipFile jlbenchJar = new ZipFile("lib/buildlib/jlbench.jar");
+    ZipFile jlbenchJar = new ZipFile("lib/buildlib/jlbench-base-14.jar");
     LinkedList<Iterable<Benchmark>> benchmarks = new LinkedList<Iterable<Benchmark>>();
     benchmarks.add(JLBench.benchmarksForZipEntries(jlbenchJar, "edu/rice/cs/jlbench/benchmarks/java/", excludes));
     benchmarks.add(JLBench.benchmarksForZipEntries(jlbenchJar, "edu/rice/cs/jlbench/benchmarks/java5/", excludes));
@@ -141,7 +141,7 @@ public class TopLevelTest {
       debugMessage.append(TextUtil.repeat('-', 60));
       try {
         if (!p.isDefault()) { i.interpret("package " + p.toString()); }
-        i.interpret("void assertTrue(boolean b) { if (!b) throw new Error(\"Assertion failed\"); }");
+        i.interpret("void assertTrue(boolean b) { if (!b) throw new java.lang.Error(\"Assertion failed\"); }");
         i.interpret(header);
         i.interpret(body);
         recordOutAndErr(out, err, debugMessage);

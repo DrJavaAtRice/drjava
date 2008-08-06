@@ -5,6 +5,7 @@ import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.Expression;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -56,6 +57,7 @@ public abstract class TypeSystem {
   protected static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
   protected static final Iterable<Type> EMPTY_TYPE_ITERABLE = IterUtil.empty();
   protected static final Iterable<Expression> EMPTY_EXPRESSION_ITERABLE = IterUtil.empty();
+  protected static final Option<Type> NONE_TYPE_OPTION = Option.none();
   
   public TypeWrapper wrap(Type t) { return new TypeWrapper(t); }
   
@@ -67,6 +69,10 @@ public abstract class TypeSystem {
     public TypeWrapper value(Type t) { return new TypeWrapper(t); }
   };
 
+  public Option<TypeWrapper> wrap(Option<Type> t) {
+    return t.isSome() ? Option.some(new TypeWrapper(t.unwrap())) : Option.<TypeWrapper>none();
+  }
+  
   public class TypeWrapper {
     private Type _t;
     public TypeWrapper(Type t) { _t = t; }
@@ -91,6 +97,8 @@ public abstract class TypeSystem {
   public abstract boolean isArray(Type t);
 
 
+  /** Determine if the type is well-formed. */
+  public abstract boolean isWellFormed(Type t);
   
   /**
    * Determine if the type can be used in an enhanced for loop.  {@code true} implies that an object of 
@@ -149,7 +157,7 @@ public abstract class TypeSystem {
   public abstract boolean isPrimitiveConvertible(Type t);
   
   public abstract boolean isReferenceConvertible(Type t);
-
+  
   /** Compute a common supertype of {@code t1} and {@code t2}. */
   public abstract Type join(Type t1, Type t2);
   
@@ -292,6 +300,7 @@ public abstract class TypeSystem {
    * @param t  The type of the object to be constructed.
    * @param typeArgs  The type arguments for the constructor's type parameters.
    * @param args  A list of typed expressions corresponding to the constructor's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
    * @return  A {@link ConstructorInvocation} object representing the matched constructor.
    * @throws InvalidTargetException  If the type {@code t} cannot be constructed.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
@@ -300,7 +309,8 @@ public abstract class TypeSystem {
    */
   // Must produce a reasonable value when looking up a constructor in an interface (for anonymous classes)
   public abstract ConstructorInvocation lookupConstructor(Type t, Iterable<? extends Type> typeArgs, 
-                                                          Iterable<? extends Expression> args)
+                                                          Iterable<? extends Expression> args,
+                                                          Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
   
   
@@ -314,14 +324,17 @@ public abstract class TypeSystem {
    * @param name  The name of the method.
    * @param typeArgs  The type arguments for the method's type parameters.
    * @param args  A list of typed expressions corresponding to the method's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
    * @return  An {@link ObjectMethodInvocation} object representing the matched method.
    * @throws InvalidTargetException  If {@code object} cannot be used to invoke a method.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
    *                                   arguments.
    */
-  public abstract ObjectMethodInvocation lookupMethod(Expression object, String name, Iterable<? extends Type> typeArgs, 
-                                                      Iterable<? extends Expression> args)
+  public abstract ObjectMethodInvocation lookupMethod(Expression object, String name,
+                                                      Iterable<? extends Type> typeArgs, 
+                                                      Iterable<? extends Expression> args,
+                                                      Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
     
   
@@ -331,14 +344,17 @@ public abstract class TypeSystem {
    * @param name  The name of the method.
    * @param typeArgs  The type arguments for the method's type parameters.
    * @param args  A list of typed expressions corresponding to the method's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
    * @return  A {@link StaticMethodInvocation} object representing the matched method.
    * @throws InvalidTargetException  If method invocation is not legal for the type {@code t}.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
    *                                   arguments.
    */
-  public abstract StaticMethodInvocation lookupStaticMethod(Type t, String name, Iterable<? extends Type> typeArgs, 
-                                                            Iterable<? extends Expression> args)
+  public abstract StaticMethodInvocation lookupStaticMethod(Type t, String name,
+                                                            Iterable<? extends Type> typeArgs, 
+                                                            Iterable<? extends Expression> args,
+                                                            Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
   
   

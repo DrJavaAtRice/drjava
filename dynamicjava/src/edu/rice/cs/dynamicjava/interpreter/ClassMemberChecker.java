@@ -46,21 +46,6 @@ public class ClassMemberChecker {
     for (Node n : nodes) { n.acceptVisitor(bod); }
   }
   
-  private Type checkType(Expression exp) { return new ExpressionChecker(_context, _opt).value(exp); }
-  
-  private Type checkType(Expression exp, Type expected) {
-    return new ExpressionChecker(_context, _opt, expected).value(exp);
-  }
-  
-  private Iterable<Type> checkTypes(Iterable<? extends Expression> l) {
-    return IterUtil.mapSnapshot(l, new ExpressionChecker(_context, _opt));
-  }
-  
-  private Type checkTypeName(TypeName t) {
-    // It would be nice to separate TypeName handling into a different visitor,
-    // but this works for now.
-    return t.acceptVisitor(new ExpressionChecker(_context, _opt));
-  }
   
   private class SignatureVisitor extends AbstractVisitor<Void> {
     
@@ -85,18 +70,18 @@ public class ClassMemberChecker {
       }
       
       TypeContext sigContext = new FunctionSignatureContext(_context, m);
-      ExpressionChecker sigChecker = new ExpressionChecker(sigContext, _opt);
+      TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
       sigChecker.setTypeParameterBounds(tparams);
       
-      Type returnT = node.getReturnType().acceptVisitor(sigChecker);
+      Type returnT = sigChecker.check(node.getReturnType());
       setErasedType(node, _opt.typeSystem().erasedClass(returnT));
       
       for (FormalParameter param : node.getParameters()) {
-        Type t = param.getType().acceptVisitor(sigChecker);
+        Type t = sigChecker.check(param.getType());
         setVariable(param, new LocalVariable(param.getName(), t, param.isFinal()));
       }
       
-      for (TypeName tn : node.getExceptions()) { tn.acceptVisitor(sigChecker); }
+      for (TypeName tn : node.getExceptions()) { sigChecker.check(tn); }
       return null;
     }
     
@@ -118,20 +103,20 @@ public class ClassMemberChecker {
       }
       
       TypeContext sigContext = new FunctionSignatureContext(_context, k);
-      ExpressionChecker sigChecker = new ExpressionChecker(sigContext, _opt);
+      TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
       sigChecker.setTypeParameterBounds(tparams);
       
       for (FormalParameter param : node.getParameters()) {
-        Type t = param.getType().acceptVisitor(sigChecker);
+        Type t = sigChecker.check(param.getType());
         setVariable(param, new LocalVariable(param.getName(), t, param.isFinal()));
       }
       
-      for (TypeName tn : node.getExceptions()) { tn.acceptVisitor(sigChecker); }
+      for (TypeName tn : node.getExceptions()) { sigChecker.check(tn); }
       return null;
     }
     
     @Override public Void visit(FieldDeclaration node) {
-      checkTypeName(node.getType());
+      new TypeNameChecker(_context, _opt).check(node.getType());
       return null;
     }
     
@@ -160,7 +145,7 @@ public class ClassMemberChecker {
       TypeContext bodyContext = new FunctionContext(sigContext, k);
       ConstructorCall call = node.getConstructorCall();
       if (call == null) { call = new ConstructorCall(null, null, true); }
-      call.acceptVisitor(new ExpressionChecker(bodyContext, _opt));
+      new ExpressionChecker(bodyContext, _opt).check(call);
       for (Node n : node.getStatements()) {
         bodyContext = n.acceptVisitor(new StatementChecker(bodyContext, _opt));
       }
@@ -172,7 +157,7 @@ public class ClassMemberChecker {
       Type expectedT = getType(node.getType());
       Expression init = node.getInitializer();
       if (init != null) {
-        Type initT = checkType(init, expectedT);
+        Type initT = new ExpressionChecker(_context, _opt).check(init, expectedT);
         TypeSystem ts = _opt.typeSystem();
         try {
           Expression newInit = ts.assign(expectedT, init);

@@ -47,9 +47,11 @@ abstract Type();
         RawClassType();
         ParameterizedClassType(Iterable<? extends Type> typeArguments);
           
+    abstract BoundType(Iterable<? extends Type> ofTypes);
+      IntersectionType();
+      UnionType();
+
     VariableType(BoundedSymbol symbol);
-    IntersectionType(Iterable<? extends Type> ofTypes);
-    UnionType(Iterable<? extends Type> ofTypes);
     TopType();
     BottomType();
 

@@ -3,6 +3,7 @@ package edu.rice.cs.dynamicjava.symbol;
 import java.util.*;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Triple;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.recur.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -79,6 +80,46 @@ public class ExtendedTypeSystem extends TypeSystem {
 
   private static final Predicate<Type> IS_ARRAY_PRED = new Predicate<Type>() {
     public boolean contains(Type t) { return t.apply(IS_ARRAY); }
+  };
+
+  /** Determine if the type is well-formed. */
+  public boolean isWellFormed(Type t) { return WELL_FORMED.contains(t); }
+  
+  private final Predicate<Type> WELL_FORMED = new Predicate<Type>() {
+    public boolean contains(Type t) {
+      return t.apply(new TypeAbstractVisitor<Boolean>() {
+        @Override public Boolean defaultCase(Type t) { return true; }
+        @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
+        @Override public Boolean forSimpleClassType(SimpleClassType t) {
+          return IterUtil.isEmpty(SymbolUtil.allTypeParameters(t.ofClass()));
+        }
+        @Override public Boolean forRawClassType(RawClassType t) {
+          return !IterUtil.isEmpty(SymbolUtil.allTypeParameters(t.ofClass()));
+        }
+        @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
+          Iterable<? extends Type> args = t.typeArguments();
+          if (IterUtil.and(args, WELL_FORMED)) {
+            Iterable<VariableType> params = SymbolUtil.allTypeParameters(t.ofClass());
+            if (IterUtil.sizeOf(params) == IterUtil.sizeOf(args)) {
+              Iterable<Type> captArgs = captureTypeArgs(args, params);
+              for (Pair<Type, Type> pair : IterUtil.zip(args, captArgs)) {
+                if (pair.first() != pair.second() && !pair.second().apply(this)) { return false; }
+              }
+              return inBounds(params, captArgs);
+            }
+          }
+          return false;
+        }
+        @Override public Boolean forVariableType(VariableType t) {
+          Type lower = t.symbol().lowerBound();
+          Type upper = t.symbol().upperBound();
+          return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper);
+        }
+        @Override public Boolean forBoundType(BoundType t) {
+          return IterUtil.and(t.ofTypes(), WELL_FORMED);
+        }
+      });
+    }
   };
 
   /**
@@ -504,12 +545,24 @@ public class ExtendedTypeSystem extends TypeSystem {
   };
   
   private ParameterizedClassType capture(ParameterizedClassType t) {
+    boolean ground = true; // optimization: simply return non-wildcard cases
+    for (Type arg : t.typeArguments()) {
+      if (arg instanceof Wildcard) { ground = false; break; }
+    }
+    if (ground) { return t; }
+    else {
+      Iterable<VariableType> params = SymbolUtil.allTypeParameters(t.ofClass());
+      Iterable<Type> captureArgs = captureTypeArgs(t.typeArguments(), params);
+      return new ParameterizedClassType(t.ofClass(), captureArgs);
+    }
+  }
+  
+  private Iterable<Type> captureTypeArgs(Iterable<? extends Type> targs,
+                                         Iterable<? extends VariableType> params) {
     List<BoundedSymbol> captureVars = new LinkedList<BoundedSymbol>();
     List<Type> newArgs = new LinkedList<Type>();
-    boolean ground = true;
-    for (Type arg : t.typeArguments()) {
+    for (Type arg : targs) {
       if (arg instanceof Wildcard) {
-        ground = false;
         BoundedSymbol s = new BoundedSymbol(new Object());
         captureVars.add(s);
         newArgs.add(new VariableType(s));
@@ -517,24 +570,20 @@ public class ExtendedTypeSystem extends TypeSystem {
       else { captureVars.add(null); newArgs.add(arg); }
     }
     
-    if (ground) { return t; }
-    else {
-      Iterable<VariableType> params = SymbolUtil.allTypeParameters(t.ofClass());
-      final SubstitutionMap sigma = new SubstitutionMap(params, newArgs);
-      for (Triple<BoundedSymbol, Type, VariableType> triple : IterUtil.zip(captureVars, t.typeArguments(), params)) {
-        Type arg = triple.second();
-        if (arg instanceof Wildcard) {
-          Wildcard argW = (Wildcard) arg;
-          VariableType param = triple.third();
-          Type paramU = substitute(param.symbol().upperBound(), sigma);
-          Type paramL = substitute(param.symbol().lowerBound(), sigma);
-          triple.first().initializeUpperBound(new IntersectionType(IterUtil.make(argW.symbol().upperBound(),
-                                                                                 paramU)));
-          triple.first().initializeLowerBound(new UnionType(IterUtil.make(argW.symbol().lowerBound(), paramL)));
-        }
+    final SubstitutionMap sigma = new SubstitutionMap(params, newArgs);
+    for (Triple<BoundedSymbol, Type, VariableType> triple : IterUtil.zip(captureVars, targs, params)) {
+      Type arg = triple.second();
+      if (arg instanceof Wildcard) {
+        Wildcard argW = (Wildcard) arg;
+        VariableType param = triple.third();
+        Type paramU = substitute(param.symbol().upperBound(), sigma);
+        Type paramL = substitute(param.symbol().lowerBound(), sigma);
+        triple.first().initializeUpperBound(new IntersectionType(IterUtil.make(argW.symbol().upperBound(),
+                                                                               paramU)));
+        triple.first().initializeLowerBound(new UnionType(IterUtil.make(argW.symbol().lowerBound(), paramL)));
       }
-      return new ParameterizedClassType(t.ofClass(), newArgs);
     }
+    return newArgs;
   }
   
   /**
@@ -1146,7 +1195,8 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                    exp.getFilename(), exp.getBeginLine(), exp.getBeginColumn(), 
                                                    exp.getEndLine(), exp.getEndColumn());
     try {
-      ObjectMethodInvocation inv = lookupMethod(exp, methodName, EMPTY_TYPE_ITERABLE, EMPTY_EXPRESSION_ITERABLE);
+      ObjectMethodInvocation inv = lookupMethod(exp, methodName, EMPTY_TYPE_ITERABLE, EMPTY_EXPRESSION_ITERABLE,
+                                                NONE_TYPE_OPTION);
       result.setExpression(inv.object());
       result.setArguments(CollectUtil.makeList(inv.args()));
       NodeProperties.setMethod(result, inv.method());
@@ -1193,7 +1243,8 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                 exp.getFilename(), exp.getBeginLine(), exp.getBeginColumn(), 
                                                 exp.getEndLine(), exp.getEndColumn());
       try {
-        MethodInvocation inv = lookupStaticMethod(boxedType, "valueOf", EMPTY_TYPE_ITERABLE, arguments);
+        MethodInvocation inv = lookupStaticMethod(boxedType, "valueOf", EMPTY_TYPE_ITERABLE, arguments,
+                                                  NONE_TYPE_OPTION);
         m.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setMethod(m, inv.method());
         NodeProperties.setType(m, capture(inv.returnType()));
@@ -1205,7 +1256,7 @@ public class ExtendedTypeSystem extends TypeSystem {
       SimpleAllocation k = new SimpleAllocation(boxedTypeName, arguments, exp.getFilename(), exp.getBeginLine(),
                                                 exp.getBeginColumn(), exp.getEndLine(), exp.getEndColumn());
       try {
-        ConstructorInvocation inv = lookupConstructor(boxedType, EMPTY_TYPE_ITERABLE, arguments); 
+        ConstructorInvocation inv = lookupConstructor(boxedType, EMPTY_TYPE_ITERABLE, arguments, NONE_TYPE_OPTION); 
         k.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setConstructor(k, inv.constructor());
         NodeProperties.setType(k, boxedType);
@@ -1805,7 +1856,8 @@ public class ExtendedTypeSystem extends TypeSystem {
   /**
    * Top-level entry point for type inference.  Produces the set of types corresponding to the given
    * type parameters, given that {@code args} were provided where {@code params} were expected
-   * ({@code args} and {@code params} are assumed to have the same length).  The inference algorithm
+   * ({@code args} and {@code params} are assumed to have the same length), and {@code returned} will
+   * be returned where {@code expected} is expected.  The inference algorithm
    * is <em>sound</em> but not <em>complete</em>: it is possible that the algorithm will return 
    * {@code null} when there exists some substitution that would make each argument a subtype of its 
    * corresponding parameter; but whenever the algorithm returns a solution, that solution is guaranteed
@@ -1815,10 +1867,11 @@ public class ExtendedTypeSystem extends TypeSystem {
    *          are overconstrained
    */
   private Iterable<Type> inferTypeArguments(Iterable<? extends VariableType> tparams, 
-                                            Iterable<? extends Type> params,
-                                            Iterable<? extends Type> args) {
-    //debug.logValues("Beginning inferTypeArguments", new String[]{ "tparams", "params", "args" },
-    //                wrap(tparams), wrap(params), wrap(args));
+                                            Iterable<? extends Type> params, Type returned,
+                                            Iterable<? extends Type> args, Option<Type> expected) {
+    //debug.logValues("Beginning inferTypeArguments",
+    //                new String[]{ "tparams", "params", "returned", "args", "expected" },
+    //                wrap(tparams), wrap(params), wrap(returned), wrap(args), wrap(expected));
     RecursionStack3<Type, Type, InferenceMode> stack = RecursionStack3.make();
     Set<? extends VariableType> tparamSet = CollectUtil.makeSet(tparams);
     
@@ -1828,16 +1881,30 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                                    tparamSet, stack));
       if (!constraintsBuilder.isSatisfiable()) { break; }
     }
+    if (expected.isSome() && constraintsBuilder.isSatisfiable()) {
+      constraintsBuilder = constraintsBuilder.and(inferFromSupertype(expected.unwrap(), returned,
+                                                                     tparamSet, stack));
+    }
     
     final ConstraintSet constraints = constraintsBuilder; // constraints must be redeclared as final
+    //debug.logValue("constraints", constraints);
 //    System.out.println("Final inference result: " + constraints);
-    if (constraints.isSatisfiable()) {
-      return IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
-        public Type value(VariableType param) { return constraints.lowerBound(param); }
-        // TODO: Handle the case where the lower bound is BOTTOM (following the JLS)
-      });
+    if (!constraints.isSatisfiable()) { return null; }
+
+    Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
+      public Type value(VariableType param) { return constraints.lowerBound(param); }
+    });
+    if (inBounds(tparams, result)) { return result; }
+    
+    List<Wildcard> constraintWs = new LinkedList<Wildcard>();
+    for (VariableType param : tparams) {
+      BoundedSymbol s = new BoundedSymbol(new Object(), constraints.upperBound(param), constraints.lowerBound(param));
+      constraintWs.add(new Wildcard(s));
     }
-    else { return null; }
+    result = captureTypeArgs(constraintWs, tparams);
+    if (IterUtil.and(result, WELL_FORMED)) { return result; }
+
+    return null;
   }
   
   private boolean containsInferenceVariable(Type t, Set<? extends VariableType> vars) {
@@ -2110,13 +2177,13 @@ public class ExtendedTypeSystem extends TypeSystem {
             
             @Override public ConstraintSet forSimpleClassType(SimpleClassType arg) {
               Type paramSuper = immediateSupertype(param);
-              if (paramSuper == null) { return EMPTY_CONSTRAINTS; }
+              if (paramSuper == null) { return UNSATISFIABLE_CONSTRAINTS; }
               else { return inferFromSupertype(arg, paramSuper, vars, stack); }
             }
             
             @Override public ConstraintSet forRawClassType(RawClassType arg) {
               Type paramSuper = immediateSupertype(param);
-              if (paramSuper == null) { return EMPTY_CONSTRAINTS; }
+              if (paramSuper == null) { return UNSATISFIABLE_CONSTRAINTS; }
               else { return inferFromSupertype(arg, paramSuper, vars, stack); }
             }
             
@@ -2125,14 +2192,15 @@ public class ExtendedTypeSystem extends TypeSystem {
               if (param.ofClass().equals(arg.ofClass())) {
                 Thunk<ConstraintSet> recurOnTargs = new Thunk<ConstraintSet>() {
                   public ConstraintSet value() {
-                    ParameterizedClassType paramCap = capture(arg);
+                    ParameterizedClassType paramCap = capture(param);
                     ConstraintSet result = EMPTY_CONSTRAINTS;
                     for (Pair<Type, Type> pair : IterUtil.zip(arg.typeArguments(), paramCap.typeArguments())) {
                       Type argArg = pair.first();
                       final Type paramArg = pair.second();
                       result = result.and(argArg.apply(new TypeAbstractVisitor<ConstraintSet>() {
                         public ConstraintSet defaultCase(Type argArg) {
-                          return inferFromEqual(argArg, paramArg, vars, stack);
+                          ConstraintSet nonWildS = inferFromEqual(argArg, paramArg, vars, stack);
+                          return nonWildS;
                         }
                         @Override public ConstraintSet forWildcard(Wildcard argArg) {
                           ConstraintSet cs = inferFromSubtype(argArg.symbol().lowerBound(), paramArg, vars, stack);
@@ -2490,15 +2558,26 @@ public class ExtendedTypeSystem extends TypeSystem {
   // cannot be defined statically, because it relies on the definition of non-static methods
   private class InferenceChecker extends SimpleChecker {
     
+    protected final Type _returned;
+    protected final Option<Type> _expected;
+    
     /**  Assumes {@code params.size() == args.size()} */
     public InferenceChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
-                            Iterable<? extends VariableType> tparams) {
+                            Iterable<? extends VariableType> tparams,
+                            Type returned, Option<Type> expected) {
       super(params, args, tparams, null);
+      _returned = returned;
+      if (expected.isSome()) {
+        Expression exp = TypeUtil.makeEmptyExpression();
+        NodeProperties.setType(exp, expected.unwrap());
+        _expected = Option.some(NodeProperties.getType(boxingConvert(exp, _returned)));
+      }
+      else { _expected = expected; }
     }
     
     @Override public boolean matches() {
-      Iterable<Type> argTypes = IterUtil.mapSnapshot(_args, TYPE_OF_EXPRESSION);
-      _targs = inferTypeArguments(_tparams, _params, argTypes);
+      Iterable<Type> argTypes = IterUtil.mapSnapshot(_args, NodeProperties.NODE_TYPE);
+      _targs = inferTypeArguments(_tparams, _params, _returned, argTypes, _expected);
       return (_targs != null);
     }
     
@@ -2516,9 +2595,9 @@ public class ExtendedTypeSystem extends TypeSystem {
         Type elementT = arrayT.ofType();
         _argForVarargs = boxingConvert(_argForVarargs, elementT);
         Iterable<Expression> inferenceArgs = IterUtil.compose(IterUtil.skipLast(_args), _argForVarargs);
-        Iterable<Type> argTypes = IterUtil.mapSnapshot(inferenceArgs, TYPE_OF_EXPRESSION);
+        Iterable<Type> argTypes = IterUtil.mapSnapshot(inferenceArgs, NodeProperties.NODE_TYPE);
         Iterable<Type> paramTypes = IterUtil.compose(IterUtil.skipLast(_params), elementT);
-        _targs = inferTypeArguments(_tparams, paramTypes, argTypes);
+        _targs = inferTypeArguments(_tparams, paramTypes, _returned, argTypes, _expected);
         if (_targs != null) {
           Expression newArg = makeArray((ArrayType) substitute(arrayT, _tparams, _targs), 
                                         IterUtil.make(_argForVarargs));
@@ -2570,8 +2649,9 @@ public class ExtendedTypeSystem extends TypeSystem {
     
     /**  Assumes {@code params.size() - 1 == args.size()} */
     public EmptyVarargInferenceChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
-                                       Iterable<? extends VariableType> tparams) {
-      super(params, args, tparams);
+                                       Iterable<? extends VariableType> tparams,
+                                       Type returned, Option<Type> expected) {
+      super(params, args, tparams, returned, expected);
       _varargParam = IterUtil.last(_params);
       _params = IterUtil.skipLast(_params);
     }
@@ -2646,8 +2726,9 @@ public class ExtendedTypeSystem extends TypeSystem {
     
     /**  Assumes {@code 1 <= params.size() < args.size()} */
     public MultiVarargInferenceChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
-                                       Iterable<? extends VariableType> tparams) {
-      super(params, args, tparams);
+                                       Iterable<? extends VariableType> tparams,
+                                       Type returned, Option<Type> expected) {
+      super(params, args, tparams, returned, expected);
       _varargParam = IterUtil.last(_params);
       _params = IterUtil.skipLast(_params);
       Pair<? extends Iterable<Expression>, ? extends Iterable<Expression>> splitArgs = 
@@ -2669,10 +2750,10 @@ public class ExtendedTypeSystem extends TypeSystem {
         };
         Iterable<Expression> boxedVarargArgs = IterUtil.map(_varargArgs, makeBoxed);
         Iterable<Expression> inferenceArgs = IterUtil.compose(_args, boxedVarargArgs);
-        Iterable<Type> argTypes = IterUtil.mapSnapshot(inferenceArgs, TYPE_OF_EXPRESSION);
+        Iterable<Type> argTypes = IterUtil.mapSnapshot(inferenceArgs, NodeProperties.NODE_TYPE);
         Iterable<Type> varargParams = IterUtil.copy(elementT, IterUtil.sizeOf(_varargArgs));
         Iterable<Type> paramTypes = IterUtil.compose(_params, varargParams);
-        _targs = inferTypeArguments(_tparams, paramTypes, argTypes);
+        _targs = inferTypeArguments(_tparams, paramTypes, _returned, argTypes, _expected);
         if (_targs != null) {
           _params = IterUtil.compose(_params, _varargParam);
           Expression newArg = makeArray((ArrayType) substitute(arrayT, _tparams, _targs), boxedVarargArgs);
@@ -2687,7 +2768,8 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   
   private SignatureChecker makeChecker(Iterable<? extends VariableType> tparams, Iterable<? extends Type> targs,
-                                       Iterable<? extends Type> params, Iterable<? extends Expression> args) {
+                                       Iterable<? extends Type> params, Iterable<? extends Expression> args,
+                                       Type returned, Option<Type> expected) {
     // Note: per the JLS, we allow the presense of (ignored) targs when tparams is empty
     int argCount = IterUtil.sizeOf(args);
     int paramCount = IterUtil.sizeOf(params);
@@ -2695,7 +2777,9 @@ public class ExtendedTypeSystem extends TypeSystem {
       if (IterUtil.isEmpty(tparams)) {
         return new EmptyVarargChecker(params, args, tparams, EMPTY_TYPE_ITERABLE);
       }
-      else if (IterUtil.isEmpty(targs)) { return new EmptyVarargInferenceChecker(params, args, tparams); }
+      else if (IterUtil.isEmpty(targs)) {
+        return new EmptyVarargInferenceChecker(params, args, tparams, returned, expected);
+      }
       else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
         return new EmptyVarargChecker(substitute(params, tparams, targs), args, tparams, targs);
       }
@@ -2705,7 +2789,9 @@ public class ExtendedTypeSystem extends TypeSystem {
       if (IterUtil.isEmpty(tparams)) { 
         return new SimpleChecker(params, args, tparams, EMPTY_TYPE_ITERABLE);
       }
-      else if (IterUtil.isEmpty(targs)) { return new InferenceChecker(params, args, tparams); }
+      else if (IterUtil.isEmpty(targs)) {
+        return new InferenceChecker(params, args, tparams, returned, expected);
+      }
       else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) { 
         return new SimpleChecker(substitute(params, tparams, targs), args, tparams, targs);
       }
@@ -2715,7 +2801,9 @@ public class ExtendedTypeSystem extends TypeSystem {
       if (IterUtil.isEmpty(tparams)) { 
         return new MultiVarargChecker(params, args, tparams, EMPTY_TYPE_ITERABLE);
       }
-      else if (IterUtil.isEmpty(targs)) { return new MultiVarargInferenceChecker(params, args, tparams); }
+      else if (IterUtil.isEmpty(targs)) {
+        return new MultiVarargInferenceChecker(params, args, tparams, returned, expected);
+      }
       else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
         return new MultiVarargChecker(substitute(params, tparams, targs), args, tparams, targs);
       }
@@ -2762,10 +2850,6 @@ public class ExtendedTypeSystem extends TypeSystem {
                         makeResult);
   }
   
-  private static final Lambda<Expression, Type> TYPE_OF_EXPRESSION = new Lambda<Expression, Type>() {
-    public Type value(Expression e) { return NodeProperties.getType(e); }
-  };
-  
   private static final Lambda<Type, Expression> EMPTY_EXPRESSION_FOR_TYPE = new Lambda<Type, Expression>() {
     public Expression value(Type t) {
       Expression result = TypeUtil.makeEmptyExpression();
@@ -2797,7 +2881,8 @@ public class ExtendedTypeSystem extends TypeSystem {
    */
   private boolean isMoreSpecific(SignatureChecker sig1, SignatureChecker sig2) {
     SignatureChecker c = makeChecker(sig2.typeParameters(), EMPTY_TYPE_ITERABLE, sig2.parameters(), 
-                                     IterUtil.mapSnapshot(sig1.parameters(), EMPTY_EXPRESSION_FOR_TYPE));
+                                     IterUtil.mapSnapshot(sig1.parameters(), EMPTY_EXPRESSION_FOR_TYPE),
+                                     BOTTOM, NONE_TYPE_OPTION);
     return c.matches();
   }
   
@@ -2806,6 +2891,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * @param t  The type of the object to be constructed.
    * @param typeArgs  The type arguments for the constructor's type parameters.
    * @param args  A list of typed expressions corresponding to the constructor's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
    * @return  A {@link ConstructorInvocation} object representing the matched constructor.
    * @throws InvalidTargetException  If the type {@code t} cannot be constructed.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
@@ -2814,24 +2900,26 @@ public class ExtendedTypeSystem extends TypeSystem {
    */
   // TODO: Must produce a reasonable value when looking up a constructor in an interface (for anonymous classes)
   public ConstructorInvocation lookupConstructor(final Type t, final Iterable<? extends Type> typeArgs, 
-                                                 final Iterable<? extends Expression> args)
+                                                 final Iterable<? extends Expression> args,
+                                                 final Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-//    System.out.println("\nLooking up constructor in type " + userRepresentation(t) +
-//                       " with typeArgs (" + userRepresentation(typeArgs) + ") and args (" +
-//                       userRepresentation(IterUtil.map(args, TYPE_OF_EXPRESSION)) + ")");
+    debug.logValues("Looking up constructor",
+                    new String[]{"t", "typeArgs", "arg types", "expected"},
+                    wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)),
+                    expected);
     Iterable<ConstructorInvocation> results = 
       t.apply(new TypeAbstractVisitor<Iterable<ConstructorInvocation>>() {
       
       public Iterable<ConstructorInvocation> defaultCase(Type t) { return IterUtil.empty(); }
       
-      @Override public Iterable<ConstructorInvocation> forSimpleClassType(SimpleClassType t) {
+      @Override public Iterable<ConstructorInvocation> forSimpleClassType(final SimpleClassType t) {
         Iterable<DJConstructor> allConstructors = t.ofClass().declaredConstructors();
-//        System.out.println("All constructors in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(allConstructors));
         Lambda<DJConstructor, SignatureChecker> makeChecker = 
           new Lambda<DJConstructor, SignatureChecker>() {
           public SignatureChecker value(DJConstructor k) {
-            return makeChecker(k.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(k), args);
+            debug.logValues(new String[]{"k", "declaredParameterTypes"}, k, SymbolUtil.declaredParameterTypes(k));
+            return makeChecker(k.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(k),
+                               args, t, expected);
           }
         };
         Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation> makeResult = 
@@ -2847,7 +2935,7 @@ public class ExtendedTypeSystem extends TypeSystem {
         return findSignatureMatches(allConstructors, makeChecker, makeResult);
       }
       
-      @Override public Iterable<ConstructorInvocation> forRawClassType(RawClassType t) {
+      @Override public Iterable<ConstructorInvocation> forRawClassType(final RawClassType t) {
         // TODO: Handle raw member access warnings; make sure this is correct
         Iterable<DJConstructor> allConstructors = t.ofClass().declaredConstructors();
 //        System.out.println("All constructors in type " + userRepresentation(t) + ": " +
@@ -2856,7 +2944,8 @@ public class ExtendedTypeSystem extends TypeSystem {
           new Lambda<DJConstructor, SignatureChecker>() {
           public SignatureChecker value(DJConstructor k) {
             return makeChecker(IterUtil.<VariableType>empty(), typeArgs, 
-                               IterUtil.map(SymbolUtil.declaredParameterTypes(k), ERASE_LAMBDA), args);
+                               IterUtil.map(SymbolUtil.declaredParameterTypes(k), ERASE_LAMBDA),
+                               args, t, expected);
           }
         };
         Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation> makeResult = 
@@ -2870,7 +2959,7 @@ public class ExtendedTypeSystem extends TypeSystem {
         return findSignatureMatches(allConstructors, makeChecker, makeResult);
       }
       
-      @Override public Iterable<ConstructorInvocation> forParameterizedClassType(ParameterizedClassType t) {
+      @Override public Iterable<ConstructorInvocation> forParameterizedClassType(final ParameterizedClassType t) {
         final SubstitutionMap classSigma = 
           new SubstitutionMap(t.ofClass().declaredTypeParameters(), t.typeArguments());
         Iterable<DJConstructor> allConstructors = t.ofClass().declaredConstructors();
@@ -2882,7 +2971,8 @@ public class ExtendedTypeSystem extends TypeSystem {
             // TODO: substitute out class type parameters from the method's parameters' bounds
             //       (how does the JLS handle this?)
             return makeChecker(k.declaredTypeParameters(), typeArgs, 
-                               substitute(SymbolUtil.declaredParameterTypes(k), classSigma), args);
+                               substitute(SymbolUtil.declaredParameterTypes(k), classSigma),
+                               args, t, expected);
           }
         };
         Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation> makeResult = 
@@ -2948,6 +3038,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * @param name  The name of the method.
    * @param typeArgs  The type arguments for the method's type parameters.
    * @param args  A list of typed expressions corresponding to the method's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
    * @return  An {@link ObjectMethodInvocation} object representing the matched method.
    * @throws InvalidTargetException  If {@code object} cannot be used to invoke a method.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
@@ -2956,11 +3047,12 @@ public class ExtendedTypeSystem extends TypeSystem {
    */
   public ObjectMethodInvocation lookupMethod(final Expression object, final String name, 
                                              final Iterable<? extends Type> typeArgs, 
-                                             final Iterable<? extends Expression> args)
+                                             final Iterable<? extends Expression> args,
+                                             final Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
 //    System.out.println("\nLooking up method " + name + " in type " + userRepresentation(NodeProperties.getType(object)) +
 //                       " with typeArgs (" + userRepresentation(typeArgs) + ") and args (" +
-//                       userRepresentation(IterUtil.map(args, TYPE_OF_EXPRESSION)) + ")");
+//                       userRepresentation(IterUtil.map(args, NodeProperties.NODE_TYPE)) + ")");
     class LookupMethod extends TypeAbstractVisitor<Iterable<ObjectMethodInvocation>> {
       
       private Predicate<? super DJMethod> _matchMethod;
@@ -2984,7 +3076,8 @@ public class ExtendedTypeSystem extends TypeSystem {
 //                           IterUtil.multilineToString(matchingMethods));
         Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
           public SignatureChecker value(DJMethod m) {
-            return makeChecker(m.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(m), args);
+            return makeChecker(m.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(m),
+                               args, m.returnType(), expected);
           }
         };
         Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation> makeResult = 
@@ -3008,7 +3101,8 @@ public class ExtendedTypeSystem extends TypeSystem {
         Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
           public SignatureChecker value(DJMethod m) {
             return makeChecker(IterUtil.<VariableType>empty(), typeArgs, 
-                               IterUtil.map(SymbolUtil.declaredParameterTypes(m), ERASE_LAMBDA), args);
+                               IterUtil.map(SymbolUtil.declaredParameterTypes(m), ERASE_LAMBDA),
+                               args, m.returnType(), expected);
           }
         };
         Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation> makeResult = 
@@ -3034,7 +3128,8 @@ public class ExtendedTypeSystem extends TypeSystem {
             // TODO: substitute out class type parameters from the method's parameters' bounds
             //       (how does the JLS handle this?)
             return makeChecker(m.declaredTypeParameters(), typeArgs, 
-                               substitute(SymbolUtil.declaredParameterTypes(m), classSigma), args);
+                               substitute(SymbolUtil.declaredParameterTypes(m), classSigma),
+                               args, m.returnType(), expected);
           }
         };
         Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation> makeResult = 
@@ -3067,6 +3162,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * @param name  The name of the method.
    * @param typeArgs  The type arguments for the method's type parameters.
    * @param args  A list of typed expressions corresponding to the method's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
    * @return  A {@link StaticMethodInvocation} object representing the matched method.
    * @throws InvalidTargetException  If method invocation is not legal for the type {@code t}.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
@@ -3075,11 +3171,11 @@ public class ExtendedTypeSystem extends TypeSystem {
    */
   public StaticMethodInvocation lookupStaticMethod(Type t, final String name, 
                                                    final Iterable<? extends Type> typeArgs, 
-                                                   final Iterable<? extends Expression> args)
+                                                   final Iterable<? extends Expression> args,
+                                                   final Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-//    System.out.println("\nLooking up static method " + name + " in type " + userRepresentation(t) +
-//                       " with typeArgs (" + userRepresentation(typeArgs) + ") and args (" +
-//                       userRepresentation(IterUtil.map(args, TYPE_OF_EXPRESSION)) + ")");
+    //debug.logValues("Looking up method", new String[]{ "t", "name", "typeArgs", "args", "expected" },
+    //                wrap(t), name, wrap(typeArgs), args, wrap(expected));
     class LookupMethod extends TypeAbstractVisitor<Iterable<StaticMethodInvocation>> {
       
       private Predicate<? super DJMethod> _matchMethod;
@@ -3104,7 +3200,8 @@ public class ExtendedTypeSystem extends TypeSystem {
 //                           IterUtil.multilineToString(matchingMethods));
         Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
           public SignatureChecker value(DJMethod m) {
-            return makeChecker(m.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(m), args);
+            return makeChecker(m.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(m),
+                               args, m.returnType(), expected);
           }
         };
         Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation> makeResult = 
@@ -3128,7 +3225,8 @@ public class ExtendedTypeSystem extends TypeSystem {
         Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
           public SignatureChecker value(DJMethod m) {
             return makeChecker(IterUtil.<VariableType>empty(), typeArgs, 
-                               IterUtil.map(SymbolUtil.declaredParameterTypes(m), ERASE_LAMBDA), args);
+                               IterUtil.map(SymbolUtil.declaredParameterTypes(m), ERASE_LAMBDA),
+                               args, m.returnType(), expected);
           }
         };
         Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation> makeResult = 
@@ -3154,7 +3252,8 @@ public class ExtendedTypeSystem extends TypeSystem {
             // TODO: substitute out class type parameters from the method's parameters' bounds
             //       (how does the JLS handle this?)
             return makeChecker(m.declaredTypeParameters(), typeArgs, 
-                               substitute(SymbolUtil.declaredParameterTypes(m), classSigma), args);
+                               substitute(SymbolUtil.declaredParameterTypes(m), classSigma),
+                               args, m.returnType(), expected);
           }
         };
         Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation> makeResult = 

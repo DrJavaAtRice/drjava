@@ -79,6 +79,7 @@ import java.util.List;
 import java.util.LinkedList;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.lambda.Lambda;
 
 import koala.dynamicjava.SourceInfo;
@@ -122,7 +123,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   
   public TypeContext value(Node n) { return n.acceptVisitor(this); }
   
-  private Type checkType(Expression exp) { return new ExpressionChecker(context, opt).value(exp); }
+  private Type checkType(Expression exp) { return new ExpressionChecker(context, opt).check(exp); }
   
   private TypeContext checkList(Iterable<? extends Node> l) {
     TypeContext c = context;
@@ -131,17 +132,15 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   }
 
   private Type checkType(Expression exp, Type expected) {
-    return new ExpressionChecker(context, opt, expected).value(exp);
+    return new ExpressionChecker(context, opt).check(exp, expected);
   }
   
   private Iterable<Type> checkTypes(Iterable<? extends Expression> l) {
-    return IterUtil.mapSnapshot(l, new ExpressionChecker(context, opt));
+    return new ExpressionChecker(context, opt).checkList(l);
   }
   
   private Type checkTypeName(TypeName t) {
-    // It would be nice to separate TypeName handling into a different visitor,
-    // but this works for now.
-    return t.acceptVisitor(new ExpressionChecker(context, opt));
+    return new TypeNameChecker(context, opt).check(t);
   }
   
   
@@ -311,11 +310,11 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     }
     
     TypeContext sigContext = new ClassSignatureContext(context, c, loader);
-    ExpressionChecker sigChecker = new ExpressionChecker(sigContext, opt);
+    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
     sigChecker.setTypeParameterBounds(tparams);
-    node.getSuperclass().acceptVisitor(sigChecker);
+    sigChecker.check(node.getSuperclass());
     if (node.getInterfaces() != null) {
-      for (TypeName tn : node.getInterfaces()) { tn.acceptVisitor(sigChecker); }
+      for (TypeName tn : node.getInterfaces()) { sigChecker.check(tn); }
     }
 
     TypeContext bodyContext = new ClassContext(sigContext, c);
@@ -327,7 +326,6 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   @Override public TypeContext visit(InterfaceDeclaration node) {
     throw new UnsupportedOperationException("Not yet implemented");
   }
-    
 
   /**
    * Visits a MethodDeclaration.  Treated as a local function (class methods are handled by
@@ -346,16 +344,16 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     }
     
     TypeContext sigContext = new FunctionSignatureContext(context, f);
-    ExpressionChecker sigChecker = new ExpressionChecker(sigContext, opt);
+    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
     sigChecker.setTypeParameterBounds(tparams);
 
-    Type returnT = node.getReturnType().acceptVisitor(sigChecker);
+    Type returnT = sigChecker.check(node.getReturnType());
     setErasedType(node, ts.erasedClass(returnT));
     for (FormalParameter p : node.getParameters()) {
-      Type t = p.getType().acceptVisitor(sigChecker);
+      Type t = sigChecker.check(p.getType());
       setVariable(p, new LocalVariable(p.getName(), t, p.isFinal()));
     }
-    for (ReferenceTypeName n : node.getExceptions()) { n.acceptVisitor(sigChecker); }
+    for (ReferenceTypeName n : node.getExceptions()) { sigChecker.check(n); }
     
     TypeContext bodyContext = new FunctionContext(sigContext, f);
     node.getBody().acceptVisitor(new StatementChecker(bodyContext, opt));
@@ -451,16 +449,18 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     }
     else if (ts.isIterable(collType)) {
       try {
-        TypeSystem.MethodInvocation iteratorInv = ts.lookupMethod(node.getCollection(), "iterator", 
-                                                                  IterUtil.<Type>empty(),
-                                                                  IterUtil.<Expression>empty());
+        MethodInvocation iteratorInv = ts.lookupMethod(node.getCollection(), "iterator", 
+                                                       IterUtil.<Type>empty(),
+                                                       IterUtil.<Expression>empty(),
+                                                       Option.<Type>none());
         
         
         Expression getIterator = TypeUtil.makeEmptyExpression(node.getCollection());
         setType(getIterator, iteratorInv.returnType());
-        TypeSystem.MethodInvocation nextInv = ts.lookupMethod(getIterator, "next", 
-                                                              IterUtil.<Type>empty(),
-                                                              IterUtil.<Expression>empty());
+        MethodInvocation nextInv = ts.lookupMethod(getIterator, "next", 
+                                                   IterUtil.<Type>empty(),
+                                                   IterUtil.<Expression>empty(),
+                                                   Option.<Type>none());
         
         if (!ts.isAssignable(paramT, nextInv.returnType())) {
           setErrorStrings(node, ts.userRepresentation(nextInv.returnType()), ts.userRepresentation(paramT));
