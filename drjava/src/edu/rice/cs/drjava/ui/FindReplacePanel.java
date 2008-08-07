@@ -62,8 +62,8 @@ import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;
 
 import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.StringSuspension;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
@@ -609,8 +609,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           
           // lazily create excerpt string
           
-          StringSuspension ss = new StringSuspension() {
-            public String eval() {
+          Thunk<String> ss = new Thunk<String>() {
+            public String value() {
               try {
                 int endSel = endPos.getOffset();
                 int startSel = startPos.getOffset();

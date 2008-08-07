@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import java.util.Arrays;
 
-import static edu.rice.cs.util.HashUtilities.hash;
+import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 public interface Query {
   

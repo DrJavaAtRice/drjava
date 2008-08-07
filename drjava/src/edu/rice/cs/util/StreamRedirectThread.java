@@ -37,6 +37,7 @@
 package edu.rice.cs.util;
 
 import java.io.*;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 
 /** StreamRedirectThread is a thread which copies its input to its output and terminates when it completes. */
 public class StreamRedirectThread extends Thread {
@@ -168,7 +169,7 @@ public class StreamRedirectThread extends Thread {
    */
   public void setInputStream(InputStream in) {
     this.in = new BufferedReader(new InputStreamReader(in));
-    cm.set();
+    cm.signal();
   }
   
   /**
@@ -203,7 +204,7 @@ public class StreamRedirectThread extends Thread {
       }
       if (keepRunning) {
         // wait for a new input stream
-        while(!cm.waitOne());
+        while(!cm.attemptEnsureSignalled());
         cm.reset();
       }
     } while(keepRunning && !close);

@@ -43,8 +43,6 @@ import edu.rice.cs.plt.lambda.Lambda2;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import static edu.rice.cs.util.HashUtilities.hash;
-
 /** Class representing binary operations that can be inserted as variables in external processes.
   * @version $Id$
   */

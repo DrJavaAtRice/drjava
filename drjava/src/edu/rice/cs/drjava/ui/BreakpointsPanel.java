@@ -60,8 +60,6 @@ import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.util.HashUtilities.hash;
-
 /** Panel for displaying the breakpoints.  This class is a swing view class and hence should only be accessed from the 
   * event-handling thread.
   * @version $Id$

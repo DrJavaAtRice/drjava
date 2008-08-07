@@ -41,16 +41,16 @@ import java.lang.ref.WeakReference;
 import javax.swing.text.Position;
 
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.StringSuspension;
+import edu.rice.cs.plt.lambda.Thunk;
 
 /** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip
  * @version $Id$Region
  */
 public class MovingDocumentRegion extends DocumentRegion {
-  protected final StringSuspension _stringSuspension;
+  protected final Thunk<String> _stringSuspension;
   
   /** Create a new moving document region. */
-  public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, StringSuspension ss) {
+  public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, Thunk<String> ss) {
     super(doc, sp, ep);
     assert doc != null;
     _stringSuspension = ss;
@@ -65,7 +65,7 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** @return the string it was assigned */
   public String getString() { 
     StringBuilder result = new StringBuilder(120);
-    result.append(_stringSuspension.eval()); 
+    result.append(_stringSuspension.value()); 
     return result.toString();
   }
   

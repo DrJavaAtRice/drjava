@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel
 import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import java.util.Date;
 
 /** Test functions of InteractionsPane.
@@ -311,7 +311,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     _controller.addConsoleStateListener(new InteractionsController.ConsoleStateListener() {
       public void consoleInputStarted(InteractionsController c) {
-        completionMonitor.set();
+        completionMonitor.signal();
       }     
       public void consoleInputCompleted(String text, InteractionsController c) {
         // do not assert the text here since it won't be called from the testing thread.
@@ -329,7 +329,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     }.start();
     
     // Wait for console input to begin
-    completionMonitor.waitOne();
+    completionMonitor.attemptEnsureSignalled();
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 

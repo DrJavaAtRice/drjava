@@ -42,8 +42,6 @@ import edu.rice.cs.plt.lambda.Lambda;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import static edu.rice.cs.util.HashUtilities.hash;
-
 /** Class representing unary operations that can be inserted as variables in external processes.
   * @version $Id$
   */

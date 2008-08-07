@@ -57,7 +57,7 @@ import java.io.*;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-import static edu.rice.cs.util.HashUtilities.hash;
+import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest. */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
@@ -181,13 +181,8 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     return end1 - end2;
   }
   
-  private int docHashCode() {
-    if (_doc == null) return 0;
-    return _doc.hashCode();
-  }
-      
   /** This hash function is consistent with equality. */
-  public int hashCode() { return hash(docHashCode(), getStartOffset(), getEndOffset()); }
+  public int hashCode() { return hash(_doc, getStartOffset(), getEndOffset()); }
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled) {

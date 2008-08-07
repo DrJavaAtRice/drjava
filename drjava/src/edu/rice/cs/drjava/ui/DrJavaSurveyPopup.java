@@ -52,7 +52,6 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.*;
-import edu.rice.cs.util.MutableReference;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.UneditableTableModel;
 import edu.rice.cs.util.swing.BorderlessScrollPane;

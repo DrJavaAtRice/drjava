@@ -46,7 +46,7 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.util.HashUtilities.hash;
+import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** This class has synchronized public methods because it is accessed outside of the event thread. */
 public class HighlightManager {
@@ -246,7 +246,7 @@ public class HighlightManager {
     }
     
     /** Overrides hashCode() for consistency with override of equals(...)  */
-    public int hashCode() { return hash(getPainter().hashCode(), getStartOffset(), getEndOffset()); }
+    public int hashCode() { return hash(getPainter(), getStartOffset(), getEndOffset()); }
     
     public void remove() { removeHighlight(this); }
     

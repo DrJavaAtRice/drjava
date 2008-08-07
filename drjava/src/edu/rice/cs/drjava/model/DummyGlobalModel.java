@@ -76,8 +76,6 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.OrderedHashSet;
-import edu.rice.cs.util.SRunnable;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 

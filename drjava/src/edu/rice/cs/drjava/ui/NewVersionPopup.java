@@ -51,10 +51,11 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.*;
-import edu.rice.cs.util.MutableReference;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.lambda.Box;
+import edu.rice.cs.plt.lambda.SimpleBox;
 
 /** Displays whether a new version of DrJava is available.
  *  @version $Id$
@@ -229,19 +230,19 @@ public class NewVersionPopup extends JDialog {
   
   /** Returns true if there is a new version available that matches the users criterion. */
   public boolean checkNewVersion() {
-    MutableReference<Boolean> availableRef = new MutableReference<Boolean>(false);
+    Box<Boolean> availableRef = new SimpleBox<Boolean>(false);
     getMessage(availableRef);
-    return availableRef.get();
+    return availableRef.value();
   }
   
   @SuppressWarnings("fallthrough")
-  protected String[] getMessage(MutableReference<Boolean> availableRef) {
-    MutableReference<String> stableString = new MutableReference<String>("");
-    MutableReference<String> betaString = new MutableReference<String>("");
-    MutableReference<String> devString = new MutableReference<String>("");
-    MutableReference<Date> stableTime = new MutableReference<Date>(new Date(0));
-    MutableReference<Date> betaTime = new MutableReference<Date>(new Date(0));
-    MutableReference<Date> devTime = new MutableReference<Date>(new Date(0));
+  protected String[] getMessage(Box<Boolean> availableRef) {
+    Box<String> stableString = new SimpleBox<String>("");
+    Box<String> betaString = new SimpleBox<String>("");
+    Box<String> devString = new SimpleBox<String>("");
+    Box<Date> stableTime = new SimpleBox<Date>(new Date(0));
+    Box<Date> betaTime = new SimpleBox<Date>(new Date(0));
+    Box<Date> devTime = new SimpleBox<Date>(new Date(0));
     boolean newVersion = false;
     _newestVersionString = "";
     if (availableRef!=null) { availableRef.set(false); }
@@ -257,29 +258,29 @@ public class NewVersionPopup extends JDialog {
         if (availableRef!=null) { availableRef.set(newVersion); }
         if (newVersion) {
           String newestType = "";
-          if (stableTime.get().after(betaTime.get())) {
+          if (stableTime.value().after(betaTime.value())) {
             // stable newer than beta
-            if (stableTime.get().after(devTime.get())) {
+            if (stableTime.value().after(devTime.value())) {
               // stable newer than beta and dev
-              _newestVersionString = stableString.get();
+              _newestVersionString = stableString.value();
               newestType = "stable ";
             }
             else {
               // stable newer than beta, but dev is even newer
-              _newestVersionString = devString.get();
+              _newestVersionString = devString.value();
               newestType = "development ";              
             }
           }
           else {
             // beta newer than stable
-            if (betaTime.get().after(devTime.get())) {
+            if (betaTime.value().after(devTime.value())) {
               // beta newer than stable and dev
-              _newestVersionString = betaString.get();
+              _newestVersionString = betaString.value();
               newestType = "beta ";
             }
             else {
               // beta newer than stable, but dev is even newer
-              _newestVersionString = devString.get();
+              _newestVersionString = devString.value();
               newestType = "development ";              
             }
           }
@@ -304,8 +305,8 @@ public class NewVersionPopup extends JDialog {
     * @param versionStringRef a reference that will be filled with the version string, or null if not desired
     * @param buildTimeRef a reference that will be filled with the build time, or null if not desired
     * @return true if newer stable version is available */
-  public static boolean checkNewStableVersion(MutableReference<String> versionStringRef,
-                                              MutableReference<Date> buildTimeRef) {
+  public static boolean checkNewStableVersion(Box<String> versionStringRef,
+                                              Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.drjava.org/LATEST_VERSION.TXT"), versionStringRef);
       if (newestTime==null) { return false; }
@@ -318,8 +319,8 @@ public class NewVersionPopup extends JDialog {
     * @param versionStringRef a reference that will be filled with the version string, or null if not desired
     * @param buildTimeRef a reference that will be filled with the build time, or null if not desired
     * @return true if newer beta version is available */
-  public static boolean checkNewBetaVersion(MutableReference<String> versionStringRef,
-                                            MutableReference<Date> buildTimeRef) {
+  public static boolean checkNewBetaVersion(Box<String> versionStringRef,
+                                            Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.drjava.org/LATEST_BETA_VERSION.TXT"), versionStringRef);
       if (newestTime==null) { return false; }
@@ -332,8 +333,8 @@ public class NewVersionPopup extends JDialog {
     * @param versionStringRef a reference that will be filled with the version string, or null if not desired
     * @param buildTimeRef a reference that will be filled with the build time, or null if not desired
     * @return true if newer development version is available */
-  public static boolean checkNewDevVersion(MutableReference<String> versionStringRef,
-                                           MutableReference<Date> buildTimeRef) {
+  public static boolean checkNewDevVersion(Box<String> versionStringRef,
+                                           Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.drjava.org/LATEST_DEV_VERSION.TXT"), versionStringRef);
       if (newestTime==null) { return false; }
@@ -352,7 +353,7 @@ public class NewVersionPopup extends JDialog {
     * @param url the URL that contains the version string
     * @param versionStringRef a reference that will be filled with the version string, or null if not desired
     * @return build time, or null if there was an error */
-  public static Date getBuildTime(URL url, MutableReference<String> versionStringRef) {
+  public static Date getBuildTime(URL url, Box<String> versionStringRef) {
     try {
       InputStream urls = url.openStream();
       InputStreamReader is = null;

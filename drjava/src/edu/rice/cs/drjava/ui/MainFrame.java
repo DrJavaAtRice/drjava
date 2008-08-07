@@ -126,7 +126,7 @@ import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
-import static edu.rice.cs.util.HashUtilities.hash;
+import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** DrJava's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
@@ -1167,7 +1167,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       ClassNameAndPackageEntry o = (ClassNameAndPackageEntry) other;
       return (getClassName().equals(o.getClassName()) && getFullPackage().equals(o.getFullPackage()));
     }
-    public int hashCode() { return hash(getClassName().hashCode(), getFullPackage().hashCode()); }
+    public int hashCode() { return hash(getClassName(), getFullPackage()); }
   }
   
   /** Wrapper class for the "Go to File" and "Auto-Complete" dialog list entries.

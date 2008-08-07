@@ -59,7 +59,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.ui.predictive.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import static edu.rice.cs.drjava.ui.MainFrame.GoToFileListEntry;
 
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
@@ -234,7 +234,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           _p = null;
         }
         Utilities.invokeLater(new Runnable() { public void run() { updateText(); updateButtons(); } });
-        _abortMonitor.set();
+        _abortMonitor.signal();
       }
     }).start();
   }
@@ -249,7 +249,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     // spin this off in a separate thread so the event thread is free
     new Thread(new Runnable() {
       public void run() {
-        while(!_abortMonitor.waitOne()) { } // wait for the abortActionPerformed() call to finish
+        while(!_abortMonitor.attemptEnsureSignalled()) { } // wait for the abortActionPerformed() call to finish
         _abortMonitor.reset();
         _sb = new StringBuilder("Command line:");
         _sb.append(_pc.cmdline());

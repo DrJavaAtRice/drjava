@@ -42,8 +42,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Lambda;
 
-import static edu.rice.cs.util.HashUtilities.hash;
-
 /** Class representing values that can be inserted as variables in external processes.
  *  @version $Id$
  */

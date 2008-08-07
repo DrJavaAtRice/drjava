@@ -41,8 +41,6 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import static edu.rice.cs.util.HashUtilities.hash;
-
 /** Class representing values that are eagerly computed, so they are never stale.
  *  @version $Id$
  */

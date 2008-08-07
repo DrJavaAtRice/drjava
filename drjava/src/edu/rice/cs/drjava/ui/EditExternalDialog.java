@@ -52,7 +52,7 @@ import javax.swing.text.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DropDownButton;
 import edu.rice.cs.util.swing.SwingFrame;
@@ -339,7 +339,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     // this waiting cannot happen in the event thread, as that would block the other dialog
     new Thread(new Runnable() {
       public void run() {
-        _editExternalDialogMonitor.waitOne();
+        _editExternalDialogMonitor.attemptEnsureSignalled();
         // dialog has finished, figure out the results in the event thread
         EventQueue.invokeLater(new Runnable() {
           public void run() {

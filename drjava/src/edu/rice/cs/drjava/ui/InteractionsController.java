@@ -82,9 +82,9 @@ import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -179,7 +179,7 @@ public class InteractionsController extends AbstractConsoleController {
               _pane.setCaretPosition(_doc.getLength()); 
               _pane.requestFocusInWindow();
               
-              completionMonitor.set();
+              completionMonitor.signal();
             }
           };
           
@@ -213,7 +213,7 @@ public class InteractionsController extends AbstractConsoleController {
       fireConsoleInputStarted();
       
       // Wait for the inputCompletionCommand to be invoked
-      completionMonitor.waitOne();
+      completionMonitor.attemptEnsureSignalled();
       
       fireConsoleInputCompleted(_text);
       

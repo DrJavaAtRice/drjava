@@ -57,8 +57,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.util.HashUtilities.hash;
-
 /** Panel for displaying browser history.
   * Currently not used because of synchronization problems.
   * This class is a swing view class and hence should only be accessed from the event-handling thread.

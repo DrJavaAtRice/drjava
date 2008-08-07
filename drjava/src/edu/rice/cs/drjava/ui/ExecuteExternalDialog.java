@@ -45,8 +45,8 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.BalancingStreamTokenizer;
-import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.ProcessCreator;
 import edu.rice.cs.util.GeneralProcessCreator;
 import edu.rice.cs.util.StringOps;
@@ -812,7 +812,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   private void _cancel() {
     _lastState = new FrameState(this);
     this.setVisible(false);
-    if (_cm!=null) { _cm.set(); }
+    if (_cm!=null) { _cm.signal(); }
   }
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
@@ -864,7 +864,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
-    if (_cm!=null) { _cm.set(); }    
+    if (_cm!=null) { _cm.signal(); }    
   }
 
   /** Save the command line to the menu. */
@@ -878,7 +878,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         // Always apply and save settings
         _saveSettings();
         this.setVisible(false);
-        if (_cm!=null) { _cm.set(); }
+        if (_cm!=null) { _cm.signal(); }
         return;
       }
       editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText(), 
@@ -893,7 +893,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         // Always apply and save settings
         _saveSettings();
         this.setVisible(false);
-        if (_cm!=null) { _cm.set(); }
+        if (_cm!=null) { _cm.signal(); }
         return;
       }
       addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText());
@@ -902,7 +902,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
-    if (_cm!=null) { _cm.set(); }
+    if (_cm!=null) { _cm.signal(); }
   }  
 
   /** Add new process to menu.
@@ -1000,7 +1000,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // this waiting cannot happen in the event thread, as that would block the other dialog
     new Thread(new Runnable() {
       public void run() {
-        _insertVarDialogMonitor.waitOne();
+        _insertVarDialogMonitor.attemptEnsureSignalled();
         // dialog has finished, figure out the results in the event thread
         EventQueue.invokeLater(new Runnable() {
           public void run() {

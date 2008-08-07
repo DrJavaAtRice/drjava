@@ -48,8 +48,10 @@ import java.util.*;
 import java.awt.dnd.*;
 import java.awt.datatransfer.*;
 import java.io.File;
-import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.plt.collect.OneToOneRelation;
+import edu.rice.cs.plt.collect.IndexedOneToOneRelation;
+
 import edu.rice.cs.drjava.DrJavaRoot;
 
 public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree 
@@ -68,10 +70,12 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   private final HashMap<ItemT, LeafNode<ItemT>> _doc2node = new HashMap<ItemT, LeafNode<ItemT>>();
   
   /** Maps path's to nodes and nodes to paths. */
-  private final BidirectionalHashMap<String, InnerNode<?, ItemT>> _path2node = new BidirectionalHashMap<String, InnerNode<?, ItemT>>();
+  private final OneToOneRelation<String, InnerNode<?, ItemT>> _path2node =
+    new IndexedOneToOneRelation<String, InnerNode<?, ItemT>>();
   
   /** The collection of INavigationListeners listening to this JListNavigator */
-  private final ArrayList<INavigationListener<? super ItemT>> navListeners = new ArrayList<INavigationListener<? super ItemT>>();
+  private final ArrayList<INavigationListener<? super ItemT>> navListeners =
+    new ArrayList<INavigationListener<? super ItemT>>();
   
   /** The renderer for this JTree. */
   private final CustomTreeCellRenderer _renderer;
@@ -179,7 +183,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         InnerNode<?, ItemT> thisNode;
         //System.out.println("pathsofar = " + pathSoFar);
         // if the node is not in the hashmap yet
-        if (!_path2node.containsKey(pathSoFar)) {
+        if (!_path2node.containsFirst(pathSoFar)) {
           // make a new node
           
           /* this inserts a folder node */
@@ -187,11 +191,11 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
           insertFolderSortedInto(thisNode, lastNode);
           this.expandPath(new TreePath(lastNode.getPath()));
           // associate the path so far with that node
-          _path2node.put(pathSoFar, thisNode);
+          _path2node.add(pathSoFar, thisNode);
         }
         else {
           // System.out.println("path2node contains pathSoFar");
-          thisNode = _path2node.getValue(pathSoFar);
+          thisNode = _path2node.value(pathSoFar);
         }
         
         lastNode = thisNode;
@@ -325,7 +329,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
       _model.removeNodeFromParent(node);
       @SuppressWarnings("unchecked") InnerNode<?, ItemT> typedNode = (InnerNode<?, ItemT>) node;
-      _path2node.removeKey(typedNode);
+      _path2node.remove(_path2node.antecedent(typedNode), typedNode);
       cleanFolderNode(parent);
     }
   }
@@ -360,7 +364,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       if (! newPath.substring(newPath.length() - 1).equals("/")) newPath = newPath + "/";
     }
     
-    InnerNode<?, ItemT> newParent = _path2node.getValue(newPath); // node that should be parent
+    InnerNode<?, ItemT> newParent = _path2node.value(newPath); // node that should be parent
     
     if (newParent == oldParent) { // no mutation has occurred before this point because oldParent != null
       if (! node.toString().equals(doc.getName())) { // document has changed name?

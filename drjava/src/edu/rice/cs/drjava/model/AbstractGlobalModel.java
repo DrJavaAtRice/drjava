@@ -141,8 +141,6 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.OrderedHashSet;
-import edu.rice.cs.util.SRunnable;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.docnavigation.AWTContainerNavigatorFactory;
@@ -2021,7 +2019,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       closeAllFiles();
       _documentsRepos.clear();
     }
-    Utilities.invokeLater(new SRunnable() {
+    Utilities.invokeLater(new Runnable() {
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });
     // Only remove listeners after pending events have completed
@@ -3878,7 +3876,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
     
     try {
-      Utilities.invokeAndWait(new SRunnable() {  
+      Utilities.invokeAndWait(new Runnable() {  
         public void run() {
 //          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
           _documentNavigator.setNextChangeModelInitiated(true);

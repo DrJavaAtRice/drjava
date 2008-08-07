@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.config.DrJavaProperty;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
-import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.swing.SwingFrame;
 
 import javax.swing.*;
@@ -254,14 +254,14 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   /** Close the dialog, keeping the last selection in _selected. */
   protected void _okCommand() {
     setVisible(false);
-    _cm.set();
+    _cm.signal();
   }
   
   /** Cancel and close the dialog. */
   protected void _cancelCommand() {
     _selected = null;
     setVisible(false);
-    _cm.set();
+    _cm.signal();
   }
   
   /** Update the properties in all the panes. */

@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.OrderedHashSet;
+import edu.rice.cs.plt.iter.IterUtil;
 
 /** The document cache is a structure that maps OpenDefinitionsDocuments to DefinitionsDocuments (which contain
   * the actual document text).  Since the latter can consume a lot of memory, the cache virtualizes some of them
@@ -86,7 +86,7 @@ public class DocumentCache {
   /** @invariant _residentQueue.size() <= CACHE_SIZE */
   private int CACHE_SIZE;
   
-  private OrderedHashSet<DocManager> _residentQueue;
+  private LinkedHashSet<DocManager> _residentQueue;
   
   private Object _cacheLock = new Object();
   
@@ -94,7 +94,7 @@ public class DocumentCache {
   public DocumentCache(int size) {
 //    Utilities.showDebug("DocumentCache created with size = " + size);
     CACHE_SIZE = size;
-    _residentQueue = new OrderedHashSet<DocManager>();
+    _residentQueue = new LinkedHashSet<DocManager>();
   }
   
   /* Default constructor; uses default cache size. */
@@ -118,22 +118,14 @@ public class DocumentCache {
     */
   public void setCacheSize(int size) {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
-    int diff;
-    DocManager[] removed = null;  // bogus initialization makes javac happy
     synchronized(_cacheLock) {    // lock the cache so entries can be removed if necessary
       CACHE_SIZE = size;
-      diff = _residentQueue.size() - CACHE_SIZE;
-      if (diff > 0) { 
-        removed = new DocManager[diff];
-        for (int i = 0; i < diff; i++) removed[i] = _residentQueue.remove(0);
+      int diff = _residentQueue.size() - CACHE_SIZE;
+      if (diff > 0) {
+        Iterable<DocManager> toRemove = IterUtil.snapshot(IterUtil.truncate(_residentQueue, diff));
+        for (DocManager dm : toRemove) { _residentQueue.remove(dm); dm.kickOut(); }
       }
-      if (diff > 0) kickOut(removed);
     }
-  }
-  
-  /** Kicks out all documents in removed.  Assumes that _cacheLock is already held. */
-  private void kickOut(DocManager[] removed) {
-    for (DocManager dm: removed) dm.kickOut();
   }
   
   public int getCacheSize() { return CACHE_SIZE; }
@@ -281,7 +273,7 @@ public class DocumentCache {
         _residentQueue.add(this);
         _stat = IN_QUEUE;
       }
-      if (_residentQueue.size() > CACHE_SIZE) _residentQueue.get(0).remove();
+      if (_residentQueue.size() > CACHE_SIZE) IterUtil.first(_residentQueue).remove();
     }
     
     /** Removes this DocManager from the queue and sets status to NOT_IN_QUEUE.  Assumes _cacheLock is already held. */
