@@ -81,10 +81,10 @@ import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.CompletionMonitor;
-import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -137,7 +137,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Default implementation of the insert text in input command */
   private static final Lambda<String, String> _defaultInsertTextCommand = 
     new Lambda<String,String>() {
-    public String apply(String input) {
+    public String value(String input) {
       throw new UnsupportedOperationException("Cannot insert text. There is no console input in progress");
     }
   };
@@ -320,7 +320,7 @@ public class InteractionsController extends AbstractConsoleController {
     * @param input The text to insert into the console input box
     * @throws UnsupportedOperationException If the the interactions pane is not receiving console input
     */
-  public void insertConsoleText(String input) { _insertTextCommand.apply(input); }
+  public void insertConsoleText(String input) { _insertTextCommand.value(input); }
   
   /** Accessor method for the InteractionsModel.
     * @return the interactions model
@@ -721,7 +721,7 @@ public class InteractionsController extends AbstractConsoleController {
       */
     Lambda<String,String> makeInsertTextCommand() {
       return new Lambda<String, String>() {
-        public String apply(String input) {
+        public String value(String input) {
           insert(input, getCaretPosition());
           return input;
         }

@@ -53,10 +53,10 @@ import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
 
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
-import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -368,8 +368,8 @@ public class DrJavaRoot {
     * @param closeAction action to be performed when the window is closing
     * @return window listener */
   public static void installModalWindowAdapter(final Window w,
-                                               final Lambda<Void,WindowEvent> toFrontAction,
-                                               final Lambda<Void,WindowEvent> closeAction) {
+                                               final Runnable1<? super WindowEvent> toFrontAction,
+                                               final Runnable1<? super WindowEvent> closeAction) {
     _mainFrame.installModalWindowAdapter(w, toFrontAction, closeAction);
   }
   

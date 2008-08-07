@@ -38,6 +38,7 @@ package edu.rice.cs.util;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.drjava.config.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -891,7 +892,7 @@ public abstract class StringOps {
                   if (n==null) { break; }
                 }
                 p.setAttributes(attrs, new Lambda<String,String>() {
-                  public String apply(String param) {
+                  public String value(String param) {
                     return replaceVariables(param, props, getter);
                   }
                 });

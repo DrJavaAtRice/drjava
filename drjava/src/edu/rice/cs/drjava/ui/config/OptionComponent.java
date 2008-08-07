@@ -46,7 +46,7 @@ import java.util.Vector;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -142,9 +142,7 @@ public abstract class OptionComponent<T> implements Serializable {
   }
   
   /** Interface for change listener. */
-  public static interface ChangeListener extends Lambda<Object, Object> {
-    public abstract Object apply(Object c);
-  }
+  public static interface ChangeListener extends Lambda<Object, Object> {}
   
   /** Adds a change listener to this component.
     * @param listener listener to add
@@ -163,7 +161,7 @@ public abstract class OptionComponent<T> implements Serializable {
 //      public void run() { 
       // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
       ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
-    for (ChangeListener l: listeners)  l.apply(OptionComponent.this); 
+    for (ChangeListener l: listeners)  l.value(OptionComponent.this); 
 //      }
 //    });
   }

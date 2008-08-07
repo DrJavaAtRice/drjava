@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -89,7 +89,7 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** Apply the given command to the specified region to change it.
    *  @param region the region to find and change
    *  @param cmd command that mutates the region. */
-  public void changeRegion(R region, Lambda<Object,R> cmd);
+  public void changeRegion(R region, Lambda<R,Object> cmd);
   
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this manager. */
   public SortedSet<R> getRegions(OpenDefinitionsDocument odd);

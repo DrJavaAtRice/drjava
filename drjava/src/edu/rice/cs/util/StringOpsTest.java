@@ -40,6 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.*;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.lambda.Lambda;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
@@ -202,9 +203,9 @@ public class StringOpsTest extends DrJavaTestCase {
       };
       return l.getClass();
     }
-    public static Lambda<Class, Object> getLambda() {
-      return new Lambda<Class, Object>() {
-        public Class apply(Object param) {
+    public static Lambda<Object, Class> getLambda() {
+      return new Lambda<Object, Class>() {
+        public Class value(Object param) {
           java.awt.event.ActionListener l = new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) { }
           };
@@ -270,7 +271,7 @@ public class StringOpsTest extends DrJavaTestCase {
                  act);
     
     exp = "";
-    act = StringOps.getSimpleName(TestGetSimpleNameInner.getLambda().apply(null));
+    act = StringOps.getSimpleName(TestGetSimpleNameInner.getLambda().value(null));
     assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
                  exp,
                  act);

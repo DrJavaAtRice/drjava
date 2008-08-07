@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.lambda.Lambda3;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,13 +62,13 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
   /** Operator 3 default */
   protected String _op3Default;
   /** Lambda to turn a string into the first operand. */
-  protected Lambda<O,String> _parse1;
+  protected Lambda<String,O> _parse1;
   /** Lambda to turn a string into the second operand. */
-  protected Lambda<P,String> _parse2;
+  protected Lambda<String,P> _parse2;
   /** Lambda to turn a string into the third operand. */
-  protected Lambda<Q,String> _parse3;
+  protected Lambda<String,Q> _parse3;
   /** Lambda to format the result. */
-  protected Lambda<String,R> _format;
+  protected Lambda<R,String> _format;
   
   /** Create an eager property. */
   public TernaryOpProperty(String name,
@@ -76,14 +76,14 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
                            Lambda3<O,P,Q,R> op,
                            String op1Name,
                            String op1Default,
-                           Lambda<O,String> parse1,
+                           Lambda<String,O> parse1,
                            String op2Name,
                            String op2Default,
-                           Lambda<P,String> parse2,
+                           Lambda<String,P> parse2,
                            String op3Name,
                            String op3Default,
-                           Lambda<Q,String> parse3,
-                           Lambda<String,R> format) {
+                           Lambda<String,Q> parse3,
+                           Lambda<R,String> format) {
     super(name, help);
     _op = op;
     _op1Name = op1Name;
@@ -103,10 +103,10 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
   public TernaryOpProperty(String name,
                            String help,
                            Lambda3<O,P,Q,R> op,
-                           Lambda<O,String> parse1,
-                           Lambda<P,String> parse2,
-                           Lambda<Q,String> parse3,
-                           Lambda<String,R> format) {
+                           Lambda<String,O> parse1,
+                           Lambda<String,P> parse2,
+                           Lambda<String,Q> parse3,
+                           Lambda<R,String> format) {
     this(name,help,op,"op1",null,parse1,"op2",null,parse2,"op3",null,parse3,format);
   }
   
@@ -120,7 +120,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op1 = _parse1.apply(_attributes.get(_op1Name));
+        op1 = _parse1.value(_attributes.get(_op1Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
@@ -134,7 +134,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op2 = _parse2.apply(_attributes.get(_op2Name));
+        op2 = _parse2.value(_attributes.get(_op2Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
@@ -148,14 +148,14 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op3 = _parse3.apply(_attributes.get(_op3Name));
+        op3 = _parse3.value(_attributes.get(_op3Name));
       }
       catch(Exception ee) {
         _value = "("+_name+" Error...)";
         return;
       }
     }
-    _value = _format.apply(_op.value(op1,op2,op3));
+    _value = _format.value(_op.value(op1,op2,op3));
   }
   
   public void resetAttributes() {

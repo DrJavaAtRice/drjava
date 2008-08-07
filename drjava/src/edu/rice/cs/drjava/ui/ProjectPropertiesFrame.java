@@ -54,6 +54,8 @@ import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
@@ -458,7 +460,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
         super._chooseFile();
-        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
     //toReturn.add(_buildDirSelector, BorderLayout.EAST);
@@ -481,7 +483,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
         super._chooseFile();
-        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
     _buildDirSelector.setFileField(bd);  // the file field is used as the initial file selection
@@ -502,7 +504,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
         super._chooseFile();
-        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
     //toReturn.add(_buildDirSelector, BorderLayout.EAST);
@@ -519,13 +521,13 @@ public class ProjectPropertiesFrame extends SwingFrame {
           public void actionPerformed(ActionEvent ae) {
             _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
             a.actionPerformed(ae);
-            _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+            _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
           }
         };
       }
     };
     _extraClassPathList.addChangeListener(new OptionComponent.ChangeListener() {
-      public Object apply(Object oc) {
+      public Object value(Object oc) {
         _applyButton.setEnabled(true);
         return null;
       }
@@ -541,14 +543,14 @@ public class ProjectPropertiesFrame extends SwingFrame {
           public void actionPerformed(ActionEvent ae) {
             _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
             a.actionPerformed(ae);
-            _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+            _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
           }
         };
       }
     };
     _excludedFilesList.setFileFilter(new JavaSourceFilter());
     _excludedFilesList.addChangeListener(new OptionComponent.ChangeListener() {
-      public Object apply(Object oc) {
+      public Object value(Object oc) {
         _applyButton.setEnabled(true);
         return null;
       }
@@ -579,7 +581,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
         super._chooseFile();
-        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, NO_OP, CANCEL);
+        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
 
@@ -618,21 +620,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
     return _jarFileSelector;
   }
 
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      cancel();
-      return null;
-    }
+  /** Runnable that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { cancel(); }
   };
   
   /** Validates before changing visibility.  Only runs in the event thread.
@@ -643,7 +633,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       toFront();
     }
     else {

@@ -49,6 +49,8 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 /** Displays uncaught exceptions and logged conditions.
  *  This window is not automatically updated when new errors occur. In the case of errors, we want to
@@ -172,20 +174,10 @@ public class DrJavaErrorWindow extends JDialog {
     }
   };
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
   /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) {
       if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
-      return null;
     }
   };
 
@@ -198,7 +190,7 @@ public class DrJavaErrorWindow extends JDialog {
     if (vis) {
       init();
       if (_parentFrame!=null) {
-        edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
+        edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       }
       toFront();
     }

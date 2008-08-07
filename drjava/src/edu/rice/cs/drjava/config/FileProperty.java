@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.FileOps;
@@ -48,9 +48,9 @@ import java.io.*;
   * @version $Id$
   */
 public class FileProperty extends DrJavaProperty {
-  protected Lambda<File,Void> _getFile;
+  protected Thunk<File> _getFile;
   /** Create an eager file property. */
-  public FileProperty(String name, Lambda<File,Void> getFile, String help) {
+  public FileProperty(String name, Thunk<File> getFile, String help) {
     super(name,help);
     _getFile = getFile;
     resetAttributes();
@@ -82,7 +82,7 @@ public class FileProperty extends DrJavaProperty {
   public void update(PropertyMaps pm) {
     try {
       File f;
-      if (_getFile == null || (f = _getFile.apply(null)) == null) {
+      if (_getFile == null || (f = _getFile.value()) == null) {
         _value = "";
         return;
       }

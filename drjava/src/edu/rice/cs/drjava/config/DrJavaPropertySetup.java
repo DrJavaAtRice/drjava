@@ -39,7 +39,11 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Thunk;
+import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.lambda.Lambda3;
+import edu.rice.cs.plt.lambda.Lambda4;
 import java.io.*;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -682,7 +686,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 "Required attributes:\n"+
                                                                 "\top1=\"<string evaluating to a number>\"\n"+
                                                                 "\top2=\"<string evaluating to a number>\"",
-                                                                new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
+                                                                new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1>op2); }
     },
                                                                 UnaryOpProperty.PARSE_DOUBLE,
@@ -695,7 +699,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 "Required attributes:\n"+
                                                                 "\top1=\"<string evaluating to a number>\"\n"+
                                                                 "\top2=\"<string evaluating to a number>\"",
-                                                                new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
+                                                                new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1<op2); }
     },
                                                                 UnaryOpProperty.PARSE_DOUBLE,
@@ -708,7 +712,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 "Required attributes:\n"+
                                                                 "\top1=\"<string evaluating to a number>\"\n"+
                                                                 "\top2=\"<string evaluating to a number>\"",
-                                                                new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
+                                                                new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1>=op2); }
     },
                                                                 UnaryOpProperty.PARSE_DOUBLE,
@@ -721,7 +725,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 "Required attributes:\n"+
                                                                 "\top1=\"<string evaluating to a number>\"\n"+
                                                                 "\top2=\"<string evaluating to a number>\"",
-                                                                new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Boolean>() {
+                                                                new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1<=op2); }
     },
                                                                 UnaryOpProperty.PARSE_DOUBLE,
@@ -734,7 +738,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 "Required attributes:\n"+
                                                                 "\top1=\"<string>\"\n"+
                                                                 "\top2=\"<string>\"",
-                                                                new edu.rice.cs.plt.lambda.Lambda2<String,String,Boolean>() {
+                                                                new Lambda2<String,String,Boolean>() {
       public Boolean value(String op1, String op2) { return op1.equals(op2); }
     },
                                                                 UnaryOpProperty.PARSE_STRING,
@@ -746,7 +750,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "Required attributes:\n"+
                                                                "\top1=\"<string evaluating to a number>\"\n"+
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
+                                                               new Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 + op2; }
     },
                                                                UnaryOpProperty.PARSE_DOUBLE,
@@ -758,7 +762,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "Required attributes:\n"+
                                                                "\top1=\"<string evaluating to a number>\"\n"+
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
+                                                               new Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 - op2; }
     },
                                                                UnaryOpProperty.PARSE_DOUBLE,
@@ -770,7 +774,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "Required attributes:\n"+
                                                                "\top1=\"<string evaluating to a number>\"\n"+
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
+                                                               new Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 * op2; }
     },
                                                                UnaryOpProperty.PARSE_DOUBLE,
@@ -782,7 +786,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "Required attributes:\n"+
                                                                "\top1=\"<string evaluating to a number>\"\n"+
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new edu.rice.cs.plt.lambda.Lambda2<Double,Double,Double>() {
+                                                               new Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 / op2; }
     },
                                                                UnaryOpProperty.PARSE_DOUBLE,
@@ -793,8 +797,8 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                         "Returns the length of the operand in characters.\n"+
                                                         "Required attributes:\n"+
                                                         "\tlist=\"<string>\"",
-                                                        new edu.rice.cs.util.Lambda<Double,String>() {
-      public Double apply(String s) { return ((double)s.length()); }
+                                                        new Lambda<String,Double>() {
+      public Double value(String s) { return ((double)s.length()); }
     },
                                                         "list",
                                                         null,
@@ -808,7 +812,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "Optional attributes:\n"+
                                                                "\tsep=\"<separator string>\"\n"+
                                                                "(if none specified, ${path.separator} will be used)",
-                                                               new edu.rice.cs.plt.lambda.Lambda2<String,String,Double>() {
+                                                               new Lambda2<String,String,Double>() {
       public Double value(String s, String sep) {
         if (s.length()==0) return 0.0;
         return ((double)s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(sep)).length);
@@ -833,7 +837,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                              "(if not specified, 1 will be used)\n"+
                                                                              "\tsep=\"<separator string>\"\n"+
                                                                              "(if none specified, ${path.separator} will be used)",
-                                                                             new edu.rice.cs.plt.lambda.Lambda4<String,Double,Double,String,String>() {
+                                                                             new Lambda4<String,Double,Double,String,String>() {
       public String value(String s, Double index, Double count, String sep) {
         if (s.length()==0) return "";
         int i = index.intValue();
@@ -874,7 +878,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                       "\tlist=\"<list string>\"\n"+
                                                                       "\told=\"<old separator>\"\n"+
                                                                       "\tnew=\"<new separator>\"",
-                                                                      new edu.rice.cs.plt.lambda.Lambda3<String,String,String,String>() {
+                                                                      new Lambda3<String,String,String,String>() {
       public String value(String s, String oldSep, String newSep) {
         if (s.length()==0) return "";
         StringBuilder sb = new StringBuilder();
@@ -1055,16 +1059,16 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.put("cmd", null);
       }
       public String toString() { return "--uninitialized--"; }
-      public void setAttributes(HashMap<String,String> attrs, edu.rice.cs.util.Lambda<String,String> replaceLambda) {
-        String value;
+      public void setAttributes(HashMap<String,String> attrs, Lambda<String,String> replaceLambda) {
+        String val;
         for(String key: attrs.keySet()) {
-          value = attrs.get(key);
+          val = attrs.get(key);
           if (key.equals("cmd")) {
             // do not evaluate the cmd attribute yet
-            setAttribute(key, value);
+            setAttribute(key, val);
           }
           else {
-            setAttribute(key, replaceLambda.apply(value));
+            setAttribute(key, replaceLambda.value(val));
           }
         }
       }
@@ -1196,7 +1200,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.put("each", "1");
       }
       public String toString() { return "--uninitialized--"; }
-      public void setAttributes(HashMap<String,String> attrs, edu.rice.cs.util.Lambda<String,String> replaceLambda) {
+      public void setAttributes(HashMap<String,String> attrs, Lambda<String,String> replaceLambda) {
         String value;
         for(String key: attrs.keySet()) {
           value = attrs.get(key);
@@ -1205,7 +1209,7 @@ public class DrJavaPropertySetup implements OptionConstants {
             setAttribute(key, value);
           }
           else {
-            setAttribute(key, replaceLambda.apply(value));
+            setAttribute(key, replaceLambda.value(value));
           }
         }
       }
@@ -1251,8 +1255,8 @@ public class DrJavaPropertySetup implements OptionConstants {
       catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }
     }
     final File drjavaFile = found;
-    PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("drjava.file", new Lambda<File,Void>() {
-      public File apply(Void notUsed) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("drjava.file", new Thunk<File>() {
+      public File value() {
         return drjavaFile; 
       }
     }, 
@@ -1262,8 +1266,8 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "\trel=\"<dir to which the output should be relative\"") {
                                                                  public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                                                });
-    PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("java.file", new Lambda<File,Void>() {
-      public File apply(Void notUsed) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("java.file", new Thunk<File>() {
+      public File value() {
         return new File(edu.rice.cs.util.newjvm.ExecJVM.getExecutable()); 
       }
     }, 

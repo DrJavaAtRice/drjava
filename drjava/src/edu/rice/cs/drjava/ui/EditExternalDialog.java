@@ -59,6 +59,8 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 
 
@@ -342,7 +344,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         EventQueue.invokeLater(new Runnable() {
           public void run() {
             EventQueue.invokeLater(new Runnable() { public void run() { EditExternalDialog.this.toFront(); } });
-            _mainFrame.installModalWindowAdapter(EditExternalDialog.this, NO_OP, OK);
+            _mainFrame.installModalWindowAdapter(EditExternalDialog.this, LambdaUtil.NO_OP, OK);
             updateList(selectedIndex);
           }
         });
@@ -456,7 +458,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   public void _import() {
     _mainFrame.removeModalWindowAdapter(this);
     int rc = _importChooser.showOpenDialog(this);
-    _mainFrame.installModalWindowAdapter(this, NO_OP, OK);
+    _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, OK);
     switch (rc) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION: {
@@ -489,7 +491,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     _exportChooser.setMultiSelectionEnabled(false);
     _mainFrame.removeModalWindowAdapter(this);
     int rc = _exportChooser.showSaveDialog(this);
-    _mainFrame.installModalWindowAdapter(this, NO_OP, OK);
+    _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, OK);
     switch (rc) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION: {
@@ -547,21 +549,9 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     _exportAction.setEnabled(names.size()>0);
   }
 
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
   /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> OK
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      _ok();
-      return null;
-    }
+  protected final Runnable1<WindowEvent> OK = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { _ok(); }
   };
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
@@ -571,7 +561,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     if (vis) {
       updateList(0);
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, OK);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, OK);
       toFront();
     }
     else {

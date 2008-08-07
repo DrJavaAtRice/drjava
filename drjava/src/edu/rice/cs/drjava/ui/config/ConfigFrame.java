@@ -60,6 +60,7 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.lambda.Runnable1;
 
 
 /** The frame for setting Configuration options on the fly
@@ -91,7 +92,7 @@ public class ConfigFrame extends SwingFrame {
   protected final String SEPS = " \t\n-,;.(";
   
   private OptionComponent.ChangeListener _changeListener = new OptionComponent.ChangeListener() {
-    public Object apply(Object oc) {
+    public Object value(Object oc) {
       _applyButton.setEnabled(true);
       return null;
     }
@@ -275,21 +276,9 @@ public class ConfigFrame extends SwingFrame {
     ConfigFrame.this.setVisible(false);
   }
 
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      cancel();
-      return null;
-    }
+  /** Thunk that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { cancel(); }
   };
   
   /** Validates before changing visibility.  Only runs in the event thread.

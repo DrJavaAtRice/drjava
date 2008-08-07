@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,24 +49,24 @@ import static edu.rice.cs.util.HashUtilities.hash;
   */
 public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Operation to perform. */
-  protected Lambda<R,P> _op;
+  protected Lambda<P,R> _op;
   /** Operator name */
   protected String _op1Name;
   /** Operator default */
   protected String _op1Default;
   /** Lambda to turn a string into the operand. */
-  protected Lambda<P,String> _parse;
+  protected Lambda<String,P> _parse;
   /** Lambda to format the result. */
-  protected Lambda<String,R> _format;
+  protected Lambda<R,String> _format;
   
   /** Create an eager property. */
   public UnaryOpProperty(String name,
                          String help,
-                         Lambda<R,P> op,
+                         Lambda<P,R> op,
                          String op1Name,
                          String op1Default,
-                         Lambda<P,String> parse,
-                         Lambda<String,R> format) {
+                         Lambda<String,P> parse,
+                         Lambda<R,String> format) {
     super(name, help);
     _op = op;
     _op1Name = op1Name;
@@ -79,9 +79,9 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Create an eager property. */
   public UnaryOpProperty(String name,
                          String help,
-                         Lambda<R,P> op,
-                         Lambda<P,String> parse,
-                         Lambda<String,R> format) {
+                         Lambda<P,R> op,
+                         Lambda<String,P> parse,
+                         Lambda<R,String> format) {
     this(name, help, op, "op", null, parse, format);
   }
   
@@ -95,14 +95,14 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
     }
     else {
       try {
-        op = _parse.apply(_attributes.get(_op1Name));
+        op = _parse.value(_attributes.get(_op1Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
         return;
       }
     }
-    _value = _format.apply(_op.apply(op));
+    _value = _format.value(_op.value(op));
   }
   
   public void resetAttributes() {
@@ -111,27 +111,27 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   }
   
   /** Lambda to parse a String into a Double. */
-  public static final Lambda<Double,String> PARSE_DOUBLE =
-    new edu.rice.cs.util.Lambda<Double,String>() {
-    public Double apply(String s) { return new Double(s); }
+  public static final Lambda<String,Double> PARSE_DOUBLE =
+    new Lambda<String,Double>() {
+    public Double value(String s) { return new Double(s); }
   };
 
   /** Lambda to parse a String into a String. */
   public static final Lambda<String,String> PARSE_STRING =
-    new edu.rice.cs.util.Lambda<String,String>() {
-    public String apply(String s) { return s; }
+    new Lambda<String,String>() {
+    public String value(String s) { return s; }
   };
   
   /** Formatter for Booleans. */
-  public static final Lambda<String,Boolean> FORMAT_BOOL = 
-    new edu.rice.cs.util.Lambda<String,Boolean>() {
-    public String apply(Boolean b) { return b.toString().toLowerCase(); }
+  public static final Lambda<Boolean,String> FORMAT_BOOL = 
+    new Lambda<Boolean,String>() {
+    public String value(Boolean b) { return b.toString().toLowerCase(); }
   };
   
   /** Formatter for Numbers. */
-  public static final Lambda<String,Double> FORMAT_DOUBLE = 
-    new edu.rice.cs.util.Lambda<String,Double>() {
-    public String apply(Double d) {
+  public static final Lambda<Double,String> FORMAT_DOUBLE = 
+    new Lambda<Double,String>() {
+    public String value(Double d) {
       String s = d.toString();
       while(s.endsWith("0")) { s = s.substring(0, s.length()-1); }
       if (s.endsWith(".")) { s = s.substring(0, s.length()-1); }
@@ -141,7 +141,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
 
   /** Formatter for Strings. */
   public static final Lambda<String,String> FORMAT_STRING = 
-    new edu.rice.cs.util.Lambda<String,String>() {
-    public String apply(String s) { return s; }
+    new Lambda<String,String>() {
+    public String value(String s) { return s; }
   };
 } 

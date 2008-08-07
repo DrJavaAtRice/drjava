@@ -138,7 +138,6 @@ import edu.rice.cs.plt.lambda.Predicate;
 //import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException;

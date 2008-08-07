@@ -48,17 +48,18 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.drjava.DrJavaRoot;
 
 /** Frame with predictive string input based on a list of strings. */
 public class PredictiveInputFrame<T extends Comparable<? super T>> extends SwingFrame {
   
   /** Interface that is used to generate additional information about an item. */
-  public static interface InfoSupplier<X> extends Lambda<String, X> {
-    public String apply(X param);
-  }
+  public static interface InfoSupplier<X> extends Lambda<X,String> {}
 
 //  /** General information supplier that just uses toString(). */
 //  public static final InfoSupplier<Object> GET_LAZY_SUPPLIER = new InfoSupplier<Object>() {
@@ -68,8 +69,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   /** Interface for an action to be performed when the user closes the frame,
    *  either by using "OK" or "Cancel".
    */
-  public static interface CloseAction<X extends Comparable<? super X>> extends Lambda<Object, PredictiveInputFrame<X>> {
-    public Object apply(PredictiveInputFrame<X> param);
+  public static interface CloseAction<X extends Comparable<? super X>> extends Lambda<PredictiveInputFrame<X>,Object> {
+    public Object value(PredictiveInputFrame<X> param);
     public String getName();
     public KeyStroke getKeyStroke(); // or null if none desired
     public String getToolTipText(); // or null if none desired
@@ -682,35 +683,23 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, NO_OP, CANCEL);
+      DrJavaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       setOwnerEnabled(false);
       selectStrategy();
       _textField.requestFocus();
       toFront();
     }
     else {
-      edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
+      DrJavaRoot.removeModalWindowAdapter(this);
       setOwnerEnabled(true);
       _owner.toFront();
     }
     super.setVisible(vis);
   }
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      cancel();
-      return null;
-    }
+  /** Runnable that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { cancel(); }
   };
 
   /** Add the listener. */
@@ -761,7 +750,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     if (_matchList.getModel().getSize()>0) {
       @SuppressWarnings("unchecked") 
       T item = (T)_matchList.getSelectedValue();
-      _infoLabel.setText("Path:   " + _info.apply(item));
+      _infoLabel.setText("Path:   " + _info.value(item));
     }
     else _infoLabel.setText("No file selected");
   }
@@ -776,7 +765,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     _buttonPressed = a.getName();
     _lastState = new FrameState(PredictiveInputFrame.this);
     setVisible(false);
-    a.apply(this);
+    a.value(this);
   }
   
   /** Select the strategy for matching. */

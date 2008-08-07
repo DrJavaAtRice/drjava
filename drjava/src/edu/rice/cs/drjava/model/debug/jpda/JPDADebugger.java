@@ -62,7 +62,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.drjava.model.debug.*;
 
 import com.sun.jdi.*;
@@ -459,8 +459,8 @@ public class JPDADebugger implements Debugger {
    */
   public /* synchronized */ void notifyBreakpointChange(Breakpoint breakpoint) {
     assert EventQueue.isDispatchThread();
-    _model.getBreakpointManager().changeRegion(breakpoint, new Lambda<Object, Breakpoint>() {
-      public Object apply(Breakpoint bp) {
+    _model.getBreakpointManager().changeRegion(breakpoint, new Lambda<Breakpoint, Object>() {
+      public Object value(Breakpoint bp) {
         // change has already been made, just notify all listeners
         return null;
       }

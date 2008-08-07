@@ -50,7 +50,7 @@ import java.util.NoSuchElementException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.SwingFrame;
 
@@ -59,9 +59,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   /** Interface for an action to be performed when the user closes the frame,
    *  either by using "OK" or "Cancel".
    */
-  public static interface CloseAction extends Lambda<Object, String> {
-    public Object apply(String selected);
-  }
+  public static interface CloseAction extends Lambda<String, Object> {}
   
   /** Class to save the frame state, i.e. location and dimensions.*/
   public static class FrameState {
@@ -381,12 +379,12 @@ public class ClipboardHistoryFrame extends SwingFrame {
       _buttonPressed = JOptionPane.OK_OPTION;
       String s = ((ListItem)_historyList.getModel().getElementAt(_historyList.getSelectedIndex())).getFull();
       _chm.put(s);
-      _okAction.apply(s);
+      _okAction.value(s);
     }
     else {
       _buttonPressed = JOptionPane.CANCEL_OPTION;
       Toolkit.getDefaultToolkit().beep();
-      _cancelAction.apply(null);
+      _cancelAction.value(null);
     }
   }
   
@@ -395,7 +393,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     _buttonPressed = JOptionPane.CANCEL_OPTION;
     _lastState = new FrameState(ClipboardHistoryFrame.this);
     setVisible(false);
-    _cancelAction.apply(null);
+    _cancelAction.value(null);
   }
   
   /** Keeps a full string, but toString is only the first line. */

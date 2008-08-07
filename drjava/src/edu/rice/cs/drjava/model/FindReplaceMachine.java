@@ -38,11 +38,11 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
 
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
-import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 
@@ -311,7 +311,7 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of processed occurrences
     */
-  public int processAll(Lambda<Void, FindResult> findAction) { return processAll(findAction, _searchAllDocuments); }
+  public int processAll(Runnable1<FindResult> findAction) { return processAll(findAction, _searchAllDocuments); }
   
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
     * depending the value of the flag searchAll.  Assumes that findAction does not modify the document it processes.
@@ -319,7 +319,7 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
-  private int processAll(Lambda<Void, FindResult> findAction, boolean searchAll) {
+  private int processAll(Runnable1<FindResult> findAction, boolean searchAll) {
     
     assert EventQueue.isDispatchThread();
     
@@ -352,7 +352,7 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
-  private int _processAllInCurrentDoc(Lambda<Void, FindResult> findAction) {
+  private int _processAllInCurrentDoc(Runnable1<FindResult> findAction) {
     
     if (_isForward) setPosition(0);
     else setPosition(_doc.getLength());
@@ -361,7 +361,7 @@ public class FindReplaceMachine {
     FindResult fr = findNext(false);  // find next match in current doc   
     
     while (! fr.getWrapped()) {
-      findAction.apply(fr);
+      findAction.run(fr);
       count++;
       fr = findNext(false);           // find next match in current doc
     }

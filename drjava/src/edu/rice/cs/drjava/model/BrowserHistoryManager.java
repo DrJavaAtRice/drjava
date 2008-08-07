@@ -47,7 +47,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Browser history manager for the entire model.  Follows readers/writers locking protocol of EventNotifier.  This 
@@ -244,8 +244,8 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Apply the given command to the specified region to change it.
     * @param region the region to find and change
     * @param cmd command that mutates the region. */
-  public void changeRegion(final BrowserDocumentRegion region, Lambda<Object,BrowserDocumentRegion> cmd) {
-    cmd.apply(region);
+  public void changeRegion(final BrowserDocumentRegion region, Lambda<BrowserDocumentRegion,Object> cmd) {
+    cmd.value(region);
     Utilities.invokeLater(new Runnable() { public void run() {
       // notify
       _lock.startRead();

@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.Lambda;
-
 /** Any class which wants to listen to DocumentRegion events fired by a RegionManager should implement this interface
  *  and use RegionManager's addListener() method.
  *  @version $Id$

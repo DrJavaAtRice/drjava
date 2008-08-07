@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.jar.JarBuilder;
 import edu.rice.cs.util.jar.ManifestWriter;
@@ -406,7 +408,7 @@ public class JarOptionsDialog extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(JarOptionsDialog.this);
         super._chooseFile();
-        _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, NO_OP, CANCEL);
+        _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, LambdaUtil.NO_OP, CANCEL);
       }
       public File convertStringToFile(String s) { 
         s = s.trim().replace('.', java.io.File.separatorChar) + ".class";
@@ -469,7 +471,7 @@ public class JarOptionsDialog extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(JarOptionsDialog.this);
         super._chooseFile();
-        _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, NO_OP, CANCEL);
+        _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
     _jarFileSelector.setFileFilter(new FileFilter() {
@@ -735,22 +737,10 @@ public class JarOptionsDialog extends SwingFrame {
     return true;
   }
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
+  /** Runnable that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { _cancel(); }
   };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      _cancel();
-      return null;
-    }
-  };  
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
@@ -758,7 +748,7 @@ public class JarOptionsDialog extends SwingFrame {
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();

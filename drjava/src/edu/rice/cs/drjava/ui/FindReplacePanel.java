@@ -61,7 +61,7 @@ import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.StringSuspension;
 import edu.rice.cs.util.UnexpectedException;
@@ -566,11 +566,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _frame.hourglassOn();
     try {
       /* Accumulate all occurrences of searchStr in results. */
-      final int count = _machine.processAll(new Lambda<Void, FindResult>() {
-        public Void apply(final FindResult fr) {
-          results.add(fr);
-          return null;
-        }
+      final int count = _machine.processAll(new Runnable1<FindResult>() {
+        public void run(FindResult fr) { results.add(fr); }
       });
       
       _machine.setDocument(oldDoc);

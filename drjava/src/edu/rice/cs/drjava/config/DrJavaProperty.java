@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import edu.rice.cs.plt.lambda.Lambda;
 
 import static edu.rice.cs.util.HashUtilities.hash;
 
@@ -126,11 +127,11 @@ public abstract class DrJavaProperty implements Cloneable {
     * @param replaceLambda lambda that can be used to replace the variables in a value
     * @throws IllegalArgumentException if an attribute with a specified key does not already exist in table
     */
-  public void setAttributes(HashMap<String,String> attrs, edu.rice.cs.util.Lambda<String,String> replaceLambda) {
+  public void setAttributes(HashMap<String,String> attrs, Lambda<String,String> replaceLambda) {
     String value;
     for(String key: attrs.keySet()) {
       value = attrs.get(key);
-      setAttribute(key, replaceLambda.apply(value));
+      setAttribute(key, replaceLambda.value(value));
     }
   }
   

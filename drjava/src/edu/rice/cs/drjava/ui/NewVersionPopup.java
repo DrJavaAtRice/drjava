@@ -53,6 +53,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.util.MutableReference;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 /** Displays whether a new version of DrJava is available.
  *  @version $Id$
@@ -382,21 +384,9 @@ public class NewVersionPopup extends JDialog {
     }
   }
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      closeAction();
-      return null;
-    }
+  /** Runnable that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { closeAction(); }
   };
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
@@ -405,7 +395,7 @@ public class NewVersionPopup extends JDialog {
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
     }
     else {
       _mainFrame.removeModalWindowAdapter(this);

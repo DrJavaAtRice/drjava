@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.lambda.Lambda4;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,15 +66,15 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
   /** Operator 4 default */
   protected String _op4Default;
   /** Lambda to turn a string into the first operand. */
-  protected Lambda<N,String> _parse1;
+  protected Lambda<String,N> _parse1;
   /** Lambda to turn a string into the second operand. */
-  protected Lambda<O,String> _parse2;
+  protected Lambda<String,O> _parse2;
   /** Lambda to turn a string into the third operand. */
-  protected Lambda<P,String> _parse3;
+  protected Lambda<String,P> _parse3;
   /** Lambda to turn a string into the fourth operand. */
-  protected Lambda<Q,String> _parse4;
+  protected Lambda<String,Q> _parse4;
   /** Lambda to format the result. */
-  protected Lambda<String,R> _format;
+  protected Lambda<R,String> _format;
   
   /** Create an eager property. */
   public QuaternaryOpProperty(String name,
@@ -82,17 +82,17 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
                               Lambda4<N,O,P,Q,R> op,
                               String op1Name,
                               String op1Default,
-                              Lambda<N,String> parse1,
+                              Lambda<String,N> parse1,
                               String op2Name,
                               String op2Default,
-                              Lambda<O,String> parse2,
+                              Lambda<String,O> parse2,
                               String op3Name,
                               String op3Default,
-                              Lambda<P,String> parse3,
+                              Lambda<String,P> parse3,
                               String op4Name,
                               String op4Default,
-                              Lambda<Q,String> parse4,
-                              Lambda<String,R> format) {
+                              Lambda<String,Q> parse4,
+                              Lambda<R,String> format) {
     super(name, help);
     _op = op;
     _op1Name = op1Name;
@@ -115,11 +115,11 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
   public QuaternaryOpProperty(String name,
                               String help,
                               Lambda4<N,O,P,Q,R> op,
-                              Lambda<N,String> parse1,
-                              Lambda<O,String> parse2,
-                              Lambda<P,String> parse3,
-                              Lambda<Q,String> parse4,
-                              Lambda<String,R> format) {
+                              Lambda<String,N> parse1,
+                              Lambda<String,O> parse2,
+                              Lambda<String,P> parse3,
+                              Lambda<String,Q> parse4,
+                              Lambda<R,String> format) {
     this(name,help,op,"op1",null,parse1,"op2",null,parse2,"op3",null,parse3,"op4",null,parse4,format);
   }
   
@@ -133,7 +133,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op1 = _parse1.apply(_attributes.get(_op1Name));
+        op1 = _parse1.value(_attributes.get(_op1Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
@@ -147,7 +147,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op2 = _parse2.apply(_attributes.get(_op2Name));
+        op2 = _parse2.value(_attributes.get(_op2Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
@@ -161,7 +161,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op3 = _parse3.apply(_attributes.get(_op3Name));
+        op3 = _parse3.value(_attributes.get(_op3Name));
       }
       catch(Exception e) {
         _value = "("+_name+" Error...)";
@@ -175,14 +175,14 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
     }
     else {
       try {
-        op4 = _parse4.apply(_attributes.get(_op4Name));
+        op4 = _parse4.value(_attributes.get(_op4Name));
       }
       catch(Exception ee) {
         _value = "("+_name+" Error...)";
         return;
       }
     }
-    _value = _format.apply(_op.value(op1,op2,op3,op4));
+    _value = _format.value(_op.value(op1,op2,op3,op4));
   }
   
   public void resetAttributes() {

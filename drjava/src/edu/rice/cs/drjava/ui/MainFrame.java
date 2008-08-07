@@ -95,11 +95,12 @@ import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.Thunk;
 
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -984,7 +985,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _pasteHistoryAction = new AbstractAction("Paste from History...") {
     public void actionPerformed(final ActionEvent ae) {
       final ClipboardHistoryFrame.CloseAction cancelAction = new ClipboardHistoryFrame.CloseAction() {
-        public Object apply(String s) {
+        public Object value(String s) {
           // "Clipboard History" dialog position and size.
           if ((DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue())
                 && (_clipboardHistoryDialog != null) && (_clipboardHistoryDialog.getFrameState() != null)) {
@@ -999,8 +1000,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       };
       ClipboardHistoryFrame.CloseAction okAction = new ClipboardHistoryFrame.CloseAction() {
-        public Object apply(String s) {
-          cancelAction.apply(null);
+        public Object value(String s) {
+          cancelAction.value(null);
           
           StringSelection ssel = new StringSelection(s);
           Clipboard cb = MainFrame.this.getToolkit().getSystemClipboard();
@@ -1211,7 +1212,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_gotoFileDialog == null) {
       PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
-        public String apply(GoToFileListEntry entry) {
+        public String value(GoToFileListEntry entry) {
           final StringBuilder sb = new StringBuilder();
           
           if (entry.doc != null) {
@@ -1232,7 +1233,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+        public Object value(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
             final OpenDefinitionsDocument newDoc = p.getItem().doc;
             final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
@@ -1275,7 +1276,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+        public Object value(PredictiveInputFrame<GoToFileListEntry> p) {
           hourglassOff();
           return null;
         }
@@ -1494,7 +1495,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_openJavadocDialog == null) {
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-        public String apply(JavaAPIListEntry entry) {
+        public String value(JavaAPIListEntry entry) {
           return entry.getFullString();
         }
       };
@@ -1503,7 +1504,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
+        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
           if (p.getItem() != null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
           }
@@ -1516,7 +1517,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
+        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
           hourglassOff();
           return null;
         }
@@ -1817,7 +1818,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       PlatformFactory.ONLY.setMnemonic(_completeJavaAPICheckbox,'j');
       PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry> info = 
         new PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry>() {
-        public String apply(ClassNameAndPackageEntry entry) {
+        public String value(ClassNameAndPackageEntry entry) {
           // show full class name as information
           StringBuilder sb = new StringBuilder();
           sb.append(entry.getFullPackage());
@@ -1830,7 +1831,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public String getToolTipText() { return "Complete the identifier"; }
-        public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
+        public Object value(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
@@ -1870,7 +1871,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK);
         }
         public String getToolTipText() { return "Complete the word using the fully-qualified class name"; }
-        public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
+        public Object value(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
@@ -1911,7 +1912,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
+        public Object value(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           hourglassOff();
           return null;
         }
@@ -3067,15 +3068,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    
 //    Utilities.show("Global Model started");
     
-    _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Lambda<Void,DetachedFrame>() {
-      public Void apply(DetachedFrame frame) {
+    _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Runnable1<DetachedFrame>() {
+      public void run(DetachedFrame frame) {
         frame.getContentPane().add(_tabbedPane);
-        return null;
       }
-    }, new Lambda<Void,DetachedFrame>() {
-      public Void apply(DetachedFrame frame) {
+    }, new Runnable1<DetachedFrame>() {
+      public void run(DetachedFrame frame) {
         _mainSplit.setBottomComponent(_tabbedPane);
-        return null;
       }
     });
     _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
@@ -3223,17 +3222,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Create detachable debug frame
     if (_debugPanel!=null) { // using debugger
-      _debugFrame = new DetachedFrame("Debugger", MainFrame.this, new Lambda<Void,DetachedFrame>() {
-        public Void apply(DetachedFrame frame) {
+      _debugFrame = new DetachedFrame("Debugger", MainFrame.this, new Runnable1<DetachedFrame>() {
+        public void run(DetachedFrame frame) {
           frame.getContentPane().add(_debugPanel);
-          return null;
         }
-      }, new Lambda<Void,DetachedFrame>() {
-        public Void apply(DetachedFrame frame) {
+      }, new Runnable1<DetachedFrame>() {
+        public void run(DetachedFrame frame) {
           _debugSplitPane.setTopComponent(_docSplitPane);
           _debugSplitPane.setBottomComponent(_debugPanel);
           _mainSplit.setTopComponent(_debugSplitPane);
-          return null;
         }
       });
       _debugFrame.addWindowListener(new WindowAdapter() {
@@ -3571,8 +3568,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Files
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
-                  new FileProperty("drjava.current.file", new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getActiveDocument().getRawFile(); }
+                  new FileProperty("drjava.current.file", new Thunk<File>() {
+      public File value() { return _model.getActiveDocument().getRawFile(); }
     }, 
                                    "Returns the current document in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3598,8 +3595,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     });
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
-                  new FileProperty("drjava.working.dir", new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getInteractionsModel().getWorkingDirectory(); }
+                  new FileProperty("drjava.working.dir", new Thunk<File>() {
+      public File value() { return _model.getInteractionsModel().getWorkingDirectory(); }
     },
                                    "Returns the current working directory of DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3608,8 +3605,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    });
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
-                  new FileProperty("drjava.master.working.dir", new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getMasterWorkingDirectory(); }
+                  new FileProperty("drjava.master.working.dir", new Thunk<File>() {
+      public File value() { return _model.getMasterWorkingDirectory(); }
     },
                                    "Returns the working directory of the DrJava master JVM.\n"+
                                    "Optional attributes:\n"+
@@ -3759,8 +3756,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileProperty("project.file", 
-                                   new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getProjectFile(); }
+                                   new Thunk<File>() {
+      public File value() { return _model.getProjectFile(); }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3771,8 +3768,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileProperty("project.main.class", 
-                                   new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getMainClass(); }
+                                   new Thunk<File>() {
+      public File value() { return _model.getMainClass(); }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3782,8 +3779,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileProperty("project.root", 
-                                   new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getProjectRoot(); }
+                                   new Thunk<File>() {
+      public File value() { return _model.getProjectRoot(); }
     },
                                    "Returns the current project root in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3793,8 +3790,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileProperty("project.build.dir", 
-                                   new Lambda<File,Void>() {
-      public File apply(Void notUsed) { return _model.getBuildDirectory(); }
+                                   new Thunk<File>() {
+      public File value() { return _model.getBuildDirectory(); }
     },
                                    "Returns the current build directory in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -4279,10 +4276,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void setStatusMessageColor(Color c) { _statusReport.setForeground(c); }
   
   /** Performs op on each document in docs and invalidates the various project file collection properties. */
-  private void _processDocs(Collection<OpenDefinitionsDocument> docs, Lambda<Void, OpenDefinitionsDocument> op) {
+  private void _processDocs(Collection<OpenDefinitionsDocument> docs, Runnable1<OpenDefinitionsDocument> op) {
     for (OpenDefinitionsDocument doc: docs) {
       if (doc != null && ! doc.isUntitled()) {
-        op.apply(doc);
+        op.run(doc);
         try {
           String path = _model.fixPathForNavigator(doc.getFile().getCanonicalPath());
           _model.getDocumentNavigator().refreshDocument(doc, path);
@@ -4299,22 +4296,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    * by ProjectMenuTest.testSaveProject. 
    */
   void _moveToAuxiliary() {
-    Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
-      public Void apply(OpenDefinitionsDocument d) { 
-        _model.addAuxiliaryFile(d);
-        return null;
-      }
+    Runnable1<OpenDefinitionsDocument> op =  new Runnable1<OpenDefinitionsDocument>() { 
+      public void run(OpenDefinitionsDocument d) { _model.addAuxiliaryFile(d); }
     };
     _processDocs(_model.getDocumentNavigator().getSelectedDocuments(), op);
   }
   
   /** Removes selected auxiliary files. */       
   private void _removeAuxiliary() {
-     Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
-      public Void apply(OpenDefinitionsDocument d) { 
-        _model.removeAuxiliaryFile(d);
-        return null;
-      }
+    Runnable1<OpenDefinitionsDocument> op =  new Runnable1<OpenDefinitionsDocument>() { 
+      public void run(OpenDefinitionsDocument d) { _model.removeAuxiliaryFile(d); }
     };
     _processDocs(_model.getDocumentNavigator().getSelectedDocuments(), op);
   }
@@ -4322,11 +4313,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Converts all external files to auxiliary files. */
   void _moveAllToAuxiliary() {
     assert EventQueue.isDispatchThread();
-    Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
-      public Void apply(OpenDefinitionsDocument d) { 
-        _model.addAuxiliaryFile(d);
-        return null;
-      }
+    Runnable1<OpenDefinitionsDocument> op =  new Runnable1<OpenDefinitionsDocument>() { 
+      public void run(OpenDefinitionsDocument d) { _model.addAuxiliaryFile(d); }
     };
     _processDocs(_model.getDocumentNavigator().getDocumentsInBin(_model.getExternalBinTitle()), op);
   }
@@ -4334,11 +4322,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Converts all auxiliary files to external files. */
   private void _removeAllAuxiliary() {
     assert EventQueue.isDispatchThread();
-    Lambda<Void, OpenDefinitionsDocument> op =  new Lambda<Void, OpenDefinitionsDocument>() { 
-      public Void apply(OpenDefinitionsDocument d) { 
-        _model.removeAuxiliaryFile(d);
-        return null;
-      }
+    Runnable1<OpenDefinitionsDocument> op =  new Runnable1<OpenDefinitionsDocument>() { 
+      public void run(OpenDefinitionsDocument d) { _model.removeAuxiliaryFile(d); }
     };
     _processDocs(_model.getDocumentNavigator().getDocumentsInBin(_model.getAuxiliaryBinTitle()), op);
   }
@@ -9564,7 +9549,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       PlatformFactory.ONLY.setMnemonic(_autoImportPackageCheckbox,'p');
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-        public String apply(JavaAPIListEntry entry) { // show full class name as information
+        public String value(JavaAPIListEntry entry) { // show full class name as information
           return entry.getFullString();
         }
       };
@@ -9573,7 +9558,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
+        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
           String text;
           if (p.getItem() != null) { // if a class was selected...
             text = p.getItem().getFullString();
@@ -9609,7 +9594,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public String getToolTipText() { return null; }
-        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
+        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
           // if no class was selected, just reset the error information so the dialog box works next time
           _model.getInteractionsModel().resetLastErrors();
           hourglassOff();
@@ -9776,8 +9761,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param toFrontAction action to be performed after the window has been moved to the front again
     * @param closeAction action to be performed when the window is closing
     * @return window listener */
-  public void installModalWindowAdapter(final Window w, final Lambda<Void,WindowEvent> toFrontAction,
-                                        final Lambda<Void,WindowEvent> closeAction) {
+  public void installModalWindowAdapter(final Window w, final Runnable1<? super WindowEvent> toFrontAction,
+                                        final Runnable1<? super WindowEvent> closeAction) {
     assert EventQueue.isDispatchThread();
     
     if (_modalWindowAdapters.containsKey(w)) { // already installed
@@ -9793,19 +9778,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void windowDeactivated(WindowEvent we) {
           we.getWindow().toFront();
           we.getWindow().requestFocus();
-          toFrontAction.apply(we);
+          toFrontAction.run(we);
         }
         public void windowIconified(WindowEvent we) {
           we.getWindow().toFront();
           we.getWindow().requestFocus();
-          toFrontAction.apply(we);
+          toFrontAction.run(we);
         }
         public void windowLostFocus(WindowEvent we) {
           we.getWindow().toFront();
           we.getWindow().requestFocus();
-          toFrontAction.apply(we);
+          toFrontAction.run(we);
         }
-        public void windowClosing(WindowEvent we) { closeAction.apply(we); }
+        public void windowClosing(WindowEvent we) { closeAction.run(we); }
       };
     }
     else {
@@ -9817,7 +9802,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void windowDeactivated(WindowEvent we) { }
         public void windowIconified(WindowEvent we) { }
         public void windowLostFocus(WindowEvent we) { }
-        public void windowClosing(WindowEvent we) { closeAction.apply(we); }
+        public void windowClosing(WindowEvent we) { closeAction.run(we); }
       };
     }
     // install it

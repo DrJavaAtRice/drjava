@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.FileOps;
@@ -52,9 +52,9 @@ public class MutableFileProperty extends FileProperty {
   protected File _fileValue = null;
   /** Create an eager file property. */
   public MutableFileProperty(String name, File initialFile, String help) {
-    super(name,new Lambda<File,Void>() { public File apply(Void v) { return null; } }, help);
+    super(name,new Thunk<File>() { public File value() { return null; } }, help);
     // cannot access _fileValue before super constructor has been called, so assign it again after the call
-    _getFile = new Lambda<File,Void>() { public File apply(Void v) { return _fileValue; } };
+    _getFile = new Thunk<File>() { public File value() { return _fileValue; } };
     _fileValue = initialFile;
     _value = "";
     resetAttributes();

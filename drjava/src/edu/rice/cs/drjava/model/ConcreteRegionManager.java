@@ -56,7 +56,7 @@ import javax.swing.SwingUtilities;
 //import javax.swing.tree.DefaultMutableTreeNode;
 //import javax.swing.tree.MutableTreeNode;
 
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -285,8 +285,8 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   /** Apply the given command to the specified region to change it.
     * @param region the region to find and change
     * @param cmd command that mutates the region. */
-  public void changeRegion(final R region, Lambda<Object, R> cmd) {
-    cmd.apply(region);
+  public void changeRegion(final R region, Lambda<R,Object> cmd) {
+    cmd.value(region);
     // notify
     _lock.startRead();
     try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 

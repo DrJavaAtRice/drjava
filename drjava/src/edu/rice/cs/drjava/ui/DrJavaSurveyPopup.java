@@ -56,6 +56,8 @@ import edu.rice.cs.util.MutableReference;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.UneditableTableModel;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 /** Asks whether DrJava may contact the DrJava developers and send information about
   * the operating system and the Java version used.
@@ -239,21 +241,9 @@ public class DrJavaSurveyPopup extends JDialog {
     }
   }
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
   /** Lambda that calls noAction. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      noAction();
-      return null;
-    }
+  protected final Runnable1<WindowEvent> NO = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { noAction(); }
   };
 
  
@@ -263,7 +253,7 @@ public class DrJavaSurveyPopup extends JDialog {
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, NO);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, NO);
     }
     else {
       _mainFrame.removeModalWindowAdapter(this);

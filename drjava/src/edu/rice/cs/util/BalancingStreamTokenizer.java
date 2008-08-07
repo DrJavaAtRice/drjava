@@ -47,6 +47,8 @@ import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.ArrayList;
 
+import edu.rice.cs.plt.lambda.Lambda;
+
 /**
  * A tokenizer that splits a stream into string tokens while balancing quoting characters.
  * @author Mathias Ricken
@@ -484,7 +486,7 @@ public class BalancingStreamTokenizer {
         // see if it can be a quote
         String temp;
         temp = findMatch(c, _state.quotes, new Lambda<String,String>() {
-          public String apply(String in) {
+          public String value(String in) {
             // we didn't find a match
             // push the tokens back, all except for the last one
             for(int i=in.length()-1; i>0; --i) {
@@ -569,7 +571,7 @@ public class BalancingStreamTokenizer {
       if (!_wasEscape) {
         // it wasn't a quote, see if it is a keyword
         String temp = findMatch(c, _state.keywords, new Lambda<String,String>() {
-          public String apply(String in) {
+          public String value(String in) {
             // we didn't find a match
             // push the tokens back, all except for the last one
             for(int i=in.length()-1; i>0; --i) {
@@ -610,7 +612,7 @@ public class BalancingStreamTokenizer {
             // System.err.println("But it's not an escape or whitespace");
             // see if a quote might be coming up
             String temp = findMatch(cnext, _state.quotes, new Lambda<String,String>() {
-              public String apply(String in) { 
+              public String value(String in) { 
                 // push the tokens back
                 for(int i=in.length()-1; i>0; --i) {
                   pushToken(in.charAt(i));
@@ -629,7 +631,7 @@ public class BalancingStreamTokenizer {
               // System.err.println("But it's not a quote");
               // it wasn't a quote, see if it could be a keyword
               temp = findMatch(cnext, _state.keywords, new Lambda<String,String>() {
-                public String apply(String in) {
+                public String value(String in) {
                   // push the tokens back
                   for(int i=in.length()-1; i>0; --i) {
                     pushToken(in.charAt(i));
@@ -726,7 +728,7 @@ public class BalancingStreamTokenizer {
       }
       if (buf.toString().equals(match)) { return buf.toString(); }
     }
-    return notFoundLambda.apply(buf.toString());
+    return notFoundLambda.value(buf.toString());
   }
   
   

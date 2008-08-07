@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.StreamRedirectThread;
-import edu.rice.cs.util.Lambda;
+import edu.rice.cs.plt.lambda.Runnable1;
 
 import javax.swing.*;
 //import javax.swing.border.EmptyBorder;
@@ -115,10 +115,10 @@ public class DetachedFrame extends SwingFrame {
   
   /** Lambda to execute when component is being detached. The parameter is the instance of DetachedFrame that
     * may contain the component. */
-  Lambda<Void,DetachedFrame> _detach;
+  Runnable1<DetachedFrame> _detach;
   /** Lambda to execute when component is being re-attached. The parameter is the instance of DetachedFrame that
     * may contain the component. */
-  Lambda<Void,DetachedFrame> _reattach;
+  Runnable1<DetachedFrame> _reattach;
   /** Last frame state. It can be stored and restored. */
   private FrameState _lastState = null;
   /** Main frame. */
@@ -177,7 +177,7 @@ public class DetachedFrame extends SwingFrame {
     * @param detach command to detach the component. The parameter is the instance of DetachedFrame that may contain the component.
     * @param reattach command to re-attach the component. The parameter is the instance of DetachedFrame that may contain the component.
     */
-  public DetachedFrame(String name, MainFrame mf, Lambda<Void,DetachedFrame> detach, Lambda<Void,DetachedFrame> reattach) {
+  public DetachedFrame(String name, MainFrame mf, Runnable1<DetachedFrame> detach, Runnable1<DetachedFrame> reattach) {
     super(name);
     _mainFrame = mf;
     _detach = detach;
@@ -195,7 +195,7 @@ public class DetachedFrame extends SwingFrame {
     * @param b true to display the tabbed pane in this window, false to display it in the MainFrame split pane */
   public void setDisplayInFrame(boolean b) {
     if (b) {
-      _detach.apply(this);
+      _detach.run(this);
       setVisible(true);
       addWindowListener(_wa);
     }
@@ -203,7 +203,7 @@ public class DetachedFrame extends SwingFrame {
       removeWindowListener(_wa);
       setVisible(false);
       getContentPane().removeAll();
-      _reattach.apply(this);
+      _reattach.run(this);
     }
   }
 }

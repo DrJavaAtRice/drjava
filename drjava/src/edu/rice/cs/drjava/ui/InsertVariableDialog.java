@@ -40,6 +40,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.DrJavaProperty;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.swing.SwingFrame;
 
@@ -317,21 +319,9 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   /** Return a pair consisting of the name of the property and the property itself. */
   public edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> getSelected() { return _selected; }
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      return null;
-    }
-  };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      _cancelCommand();
-      return null;
-    }
+  /** Runnable1 that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { _cancelCommand(); }
   };
 
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
@@ -341,7 +331,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     if (vis) {
       updatePanes();
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
     }
     else {
       _mainFrame.removeModalWindowAdapter(this);

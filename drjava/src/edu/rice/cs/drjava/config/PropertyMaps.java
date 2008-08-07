@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
 import java.util.*;
 

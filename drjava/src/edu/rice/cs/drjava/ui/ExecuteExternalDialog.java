@@ -43,6 +43,8 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.BalancingStreamTokenizer;
 import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.ProcessCreator;
@@ -871,7 +873,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -886,7 +888,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       if (name==null) {
         // Always apply and save settings
         _saveSettings();
@@ -1003,7 +1005,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         EventQueue.invokeLater(new Runnable() {
           public void run() {
             EventQueue.invokeLater(new Runnable() { public void run() { ExecuteExternalDialog.this.toFront(); } });
-            _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, NO_OP, CANCEL);
+            _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, LambdaUtil.NO_OP, CANCEL);
 
             edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
             if (selected!=null) {
@@ -1023,19 +1025,9 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     }).start();
   }  
   
-  /** Lambda doing nothing. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> NO_OP 
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) { return null; }
-  };
-  
-  /** Lambda that calls _cancel. */
-  protected final edu.rice.cs.util.Lambda<Void,WindowEvent> CANCEL
-    = new edu.rice.cs.util.Lambda<Void,WindowEvent>() {
-    public Void apply(WindowEvent e) {
-      _cancel();
-      return null;
-    }
+  /** Runnable that calls _cancel. */
+  protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
+    public void run(WindowEvent e) { _cancel(); }
   };
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
@@ -1047,7 +1039,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         throw new edu.rice.cs.util.UnexpectedException(e);
       }
       _mainFrame.hourglassOn();
-      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       _documentListener.changedUpdate(null);
       _workDirDocumentListener.changedUpdate(null);
       toFront();
@@ -1073,7 +1065,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _dirChooser.setSelectedFile(wd);
     _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _dirChooser.showDialog(wd);
-    _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);      
+    _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);      
     if (returnValue == DirectoryChooser.APPROVE_OPTION) {
       File chosen = _dirChooser.getSelectedDirectory();
       if (chosen != null) { pane.setText(chosen.toString()); };
@@ -1093,7 +1085,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _fileChooser.setSelectedFile(wd);
     _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _fileChooser.showOpenDialog(this);
-    _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);      
+    _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);      
     if (returnValue == DirectoryChooser.APPROVE_OPTION) {
       File chosen = _fileChooser.getSelectedFile();
       if (chosen != null) { pane.setText(chosen.toString()); } else { pane.setText(""); }
