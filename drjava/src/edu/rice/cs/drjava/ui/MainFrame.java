@@ -9755,8 +9755,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _editExternalProcessesAction = new AbstractAction("Edit...") {
     public void actionPerformed(ActionEvent ae) { _editExternalDialog.setVisible(true); }
   };
-  
+
   /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
+    * Note that the WindowEvent passed to the toFrontAction runnable may not be the WindowEvent that
+    * caused the window w to be pushed off the front, it may also be the WindowEvent that restores
+    * w as front window after a modal dialog that trumped w was closed.
     * @param w window trying to get the modal window listener
     * @param toFrontAction action to be performed after the window has been moved to the front again
     * @param closeAction action to be performed when the window is closing
@@ -9775,21 +9778,42 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _modalWindowAdapterOwner = w;
       // create a window adapter performs the specified actions after delegating to the modal window adapter
       wa = new WindowAdapter() {
-        public void windowDeactivated(WindowEvent we) {
+        final HashSet<Window> trumpedBy = new HashSet<Window>(); // set of windows that trumped this window in getting to the front
+        final WindowAdapter regainFront = new WindowAdapter() {
+          public void windowClosed(WindowEvent we) {
+            // the window that trumped w was closed, so we're moving w back to the front
+            w.toFront();
+            w.requestFocus();
+            toFrontAction.run(we);
+            // then we remove the window that trumped w from the set of trump windows
+            Window o = we.getOppositeWindow();
+            trumpedBy.remove(o);
+            // and we remove this listener
+            o.removeWindowListener(this);
+          }
+        };
+        public void toFront(WindowEvent we) {
+          Window opposite = we.getOppositeWindow();
+          if (opposite instanceof Dialog) {
+            Dialog d = (Dialog)opposite;
+            if (d.isModal()) {
+              // the other window is a real modal dialog, we'll leave it on top -- the window trumped this window
+              if (!trumpedBy.contains(d)) {
+                // add a listener to move this window back to the front when the opposite window has been closed
+                d.addWindowListener(regainFront);
+                // add trump window to set of windows that have trumped this window
+                trumpedBy.add(d);
+              }
+              return; 
+            }
+          }
           we.getWindow().toFront();
           we.getWindow().requestFocus();
           toFrontAction.run(we);
         }
-        public void windowIconified(WindowEvent we) {
-          we.getWindow().toFront();
-          we.getWindow().requestFocus();
-          toFrontAction.run(we);
-        }
-        public void windowLostFocus(WindowEvent we) {
-          we.getWindow().toFront();
-          we.getWindow().requestFocus();
-          toFrontAction.run(we);
-        }
+        public void windowDeactivated(WindowEvent we) { toFront(we); }
+        public void windowIconified(WindowEvent we) { toFront(we); }
+        public void windowLostFocus(WindowEvent we) { toFront(we); }
         public void windowClosing(WindowEvent we) { closeAction.run(we); }
       };
     }
