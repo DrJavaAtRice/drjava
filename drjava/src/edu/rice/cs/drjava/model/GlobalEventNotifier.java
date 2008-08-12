@@ -196,9 +196,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   //------------------------------ GlobalModel -------------------------------//
   
   /** Called when a file's main method is about to be run. */
-  public void runStarted(OpenDefinitionsDocument doc) {
+  public void prepareForRun(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.runStarted(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.prepareForRun(doc); } }
     finally { _lock.endRead(); }
   }
   

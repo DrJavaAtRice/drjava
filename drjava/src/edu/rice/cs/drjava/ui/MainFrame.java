@@ -8566,7 +8566,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     
-    public void runStarted(final OpenDefinitionsDocument doc) {
+    public void prepareForRun(final OpenDefinitionsDocument doc) {
       // Only change GUI from event-dispatching AbstractDJDocument
       assert EventQueue.isDispatchThread();
       

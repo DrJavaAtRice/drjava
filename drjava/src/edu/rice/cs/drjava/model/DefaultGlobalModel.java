@@ -506,6 +506,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       */
     public void runMain() throws ClassNameNotFoundException, IOException {
       assert EventQueue.isDispatchThread();
+
+      _notifier.prepareForRun(ConcreteOpenDefDoc.this);
       
       // Get the class name for this document, the first top level class in the document.
       final String className = getDocument().getQualifiedClassName();
@@ -534,7 +536,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           new Thread("Running main method") {
             public void run() { _interactionsModel.interpretCurrentInteraction(); }
           }.start();
-          _notifier.runStarted(ConcreteOpenDefDoc.this);
           
           // This used to be called using invokeLater, so that the listener would be removed
           // after the read lock of the notifier had been released, but that was not always

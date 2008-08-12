@@ -724,7 +724,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public void assertRunStartCount(int i) {
-      assertEquals("number of times runStarted fired", i, runStartCount);
+      assertEquals("number of times prepareForRun fired", i, runStartCount);
     }
 
     public void assertInterpreterResettingCount(int i) {
@@ -848,7 +848,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void compileAborted(Exception e) { listenerFail("compileAborted fired unexpectedly"); }
     public void activeCompilerChanged() { listenerFail("activeCompilerChanged fired unexpectedly"); }
 
-    public void runStarted(OpenDefinitionsDocument doc) { listenerFail("runStarted fired unexpectedly"); }
+    public void prepareForRun(OpenDefinitionsDocument doc) { listenerFail("prepareForRun fired unexpectedly"); }
     
     public void interpreterResetting() { listenerFail("interpreterResetting fired unexpectedly"); }
 

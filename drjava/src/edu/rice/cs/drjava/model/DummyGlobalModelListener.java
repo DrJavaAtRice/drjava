@@ -94,7 +94,7 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   public void activeCompilerChanged() { }
 
   /** Called when a file's main method is about to be run. */
-  public void runStarted(OpenDefinitionsDocument doc) { }
+  public void prepareForRun(OpenDefinitionsDocument doc) { }
   
   /** Called when saving a file whose path contains a '#' symbol. */
   public void filePathContainsPound() { }

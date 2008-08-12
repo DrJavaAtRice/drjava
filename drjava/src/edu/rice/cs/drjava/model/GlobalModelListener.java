@@ -97,7 +97,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   public boolean shouldRevertFile(OpenDefinitionsDocument doc);
   
   /** Called when a file's main method is about to be run. */
-  public void runStarted(OpenDefinitionsDocument doc);
+  public void prepareForRun(OpenDefinitionsDocument doc);
   
   /** Called when the console window is reset. */
   public void consoleReset();
