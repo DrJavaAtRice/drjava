@@ -356,6 +356,9 @@ public class DefaultJavadocModel implements JavadocModel {
     else if (linkVersion.equals(OptionConstants.JAVADOC_1_5_TEXT)) {
       return IterUtil.make("-link", config.getSetting(OptionConstants.JAVADOC_1_5_LINK));
     }
+    else if (linkVersion.equals(OptionConstants.JAVADOC_1_6_TEXT)) {
+      return IterUtil.make("-link", config.getSetting(OptionConstants.JAVADOC_1_6_LINK));
+    }
     else {
       // should never happen -- use an enum to guarantee
       return IterUtil.empty();
