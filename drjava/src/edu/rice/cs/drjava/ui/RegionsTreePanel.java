@@ -593,6 +593,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       OpenDefinitionsDocument doc = r.getDocument();  // r must not have bee disposed above
       _docToTreeNode.remove(doc);
       _regTreeModel.removeNodeFromParent(parent);
+      if (parent == _cachedDocNode) _cachedDoc = null;
     }
 //    expandTree();
     _changeState.updateButtons();
@@ -612,6 +613,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _regTreeModel.removeNodeFromParent(node);
     }
     _regTreeModel.removeNodeFromParent(docNode);
+    if (docNode == _cachedDocNode) _cachedDoc = null;
     _regionManager.removeRegions(odd);
     _changeState.updateButtons();
   }
