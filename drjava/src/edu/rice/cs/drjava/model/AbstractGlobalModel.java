@@ -58,6 +58,7 @@ import java.io.StringReader;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
@@ -291,7 +292,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public BrowserHistoryManager getBrowserHistoryManager() { return _browserHistoryManager; }
   
   
-//  /** Completion monitor for loading the files of a project (as OpenDefintionsDocuments). */
+//  /** Completion monitor for loading the files of a project (as OpenDefinitionsDocuments). */
 //  public final CompletionMonitor projectLoading = new CompletionMonitor();
   
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
@@ -1042,33 +1043,28 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     assert EventQueue.isDispatchThread();
     
     final OpenDefinitionsDocument doc = getActiveDocument();
-
+    
     int startSel = Math.min(pos1, pos2);
     int endSel = Math.max(pos1, pos2);
-    try {
-      final RegionManager<OrderedDocumentRegion> rm = getBookmarkManager();
-      
-      // Check for match against existing bookmark and remove if present; find rightmost region containing selection
-      OrderedDocumentRegion match = rm.getRegionContaining(doc, startSel, endSel);
-      if (match != null) {
-        rm.removeRegion(match);
-        return;
-      }
-      
-      // No match against existing bookmark
-      if (startSel == endSel) {  // offset only; no selection
-        endSel = doc._getLineEndPos(startSel);
-        startSel = doc._getLineStartPos(startSel);
-      }
-      final Position startPos = doc.createPosition(startSel);
-      final Position endPos = doc.createPosition(endSel);
-      
-      OrderedDocumentRegion r = new DocumentRegion(doc, startPos, endPos);
-//      Utilities.show("Adding bookmark " + r);
-      rm.addRegion(r);
+//    try {
+    RegionManager<OrderedDocumentRegion> bm = _bookmarkManager;
+    if (startSel == endSel) {  // offset only; bookmark the entire line
+      endSel = doc._getLineEndPos(startSel);
+      startSel = doc._getLineStartPos(startSel);
     }
-//    catch (FileMovedException fme) { throw new UnexpectedException(fme); }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    
+    Collection<OrderedDocumentRegion> conflictingRegions = bm.getRegionsOverlapping(doc, startSel, endSel);
+    
+    if (conflictingRegions.size() > 0) {
+      for (OrderedDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
+    }
+    else {
+
+      OrderedDocumentRegion newR = new DocumentRegion(doc, startSel, endSel);
+      bm.addRegion(newR);
+    }
+//    }
+//    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
   
   
@@ -1552,7 +1548,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     catch(DebugException de) { /* ignore, just don't store watches */ }
     
     // add bookmarks
-    builder.setBookmarks(getBookmarkManager().getRegions());
+    builder.setBookmarks(_bookmarkManager.getRegions());
     
     builder.setAutoRefreshStatus(_state.getAutoRefreshStatus());
     
@@ -1657,9 +1653,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final boolean autoRefresh = ir.getAutoRefreshStatus();
     
     // clear browser, breakpoint, and bookmark histories
-    getBrowserHistoryManager().clearBrowserRegions();
-    getBreakpointManager().clearRegions();
-    getBookmarkManager().clearRegions();
+
+    if (! _browserHistoryManager.getRegions().isEmpty()) _browserHistoryManager.clearBrowserRegions();
+    if (! _breakpointManager.getDocuments().isEmpty()) _breakpointManager.clearRegions();
+    if (! _bookmarkManager.getDocuments().isEmpty()) _bookmarkManager.clearRegions();
     
     final String projfilepath = projectRoot.getCanonicalPath();
     
@@ -1781,14 +1778,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // set bookmarks
     
     try {
-      for (final Region bm: ir.getBookmarks()) {
+      for (Region bm: ir.getBookmarks()) {
         File f = bm.getFile();
         if (! modifiedFiles.contains(f)) {
-          final OpenDefinitionsDocument odd = getDocumentForFile(f);
-          if (getOpenDefinitionsDocuments().contains(odd)) { // bookmark is not stale
-            final Position startPos = odd.createPosition(bm.getStartOffset());
-            final Position endPos = odd.createPosition(bm.getEndOffset());
-            try { getBookmarkManager().addRegion(new DocumentRegion(odd, startPos, endPos)); }
+          OpenDefinitionsDocument odd = getDocumentForFile(f);
+          int start = bm.getStartOffset();
+          int end = bm.getEndOffset();
+          if (getOpenDefinitionsDocuments().contains(odd) && 
+              _bookmarkManager.getRegionsOverlapping(odd, start, end).size() == 0) { // bookmark is valid
+            Position startPos = odd.createPosition(start);
+            Position endPos = odd.createPosition(end);
+            try { _bookmarkManager.addRegion(new DocumentRegion(odd, startPos, endPos)); }
             catch(Exception e) { DrJavaErrorHandler.record(e); }  // should never happen
           }
           // should remove stale bookmark
@@ -2964,7 +2964,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             /* remove regions for this document */
             removeFromDebugger();
             getBreakpointManager().removeRegions(this);
-            getBookmarkManager().removeRegions(this);
+            _bookmarkManager.removeRegions(this);
             for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
             clearBrowserRegions();
           }
@@ -3236,7 +3236,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       //need to remove old, possibly invalid breakpoints
       removeFromDebugger();
       getBreakpointManager().removeRegions(this);
-      getBookmarkManager().removeRegions(this);
+      _bookmarkManager.removeRegions(this);
       for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
       doc.clearBrowserRegions();
       

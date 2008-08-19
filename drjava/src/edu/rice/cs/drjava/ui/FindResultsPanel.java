@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
@@ -262,7 +263,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _docToTreeNode.clear();
       _regionToTreeNode.clear();
       _regTreeModel.nodeStructureChanged(_rootNode);
-      _requestFocusInWindow();
+//      _requestFocusInWindow();
 //      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
                            _regionManager, this);
@@ -272,17 +273,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   /** Turn the selected regions into bookmarks. */
-  private void _bookmark() {
+  private void _bookmark() {  // TODO: consolidate with _toggleBookmark in MainFrame/AbstractGlobalModel?
     updateButtons();
-//    _frame._bookmarksPanel.startChanging();
-    for (final MovingDocumentRegion r: getSelectedRegions()) {
-      if (! _model.getBookmarkManager().contains(r)) {
-        OrderedDocumentRegion newR = 
-          new DocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
-        _model.getBookmarkManager().addRegion(newR);
-      }
+    RegionManager<OrderedDocumentRegion> bm = _model.getBookmarkManager();
+    for (MovingDocumentRegion r: getSelectedRegions()) {
+      Collection<OrderedDocumentRegion> conflictingRegions = 
+        bm.getRegionsOverlapping(r.getDocument(), r.getStartOffset(), r.getEndOffset());
+      for (OrderedDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
+      OrderedDocumentRegion newR = new DocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
+      bm.addRegion(newR);
     }
-//    _frame._bookmarksPanel.finishChanging();
+    _frame.createBookmarks();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
@@ -294,26 +295,27 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     int[] rows = _regTree.getSelectionRows();
 //    System.err.println("_remove() called with rows " + Arrays.toString(rows));
     int len = rows.length;
-    int row = (len > 0) ? rows[len - 1] : 0;
+    int row = (len > 0) ? rows[0] : 0;
 //    _regTree.setSelectionRow(row);
     _frame.removeCurrentLocationHighlight();
 //    startChanging();
     for (MovingDocumentRegion r: getSelectedRegions()) {
       _regionManager.removeRegion(r); // removes r from region manager and the panel node for r from the tree model
     }
+    int rowCount = _regTree.getRowCount();
+    if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
     _regTree.setSelectionRow(row);
     _requestFocusInWindow();
     _regTree.scrollRowToVisible(row);
-
   }
   
-  /** Remove a region from this panel.  If this panel is emptied, remove this.  Must be executed in event thread.
-    * @param r the region
-    */
-  public void removeRegion(final MovingDocumentRegion r) {
-    super.removeRegion(r);
-    if (_regionManager.getDocuments().isEmpty()) _closePanel();
-  }
+//  /** Remove a region from this panel.  If this panel is emptied, remove this.  Must be executed in event thread.
+//    * @param r the region
+//    */
+//  public void removeRegion(final MovingDocumentRegion r) {
+//    super.removeRegion(r);
+//    if (_regionManager.getDocuments().isEmpty()) _closePanel();
+//  }
   
   /** Update button state and text. */
   protected void _updateButtons() {
@@ -347,16 +349,16 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   /** Destroys this panel and its contents. This is a much more comprehensive command than _closePanel (which is the
-    * _close operation inherited from RegionsTreePanel.  The latter merely removes the panel from the TabbedPane but 
+    * _close operation inherited from RegionsTreePanel).  The latter merely removes the panel from the TabbedPane but 
     * does not affect its contents, so panels like Find/Replace can be regenerated with their contents preserved.
     */
   protected void _close() {
+//    System.err.println("FindResultsPanel.close() called on " + this);
     _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
     _frame.removeCurrentLocationHighlight();
     freeResources();
+    super._close();  // Is this redundant?  Shouldn't clearRegions close this panel (when it clears the last region)
   }
-  
-  private void _closePanel() { super._close(); }
   
   /** Free the resources; this can be used if the panel was never actually displayed. */
   public void freeResources() {

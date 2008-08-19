@@ -59,7 +59,9 @@ import com.sun.jdi.request.*;
 
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
-/** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest. */
+/** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest.  See the
+  * WARNING below about hashing on this type or its subtypes.
+  */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
   
   private volatile Position _startPos;
@@ -162,7 +164,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
   }
   
-   /** Totally orders regions lexicographically based on (_doc, startOffset, endOffset). This method is typically applied
+  /** Totally orders regions lexicographically based on (_doc, endOffset, startOffset). This method is typically applied
     * to regions within the same document. 
     */
   public int compareTo(OrderedDocumentRegion r) {
@@ -171,18 +173,21 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
     
     assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
-    int start1 = getStartOffset();
-    int start2 = r.getStartOffset();
-    int startDiff = start1 - start2;
-    if (startDiff != 0) return startDiff;
-    
     int end1 = getEndOffset();
     int end2 = r.getEndOffset();
-    return end1 - end2;
+    int endDiff = end1 - end2;
+    if (endDiff != 0) return endDiff;
+    
+    int start1 = getStartOffset();
+    int start2 = r.getStartOffset();
+    return start1 - start2;
   }
   
-  /** This hash function is consistent with equality. */
-  public int hashCode() { return hash(_doc, getStartOffset(), getEndOffset()); }
+  /* WARNING: overriding hashCode to "agree" with equals is disastrous because Breakpoint offsets change!  Hashcode must
+   * be inconsisent with equals to produce an invariant value.  Hence, you must use IdentityHashMap instead of HashMap
+   * or Hashtable. 
+   */
+//  public int hashCode() { return hash(_doc, getStartOffset(), getEndOffset()); }
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled) {

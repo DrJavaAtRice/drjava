@@ -95,68 +95,75 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertNull(rm.getRegionAt(_doc, 7));
     assertNull(rm.getRegionAt(_doc, 2));
     assertNull(rm.getRegionAt(_doc, 8));
-    assertNull(rm.getRegionContaining(_doc, 5, 5));
-    assertNull(rm.getRegionContaining(_doc, 4, 6));
-    assertNull(rm.getRegionContaining(_doc, 3, 7));
-    assertNull(rm.getRegionContaining(_doc, 2, 8));
-    assertNull(rm.getRegionContaining(_doc, 2, 5));
-    assertNull(rm.getRegionContaining(_doc, 5, 8));
+    
+    assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 5, 5).size() == 0);
+    assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 4, 6).size() == 0);
+    assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 3, 7).size() == 0);
+    assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 2, 8).size() == 0);
+    assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 2, 5).size() == 0);
+    assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 5, 8).size() == 0);
     
     DocumentRegion r1 = new DocumentRegion(_doc, createPosition(_doc, 3), createPosition(_doc, 7));
     rm.addRegion(r1);
-    assertTrue(r1==rm.getRegionAt(_doc, 5));
-    assertTrue(r1==rm.getRegionAt(_doc, 3));
-    assertTrue(r1==rm.getRegionAt(_doc, 7));
+    assertTrue("Region found", r1 == rm.getRegionAt(_doc, 5));
+    assertTrue("Region found", r1 == rm.getRegionAt(_doc, 3));
+    assertTrue("Region found", r1 == rm.getRegionAt(_doc, 4));
+    assertTrue("Region found", r1 == rm.getRegionAt(_doc, 6));
+    
+    assertNull(rm.getRegionAt(_doc, 7));
     assertNull(rm.getRegionAt(_doc, 2));
     assertNull(rm.getRegionAt(_doc, 8));
-    assertTrue(r1==rm.getRegionContaining(_doc, 5, 5));
-    assertTrue(r1==rm.getRegionContaining(_doc, 4, 6));
-    assertTrue(r1==rm.getRegionContaining(_doc, 3, 7));
-    assertNull(rm.getRegionContaining(_doc, 2, 8));
-    assertNull(rm.getRegionContaining(_doc, 2, 5));
-    assertNull(rm.getRegionContaining(_doc, 5, 8));
+    
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 5, 6).contains(r1));
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 4, 6).contains(r1));
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 3, 7).contains(r1));
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 2, 3).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 5, 5).size() == 0);
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 5, 8).contains(r1));
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 15, 18).size() == 0);
     
     assertNull(rm.getRegionAt(_doc, 15));
     assertNull(rm.getRegionAt(_doc, 13));
     assertNull(rm.getRegionAt(_doc, 17));
     assertNull(rm.getRegionAt(_doc, 12));
     assertNull(rm.getRegionAt(_doc, 18));
-    assertNull(rm.getRegionContaining(_doc, 15, 15));
-    assertNull(rm.getRegionContaining(_doc, 14, 16));
-    assertNull(rm.getRegionContaining(_doc, 13, 17));
-    assertNull(rm.getRegionContaining(_doc, 12, 18));
-    assertNull(rm.getRegionContaining(_doc, 12, 15));
-    assertNull(rm.getRegionContaining(_doc, 15, 18));
+
     
     DocumentRegion r2 = new DocumentRegion(_doc, createPosition(_doc, 13), createPosition(_doc, 17));
     rm.addRegion(r2);
-    assertTrue(r2==rm.getRegionAt(_doc, 15));
-    assertTrue(r2==rm.getRegionAt(_doc, 13));
-    assertTrue(r2==rm.getRegionAt(_doc, 17));
+    assertTrue(r2 == rm.getRegionAt(_doc, 15));
+    assertTrue(r2 == rm.getRegionAt(_doc, 13));
+    assertNull(rm.getRegionAt(_doc, 17));
     assertNull(rm.getRegionAt(_doc, 12));
     assertNull(rm.getRegionAt(_doc, 18));
-    assertTrue(r2==rm.getRegionContaining(_doc, 15, 15));
-    assertTrue(r2==rm.getRegionContaining(_doc, 14, 16));
-    assertTrue(r2==rm.getRegionContaining(_doc, 13, 17));
-    assertNull(rm.getRegionContaining(_doc, 12, 18));
-    assertNull(rm.getRegionContaining(_doc, 12, 15));
-    assertNull(rm.getRegionContaining(_doc, 15, 18)); 
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 15, 15).size() == 0);
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 0, 14).contains(r2));
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 14, 16).contains(r2));
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 10, 17).contains(r2));
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 10, 20).contains(r2));
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 16, 17).contains(r2));
+
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 17, 18).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 10, 13).size() == 0); 
     
-    // r2 and r3 are the same region, so the region will be reused
-    // and we get r2 back
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 6, 14).contains(r1)); 
+    assertTrue("Region found", rm.getRegionsOverlapping(_doc, 6, 14).contains(r2));
+    
+//    // r2 and r3 are the same region, so the region will be reused
+//    // and we get r2 back
     DocumentRegion r3 = new DocumentRegion(_doc, createPosition(_doc, 13), createPosition(_doc, 17));
-    rm.addRegion(r3);
-    assertTrue(r2==rm.getRegionAt(_doc, 15));
-    assertTrue(r2==rm.getRegionAt(_doc, 13));
-    assertTrue(r2==rm.getRegionAt(_doc, 17));
-    assertNull(rm.getRegionAt(_doc, 12));
-    assertNull(rm.getRegionAt(_doc, 18));
-    assertTrue(r2==rm.getRegionContaining(_doc, 15, 15));
-    assertTrue(r2==rm.getRegionContaining(_doc, 14, 16));
-    assertTrue(r2==rm.getRegionContaining(_doc, 13, 17));
-    assertNull(rm.getRegionContaining(_doc, 12, 18));
-    assertNull(rm.getRegionContaining(_doc, 12, 15));
-    assertNull(rm.getRegionContaining(_doc, 15, 18)); 
+//    rm.addRegion(r3);
+//    assertTrue(r2==rm.getRegionAt(_doc, 15));
+//    assertTrue(r2==rm.getRegionAt(_doc, 13));
+//    assertTrue(r2==rm.getRegionAt(_doc, 17));
+//    assertNull(rm.getRegionAt(_doc, 12));
+//    assertNull(rm.getRegionAt(_doc, 18));
+//    assertTrue(r2==rm.getRegionsOverlapping(_doc, 15, 15));
+//    assertTrue(r2==rm.getRegionsOverlapping(_doc, 14, 16));
+//    assertTrue(r2==rm.getRegionsOverlapping(_doc, 13, 17));
+//    assertNull(rm.getRegionsOverlapping(_doc, 12, 18));
+//    assertNull(rm.getRegionsOverlapping(_doc, 12, 15));
+//    assertNull(rm.getRegionsOverlapping(_doc, 15, 18)); 
     
     // removal uses equality, not identity, so we can remove r3, and r2 will be gone
     rm.removeRegion(r3);
@@ -165,24 +172,12 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertNull(rm.getRegionAt(_doc, 17));
     assertNull(rm.getRegionAt(_doc, 12));
     assertNull(rm.getRegionAt(_doc, 18));
-    assertNull(rm.getRegionContaining(_doc, 15, 15));
-    assertNull(rm.getRegionContaining(_doc, 14, 16));
-    assertNull(rm.getRegionContaining(_doc, 13, 17));
-    assertNull(rm.getRegionContaining(_doc, 12, 18));
-    assertNull(rm.getRegionContaining(_doc, 12, 15));
-    assertNull(rm.getRegionContaining(_doc, 15, 18)); 
-
-    assertNull(rm.getRegionAt(_doc, 15));
-    assertNull(rm.getRegionAt(_doc, 13));
-    assertNull(rm.getRegionAt(_doc, 17));
-    assertNull(rm.getRegionAt(_doc, 12));
-    assertNull(rm.getRegionAt(_doc, 18));
-    assertNull(rm.getRegionContaining(_doc, 15, 15));
-    assertNull(rm.getRegionContaining(_doc, 14, 16));
-    assertNull(rm.getRegionContaining(_doc, 13, 17));
-    assertNull(rm.getRegionContaining(_doc, 12, 18));
-    assertNull(rm.getRegionContaining(_doc, 12, 15));
-    assertNull(rm.getRegionContaining(_doc, 15, 18));
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 13, 15).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 14, 16).size() == 0);
+//    assertNull(rm.getRegionsOverlapping(_doc, 13, 17));
+//    assertNull(rm.getRegionsOverlapping(_doc, 12, 18));
+//    assertNull(rm.getRegionsOverlapping(_doc, 12, 15));
+//    assertNull(rm.getRegionsOverlapping(_doc, 15, 18)); 
     
     rm.removeRegion(r1);
     assertNull(rm.getRegionAt(_doc, 5));
@@ -190,11 +185,11 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertNull(rm.getRegionAt(_doc, 7));
     assertNull(rm.getRegionAt(_doc, 2));
     assertNull(rm.getRegionAt(_doc, 8));
-    assertNull(rm.getRegionContaining(_doc, 5, 5));
-    assertNull(rm.getRegionContaining(_doc, 4, 6));
-    assertNull(rm.getRegionContaining(_doc, 3, 7));
-    assertNull(rm.getRegionContaining(_doc, 2, 8));
-    assertNull(rm.getRegionContaining(_doc, 2, 5));
-    assertNull(rm.getRegionContaining(_doc, 5, 8));
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 5, 5).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 4, 6).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 3, 7).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 2, 8).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 2, 5).size() == 0);
+    assertTrue("No region found", rm.getRegionsOverlapping(_doc, 5, 8).size() == 0);
   }
 }

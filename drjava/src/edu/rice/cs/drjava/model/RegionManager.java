@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.plt.lambda.Lambda;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -51,11 +52,12 @@ import javax.swing.tree.MutableTreeNode;
   */
 public interface RegionManager<R extends IDocumentRegion> {
   
-  /** Returns the rightmost region starting on the same line containing the specified offset
-   *  @param odd the document
-   *  @param offset the offset in the document
-   *  @return the rightmost DocumentRegion containing the given offset, or null if it does not exist.
-   */
+  /** Returns the unique region [start,end), if any, containing the specified offset.  Assumes that document regions
+    * are disjoint.
+    * @param odd the document
+    * @param offset the offset in the document
+    * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
+    */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset);
   
   /** Returns the rightmost region starting on the same line containing the specified selection
@@ -63,7 +65,7 @@ public interface RegionManager<R extends IDocumentRegion> {
    *  @param offset the offset in the document
    *  @return the rightmost DocumentRegion containing the given selection, or null if it does not exist.
    */
-  public R getRegionContaining(OpenDefinitionsDocument odd, int startOffset, int endOffset);
+  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset);
 
   /** Tests if specified region r is contained in this manager.
       * @param r  The region
@@ -80,6 +82,11 @@ public interface RegionManager<R extends IDocumentRegion> {
    *  @param region the DocumentRegion to be removed.
    */
   public void removeRegion(R region);
+  
+  /** Remove the given DocumentRegions from the manager.
+   *  @param regions the DocumentRegions to be removed.
+   */
+  public void removeRegions(Collection<R> regions);
   
   /** Remove the given OpenDefinitionsDocument and all of its regions from the manager.
    *  @param the OpenDefinitionsDocument to be removed.

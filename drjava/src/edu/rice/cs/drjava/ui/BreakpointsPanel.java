@@ -77,6 +77,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     */
   public BreakpointsPanel(MainFrame frame, RegionManager<Breakpoint> breakpointManager) {
     super(frame, "Breakpoints", breakpointManager);
+    // TODO: consolidate the following listener with the MainFrame Breakpoint listener
     _regionManager.addListener(new RegionManagerListener<Breakpoint>() {
       /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
         *  Must be executed in event thread.

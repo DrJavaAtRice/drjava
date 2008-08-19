@@ -2453,7 +2453,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes(); 
       showTab(_bookmarksPanel, true);
-      _bookmarksPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_bookmarksPanel);
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _bookmarksPanel has been selected
       EventQueue.invokeLater(new Runnable() { public void run() { _bookmarksPanel.requestFocusInWindow(); } });
@@ -2482,6 +2481,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     addToBrowserHistory();
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
+    showTab(_bookmarksPanel, true);
   }
   
   /** Add the current location to the browser history. */
@@ -2527,6 +2527,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
+//        System.err.println("MainFrame$highlightListener.regionRemoved(" + r + ") called");
         panel.removeRegion(r);  // Removes panel if it becomes empty
 //        Utilities.show("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
@@ -2570,7 +2571,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
     showTab(panel, true);
-    panel.setVisible(true);
+//    panel.setVisible(true);
     _tabbedPane.setSelectedComponent(panel);
     // Use EvenQueue.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
     EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
@@ -4603,6 +4604,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Opens all the files in the directory returned by the FolderSelector.
     * @param chooser the selector that returns the files to open
+    * TODO: change the dialog title to give the current path rather than "..."
     */
   public void openFolder(DirectoryChooser chooser) {
     String type = "'." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
@@ -9094,6 +9096,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _currentDefPane.requestFocusInWindow();
   }
   
+  /** Shows the bookmark panel in the tabbed pane. */
+  public void createBookmarks() { _createTab(_bookmarksPanel); }
+  
+  private void _createTab(TabbedPanel panel) {
+    int numVisible = 0;
+    for (TabbedPanel t: _tabs) {
+      if (t == panel) {
+        Icon icon = (panel instanceof FindResultsPanel) ? FIND_ICON : null;
+        _tabbedPane.insertTab(panel.getName(), icon, panel, null, numVisible + 2);  // interactions, console always shown
+        panel.setVisible(true);
+        panel.setDisplayed(true);
+        panel.repaint();
+        break;
+      }
+      else if (isDisplayed(t)) numVisible++;
+    }
+  }
+  
   public static final Icon FIND_ICON = getIcon("Find16.gif");
   /** Shows the components passed in the appropriate place in the tabbedPane depending on the position of
     * the component in the _tabs list.  Only runs in the event thread.
@@ -9106,28 +9126,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     assert EventQueue.isDispatchThread();
     try {
       
-      if (c instanceof TabbedPanel) {
-        int numVisible = 0;
-        for (TabbedPanel tp: _tabs) {
-          if (tp == c) {
-            Icon icon = (c instanceof FindResultsPanel) ? FIND_ICON : null;
-            _tabbedPane.insertTab(tp.getName(), icon, tp, null, numVisible + 2);  // interactions, console always shown
-            tp.setVisible(true);
-            tp.setDisplayed(true);
-            tp.repaint();
-            break;
-          }
-          else if (isDisplayed(tp)) numVisible++;
-        }
-      };
-      
+      if (c instanceof TabbedPanel) _createTab((TabbedPanel) c);
       _tabbedPane.setSelectedComponent(c);
       c.requestFocusInWindow();
       
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
     }
     finally {
-      if (showDetachedWindow && (_tabbedPanesFrame!=null) && (_tabbedPanesFrame.isVisible())) { 
+      if (showDetachedWindow && (_tabbedPanesFrame != null) && (_tabbedPanesFrame.isVisible())) { 
         _tabbedPanesFrame.toFront(); 
       }
     }

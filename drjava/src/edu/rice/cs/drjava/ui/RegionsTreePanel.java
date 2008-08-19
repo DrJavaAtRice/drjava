@@ -91,12 +91,12 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /* _ */
   
-  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
-    * the list of regions for its document. If _cachedDoc is null, the other cached values are invalid. */
-  protected OpenDefinitionsDocument _cachedDoc = null;
-  protected DefaultMutableTreeNode _cachedDocNode = null;
-  protected int _cachedRegionIndex = 0;
-  protected int _cachedStartOffset = 0;
+//  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
+//    * the list of regions for its document. If _cachedDoc is null, the other cached values are invalid. */
+//  protected OpenDefinitionsDocument _cachedDoc = null;
+//  protected DefaultMutableTreeNode _cachedDocNode = null;
+//  protected int _cachedRegionIndex = 0;
+//  protected int _cachedStartOffset = 0;
   
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
@@ -164,6 +164,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Close the panel. */
   protected void _close() {
+//    System.err.println("RegionsTreePanel.close() called");
     super._close();
     updateButtons();
   }
@@ -450,6 +451,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Gets the currently selected regions in the region tree, or an empty array if no regions are selected.
     * @return list of selected regions in the tree
+    * TODO: change this code to use getMinSelectionRow and getMaxSelectionRow
     */
   protected ArrayList<R> getSelectedRegions() {
     ArrayList<R> regs = new ArrayList<R>();
@@ -482,8 +484,8 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     DefaultMutableTreeNode docNode;
     OpenDefinitionsDocument doc = r.getDocument();
     
-    if (doc == _cachedDoc) docNode = _cachedDocNode;
-    else {
+//    if (doc == _cachedDoc) docNode = _cachedDocNode;
+//    else {
       docNode = _docToTreeNode.get(doc);
       if (docNode == null) {
         // No matching document node was found, so create one
@@ -491,19 +493,19 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
         _regTreeModel.insertNodeInto(docNode, _rootNode, _rootNode.getChildCount());
         // Create link from doc to docNode
         _docToTreeNode.put(doc, docNode);
-        _cachedDoc = doc;
-        _cachedDocNode = docNode;
-        _cachedStartOffset = -1;  // a sentinel value guaranteed to be less than r.getStartOffset()
-        _cachedRegionIndex = -1;  // The next region in this document will have index 0
+//        _cachedDoc = doc;
+//        _cachedDocNode = docNode;
+//        _cachedStartOffset = -1;  // a sentinel value guaranteed to be less than r.getStartOffset()
+//        _cachedRegionIndex = -1;  // The next region in this document will have index 0
       }
-    }
+//    }
     
-    if (doc == _cachedDoc & r.getStartOffset() >= _cachedStartOffset) { // insert new region after previous insert
-      _cachedRegionIndex++;
-      _cachedStartOffset = r.getStartOffset();
-      insertNewRegionNode(r, docNode, _cachedRegionIndex);
-    }
-    else {
+//    if (doc == _cachedDoc & r.getStartOffset() >= _cachedStartOffset) { // insert new region after previous insert
+//      _cachedRegionIndex++;
+//      _cachedStartOffset = r.getStartOffset();
+//      insertNewRegionNode(r, docNode, _cachedRegionIndex);
+//    }
+//    else {
       @SuppressWarnings("unchecked")
       Enumeration<DefaultMutableTreeNode> regionNodes = (Enumeration<DefaultMutableTreeNode>) docNode.children();
       
@@ -514,10 +516,10 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
         if (! regionNodes.hasMoreElements()) { // exhausted all elements; insert new region node at end
 //          System.err.println("inserting " + r + " at end, unaided by caching");
           insertNewRegionNode(r, docNode, index);
-          _cachedDoc = doc;
-          _cachedDocNode = docNode;
-          _cachedRegionIndex = index;
-          _cachedStartOffset = startOffset;
+//          _cachedDoc = doc;
+//          _cachedDocNode = docNode;
+//          _cachedRegionIndex = index;
+//          _cachedStartOffset = startOffset;
           break;
         }
         DefaultMutableTreeNode node = regionNodes.nextElement();
@@ -543,11 +545,11 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
 //        else 
         if (nodeOffset >= startOffset) {
           insertNewRegionNode(r, docNode, index);
-          _cachedDoc = null;  // insertion was not at the end of the region list for doc
+//          _cachedDoc = null;  // insertion was not at the end of the region list for doc
           break;
         }
       }
-    }
+//    }
     _changeState.updateButtons();
   }
   catch(Exception e) { DrJavaErrorHandler.record(e); throw new UnexpectedException(e); }
@@ -567,15 +569,17 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     _changeState.setLastAdded(newRegionNode);
   }       
   
+  /** Expands all nodes in a two-level tree. */
   public void expandTree() {
     int ct = _regTree.getRowCount();
-    for (int i = 0; i < ct; i++) _regTree.expandRow(i);
+    for (int i = ct - 1; i >= 0; i--) _regTree.expandRow(i);
   }
     
   /** Remove a region from this panel. Must be executed in event thread.
     * @param r the region
     */
   public void removeRegion(final R r) {
+//    System.err.println("RegionsTreePanel.removeRegion(" + r + ") called");
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
@@ -586,17 +590,19 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
 //    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode) regionNode.getParent();  // TreeNode for document
     _regTreeModel.removeNodeFromParent(regionNode);
-    
+//    System.err.println("panel region count in " + r.getDocument() + " = " + parent.getChildCount());
     // check for empty subtree for this document (rooted at parent)
     if (parent.getChildCount() == 0) {
       // this document has no more regions, remove it
-      OpenDefinitionsDocument doc = r.getDocument();  // r must not have bee disposed above
+      OpenDefinitionsDocument doc = r.getDocument();  // r must not have been disposed above
       _docToTreeNode.remove(doc);
       _regTreeModel.removeNodeFromParent(parent);
-      if (parent == _cachedDocNode) _cachedDoc = null;
+//      if (parent == _cachedDocNode) _cachedDoc = null;
     }
 //    expandTree();
     _changeState.updateButtons();
+//    System.err.println("_regionManager.getDocuments() = " + _regionManager.getDocuments());
+    if (_regionManager.getDocuments().isEmpty()) _close(); // _regTreeModel.getChildCount(_regTreeModel.getRoot()) == 0
   }
   
   /** Remove all regions for the given document from the tree. Must be executed in event thread. */
@@ -613,7 +619,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _regTreeModel.removeNodeFromParent(node);
     }
     _regTreeModel.removeNodeFromParent(docNode);
-    if (docNode == _cachedDocNode) _cachedDoc = null;
+//    if (docNode == _cachedDocNode) _cachedDoc = null;
     _regionManager.removeRegions(odd);
     _changeState.updateButtons();
   }

@@ -550,32 +550,34 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(12,8); } });
     bms = _model.getBookmarkManager().getRegions();
     // Note: bms is sorted by increasing (startOffset, endOffset)
-    assertEquals("Should be 2 bookmarks", 2, bms.size());
+    assertEquals("Should be 2 bookmarks", 2, bms.size());  // the bookmarks are disjoint
     assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
     assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
     assertEquals("Start offset should be 8", 8, bms.get(1).getStartOffset());
     assertEquals("End offset should be 12", 12, bms.get(1).getEndOffset());
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(5,10); } });
     bms = _model.getBookmarkManager().getRegions();
-    assertEquals("Should be 3 bookmarks", 3, bms.size());
-    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
-    assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
-    assertEquals("Start offset should be 5", 5, bms.get(1).getStartOffset());
-    assertEquals("End offset should be 10", 10, bms.get(1).getEndOffset());
-    assertEquals("Start offset should be 8", 8, bms.get(2).getStartOffset());
-    assertEquals("End offset should be 12", 12, bms.get(2).getEndOffset());
+    assertEquals("Should be 0 bookmarks", 0, bms.size());  // the preceding two bookmarks overlapped and were deleted
+//    assertEquals("Start offset should be 5", 5, bms.get(0).getStartOffset());
+//    assertEquals("End offset should be 10", 10, bms.get(0).getEndOffset());
+//    assertEquals("Start offset should be 5", 5, bms.get(1).getStartOffset());
+//    assertEquals("End offset should be 10", 10, bms.get(1).getEndOffset());
+//    assertEquals("Start offset should be 8", 8, bms.get(2).getStartOffset());
+//    assertEquals("End offset should be 12", 12, bms.get(2).getEndOffset());
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(8,12); } });
     bms = _model.getBookmarkManager().getRegions();
-    assertEquals("Should be 2 bookmarks", 2, bms.size());
-    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
-    assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
-    assertEquals("Start offset should be 5", 5, bms.get(1).getStartOffset());
-    assertEquals("End offset should be 10", 10, bms.get(1).getEndOffset());
+    assertEquals("Should be 1 bookmarks", 1, bms.size());  // no preceding bookmark
+    assertEquals("Start offset should be 8", 8, bms.get(0).getStartOffset());
+    assertEquals("End offset should be 12", 12, bms.get(0).getEndOffset());
+//    assertEquals("Start offset should be 5", 5, bms.get(1).getStartOffset());
+//    assertEquals("End offset should be 10", 10, bms.get(1).getEndOffset());
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(3,6); } });
     bms = _model.getBookmarkManager().getRegions();
-    assertEquals("Should be 1 bookmarks", 1, bms.size());
-    assertEquals("Start offset should be 5", 5, bms.get(0).getStartOffset());
-    assertEquals("End offset should be 10", 10, bms.get(0).getEndOffset());
+    assertEquals("Should be 2 bookmarks", 2, bms.size());  // no overlap
+    assertEquals("Start offset should be 3", 3, bms.get(0).getStartOffset());
+    assertEquals("End offset should be 6", 6, bms.get(0).getEndOffset());
+    assertEquals("Start offset should be 8", 8, bms.get(1).getStartOffset());
+    assertEquals("End offset should be 12", 12, bms.get(1).getEndOffset());
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.toggleBookmark(10,5); } });
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 0 bookmarks", 0, bms.size());

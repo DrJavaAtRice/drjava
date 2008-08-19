@@ -44,6 +44,7 @@ import javax.swing.text.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -83,7 +84,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
   private ThreadGroup _updaterThreadGroup = new ThreadGroup("Light-weight parsing updater thread group") {
     public void uncaughtException(Thread t, Throwable e) {
       _log.log("Uncaught exception in updater; disabled for rest of session", e);
-      new edu.rice.cs.drjava.ui.DrJavaErrorHandler().handle(e);
+      new DrJavaErrorHandler().handle(e);
     }
   };
   

@@ -96,10 +96,11 @@ public abstract class TabbedPanel extends JPanel
 
   /** Visibly closes the panel and removes it from the frame. */
   protected void _close() {
-     _displayed = false;
-     _frame.removeTab(this);
+//    System.err.println("TabbedPanel._close() called");
+    _displayed = false;
+    _frame.removeTab(this);
   }
-   
+  
   public void addCloseListener(ActionListener l) { _closeButton.addActionListener(l); }
 
   public void setVisible(boolean b) {

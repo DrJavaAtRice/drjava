@@ -98,7 +98,7 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
   }
   
-   /** Totally orders regions lexicographically based on (_doc, startOffset, endOffset). This method is typically applied
+  /** Totally orders regions lexicographically based on (_doc, endOffset, startOffset). This method is typically applied
     * to regions within the same document. 
     */
   public int compareTo(OrderedDocumentRegion r) {
@@ -107,14 +107,14 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
     
     assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
-    int start1 = getStartOffset();
-    int start2 = r.getStartOffset();
-    int startDiff = start1 - start2;
-    if (startDiff != 0) return startDiff;
-    
     int end1 = getEndOffset();
     int end2 = r.getEndOffset();
-    return end1 - end2;
+    int endDiff = end1 - end2;
+    if (endDiff != 0) return endDiff;
+    
+    int start1 = getStartOffset();
+    int start2 = r.getStartOffset();
+    return start1 - start2;
   }
   
   /** WARNING: The hashCode function is left unchanged making it inconsisent with equality.  Hence, only Identity based 

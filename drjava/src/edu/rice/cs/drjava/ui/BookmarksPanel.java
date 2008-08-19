@@ -96,11 +96,17 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
     };
     _goToButton = new JButton(goToAction);
 
-    Action removeAction = new AbstractAction("Remove") {
+    Action removeAction = new AbstractAction("Remove") {  // TODO: combine with _remove in FindResultsPanel
       public void actionPerformed(ActionEvent ae) {
-//        startChanging();
-        for (OrderedDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
-//        finishChanging();
+        int[] rows = _regTree.getSelectionRows();
+        int len = rows.length;
+        int row = (len > 0) ? rows[0] : 0;
+        for (OrderedDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r); 
+        int rowCount = _regTree.getRowCount();
+        if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
+        _regTree.setSelectionRow(row);
+        _requestFocusInWindow();
+        _regTree.scrollRowToVisible(row);
       }
     };
     _removeButton = new JButton(removeAction);

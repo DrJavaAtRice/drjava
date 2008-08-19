@@ -142,7 +142,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Remove the given DocumentRegion from the manager.
     * @param region  the DocumentRegion to be removed.
     */
-  public synchronized void remove(final BrowserDocumentRegion r) {
+  public /* synchronized */ void remove(final BrowserDocumentRegion r) {
     OpenDefinitionsDocument doc = r.getDocument();
     _regions.remove(r);
     doc.removeBrowserRegion(r);
@@ -160,7 +160,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   public SortedSet<BrowserDocumentRegion> getRegions() { return _regions; }
   
   /** Tells the manager to remove all regions. */
-  public synchronized void clearBrowserRegions() {
+  public /* synchronized */ void clearBrowserRegions() {
     _current = null;
     _regions.clear();
   }
@@ -169,10 +169,10 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   public BrowserDocumentRegion getCurrentRegion() { return _current; }
   
   /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
-  public synchronized boolean isCurrentRegionFirst() { return (! _regions.isEmpty()) && _current == _regions.first(); }
+  public /* synchronized */ boolean isCurrentRegionFirst() { return (! _regions.isEmpty()) && _current == _regions.first(); }
   
   /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
-  public synchronized boolean isCurrentRegionLast() { return (! _regions.isEmpty()) && _current == _regions.last();  }
+  public /* synchronized */ boolean isCurrentRegionLast() { return (! _regions.isEmpty()) && _current == _regions.last();  }
   
   /** Set the current region. 
     * @param index  the index of the new current region, may be -1. */
@@ -180,7 +180,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   
   /** Make the region that is more recent the current region.  If _current is null, set it to refer to first.
     * @return new current region */
-  public synchronized BrowserDocumentRegion nextCurrentRegion(final GlobalEventNotifier notifier) {
+  public /* synchronized */ BrowserDocumentRegion nextCurrentRegion(final GlobalEventNotifier notifier) {
 //    Utilities.show("nextCurrentRegion called with regions = " + _regions + " and _current = " + _current);
     if (_regions.isEmpty()) return null;
     if (_current == null) _current = _regions.first();
@@ -191,7 +191,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   
   /** Make the region that is less recent the current region.  If _current is null, set it to refer to last.
     * @return new current region */
-  public synchronized BrowserDocumentRegion prevCurrentRegion(final GlobalEventNotifier notifier) {
+  public /* synchronized */ BrowserDocumentRegion prevCurrentRegion(final GlobalEventNotifier notifier) {
 //    Utilities.show("prevCurrentRegion called with regions = " + _regions + " and _current = " + _current);
     if (_regions.isEmpty()) return null;
     if (_current == null) _current = _regions.last();
@@ -231,7 +231,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     * and another region is added, the region at the end farther away from the insertion location will be discarded.
     * @param size maximum number of regions, or 0 if no maximum
     */
-  public synchronized void setMaximumSize(int size) {
+  public /* synchronized */ void setMaximumSize(int size) {
     _maxSize = size;
     
     // remove regions if necessary

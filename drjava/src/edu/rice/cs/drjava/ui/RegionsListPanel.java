@@ -309,16 +309,16 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //        catch (ClassNameNotFoundException cnnfe) {
 //          name = r.getDocument().toString();
 //        }
-        
-        for (int i = 0; i < _listModel.size(); ++i) {
-          @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
-          if (userObj.region() == r) {
-            _listModel.removeElementAt(i);
-            break;
-          }
-        }
-        
-        updateButtons();
+    
+    for (int i = 0; i < _listModel.size(); ++i) {
+      @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+      if (userObj.region() == r) {
+        _listModel.removeElementAt(i);
+        break;
+      }
+    }
+    
+    updateButtons();
 //      }
 //    };
 //    Utilities.invokeLater(doCommand);
