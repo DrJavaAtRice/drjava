@@ -36,7 +36,7 @@
 package edu.rice.cs.drjava.model;
 
 import java.awt.EventQueue;
-
+import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +64,7 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
-class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements 
+public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements 
   RegionManager<R> {
   
   /** Hashtable mapping documents to collections of regions.  Primitive operations are thread safe. */
@@ -93,7 +93,7 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     */
   @SuppressWarnings("unchecked")
   private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
-    return (T) new DocumentRegion(odd, start, end);
+    return (T) new MovingDocumentRegion(odd, start, end, odd._getLineStartPos(start), odd._getLineEndPos(end));
   }
   
   /** Gets the sorted set of regions less than r. */
@@ -120,8 +120,8 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
 //    return outputSet;
 //  }
   
-  /** Returns the region [start, end) containing offset.  Since regions can never overlap, there is only one such region
-    * in the given document that contains offset.  (Degenerate regions can coalesce but they are empty implying that
+  /** Returns the region [start, end) containing offset.  Since regions can never overlap, there is at most one such 
+    * region in the given document.  (Degenerate regions can coalesce but they are empty implying that
     * they are never returned by this method.)  Only runs in the event thread.
     * @param odd the document
     * @param offset the offset in the document
@@ -134,21 +134,47 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     @SuppressWarnings("unchecked")
     SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, offset + 1));
     
-    /* If tail contains a match, it must be the first non-degenerate region, since all regions in a document are 
-     * disjoint. (Every degenerate region is disjoint from every other region because it is empty.) tail is sorted by 
-     * [endOffset, startOffset]; tail may be empty.  We use a loop because the number of degenerate regions is 
-     * unbounded. */
+    /* If tail contains a match, it must be the first region, since all regions in a document are disjoint and no
+     * degenerate region in tail can contain offset. (Every degenerate region is disjoint from every other region 
+     * because it is empty.) tail is sorted by [endOffset, startOffset]; tail may be empty. */
 
-    for (R r: tail) {
-      int start = r.getStartOffset();
-      int end = r.getEndOffset();
-      if (start == end) continue;
-      if (start <= offset) return r;
-      else break;
-    }
-    return null;
+    if (tail.size() == 0) return null;
+    R r = tail.first();
+    int start = r.getStartOffset();
+    int end = r.getEndOffset();
+    
+    if (start <= offset) return r;
+    else return null;
   }
   
+  public Collection<R> getRegionsNear(OpenDefinitionsDocument odd, int offset) { 
+//    assert EventQueue.isDispatchThread();
+    
+    /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset - 120.  The maximium
+     * size of the excerpt enclosing a region is 120 characters. */
+    @SuppressWarnings("unchecked")
+    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, offset - 119));
+    
+    /* Search tail, selecting each region r such that r.getLineEnd() > offset and r.getLineStart < offset.  The tail is
+     * totally order on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart and end to
+     * lineEnd are monotonic and the tail is totally ordered on BOTH start and end.  Hence, we can abandon the search as
+     * soon as we reach a region r such that r.getLineStart() >= offset.  tail may be empty. */
+    
+    if (tail.size() == 0) return null;
+    
+    ArrayList<R> result = new ArrayList<R>(0);  // For most edits, there is no match. Should we use a LinkedList?
+    for (R r: tail) {
+      /* Note: r may span more than one line. */
+      int lineStart = r.getLineStart();
+      int lineEnd = r.getLineEnd();
+      if (lineStart <= offset && lineEnd >= offset) result.add(r);
+      else if (lineStart > offset) break;
+    }
+    
+    return result;
+  }
+    
+    
 //  /** Returns the rightmost region in the given document that contains [startOffset, endOffset], or null if one does
 //    * not exist.  Only executes in the event thread.  Otherwise offset args could be invalid.
 //    * Note: this method could be implemented  more cleanly using a revserseIterator on the headSet containing all
@@ -332,6 +358,16 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
     return regions;
   }
   
+  public ArrayList<FileRegion> getFileRegions() {
+    ArrayList<FileRegion> regions = new ArrayList<FileRegion>();
+    for (OpenDefinitionsDocument odd: _documents) {
+      File f = odd.getRawFile();
+      for (R r: _regions.get(odd)) regions.add(new DummyDocumentRegion(f, r.getStartOffset(), r.getEndOffset()));
+    }
+    return regions;
+  }
+      
+  
   public boolean contains(R region) {
     for (OpenDefinitionsDocument doc: _documents) {
       if (_regions.get(doc).contains(region)) return true;
@@ -341,13 +377,14 @@ class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifi
   
   /** Tells the manager to remove all regions. */
   public void clearRegions() {
-    final ArrayList<R> regions = getRegions();
-//    System.err.println("ConcreteRegionManager.clearRegions() called with regions = " + regions);
-    // Notify all listeners for this manager that all regions are being removed; listener access _regions and _documents
-    _notifyRegionsRemoved(regions);  // fails to close the associated panel because _documents not yet cleared.
-    // Remove all regions in this manager
-    _regions.clear();
-    _documents.clear();
+    for (R r: getRegions()) removeRegion(r);
+//    final ArrayList<R> regions = getRegions();
+////    System.err.println("ConcreteRegionManager.clearRegions() called with regions = " + regions);
+//    // Notify all listeners for this manager that all regions are being removed; listener access _regions and _documents
+//    _notifyRegionsRemoved(regions);  // fails to close the associated panel because _documents not yet cleared.
+//    // Remove all regions in this manager
+//    _regions.clear();
+//    _documents.clear();
   }
   
 //  /** Set the current region. 

@@ -42,6 +42,7 @@ import java.awt.font.*;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -56,7 +57,8 @@ import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicToolTipUI;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.IDocumentRegion;
+import edu.rice.cs.drjava.model.MovingDocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
@@ -71,7 +73,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** Panel for displaying regions in a tree sorted by class name and line number.  Only accessed from event thread.
   * @version $Id$
   */
-public abstract class RegionsTreePanel<R extends IDocumentRegion> extends TabbedPanel {
+public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
   protected JPanel _leftPane;
   
   protected DefaultMutableTreeNode _rootNode;
@@ -113,7 +115,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** State variable used to control the granular updating of the tabbed panel. */
   private volatile long _lastChangeTime;
-  private volatile Object _updateLock = new Object();
+//  private volatile Object _updateLock = new Object();  // commented out when update delay in this class was disabled
   private volatile boolean _updatePending = false;
   public static final long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
   
@@ -178,33 +180,32 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
 //  /** Set the default state again. Not equipped to handle rapid changes. */
 //  public void finishChanging() { _changeState.switchStateTo(DEFAULT_STATE); }
   
-  /** Update the tree. This method adds significant overhead to displaying RegionsTreePanels.  We need to make it more
-    * efficient. */
+  /** Update the JTree. */
   public boolean requestFocusInWindow() {
     assert EventQueue.isDispatchThread();
-    _updatePanel();
+    updatePanel();  // formerly _updatePanel()
     return super.requestFocusInWindow();
   }
 
-  /** Updates the tabbed panel if the time delay threshold has been exceeeded and no such update is already pending. */
-  private void _updatePanel() {
-    synchronized(_updateLock) { 
-      if (_updatePending || _lastChangeTime == _frame.getLastChangeTime()) return; 
-    }
-    Thread updater = new Thread(new Runnable() {
-      public void run() {
-        try { _updateLock.wait(UPDATE_DELAY); }
-        catch(InterruptedException e) { /* fall through */ }
-        EventQueue.invokeLater(new Runnable() { 
-          public void run() {
-            updatePanel();  // resets _tabUpdatePending and _lastChangeTime
-            updateButtons();
-          }
-        });
-      }
-    });
-    updater.start();
-  }
+//  /** Updates the tabbed panel if the time delay threshold has been exceeeded and no such update is already pending. */
+//  private void _updatePanel() {
+//    synchronized(_updateLock) { 
+//      if (_updatePending || _lastChangeTime == _frame.getLastChangeTime()) return; 
+//    }
+//    Thread updater = new Thread(new Runnable() {
+//      public void run() {
+//        try { _updateLock.wait(UPDATE_DELAY); }
+//        catch(InterruptedException e) { /* fall through */ }
+//        EventQueue.invokeLater(new Runnable() { 
+//          public void run() {
+//            updatePanel();  // resets _tabUpdatePending and _lastChangeTime
+//            updateButtons();
+//          }
+//        });
+//      }
+//    });
+//    updater.start();
+//  }
   
   protected void traversePanel() {
     Enumeration docNodes = _rootNode.children();
@@ -222,17 +223,16 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   
   /** Forces this panel to be completely updated. */
   protected void updatePanel() {
-
-    synchronized(_updateLock) { 
-      _updatePending = false; 
-      _lastChangeTime = _frame.getLastChangeTime();
-    }
+    // The following lines were commented out when update delays in this class were disabled
+//    synchronized(_updateLock) { 
+//      _updatePending = false; 
+//      _lastChangeTime = _frame.getLastChangeTime();
+//    }
 //    traversePanel();
-//    _regTreeModel.reload();
-    revalidate();
+    _regTreeModel.reload();
+//    revalidate(); //
+    expandTree();
     repaint();
-//    expandTree();
-//    repaint();
   }
   
   /** Forces the panel to be updated and requests focus in this panel. */
@@ -296,6 +296,31 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
     expandRecursive(_regTree, new TreePath(root), false);
   }
   
+  /** Remove the selected regions. */
+  protected void _remove() {   
+    int[] rows = _regTree.getSelectionRows();
+    System.err.println("_remove() called with rows " + Arrays.toString(rows));
+    int len = rows.length;
+    int row = (len > 0) ? rows[0] : 0;
+    _frame.removeCurrentLocationHighlight();
+    for (R r: getSelectedRegions()) {
+      _regionManager.removeRegion(r); // removes r from region manager and the panel node for r from the tree model
+    }
+    int rowCount = _regTree.getRowCount();
+    
+    System.err.println("rowCount = " + rowCount);
+    if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
+    _requestFocusInWindow();
+    _regTree.scrollRowToVisible(row);
+    
+    //Set selection row; must be done after preceding too lines for selection highlight to persist
+    _regTree.setSelectionRow(row);
+    System.err.println("Setting selection row = " + row);
+    // Ensure that a leaf (region node) is selected  (Is there a simpler way to determine if selected node is a leaf?)
+    if (_regTree.getLeadSelectionPath().getPathCount() < 2) _regTree.setSelectionRow(row + 1);
+    System.err.println("Resetting selection row = " + (row + 1));
+  }
+  
   private void expandRecursive(JTree tree, TreePath parent, boolean expand) {
     // Traverse children
     TreeNode node = (TreeNode)parent.getLastPathComponent();
@@ -349,7 +374,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
           DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
           Object o = node.getUserObject();
           
-          if (node.getUserObject() instanceof RegionTreeUserObj) {
+          if (o instanceof RegionTreeUserObj) {
             @SuppressWarnings("unchecked")
             RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) o;
             R r = userObject.region();
@@ -433,9 +458,7 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   }
   
   /** Makes the popup menu actions. Should be overridden. */
-  protected AbstractAction[] makePopupMenuActions() {
-    return null;
-  }
+  protected AbstractAction[] makePopupMenuActions() { return null; }
   
   /** Initializes the pop-up menu. */
   private void _initPopup() {
@@ -448,6 +471,12 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _regTree.addMouseListener(new RegionMouseAdapter());
     }
   }
+  
+  /** Gets the tree node for the given document. */
+  DefaultMutableTreeNode getNode(OpenDefinitionsDocument doc) { return _docToTreeNode.get(doc); }
+  
+    /** Gets the tree node for the given region. */
+  DefaultMutableTreeNode getNode(R region) { return _regionToTreeNode.get(region); }
   
   /** Gets the currently selected regions in the region tree, or an empty array if no regions are selected.
     * @return list of selected regions in the tree
@@ -664,19 +693,24 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
   }
   
   /** Class that is embedded in each leaf node. The toString() method determines what's displayed in the tree. */
-  protected static class RegionTreeUserObj<R extends IDocumentRegion> {
+  protected static class RegionTreeUserObj<R extends OrderedDocumentRegion> {
     protected R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1; }
     public R region() { return _region; }
     public RegionTreeUserObj(R r) { _region = r; }
+
+    // TODO: change 120 to a defined constand (must search for 119 as well as 120 in code)
     public String toString() {
-      final StringBuilder sb = new StringBuilder();
-        sb.append(lineNumber());
-        try {
-          sb.append(": ");
-          int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
-          sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
-        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
+      final StringBuilder sb = new StringBuilder(120);
+      sb.append("<html>");
+      sb.append(lineNumber());
+      sb.append(": ");
+      String text = _region.getString(); // limited to 124 chars (120 chars of text + " ...")  
+      int len = text.length();
+      if (text.lastIndexOf('\n') != len - 1) sb.append(StringOps.flatten(text));  // multiline label
+      else sb.append(text);  
+      sb.append("</html>");
+//      System.err.println("Returning node label: " + sb.toString());
       return sb.toString();
     }
   }
@@ -702,25 +736,5 @@ public abstract class RegionsTreePanel<R extends IDocumentRegion> extends Tabbed
       _changeState = newState;
     }
     protected DefaultState() { }
-  }
-
-  /** Rapid changing state, GUI changes are delayed until the state is switched back to DefaultState. */
-  protected class ChangingState implements IChangeState {
-    private DefaultMutableTreeNode _lastAdded = null;
-    public void scrollPathToVisible(TreePath tp) { }
-    public void updateButtons() { }
-    public void setLastAdded(DefaultMutableTreeNode node) {
-      _lastAdded = node;
-    }
-    public void switchStateTo(IChangeState newState) {
-      updateButtons();
-      if (_lastAdded!=null) {
-        TreePath pathToNewRegion = new TreePath(_lastAdded.getPath());
-        _regTree.scrollPathToVisible(pathToNewRegion);
-      }
-      expandAll();
-      _regTree.revalidate();
-      _changeState = newState;
-    }
   }
 }

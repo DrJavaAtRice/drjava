@@ -39,35 +39,101 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import javax.swing.text.Position;
+import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.lambda.Thunk;
 
-/** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip
- * @version $Id$Region
- */
+/** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip and line
+  * boundaries.
+  * @version $Id$Region
+  */
 public class MovingDocumentRegion extends DocumentRegion {
+  protected volatile Position _lineStartPos;
+  protected volatile Position _lineEndPos;
   protected final Thunk<String> _stringSuspension;
   
+  /** Update _lineStartPos and _lineEndPos */
+  public void updateLines() {
+    try {  // _doc is inherited from DocumentRegion
+      _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
+      _lineEndPos  = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
+    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
+  }
+    
   /** Create a new moving document region. */
-  public MovingDocumentRegion(OpenDefinitionsDocument doc, File file, Position sp, Position ep, Thunk<String> ss) {
-    super(doc, sp, ep);
+  public MovingDocumentRegion(final OpenDefinitionsDocument doc, int start, int end, int lineStart, int lineEnd) {
+
+    super(doc, start, end);
+    try {
+      _lineStartPos = doc.createPosition(lineStart);
+      _lineEndPos  = doc.createPosition(lineEnd);
+    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
+    
     assert doc != null;
-    _stringSuspension = ss;
+    _stringSuspension = new Thunk<String>() {
+      public String value() {
+        try {
+          int endSel = getEndOffset();
+          int startSel = getStartOffset();
+          int selLength = endSel - startSel;
+          
+          int excerptEnd = _lineEndPos.getOffset();
+          int excerptStart = _lineStartPos.getOffset();
+          int exceptLength = excerptEnd - excerptStart;
+          
+          // the offsets within the excerpted string of the selection (figuratively in "Red")
+          int startRed = startSel - excerptStart;
+          int endRed = endSel - excerptStart;
+          
+          int excerptLength = Math.min(120, excerptEnd - excerptStart);
+          String text = doc.getText(excerptStart, excerptLength);
+          
+          // Construct the matching string and compressed selection prefix and suffix strings within text
+          String prefix = StringOps.compress(text.substring(0, startRed));
+          String match, suffix;
+          if (excerptLength < startRed + selLength) { // selection extends beyond excerpt
+            match = text.substring(startRed) + " ...";
+            suffix = "";
+          }
+          else {
+            match = text.substring(startRed, endRed);
+            suffix = StringOps.compress(text.substring(endRed, excerptLength));
+          }
+          
+          // COMMENT: We need a global invariant concerning non-displayable characters.  
+          
+          // create the excerpt string
+          StringBuilder sb = new StringBuilder(edu.rice.cs.plt.text.TextUtil.htmlEscape(prefix));
+          sb.append("<font color=#ff0000>");
+//                sb.append(LEFT);
+          sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(match));
+          sb.append("</font>");
+//                sb.append(RIGHT);
+          sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(suffix));
+//                sb.append("</html>");
+//                sb.append(StringOps.getBlankString(120 - sLength));  // move getBank to StringOps
+          return sb.toString();
+        }
+        catch(BadLocationException e) { return "";  /* Ignore the exception. */ }
+      }
+    };
   }
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }
-
-  /** @return the file */
-  public File getFile() { return _file; }
+  
+  /** @return line start */
+  public int getLineStart() { return _lineStartPos.getOffset(); }
+  
+  /** @return line end */
+  public int getLineEnd() { return _lineEndPos.getOffset(); }
   
   /** @return the string it was assigned */
-  public String getString() { 
-    StringBuilder result = new StringBuilder(120);
-    result.append(_stringSuspension.value()); 
-    return result.toString();
-  }
+  public String getString() { return _stringSuspension.value(); }
   
   /** @return true if objects a and b are equal; null values are handled correctly. */
   public static boolean equals(Object a, Object b) {

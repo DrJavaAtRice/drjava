@@ -63,6 +63,9 @@ public abstract class StringOps {
   
   public static final String EOL = System.getProperty("line.separator");
   public static final String NEWLINE = "\n";
+  public static final char newline = '\n';
+  public static final char SEPARATOR = '\u220E';
+  
    /** Defines blank[k] (k = 0,..,16) as a string consisting of k blanks */
   private static final String blank0 = "";
   private static final String blank1 = makeBlankString(1);
@@ -546,7 +549,8 @@ public abstract class StringOps {
     return sb.toString();
   }
      
-
+/** Converts newline chars to SEPARATOR char (a solid black upright rectangle). */
+  public static String flatten(String s) { return s.replace(newline, SEPARATOR); }
       
   /** Return a string representing the approximate amount of memory specified in bytes.
     * @param l memory in bytes

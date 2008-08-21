@@ -581,20 +581,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _machine.setIgnoreTestCases(oldNoTestCases);
       _machine.setPosition(oldPosition);
 
-//      Utilities.show("Searching complete");
-      // Set of documents that have been reverted in the process of "find all"
-//      HashSet<OpenDefinitionsDocument> reverted = new HashSet<OpenDefinitionsDocument>();
-      
-//      panel.startChanging();
       for (FindResult fr: results) {
-//        if (reverted.contains(fr.getDocument())) {
-//          // skipping document because we have previously noticed that it has been modified,
-//          // i.e. the document is in the reverted list
-//          continue;
-//        }
-        
-//        // get the original time stamp
-//        long origts = fr.getDocument().getTimestamp();
          
         final OpenDefinitionsDocument doc = fr.getDocument();
         
@@ -603,69 +590,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         
         int end = fr.getFoundOffset();
         int start = end - searchLen;
-        try {
-          final Position startPos = doc.createPosition(start);
-          final Position endPos = doc.createPosition(end);
-          
-          // lazily create excerpt string
-          
-          Thunk<String> ss = new Thunk<String>() {
-            public String value() {
-              try {
-                int endSel = endPos.getOffset();
-                int startSel = startPos.getOffset();
-                int selLength = endSel - startSel;
-                if (selLength == 0) return "";  // excerpt has been deleted by prior editing
-                assert selLength > 0;
-               
-                int excerptEnd = doc._getLineEndPos(endSel);
-                int excerptStart = doc._getLineStartPos(startSel);
-                assert excerptStart <= startSel;
-
-                // the offsets within the excerpted string of the selection (figuratively in "Red")
-                int startRed = startSel - excerptStart;
-                int endRed = endSel - excerptStart;
-                
-                int excerptLength = Math.min(120, excerptEnd - excerptStart);
-                String text = doc.getText(excerptStart, excerptLength);
-                
-                // Construct the matching string and compressed selection prefix and suffix strings within text
-                String prefix = StringOps.compress(text.substring(0, startRed));
-                String match, suffix;
-                if (excerptLength < startRed + selLength) { // selection extends beyond excerpt
-                  match = text.substring(startRed) + "...";
-                  suffix = "";
-                }
-                else {
-                  match = text.substring(startRed, endRed);
-                  suffix = StringOps.compress(text.substring(endRed, excerptLength));
-                }
-
-                // COMMENT: We need a global invariant concerning non-displayable characters.  
-                
-                // create the excerpt string
-                StringBuilder sb = new StringBuilder(edu.rice.cs.plt.text.TextUtil.htmlEscape(prefix));
-                sb.append("<font color=#ff0000>");
-//                sb.append(LEFT);
-                sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(match));
-                sb.append("</font>");
-//                sb.append(RIGHT);
-                sb.append(edu.rice.cs.plt.text.TextUtil.htmlEscape(suffix));
-//                sb.append("</html>");
-//                sb.append(StringOps.getBlankString(120 - sLength));  // move getBank to StringOps
-                return sb.toString();
-              }
-              catch(BadLocationException e) { return "";  /* Ignore the exception. */ }
-            }
-          };
-          
-          rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, ss));
-//          rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, s));
-        }
-        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
-        catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+        int lineStart = doc._getLineStartPos(start);
+        int lineEnd = doc._getLineEndPos(end);                                          
+        
+        rm.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd));
       }
-//      panel.finishChanging();
       
       EventQueue.invokeLater(new Runnable() {
         public void run() {

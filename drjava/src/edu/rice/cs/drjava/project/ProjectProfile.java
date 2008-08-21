@@ -55,8 +55,8 @@ import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.drjava.model.FileRegion;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
-import edu.rice.cs.drjava.model.Region;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugException;
@@ -97,7 +97,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private boolean _autoRefreshStatus = false;
   
-  private List<Region> _bookmarks = new ArrayList<Region>();
+  private List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
   private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
@@ -157,7 +157,7 @@ public class ProjectProfile implements ProjectFileIR {
   public int getCreateJarFlags() { return _createJarFlags; }
   
   /** @return an array of the bookmarks in this project. */
-  public Region[] getBookmarks() { return _bookmarks.toArray(new Region[_bookmarks.size()]); }
+  public FileRegion[] getBookmarks() { return _bookmarks.toArray(new FileRegion[_bookmarks.size()]); }
   
   /** @return an array of the breakpoints in this project. */
   public DebugBreakpointData[] getBreakpoints() { return _breakpoints.toArray(new DebugBreakpointData[_breakpoints.size()]); }
@@ -226,7 +226,7 @@ public class ProjectProfile implements ProjectFileIR {
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
-  public void setBookmarks(List<? extends Region> bms) { _bookmarks = new ArrayList<Region>(bms); }
+  public void setBookmarks(List<? extends FileRegion> bms) { _bookmarks = new ArrayList<FileRegion>(bms); }
   public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
   public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
@@ -397,13 +397,14 @@ public class ProjectProfile implements ProjectFileIR {
     }
     xc.createNode("drjava/project/bookmarks");
     if (!_bookmarks.isEmpty()) {
-      for (Region bm: _bookmarks) {
-        Node f = xc.createNode("drjava/project/bookmarks/bookmark", null, false);
-        path = FileOps.stringMakeRelativeTo(bm.getFile(), _projectRoot);
+      for (FileRegion bm: _bookmarks) {
+        Node n = xc.createNode("drjava/project/bookmarks/bookmark", null, false);
+        File file = bm.getFile();
+        path = FileOps.stringMakeRelativeTo(file, _projectRoot);
         path = replace(path, File.separator, "/");
-        xc.set(".file", path, f, true);
-        xc.set(".from", String.valueOf(bm.getStartOffset()), f, true);
-        xc.set(".to", String.valueOf(bm.getEndOffset()), f, true);
+        xc.set(".file", path, n, true);
+        xc.set(".from", String.valueOf(bm.getStartOffset()), n, true);
+        xc.set(".to", String.valueOf(bm.getEndOffset()), n, true);
       }
     }
     xc.save(os);
@@ -482,7 +483,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write classpaths
     if (!_classPathFiles.isEmpty()) {
       fw.write("\n(classpaths");
-      for(File f: _classPathFiles) {
+      for (File f: _classPathFiles) {
         fw.write("\n" + encodeFileAbsolute(f, "  "));
       }
       fw.write(")"); // close the classpaths expression
@@ -547,7 +548,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write bookmarks
     if (!_bookmarks.isEmpty()) {
       fw.write("\n(bookmarks");
-      for(Region bm: _bookmarks) { fw.write("\n" + encodeBookmarkRelative(bm, "  ")); }
+      for(FileRegion bm: _bookmarks) { fw.write("\n" + encodeBookmarkRelative(bm, "  ")); }
       fw.write(")"); // close the bookmarks expression
     }
     else fw.write("\n;; no bookmarks");
@@ -690,7 +691,7 @@ public class ProjectProfile implements ProjectFileIR {
    *  @param prefix the indent level to place the s-expression at
    *  @return the s-expression syntax to describe the given breakpoint.
    */
-  private String encodeBookmarkRelative(Region bm, String prefix) throws IOException {
+  private String encodeBookmarkRelative(FileRegion bm, String prefix) throws IOException {
     String ret = "";
     String path = FileOps.stringMakeRelativeTo(bm.getFile(), _projectRoot);
     

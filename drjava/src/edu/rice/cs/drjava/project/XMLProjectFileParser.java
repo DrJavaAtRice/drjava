@@ -47,17 +47,18 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
-import edu.rice.cs.drjava.model.Region;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
+import edu.rice.cs.drjava.model.FileRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.util.XMLConfig;
-import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.StringOps;
+
+import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
 /** This parser loads XML configuration files using the XMLConfig class in the util package.
  * 
@@ -327,8 +328,8 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     return wList;
   }
     
-  protected List<Region> readBookmarks() {
-    List<Region> rList = new ArrayList<Region>();
+  protected List<FileRegion> readBookmarks() {
+    List<FileRegion> rList = new ArrayList<FileRegion>();
     List<Node> defs = _xc.getNodes("bookmarks/bookmark");
     for(Node n: defs) {
       // now all path names are relative to node n...

@@ -78,14 +78,14 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
   public BrowserHistoryPanel(final MainFrame frame) {
     super(frame, "Browser History");  // initializes inherited field _frame
     final BrowserHistoryManager rm = _model.getBrowserHistoryManager();
-    rm.addListener(new RegionManagerListener<BrowserDocumentRegion>() {      
-      public void regionAdded(BrowserDocumentRegion r) { rm.addBrowserRegion(r, frame.getModel().getNotifier()); }
-      public void regionChanged(BrowserDocumentRegion r) { 
-        regionRemoved(r);
-        regionAdded(r);
-      }
-      public void regionRemoved(BrowserDocumentRegion r) { rm.remove(r); }
-    });
+//    rm.addListener(new RegionManagerListener<BrowserDocumentRegion>() {
+//      public void regionAdded(BrowserDocumentRegion r) { rm.addBrowserRegion(r, frame.getModel().getNotifier()); }
+//      public void regionChanged(BrowserDocumentRegion r) { 
+//        regionRemoved(r);
+//        regionAdded(r);
+//      }
+//      public void regionRemoved(BrowserDocumentRegion r) { rm.remove(r); }
+//    });
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */

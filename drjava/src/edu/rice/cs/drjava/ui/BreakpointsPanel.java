@@ -80,8 +80,8 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     // TODO: consolidate the following listener with the MainFrame Breakpoint listener
     _regionManager.addListener(new RegionManagerListener<Breakpoint>() {
       /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
-        *  Must be executed in event thread.
-        *  @param bp the breakpoint
+        * Must be executed in event thread.
+        * @param bp the breakpoint
         */
       public void regionAdded(final Breakpoint bp) { 
         assert EventQueue.isDispatchThread();
@@ -112,9 +112,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
-  protected void performDefaultAction() {
-    goToRegion();
-  }
+  protected void performDefaultAction() { goToRegion(); }
   
   /** Creates the buttons for controlling the regions. Should be overridden. */
   protected JComponent[] makeButtons() {    
@@ -193,9 +191,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   /** Go to region. */
   protected void goToRegion() {
     ArrayList<Breakpoint> bps = getSelectedRegions();
-    if (bps.size() == 1) {
-      _debugger.scrollToSource(bps.get(0));
-    }
+    if (bps.size() == 1) _debugger.scrollToSource(bps.get(0));
   }
   
   /** Toggle breakpoint's enable/disable flag. */
@@ -235,16 +231,5 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
       return sb.toString();
     }
-//    public boolean equals(Object other) {
-//      
-//      if (other == null || other.getClass() != this.getClass()) return false; 
-//      @SuppressWarnings("unchecked") 
-//      BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj) other;
-//      return (o.region().getDocument().equals(region().getDocument())) &&
-//        (o.region().getStartOffset()==region().getStartOffset()) &&
-//        (o.region().getEndOffset()==region().getEndOffset()) &&
-//        (o.region().isEnabled()==region().isEnabled());
-//    }
-//    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }
 }

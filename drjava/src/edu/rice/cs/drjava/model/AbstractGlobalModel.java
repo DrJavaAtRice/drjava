@@ -255,10 +255,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
   
   /** Manager for bookmark regions. */
-  protected final ConcreteRegionManager<OrderedDocumentRegion> _bookmarkManager;
+  protected final ConcreteRegionManager<MovingDocumentRegion> _bookmarkManager;
   
   /** @return manager for bookmark regions. */
-  public RegionManager<OrderedDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
+  public RegionManager<MovingDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
   
   /** Managers for find result regions. */
   protected final LinkedList<RegionManager<MovingDocumentRegion>> _findResultsManagers;
@@ -276,12 +276,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return rm;
   }
   
-  /** Dispose a manager for find result regions. */
-  public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
-    // remove manager from all documents
-    for (final OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
-      doc.removeFindResultsManager(rm);
-    }
+  /** Remove a manager from the model. */
+  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
     _findResultsManagers.remove(rm);
   }
   
@@ -311,7 +307,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _consoleDocAdapter = new InteractionsDJDocument();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
-    _bookmarkManager = new ConcreteRegionManager<OrderedDocumentRegion>();
+    _bookmarkManager = new ConcreteRegionManager<MovingDocumentRegion>();
     _findResultsManagers = new LinkedList<RegionManager<MovingDocumentRegion>>();
     _browserHistoryManager = new BrowserHistoryManager();
     
@@ -882,8 +878,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  
-  
   protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
   
   class FlatFileGroupingState implements FileGroupingState {
@@ -1047,26 +1041,23 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int startSel = Math.min(pos1, pos2);
     int endSel = Math.max(pos1, pos2);
 //    try {
-    RegionManager<OrderedDocumentRegion> bm = _bookmarkManager;
+    RegionManager<MovingDocumentRegion> bm = _bookmarkManager;
     if (startSel == endSel) {  // offset only; bookmark the entire line
       endSel = doc._getLineEndPos(startSel);
       startSel = doc._getLineStartPos(startSel);
     }
     
-    Collection<OrderedDocumentRegion> conflictingRegions = bm.getRegionsOverlapping(doc, startSel, endSel);
+    Collection<MovingDocumentRegion> conflictingRegions = bm.getRegionsOverlapping(doc, startSel, endSel);
     
     if (conflictingRegions.size() > 0) {
-      for (OrderedDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
+      for (MovingDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
     }
     else {
-
-      OrderedDocumentRegion newR = new DocumentRegion(doc, startSel, endSel);
+      MovingDocumentRegion newR = 
+        new MovingDocumentRegion(doc, startSel, endSel, doc._getLineStartPos(startSel), doc._getLineEndPos(endSel));
       bm.addRegion(newR);
     }
-//    }
-//    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
-  
   
   /** Creates a new open definitions document and adds it to the list.  Public for testing purposes.  Only runs in 
     * the event thread.
@@ -1537,18 +1528,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (createJarFlags != 0) builder.setCreateJarFlags (createJarFlags);
     
     // add breakpoints and watches
-    ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();
-    RegionManager<Breakpoint> bm = getBreakpointManager();
-    
-    for (OpenDefinitionsDocument odd: bm.getDocuments()) {
-      for(Breakpoint bp: bm.getRegions(odd)) { l.add(bp); }
+    ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();  
+    for (OpenDefinitionsDocument odd: _breakpointManager.getDocuments()) {
+      for(Breakpoint bp: _breakpointManager.getRegions(odd)) { l.add(bp); }
     }
     builder.setBreakpoints(l);
     try { builder.setWatches(getDebugger().getWatches()); }
     catch(DebugException de) { /* ignore, just don't store watches */ }
     
     // add bookmarks
-    builder.setBookmarks(_bookmarkManager.getRegions());
+    builder.setBookmarks(_bookmarkManager.getFileRegions());
     
     builder.setAutoRefreshStatus(_state.getAutoRefreshStatus());
     
@@ -1751,14 +1740,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /* Files are opened synchronously by the preceding notification.  If this process is made asynchronous, we need to 
      * wait here (using the projectLoaded CompletionMonitor above (commented out). */
-    
+    // set breakpoints
     for (DebugBreakpointData dbd: ir.getBreakpoints()) {
       try {
         File f = dbd.getFile();
         if (! modifiedFiles.contains(f)) {
           int lnr = dbd.getLineNumber();
           OpenDefinitionsDocument odd = getDocumentForFile(f);
-          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled()); 
+          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled());
         }
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
@@ -1776,26 +1765,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // set bookmarks
-    
-    try {
-      for (Region bm: ir.getBookmarks()) {
-        File f = bm.getFile();
-        if (! modifiedFiles.contains(f)) {
-          OpenDefinitionsDocument odd = getDocumentForFile(f);
-          int start = bm.getStartOffset();
-          int end = bm.getEndOffset();
-          if (getOpenDefinitionsDocuments().contains(odd) && 
-              _bookmarkManager.getRegionsOverlapping(odd, start, end).size() == 0) { // bookmark is valid
-            Position startPos = odd.createPosition(start);
-            Position endPos = odd.createPosition(end);
-            try { _bookmarkManager.addRegion(new DocumentRegion(odd, startPos, endPos)); }
-            catch(Exception e) { DrJavaErrorHandler.record(e); }  // should never happen
+    for (FileRegion bm: ir.getBookmarks()) {
+      File f = bm.getFile();
+      if (! modifiedFiles.contains(f)) {
+        OpenDefinitionsDocument odd = getDocumentForFile(f);
+        int start = bm.getStartOffset();
+        int end = bm.getEndOffset();
+        if (getOpenDefinitionsDocuments().contains(odd) && 
+            _bookmarkManager.getRegionsOverlapping(odd, start, end).size() == 0) { // bookmark is valid
+          try { 
+            int lineStart = odd._getLineStartPos(start);
+            int lineEnd = odd._getLineEndPos(end);
+            _bookmarkManager.addRegion(new MovingDocumentRegion(odd, start, end, lineStart, lineEnd)); 
           }
-          // should remove stale bookmark
+          catch(Exception e) { DrJavaErrorHandler.record(e); }  // should never happen
         }
+        // should remove stale bookmark
       }
     }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
     
     if (_documentNavigator instanceof JTreeSortNavigator) 
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths()); 
@@ -1814,7 +1801,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
                            makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(makeFlatFileGroupingState());
-    
+
     if (! suppressReset) resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();
   }
@@ -1914,21 +1901,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // remove regions for this file
-    doc.getBreakpointManager().clearRegions();
-    doc.getBookmarkManager().clearRegions();
-    for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(doc);
+    _breakpointManager.clearRegions();
+    _bookmarkManager.clearRegions();
+    for (RegionManager<MovingDocumentRegion> rm: _findResultsManagers) rm.removeRegions(doc);
     doc.clearBrowserRegions();
     
     // if the document was an auxiliary file, remove it from the list
     if (doc.isAuxiliaryFile()) { removeAuxiliaryFile(doc); }
     
     _documentNavigator.removeDocument(doc);
-    
-//    Utilities.invokeLater(new Runnable() { 
-//      public void run() { 
-        _notifier.fileClosed(doc); 
-//      } 
-//    });
+    _notifier.fileClosed(doc); 
     doc.close();
     return true;
   }
@@ -2963,7 +2945,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (! oldFile.equals(file)) {
             /* remove regions for this document */
             removeFromDebugger();
-            getBreakpointManager().removeRegions(this);
+            _breakpointManager.removeRegions(this);
             _bookmarkManager.removeRegions(this);
             for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
             clearBrowserRegions();
@@ -3235,7 +3217,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       //need to remove old, possibly invalid breakpoints
       removeFromDebugger();
-      getBreakpointManager().removeRegions(this);
+      _breakpointManager.removeRegions(this);
       _bookmarkManager.removeRegions(this);
       for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
       doc.clearBrowserRegions();
@@ -3328,7 +3310,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
     
     /** @return the bookmark region manager. */
-    public RegionManager<OrderedDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
+    public RegionManager<MovingDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
     
     /** @return clear the browser history regions for this document. */
     public void clearBrowserRegions() { 
@@ -3697,9 +3679,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //      * @param rm the global model's region manager */
 //    public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.add(rm); }
     
-    /** Remove a manager for find results from this document.
-      * @param rm the global model's region manager. */
-    public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.remove(rm); }
+//    /** Remove a manager for find results from this document.
+//      * @param rm the global model's region manager. */
+//    public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.remove(rm); }
   } /* End of ConcreteOpenDefDoc */
   
   private static class TrivialFSS implements FileSaveSelector {

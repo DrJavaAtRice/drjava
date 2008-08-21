@@ -125,6 +125,16 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _doc          = doc;
     _findReplace  = findReplace;
     
+    // TODO: hoist this into RegionsTreePanel; repeated in BookmarksPanel and BreakpointsPanel
+    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+      public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
+      public void regionChanged(MovingDocumentRegion r) { 
+        regionRemoved(r);
+        regionAdded(r);
+      }
+      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
+    });
+    
     for(int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       final OptionListener<Color> listener = new FindResultsColorOptionListener(i);
       final Pair<Option<Color>, OptionListener<Color>> pair = 
@@ -188,7 +198,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _bookmarkButton = new JButton(bookmarkAction);
     
     Action removeAction = new AbstractAction("Remove") {
-      public void actionPerformed(ActionEvent ae) { _remove(); }
+      public void actionPerformed(ActionEvent ae) { _remove(); }  // _remove is inherited from RegionsTreePanel
     };
     _removeButton = new JButton(removeAction);
     
@@ -275,47 +285,23 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {  // TODO: consolidate with _toggleBookmark in MainFrame/AbstractGlobalModel?
     updateButtons();
-    RegionManager<OrderedDocumentRegion> bm = _model.getBookmarkManager();
+    RegionManager<MovingDocumentRegion> bm = _model.getBookmarkManager();
     for (MovingDocumentRegion r: getSelectedRegions()) {
-      Collection<OrderedDocumentRegion> conflictingRegions = 
-        bm.getRegionsOverlapping(r.getDocument(), r.getStartOffset(), r.getEndOffset());
-      for (OrderedDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
-      OrderedDocumentRegion newR = new DocumentRegion(r.getDocument(), r.getStartPosition(), r.getEndPosition());
-      bm.addRegion(newR);
+      OpenDefinitionsDocument doc = r.getDocument();
+      int start = r.getStartOffset();
+      int end = r.getEndOffset();
+      Collection<MovingDocumentRegion> conflictingRegions = bm.getRegionsOverlapping(doc, start, end);
+      for (MovingDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
+
+      int lineStart = r.getLineStart();
+      int lineEnd = r.getLineEnd();
+      bm.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd));
     }
     _frame.createBookmarks();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
   protected void performDefaultAction() { goToRegion(); }
-  
-  /** Remove the selected regions. */
-  private void _remove() {
-
-    int[] rows = _regTree.getSelectionRows();
-//    System.err.println("_remove() called with rows " + Arrays.toString(rows));
-    int len = rows.length;
-    int row = (len > 0) ? rows[0] : 0;
-//    _regTree.setSelectionRow(row);
-    _frame.removeCurrentLocationHighlight();
-//    startChanging();
-    for (MovingDocumentRegion r: getSelectedRegions()) {
-      _regionManager.removeRegion(r); // removes r from region manager and the panel node for r from the tree model
-    }
-    int rowCount = _regTree.getRowCount();
-    if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
-    _regTree.setSelectionRow(row);
-    _requestFocusInWindow();
-    _regTree.scrollRowToVisible(row);
-  }
-  
-//  /** Remove a region from this panel.  If this panel is emptied, remove this.  Must be executed in event thread.
-//    * @param r the region
-//    */
-//  public void removeRegion(final MovingDocumentRegion r) {
-//    super.removeRegion(r);
-//    if (_regionManager.getDocuments().isEmpty()) _closePanel();
-//  }
   
   /** Update button state and text. */
   protected void _updateButtons() {
@@ -348,23 +334,23 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  /** Destroys this panel and its contents. This is a much more comprehensive command than _closePanel (which is the
+  /** Destroys this panel and its contents. This is a more comprehensive command than _closePanel (which is the
     * _close operation inherited from RegionsTreePanel).  The latter merely removes the panel from the TabbedPane but 
     * does not affect its contents, so panels like Find/Replace can be regenerated with their contents preserved.
     */
   protected void _close() {
 //    System.err.println("FindResultsPanel.close() called on " + this);
     _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
-    _frame.removeCurrentLocationHighlight();
-    freeResources();
-    super._close();  // Is this redundant?  Shouldn't clearRegions close this panel (when it clears the last region)
+    _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
+//    freeResources();
+    super._close();  // Not redundant.  _close may be called from removeRegion.
   }
   
-  /** Free the resources; this can be used if the panel was never actually displayed. */
+  /** Called from FindReplacePanel.findAll if search finds no matches. */
   public void freeResources() {
-    _model.disposeFindResultsManager(_regionManager);
     _docToTreeNode.clear();
     _regionToTreeNode.clear();
+    _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }
@@ -372,13 +358,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       --DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     }
   }
-  
-  /** Factory method to create user objects in tree nodes.  If subclasses extend RegionTreeUserObj, they must override
-    * this method. */
-  protected RegionTreeUserObj<MovingDocumentRegion> makeRegionTreeUserObj(MovingDocumentRegion r) {
-    return new FindResultsRegionTreeUserObj(r);
-  }
-  
+
   /** Return true if all documents were searched. */
   public boolean isSearchAll() { return _searchAll; }
   
@@ -388,29 +368,6 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 
   /** Disables "Find Again", e.g. because the document was closed. */
   public void disableFindAgain() {_doc.clear(); updateButtons(); }
-  
-  /** Class that gets put into the tree. The toString() method determines what's displayed in the tree. */
-  protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<MovingDocumentRegion> {
-    protected int _lineNumber;
-    public FindResultsRegionTreeUserObj(MovingDocumentRegion r) {
-      super(r);
-      _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
-    }
-
-    public String toString() {
-      final String textFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN).toString();
-      final String numFont = DrJava.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS).toString();
-      final StringBuilder sb = new StringBuilder(120);
-      sb.append("<html>");
-      sb.append(lineNumber());
-      sb.append(": ");
-      String text = _region.getString();
-      sb.append(text);
-      sb.append(StringOps.getBlankString(120 - text.length()));
-      sb.append("</html>");
-      return sb.toString();
-    }
-  }
   
   /** The OptionListener for FIND_RESULTS_COLOR. */
   private class FindResultsColorOptionListener implements OptionListener<Color> {

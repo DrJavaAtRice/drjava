@@ -44,16 +44,17 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
-/** Class for a simple document region that records positions rather than offsets.  See the WARNING below about hashing
-  * on this type or its subtypes.
+/** Class for a simple document region that records positions rather than offsets.  Instances of this class represent
+  * dummy regions used in searching SortSets of DocumentRegions.  Hence, getLineStart() and getLineEnd() should never be
+  * called.  WARNING: this class overrides the equals method but does not override the hashCode method to maintain 
+  * consistency.  Hence, instances can only be used as keys in identity based hash tables.  NOTE: since class instances
+  * are mutable, a hashCode method consistent with equals WOULD NOT WORK anyway.
   * @version $Id$
   */
 public class DocumentRegion implements OrderedDocumentRegion, Comparable<OrderedDocumentRegion> {
   protected final OpenDefinitionsDocument _doc;
-  protected final File _file;
   protected volatile Position _startPosition; 
   protected volatile Position _endPosition;
-  protected volatile DefaultMutableTreeNode _treeNode;
   
   /** Create a new simple document region using offsets.
     * @param doc document that contains this region, which cannot be null
@@ -61,33 +62,42 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     * @param so start offset of the region; if doc is non-null, then a Position will be created that moves within the document
     * @param eo end offset of the region; if doc is non-null, then a Position will be created that moves within the document
     */
-  public DocumentRegion(OpenDefinitionsDocument doc, int so, int eo) {
-    this(doc, createPosition(doc, so), createPosition(doc, eo));
-  }
  
   /** Create a new simple document region with a bona fide document */
-  public DocumentRegion(OpenDefinitionsDocument doc, Position sp, Position ep) {
+  public DocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
     assert doc != null;
     _doc = doc;
-    _file = doc.getRawFile();  // don't check the validity of _file here
-    _startPosition = sp;
-    _endPosition = ep;
+    try {
+      _startPosition = doc.createPosition(start);
+      _endPosition = doc.createPosition(end);
+    }
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-//  public DefaultMutableTreeNode getTreeNode() { return _treeNode; }
-//  
-//  public void setTreeNode(DefaultMutableTreeNode n) { _treeNode = n; }
+  /** Throws exception indicating that getLineStart() is not supported. */
+  public int getLineStart() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineStart()"); 
+  }
+  
+  /** Throws exception indicating that getLineEnd() is not supported. */
+  public int getLineEnd() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineEnd()"); 
+  }
+  
+  /** Throws exception indicating that getString() is not supported. */
+  public String getString() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport getString()"); 
+  }
+  
+  /** Throws exception indicating that getString() is not supported. */
+  public void updateLines() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport updateLines()"); 
+  }
   
   private static Position createPosition(OpenDefinitionsDocument doc, int i) {
     try { return doc.createPosition(i); }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
-
-//  /** Structural equality method that copes with null!  This method should be a member of class Object. */
-//  public static boolean equals(Object o1, Object o2) { 
-//    if (o1 == null) return o2 == null;
-//    return o1.equals(o2);
-//  }
   
   /** Defines the equality relation on DocumentRegions.  This equivalence relation is consistent with the equivalence
     * relation induced by the compareTo method.
@@ -118,16 +128,10 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   }
   
   /** WARNING: The hashCode function is left unchanged making it inconsisent with equality.  Hence, only Identity based 
-    * hash table should use this type as keys. */
-      
-//  /** This hash function is consistent with equality. */
-//  public int hashCode() { return hash(_doc, getStartOffset(), getEndOffset()); }
+    * hash tables should use this type as keys. */
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }
-
-  /** @return the file */
-  public File getFile() { return _file; }
 
   /** @return the start offset */
   public int getStartOffset() { return _startPosition.getOffset(); }

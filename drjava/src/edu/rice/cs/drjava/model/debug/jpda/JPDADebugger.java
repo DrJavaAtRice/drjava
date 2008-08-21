@@ -472,27 +472,37 @@ public class JPDADebugger implements Debugger {
     * @param offset  Start offset on the line to set the breakpoint
     * @param lineNum  Line on which to set or remove the breakpoint, >=1
     * @param isEnabled  {@code true} if this breakpoint should be enabled
-    * TODO: check synchronization; why no read lock on doc?
+    * @return true if breakpoint is set
     */
-  public /* synchronized */ void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
+  public boolean toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
         assert EventQueue.isDispatchThread();
     // ensure that offset is at line start and falls within the document
     offset = doc._getLineStartPos(offset);
-    if (offset < 0 || offset > doc.getLength()) return;
+    if (offset < 0 || offset > doc.getLength()) return false;
     
     Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset);
     
     if (breakpoint == null) {
       if (offset == doc._getLineEndPos(offset)) {
         Utilities.show("Cannot set a breakpoint on an empty line.");
+        return false;
       }
       else {
-        try { setBreakpoint(new JPDABreakpoint(doc, offset, lineNum, isEnabled, this)); }
-        catch(LineNotExecutableException lnee) { Utilities.show(lnee.getMessage()); }
+        try { 
+          setBreakpoint(new JPDABreakpoint(doc, offset, lineNum, isEnabled, this));
+          return true;
+        }
+        catch(LineNotExecutableException lne) { 
+          Utilities.show(lne.getMessage());
+          return false;
+        }
       }
     }
-    else _model.getBreakpointManager().removeRegion(breakpoint);
+    else {
+      _model.getBreakpointManager().removeRegion(breakpoint);
+      return false;
+    }
   }
   
   /** Sets a breakpoint.

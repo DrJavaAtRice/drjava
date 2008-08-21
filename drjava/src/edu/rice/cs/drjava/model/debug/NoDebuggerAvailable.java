@@ -110,7 +110,8 @@ public class NoDebuggerAvailable implements Debugger {
   public void removeAllWatches() { }
   
   /** Toggles whether a breakpoint is set at the given line in the given document. */
-  public void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) throws DebugException { }
+  public boolean toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
+    throws DebugException { return false; }
   
   /** Sets a breakpoint. */
   public void setBreakpoint(Breakpoint breakpoint) { }

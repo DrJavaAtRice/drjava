@@ -309,7 +309,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public RegionManager<Breakpoint> getBreakpointManager();
     
   /** @return the bookmark region manager. */
-  public RegionManager<OrderedDocumentRegion> getBookmarkManager();
+  public RegionManager<MovingDocumentRegion> getBookmarkManager();
     
 //  /** @return managers for find result regions. */
 //  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
@@ -318,9 +318,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 //   *  @param rm the global model's region manager */
 //  public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
-  /** Remove a manager for find results from this document.
-   *  @param rm the global model's region manager. */
-  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
+//  /** Remove a manager for find results from this document.
+//   *  @param rm the global model's region manager. */
+//  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** Remove the browser regions for this document from the browser history manager. */
   public void clearBrowserRegions();

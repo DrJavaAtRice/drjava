@@ -60,6 +60,14 @@ public interface RegionManager<R extends IDocumentRegion> {
     */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset);
   
+  /** Returns the collection of regions, if any, where r.getLineStart() <= offset < r.getLineEnd().  Assumes that 
+    * document regions are disjoint and that lineStart precedes the start offset by at most 119 characters.
+    * @param odd the document
+    * @param offset the offset in the document
+    * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
+    */
+  public Collection<R> getRegionsNear(OpenDefinitionsDocument odd, int offset);
+  
   /** Returns the rightmost region starting on the same line containing the specified selection
    *  @param odd the document
    *  @param offset the offset in the document

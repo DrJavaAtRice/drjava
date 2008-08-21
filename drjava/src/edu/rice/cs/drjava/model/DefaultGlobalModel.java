@@ -307,14 +307,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return IterUtil.reverse(results.values());
   }
   
-  
-//  public void compileAll() throws IOException{ 
-////    ScrollableDialog sd = new ScrollableDialog(null, "DefaultGlobalModel.compileAll() called", "", "");
-////    sd.show();
-//    _state.compileAll(); 
-//  }
-  
-  
 //  public void junitAll() { _state.junitAll(); }
   
   /** Sets the build directory for a project. */
@@ -624,10 +616,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         setProjectChanged(true);
       }
     });
-    getBookmarkManager().addListener(new RegionManagerListener<OrderedDocumentRegion>() {
-      public void regionAdded(OrderedDocumentRegion r) { setProjectChanged(true); }
-      public void regionChanged(OrderedDocumentRegion r) { setProjectChanged(true); }
-      public void regionRemoved(OrderedDocumentRegion r) { setProjectChanged(true); }
+    getBookmarkManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {
+      public void regionAdded(MovingDocumentRegion r) { setProjectChanged(true); }
+      public void regionChanged(MovingDocumentRegion r) { setProjectChanged(true); }
+      public void regionRemoved(MovingDocumentRegion r) { setProjectChanged(true); }
     });
     
     _debugger.addListener(new DebugListener() {
@@ -713,7 +705,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     for (OpenDefinitionsDocument odd: getNonProjectDocuments()) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
-      try { 
+      try {
         File sourceRoot = odd.getSourceRoot();
         if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(sourceRoot); 
       }
@@ -725,20 +717,4 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
     setClassPathChanged(false);  // reset classPathChanged state
   }
-  
-//  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
-//    public void optionChanged (OptionEvent<Vector<File>> oce) {
-//      Vector<File> cp = oce.value;
-//      if (cp != null) {
-//        for (File f: cp) {
-//          // this forwards directly to InterpreterJVM.addClassPath(String)
-//          try { _interactionsModel.addExtraClassPath(f.toURL()); }
-//          catch(MalformedURLException murle) { 
-//            /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */ 
-//          }
-//        }
-//      }
-//    }
-//  }
-  
 }

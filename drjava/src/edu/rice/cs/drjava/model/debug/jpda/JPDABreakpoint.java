@@ -64,6 +64,7 @@ import static edu.rice.cs.plt.object.ObjectUtil.hash;
   */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
   
+  private volatile Position _position;
   private volatile Position _startPos;
   private volatile Position _endPos;
   private volatile OpenDefinitionsDocument _doc;
@@ -73,8 +74,12 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     throws DebugException {
     
     super(manager, doc, offset);
+    
     assert EventQueue.isDispatchThread();
     _doc = doc;
+    try { _position = doc.createPosition(offset); }
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
+    
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
     _isEnabled = isEnabled;
@@ -83,15 +88,29 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
       _startPos = doc.createPosition(doc._getLineStartPos(offset));
       _endPos = doc.createPosition(doc._getLineEndPos(offset));
     }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
     
-    if ((_manager != null) && (_manager.isReady())) {
+    if (_manager != null && _manager.isReady()) {
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
       Vector<ReferenceType> refTypes = _manager.getReferenceTypes(_className, _lineNumber);
       _initializeRequests(refTypes);
       setEnabled(isEnabled);
     }
+  }
+  
+  /** Returns the String used on the JTree label for this breakpoint. */
+  public String getString() {
+    try {
+      int start = _startPos.getOffset();
+      int end = _endPos.getOffset();
+      int length = end - start;
+      if (length <= 120) return _doc.getText(start, length);
+      StringBuilder sb = new StringBuilder(124);
+      sb.append(_doc.getText(start, 120)).append(" ...");
+      return sb.toString();
+    }
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
   
 //  public void setTreeNode(DefaultMutableTreeNode node) { 
@@ -143,6 +162,27 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     * @return the end offset
     */
   public int getEndOffset() { return _endPos.getOffset(); }
+  
+  /** Accessor for the start of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
+    * complete line.
+    * @return the lineStart offset
+    */
+  public int getLineStart() { return _startPos.getOffset(); }
+  
+  /** Accessor for the end of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
+    * complete line.
+    * @return the lineStart offset
+    */
+  public int getLineEnd() { return _endPos.getOffset(); }
+  
+  public void updateLines() {
+    try {  // _doc is inherited from DocumentRegion
+      int offset = _position.getOffset();
+      _startPos = _doc.createPosition(_doc._getLineStartPos(offset));
+      _endPos  = _doc.createPosition(_doc._getLineEndPos(offset));
+    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
+  }
   
   /** Accessor for this breakpoint's start position
     * @return the start position

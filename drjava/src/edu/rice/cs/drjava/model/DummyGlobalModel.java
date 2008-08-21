@@ -172,7 +172,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getBreakpointManager on a Dummy");
   }
   
-  public RegionManager<OrderedDocumentRegion> getBookmarkManager() {
+  public RegionManager<MovingDocumentRegion> getBookmarkManager() {
     throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
   }
   
@@ -184,7 +184,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call createFindResultsManager on a Dummy");
   }
   
-  public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
+  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
     throw new UnsupportedOperationException("Tried to call disposeFindResultsManager on a Dummy");
   }
   

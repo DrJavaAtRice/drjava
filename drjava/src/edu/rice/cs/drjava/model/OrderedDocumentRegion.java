@@ -36,12 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.UnexpectedException;
-
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
-import java.io.File;
-
 /** Interface supported by all document regions used in search results, bookmarks, and breakpoints (e.g., region 
   * classes other than DummyDocumentRegion and BrowserDocumentRegion).  OrderedDocumentRegions are presumed to
   * contain three fields: an OpenDefinitionsDocument, a start Postion, and an end Position, where Positions 
@@ -60,4 +54,9 @@ import java.io.File;
   * work regardless of what document mutation occurs.  (Note the complements of the preceding two relations are NOT
   * invariant as a document is modified.)
   */
-public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<OrderedDocumentRegion> { }
+public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<OrderedDocumentRegion> {
+  public int getLineStart();
+  public int getLineEnd();
+  public void updateLines();
+  public String getString();
+}

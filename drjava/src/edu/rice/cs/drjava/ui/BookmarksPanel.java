@@ -50,18 +50,16 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
+import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * Panel for displaying bookmarks.
- * This class is a swing view class and hence should only be accessed from the event-handling thread.
- * @version $Id$
- */
-public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
+/** Panel for displaying bookmarks. Only runs in the event thread.
+  * @version $Id$
+  */
+public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _goToButton;
   protected JButton _removeButton;
   protected JButton _removeAllButton;
@@ -70,15 +68,15 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
    *  This is swing view class and hence should only be accessed from the event-handling thread.
    *  @param frame the MainFrame
    */
-  public BookmarksPanel(MainFrame frame, RegionManager<OrderedDocumentRegion> bookmarkManager) {
+  public BookmarksPanel(MainFrame frame, RegionManager<MovingDocumentRegion> bookmarkManager) {
     super(frame, "Bookmarks", bookmarkManager);
-    _regionManager.addListener(new RegionManagerListener<OrderedDocumentRegion>() {      
-      public void regionAdded(OrderedDocumentRegion r) { addRegion(r); }
-      public void regionChanged(OrderedDocumentRegion r) { 
+    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+      public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
+      public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
         regionAdded(r);
       }
-      public void regionRemoved(OrderedDocumentRegion r) { removeRegion(r); }
+      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });
   }
   
@@ -96,19 +94,10 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
     };
     _goToButton = new JButton(goToAction);
 
-    Action removeAction = new AbstractAction("Remove") {  // TODO: combine with _remove in FindResultsPanel
-      public void actionPerformed(ActionEvent ae) {
-        int[] rows = _regTree.getSelectionRows();
-        int len = rows.length;
-        int row = (len > 0) ? rows[0] : 0;
-        for (OrderedDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r); 
-        int rowCount = _regTree.getRowCount();
-        if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
-        _regTree.setSelectionRow(row);
-        _requestFocusInWindow();
-        _regTree.scrollRowToVisible(row);
-      }
+    Action removeAction = new AbstractAction("Remove") {
+      public void actionPerformed(ActionEvent ae) { _remove(); }  // remove is inherited from RegionsTreePanel
     };
+  
     _removeButton = new JButton(removeAction);
     
     Action removeAllAction = new AbstractAction("Remove All") {
@@ -131,7 +120,7 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
 
   /** Update button state and text. */
   protected void _updateButtons() {
-    ArrayList<OrderedDocumentRegion> regs = getSelectedRegions();
+    ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size()==1);
     _removeButton.setEnabled(regs.size()>0);
     _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
@@ -144,7 +133,7 @@ public class BookmarksPanel extends RegionsTreePanel<OrderedDocumentRegion> {
         
       new AbstractAction("Remove") {
         public void actionPerformed(ActionEvent e) {
-          for (OrderedDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
+          for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
         }
       }
     };

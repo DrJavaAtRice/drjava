@@ -44,9 +44,6 @@ import java.io.File;
   */
 public interface Region {
   
-  /** @return the file */
-  public File getFile();
-  
   /** @return the start offset */
   public int getStartOffset();
 

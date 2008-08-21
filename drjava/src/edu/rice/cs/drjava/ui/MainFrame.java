@@ -37,9 +37,10 @@
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
 import javax.swing.border.*;
+import javax.swing.event.*;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.text.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
@@ -57,6 +58,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.jar.JarEntry;
@@ -73,6 +75,7 @@ import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.drjava.model.ConcreteRegionManager;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
@@ -2384,9 +2387,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that enables the debugger.  Only runs in the event thread. */
   private final Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
     public void actionPerformed(ActionEvent ae) { 
-      this.setEnabled(false);
+      setEnabled(false);
       debuggerToggle();
-      this.setEnabled(true);
+      setEnabled(true);
     }
   };
   
@@ -2516,7 +2519,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // hook highlighting listener to find results manager
     rm.addListener(new RegionManagerListener<MovingDocumentRegion>() {     
       public void regionAdded(MovingDocumentRegion r) {
-        panel.addRegion(r);
         DefinitionsPane pane = getDefPaneGivenODD(r.getDocument());
 //        if (pane == null) System.err.println("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
         highlights.put(r, pane.getHighlightManager().
@@ -2527,18 +2529,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
-//        System.err.println("MainFrame$highlightListener.regionRemoved(" + r + ") called");
-        panel.removeRegion(r);  // Removes panel if it becomes empty
 //        Utilities.show("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
 //        Utilities.show("The retrieved highlight is " + highlight);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
-        // The following is done in FindResultsPanel.removeRegion
-//        // close the panel and dispose of its MainFrame resources when all regions have been removed.
-//        if (rm.getDocuments().isEmpty()) {
-//          panel._close(); // _close removes the panel from _tabs and pair from _findResults
-//        }
+        // The following is done in ??
+        // close the panel and dispose of its MainFrame resources when all regions have been removed.
+        if (rm.getDocuments().isEmpty()) {
+          panel._close(); // _close removes the panel from _tabs and pair from _findResults
+        }
       }
     });
     
@@ -4078,7 +4078,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     updateStatusField("Toggling Debugger Mode");
     
     try { 
-      if (isDebuggerReady()) debugger.shutdown();
+      if (isDebuggerReady()) {
+        debugger.shutdown();
+        _breakpointsPanel._close();
+      }
       else {
         // Turn on debugger
         hourglassOn();
@@ -4091,9 +4094,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         finally { hourglassOff(); }
       }
     }
-    catch (DebugException de) {
-      _showError(de, "Debugger Error", "Could not start the debugger.");
-    }
+    catch (DebugException de) { _showError(de, "Debugger Error", "Could not start the debugger."); }
     catch (NoClassDefFoundError err) {
       _showError(err, "Debugger Error",
                  "Unable to find the JPDA package for the debugger.\n" +
@@ -4463,9 +4464,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  boolean _closeProject() { return _closeProject(false); }
-  
-  
   /** Closes project when DrJava is not in the process of quitting.
     * @return true if the project is closed, false if cancelled.
     */
@@ -4473,6 +4471,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     updateStatusField("Closing current project");
     return _closeProject();
   }
+  
+  boolean _closeProject() { return _closeProject(false); }
   
   /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) the 
     * clean up the state of the global model.  It also restores the list view navigator
@@ -5646,7 +5646,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     try {
       Debugger debugger = _model.getDebugger();
-      debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
+      boolean breakpointSet = 
+        debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
+      if (breakpointSet) createBookmarks();
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
@@ -6884,19 +6886,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // hook highlighting listener to bookmark manager
-    _model.getBookmarkManager().addListener(new RegionManagerListener<OrderedDocumentRegion>() { 
+    _model.getBookmarkManager().addListener(new RegionManagerListener<MovingDocumentRegion>() { 
       // listener methods only run in the event thread
-      public void regionAdded(OrderedDocumentRegion r) {
+      public void regionAdded(MovingDocumentRegion r) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
         _documentBookmarkHighlights.
           put(r, bpPane.getHighlightManager().
                 addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.BOOKMARK_PAINTER));
       }
-      public void regionChanged(OrderedDocumentRegion r) { 
+      public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
         regionAdded(r);
       }
-      public void regionRemoved(OrderedDocumentRegion r) {
+      public void regionRemoved(MovingDocumentRegion r) {
         HighlightManager.HighlightInfo highlight = _documentBookmarkHighlights.get(r);
         if (highlight != null) highlight.remove();
         _documentBookmarkHighlights.remove(r);
@@ -7387,40 +7389,31 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private volatile Object _updateLock = new Object();
-  private Component _lastUpdatedComponent = null;
-  private boolean _tabUpdatePending = false;
-  public static long UPDATE_DELAY = 3000L;  // update delay threshold in milliseconds
+  private volatile boolean _tabUpdatePending = false;
+  private volatile Runnable _pendingUpdate = null;
+  public static long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
+  public static int UPDATER_PRIORITY = 3;   // priority in [1..10] of the updater thread.
   
-  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  The update is always performed
-    * if the selected component has changed since the last call or _tabUpdatePending is false. 
-    */
-  public void updateTabbedPane() {
-    final JComponent c = (JComponent) _tabbedPane.getSelectedComponent();
-    synchronized(_updateLock) {
-      if (c == null || (_tabUpdatePending && c == _lastUpdatedComponent)) return;
-    }
-    _tabUpdatePending = true;
-    Thread updater = new Thread(new Runnable() {
-      public void run() {
-        synchronized(_updateLock) { 
-          try { _updateLock.wait(UPDATE_DELAY); } 
-          catch(InterruptedException e) { /* fall through */ }
-        }
-        EventQueue.invokeLater(new Runnable() { 
-          public void run() {
-            synchronized(_updateLock) { 
-              _tabUpdatePending = false;
-              _lastUpdatedComponent = c;
-            }
-//            System.err.println("Repainting " + c);
-            c.revalidate();
-            c.repaint();
-          }
-        });
-      }
-    });
-    updater.start();
-  }
+//  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  */
+//  public void updateTabbedPane() {
+//    if (_tabUpdatePending) return;
+//    _tabUpdatePending = true;
+//    Thread updater = new Thread(new Runnable() {
+//      public void run() {
+//        synchronized(_updateLock) { 
+//          try { _updateLock.wait(UPDATE_DELAY); } 
+//          catch(InterruptedException e) { /* fall through */ }
+//        }
+//        EventQueue.invokeLater(new Runnable() { 
+//          public void run() {
+//            _tabUpdatePending = false;
+//            _tabbedPane.getSelectedComponent().repaint();
+//          }
+//        });
+//      }
+//    });
+//    updater.start();
+//  }
   
   private static boolean isDisplayed(TabbedPanel p) { return p != null && p.isDisplayed(); }
   
@@ -7439,18 +7432,67 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     ErrorCaretListener caretListener = new ErrorCaretListener(doc, pane, this);
     pane.addErrorCaretListener(caretListener);
     
-    // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
-      private void updateUI() {
-        if (isDisplayed(_breakpointsPanel)) { _breakpointsPanel.repaint(); }
-        if (isDisplayed(_bookmarksPanel)) { _bookmarksPanel.repaint(); }
+      /** Updates panel displayed in interactions subwindow. */
+      private void updateUI(OpenDefinitionsDocument doc, int offset) {
+//        System.err.println("updateUI(" + doc + ", " + offset + ")");
         
-        updateTabbedPane();
-        _lastChangeTime = System.currentTimeMillis();  // TODO: what about changes to file names?
+        JComponent c = (JComponent) _tabbedPane.getSelectedComponent();
+        if (c instanceof RegionsTreePanel) reloadPanel((RegionsTreePanel<? extends OrderedDocumentRegion>) c, doc, offset);
+          
+//        _lastChangeTime = System.currentTimeMillis();  // TODO: what about changes to file names?
       }
-      public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // signifcant changes are inserts and removes
-      public void insertUpdate(DocumentEvent e) { updateUI(); }
-      public void removeUpdate(DocumentEvent e) { updateUI(); }
+    
+      // coarsely update the displayed RegionsTreePanel
+      private <R extends OrderedDocumentRegion> void 
+        reloadPanel(final RegionsTreePanel<R> p, OpenDefinitionsDocument doc, int offset) {
+        
+        RegionManager<R> rm = p._regionManager;
+        SortedSet<R> regions = rm.getRegions(doc);
+        if (regions == null) return;
+        final Collection<R> matches = rm.getRegionsNear(doc, offset);
+        if (matches == null || matches.size() == 0) return;
+        // Queue a reqeust to perform the update
+        EventQueue.invokeLater(new Runnable() {
+          public void run() {
+            synchronized (_updateLock) {
+              _pendingUpdate = new Runnable() {
+                public void run() {
+                  for (final R r: matches) {
+                    r.updateLines();  // recompute _lineStartPos and _lineEndPos in r
+//                    System.err.println("reloading node for " + r);
+                    p._regTreeModel.reload(p.getNode(r));
+                    p.repaint();
+                  }
+                }
+              };  // end Runnable
+              if (_tabUpdatePending) return;  // Let the queued task run this update (or a successor)
+              _tabUpdatePending = true;
+            } // end synchronized
+            
+            // Create a new update task
+            new Thread(new Runnable() {
+              public void run() {
+                Thread.currentThread().setPriority(UPDATER_PRIORITY);
+                synchronized (_updateLock) {
+                  try { _updateLock.wait(UPDATE_DELAY); }  // _pendingUpdate can be updated during wait
+                  catch(InterruptedException e) { /* fall through */ }
+                  _tabUpdatePending = false;
+                } // end synchronized
+                _pendingUpdate.run();
+              }
+            }).start();
+          }
+        });
+      }
+                        
+      public void changedUpdate(DocumentEvent e) { }
+      public void insertUpdate(DocumentEvent e) {
+        updateUI(((DefinitionsDocument) e.getDocument()).getOpenDefDoc(), e.getOffset()); 
+      }
+      public void removeUpdate(DocumentEvent e) {
+        updateUI(((DefinitionsDocument) e.getDocument()).getOpenDefDoc(), e.getOffset());
+      }
     });
     
     // add a listener to update line and column.
@@ -9096,8 +9138,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _currentDefPane.requestFocusInWindow();
   }
   
-  /** Shows the bookmark panel in the tabbed pane. */
+  /** Adds the bookmarks panel to the tabbed pane. */
   public void createBookmarks() { _createTab(_bookmarksPanel); }
+   
+  /** Adds the breakpoints panel to the tabbed pane. */
+  public void createBreakpoints() { _createTab(_breakpointsPanel); }
   
   private void _createTab(TabbedPanel panel) {
     int numVisible = 0;
@@ -9125,8 +9170,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // are always displayed)
     assert EventQueue.isDispatchThread();
     try {
-      
       if (c instanceof TabbedPanel) _createTab((TabbedPanel) c);
+      if (c instanceof RegionsTreePanel) {
+        RegionsTreePanel p = (RegionsTreePanel) c;
+        DefaultTreeModel model = p._regTreeModel;
+        model.reload();
+        p.expandTree();
+        p.repaint();
+      }
+
       _tabbedPane.setSelectedComponent(c);
       c.requestFocusInWindow();
       

@@ -119,7 +119,7 @@ public interface GlobalModel extends ILoadDocuments {
   public RegionManager<Breakpoint> getBreakpointManager();
   
   /** @return manager for bookmark regions. */
-  public RegionManager<OrderedDocumentRegion> getBookmarkManager();
+  public RegionManager<MovingDocumentRegion> getBookmarkManager();
   
 //  /** @return managers for find result regions. */
 //  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
@@ -128,7 +128,7 @@ public interface GlobalModel extends ILoadDocuments {
   public RegionManager<MovingDocumentRegion> createFindResultsManager();
   
   /** Dispose a manager for find result regions. */
-  public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
+  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** @return manager for browser history regions. */
   public BrowserHistoryManager getBrowserHistoryManager();

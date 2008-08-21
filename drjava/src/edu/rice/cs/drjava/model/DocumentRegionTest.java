@@ -66,8 +66,8 @@ public class DocumentRegionTest extends DrJavaTestCase {
     doc1.append("This is a test");
     doc2.append("This is another test");
     IDocumentRegion r1 = new BrowserDocumentRegion(doc1, createPosition(doc1, 5), createPosition(doc1, 10));
-    IDocumentRegion r2 = new DocumentRegion(doc1, createPosition(doc1, 5), createPosition(doc1, 10));
-    IDocumentRegion r3 = new DocumentRegion(doc2, createPosition(doc1, 5), createPosition(doc2, 10));
+    IDocumentRegion r2 = new DocumentRegion(doc1, 5, 10);
+    IDocumentRegion r3 = new DocumentRegion(doc2, 5, 10);
     assertEquals("equality test 1", r1, r1);
     assertFalse("equality test 2", r1.equals(r2));
     assertFalse("equality test 3", r2.equals(r3));
@@ -103,7 +103,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 2, 5).size() == 0);
     assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 5, 8).size() == 0);
     
-    DocumentRegion r1 = new DocumentRegion(_doc, createPosition(_doc, 3), createPosition(_doc, 7));
+    DocumentRegion r1 = new DocumentRegion(_doc, 3, 7);
     rm.addRegion(r1);
     assertTrue("Region found", r1 == rm.getRegionAt(_doc, 5));
     assertTrue("Region found", r1 == rm.getRegionAt(_doc, 3));
@@ -129,7 +129,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertNull(rm.getRegionAt(_doc, 18));
 
     
-    DocumentRegion r2 = new DocumentRegion(_doc, createPosition(_doc, 13), createPosition(_doc, 17));
+    DocumentRegion r2 = new DocumentRegion(_doc, 13, 17);
     rm.addRegion(r2);
     assertTrue(r2 == rm.getRegionAt(_doc, 15));
     assertTrue(r2 == rm.getRegionAt(_doc, 13));
@@ -151,7 +151,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
     
 //    // r2 and r3 are the same region, so the region will be reused
 //    // and we get r2 back
-    DocumentRegion r3 = new DocumentRegion(_doc, createPosition(_doc, 13), createPosition(_doc, 17));
+    DocumentRegion r3 = new DocumentRegion(_doc, 13, 17);
 //    rm.addRegion(r3);
 //    assertTrue(r2==rm.getRegionAt(_doc, 15));
 //    assertTrue(r2==rm.getRegionAt(_doc, 13));
