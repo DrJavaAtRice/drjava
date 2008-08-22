@@ -207,6 +207,7 @@ public class GeneralProcessCreator extends ProcessCreator {
       if (pipe.size()==1) {
         // only one process, creating a piping chain is not necessary
         List<String> cmds = pipe.get(0);
+        if (cmds.size()<1) { throw new IOException("No process to start."); }
         String[] cmdarray = new String[cmds.size()];
         for (int i=0; i<cmds.size(); ++i) {
           cmdarray[i] = StringOps.unescapeFileName(cmds.get(i));
@@ -218,6 +219,7 @@ public class GeneralProcessCreator extends ProcessCreator {
       ProcessCreator[] creators = new ProcessCreator[pipe.size()];
       for (int i=0; i<pipe.size(); ++i) {
         List<String> cmds = pipe.get(i);
+        if (cmds.size()<1) { throw new IOException("No process to start."); }
         String[] cmdarray = new String[cmds.size()];
         for (int j=0; j<cmds.size(); ++j) {
           cmdarray[j] = StringOps.unescapeFileName(cmds.get(j));

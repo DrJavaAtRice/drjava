@@ -299,7 +299,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Remove the selected regions. */
   protected void _remove() {   
     int[] rows = _regTree.getSelectionRows();
-    System.err.println("_remove() called with rows " + Arrays.toString(rows));
+//    System.err.println("_remove() called with rows " + StringOps.toString(rows));
     int len = rows.length;
     int row = (len > 0) ? rows[0] : 0;
     _frame.removeCurrentLocationHighlight();
@@ -308,17 +308,17 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
     int rowCount = _regTree.getRowCount();
     
-    System.err.println("rowCount = " + rowCount);
+//    System.err.println("rowCount = " + rowCount);
     if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
     _requestFocusInWindow();
     _regTree.scrollRowToVisible(row);
     
     //Set selection row; must be done after preceding too lines for selection highlight to persist
     _regTree.setSelectionRow(row);
-    System.err.println("Setting selection row = " + row);
+//    System.err.println("Setting selection row = " + row);
     // Ensure that a leaf (region node) is selected  (Is there a simpler way to determine if selected node is a leaf?)
     if (_regTree.getLeadSelectionPath().getPathCount() < 2) _regTree.setSelectionRow(row + 1);
-    System.err.println("Resetting selection row = " + (row + 1));
+//    System.err.println("Resetting selection row = " + (row + 1));
   }
   
   private void expandRecursive(JTree tree, TreePath parent, boolean expand) {

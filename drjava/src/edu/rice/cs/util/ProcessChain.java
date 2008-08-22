@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.util.JoinInputStream;
 
 /**
  * This class represents a piping chain of processes, in which the output of the first
@@ -81,6 +82,16 @@ public class ProcessChain extends Process {
   
   /** The stream into which all outputs to stdout are written. */
   protected PipedOutputStream _combinedStdOutStream;
+  
+  /** The combined input stream of all the processes, plus a debug stream. */
+  protected JoinInputStream _combinedInputJoinedWithDebugStream;
+
+  /** Debug output that gets joined with the streams from the processes. */
+  protected PrintWriter _debugOutput;
+
+  /** Debug input and output stream. */
+  protected PipedInputStream _debugInputStream;
+  protected PipedOutputStream _debugOutputStream;
 
   /** The combined error stream of all processes. */
   protected PipedInputStream _combinedErrorStream;
@@ -103,6 +114,16 @@ public class ProcessChain extends Process {
       _combinedInputStream.connect(_combinedStdOutStream);
     }
     catch(IOException e) { /* ignore, no output if this goes wrong */ }
+    
+    _debugInputStream = new PipedInputStream();
+    try {
+      _debugOutputStream = new PipedOutputStream(_debugInputStream);
+      _debugInputStream.connect(_debugOutputStream);
+    }
+    catch(IOException e) { /* ignore, no output if this goes wrong */ }
+     _combinedInputJoinedWithDebugStream = new JoinInputStream(_combinedInputStream, _debugInputStream);
+    _debugOutput = new PrintWriter(new OutputStreamWriter(_debugOutputStream));
+
     _combinedErrorStream = new PipedInputStream();
     try {
       _combinedStdErrStream = new PipedOutputStream(_combinedErrorStream);
@@ -131,6 +152,10 @@ public class ProcessChain extends Process {
 //        _deathThreads[i].start();
       }
       catch(IOException e) {
+        GeneralProcessCreator.LOG.log("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+        // could not start the process, record error and abort
+        _debugOutput.println("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+        _debugOutput.flush();
         _aborted = true;
         destroy();
         return;
@@ -166,6 +191,8 @@ public class ProcessChain extends Process {
                                  new ProcessChainThreadGroup(this));
     _redirectors.add(r);
     r.start();
+//    _debugOutput.println("\n\nProcessChain started\n\n");
+//    _debugOutput.flush();
   }
   
 //  /**
@@ -247,7 +274,7 @@ public class ProcessChain extends Process {
    * @return  the input stream of the process chain
    */
   public InputStream getInputStream() {
-    return _combinedInputStream;
+    return _combinedInputJoinedWithDebugStream;
   }
   
   /**
@@ -330,18 +357,18 @@ public class ProcessChain extends Process {
   /** Thread group for all threads that deal with this process sequence. */
   protected class ProcessChainThreadGroup extends ThreadGroup {
     private ProcessChain _chain;
-    private PrintWriter _errOut;
+    private PrintWriter _debugOut;
     public ProcessChainThreadGroup(ProcessChain chain) {
       super("Process Chain Thread Group");
       _chain = chain;
-      _errOut = new PrintWriter(new OutputStreamWriter(_chain._combinedStdErrStream));
+      _debugOut = _chain._debugOutput;
     }
     public void uncaughtException(Thread t, Throwable e) {
       destroy();
       if ((e instanceof StreamRedirectException) &&
           (e.getCause() instanceof java.io.IOException)) {
-        _errOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
-                        e.toString()+"\n\n");
+        _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
+                          e.toString()+"\n\n");
       }
       else {
         DrJavaErrorHandler.record(e);

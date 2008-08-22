@@ -76,6 +76,16 @@ public class ProcessSequence extends Process {
   /** The stream into which all outputs to stdout are written. */
   protected PipedOutputStream _combinedStdOutStream;
 
+  /** The combined input stream of all the processes, plus a debug stream. */
+  protected JoinInputStream _combinedInputJoinedWithDebugStream;
+
+  /** Debug output that gets joined with the streams from the processes. */
+  protected PrintWriter _debugOutput;
+
+  /** Debug input and output stream. */
+  protected PipedInputStream _debugInputStream;
+  protected PipedOutputStream _debugOutputStream;
+
   /** The combined error stream of all processes. */
   protected PipedInputStream _combinedErrorStream;
   
@@ -101,6 +111,16 @@ public class ProcessSequence extends Process {
       _combinedInputStream.connect(_combinedStdOutStream);
     }
     catch(IOException e) { /* ignore, no output if this goes wrong */ }
+    
+    _debugInputStream = new PipedInputStream();
+    try {
+      _debugOutputStream = new PipedOutputStream(_debugInputStream);
+      _debugInputStream.connect(_debugOutputStream);
+    }
+    catch(IOException e) { /* ignore, no output if this goes wrong */ }
+     _combinedInputJoinedWithDebugStream = new JoinInputStream(_combinedInputStream, _debugInputStream);
+    _debugOutput = new PrintWriter(new OutputStreamWriter(_debugOutputStream));
+
     _combinedErrorStream = new PipedInputStream();
     try {
       _combinedStdErrStream = new PipedOutputStream(_combinedErrorStream);
@@ -133,9 +153,10 @@ public class ProcessSequence extends Process {
               connectProcess(_processes[_index]);
             }
             catch(IOException e) {
+              GeneralProcessCreator.LOG.log("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
               // could not start the process, record error but continue
-              // TODO-MGR: find a way to record the error in the ExternalProcessPanel (mgricken)
-//              DrJavaErrorHandler.record(e);
+              _debugOutput.println("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+              _debugOutput.flush();
               _processes[_index] = DUMMY_PROCESS;
             }
           }
@@ -159,13 +180,16 @@ public class ProcessSequence extends Process {
       _processes[_index] = _creators[_index].start();
     }
     catch(IOException e) {
+      GeneralProcessCreator.LOG.log("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
       // could not start the process, record error but continue
-      // TODO-MGR: find a way to record the error in the ExternalProcessPanel (mgricken)
       _processes[_index] = DUMMY_PROCESS;
-//      DrJavaErrorHandler.record(e);
+      _debugOutput.println("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+      _debugOutput.flush();
     }
     connectProcess(_processes[_index]);
     _deathThread.start();
+//    _debugOutput.println("\n\nProcessSequence started\n\n");
+//    _debugOutput.flush();
   }
   
   /**
@@ -205,7 +229,7 @@ public class ProcessSequence extends Process {
    * @return  the input stream of the process chain
    */
   public InputStream getInputStream() {
-    return _combinedInputStream;
+    return _combinedInputJoinedWithDebugStream;
   }
   
   /**
@@ -288,7 +312,7 @@ public class ProcessSequence extends Process {
                                                    p.getInputStream(),
                                                    _combinedStdOutStream,
                                                    false/*close*/,
-                                                   new ProcessSequenceThreadGroup(_combinedStdErrStream),
+                                                   new ProcessSequenceThreadGroup(this),
                                                    true/*keepRunning*/);
       _stdOutRedirector.start();
     }
@@ -300,7 +324,7 @@ public class ProcessSequence extends Process {
                                                    p.getErrorStream(),
                                                    _combinedStdErrStream,
                                                    false/*close*/,
-                                                   new ProcessSequenceThreadGroup(_combinedStdErrStream),
+                                                   new ProcessSequenceThreadGroup(this),
                                                    true/*keepRunning*/);
       _stdErrRedirector.start();
     }
@@ -312,16 +336,16 @@ public class ProcessSequence extends Process {
 
   /** Thread group for all threads that deal with this process sequence. */
   protected class ProcessSequenceThreadGroup extends ThreadGroup {
-    private PrintWriter _errOut;
-    public ProcessSequenceThreadGroup(OutputStream errOut) {
+    private PrintWriter _debugOut;
+    public ProcessSequenceThreadGroup(ProcessSequence seq) {
       super("Process Sequence Thread Group");
-      _errOut = new PrintWriter(new OutputStreamWriter(errOut));
+      _debugOut = seq._debugOutput;
     }
     public void uncaughtException(Thread t, Throwable e) {
       if ((e instanceof StreamRedirectException) &&
           (e.getCause() instanceof java.io.IOException)) {
-        _errOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
-                        e.toString()+"\n\n");
+        _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
+                          e.toString()+"\n\n");
       }
       else {
         DrJavaErrorHandler.record(e);

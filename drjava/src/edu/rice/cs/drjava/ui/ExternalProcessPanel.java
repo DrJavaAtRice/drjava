@@ -209,12 +209,15 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected void abortActionPerformed(ActionEvent e) {    
     _abortButton.setEnabled(false);
     _updateNowButton.setEnabled(false);
-    _runAgainButton.setEnabled(false);
+    _runAgainButton.setEnabled(true);
     // spin this off in a separate thread so the event thread is free
     new Thread(new Runnable() {
       public void run() {
         if (_is!=null) {
           try {
+            // cannot close() an InputStreamReader from thread A while thread B is blocked in read()
+            // close() will block as well, so we close the InputStream of the process first
+            _p.getInputStream().close();
             _is.close();
           }
           catch(IOException ioe) { /* ignore, just stop polling */ }
@@ -223,6 +226,9 @@ public class ExternalProcessPanel extends AbortablePanel {
         }
         if (_erris!=null) {
           try {
+            // cannot close() an InputStreamReader from thread A while thread B is blocked in read()
+            // close() will block as well, so we close the InputStream of the process first
+            _p.getErrorStream().close();
             _erris.close();
           }
           catch(IOException ioe) { /* ignore, just stop polling */ }
@@ -238,27 +244,26 @@ public class ExternalProcessPanel extends AbortablePanel {
       }
     }).start();
   }
-  
+
   /** Run Again action was performed
     * @param e action event performed by user, or null if initiated programmatically */
   protected void runAgainActionPerformed(ActionEvent e) {
+    abortActionPerformed(e);
     _abortButton.setEnabled(false);
     _updateNowButton.setEnabled(false);
     _runAgainButton.setEnabled(false);
-    abortActionPerformed(e);
     // spin this off in a separate thread so the event thread is free
     new Thread(new Runnable() {
       public void run() {
         while(!_abortMonitor.attemptEnsureSignalled()) { } // wait for the abortActionPerformed() call to finish
         _abortMonitor.reset();
-        _sb = new StringBuilder("Command line:");
+        _sb = new StringBuilder("Command line: ");
         _sb.append(_pc.cmdline());
         _sb.append('\n');
         _header = _sb.toString();
         initThread(_pc);
         EventQueue.invokeLater(new Runnable() {
           public void run() {
-            _textArea.setText(_header);
             updateText();
           } });
       }

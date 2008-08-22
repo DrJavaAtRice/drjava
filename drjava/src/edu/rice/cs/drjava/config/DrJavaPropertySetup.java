@@ -44,6 +44,9 @@ import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.plt.lambda.Lambda4;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
+
 import java.io.*;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -1276,5 +1279,53 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "\trel=\"<dir to which the output should be relative\"") {
                                                                  public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                                                });
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("echo",
+                                                                 "Echo text to the console.\n"+
+                                                                 "Required attributes:\n"+
+                                                                 "\ttext=\"<text to echo>\"") {
+      public void update(PropertyMaps pm) {
+        String text = _attributes.get("text");
+        if (text==null) {
+          _value = "(echo Error: text missing...)";
+          return;
+        }
+        StringBuilder sb = new StringBuilder();
+        final String osName = System.getProperty("os.name");
+        if ((osName.indexOf("Windows")>=0)) {
+          String exe = "cmd";
+          if ((osName.indexOf("95")>=0) || (osName.indexOf("98")>=0)) { exe = "command"; }
+          if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
+            // System.getenv is deprecated under 1.3 and 1.4, and may throw a java.lang.Error (!),
+            // which we'd rather not have to catch
+            String var = System.getenv("ComSpec");
+            if (var!=null) { sb.append(var); }
+            else {
+              var = System.getenv("WinDir");
+              if (var!=null) {
+                sb.append(var);
+                sb.append("\\System32\\");
+              }
+              sb.append(exe);
+            }
+          }
+          else {
+            sb.append(exe);
+          }
+          sb.append(" /c echo ");
+          sb.append(text);
+        }
+        else {
+          sb.append("echo ");
+          sb.append(text);
+        }
+        _value = sb.toString();
+      }
+      public boolean isCurrent() { return false; }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("text", null);
+      }
+      public String toString() { return "--uninitialized--"; }
+    });
   }
 }

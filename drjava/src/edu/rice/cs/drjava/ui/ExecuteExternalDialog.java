@@ -975,8 +975,8 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     XMLConfig xc = new XMLConfig();
-    System.out.println("saveToFile("+index+", "+f+")");
-    System.out.println("\t"+names.get(index));
+//    System.out.println("saveToFile("+index+", "+f+")");
+//    System.out.println("\t"+names.get(index));
     xc.set("drjava/extprocess/name", names.get(index));
     xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
     xc.set("drjava/extprocess/workdir", workdirs.get(index));
