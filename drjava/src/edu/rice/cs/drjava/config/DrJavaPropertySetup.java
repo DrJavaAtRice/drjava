@@ -748,6 +748,43 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 UnaryOpProperty.PARSE_STRING,
                                                                 UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
+                                        <Boolean,Boolean,Boolean>("and",
+                                                                "If op1 and op2 are true, returns true,"+
+                                                                "false otherwise.\n"+
+                                                                "Required attributes:\n"+
+                                                                "\top1=\"<boolean>\"\n"+
+                                                                "\top2=\"<boolean>\"",
+                                                                new Lambda2<Boolean,Boolean,Boolean>() {
+      public Boolean value(Boolean op1, Boolean op2) { return op1 && op2; }
+    },
+                                                                UnaryOpProperty.PARSE_BOOL,
+                                                                UnaryOpProperty.PARSE_BOOL,
+                                                                UnaryOpProperty.FORMAT_BOOL));
+    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
+                                        <Boolean,Boolean,Boolean>("or",
+                                                                "If at least one of op1, op2 is true, returns true,"+
+                                                                "false otherwise.\n"+
+                                                                "Required attributes:\n"+
+                                                                "\top1=\"<boolean>\"\n"+
+                                                                "\top2=\"<boolean>\"",
+                                                                new Lambda2<Boolean,Boolean,Boolean>() {
+      public Boolean value(Boolean op1, Boolean op2) { return op1 || op2; }
+    },
+                                                                UnaryOpProperty.PARSE_BOOL,
+                                                                UnaryOpProperty.PARSE_BOOL,
+                                                                UnaryOpProperty.FORMAT_BOOL));
+    PropertyMaps.TEMPLATE.setProperty("Misc", new UnaryOpProperty
+                                        <Boolean,Boolean>("not",
+                                                          "If op is true, returns false,"+
+                                                          "true otherwise.\n"+
+                                                          "Required attributes:\n"+
+                                                          "\top=\"<boolean>\"",
+                                                          new Lambda<Boolean,Boolean>() {
+      public Boolean value(Boolean op) { return !op; }
+    },
+                                                          UnaryOpProperty.PARSE_BOOL,
+                                                          UnaryOpProperty.FORMAT_BOOL));
+    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Double,Double,Double>("add",
                                                                "Returns the sum of the two operands (op1+op2).\n"+
                                                                "Required attributes:\n"+
