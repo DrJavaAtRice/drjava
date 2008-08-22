@@ -3571,6 +3571,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       setProperty("DrJava", 
                   new FileProperty("drjava.current.file", new Thunk<File>() {
       public File value() { return _model.getActiveDocument().getRawFile(); }
+      public boolean isCurrent() { return false; }
     }, 
                                    "Returns the current document in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3582,6 +3583,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                          "Returns the current line in the Definitions Pane.") {
       public void update(PropertyMaps pm) { _value = String.valueOf(_posListener.lastLine()); }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", new DrJavaProperty("drjava.current.col",
@@ -3593,11 +3595,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _value = String.valueOf(_posListener.lastCol());
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
                   new FileProperty("drjava.working.dir", new Thunk<File>() {
       public File value() { return _model.getInteractionsModel().getWorkingDirectory(); }
+      public boolean isCurrent() { return false; }
     },
                                    "Returns the current working directory of DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3608,6 +3612,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       setProperty("DrJava", 
                   new FileProperty("drjava.master.working.dir", new Thunk<File>() {
       public File value() { return _model.getMasterWorkingDirectory(); }
+      public boolean isCurrent() { return false; }
     },
                                    "Returns the working directory of the DrJava master JVM.\n"+
                                    "Optional attributes:\n"+
@@ -3631,6 +3636,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
@@ -3648,6 +3654,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
@@ -3666,6 +3673,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
@@ -3684,6 +3692,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));    
     
     PropertyMaps.TEMPLATE.
@@ -3715,6 +3724,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _attributes.put("prompt", null);
         _attributes.put("default", null);
       }
+      public boolean isCurrent() { return false; }
     });
     
     // Project
@@ -3734,6 +3744,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _attributes.clear();
         _attributes.put("fmt", "boolean");
       }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
@@ -3753,12 +3764,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _attributes.clear();
         _attributes.put("fmt", "boolean");
       }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileProperty("project.file", 
                                    new Thunk<File>() {
       public File value() { return _model.getProjectFile(); }
+      public boolean isCurrent() { return false; }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3771,6 +3784,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.main.class", 
                                    new Thunk<File>() {
       public File value() { return _model.getMainClass(); }
+      public boolean isCurrent() { return false; }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3782,6 +3796,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.root", 
                                    new Thunk<File>() {
       public File value() { return _model.getProjectRoot(); }
+      public boolean isCurrent() { return false; }
     },
                                    "Returns the current project root in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3793,6 +3808,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.build.dir", 
                                    new Thunk<File>() {
       public File value() { return _model.getBuildDirectory(); }
+      public boolean isCurrent() { return false; }
     },
                                    "Returns the current build directory in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3830,6 +3846,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _attributes.clear();
         _attributes.put("fmt", "boolean");
       }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
@@ -3845,6 +3862,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
@@ -3860,17 +3878,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+      public boolean isCurrent() { return false; }
     });
     
     // Actions
     PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
                                                                          "Execute a \"Save All\" action.") {
       public void update(PropertyMaps pm) { _saveAll(); }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Action", new DrJavaActionProperty("action.compile.all", "(Compile All...)",
                                                      "Execute a \"Compile All\" action.") {
       public void update(PropertyMaps pm) { _compileAll(); }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Action", 
@@ -3881,6 +3902,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // is implemented as an asynchronous task, and DrJava would not wait for its completion
         edu.rice.cs.plt.io.IOUtil.deleteRecursively(_model.getBuildDirectory());
       }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.open.file", "(Open File...)",
                                                                          "Execute an \"Open File\" action.\n"+
@@ -3911,14 +3933,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             Utilities.invokeLater(new Runnable() { public void run() { _jumpToLine(l); } });
           }
         }
-      }
-      
+      }      
       /** Reset the attributes. */
       public void resetAttributes() {
         _attributes.clear();
         _attributes.put("file", null);
         _attributes.put("line", null);
       }
+      public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Action", 
@@ -3927,6 +3949,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void update(PropertyMaps pm) {
         _model.autoRefreshProject();
       }
+      public boolean isCurrent() { return false; }
     });
   }
   
