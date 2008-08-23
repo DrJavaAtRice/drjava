@@ -1903,7 +1903,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // remove regions for this file
     _breakpointManager.clearRegions();
     _bookmarkManager.clearRegions();
+    
     // The following copy operation is dictated by the silly "no comodification" constraint on Collection iterators
+    @SuppressWarnings("unchecked")
     RegionManager<MovingDocumentRegion>[] managers = _findResultsManagers.toArray(new RegionManager[0]);
     for (RegionManager<MovingDocumentRegion> rm: managers) rm.removeRegions(doc);
     doc.clearBrowserRegions();

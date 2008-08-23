@@ -7483,8 +7483,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           public void run() {
             synchronized (_updateLock) {
               _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
+                @SuppressWarnings("unchecked") 
                 public void run() {
-                  rm.updateLines((R)_firstMatch); // recompute _cachedLineStart, _cachedLineEndP in affected regions
+                  rm.updateLines((R)_firstMatch); // recompute _lineStartPos, _lineEndPos in affected regions
                   for (final R r: matches) {
 //                    System.err.println("reloading node for " + r);
                     p._regTreeModel.reload(p.getNode(r));
