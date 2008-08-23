@@ -60,4 +60,8 @@ public abstract class EagerProperty extends DrJavaProperty {
   public String getLazy(PropertyMaps pm) {
     return getCurrent(pm);
   }
+  
+  /** Return that it is never current.
+    * @return always false. */
+  public boolean isCurrent() { return false; }
 } 

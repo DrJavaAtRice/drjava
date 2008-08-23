@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<drjava>
+  <extprocess>
+    <name>xajavac Compile All</name>
+    <cmdline>${if;cond="${and;op1="${project.mode}";op2="${not;op="${eq;op1="${project.build.dir}";op2=""}"}"}";then="${ignore;cmd="${file.mkdir;file="${project.build.dir}"}"}${java.file} -jar ${enclosing.djapp.file} @${tmpfile;content="-sourcepath ${project.root} -cp ${project.build.dir}${path.separator}${project.extra.class.path}${path.separator}${config.extra.classpath}${path.separator}${drjava.file} -d ${project.build.dir} ${drjava.all.files;sep=" ";rel="${project.root}"}"}";else="${echo;text="DrJava must be in project mode and have well-defined project root and build directory."}"}</cmdline>
+    <workdir>${project.root}</workdir>
+    <drjavajarfile></drjavajarfile>
+  </extprocess>
+</drjava>
