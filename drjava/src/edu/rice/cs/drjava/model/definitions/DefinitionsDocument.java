@@ -351,9 +351,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Return the current line of the cursor position.  Uses a 1-based index. */
-  public int getCurrentLine() {
-    return getDefaultRootElement().getElementIndex(_currentLocation) + 1; 
-  }
+  public int getCurrentLine() { return getLineOfOffset(_currentLocation); }
+  
+  /** Return the line number corresponding to offset.  Uses a 1-based index. */
+  public int getLineOfOffset(int offset) { return getDefaultRootElement().getElementIndex(offset) + 1; }
   
   /** Returns the offset corresponding to the first character of the given line number, or -1 if the lineNum is not
     * found.  Line number counting begins with 1 not 0.  Assumes read lock is already held.

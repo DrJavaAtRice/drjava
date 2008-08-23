@@ -44,7 +44,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
-/** Class for a simple document region that records positions rather than offsets.  Instances of this class represent
+/** Class for a simple document region that only records region offsets, not positions.  Instances of this class represent
   * dummy regions used in searching SortSets of DocumentRegions.  Hence, getLineStart() and getLineEnd() should never be
   * called.  WARNING: this class overrides the equals method but does not override the hashCode method to maintain 
   * consistency.  Hence, instances can only be used as keys in identity based hash tables.  NOTE: since class instances
@@ -53,8 +53,8 @@ import java.io.File;
   */
 public class DocumentRegion implements OrderedDocumentRegion, Comparable<OrderedDocumentRegion> {
   protected final OpenDefinitionsDocument _doc;
-  protected volatile Position _startPosition; 
-  protected volatile Position _endPosition;
+  protected volatile int _start; 
+  protected volatile int _end;
   
   /** Create a new simple document region using offsets.
     * @param doc document that contains this region, which cannot be null
@@ -67,20 +67,20 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   public DocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
     assert doc != null;
     _doc = doc;
-    try {
-      _startPosition = doc.createPosition(start);
-      _endPosition = doc.createPosition(end);
-    }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
+//    try {
+      _start = start;
+      _end = end;
+//    }
+//    catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
   
   /** Throws exception indicating that getLineStart() is not supported. */
-  public int getLineStart() { 
+  public int getLineStartOffset() { 
     throw new UnsupportedOperationException("DocumentRegion does not suppport getLineStart()"); 
   }
   
   /** Throws exception indicating that getLineEnd() is not supported. */
-  public int getLineEnd() { 
+  public int getLineEndOffset() { 
     throw new UnsupportedOperationException("DocumentRegion does not suppport getLineEnd()"); 
   }
   
@@ -90,7 +90,7 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   }
   
   /** Throws exception indicating that getString() is not supported. */
-  public void updateLines() { 
+  public void update() { 
     throw new UnsupportedOperationException("DocumentRegion does not suppport updateLines()"); 
   }
   
@@ -134,16 +134,20 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   public OpenDefinitionsDocument getDocument() { return _doc; }
 
   /** @return the start offset */
-  public int getStartOffset() { return _startPosition.getOffset(); }
+  public int getStartOffset() { return _start; }
 
   /** @return the end offset */
-  public int getEndOffset() { return _endPosition.getOffset(); }
+  public int getEndOffset() { return _end; }
   
-  /** @return the start position */
-  public Position getStartPosition() { return _startPosition; }
+//  /** @return the start position */
+//  public Position getStartPosition() { 
+//    throw new UnsupportedOperationException("DocumentRegion does not support getStartPostion()"); 
+//  }
 
-  /** @return the end offset */
-  public Position getEndPosition() { return _endPosition; }
+//  /** @return the end offset */
+//  public Position getEndPosition() { 
+//    throw new UnsupportedOperationException("DocumentRegion does not support getEndPostion()"); 
+//  }
   
   public String toString() {
     return (/* _doc != null ? */ _doc.toString() /* : "null" */) + "[" + getStartOffset() + " .. " + getEndOffset() + "]";

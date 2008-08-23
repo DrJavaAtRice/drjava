@@ -307,6 +307,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       _regionManager.removeRegion(r); // removes r from region manager and the panel node for r from the tree model
     }
     int rowCount = _regTree.getRowCount();
+    if (rowCount == 0) return; // removed last region from panel
     
 //    System.err.println("rowCount = " + rowCount);
     if (row >= rowCount) row = Math.max(0, rowCount - 1);  // ensure row is in range
@@ -634,24 +635,24 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     if (_regionManager.getDocuments().isEmpty()) _close(); // _regTreeModel.getChildCount(_regTreeModel.getRoot()) == 0
   }
   
-  /** Remove all regions for the given document from the tree. Must be executed in event thread. */
-  public void removeRegions(final OpenDefinitionsDocument odd) {
-    assert EventQueue.isDispatchThread();
-    _changeState.setLastAdded(null);
-    
-    DefaultMutableTreeNode docNode = _docToTreeNode.get(odd);
-    
-    // Find the document node for this region
-
-    while(docNode.getChildCount() > 0) {
-      DefaultMutableTreeNode node = (DefaultMutableTreeNode)docNode.getFirstChild();
-      _regTreeModel.removeNodeFromParent(node);
-    }
-    _regTreeModel.removeNodeFromParent(docNode);
-//    if (docNode == _cachedDocNode) _cachedDoc = null;
-    _regionManager.removeRegions(odd);
-    _changeState.updateButtons();
-  }
+//  /** Remove all regions for the given document from the tree. Must be executed in event thread. */
+//  public void removeRegions(final OpenDefinitionsDocument odd) {
+//    assert EventQueue.isDispatchThread();
+//    _changeState.setLastAdded(null);
+//    
+//    DefaultMutableTreeNode docNode = _docToTreeNode.get(odd);
+//    
+//    // Find the document node for this region
+//
+//    while(docNode.getChildCount() > 0) {
+//      DefaultMutableTreeNode node = (DefaultMutableTreeNode)docNode.getFirstChild();
+//      _regTreeModel.removeNodeFromParent(node);
+//    }
+//    _regTreeModel.removeNodeFromParent(docNode);
+////    if (docNode == _cachedDocNode) _cachedDoc = null;
+//    _regionManager.removeRegions(odd);
+//    _changeState.updateButtons();
+//  }
   
   /** Mouse adapter for the region tree. */
   protected class RegionMouseAdapter extends RightClickMouseAdapter {

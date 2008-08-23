@@ -293,8 +293,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       Collection<MovingDocumentRegion> conflictingRegions = bm.getRegionsOverlapping(doc, start, end);
       for (MovingDocumentRegion cr: conflictingRegions) bm.removeRegion(cr);
 
-      int lineStart = r.getLineStart();
-      int lineEnd = r.getLineEnd();
+      int lineStart = r.getLineStartOffset();
+      int lineEnd = r.getLineEndOffset();
       bm.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd));
     }
     _frame.createBookmarks();

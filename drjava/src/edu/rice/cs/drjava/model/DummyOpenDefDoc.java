@@ -238,11 +238,19 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   public Element getDefaultRootElement() { return _defDoc.getDefaultRootElement(); }
-  public Position getEndPosition() { return _defDoc.getEndPosition(); }
+  
+  /* The following two methods are included in javax.swing.Document. */
+  public Position getStartPosition() { 
+    throw new UnsupportedOperationException("DummyOpenDefDoc does not support getStartPosition()"); 
+  }
+  public Position getEndPosition() { 
+    throw new UnsupportedOperationException("ConcreteOpenDefDoc does not support getEndPosition()"); 
+  }
+  
   public int getLength() { return _defDoc.getLength(); }
   public Object getProperty(Object key) { return _defDoc.getProperty(key); }
   public Element[] getRootElements() { return _defDoc.getRootElements(); }
-  public Position getStartPosition() { return _defDoc.getStartPosition(); }
+//  public Position getStartPosition() { return _defDoc.getStartPosition(); }
   
   public String getText(int offset, int length) throws BadLocationException {
     return _defDoc.getText(offset, length);

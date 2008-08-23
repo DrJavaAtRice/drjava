@@ -93,11 +93,11 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   /** @return the end offset */
   public int getEndOffset() { return _endPosition.getOffset(); }
   
-  /** @return the start position */
-  public Position getStartPosition() { return _startPosition; }
+//  /** @return the start position */
+//  public Position getStartPosition() { return _startPosition; }
 
-  /** @return the end offset */
-  public Position getEndPosition() { return _endPosition; }
+//  /** @return the end offset */
+//  public Position getEndPosition() { return _endPosition; }
 
   public String toString() {
     return _doc.toString() + "[" + getStartOffset() + " .. " + getEndOffset() + "]";

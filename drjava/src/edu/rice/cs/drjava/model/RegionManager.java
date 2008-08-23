@@ -66,7 +66,7 @@ public interface RegionManager<R extends IDocumentRegion> {
     * @param offset the offset in the document
     * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
     */
-  public Collection<R> getRegionsNear(OpenDefinitionsDocument odd, int offset);
+  public ArrayList<R> getRegionsNear(OpenDefinitionsDocument odd, int offset);
   
   /** Returns the rightmost region starting on the same line containing the specified selection
    *  @param odd the document
@@ -117,6 +117,9 @@ public interface RegionManager<R extends IDocumentRegion> {
 
   /** @return the set of documents containing regions. */
   public Set<OpenDefinitionsDocument> getDocuments();
+  
+  /** Updates _cachedLineStart, _cachedLineEnd in regions following r. */
+  public void updateLines(R region);
   
   /** Adds a listener to the notifier.
    *  @param listener a listener that reacts on events

@@ -2571,6 +2571,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
     showTab(panel, true);
+    panel.updatePanel();
 //    panel.setVisible(true);
     _tabbedPane.setSelectedComponent(panel);
     // Use EvenQueue.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
@@ -7007,7 +7008,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void focusGained(FocusEvent e) { _lastFocusOwner = _breakpointsPanel; }
       });
     }
-    _bookmarksPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+    _bookmarksPanel.getMainPanel().addFocusListener(new FocusAdapter() { 
       public void focusGained(FocusEvent e) { _lastFocusOwner = _bookmarksPanel; }
     });
   }
@@ -7414,8 +7415,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile Object _updateLock = new Object();
   private volatile boolean _tabUpdatePending = false;
   private volatile Runnable _pendingUpdate = null;
-  public static long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
-  public static int UPDATER_PRIORITY = 3;   // priority in [1..10] of the updater thread.
+  private volatile OrderedDocumentRegion    _firstMatch = null;
+  public static long UPDATE_DELAY = 2500L;  // update delay threshold in milliseconds
+  public static int UPDATER_PRIORITY = 2;   // priority in [1..10] of the updater thread.
   
 //  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  */
 //  public void updateTabbedPane() {
@@ -7468,32 +7470,40 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
       // coarsely update the displayed RegionsTreePanel
       private <R extends OrderedDocumentRegion> void 
-        reloadPanel(final RegionsTreePanel<R> p, OpenDefinitionsDocument doc, int offset) {
+        reloadPanel(final RegionsTreePanel<R> p, final OpenDefinitionsDocument doc, int offset) {
         
-        RegionManager<R> rm = p._regionManager;
+        final RegionManager<R> rm = p._regionManager;
         SortedSet<R> regions = rm.getRegions(doc);
         if (regions == null) return;
-        final Collection<R> matches = rm.getRegionsNear(doc, offset);
+        final ArrayList<R> matches = rm.getRegionsNear(doc, offset);
         if (matches == null || matches.size() == 0) return;
-        // Queue a reqeust to perform the update
+        
+        // Queue a request to perform the update
         EventQueue.invokeLater(new Runnable() {
           public void run() {
             synchronized (_updateLock) {
-              _pendingUpdate = new Runnable() {
+              _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
                 public void run() {
+                  rm.updateLines((R)_firstMatch); // recompute _cachedLineStart, _cachedLineEndP in affected regions
                   for (final R r: matches) {
-                    r.updateLines();  // recompute _lineStartPos and _lineEndPos in r
 //                    System.err.println("reloading node for " + r);
                     p._regTreeModel.reload(p.getNode(r));
                     p.repaint();
                   }
                 }
               };  // end Runnable
-              if (_tabUpdatePending) return;  // Let the queued task run this update (or a successor)
+              if (_firstMatch == null || doc != _firstMatch.getDocument()) {  // superseded update is moot; wrong document
+                _firstMatch = matches.get(0);
+              }
+              else { // updating same document as superseded update; pick best _firstMatch
+                R newMatch = matches.get(0);
+                if (newMatch.compareTo(_firstMatch) < 0) _firstMatch = newMatch;
+              };
+              if (_tabUpdatePending) return;  // Let the queued task perform this update (or a successor)
               _tabUpdatePending = true;
             } // end synchronized
             
-            // Create a new update task
+            // Create and run a new update thread that waits UPDATE_DELAY millis, then performs update in event thread
             new Thread(new Runnable() {
               public void run() {
                 Thread.currentThread().setPriority(UPDATER_PRIORITY);
@@ -7502,7 +7512,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   catch(InterruptedException e) { /* fall through */ }
                   _tabUpdatePending = false;
                 } // end synchronized
-                _pendingUpdate.run();
+                Utilities.invokeLater(_pendingUpdate);
               }
             }).start();
           }

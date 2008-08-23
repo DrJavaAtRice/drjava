@@ -127,10 +127,9 @@ import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
 import edu.rice.cs.drjava.model.cache.DocumentCache;
 
-/**
- * Concrete implementation of GlobalModel that always throws UnsupportedOperation exceptions.
- * @version $Id$
- */
+/** Concrete implementation of GlobalModel that always throws UnsupportedOperationExceptions.
+  * @version $Id$
+  */
 public class DummyGlobalModel implements GlobalModel {
   /** Since this is not supposed to be used, we need to throw an exception OTHER than the ones it officially supports.
     * @throws UnsupportedOperationException

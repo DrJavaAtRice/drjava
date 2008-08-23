@@ -1903,7 +1903,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // remove regions for this file
     _breakpointManager.clearRegions();
     _bookmarkManager.clearRegions();
-    for (RegionManager<MovingDocumentRegion> rm: _findResultsManagers) rm.removeRegions(doc);
+    // The following copy operation is dictated by the silly "no comodification" constraint on Collection iterators
+    RegionManager<MovingDocumentRegion>[] managers = _findResultsManagers.toArray(new RegionManager[0]);
+    for (RegionManager<MovingDocumentRegion> rm: managers) rm.removeRegions(doc);
     doc.clearBrowserRegions();
     
     // if the document was an auxiliary file, remove it from the list
@@ -3363,7 +3365,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public Element getDefaultRootElement() { return getDocument().getDefaultRootElement(); }
     
-    public Position getEndPosition() { return getDocument().getEndPosition(); }
+  /** The following two methods are in javax.swing.Document. */
+  public Position getStartPosition() { 
+    throw new UnsupportedOperationException("ConcreteOpenDefDoc does not support getStartPosition()"); 
+  }
+  public Position getEndPosition() { 
+    throw new UnsupportedOperationException("ConcreteOpenDefDoc does not support getEndPosition()"); 
+  }
     
     public int getLength() { return _cacheAdapter.getLength(); }
     
@@ -3371,7 +3379,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public Element[] getRootElements() { return getDocument().getRootElements(); }
     
-    public Position getStartPosition() { return getDocument().getStartPosition(); } 
+//    public Position getStartPosition() { return getDocument().getStartPosition(); } 
     
 //    public String getText() {
 //      synchronized(_cache._cacheLock) {  // lock down the cache 
@@ -3661,9 +3669,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @param offset the offset >= 0
       * @return the line number >= 0 
       */
-    public int getLineOfOffset(int offset) {
-      return getDefaultRootElement().getElementIndex(offset);
-    }
+    public int getLineOfOffset(int offset) { return getDefaultRootElement().getElementIndex(offset); }
     
     /** Translates a line number into an offset.
       * @param line number >= 0

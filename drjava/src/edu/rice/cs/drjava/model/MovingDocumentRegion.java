@@ -46,19 +46,28 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.lambda.Thunk;
 
 /** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip and line
-  * boundaries.
-  * @version $Id$Region
+  * boundaries.  TODO: convert _startPos and _endPos to _cachedStart and _cachedEnd which are updated by updateLines
+  * @version $Id$Regiong
   */
 public class MovingDocumentRegion extends DocumentRegion {
+  
+//  /** Offset of beginning of first line of this region as recorded in last call on updateLines (or <init>). */
+//  protected volatile int _cachedLineStart;
+//  /** Offset of end of last line of this region as recorded in last call on updateLines (or <init>). */
+//  protected volatile int _cachedLineEnd;
+  protected final Position _startPos;
+  protected final Position _endPos;
   protected volatile Position _lineStartPos;
   protected volatile Position _lineEndPos;
+    
+  /** Suspension that generates the JTree label excerpt for this region. */
   protected final Thunk<String> _stringSuspension;
   
-  /** Update _lineStartPos and _lineEndPos */
-  public void updateLines() {
+  /** Update _lineStartPos and _lineEndPos after line has been edited*/
+  public void update() {
     try {  // _doc is inherited from DocumentRegion
-      _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
-      _lineEndPos  = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
+      _lineStartPos =_doc.createPosition(_doc._getLineStartPos(getStartOffset()));
+      _lineEndPos = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
   }
@@ -68,8 +77,10 @@ public class MovingDocumentRegion extends DocumentRegion {
 
     super(doc, start, end);
     try {
+      _startPos = doc.createPosition(start);
+      _endPos = doc.createPosition(end);
       _lineStartPos = doc.createPosition(lineStart);
-      _lineEndPos  = doc.createPosition(lineEnd);
+      _lineEndPos = doc.createPosition(lineEnd);
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
     
@@ -77,12 +88,13 @@ public class MovingDocumentRegion extends DocumentRegion {
     _stringSuspension = new Thunk<String>() {
       public String value() {
         try {
+          update();
           int endSel = getEndOffset();
           int startSel = getStartOffset();
           int selLength = endSel - startSel;
           
-          int excerptEnd = _lineEndPos.getOffset();
-          int excerptStart = _lineStartPos.getOffset();
+          int excerptEnd = getLineEndOffset();
+          int excerptStart = getLineStartOffset();
           int exceptLength = excerptEnd - excerptStart;
           
           // the offsets within the excerpted string of the selection (figuratively in "Red")
@@ -127,10 +139,10 @@ public class MovingDocumentRegion extends DocumentRegion {
   public OpenDefinitionsDocument getDocument() { return _doc; }
   
   /** @return line start */
-  public int getLineStart() { return _lineStartPos.getOffset(); }
+  public int getLineStartOffset() { return _lineStartPos.getOffset(); }
   
   /** @return line end */
-  public int getLineEnd() { return _lineEndPos.getOffset(); }
+  public int getLineEndOffset() { return _lineEndPos.getOffset(); }
   
   /** @return the string it was assigned */
   public String getString() { return _stringSuspension.value(); }

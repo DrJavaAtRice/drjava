@@ -93,7 +93,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     */
   @SuppressWarnings("unchecked")
   private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
-    return (T) new MovingDocumentRegion(odd, start, end, odd._getLineStartPos(start), odd._getLineEndPos(end));
+    return (T) new DocumentRegion(odd, start, end);
   }
   
   /** Gets the sorted set of regions less than r. */
@@ -147,8 +147,10 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     else return null;
   }
   
-  public Collection<R> getRegionsNear(OpenDefinitionsDocument odd, int offset) { 
+  public ArrayList<R> getRegionsNear(OpenDefinitionsDocument odd, int offset) {
 //    assert EventQueue.isDispatchThread();
+    
+//    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
     
     /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset - 120.  The maximium
      * size of the excerpt enclosing a region is 120 characters. */
@@ -165,9 +167,13 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     ArrayList<R> result = new ArrayList<R>(0);  // For most edits, there is no match. Should we use a LinkedList?
     for (R r: tail) {
       /* Note: r may span more than one line. */
-      int lineStart = r.getLineStart();
-      int lineEnd = r.getLineEnd();
-      if (lineStart <= offset && lineEnd >= offset) result.add(r);
+//      System.err.println("Processing tail set region " + r + " lineStart = " + r.getCachedLineStart());
+      int lineStart = r.getLineStartOffset();
+      int lineEnd = r.getLineEndOffset();
+      if (lineStart - 1 <= offset && lineEnd >= offset) {
+        result.add(r);
+//        System.err.println("Adding tail set region " + r + " to update list");
+      }
       else if (lineStart > offset) break;
     }
     
@@ -339,13 +345,20 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   @SuppressWarnings("unchecked")
   public void removeRegions(final OpenDefinitionsDocument doc) {
     assert doc != null;
-//    System.err.println("Removing ODD " + doc + " in " + this);
+//    System.err.println("Removing regions from ODD " + doc + " in " + this);
+//    System.err.println("_documents = " + _documents);
     boolean found = _documents.remove(doc);
+//    System.err.println("ODD " + doc + " exists in " + this);
     if (found) {
-//      System.err.println("Removing document regions for " + doc + " in " + this);
       final SortedSet<R> regions = _regions.get(doc);
-      // The following ugly line of code is dictated by the "fail fast" semantics of Java iterators
-      while (! regions.isEmpty()) regions.remove(regions.first());
+//      System.err.println("Before removal, regions = " + regions);
+      // The following ugly loop is dictated by the "fail fast" semantics of Java iterators
+      while (! regions.isEmpty()) {
+        R r = regions.first();
+        regions.remove(r);  
+        _notifyRegionRemoved(r);
+      }
+//      System.err.println("After removal, regions = " + regions);
     }
   }
   
@@ -389,7 +402,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   
 //  /** Set the current region. 
 //    * @param region new current region */
-//  public void setCurrentRegion(final R region) { throw new UnsupportedOperation(); }
+//  public void setCurrentRegion(final R region) { throw new UnsupportedOperationException(); }
   
   /** Apply the given command to the specified region to change it.
     * @param region the region to find and change
@@ -400,5 +413,17 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     _lock.startRead();
     try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
     finally { _lock.endRead(); }            
+  }
+  
+  /** Updates _lineStartPos, _lineEndPos in regions following (and including) r.   Assumes this contains r. */
+  public void updateLines(R region) { 
+//    assert EventQueue.isDispatchThread();
+    
+    /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset. */
+    @SuppressWarnings("unchecked")
+    SortedSet<R> tail = getTailSet(region);
+
+    assert (tail.size() > 0);
+    for (R r: tail) r.update();
   }
 } 

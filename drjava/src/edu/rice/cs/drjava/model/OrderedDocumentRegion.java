@@ -44,7 +44,7 @@ package edu.rice.cs.drjava.model;
   * 
   * All implementations of this interface should be immutable (at the level of the field bindings in those classes), 
   * but a given document Postion can "move" when the associated document is modified.  As a result, hashing on 
-  * OrderedDocumentRegions will produced upredictable results (WiLL NOT WORk) unless hashing on Positions works 
+  * OrderedDocumentRegions will produce upredictable results (WiLL NOT WORK) unless hashing on Positions works 
   * (which this design does NOT presume).  On the other hand, the relative ordering of Positions is invariant 
   * (except for possible coalescing of formerly distinct Positions) regardless of how the associated document is 
   * modified.  Mutation of the document backing an OrderedDocumentRegion can coarsen the compareTo ordering, equating
@@ -55,8 +55,8 @@ package edu.rice.cs.drjava.model;
   * invariant as a document is modified.)
   */
 public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<OrderedDocumentRegion> {
-  public int getLineStart();
-  public int getLineEnd();
-  public void updateLines();
+  public int getLineStartOffset();
+  public int getLineEndOffset();
+  public void update();
   public String getString();
 }

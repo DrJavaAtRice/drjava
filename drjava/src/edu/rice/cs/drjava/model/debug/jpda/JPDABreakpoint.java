@@ -61,12 +61,20 @@ import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest.  See the
   * WARNING below about hashing on this type or its subtypes.
+  * TODO: _lineNumber, _startPos, and _endPos should be computed dynamically from _position.  Editing a document 
+  * with breakpoint set can change the proper value for these fields.
   */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
   
   private volatile Position _position;
+  /** Offset of beginning of this breakpoint line as recorded in last call on updateLines (or <init>). */
+//  private volatile int _cachedLineStart;
+//   /** Offset of end of this breakpoint line as recorded in last call on updateLines (or <init>). */
+//  private volatile int _cachedLineEnd;
   private volatile Position _startPos;
   private volatile Position _endPos;
+  
+  /** Note that _position, which records the breakpoint position, is inherited from DocumentDebugAction. */
   private volatile OpenDefinitionsDocument _doc;
   
   /** @throws DebugException if the document does not have a file */
@@ -85,8 +93,10 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     _isEnabled = isEnabled;
     
     try {
-      _startPos = doc.createPosition(doc._getLineStartPos(offset));
-      _endPos = doc.createPosition(doc._getLineEndPos(offset));
+//      _cachedLineStart = doc._getLineStartPos(offset);
+//      _cachedLineEnd = doc._getLineEndPos(offset);
+      _startPos = doc.createPosition(_doc._getLineStartPos(offset));
+      _endPos = doc.createPosition(_doc._getLineEndPos(offset));
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
@@ -163,36 +173,49 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   public int getEndOffset() { return _endPos.getOffset(); }
   
-  /** Accessor for the start of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
-    * complete line.
-    * @return the lineStart offset
+  /** Accessor for the offset of this breakpoint's start position
+    * @return the start offset
     */
-  public int getLineStart() { return _startPos.getOffset(); }
+  public int getLineStartOffset() { return _startPos.getOffset(); }
   
-  /** Accessor for the end of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
-    * complete line.
-    * @return the lineStart offset
+  /** Accessor for the offset of this breakpoint's end position
+    * @return the end offset
     */
-  public int getLineEnd() { return _endPos.getOffset(); }
+  public int getLineEndOffset() { return _endPos.getOffset(); }
   
-  public void updateLines() {
-    try {  // _doc is inherited from DocumentRegion
+//  /** Accessor for the start of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
+//    * complete line.
+//    * @return the lineStart offset
+//    */
+//  public int getCachedLineStart() { return _startPos.getOffset(); }
+//  
+//  /** Accessor for the end of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
+//    * complete line.
+//    * @return the lineStart offset
+//    */
+//  public int getCachedLineEnd() { return _endPos.getOffset(); }
+  
+  public void update() {
+   try {  // _doc is inherited from DocumentRegion
       int offset = _position.getOffset();
+//      _cachedLineStart = _doc._getLineStartPos(offset);
+//      _cachedLineEnd  = _doc._getLineEndPos(offset);
       _startPos = _doc.createPosition(_doc._getLineStartPos(offset));
-      _endPos  = _doc.createPosition(_doc._getLineEndPos(offset));
+      _endPos = _doc.createPosition(_doc._getLineEndPos(offset));
+      _lineNumber = _doc.getLineOfOffset(offset);
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
   }
   
-  /** Accessor for this breakpoint's start position
-    * @return the start position
-    */
-  public Position getStartPosition() { return _startPos; }
+//  /** Accessor for this breakpoint's start position
+//    * @return the start position
+//    */
+//  public Position getStartPosition() { return _startPos; }
   
-  /** Accessor for this breakpoint's end position
-    * @return the end position
-    */
-  public Position getEndPosition() { return _endPos; }
+//  /** Accessor for this breakpoint's end position
+//    * @return the end position
+//    */
+//  public Position getEndPosition() { return _endPos; }
   
   /** Defines the equality relation on DocumentRegions.  This equivalence relation on allocated objects is finer
     * grained than the equivalence relation induced by compareTo because it requires equality on Position objects, 

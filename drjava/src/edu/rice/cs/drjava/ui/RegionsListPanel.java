@@ -324,28 +324,28 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //    Utilities.invokeLater(doCommand);
   }
   
-  /** Remove all regions for this document from the tree. Must be executed in event thread. */
-  public void removeRegions(final OpenDefinitionsDocument odd) {
-    // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
-      public void run() {
-//        String name = "";
-//        try { name = odd.getQualifiedClassName(); }
-//        catch (ClassNameNotFoundException cnnfe) { name = odd.toString(); }
-        
-        for (int i = 0; i < _listModel.size(); ++i) {
-          @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
-          
-          if (userObj.region().getDocument().equals(odd)) {
-            _listModel.removeElementAt(i);
-          }
-        }
-        
-        updateButtons();
-      }
-    };
-    Utilities.invokeLater(doCommand);
-  }
+//  /** Remove all regions for this document from the tree. Must be executed in event thread. */
+//  public void removeRegions(final OpenDefinitionsDocument odd) {
+//    // Only change GUI from event-dispatching thread
+//    Runnable doCommand = new Runnable() {
+//      public void run() {
+////        String name = "";
+////        try { name = odd.getQualifiedClassName(); }
+////        catch (ClassNameNotFoundException cnnfe) { name = odd.toString(); }
+//        
+//        for (int i = 0; i < _listModel.size(); ++i) {
+//          @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+//          
+//          if (userObj.region().getDocument().equals(odd)) {
+//            _listModel.removeElementAt(i);
+//          }
+//        }
+//        
+//        updateButtons();
+//      }
+//    };
+//    Utilities.invokeLater(doCommand);
+//  }
   
   /** Factory method to create user objects put in the list.
     * If subclasses extend RegionListUserObj, they need to override this method. */
