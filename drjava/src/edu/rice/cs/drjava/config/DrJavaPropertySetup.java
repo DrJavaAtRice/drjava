@@ -162,7 +162,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                             "\tdir=\"<dir where to start>\"\n"+
                                                                             "\trel=\"<dir to which the files are relative>\"\n"+
                                                                             "\tfilter=\"<filter, like *.txt, for files to list>\"\n"+
-                                                                            "\tdirfilter=\"<filter for which dirs to recurse>\""));
+                                                                            "\tdirfilter=\"<filter for which dirs to recurse>\"\n"+
+                                                                            "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                                                            "\tdquote=\"<true to enclose file in double quotes>\""));
     
     PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.isdir",
                                                                  "Return true if the specified file is a directory, false "+
@@ -748,12 +750,25 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 UnaryOpProperty.PARSE_STRING,
                                                                 UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <Boolean,Boolean,Boolean>("and",
-                                                                "If op1 and op2 are true, returns true,"+
+                                        <String,String,Boolean>("neq",
+                                                                "If the op1 is not equal to op2, returns true,"+
                                                                 "false otherwise.\n"+
                                                                 "Required attributes:\n"+
-                                                                "\top1=\"<boolean>\"\n"+
-                                                                "\top2=\"<boolean>\"",
+                                                                "\top1=\"<string>\"\n"+
+                                                                "\top2=\"<string>\"",
+                                                                new Lambda2<String,String,Boolean>() {
+      public Boolean value(String op1, String op2) { return !op1.equals(op2); }
+    },
+                                                                UnaryOpProperty.PARSE_STRING,
+                                                                UnaryOpProperty.PARSE_STRING,
+                                                                UnaryOpProperty.FORMAT_BOOL));
+    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
+                                        <Boolean,Boolean,Boolean>("and",
+                                                                  "If op1 and op2 are true, returns true,"+
+                                                                  "false otherwise.\n"+
+                                                                  "Required attributes:\n"+
+                                                                  "\top1=\"<boolean>\"\n"+
+                                                                  "\top2=\"<boolean>\"",
                                                                 new Lambda2<Boolean,Boolean,Boolean>() {
       public Boolean value(Boolean op1, Boolean op2) { return op1 && op2; }
     },
@@ -762,11 +777,11 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                 UnaryOpProperty.FORMAT_BOOL));
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Boolean,Boolean,Boolean>("or",
-                                                                "If at least one of op1, op2 is true, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<boolean>\"\n"+
-                                                                "\top2=\"<boolean>\"",
+                                                                  "If at least one of op1, op2 is true, returns true,"+
+                                                                  "false otherwise.\n"+
+                                                                  "Required attributes:\n"+
+                                                                  "\top1=\"<boolean>\"\n"+
+                                                                  "\top2=\"<boolean>\"",
                                                                 new Lambda2<Boolean,Boolean,Boolean>() {
       public Boolean value(Boolean op1, Boolean op2) { return op1 || op2; }
     },
@@ -934,6 +949,30 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     },
                                                                       "list",
+                                                                      null,
+                                                                      UnaryOpProperty.PARSE_STRING,
+                                                                      "old",
+                                                                      null,
+                                                                      UnaryOpProperty.PARSE_STRING,
+                                                                      "new",
+                                                                      null,
+                                                                      UnaryOpProperty.PARSE_STRING,
+                                                                      UnaryOpProperty.FORMAT_STRING));
+
+    PropertyMaps.TEMPLATE.setProperty("Misc", new TernaryOpProperty
+                                        <String,String,String,String>("replace.string",
+                                                                      "Replaces each occurrence in a string."+
+                                                                      "Required attributes:\n"+
+                                                                      "\ttext=\"<text in which to replace>\"\n"+
+                                                                      "\told=\"<old separator>\"\n"+
+                                                                      "\tnew=\"<new separator>\"",
+                                                                      new Lambda3<String,String,String,String>() {
+      public String value(String s, String oldStr, String newStr) {
+        if (s.length()==0) return "";
+        return s.replaceAll(edu.rice.cs.plt.text.TextUtil.regexEscape(oldStr), newStr);
+      }
+    },
+                                                                      "text",
                                                                       null,
                                                                       UnaryOpProperty.PARSE_STRING,
                                                                       "old",
@@ -1265,7 +1304,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                       "was a JAR file, then this property contains the file. "+
                                                                       "Otherwise, it is empty.\n"+
                                                                       "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which the files are relative>\""));
+                                                                      "\trel=\"<dir to which the files are relative>\"\n"+
+                                                                      "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                                                      "\tdquote=\"<true to enclose file in double quotes>\""));
     String[] cps = System.getProperty("java.class.path").split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator));
     File found = null;
     for(String cp: cps) {
@@ -1303,7 +1344,9 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                "Returns the executable file of DrJava that is currently "+
                                                                "running.\n"+
                                                                "Optional attributes:\n"+
-                                                               "\trel=\"<dir to which the output should be relative\"") {
+                                                               "\trel=\"<dir to which the output should be relative\"\n"+
+                                                               "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                                               "\tdquote=\"<true to enclose file in double quotes>\"") {
                                                                  public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                                                });
     PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("java.file", new Thunk<File>() {
@@ -1313,7 +1356,9 @@ public class DrJavaPropertySetup implements OptionConstants {
     }, 
                                                                "Returns the Java interpreter executable file.\n"+
                                                                "Optional attributes:\n"+
-                                                               "\trel=\"<dir to which the output should be relative\"") {
+                                                               "\trel=\"<dir to which the output should be relative\"\n"+
+                                                               "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                                               "\tdquote=\"<true to enclose file in double quotes>\"") {
                                                                  public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                                                });
     PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("echo",

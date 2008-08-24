@@ -80,6 +80,16 @@ public class FileProperty extends DrJavaProperty {
   /** Update the value of the property.
     * @param pm PropertyMaps used for substitution */
   public void update(PropertyMaps pm) {
+    String quot = "";
+    String q = _attributes.get("squote");
+    if (q!=null) {
+      if (q.toLowerCase().equals("true")) { quot = "'"; }
+    }
+    boolean doubleQuote = false;
+    q = _attributes.get("dquote");
+    if (q!=null) {
+      if (q.toLowerCase().equals("true")) { quot = "\"" + quot; }
+    }
     try {
       File f;
       if (_getFile == null || (f = _getFile.value()) == null) {
@@ -96,8 +106,8 @@ public class FileProperty extends DrJavaProperty {
         File rf = new File(StringOps.unescapeFileName(StringOps.replaceVariables(_attributes.get("rel"), 
                                                                                         pm,
                                                                                         PropertyMaps.GET_CURRENT)));
-        String s = FileOps.stringMakeRelativeTo(f,rf);                                     
-        _value = edu.rice.cs.util.StringOps.escapeFileName(s);
+        String s = FileOps.stringMakeRelativeTo(f,rf);
+        _value = quot+edu.rice.cs.util.StringOps.escapeFileName(s)+quot;
       }
     }
     catch(IOException e) { _value = "(Error...)"; }
@@ -107,5 +117,7 @@ public class FileProperty extends DrJavaProperty {
   public void resetAttributes() {
     _attributes.clear();
     _attributes.put("rel", "/");
+    _attributes.put("squote", null);
+    _attributes.put("dquote", null);
   }
 } 

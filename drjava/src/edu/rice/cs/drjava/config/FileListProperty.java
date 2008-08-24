@@ -77,6 +77,16 @@ public abstract class FileListProperty extends DrJavaProperty {
   /** Update the value by concatenating the list of documents.
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
+    String quot = "";
+    String q = _attributes.get("squote");
+    if (q!=null) {
+      if (q.toLowerCase().equals("true")) { quot = "'"; }
+    }
+    boolean doubleQuote = false;
+    q = _attributes.get("dquote");
+    if (q!=null) {
+      if (q.toLowerCase().equals("true")) { quot = "\"" + quot; }
+    }
     List<File> l = getList(pm);
     if (l.size()==0) { _value = ""; return; }
     StringBuilder sb = new StringBuilder();
@@ -88,12 +98,14 @@ public abstract class FileListProperty extends DrJavaProperty {
         else {
           File rf = new File(StringOps.
                                unescapeFileName(StringOps.replaceVariables(_attributes.get("rel"), 
-                                                                                  pm,
-                                                                                  PropertyMaps.GET_CURRENT)));
+                                                                           pm,
+                                                                           PropertyMaps.GET_CURRENT)));
           f = FileOps.stringMakeRelativeTo(fil, rf);
         }
         String s = edu.rice.cs.util.StringOps.escapeFileName(f);
+        sb.append(quot);
         sb.append(s);
+        sb.append(quot);
       }
       catch(IOException e) { /* ignore */ }
       catch(SecurityException e) { /* ignore */ }
@@ -109,5 +121,7 @@ public abstract class FileListProperty extends DrJavaProperty {
     _attributes.clear();
     _attributes.put("sep", _sep);
     _attributes.put("rel", _dir);
+    _attributes.put("squote", null);
+    _attributes.put("dquote", null);
   }
 }

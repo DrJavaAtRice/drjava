@@ -1560,4 +1560,30 @@ public class BalancingStreamTokenizerTest extends TestCase {
 //    assertEquals(null, s);
 //    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
 //  }
+
+  public void testEscapedQuoted() throws IOException {
+    BalancingStreamTokenizer tok = make("name=\"$\"text$\"\"", '$');
+    tok.wordRange(0,255);
+    tok.whitespaceRange(0,32); 
+    tok.addQuotes("\"", "\"");
+    tok.addQuotes("${", "}");
+    tok.addKeyword(";");
+    tok.addKeyword("=");
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("name", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("=", s);
+    assertEquals(BalancingStreamTokenizer.Token.KEYWORD, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("\"\"text\"\"", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
 }

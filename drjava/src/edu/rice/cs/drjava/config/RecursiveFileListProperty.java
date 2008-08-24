@@ -117,5 +117,7 @@ public class RecursiveFileListProperty extends FileListProperty {
     _attributes.put("dir", _start);
     _attributes.put("filter", "*");
     _attributes.put("dirfilter", "*");
+    _attributes.put("squote", null);
+    _attributes.put("dquote", null);
   }
 } 

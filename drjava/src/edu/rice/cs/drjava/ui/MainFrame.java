@@ -3576,7 +3576,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }, 
                                    "Returns the current document in DrJava.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which the output should be relative\"") {
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     PropertyMaps.TEMPLATE.setProperty("DrJava", 
@@ -3606,7 +3608,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     },
                                    "Returns the current working directory of DrJava.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which output should be relative\"") {
+                                   "\trel=\"<dir to which output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     PropertyMaps.TEMPLATE.
@@ -3617,7 +3621,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     },
                                    "Returns the working directory of the DrJava master JVM.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which output should be relative\"") {
+                                   "\trel=\"<dir to which output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     
@@ -3628,7 +3634,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "Returns a list of all files open in DrJava.\n"+
                                        "Optional attributes:\n"+
                                        "\trel=\"<dir to which output should be relative\"\n"+
-                                       "\tsep=\"<separator between files>\"") {
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) {
@@ -3646,7 +3654,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "to a project and are underneath the project root.\n" +
                                        "Optional attributes:\n" +
                                        "\trel=\"<dir to which output should be relative\"\n" +
-                                       "\tsep=\"<separator between files>\"") {
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getProjectDocuments()) {
@@ -3665,7 +3675,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "the project.\n" +
                                        "Optional attributes:\n" +
                                        "\trel=\"<dir to which output should be relative\"\n" +
-                                       "\tsep=\"<separator between files>\"") {
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getAuxiliaryDocuments()) {
@@ -3684,7 +3696,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "the project.\n"+
                                        "Optional attributes:\n"+
                                        "\trel=\"<dir to which output should be relative\"\n"+
-                                       "\tsep=\"<separator between files>\"") {
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: _model.getNonProjectDocuments()) {
@@ -3776,7 +3790,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which the output should be relative\"") {
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     
@@ -3789,7 +3805,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which the output should be relative\"") {
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     PropertyMaps.TEMPLATE.
@@ -3801,7 +3819,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     },
                                    "Returns the current project root in DrJava.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which the output should be relative\"") {
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     PropertyMaps.TEMPLATE.
@@ -3813,13 +3833,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     },
                                    "Returns the current build directory in DrJava.\n"+
                                    "Optional attributes:\n"+
-                                   "\trel=\"<dir to which the output should be relative\"") {
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     RecursiveFileListProperty classFilesProperty = 
       new RecursiveFileListProperty("project.class.files", File.pathSeparator, DEF_DIR,
                                     _model.getBuildDirectory().getAbsolutePath(),
-                                    "Returns the class files currently in the build directory.") {
+                                    "Returns the class files currently in the build directory.\n"+
+                                    "\trel=\"<dir to which the output should be relative\"\n"+
+                                    "\tsep=\"<string to separate files in the list>\"\n"+
+                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
       /** Reset the attributes. */
       public void resetAttributes() {
         _attributes.clear();
@@ -3856,7 +3882,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "project auto-refresh.\n"+
                                        "Optional attributes:\n"+
                                        "\trel=\"<dir to which output should be relative\"\n"+
-                                       "\tsep=\"<separator between files>\"") {
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(File f: _model.getExclFiles()) { l.add(f); }
@@ -3872,7 +3900,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "class path.\n"+
                                        "Optional attributes:\n"+
                                        "\trel=\"<dir to which output should be relative\"\n"+
-                                       "\tsep=\"<separator between files>\"") {
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
         for(File f: _model.getExtraClassPath()) { l.add(f); }
@@ -7469,6 +7499,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     
       // coarsely update the displayed RegionsTreePanel
+      @SuppressWarnings("unchecked") 
       private <R extends OrderedDocumentRegion> void 
         reloadPanel(final RegionsTreePanel<R> p, final OpenDefinitionsDocument doc, int offset) {
         
