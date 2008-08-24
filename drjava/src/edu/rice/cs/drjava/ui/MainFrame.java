@@ -9612,8 +9612,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public static void openExtProcessFile(File file) {
     try {
       XMLConfig xc = new XMLConfig(file);
-      ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"), xc.get("drjava/extprocess/cmdline"),
+      String name = xc.get("drjava/extprocess/name");
+      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"), "");
+      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
+                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
       // We override the drjava/extprocess/enclosingfile and set it to the empty string ""
       // because this external process did not come from a *.djapp file that was a JAR file.
     }
@@ -9630,8 +9633,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
       InputStream is = jf.getInputStream(je);
       XMLConfig xc = new XMLConfig(is);
-      ExecuteExternalDialog.addToMenu(xc.get("drjava/extprocess/name"), xc.get("drjava/extprocess/cmdline"),
+      String name = xc.get("drjava/extprocess/name");
+      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"), file.getAbsolutePath());
+      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
+                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
       // We override the drjava/extprocess/enclosingfile and set it to the file specified
       // because this external process came from a *.djapp file that was a JAR file.
       is.close();
