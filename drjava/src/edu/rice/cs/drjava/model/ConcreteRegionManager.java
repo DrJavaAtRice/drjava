@@ -63,7 +63,9 @@ import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-/** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
+/** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. 
+  * TODO: fix the typing of regions.  In many (all?) places, R should be OrderedDocumentRegion. 
+  */
 public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements 
   RegionManager<R> {
   
@@ -167,7 +169,6 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     ArrayList<R> result = new ArrayList<R>(0);  // For most edits, there is no match. Should we use a LinkedList?
     for (R r: tail) {
       /* Note: r may span more than one line. */
-//      System.err.println("Processing tail set region " + r + " lineStart = " + r.getCachedLineStart());
       int lineStart = r.getLineStartOffset();
       int lineEnd = r.getLineEndOffset();
       if (lineStart - 1 <= offset && lineEnd >= offset) {
@@ -415,15 +416,19 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     finally { _lock.endRead(); }            
   }
   
-  /** Updates _lineStartPos, _lineEndPos in regions following (and including) r.   Assumes this contains r. */
-  public void updateLines(R region) { 
+  /** Updates _lineStartPos, _lineEndPos in regions following (and including) r.  Removes empty regions.  r is not
+    * necessarily a region in this manager.  */
+  public void updateLines(R r) { 
 //    assert EventQueue.isDispatchThread();
     
-    /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset. */
+    /* Get the tailSet consisting of the ordered set of regions >= r. */
     @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet(region);
+    SortedSet<R> tail = getTailSet(r);
 
-    assert (tail.size() > 0);
-    for (R r: tail) r.update();
+    // tail can be empty if r is a constructed DocumentRegion
+    for (R region: tail) {
+      if (region.getStartOffset() == region.getEndOffset()) removeRegion(region);
+      region.update();
+    }
   }
 } 

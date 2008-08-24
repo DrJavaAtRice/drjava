@@ -171,10 +171,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   //-------- METHODS ---------//
   
-//  /** Returns a new indenter.  Assumes writeLock is held. */
-//  protected abstract Indenter makeNewIndenter(int indentLevel);
-  
-  /** Get the indenter.  Assumes writeLock is already held.
+  /** Get the indenter.
     * @return the indenter
     */
   private Indenter getIndenter() { return _indenter; }
@@ -1053,7 +1050,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _offsetToQueries = null;
   }
   
-  /** Indents a line using the Indenter.  Public ONLY for testing purposes. Assumes writeLock is already held.*/
+  /** Indents a line using the Indenter.  Public ONLY for testing purposes. */
   public boolean _indentLine(Indenter.IndentReason reason) { return getIndenter().indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
@@ -1173,10 +1170,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    catch(BadLocationException e) { throw new UnexpectedException(e); }
 //  }
   
- 
-  
-  /** Determines if the given character exists on the line where the given cursor position is.  Does not 
-    * search in quotes or comments. <b>Does not work if character being searched for is a '/' or a '*'</b>. Assumes
+  /** Determines if the given character exists on the line where the given cursor position is.  Does not search
+    * inside quotes or comments. <b>Does not work if character being searched for is a '/' or a '*'</b>.  Only
     * read lock is already held.
     * @param pos Cursor position
     * @param findChar Character to search for
@@ -1535,8 +1530,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    return cachedPosInBlockComment(lineStart);
 //  }
   
-//  /** Returns true if the given position is inside a block comment using cached information.  Assumes read lock and reduced
-//    * lock are already held
+//  /** Returns true if given position is inside a block comment using cached information.  Only runs in event thread/
 //    * @param pos a position at the beginning of a line.
 //    * @return true if pos is immediately inside a block comment.
 //    */
@@ -1748,8 +1742,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       if (length > 0) _clearCache(offset);    // Selectively clear the query cache
 
-      Runnable doCommand = (length == 1) ? new CharInsertCommand(offset, str.charAt(0)) : new InsertCommand(offset, str);
-      RemoveCommand undoCommand = new UninsertCommand(offset, length);
+      Runnable doCommand = 
+        (length == 1) ? new CharInsertCommand(offset, str.charAt(0)) : new InsertCommand(offset, str);
+      RemoveCommand undoCommand = new UninsertCommand(offset, length, str);
       
       // add the undo/redo
       addUndoRedo(chng, undoCommand, doCommand);
@@ -1761,7 +1756,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Updates document structure as a result of text removal. This happens within the swing remove operation before
-    * the text has actually been removed. Here we update the reduced model (using a {@link AbstractDJDocument.RemoveCommand
+    * the text has actually been removed. Updates the reduced model (using a {@link AbstractDJDocument.RemoveCommand
     * RemoveCommand}) and store information for how to undo/redo the reduced model changes inside the 
     * {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
     * NOTE: an exclusive read lock on the document is already held when this code runs.
@@ -1779,7 +1774,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       if (length > 0) _clearCache(offset);  // Selectively clear the query cache
       
-      Runnable doCommand = new RemoveCommand(offset, length);
+      Runnable doCommand = new RemoveCommand(offset, length, removedText);
       Runnable undoCommand = new UnremoveCommand(offset, removedText);
       
       // add the undo/redo info
@@ -1827,6 +1822,29 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   //-------- INNER CLASSES ------------
   
+  //--- Fields set only by InsertCommand, CharInsertCommand, and RemoveCommand
+  
+  /** Offset marking where line number changes begin due to an insertion or deletion. */
+  private volatile int _numLinesChangedAfter = -1;
+  
+  //--- Private methods that only support these inner classes
+  
+  /** Updates _numLinesChanged given that a newline was inserted or removed at the specified offset. */
+  private void _numLinesChanged(int offset) {
+    if (_numLinesChangedAfter < 0) {
+      _numLinesChangedAfter =  offset;
+      return;
+    }
+    _numLinesChangedAfter = Math.min(_numLinesChangedAfter, offset);
+  }
+  
+  /** Gets the value of _numLinesChangedAfter field and reset it -1. */
+  public int getAndResetNumLinesChangedAfter() {
+    int result = _numLinesChangedAfter;
+    _numLinesChangedAfter = -1;
+    return result;
+  }
+  
   protected class InsertCommand implements Runnable {
     protected final int _offset;
     protected final String _text;
@@ -1842,8 +1860,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       _reduced.move(_offset - _currentLocation);  
       int len = _text.length();
       
-      // loop over string, inserting characters into reduced model
-      for (int i = 0; i < len; i++) _addCharToReducedModel(_text.charAt(i));
+      // loop over string, inserting characters into reduced model and recording any change to line numbering
+      for (int i = 0; i < len; i++) {
+        char ch = _text.charAt(i);
+        if (ch == '\n') _numLinesChanged(_offset + i);
+        _addCharToReducedModel(ch);
+      }
 
       _currentLocation = _offset + len;  // update _currentLocation to match effects on the reduced model
       _styleChanged();  // update the color highlighting of the remainder of the document
@@ -1858,7 +1880,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     public UnremoveCommand(final int offset, final String text) { super(offset, text); }
     public void run() {
       super.run();
-//      System.err.println("Restoring currentLocation in unremove operation; before restoration = " + getCurrentLocation());
+//      System.err.println("Before restoration, currentLocation in unremove operation = " + getCurrentLocation());
       // The following command effectively modifies a document in a document listener; the invokeLater
       // call moves it out of the listener; pending events reset _currentLocation
       EventQueue.invokeLater(new Runnable() { public void run() { _setCurrentLocation(_offset); } });
@@ -1878,7 +1900,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     public void run() {
       
       _reduced.move(_offset - _currentLocation);  
-     
+      if (_ch == '\n') _numLinesChanged(_offset);  // record change to line numbering
       _addCharToReducedModel(_ch);
       _currentLocation = _offset + 1;  // update _currentLocation to match effects on the reduced model
       _styleChanged();
@@ -1888,15 +1910,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   protected class RemoveCommand implements Runnable {
     protected final int _offset;
     protected final int _length;
+    protected final String _removedText;
     
-    public RemoveCommand(final int offset, final int length) {
+    public RemoveCommand(final int offset, final int length, final String removedText) {
       _offset = offset;
       _length = length;
+      _removedText = removedText;
     }
     
     /** Removes chars from reduced model; cache has already been selectively cleared. */
     public void run() {
       _setCurrentLocation(_offset);
+      if (_removedText.indexOf('\n') >= 0) _numLinesChanged(_offset);  // record change to line numbering
       _reduced.delete(_length);    
       _styleChanged(); 
     }
@@ -1904,7 +1929,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 
   // command that undoes an InsertCommand; identical to RemoveCommand; separate for debugging purposes
   protected class UninsertCommand extends RemoveCommand {
-    public UninsertCommand(final int offset, final int length) { super(offset, length); }
+    public UninsertCommand(final int offset, final int length, String text) { super(offset, length, text); }
     public void run() { super.run(); }
   }
 }

@@ -53,45 +53,21 @@ import java.io.File;
   */
 public class DocumentRegion implements OrderedDocumentRegion, Comparable<OrderedDocumentRegion> {
   protected final OpenDefinitionsDocument _doc;
+  // The following two fields are ignored in subclasses of DocumentRegion
   protected volatile int _start; 
-  protected volatile int _end;
+  protected volatile int _end;  // _end >= _start
   
   /** Create a new simple document region using offsets.
     * @param doc document that contains this region, which cannot be null
     * @param file file that contains the region
-    * @param so start offset of the region; if doc is non-null, then a Position will be created that moves within the document
-    * @param eo end offset of the region; if doc is non-null, then a Position will be created that moves within the document
     */
  
   /** Create a new simple document region with a bona fide document */
   public DocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
-    assert doc != null;
+    assert doc != null && _end >= _start;
     _doc = doc;
-//    try {
-      _start = start;
-      _end = end;
-//    }
-//    catch(BadLocationException e) { throw new UnexpectedException(e); }
-  }
-  
-  /** Throws exception indicating that getLineStart() is not supported. */
-  public int getLineStartOffset() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineStart()"); 
-  }
-  
-  /** Throws exception indicating that getLineEnd() is not supported. */
-  public int getLineEndOffset() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineEnd()"); 
-  }
-  
-  /** Throws exception indicating that getString() is not supported. */
-  public String getString() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport getString()"); 
-  }
-  
-  /** Throws exception indicating that getString() is not supported. */
-  public void update() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport updateLines()"); 
+    _start = start;
+    _end = end;
   }
   
   private static Position createPosition(OpenDefinitionsDocument doc, int i) {
@@ -139,15 +115,27 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
   /** @return the end offset */
   public int getEndOffset() { return _end; }
   
-//  /** @return the start position */
-//  public Position getStartPosition() { 
-//    throw new UnsupportedOperationException("DocumentRegion does not support getStartPostion()"); 
-//  }
-
-//  /** @return the end offset */
-//  public Position getEndPosition() { 
-//    throw new UnsupportedOperationException("DocumentRegion does not support getEndPostion()"); 
-//  }
+  /** Throws exception indicating that getLineStart() is not supported. */
+  public int getLineStartOffset() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineStart()"); 
+  }
+  
+  /** Throws exception indicating that getLineEnd() is not supported. */
+  public int getLineEndOffset() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineEnd()"); 
+  }
+  
+  /** Throws exception indicating that getString() is not supported. */
+  public String getString() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport getString()"); 
+  }
+  
+  /** Throws exception indicating that getString() is not supported. */
+  public void update() { 
+    throw new UnsupportedOperationException("DocumentRegion does not suppport updateLines()"); 
+  }
+  
+  public boolean isEmpty() { return getStartOffset() == getEndOffset(); }
   
   public String toString() {
     return (/* _doc != null ? */ _doc.toString() /* : "null" */) + "[" + getStartOffset() + " .. " + getEndOffset() + "]";

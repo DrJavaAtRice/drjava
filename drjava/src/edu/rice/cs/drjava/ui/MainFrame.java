@@ -7415,7 +7415,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile Object _updateLock = new Object();
   private volatile boolean _tabUpdatePending = false;
   private volatile Runnable _pendingUpdate = null;
-  private volatile OrderedDocumentRegion    _firstMatch = null;
+  private volatile OrderedDocumentRegion   _firstMatch = null;
   public static long UPDATE_DELAY = 2500L;  // update delay threshold in milliseconds
   public static int UPDATER_PRIORITY = 2;   // priority in [1..10] of the updater thread.
   
@@ -7476,7 +7476,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         SortedSet<R> regions = rm.getRegions(doc);
         if (regions == null) return;
         final ArrayList<R> matches = rm.getRegionsNear(doc, offset);
-        if (matches == null || matches.size() == 0) return;
+        if (matches == null || matches.size() == 0) {
+          int numLinesChangedAfter = doc.getDocument().getAndResetNumLinesChangedAfter();
+          if (numLinesChangedAfter >= 0)  // TODO: eliminate redundancy in updateLines
+            rm.updateLines((R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter));
+          return;
+        }
         
         // Queue a request to perform the update
         EventQueue.invokeLater(new Runnable() {
@@ -7485,22 +7490,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
                 @SuppressWarnings("unchecked") 
                 public void run() {
+                  
                   rm.updateLines((R)_firstMatch); // recompute _lineStartPos, _lineEndPos in affected regions
                   for (final R r: matches) {
 //                    System.err.println("reloading node for " + r);
+                    if (r.isEmpty()) rm.removeRegion(r);
                     p._regTreeModel.reload(p.getNode(r));
                     p.repaint();
                   }
                 }
-              };  // end Runnable
-              if (_firstMatch == null || doc != _firstMatch.getDocument()) {  // superseded update is moot; wrong document
+              };  // end _pendingUpdate Runnable
+              if (_firstMatch == null || doc != _firstMatch.getDocument()) { // no update pending or document changed
                 _firstMatch = matches.get(0);
+                // do not check _tabupdatePending, forcing execution of update
               }
               else { // updating same document as superseded update; pick best _firstMatch
                 R newMatch = matches.get(0);
                 if (newMatch.compareTo(_firstMatch) < 0) _firstMatch = newMatch;
-              };
-              if (_tabUpdatePending) return;  // Let the queued task perform this update (or a successor)
+                if (_tabUpdatePending) return;  // Let the queued task perform this update (or a successor)
+              }
               _tabUpdatePending = true;
             } // end synchronized
             
@@ -9208,7 +9216,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (c instanceof RegionsTreePanel) {
         RegionsTreePanel p = (RegionsTreePanel) c;
         DefaultTreeModel model = p._regTreeModel;
-        model.reload();
+        // Update all JTree labels in p (equivalent to performing updateLines on p._regionManager with a [0,0] region)
+        model.reload(); 
         p.expandTree();
         p.repaint();
       }

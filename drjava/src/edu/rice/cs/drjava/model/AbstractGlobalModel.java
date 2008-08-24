@@ -3436,13 +3436,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Decorator pattern for the definitions document. */
     public CompoundUndoManager getUndoManager() { return getDocument().getUndoManager(); }
     
-    /** Assumes read lock is already held. */    
+    /** Gets start of line containing pos. */    
     public int _getLineStartPos(int pos) { 
       DefinitionsDocument doc = getDocument();
       return doc._getLineStartPos(pos); 
     }
     
-    /** Assumes read lock is already held. */
+    /** Gets end of line containing pos (line includes closing '\n'). */
     public int _getLineEndPos(int pos) { 
       DefinitionsDocument doc = getDocument();
       return doc._getLineEndPos(pos); 
@@ -3473,7 +3473,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getIntelligentBeginLinePos(currPos);
     }
     
-    /** Assumes read lock is already held. */    
+    /** Gets offset of beginning of given line. */    
     public int _getOffset(int lineNum) { return getDocument()._getOffset(lineNum); }
     
     public String getQualifiedClassName() throws ClassNameNotFoundException {
@@ -3507,12 +3507,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getEnclosingClassName(pos, fullyQualified);
     }
     
-    /** Assumes read lock is already held. */
+    /** Finds the previous brace of specified form enclosing pos. */
     public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
       return getDocument()._findPrevEnclosingBrace(pos, opening, closing);
     }
     
-    /** Assumes read lock is already held. */   
+    /**  Finds the next brace of specified form enclosing pos. */   
     public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
       return getDocument()._findNextEnclosingBrace(pos, opening, closing);
     }

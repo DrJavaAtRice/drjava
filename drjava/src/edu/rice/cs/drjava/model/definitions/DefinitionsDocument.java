@@ -111,15 +111,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Specifies if the document has been modified since the last save.  Modified under write lock. */
   private volatile boolean _isModifiedSinceSave = false;
   
-  /** Cached location, aides in determining line number. */
-  private volatile int _cachedLocation;
-  /** Cached current line number. */
-  private volatile int _cachedLineNum;
-  /** Cached location of previous line. */
-  private volatile int _cachedPrevLineLoc;
-  /** Cached location of next line. */
-  private volatile int _cachedNextLineLoc;
-  
   /** This reference to the OpenDefinitionsDocument is needed so that the document iterator 
     * (the DefaultGlobalModel) can find the next ODD given a DD. */
   private volatile OpenDefinitionsDocument _odd;
@@ -143,7 +134,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
     super(indenter);
     _notifier = notifier;
-    _init();
     resetUndoManager();
   }
   
@@ -154,7 +144,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
     _notifier = notifier;
-    _init();
     resetUndoManager();
   }
   
@@ -166,7 +155,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     super();
     _notifier = notifier;
     _undoManager = undoManager;
-    _init();
   }
   
 //  public void setUndoManager(CompoundUndoManager undoManager) {
@@ -176,15 +164,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Returns a new indenter. */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
-  
-  /** Private common helper for constructors. */
-  private void _init() {
-    _odd = null;
-    _cachedLocation = 0;
-    _cachedLineNum = 1;
-    _cachedPrevLineLoc = -1;
-    _cachedNextLineLoc = -1;
-  }
   
   /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from AbstractDJDocument. */
   
@@ -526,10 +505,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         actualLine++;
         _move(dist);  // updates _currentLocation
       }
-      _cachedLineNum = actualLine;
-      _cachedLocation = _currentLocation;
-      _cachedPrevLineLoc = _getLineStartPos(_currentLocation);
-      _cachedNextLineLoc = _getLineEndPos(_currentLocation);
   }  
   
   /** Assumes that read lock is already held. */

@@ -51,8 +51,6 @@ import edu.rice.cs.plt.lambda.Thunk;
   */
 public class MovingDocumentRegion extends DocumentRegion {
   
-//  /** Offset of beginning of first line of this region as recorded in last call on updateLines (or <init>). */
-//  protected volatile int _cachedLineStart;
 //  /** Offset of end of last line of this region as recorded in last call on updateLines (or <init>). */
 //  protected volatile int _cachedLineEnd;
   protected final Position _startPos;
@@ -138,10 +136,16 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }
   
-  /** @return line start */
+  /** @return region start. */
+  public int getStartOffset() { return _startPos.getOffset(); }
+  
+  /** @return region end. */
+  public int getEndOffset() { return _endPos.getOffset(); }
+  
+  /** @return line start preeding region. */
   public int getLineStartOffset() { return _lineStartPos.getOffset(); }
   
-  /** @return line end */
+  /** @return line end following region. */
   public int getLineEndOffset() { return _lineEndPos.getOffset(); }
   
   /** @return the string it was assigned */

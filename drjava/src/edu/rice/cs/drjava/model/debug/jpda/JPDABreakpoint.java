@@ -67,10 +67,6 @@ import static edu.rice.cs.plt.object.ObjectUtil.hash;
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
   
   private volatile Position _position;
-  /** Offset of beginning of this breakpoint line as recorded in last call on updateLines (or <init>). */
-//  private volatile int _cachedLineStart;
-//   /** Offset of end of this breakpoint line as recorded in last call on updateLines (or <init>). */
-//  private volatile int _cachedLineEnd;
   private volatile Position _startPos;
   private volatile Position _endPos;
   
@@ -93,8 +89,6 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     _isEnabled = isEnabled;
     
     try {
-//      _cachedLineStart = doc._getLineStartPos(offset);
-//      _cachedLineEnd = doc._getLineEndPos(offset);
       _startPos = doc.createPosition(_doc._getLineStartPos(offset));
       _endPos = doc.createPosition(_doc._getLineEndPos(offset));
     }
@@ -183,23 +177,9 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   public int getLineEndOffset() { return _endPos.getOffset(); }
   
-//  /** Accessor for the start of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
-//    * complete line.
-//    * @return the lineStart offset
-//    */
-//  public int getCachedLineStart() { return _startPos.getOffset(); }
-//  
-//  /** Accessor for the end of the except enclosing this breakpoint.  Degenerate since each breakpoint is a single
-//    * complete line.
-//    * @return the lineStart offset
-//    */
-//  public int getCachedLineEnd() { return _endPos.getOffset(); }
-  
   public void update() {
    try {  // _doc is inherited from DocumentRegion
       int offset = _position.getOffset();
-//      _cachedLineStart = _doc._getLineStartPos(offset);
-//      _cachedLineEnd  = _doc._getLineEndPos(offset);
       _startPos = _doc.createPosition(_doc._getLineStartPos(offset));
       _endPos = _doc.createPosition(_doc._getLineEndPos(offset));
       _lineNumber = _doc.getLineOfOffset(offset);
@@ -207,6 +187,8 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
   }
   
+  public boolean isEmpty() { return getStartOffset() == getEndOffset(); }
+    
 //  /** Accessor for this breakpoint's start position
 //    * @return the start position
 //    */

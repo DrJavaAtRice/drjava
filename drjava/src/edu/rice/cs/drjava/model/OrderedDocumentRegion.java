@@ -59,4 +59,5 @@ public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<Order
   public int getLineEndOffset();
   public void update();
   public String getString();
+  public boolean isEmpty();
 }

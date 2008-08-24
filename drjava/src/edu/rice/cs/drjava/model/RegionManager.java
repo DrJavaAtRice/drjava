@@ -118,7 +118,6 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** @return the set of documents containing regions. */
   public Set<OpenDefinitionsDocument> getDocuments();
   
-  /** Updates _cachedLineStart, _cachedLineEnd in regions following r. */
   public void updateLines(R region);
   
   /** Adds a listener to the notifier.
