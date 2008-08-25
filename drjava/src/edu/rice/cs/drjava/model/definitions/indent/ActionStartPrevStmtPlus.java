@@ -110,7 +110,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
         
         assert doc.getCurrentLocation() == here;
         doc._setCurrentLocation(prevDelimiterPos + 1);   // move cursor to right of '}' or ')' delim
-        prevDelimiterPos -= doc._balanceBackward() - 1;  // use matching '{' or '(' as delim
+        prevDelimiterPos -= doc.balanceBackward() - 1;  // use matching '{' or '(' as delim
         doc._setCurrentLocation(here);
         
         assert doc.getText(prevDelimiterPos, 1).charAt(0) == '{' || 

@@ -59,16 +59,10 @@ class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     if (reason == Indenter.IndentReason.ENTER_KEY_PRESS) return true;
-    try {
-      // Determine if there are only whitespace chars by seeing if the first non-WS char is the endOfLine
-      int here = doc.getCurrentLocation();
-      int endOfLine = doc._getLineEndPos(here);
-      int firstNonWS = doc._getLineFirstCharPos(here);
-      return (endOfLine == firstNonWS);
-    }
-    catch (BadLocationException e) {
-      // Shouldn't happen
-      throw new UnexpectedException(e);
-    }
+    // Determine if there are only whitespace chars by seeing if the first non-WS char is the endOfLine
+    int here = doc.getCurrentLocation();
+    int endOfLine = doc._getLineEndPos(here);
+    int firstNonWS = doc._getLineFirstCharPos(here);
+    return (endOfLine == firstNonWS);
   }
 }

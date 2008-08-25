@@ -100,10 +100,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
 //  public boolean indentInProgress() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int balanceForward() { throw new UnsupportedOperationException("Dummy method"); }
-  public int _balanceForward() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int balanceBackward() { throw new UnsupportedOperationException("Dummy method"); }
-  public int _balanceBackward() { throw new UnsupportedOperationException("Dummy method"); }
   
   public File getFile() throws FileMovedException { throw new UnsupportedOperationException("Dummy method"); }
   

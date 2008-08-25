@@ -424,10 +424,13 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     /* Get the tailSet consisting of the ordered set of regions >= r. */
     @SuppressWarnings("unchecked")
     SortedSet<R> tail = getTailSet(r);
+    if (tail.size() == 0) return;
+    OrderedDocumentRegion[] tailRegions = tail.toArray(new OrderedDocumentRegion[0]);
 
     // tail can be empty if r is a constructed DocumentRegion
-    for (R region: tail) {
-      if (region.getStartOffset() == region.getEndOffset()) removeRegion(region);
+    for (OrderedDocumentRegion region: tailRegions) {
+      // The following cast is gross, but the silly erasure based generics won't let me execute new R[0]
+      if (region.getStartOffset() == region.getEndOffset()) removeRegion((R) region);
       region.update();
     }
   }

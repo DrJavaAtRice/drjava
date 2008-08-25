@@ -3294,21 +3294,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    /** @return the caret position as set by the view. */
 //    public int getCaretPosition() { return _caretPosition; }
     
-    /** Forwarding method to find the match for the closing brace immediately to the left, assuming there is such a brace.
+    /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.  Only runs in the
+      * event thread.
       * @return the relative distance backwards to the offset before the matching brace.
       */
     public int balanceBackward() { return getDocument().balanceBackward(); }
     
-    /* Raw version of balanceBackward.  Assume read and reduced locks are already held. */
-    public int _balanceBackward() { return getDocument()._balanceBackward(); }
-    
     /** Forwarding method to find the match for the open brace immediately to the right, assuming there is such a brace.
+      * Only runs in the event thread.
       * @return the relative distance forwards to the offset after the matching brace.
       */
     public int balanceForward() { return getDocument().balanceForward(); }
-    
-    /* Raw version of balanceForward.  Assume read and reduced locks are already held. */
-    public int _balanceForward() { return getDocument()._balanceForward(); }
     
     /** @return the breakpoint region manager. */
     public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }

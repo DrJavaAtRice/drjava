@@ -200,7 +200,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible if read lock is already held
   }
  
-  /** Raw version of getText(int, int) that converts BadLocationException to UnexpectedException. */
+  /** Sanitized version of getText(int, int) that converts BadLocationException to UnexpectedException. */
   public String _getText(int pos, int len) { 
     try { return getText(pos, len); }  // calls method defined in DefaultStyledDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }

@@ -354,7 +354,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         for (i = 1; (i < lineNum) && (_currentLocation < docLen); i++) {
           int dist = _reduced.getDistToNextNewline();     // or end of doc
           if (_currentLocation + dist < docLen) dist++;  // skip newline
-          _move(dist);  // updates _currentLocation to beginning of line # (i + 1)
+          move(dist);  // updates _currentLocation to beginning of line # (i + 1)
         }
         if (i == lineNum) return _currentLocation;
         else return -1;
@@ -503,7 +503,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         dist = _reduced.getDistToNextNewline();
         if (_currentLocation + dist < len) dist++;
         actualLine++;
-        _move(dist);  // updates _currentLocation
+        move(dist);  // updates _currentLocation
       }
   }  
   
@@ -790,7 +790,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (text.charAt(parenStart) == '(') {
             final int origLocation = _currentLocation;
             _setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
-            int parenEnd = _balanceForward();
+            int parenEnd = balanceForward();
 //            _setCurrentLocation(parenStart + 1);   // Restore the state of the reduced model; unnecessary
             if (parenEnd > -1) {
               parenEnd = parenEnd + parenStart + 1;
@@ -930,7 +930,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (braceType.equals(BraceInfo.OPEN_CURLY)) {
             topLevelBracePos = _currentLocation - info.distance();
           }
-          _move(-info.distance());
+          move(-info.distance());
           info = _getEnclosingBrace();
           braceType = info.braceType();
         }

@@ -70,58 +70,52 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
     * character sequence specified by the String field _prefix.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    try {
-      // Find the first non-whitespace character on the current line.
-      
-      int origPos = doc.getCurrentLocation();
-      int startPos   = doc._getLineFirstCharPos(origPos);
-      int endPos     = doc._getLineEndPos(origPos);
-      int lineLength = endPos - startPos;
-      int prefixLen = _prefix.length();
-      
-      char prevChar = '\0';
-      String text = doc.getText(startPos, lineLength);
-      
-//      System.err.println("line is: '" + text + "'");
-      
-      doc._setCurrentLocation(startPos);
-      try { 
-        for (int i = 0; i < lineLength; i++, doc._move(1)) {
-          
-          ReducedModelState state = doc._getStateAtCurrent();
-          
-          if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
-            assert prevChar == '\0'; 
-            continue;
-          }
-          char currentChar = text.charAt(i);
-//          System.err.println("Iteration " + i + ": ch = " + currentChar + " prevCh = " + prevChar);
-          
-          if (currentChar == '/') {
-            if (prevChar == '/') return false;  // opened a LINE_COMMENT
-            if (prevChar == '\0') {
-              prevChar = currentChar;
-              continue;     // leading char in line is '/'
-            }
-          }
-          else if (currentChar == '*' && prevChar == '/') { // opened a BLOCK_COMMENT, subsequent chars will be inside
-            prevChar = '\0';
-            continue;      
-          }
-          else if (currentChar == ' ' || currentChar == '\t') {  
-            if (prevChar == '\0') {
-              continue;  // consume opening whitespace
-            }
-          }
-          return text.startsWith(_prefix, i);   // special cases have already been eliminated
+    // Find the first non-whitespace character on the current line.
+    
+    int origPos = doc.getCurrentLocation();
+    int startPos   = doc._getLineFirstCharPos(origPos);
+    int endPos     = doc._getLineEndPos(origPos);
+    int lineLength = endPos - startPos;
+    int prefixLen = _prefix.length();
+    
+    char prevChar = '\0';
+    String text = doc._getText(startPos, lineLength);
+//    System.err.println("line is: '" + text + "'");
+    
+    doc._setCurrentLocation(startPos);
+    try { 
+      for (int i = 0; i < lineLength; i++, doc.move(1)) {
+        
+        ReducedModelState state = doc._getStateAtCurrent();
+        
+        if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
+          assert prevChar == '\0'; 
+          continue;
         }
+        char currentChar = text.charAt(i);
+//        System.err.println("Iteration " + i + ": ch = " + currentChar + " prevCh = " + prevChar);
+        
+        if (currentChar == '/') {
+          if (prevChar == '/') return false;  // opened a LINE_COMMENT
+          if (prevChar == '\0') {
+            prevChar = '/';
+            continue;     // leading char in line is '/'
+          }
+        }
+        else if (currentChar == '*' && prevChar == '/') { // opened a BLOCK_COMMENT, subsequent chars will be inside
+          prevChar = '\0';
+          continue;      
+        }
+        else if (currentChar == ' ' || currentChar == '\t') {  
+          if (prevChar == '\0') {
+            continue;  // consume opening whitespace
+          }
+        }
+        return text.startsWith(_prefix, i);   // special cases have already been eliminated
       }
-      finally { doc._setCurrentLocation(origPos); }
     }
-    catch (BadLocationException e) {
-      // Control flow should never reach this point!
-      throw new UnexpectedException(new RuntimeException("Bug in QuestionCurrLineStartsWithSkipComments"));
-    }
+    finally { doc._setCurrentLocation(origPos); }
+    
     return false;
   }
 }

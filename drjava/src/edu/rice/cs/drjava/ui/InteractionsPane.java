@@ -187,7 +187,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     
 //    addToPromptList(getPromptPos()); // NOT USED
     int to = getCaretPosition();
-    int from = _doc._balanceBackward(); //_doc()._reduced.balanceBackward();
+    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
@@ -198,7 +198,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     else {
       // (getCaretPosition will be the start of the highlight)
       from = to;
-      to = _doc._balanceForward();
+      to = _doc.balanceForward();
       
       if (to > -1) {
         to = to + from;

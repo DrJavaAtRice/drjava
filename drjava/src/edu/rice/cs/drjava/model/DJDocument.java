@@ -87,21 +87,14 @@ public interface DJDocument extends SwingDocumentInterface {
 //  /* Returns whether a block indent operation is in progress on this document. */
 //  public boolean indentInProgress();
   
-  /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.
+  /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.  Only runs in the
+    * event thread.
     * @return the relative distance backwards to the offset before the matching brace.
     */
   public int balanceBackward();
   
-  /* Raw version of balanceBackward.  Assume read and reduced locks are already held. */
-  public int _balanceBackward();
-  
-  /** Finds the match for the open brace immediately to the right, assuming there is such a brace.
-    * @return the relative distance forwards to the offset after the matching brace.
-    */
-  public int balanceForward();
-  
   /* Raw version of balanceForward.  Assume read and reduced locks are already held. */
-  public int _balanceForward();
+  public int balanceForward();
   
 //  /** Returns the indent information for the current location. */
 //  public IndentInfo getIndentInformation();

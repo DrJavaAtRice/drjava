@@ -146,7 +146,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
     // Update the highlight if there is any. Not necessarily executed in event thread
     int to = getCaretPosition();
-    int from = _doc._balanceBackward();
+    int from = _doc.balanceBackward();
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
@@ -164,7 +164,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       // (getCaretPosition will be the start of the highlight)
       from = to;
       
-      to = _doc._balanceForward();
+      to = _doc.balanceForward();
       if (to > -1) {
         to = to + from;
         _addHighlight(from - 1, to);
