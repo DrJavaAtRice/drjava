@@ -3480,7 +3480,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getQualifiedClassName(pos);
     }
     
-    public ReducedModelState _getStateAtCurrent() { return getDocument()._getStateAtCurrent(); }
+    public ReducedModelState getStateAtCurrent() { return getDocument().getStateAtCurrent(); }
     
     public void resetUndoManager() {
       // if it's not in the cache, the undo manager will be reset when it's reconstructed
@@ -3504,33 +3504,33 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Finds the previous brace of specified form enclosing pos. */
-    public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
-      return getDocument()._findPrevEnclosingBrace(pos, opening, closing);
+    public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+      return getDocument().findPrevEnclosingBrace(pos, opening, closing);
     }
     
     /**  Finds the next brace of specified form enclosing pos. */   
-    public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
-      return getDocument()._findNextEnclosingBrace(pos, opening, closing);
+    public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+      return getDocument().findNextEnclosingBrace(pos, opening, closing);
     }
     
 //    public int findPrevNonWSCharPos(int pos) throws BadLocationException {
 //      return getDocument().findPrevNonWSCharPos(pos);
 //    }
     
-    /** Assumes read lock is already held. */
-    public int _getFirstNonWSCharPos(int pos) throws BadLocationException {
-      return getDocument()._getFirstNonWSCharPos(pos);
+    /**Only runs in the event thread. */
+    public int getFirstNonWSCharPos(int pos) throws BadLocationException {
+      return getDocument().getFirstNonWSCharPos(pos);
+    }
+    
+    /** Only runs in the event thread. */
+    public int getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
+      return getDocument().getFirstNonWSCharPos(pos, acceptComments);
     }
     
     /** Assumes read lock is already held. */
-    public int _getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
-      return getDocument()._getFirstNonWSCharPos(pos, acceptComments);
-    }
-    
-    /** Assumes read lock is already held. */
-    public int _getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
+    public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
       throws BadLocationException {
-      return getDocument()._getFirstNonWSCharPos(pos, whitespace, acceptComments);
+      return getDocument().getFirstNonWSCharPos(pos, whitespace, acceptComments);
     }
     
     /** Assumes read lock is already held. */
@@ -3566,12 +3566,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //      return getDocument().findCharInStmtBeforePos(findChar, position);
 //    }
     
-    public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
-      return getDocument()._findPrevDelimiter(pos, delims);
+    public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
+      return getDocument().findPrevDelimiter(pos, delims);
     }
     
-    public int _findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException {
-      return getDocument()._findPrevDelimiter(pos, delims, skipParenPhrases);
+    public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException {
+      return getDocument().findPrevDelimiter(pos, delims, skipParenPhrases);
     }
     
 //    public void resetReducedModelLocation() { getDocument().resetReducedModelLocation(); }
@@ -3661,7 +3661,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public int getNumberOfLines() { return getLineOfOffset(getLength()); }
     
     /** Determines if pos in document is inside a comment or a string. */
-    public boolean _isShadowed(int pos) { return getDocument()._isShadowed(pos); }
+    public boolean isShadowed(int pos) { return getDocument().isShadowed(pos); }
     
     /** Translates an offset into the components text to a line number.
       * @param offset the offset >= 0

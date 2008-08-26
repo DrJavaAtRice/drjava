@@ -80,25 +80,25 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
     
     char prevChar = '\0';
     String text = doc._getText(startPos, lineLength);
-//    System.err.println("line is: '" + text + "'");
+//      System.err.println("line is: '" + text + "'");
     
-    doc._setCurrentLocation(startPos);
+    doc.setCurrentLocation(startPos);
     try { 
       for (int i = 0; i < lineLength; i++, doc.move(1)) {
         
-        ReducedModelState state = doc._getStateAtCurrent();
+        ReducedModelState state = doc.getStateAtCurrent();
         
         if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
           assert prevChar == '\0'; 
           continue;
         }
         char currentChar = text.charAt(i);
-//        System.err.println("Iteration " + i + ": ch = " + currentChar + " prevCh = " + prevChar);
+//          System.err.println("Iteration " + i + ": ch = " + currentChar + " prevCh = " + prevChar);
         
         if (currentChar == '/') {
           if (prevChar == '/') return false;  // opened a LINE_COMMENT
           if (prevChar == '\0') {
-            prevChar = '/';
+            prevChar = currentChar;
             continue;     // leading char in line is '/'
           }
         }
@@ -114,8 +114,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
         return text.startsWith(_prefix, i);   // special cases have already been eliminated
       }
     }
-    finally { doc._setCurrentLocation(origPos); }
-    
+    finally { doc.setCurrentLocation(origPos); }
     return false;
   }
 }

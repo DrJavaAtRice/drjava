@@ -161,19 +161,19 @@ public class ReducedModelControl implements BraceReduction {
     // check the reduced brace model for braces
     ReducedToken rmbToken = _rmb.current();
     if (! rmbToken.isGap()) {
-      rmbToken.setState(_rmc._getStateAtCurrent());
+      rmbToken.setState(_rmc.getStateAtCurrent());
       return rmbToken;
     }
     // otherwise, we have a gap.
     int size = getSize(rmbToken,rmcToken);
-    return new Gap(size, _rmc._getStateAtCurrent());
+    return new Gap(size, _rmc.getStateAtCurrent());
   }
   
   /** Gets the shadowing state at the current caret position.
     * @return FREE|INSIDE_LINE_COMMENT|INSIDE_BLOCK_COMMENT|
     * INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE
     */
-  public ReducedModelState _getStateAtCurrent() { return _rmc._getStateAtCurrent(); }
+  public ReducedModelState getStateAtCurrent() { return _rmc.getStateAtCurrent(); }
   
   /** Get a string representation of the current token's type.
     * @return "" if current is a Gap, otherwise, use ReducedToken.getType()

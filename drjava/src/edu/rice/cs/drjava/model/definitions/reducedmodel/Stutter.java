@@ -54,6 +54,6 @@ public class Stutter extends ReducedModelState {
 
   ReducedModelState update(TokenList.Iterator copyCursor) {
     if (copyCursor.atStart())  copyCursor.next();
-    return copyCursor._getStateAtCurrent();
+    return copyCursor.getStateAtCurrent();
   }
 }

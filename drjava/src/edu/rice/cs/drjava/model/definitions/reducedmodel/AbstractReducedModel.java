@@ -107,7 +107,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   }
   
   /* @return the shadowing state of _cursor; only makes sense for ReducedModelComment. */
-  public ReducedModelState getState() { return _cursor._getStateAtCurrent(); }
+  public ReducedModelState getState() { return _cursor.getStateAtCurrent(); }
   
   /** A toString() replacement for testing - easier to read. */
   public String simpleString() {
@@ -230,7 +230,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     * @param length size of gap to insert
     */
   protected void _insertNewGap(int length) {
-    _cursor.insert(new Gap(length, _cursor._getStateAtCurrent()));
+    _cursor.insert(new Gap(length, _cursor.getStateAtCurrent()));
     _cursor.next();
     _cursor.setBlockOffset(0);
   }

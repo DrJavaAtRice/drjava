@@ -61,7 +61,7 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** Suspension that generates the JTree label excerpt for this region. */
   protected final Thunk<String> _stringSuspension;
   
-  /** Update _lineStartPos and _lineEndPos after line has been edited*/
+  /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
     try {  // _doc is inherited from DocumentRegion
       _lineStartPos =_doc.createPosition(_doc._getLineStartPos(getStartOffset()));

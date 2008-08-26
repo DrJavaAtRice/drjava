@@ -96,7 +96,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     // document is:
     // Start:=>a/*bc */"\\{}()
     BraceReduction _reduced = _doc.getReduced();
-    assertEquals("2.1", FREE, _reduced._getStateAtCurrent());
+    assertEquals("2.1", FREE, _reduced.getStateAtCurrent());
     _reduced.move(2);
     // document is:
     // Start:a/=>*bc */"\\{}()
@@ -206,7 +206,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _reduced.move(-2);
     assertEquals("1.2", "/*", _reduced.currentToken().getType());
     _reduced.move(2);
-    assertEquals("1.3", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced._getStateAtCurrent());
+    assertEquals("1.3", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.getStateAtCurrent());
   }
   
   /** Make sure the vector is consistent: all elements immediately adjoin one another (no overlap), and make sure all

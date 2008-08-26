@@ -302,7 +302,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   public String getLexiName() { throw new UnsupportedOperationException("Dummy method"); }
-  public ReducedModelState _getStateAtCurrent() { throw new UnsupportedOperationException("Dummy method"); }
+  public ReducedModelState getStateAtCurrent() { throw new UnsupportedOperationException("Dummy method"); }
   public void resetUndoManager() { throw new UnsupportedOperationException("Dummy method"); }
   public File getCachedClassFile() { throw new UnsupportedOperationException("Dummy method"); }
   public void setCachedClassFile(File f) { throw new UnsupportedOperationException("Dummy method"); }
@@ -350,11 +350,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
 //  public boolean inParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
 //  public boolean inParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
   
-  public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+  public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -362,15 +362,15 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
 //    throw new UnsupportedOperationException("Dummy method");
 //  }
   
-  public int _getFirstNonWSCharPos(int pos) throws BadLocationException {
+  public int getFirstNonWSCharPos(int pos) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int _getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
+  public int getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int _getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
+  public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -404,11 +404,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
 //    throw new UnsupportedOperationException("Dummy method");
 //  }
   
-  public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
+  public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int _findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException {
+  public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -454,7 +454,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getNumberOfLines() { return 0; }
   
   /** Determines if pos in document is inside a comment or a string. */
-  public boolean _isShadowed(int pos) { return false; }
+  public boolean isShadowed(int pos) { return false; }
   
   /** Translates an offset into the components text to a line number.
    * @param offset the offset >= 0

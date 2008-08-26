@@ -397,7 +397,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       // Only indent if in code
 
       _doc.setCurrentLocation(getCaretPosition());
-      ReducedModelState state = _doc._getStateAtCurrent();
+      ReducedModelState state = _doc.getStateAtCurrent();
       if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
     }
   }

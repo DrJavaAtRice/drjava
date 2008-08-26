@@ -182,7 +182,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     * lock and reduced locks on _doc are already held. */
   protected void matchUpdate(int offset) {
     if (! _doc.hasPrompt()) return;
-    _doc._setCurrentLocation(offset); 
+    _doc.setCurrentLocation(offset); 
     _removePreviousHighlight();
     
 //    addToPromptList(getPromptPos()); // NOT USED

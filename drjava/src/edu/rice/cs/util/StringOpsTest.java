@@ -63,7 +63,7 @@ public class StringOpsTest extends DrJavaTestCase {
     
     // The offset is always one less than the first row/col
     // The length includes the start and end positions
-    Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 9);
+    Pair<Integer, Integer> oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 9);
     assertEquals("testGetOffsetAndLength- offSet:", Integer.valueOf(0), oAndL.first());
     assertEquals("testGetOffsetAndLength- length:", Integer.valueOf(9), oAndL.second());
     

@@ -94,10 +94,10 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     */
   public boolean indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
-    doc._setCurrentLocation(pos);
+    doc.setCurrentLocation(pos);
     indentLine(doc, reason);
     if (oldPos > doc.getLength()) oldPos = doc.getLength();
-    doc._setCurrentLocation(oldPos);
+    doc.setCurrentLocation(oldPos);
     return false;
   }
 

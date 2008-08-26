@@ -87,13 +87,14 @@ public interface DJDocument extends SwingDocumentInterface {
 //  /* Returns whether a block indent operation is in progress on this document. */
 //  public boolean indentInProgress();
   
-  /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.  Only runs in the
-    * event thread.
+  /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.
     * @return the relative distance backwards to the offset before the matching brace.
     */
   public int balanceBackward();
   
-  /* Raw version of balanceForward.  Assume read and reduced locks are already held. */
+  /** Finds the match for the open brace immediately to the right, assuming there is such a brace.
+    * @return the relative distance forwards to the offset after the matching brace.
+    */
   public int balanceForward();
   
 //  /** Returns the indent information for the current location. */
@@ -101,7 +102,7 @@ public interface DJDocument extends SwingDocumentInterface {
   
 //  public ReducedModelState stateAtRelLocation(int dist);
   
-  public ReducedModelState _getStateAtCurrent();
+  public ReducedModelState getStateAtCurrent();
   
 //  public void resetReducedModelLocation();
   
@@ -112,7 +113,7 @@ public interface DJDocument extends SwingDocumentInterface {
     * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
-  public int _findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
+  public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /** Searching forwards, finds the position of the enclosing brace.
     * NB: ignores comments.
@@ -122,7 +123,7 @@ public interface DJDocument extends SwingDocumentInterface {
     * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
-  public int _findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
+  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /** Searching backwards, finds the position of the first character that is one
     * of the given delimiters.  Does not look for delimiters inside paren phrases.
@@ -133,7 +134,7 @@ public interface DJDocument extends SwingDocumentInterface {
     * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
-  public int _findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
+  public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
   
   /** Searching backwards, finds the position of the first character that is one
    * of the given delimiters.  Will not look for delimiters inside a paren
@@ -146,7 +147,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
    * of document is reached.
    */
-  public int _findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
+  public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
 //  /** This function finds the given character in the same statement as the given
 //   * position, and before the given position.  It is used by QuestionExistsCharInStmt and
@@ -247,7 +248,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX (-1) if end of document is reached
    */
-  public int _getFirstNonWSCharPos(int pos) throws BadLocationException;
+  public int getFirstNonWSCharPos(int pos) throws BadLocationException;
   
   /** Similar to the single-argument version, but allows including comments.
    * @param pos Position to start from
@@ -255,7 +256,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX (-1) if end of document is reached
    */
-  public int _getFirstNonWSCharPos(int pos, boolean acceptComments) 
+  public int getFirstNonWSCharPos(int pos, boolean acceptComments) 
     throws BadLocationException;
   
   /** Finds the position of the first non-whitespace character after pos.
@@ -266,7 +267,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX (-1) if end of document is reached
    */
-  public int _getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
+  public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
     throws BadLocationException;
   
 //  public int findPrevNonWSCharPos(int pos) throws BadLocationException;

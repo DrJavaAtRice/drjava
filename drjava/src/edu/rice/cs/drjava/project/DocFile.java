@@ -43,8 +43,8 @@ import edu.rice.cs.plt.tuple.Pair;
 
 public class DocFile extends File {
   
-  private Pair<Integer,Integer> _sel;
-  private Pair<Integer,Integer> _scroll;
+  private Pair<Integer, Integer> _sel;
+  private Pair<Integer, Integer> _scroll;
   private boolean _active;
   private String _package;
   private long _mod;

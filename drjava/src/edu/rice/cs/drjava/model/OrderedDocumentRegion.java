@@ -61,3 +61,4 @@ public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<Order
   public String getString();
   public boolean isEmpty();
 }
+

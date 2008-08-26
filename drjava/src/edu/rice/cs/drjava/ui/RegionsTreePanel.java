@@ -47,6 +47,8 @@ import java.util.LinkedList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.SortedSet;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -207,19 +209,20 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    updater.start();
 //  }
   
-  protected void traversePanel() {
-    Enumeration docNodes = _rootNode.children();
-    while (docNodes.hasMoreElements()) {
-      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
-      // Find the correct start offset node for this region
-      Enumeration regionNodes = docNode.children();
-      while (regionNodes.hasMoreElements()) {
-        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
-        _regTreeModel.reload(regionNode);
-      }
-      _regTreeModel.reload(docNode);  // file name may have changed
-    }
-  }
+  // Not currently used.
+//  protected void traversePanel() {
+//    Enumeration docNodes = _rootNode.children();
+//    while (docNodes.hasMoreElements()) {
+//      DefaultMutableTreeNode docNode = (DefaultMutableTreeNode) docNodes.nextElement();          
+//      // Find the correct start offset node for this region
+//      Enumeration regionNodes = docNode.children();
+//      while (regionNodes.hasMoreElements()) {
+//        DefaultMutableTreeNode regionNode = (DefaultMutableTreeNode) regionNodes.nextElement();
+//        _regTreeModel.reload(regionNode);
+//      }
+//      _regTreeModel.reload(docNode);  // file name may have changed
+//    }
+//  }
   
   /** Forces this panel to be completely updated. */
   protected void updatePanel() {
@@ -633,6 +636,19 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _changeState.updateButtons();
 //    System.err.println("_regionManager.getDocuments() = " + _regionManager.getDocuments());
     if (_regionManager.getDocuments().isEmpty()) _close(); // _regTreeModel.getChildCount(_regTreeModel.getRoot()) == 0
+  }
+  
+  // Reloads regions between starting and endRegion inclusive.  Assumes startRegion, endRegion are in the same document.
+  public void reload(R startRegion, R endRegion) {
+    SortedSet<R> tail = _regionManager.getTailSet(startRegion);
+    Iterator<R> iterator = tail.iterator();
+    
+    while (iterator.hasNext()) {
+      R r = iterator.next();
+      if (r.compareTo(endRegion) > 0) break; 
+      System.err.println("Reloading region '" + r.getString() + "'");
+      _regTreeModel.reload(getNode(r));
+    }
   }
   
 //  /** Remove all regions for the given document from the tree. Must be executed in event thread. */

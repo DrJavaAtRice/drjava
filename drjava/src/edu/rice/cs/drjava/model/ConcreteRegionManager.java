@@ -60,6 +60,7 @@ import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -106,7 +107,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   }
   
   /** Gets the sorted set of regions greater than or equal to r. */
-  private SortedSet<R> getTailSet(R r) {
+  public SortedSet<R> getTailSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());
     if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
     return oddRegions.tailSet(r);
@@ -149,38 +150,65 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     else return null;
   }
   
-  public ArrayList<R> getRegionsNear(OpenDefinitionsDocument odd, int offset) {
+  /** Finds the interval of regions in odd such that the line label (excerpt) for the region contains offset. */
+  public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset) {
 //    assert EventQueue.isDispatchThread();
     
 //    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
     
-    /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset - 120.  The maximium
-     * size of the excerpt enclosing a region is 120 characters. */
+    /* Get the interval of regions whose line label (excerpts) contain offset. The maximium size of the excerpt 
+     * enclosing a region is 120 characters; it begins at the start of the line containing the start of the region. 
+     * Since empty regions are ignore (and deleted as soon as they are found), the end of a containing region must be 
+     * less than 120 characters from offset.  Find the tail set of all regions [start, end) where offset - 120 < end.
+     */
     @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, offset - 119));
+    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, offset - 119));
     
-    /* Search tail, selecting each region r such that r.getLineEnd() > offset and r.getLineStart < offset.  The tail is
-     * totally order on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart and end to
-     * lineEnd are monotonic and the tail is totally ordered on BOTH start and end.  Hence, we can abandon the search as
-     * soon as we reach a region r such that r.getLineStart() >= offset.  tail may be empty. */
+    /* Search tail, selecting first and last regions r such that r.getLineEnd() >= offset and r.getLineStart <= offset.
+     * The tail is totally order on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart
+     * and end to lineEnd are monotonic and the tail is totally ordered on BOTH start and end (since regions do not 
+     * overlap).  Hence, we can abandon the search as soon as we reach a region r such that r.getLineStart() > offset.  
+     * tail may be empty. */
     
     if (tail.size() == 0) return null;
     
-    ArrayList<R> result = new ArrayList<R>(0);  // For most edits, there is no match. Should we use a LinkedList?
-    for (R r: tail) {
+    // Find the first and last regions whose bounds (using line boundaries) contain offset
+    Iterator<R> it = tail.iterator();
+    R first = null;
+    R last = null;
+    
+    // Find first
+    while (it.hasNext()) {
+      R r = it.next();
+//      System.err.println("Testing region '" + r.getString() + "'");
       /* Note: r may span more than one line. */
       int lineStart = r.getLineStartOffset();
+//      System.err.println("lineStart = " + lineStart + " offset = " + offset);
+      if (lineStart > offset) break;  // first == null implying test following loop will return
       int lineEnd = r.getLineEndOffset();
-      if (lineStart - 1 <= offset && lineEnd >= offset) {
-        result.add(r);
-//        System.err.println("Adding tail set region " + r + " to update list");
+//      System.err.println("lineEnd = " + lineEnd);
+      if (lineStart - 1 <= offset && lineEnd >= offset) {  // - 1 required to handle inserting wing comment chars
+        first = r;
+//        System.err.println("Found first region in getRegionInterval = '" + r.getString() +  "'");
+        break;
       }
-      else if (lineStart > offset) break;
     }
+    if (first == null) return null;
     
-    return result;
+    // Find last
+    last = first;
+    while (it.hasNext()) {
+      R r = it.next();
+      int lineStart = r.getLineStartOffset();
+      if (lineStart > offset) break;
+      int lineEnd = r.getLineEndOffset();
+      if (lineStart <= offset && lineEnd >= offset) {
+        last = r;
+      }
+    }
+//    System.err.println("Found last region in getRegionInterval = '" + last +  "'");
+    return new Pair<R, R>(first, last);
   }
-    
     
 //  /** Returns the rightmost region in the given document that contains [startOffset, endOffset], or null if one does
 //    * not exist.  Only executes in the event thread.  Otherwise offset args could be invalid.
@@ -416,22 +444,26 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     finally { _lock.endRead(); }            
   }
   
-  /** Updates _lineStartPos, _lineEndPos in regions following (and including) r.  Removes empty regions.  r is not
-    * necessarily a region in this manager.  */
-  public void updateLines(R r) { 
+  /** Updates _lineStartPos, _lineEndPos of regions in the interval [firstRegion, lastRegion] using total ordering on
+    * regions.  Removes empty regions.  firstRegion and lastRegion are not necessarily regions in this manager.  
+    */
+  public void updateLines(R firstRegion, R lastRegion) { 
 //    assert EventQueue.isDispatchThread();
     
     /* Get the tailSet consisting of the ordered set of regions >= r. */
     @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet(r);
+    SortedSet<R> tail = getTailSet(firstRegion);
     if (tail.size() == 0) return;
     OrderedDocumentRegion[] tailRegions = tail.toArray(new OrderedDocumentRegion[0]);
 
+    LinkedList<R> toBeRemoved = new LinkedList<R>();  // nonsense to avoid concurrent modification exception
     // tail can be empty if r is a constructed DocumentRegion
-    for (OrderedDocumentRegion region: tailRegions) {
-      // The following cast is gross, but the silly erasure based generics won't let me execute new R[0]
-      if (region.getStartOffset() == region.getEndOffset()) removeRegion((R) region);
-      region.update();
+    for (R region: tail) {
+      if (region.compareTo(lastRegion) > 0) break;
+      if (region.getStartOffset() == region.getEndOffset()) toBeRemoved.add(region); 
+      else region.update();  // The bounds of this region must be recomputed.
+
     }
+    for (R r: toBeRemoved) removeRegion(r);
   }
 } 

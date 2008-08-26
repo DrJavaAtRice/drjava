@@ -198,8 +198,8 @@ public abstract class StringOps {
     * @param endCol the character position on which the error ends. Equals the startCol for one-character errors.
     * @return a Pair of which the first is the offset, the second is the length
     */
-  public static Pair<Integer,Integer> getOffsetAndLength(String fullString, int startRow,
-                                                         int startCol, int endRow, int endCol) {
+  public static Pair<Integer, Integer> getOffsetAndLength(String fullString, int startRow,
+                                                          int startCol, int endRow, int endCol) {
     _ensureStartBeforeEnd(startRow, startCol, endRow, endCol);
 
     // find the offset
@@ -235,7 +235,7 @@ public abstract class StringOps {
     if (offset + length > fullString.length()) {
       throw new IllegalArgumentException("Given positions beyond the end of the string");
     }
-    return new Pair<Integer,Integer>(Integer.valueOf(offset), Integer.valueOf(length));
+    return new Pair<Integer, Integer>(Integer.valueOf(offset), Integer.valueOf(length));
   }
 
   /** Gets the stack trace of the given Throwable as a String.

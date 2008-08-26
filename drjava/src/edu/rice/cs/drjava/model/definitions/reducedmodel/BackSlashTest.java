@@ -259,7 +259,7 @@ public final class BackSlashTest extends BraceReductionTestCase
     model0.move(-1);
     model0.delete(-1);
     assertEquals("#0.0", "\"", model0.currentToken().getType());
-    assertEquals("#0.1", FREE, model0._getStateAtCurrent());
+    assertEquals("#0.1", FREE, model0.getStateAtCurrent());
     model1.insertChar('\\');
     model1.insertChar('\\');
     model1.delete(-1);

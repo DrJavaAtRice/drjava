@@ -76,7 +76,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     /** Returns the current commented/quoted state at the cursor.
       * @return FREE | INSIDE_BLOCK_COMMENT | INSIDE_LINE_COMMENT | INSIDE_SINGLE_QUOTE | INSIDE_DOUBLE_QUOTE
       */
-    public ReducedModelState _getStateAtCurrent() {
+    public ReducedModelState getStateAtCurrent() {
       if (atFirstItem() || atStart() || TokenList.this.isEmpty())  return FREE;
       else if (prevItem().isLineComment() || (prevItem().getState() == INSIDE_LINE_COMMENT))
         return INSIDE_LINE_COMMENT;
@@ -97,11 +97,11 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       */
     void insertBraceToGap(String text) {
       current().shrink(getBlockOffset());
-      insert(Brace.MakeBrace(text, _getStateAtCurrent()));
+      insert(Brace.MakeBrace(text, getStateAtCurrent()));
       // add a new gap to account for the remainder from the split gap
       // if block offset is zero, do NOT add a Gap of size 0.
       if (getBlockOffset() > 0) {
-        insert(new Gap(getBlockOffset(), _getStateAtCurrent()));
+        insert(new Gap(getBlockOffset(), getStateAtCurrent()));
         next(); //now point at new brace
       }
       next(); // now pointing at second half of gap
@@ -112,7 +112,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       * reduced tokens.  No destructive action is taken.  Assume that read lock and reduced lock are already held.
       */
     void insertNewBrace(String text) {
-      insert(Brace.MakeBrace(text, _getStateAtCurrent()));
+      insert(Brace.MakeBrace(text, getStateAtCurrent()));
       next();
       setBlockOffset(0);
     }
@@ -154,7 +154,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       // If there's no text after here, nothing to update!
       if (atEnd()) return;
       
-      ReducedModelState curState = _getStateAtCurrent();
+      ReducedModelState curState = getStateAtCurrent();
       // Free if at the beginning
       while (! atEnd()) { curState = curState.update(this); }
     }

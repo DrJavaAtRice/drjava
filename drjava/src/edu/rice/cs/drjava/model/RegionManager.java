@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,13 +61,13 @@ public interface RegionManager<R extends IDocumentRegion> {
     */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset);
   
-  /** Returns the collection of regions, if any, where r.getLineStart() <= offset < r.getLineEnd().  Assumes that 
+  /** Returns the first and last region r where r.getLineStart() <= offset < r.getLineEnd().  Assumes that 
     * document regions are disjoint and that lineStart precedes the start offset by at most 119 characters.
     * @param odd the document
     * @param offset the offset in the document
     * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
     */
-  public ArrayList<R> getRegionsNear(OpenDefinitionsDocument odd, int offset);
+  public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset);
   
   /** Returns the rightmost region starting on the same line containing the specified selection
    *  @param odd the document
@@ -111,6 +112,9 @@ public interface RegionManager<R extends IDocumentRegion> {
   
   /** @return a Vector<R> containing all the DocumentRegion objects in this mangager. */
   public ArrayList<R> getRegions();
+  
+  /** Gets the sorted set of regions greater than or equal to r. */
+  public SortedSet<R> getTailSet(R r);
 
   /** Tells the manager to remove all regions. */
   public void clearRegions();
@@ -118,7 +122,10 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** @return the set of documents containing regions. */
   public Set<OpenDefinitionsDocument> getDocuments();
   
-  public void updateLines(R region);
+  /** Updates _lineStartPos, _lineEndPos of regions in the interval [firstRegion, lastRegion] using total ordering on
+    * regions.  Removes empty regions.  firstRegion and lastRegion are not necessarily regions in this manager.  
+    */
+  public void updateLines(R firstRegion, R lastRegion);
   
   /** Adds a listener to the notifier.
    *  @param listener a listener that reacts on events

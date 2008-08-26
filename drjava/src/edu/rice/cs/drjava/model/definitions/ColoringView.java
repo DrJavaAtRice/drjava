@@ -153,7 +153,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     
     final AbstractDJDocument _doc = (AbstractDJDocument) doc;
     
-    ArrayList<HighlightStatus> stats = _doc._getHighlightStatus(start, end);
+    ArrayList<HighlightStatus> stats = _doc.getHighlightStatus(start, end);
     if (stats.size() < 1) throw new UnexpectedException("GetHighlightStatus returned nothing!");
     
     for (HighlightStatus stat: stats) {

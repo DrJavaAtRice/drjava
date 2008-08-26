@@ -664,6 +664,6 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     return (_matchWholeWord && ! wholeWordFoundAtCurrent(odd, foundOffset)) || 
-      (_ignoreCommentsAndStrings && odd._isShadowed(foundOffset));
+      (_ignoreCommentsAndStrings && odd.isShadowed(foundOffset));
   }
 }

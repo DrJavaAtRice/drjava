@@ -45,8 +45,8 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 public final class IndentHelperTest extends IndentRulesTestCase {
   
   /** Convenience method that wraps _doc.findPrevDelimiter calls in a read lock. */
-  private int _findPrevDelimiter(int pos, char[] delimiters) throws BadLocationException {
-    return _doc._findPrevDelimiter(pos, delimiters); 
+  private int findPrevDelimiter(int pos, char[] delimiters) throws BadLocationException {
+    return _doc.findPrevDelimiter(pos, delimiters); 
   }
   
   /** Convenience method that wraps _doc.inParenPhrase calls in a read lock. */
@@ -75,8 +75,8 @@ public final class IndentHelperTest extends IndentRulesTestCase {
   }
   
     /** Convenience method that wraps _doc.getFirstNonWSCharPos calls in a read lock. */
-  private int _getFirstNonWSCharPos(int pos) throws BadLocationException {
-    return _doc._getFirstNonWSCharPos(pos); 
+  private int getFirstNonWSCharPos(int pos) throws BadLocationException {
+    return _doc.getFirstNonWSCharPos(pos); 
   }
   
   /** Tests findPrevDelimiter() */
@@ -95,27 +95,27 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     _setDocText("/*bar;\nfoo();\nx;*/\nreturn foo;\n");
     assertEquals("Check that delimiters in multi-line comments are ignored",
                  -1,
-                 _findPrevDelimiter(23, delimiters1));
+                 findPrevDelimiter(23, delimiters1));
     
     _setDocText("foo();\n//bar();\nbiz();\n");
     assertEquals("Check that delimiters in single-line comments are ignored",
                  5,
-                 _findPrevDelimiter(16, delimiters1));
+                 findPrevDelimiter(16, delimiters1));
     
     _setDocText("x=';'\n");
     assertEquals("Check that delimiters in single-quotes are ignored",
                  -1,
-                 _findPrevDelimiter(5, delimiters1));
+                 findPrevDelimiter(5, delimiters1));
     
     _setDocText("x=\";\"\n");
     assertEquals("Check that delimiters in double-quotes are ignored",
                  -1,
-                 _findPrevDelimiter(5, delimiters1));
+                 findPrevDelimiter(5, delimiters1));
     
     _setDocText("foo();\nfor(;;)\n");
     assertEquals("Check that delimiters in paren phrases are usually ignored",
                  5,
-                 _findPrevDelimiter(14, delimiters1));
+                 findPrevDelimiter(14, delimiters1));
     
 // Commented out because this behavior is undesirable!  Preceding chars enclosed in parens should not be visible!    
 //    _setDocText("foo();\nfor(;;)\n");
@@ -127,36 +127,36 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     _setDocText("foo();\n test ? x : y;\n\t    return blah();\n");
     assertEquals("Check that ERROR_INDEX (-1) is returned if no matching character is found", 
                  -1, 
-                 _findPrevDelimiter(20, delimiters2)); 
+                 findPrevDelimiter(20, delimiters2)); 
     assertEquals("Check that delimiter is found if it is right after 0",
                  0,
-                 _findPrevDelimiter(20, delimiters3));
+                 findPrevDelimiter(20, delimiters3));
     assertEquals("Check that delimiter is not found if it is at cursor's position",
                  -1,
-                 _findPrevDelimiter(5, delimiters1));
+                 findPrevDelimiter(5, delimiters1));
     assertEquals("Check that the first delimiter in the list is found",
                  17,
-                 _findPrevDelimiter(19, delimiters1));
+                 findPrevDelimiter(19, delimiters1));
     assertEquals("Check that the second delimiter in the list is found",
                  13,
-                 _findPrevDelimiter(17, delimiters1));
+                 findPrevDelimiter(17, delimiters1));
     assertEquals("Check that the last delimiter in the list is found",
                  5,
-                 _findPrevDelimiter(13, delimiters1));
+                 findPrevDelimiter(13, delimiters1));
     
     _setDocText("foo *\n" + "// comment\n" + "bar\n");
     assertEquals("Check that findprevDelimiter ignores comments even when delimiters include * and / (1)",
                  4,
-                 _findPrevDelimiter(17, delimiters4));
+                 findPrevDelimiter(17, delimiters4));
     _setDocText("foo /\n" + "/* comment */\n" + "bar\n");
     assertEquals("Check that findprevDelimiter ignores comments even when delimiters include * and / (2)",
                  4,
-                 _findPrevDelimiter(17, delimiters4));
+                 findPrevDelimiter(17, delimiters4));
 
     _setDocText("abcdefghijk");
     _doc.setCurrentLocation(3);
     int reducedModelPos = _doc.getReduced().absOffset();
-    _findPrevDelimiter(8, delimiters2);
+    findPrevDelimiter(8, delimiters2);
     assertEquals("Check that position in reduced model is unaffected after call to findPrevDelimiter",
                  reducedModelPos,
                  _doc.getReduced().absOffset());
@@ -332,39 +332,39 @@ public final class IndentHelperTest extends IndentRulesTestCase {
   public void testGetFirstNonWSCharPos() throws BadLocationException {
 
     _setDocText("foo();\nbar()\tx();     y();\n  \t  \n\nz();\n ");
-    assertEquals("Current position is non-whitespace", 0, _getFirstNonWSCharPos(0));
-    assertEquals("Current position is non-whitespace, end of line", 5, _getFirstNonWSCharPos(5));
-    assertEquals("Next non-whitespace is 1 '\\n' ahead.", 7, _getFirstNonWSCharPos(6));
-    assertEquals("Next non-whitespace is 2 '\\t' ahead.", 13, _getFirstNonWSCharPos(12));
-    assertEquals("Next non-whitespace is 3 spaces ahead.", 22, _getFirstNonWSCharPos(20));
+    assertEquals("Current position is non-whitespace", 0, getFirstNonWSCharPos(0));
+    assertEquals("Current position is non-whitespace, end of line", 5, getFirstNonWSCharPos(5));
+    assertEquals("Next non-whitespace is 1 '\\n' ahead.", 7, getFirstNonWSCharPos(6));
+    assertEquals("Next non-whitespace is 2 '\\t' ahead.", 13, getFirstNonWSCharPos(12));
+    assertEquals("Next non-whitespace is 3 spaces ahead.", 22, getFirstNonWSCharPos(20));
     assertEquals("Next non-whitespace is multiple whitespaces ('\\n', '\\t', ' ') ahead.", 
                  34,
-                 _getFirstNonWSCharPos(27));
+                 getFirstNonWSCharPos(27));
     assertEquals("Next non-whitespace is end of document", 
                  -1,
-                 _getFirstNonWSCharPos(39));
+                 getFirstNonWSCharPos(39));
     
     _setDocText("foo();\n// comment\nbar();\n");
     assertEquals("Ignore single-line comments",
                  18,
-                 _getFirstNonWSCharPos(6));
+                 getFirstNonWSCharPos(6));
     
     _setDocText("foo();\n /* bar\nblah */ boo\n");
     assertEquals("Ignore multiline comments",
                  23,
-                 _getFirstNonWSCharPos(6));  
+                 getFirstNonWSCharPos(6));  
     _setDocText("foo   /");
     assertEquals("Slash at end of document",
                  6,
-                 _getFirstNonWSCharPos(4));
+                 getFirstNonWSCharPos(4));
     _setDocText("foo   //");
     assertEquals("// at end",
                  -1,
-                 _getFirstNonWSCharPos(4));
+                 getFirstNonWSCharPos(4));
     _setDocText("foo   /*");
     assertEquals("/* at end",
                  -1,
-                 _getFirstNonWSCharPos(4));
+                 getFirstNonWSCharPos(4));
     
     _setDocText("abcdefghijk");
     _doc.setCurrentLocation(3);

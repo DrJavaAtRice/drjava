@@ -74,10 +74,10 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     */
   boolean applyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
-    doc._setCurrentLocation(pos);
+    doc.setCurrentLocation(pos);
     boolean result = applyRule(doc, reason);
     if (oldPos > doc.getLength()) oldPos = doc.getLength();
-    doc._setCurrentLocation(oldPos);
+    doc.setCurrentLocation(oldPos);
     return result;
   }
   

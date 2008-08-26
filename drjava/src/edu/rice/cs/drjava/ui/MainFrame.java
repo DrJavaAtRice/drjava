@@ -48,6 +48,7 @@ import java.awt.dnd.*;
 import java.beans.*;
 
 import java.io.*;
+import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,6 +62,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.net.URL;
@@ -144,6 +147,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * the debugger.
     */
   private static final int DEBUG_STEP_TIMER_VALUE = 2000;
+  
+  // ------ Field Declarations -------
   
   /** The model which controls all logic in DrJava. */
   private final AbstractGlobalModel _model;
@@ -313,6 +318,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public boolean accept(File f) { return true; }
     public String getDescription() { return "All files (*.*)"; }
   };
+  
+    
+  /** Thread pool for executing asynchronous tasks. */
+  private ExecutorService _threadPool = Executors.newCachedThreadPool();
+  
+  // ------ End Field Declarations ------
   
   /** Returns the files to open to the model (command pattern). */
   private final FileOpenSelector _openSelector = new FileOpenSelector() {
@@ -647,7 +658,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Returns the changed status of the MainFrame. */
   public long getLastChangeTime() { return _lastChangeTime; }
-    
+  
   /** Ensures that pack() is run in the event thread. Only used in test code */
   public void pack() {
     Utilities.invokeAndWait(new Runnable() { public void run() { packHelp(); } });
@@ -2328,7 +2339,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
       try {
-        int pos = odd._findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
+        int pos = odd.findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
@@ -2340,7 +2351,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
       try {
-        int pos = odd._findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
+        int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
         if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
@@ -2372,7 +2383,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that calls the ConfigFrame to edit preferences.  Only runs in the event thread. */
   private final Action _editPreferencesAction = new AbstractAction("Preferences ...") {
     public void actionPerformed(ActionEvent ae) {
-
+      
       _configFrame.setUp();
       setPopupLoc(_configFrame);
       _configFrame.setVisible(true);
@@ -2954,7 +2965,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public MainFrame() {
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig(); 
-//    Utilities.show("MainFrame starting");
     
     // create our model
     _model = new DefaultGlobalModel();
@@ -2986,16 +2996,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
     
     _interactionsPane = _interactionsController.getPane();
-//    _interactionsController.setCachedCaretPos(0);
-//    _interactionsController.setCachedPromptPos(_model.getConsoleDocument().getPromptPos());
     
-    _interactionsContainer = new JPanel(new BorderLayout()); /* {
-     public boolean requestFocusInWindow() { 
-     super.requestFocusInWindow();
-     return _interactionsPane.requestFocusInWindow(); 
-     } 
-     };*/
-    
+    _interactionsContainer = new JPanel(new BorderLayout());
     _lastFocusOwner = _interactionsContainer;
     
     _junitErrorPanel = new JUnitPanel(_model, this);
@@ -3035,7 +3037,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.addFocusListener(_focusListenerForRecentDocs);
     _tabbedPane.addKeyListener(_historyListener);    // TODO: can this code be moved to the MainFrame keymap?
     
-    if(Utilities.isPlasticLaf()) {
+    if (Utilities.isPlasticLaf()) {
       _tabbedPane.putClientProperty(com.jgoodies.looks.Options.EMBEDDED_TABS_KEY, Boolean.TRUE);
     }
     
@@ -4347,7 +4349,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
     PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
   }
-    
+  
   /* Converts the selected files to auxiliary files.  Access is ackage protected rather than private to support access
    * by ProjectMenuTest.testSaveProject. 
    */
@@ -4654,7 +4656,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (IOException ioe) { _showIOError(ioe); }
     finally { hourglassOff(); }
   }
-  
   
   /** Opens all the files in the directory returned by the FolderSelector.
     * @param chooser the selector that returns the files to open
@@ -5067,7 +5068,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private DocumentInfoGetter _makeInfoGetter(final OpenDefinitionsDocument doc) {
     JScrollPane s = _defScrollPanes.get(doc);
     if (s == null) s = _createDefScrollPane(doc);
-
+    
     final JScrollPane scroller = s;
     final DefinitionsPane pane = _currentDefPane; // rhs was (DefinitionsPane)scroller.getViewport().getView();
     return new DocumentInfoGetter() {
@@ -5366,8 +5367,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           DummyOpenDefDoc dummyDoc = new DummyOpenDefDoc();
           for(File f: classFiles) {
             String s = f.toString();
-            if (s.lastIndexOf(java.io.File.separatorChar) >= 0) {
-              s = s.substring(s.lastIndexOf(java.io.File.separatorChar)+1);
+            if (s.lastIndexOf(File.separatorChar) >= 0) {
+              s = s.substring(s.lastIndexOf(File.separatorChar)+1);
             }
             s = s.substring(0, s.lastIndexOf(".class"));
             s = s.replace('$', '.');
@@ -5388,7 +5389,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               hs.add(entry);
               try {
                 String rel = FileOps.stringMakeRelativeTo(f, buildDir);
-                String full = rel.replace(java.io.File.separatorChar, '.');
+                String full = rel.replace(File.separatorChar, '.');
                 full = full.substring(0, full.lastIndexOf(".class"));
                 if (full.indexOf('$')<0) {
                   // no $ in the name means not an inner class
@@ -7445,8 +7446,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile Object _updateLock = new Object();
   private volatile boolean _tabUpdatePending = false;
   private volatile Runnable _pendingUpdate = null;
-  private volatile OrderedDocumentRegion   _firstMatch = null;
-  public static long UPDATE_DELAY = 2500L;  // update delay threshold in milliseconds
+  private volatile OpenDefinitionsDocument _pendingDocument = null;
+  private volatile OrderedDocumentRegion _firstRegion = null;
+  private volatile OrderedDocumentRegion _lastRegion = null;
+  public static long UPDATE_DELAY = 1500L;  // update delay threshold in milliseconds
   public static int UPDATER_PRIORITY = 2;   // priority in [1..10] of the updater thread.
   
 //  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  */
@@ -7494,10 +7497,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         
         JComponent c = (JComponent) _tabbedPane.getSelectedComponent();
         if (c instanceof RegionsTreePanel) reloadPanel((RegionsTreePanel<? extends OrderedDocumentRegion>) c, doc, offset);
-          
+        
 //        _lastChangeTime = System.currentTimeMillis();  // TODO: what about changes to file names?
       }
-    
+      
       // coarsely update the displayed RegionsTreePanel
       @SuppressWarnings("unchecked") 
       private <R extends OrderedDocumentRegion> void 
@@ -7506,59 +7509,67 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         final RegionManager<R> rm = p._regionManager;
         SortedSet<R> regions = rm.getRegions(doc);
         if (regions == null) return;
-        final ArrayList<R> matches = rm.getRegionsNear(doc, offset);
-        if (matches == null || matches.size() == 0) {
-          int numLinesChangedAfter = doc.getDocument().getAndResetNumLinesChangedAfter();
-          if (numLinesChangedAfter >= 0)  // TODO: eliminate redundancy in updateLines
-            rm.updateLines((R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter));
-          return;
-        }
         
-        // Queue a request to perform the update
-        EventQueue.invokeLater(new Runnable() {
-          public void run() {
-            synchronized (_updateLock) {
-              _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
-                @SuppressWarnings("unchecked") 
-                public void run() {
-                  
-                  rm.updateLines((R)_firstMatch); // recompute _lineStartPos, _lineEndPos in affected regions
-                  for (final R r: matches) {
-//                    System.err.println("reloading node for " + r);
-                    if (r.isEmpty()) rm.removeRegion(r);
-                    p._regTreeModel.reload(p.getNode(r));
-                    p.repaint();
-                  }
-                }
-              };  // end _pendingUpdate Runnable
-              if (_firstMatch == null || doc != _firstMatch.getDocument()) { // no update pending or document changed
-                _firstMatch = matches.get(0);
-                // do not check _tabupdatePending, forcing execution of update
-              }
-              else { // updating same document as superseded update; pick best _firstMatch
-                R newMatch = matches.get(0);
-                if (newMatch.compareTo(_firstMatch) < 0) _firstMatch = newMatch;
-                if (_tabUpdatePending) return;  // Let the queued task perform this update (or a successor)
-              }
-              _tabUpdatePending = true;
-            } // end synchronized
+        // Adjust line numbers and line bounds if insert involves newline
+        final int numLinesChangedAfter = doc.getDocument().getAndResetNumLinesChangedAfter();
+        
+        Pair<R, R> lineNumInterval = null;  // interval regions that need line number updating
+        
+        if (numLinesChangedAfter >= 0)  {  // insertion/deletion included a newline
+          int len = doc.getLength();
+          // Update the bounds of the affected regions
+          lineNumInterval = new Pair<R, R> ((R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter), 
+                                            (R) new DocumentRegion(doc, len, len));
+        }
+
+        Pair<R, R> interval = rm.getRegionInterval(doc, offset);
+        if (interval == null && lineNumInterval == null) return;
+        
+        interval = maxInterval(lineNumInterval, interval);
+    
+        final R first = interval.first();
+        final R last = interval.second();
             
-            // Create and run a new update thread that waits UPDATE_DELAY millis, then performs update in event thread
-            new Thread(new Runnable() {
+        synchronized(_updateLock) {
+          if (_tabUpdatePending && _pendingDocument == doc) {  // revise existing task
+            _firstRegion = _firstRegion.compareTo(first) <= 0 ? _firstRegion : first;
+            _lastRegion = _lastRegion.compareTo(last) >= 0 ? _lastRegion : last;
+            return;
+          }
+          else {  // create a new update task
+            _firstRegion = first;
+            _lastRegion = last;
+            _pendingDocument = doc;
+            _tabUpdatePending = true;
+            
+            _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
+              @SuppressWarnings("unchecked") 
               public void run() {
-                Thread.currentThread().setPriority(UPDATER_PRIORITY);
-                synchronized (_updateLock) {
-                  try { _updateLock.wait(UPDATE_DELAY); }  // _pendingUpdate can be updated during wait
-                  catch(InterruptedException e) { /* fall through */ }
-                  _tabUpdatePending = false;
-                } // end synchronized
-                Utilities.invokeLater(_pendingUpdate);
+                R first = (R) _firstRegion;
+                R last = (R) _lastRegion;
+                rm.updateLines(first, last); // recompute _lineStartPos, _lineEndPos in affected regions
+                p.reload(first, last);  // reload the entries whose length may have changed
+                p.repaint();
               }
-            }).start();
+            };  // end _pendingUpdate Runnable
+          }
+        }
+        // Queue a request to perform the update
+        
+        // Create and run a new aynchronous task      that waits UPDATE_DELAY millis, then performs update in event thread
+        _threadPool.submit(new Runnable() {
+          public void run() {
+            Thread.currentThread().setPriority(UPDATER_PRIORITY);
+            synchronized (_updateLock) {
+              try { _updateLock.wait(UPDATE_DELAY); }  // _pendingUpdate can be updated during wait
+              catch(InterruptedException e) { /* fall through */ }
+              _tabUpdatePending = false;
+            } // end synchronized
+            Utilities.invokeLater(_pendingUpdate);
           }
         });
       }
-                        
+      
       public void changedUpdate(DocumentEvent e) { }
       public void insertUpdate(DocumentEvent e) {
         updateUI(((DefinitionsDocument) e.getDocument()).getOpenDefDoc(), e.getOffset()); 
@@ -7588,6 +7599,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _defScrollPanes.put(doc, scroll);
     
     return scroll;
+  }
+  
+  private static <R extends OrderedDocumentRegion> Pair<R, R> maxInterval(Pair<R, R> i, Pair<R, R> j) {
+    if (i == null) return j;
+    if (j == null) return i;
+    R i1 = i.first();
+    R i2 = i.second();
+    R j1 = j.first();
+    R j2 = j.second();
+             
+    return new Pair<R, R>(i1.compareTo(j1) <= 0 ? i1 : j1, i2.compareTo(j2) >= 0 ? i2 : j2);
   }
   
   private void _setUpPanes() {
@@ -8076,7 +8098,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _currentDefPane.requestFocusInWindow();
       }
     };
-      
+    
     if (! toSameDoc) {
       _model.setActiveDocument(doc);    // queues event actions
       _findReplace.updateFirstDocInSearch();
@@ -8087,7 +8109,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       command.run();
     }
   }
-    
+  
   /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
     * @param doc Document to display
     * @param offset Offset to display
@@ -8631,7 +8653,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _runAction.setEnabled(true);
       _runProjectAction.setEnabled(_model.isProjectActive());
     }
-  
+    
     public void interactionErrorOccurred(final int offset, final int length) {
       _interactionsPane.highlightError(offset, length); 
     }
@@ -8656,7 +8678,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void compileEnded(File workDir, final List<? extends File> excludedFiles) {
       assert EventQueue.isDispatchThread();    
-
+      
       _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
       if (isDebuggerReady()) {
 //              _model.getActiveDocument().checkIfClassFileInSync();
@@ -8858,9 +8880,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //          _resetInteractionsAction.setEnabled(true);
       if (_showDebugger) _toggleDebuggerAction.setEnabled(true);
       
-    /* This line was moved here from interpreterResetting because it was possible to get an InputBox in 
-     * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 
-     * "Interactions Reset Bug". */
+      /* This line was moved here from interpreterResetting because it was possible to get an InputBox in 
+       * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 
+       * "Interactions Reset Bug". */
       _interactionsController.interruptConsoleInput();
     }
     
@@ -9213,7 +9235,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Adds the bookmarks panel to the tabbed pane. */
   public void createBookmarks() { _createTab(_bookmarksPanel); }
-   
+  
   /** Adds the breakpoints panel to the tabbed pane. */
   public void createBreakpoints() { _createTab(_breakpointsPanel); }
   
@@ -9252,7 +9274,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         p.expandTree();
         p.repaint();
       }
-
+      
       _tabbedPane.setSelectedComponent(c);
       c.requestFocusInWindow();
       
@@ -9659,7 +9681,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (s.startsWith("#")) continue; // the line is a comment (as per the RFC 2483)
       try {
         java.net.URI uri = new java.net.URI(s);
-        java.io.File file = new java.io.File(uri);
+        File file = new File(uri);
         list.add(file);
       }
       catch (java.net.URISyntaxException e) { /* malformed URI*/ }
@@ -9670,7 +9692,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Reset the position of the "Open Javadoc" dialog. */
   public void resetAutoImportDialogPosition() {
-    initAutoImportDialog();
+    _initAutoImportDialog();
     _autoImportDialog.setFrameState("default");
     if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
       DrJava.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
@@ -9678,7 +9700,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Initialize dialog if necessary. */
-  void initAutoImportDialog() {
+  private void _initAutoImportDialog() {
     if (_autoImportDialog == null) {
       _autoImportPackageCheckbox = new JCheckBox("Import Package");
       _autoImportPackageCheckbox.addActionListener(new ActionListener() {
@@ -9769,7 +9791,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   JCheckBox _autoImportPackageCheckbox;
   
   /** Imports a class. */
-  void _showAutoImportDialog(String s) {
+  private void _showAutoImportDialog(String s) {
     generateJavaAPIList();
     if (_javaAPIList == null) return;
     
@@ -9786,7 +9808,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           if (d.isUntitled()) continue;
           try {
             String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
-            String full = rel.replace(java.io.File.separatorChar, '.');
+            String full = rel.replace(File.separatorChar, '.');
             for (String ext: edu.rice.cs.drjava.model.compiler.CompilerModel.EXTENSIONS) {
               if (full.endsWith(ext)) {
                 full = full.substring(0, full.lastIndexOf(ext));
@@ -9807,7 +9829,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PredictiveInputModel<JavaAPIListEntry> pim =
       new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), autoImportList);
     pim.setMask(s);
-    initAutoImportDialog();
+    _initAutoImportDialog();
     _autoImportDialog.setModel(true, pim); // ignore case
     hourglassOn();
     _autoImportPackageCheckbox.setSelected(false);
@@ -9893,7 +9915,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _editExternalProcessesAction = new AbstractAction("Edit...") {
     public void actionPerformed(ActionEvent ae) { _editExternalDialog.setVisible(true); }
   };
-
+  
   /** Return the modal window listener if available, otherwise returns a non-modal dummy listener.
     * Note that the WindowEvent passed to the toFrontAction runnable may not be the WindowEvent that
     * caused the window w to be pushed off the front, it may also be the WindowEvent that restores

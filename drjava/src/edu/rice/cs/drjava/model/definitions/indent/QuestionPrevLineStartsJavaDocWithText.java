@@ -74,7 +74,7 @@ public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
       // Compare prefix
       String actualPrefix = doc.getText(firstChar, 3);
       if (! actualPrefix.equals("/**")) return false;
-      int nextNonWSChar = doc._getFirstNonWSCharPos(firstChar + 3, true);
+      int nextNonWSChar = doc.getFirstNonWSCharPos(firstChar + 3, true);
       return nextNonWSChar != -1 && nextNonWSChar <= endPrevLine;     
     }
     catch (BadLocationException e) {

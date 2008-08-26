@@ -62,6 +62,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.lambda.Runnable1;
 
+import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$

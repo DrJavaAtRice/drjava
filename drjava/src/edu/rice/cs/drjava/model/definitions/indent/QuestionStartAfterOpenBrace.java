@@ -64,9 +64,9 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     
     if (lineStart <= 1) return false;  // linestart follows a newLine, which must be preceded by a brace to return true
     // Get brace for start of line
-    doc._setCurrentLocation(lineStart);
+    doc.setCurrentLocation(lineStart);
     BraceInfo info = doc._getLineEnclosingBrace();
-    doc._setCurrentLocation(origin);    
+    doc.setCurrentLocation(origin);    
     
     if (! info.braceType().equals(BraceInfo.OPEN_CURLY) || info.distance() <= 0)
       // Precondition not met: we should have a brace
@@ -79,7 +79,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     // Get position of next non-WS char (not in comments)
     int nextNonWS = -1;
 //    System.err.println("bracePos = " + bracePos + " docLength = " + doc.getLength());
-    try { nextNonWS = doc._getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/); }
+    try { nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/); }
     catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
     
     if (nextNonWS == -1) return true;

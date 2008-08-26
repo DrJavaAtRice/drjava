@@ -184,7 +184,7 @@ public class ReducedModelComment extends AbstractReducedModel {
       }
       // if we're after a star,
       else if (_cursor.prevItem().getType().equals("*") &&
-               _getStateAtCurrent() == INSIDE_BLOCK_COMMENT &&
+               getStateAtCurrent() == INSIDE_BLOCK_COMMENT &&
                special.equals("/")) {
         _cursor.prevItem().setType("*" + special);
         _cursor.prevItem().setState(FREE);
@@ -227,7 +227,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
       _cursor._splitCurrentIfCommentBlock(true, true);
       _cursor.next();
-      _cursor.insert(Brace.MakeBrace("\n", _getStateAtCurrent()));
+      _cursor.insert(Brace.MakeBrace("\n", getStateAtCurrent()));
       _cursor.prev();
       _updateBasedOnCurrentState();
       _cursor.next();
@@ -294,7 +294,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
       _cursor._splitCurrentIfCommentBlock(true,true);
       _cursor.next();
-      _cursor.insert(Brace.MakeBrace(quote, _getStateAtCurrent()));
+      _cursor.insert(Brace.MakeBrace(quote, getStateAtCurrent()));
       _cursor.prev();
       _updateBasedOnCurrentState();
       if (!_cursor.current().isMultipleCharBrace())
@@ -331,7 +331,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   }
   
   /** Returns the state of the _cursor iterator.  */
-  public ReducedModelState _getStateAtCurrent() { return _cursor._getStateAtCurrent(); }
+  public ReducedModelState getStateAtCurrent() { return _cursor.getStateAtCurrent(); }
   
   public int walkerOffset() { return absOffset(_walker); }
   
@@ -429,7 +429,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     * opening a line, block comment, or quotation. */
   public boolean isShadowed() {
 //     ReducedToken curToken = _cursor.current();
-    return _getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
+    return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
   }
   
   public boolean isWeaklyShadowed() { return isShadowed() || isOpenComment(); }
@@ -462,7 +462,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     */
   protected ReducedModelState moveWalkerGetState(int relLocation) {
     _walker.move(relLocation);
-    return _walker._getStateAtCurrent();
+    return _walker.getStateAtCurrent();
   }
   
   /** Resets the walker to the current position in document */

@@ -367,5 +367,5 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public Position createUnwrappedPosition(int offs) throws BadLocationException;
   
   /** Determines if pos in document is inside a comment or a string. */
-  public boolean _isShadowed(int pos);
+  public boolean isShadowed(int pos);
 }
