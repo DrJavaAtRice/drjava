@@ -3637,26 +3637,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /* Gets the reduced model so it can be locked. */
     public ReducedModelControl getReduced() { return getDocument().getReduced(); }
     
-//    /** Swing-style readLock(). */
-//    public void acquireReadLock() { getDocument().acquireReadLock(); }
-//    
-//    /** Swing-style readUlLock(). */
-//    public void releaseReadLock() { getDocument().releaseReadLock(); }
-//    
-//    /** Swing-style writeLock(). */
-//    public void acquireWriteLock() { getDocument().acquireWriteLock(); }
-//    
-//    /** Swing-style writeUnlock(). */
-//    public void releaseWriteLock() { getDocument().releaseWriteLock(); }
-//    
-//    /** Returns true iff this thread holds a read lock or write lock. */
-//    public boolean isReadLocked() { return getDocument().isReadLocked(); }
-//    
-//    /** Returns true iff this thread holds a write lock. */
-//    public boolean isWriteLocked() { return getDocument().isWriteLocked(); }
-    
-//    public int getLockState() { return getDocument().getLockState(); }
-    
     /** @return the number of lines in this document. */
     public int getNumberOfLines() { return getLineOfOffset(getLength()); }
     
@@ -3851,12 +3831,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param doc Document to set as active
     */
   public void setActiveDocument(final OpenDefinitionsDocument doc) {
-    /* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
-     * component. Hence it must run in the event thread.  Note that setting the active document triggers the execution
-     * of listeners some of which also need to run in the event thread.
-     *
-     * The _activeDoc field is set by _gainVisitor when the DocumentNavigator changes the active document.
+    /* The _activeDoc field is set by _gainVisitor when the DocumentNavigator changes the active document.
+     * TODO: This operation should not required invokeAndWait.  Document switching is initiated only by events EXCEPT in 
+     * unit esting.  We need to clean up unit testing and eliminate the invokeAndWait overhead.
      */
+    
+//    assert EventQueue.isDispatchThread();
     
 //    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
@@ -3865,8 +3845,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       Utilities.invokeAndWait(new Runnable() {  
         public void run() {
 //          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
-          _documentNavigator.setNextChangeModelInitiated(true);
-          _documentNavigator.setActiveDoc(doc);
+      _documentNavigator.setNextChangeModelInitiated(true);
+      _documentNavigator.setActiveDoc(doc);
         }
       });
     }

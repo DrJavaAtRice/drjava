@@ -297,28 +297,23 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     catch (OperationCanceledException oce) { return; }
     final ArrayList<String> _histories = histories;
     
-    Utilities.invokeAndWait(new Runnable() {  // must run in event thread because caret is updated indivisibly
-      public void run() {
-        _document.clearCurrentInteraction();
-        
-        // Insert into the document and interpret
-        final StringBuilder buf = new StringBuilder();
-        for (String hist: _histories) {
-          ArrayList<String> interactions = _removeSeparators(hist);
-          for (String curr: interactions) {
-            int len = curr.length();
-            buf.append(curr);
-            if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
-            buf.append(StringOps.EOL);
-          }
-        }
-        String text = buf.toString().trim();
-//          System.err.println("Histtory is: '" + text + "'");
-        append(text, InteractionsDocument.DEFAULT_STYLE);
-        interpretCurrentInteraction();  // Must be executed in event thread
+    _document.clearCurrentInteraction();
+    
+    // Insert into the document and interpret
+    final StringBuilder buf = new StringBuilder();
+    for (String hist: _histories) {
+      ArrayList<String> interactions = _removeSeparators(hist);
+      for (String curr: interactions) {
+        int len = curr.length();
+        buf.append(curr);
+        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
+        buf.append(StringOps.EOL);
       }
-    });
-    // Wait is necessary because interpretation can only be applied after history is loaded
+    }
+    String text = buf.toString().trim();
+//          System.err.println("Histtory is: '" + text + "'");
+    append(text, InteractionsDocument.DEFAULT_STYLE);
+    interpretCurrentInteraction();  
 //    System.err.println("Interpreting loaded history");
     
   }

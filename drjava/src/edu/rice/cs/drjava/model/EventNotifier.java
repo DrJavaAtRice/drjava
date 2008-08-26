@@ -61,13 +61,9 @@ public abstract class EventNotifier<T> {
     * @param listener a listener that reacts on events
     */
   public void addListener(T listener) {
-//    Utilities.showDebug("Adding listener " + listener + " to event notifier " + this);
     _lock.startWrite();
     try { _listeners.add(listener); }
-    finally {
-      _lock.endWrite();
-//      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
-    }
+    finally { _lock.endWrite(); }
   }
   
   /** Removes a listener from the notifier. If the thread already holds the lock,
@@ -76,14 +72,10 @@ public abstract class EventNotifier<T> {
     * @param listener a listener that reacts on events
     */
   public void removeListener(final T listener) {
-//    Utilities.show("writeLock on _listeners grabbed by " + this);
     try {
       _lock.startWrite();
       try { _listeners.remove(listener); }
-      finally {
-        _lock.endWrite();
-//      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
-      }
+      finally { _lock.endWrite(); }
     }
     catch(ReaderWriterLock.DeadlockException e) {
       // couldn't remove right now because this thread already owns a lock
@@ -105,14 +97,10 @@ public abstract class EventNotifier<T> {
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again. */
   public void removeAllListeners() {
-//    new ScrollableDialog(null, "Grabbing writeLock on event queue", "", "").show();
     try { 
       _lock.startWrite();
       try { _listeners.clear(); }
-      finally {
-        _lock.endWrite();
-//      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
-      }
+      finally { _lock.endWrite(); }
     }
     catch(ReaderWriterLock.DeadlockException e) {
       // couldn't remove right now because this thread already owns a lock

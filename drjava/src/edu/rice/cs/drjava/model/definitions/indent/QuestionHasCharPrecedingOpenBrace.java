@@ -55,7 +55,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     _prefix = prefix;
   }
   
-  /** Applies the rule described in class documentation. Assumes ReadLock is already held.  
+  /** Applies the rule described in class documentation. Only runs in the event thread.  
     * @param doc The AbstractDJDocument containing the current line.
     * @return true iff the last block/expression-list opened before the start of the current line begins with '{'. 
     */

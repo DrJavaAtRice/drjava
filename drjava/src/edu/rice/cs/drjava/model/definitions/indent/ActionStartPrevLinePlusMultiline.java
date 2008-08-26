@@ -81,10 +81,6 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
       throw new IllegalArgumentException
         ("The specified position was not within the bounds of the specified line.");
     }
-//    else {
-//      _position = position;
-//    }
-
     
     // pre-compute the relative offset (without indents) of the new position
     for (int i = 0; i < line; i++) {
@@ -94,7 +90,7 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
   }
   
   /** Indents the line according to the previous line, with the suffix lines added and the cursor moved to a specific 
-    * location.  If on the first line, indent is set to 0.  Assumes WriteLock and reduced lock are already held.
+    * location.  If on the first line, indent is set to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location

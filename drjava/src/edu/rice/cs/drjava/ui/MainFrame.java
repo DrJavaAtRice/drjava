@@ -1122,7 +1122,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab(true);
       _findReplace.requestFocusInWindow();
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+      // Use EventQueue.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
       EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
     }
   };
@@ -1132,7 +1132,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab(false);
       if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
-        // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+        // Use EventQueue.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
       _findReplace.findNext();
@@ -1146,7 +1146,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab(false);
       if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
-        // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+        // Use EventQueue.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
       _findReplace.findPrevious();
@@ -2456,7 +2456,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       showTab(_breakpointsPanel, true);
       _breakpointsPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_breakpointsPanel);
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _breakpointsPanel has been selected
+      // Use EventQueue.invokeLater to ensure that focus is set AFTER the _breakpointsPanel has been selected
       EventQueue.invokeLater(new Runnable() { public void run() { _breakpointsPanel.requestFocusInWindow(); } });
     }
   };
@@ -2468,7 +2468,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _mainSplit.resetToPreferredSizes(); 
       showTab(_bookmarksPanel, true);
       _tabbedPane.setSelectedComponent(_bookmarksPanel);
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _bookmarksPanel has been selected
+      // Use EventQueue.invokeLater to ensure that focus is set AFTER the _bookmarksPanel has been selected
       EventQueue.invokeLater(new Runnable() { public void run() { _bookmarksPanel.requestFocusInWindow(); } });
     }
   };
@@ -2499,9 +2499,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Add the current location to the browser history. */
-  public void addToBrowserHistory() { 
-    EventQueue.invokeLater(new Runnable() { public void run() { _model.addToBrowserHistory(); } }); 
-  }
+  public void addToBrowserHistory() { _model.addToBrowserHistory(); }
   
   /** Create a new find results tab.
     * @param rm the region manager that will contain the regions
@@ -2585,7 +2583,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     panel.updatePanel();
 //    panel.setVisible(true);
     _tabbedPane.setSelectedComponent(panel);
-    // Use EvenQueue.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+    // Use EventQueue.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
     EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
   };
   
@@ -7449,7 +7447,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile OpenDefinitionsDocument _pendingDocument = null;
   private volatile OrderedDocumentRegion _firstRegion = null;
   private volatile OrderedDocumentRegion _lastRegion = null;
-  public static long UPDATE_DELAY = 1500L;  // update delay threshold in milliseconds
+  public static long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
   public static int UPDATER_PRIORITY = 2;   // priority in [1..10] of the updater thread.
   
 //  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  */
@@ -8054,12 +8052,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (startOffset != startPos.getOffset()) start -= 2;
     final int f_start = start;
     final boolean moveSelection = start != end;
-//    Utilities.invokeAndWait(new Runnable() { 
-//      public void run() { 
     _currentDefPane.setCaretPosition(f_start);
     if (moveSelection) _currentDefPane.moveCaretPosition(newEnd);
-//      } 
-//    });   
   }
   
   /** Blocks access to DrJava while the hourglass cursor is on. */

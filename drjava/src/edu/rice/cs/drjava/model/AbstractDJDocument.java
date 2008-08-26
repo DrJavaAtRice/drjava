@@ -82,11 +82,8 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
   * model is automatically kept in sync when this document is updated. Also, that synchronization is maintained even 
   * across undo/redo -- this is done by making the undo/redo commands know how to restore the reduced model state.
   *
-  * The reduced model is not thread-safe, so it is essential that ONLY this class/subclasses call methods on it.  
-  * Any information from the reduced model should be obtained through helper methods in this class/subclasses, and ALL 
-  * methods in this class/subclasses which reference the reduced model (via the _reduced field) sync on _reducedModel.
-  * Of course, a readLock or writeLock on this must be acquired BEFOFE locking _reducedModel.  This protocol
-  * prevents any thread from seeing an inconsistent state in the middle of another thread's changes.
+  * The reduced model is not thread-safe, so it is essential that its methods are only called from the event thread.  In
+  * addition, any information from the reduced model should be obtained through helper methods in this class/subclasses.
   *
   * @see edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction
   * @see edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl
@@ -506,7 +503,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState getStateAtCurrent() { 
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     return _reduced.getStateAtCurrent(); 
   }
   
@@ -673,7 +670,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipBracePhrases)
     throws BadLocationException {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
@@ -759,7 +756,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean findCharInStmtBeforePos(char findChar, int position) {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     if (position == -1) {
       String msg = 
@@ -805,7 +802,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _findPrevCharPos(final int pos, final char[] whitespace) throws BadLocationException {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PrevCharPos(pos, whitespace);
@@ -918,7 +915,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param selEnd the offset of the last character of the region to indent
     */
   public void indentLines(int selStart, int selEnd) {
-    // assert isWriteLocked();
+//    assert EventQueue.isDispatchThread();
     try { indentLines(selStart, selEnd, Indenter.IndentReason.OTHER, null); }
     catch (OperationCanceledException oce) {
       // Indenting without a ProgressMonitor should never be cancelled!
@@ -938,7 +935,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException {
     
-    // assert isWriteLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
@@ -966,8 +963,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     endLastCompoundEdit();
   }
   
-  /** Indents the lines between and including the lines containing points start and end.  Assumes that writeLock
-    * is already held.
+  /** Indents the lines between and including the lines containing points start and end.  Only runs in event thread.
     * @param start Position in document to start indenting from
     * @param end Position in document to end indenting at
     * @param reason a flag from {@link Indenter} to indicate the reason for the indent
@@ -1072,7 +1068,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param whitespace  characters to skip when looking for beginning of next statement
     */
   public int _getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     try {
       // Check cache
@@ -1118,7 +1114,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    * Assumes that line has nonWS character.
 //    */
 //  public String getWSPrefix(int pos) {
-//    assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
 //    try {
 //        
 //        // Get the start of this line
@@ -1301,7 +1297,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int getFirstNonWSCharPos(final int pos, final char[] whitespace, final boolean acceptComments) throws 
     BadLocationException {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.FirstNonWSCharPos(pos, whitespace, acceptComments);
@@ -1411,7 +1407,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean _inParenPhrase(final int pos) {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PosInParenPhrase(pos);
@@ -1433,7 +1429,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
   public BraceInfo _getLineEnclosingBrace() {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     int origPos = _currentLocation;
     // Check cache
@@ -1464,8 +1460,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return b;
   }
   
-  /** Returns true if the reduced model's current position is inside a paren phrase.  Assumes that readLock and _reduced
-    * locks are already held.
+  /** Returns true if the reduced model's current position is inside a paren phrase.  Only runs in the event thread.
     * @return true if pos is immediately inside parentheses
     */
   private boolean _inParenPhrase() {
@@ -1565,7 +1560,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   private boolean onlyWhiteSpaceBeforeCurrent() throws BadLocationException{
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line
@@ -1588,7 +1583,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   private int _getWhiteSpace() throws BadLocationException {
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     String text = "";
     int lineEnd = _getLineEndPos(_currentLocation);  // index of next '\n' char or end of document
@@ -1608,7 +1603,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 //    System.err.println("lockState = " + _lockState);
     
-    // assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line
@@ -1631,7 +1626,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public void setTab(int tab, int pos) {
     
-    // assert isWriteLocked();
+//    assert EventQueue.isDispatchThread();
     
     try {
       int startPos = _getLineStartPos(pos);
@@ -1659,7 +1654,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public void setTab(String tab, int pos) {
     
-    // assert isWriteLocked();
+//    assert EventQueue.isDispatchThread();
     
     try {
       int startPos = _getLineStartPos(pos);

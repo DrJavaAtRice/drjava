@@ -132,12 +132,8 @@ public class DrJavaRoot {
      * creation process generates some swing events that are processed by the event thread.  Hence we need to create the MainFrame in
      * the event thread.
      */
-//    Utilities.invokeAndWait(new Runnable() {
-//      public void run() {
     
-    /*
-     * Set the LookAndFeel for this session. If using a Plastic LAF, the theme must be set before setting the LAF.
-     */
+    /* Set the LookAndFeel for this session. If using a Plastic LAF, the theme must be set before setting the LAF. */
     try {
       String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
       String currLAFName = UIManager.getLookAndFeel().getClass().getName();

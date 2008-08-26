@@ -596,16 +596,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         rm.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd));
       }
       
-      EventQueue.invokeLater(new Runnable() {
-        public void run() {
+//      EventQueue.invokeLater(new Runnable() {
+//        public void run() {
           if (count > 0) _frame.showFindResultsPanel(panel);
           else { 
             Toolkit.getDefaultToolkit().beep();
             panel.freeResources(); 
           }
           _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
-        }
-      });
+//        }
+//      });
     }
     finally { 
       _frame.hourglassOff(); 

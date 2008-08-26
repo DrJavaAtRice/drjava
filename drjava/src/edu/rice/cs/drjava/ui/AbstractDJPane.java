@@ -138,8 +138,7 @@ public abstract class AbstractDJPane extends JTextPane
   /** Updates status fields in the main frame (title bar, selected file name) when document is modified. */
   protected abstract void updateStatusField();
 
-  /** Removes the previous highlight so document is cleared when caret position changes.  Assumes ReadLock is already
-    * held.  Can be executed from outside the event thread. */
+  /** Removes the previous highlight so document is cleared when caret position changes.  Only runs in event thread. */
   protected void _removePreviousHighlight() {
     if (_matchHighlight != null) {
       _matchHighlight.remove();

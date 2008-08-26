@@ -71,7 +71,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     _psrvPos = psrvPos;
   }
 
-  /** Forwards the call to the enclosed ActionStartPrevLinePlusMultiline.  Assumes that WriteLock and reduced lock are already held.
+  /** Forwards the call to the enclosed ActionStartPrevLinePlusMultiline.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location

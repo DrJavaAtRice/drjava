@@ -82,7 +82,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     // _metrics is initialized by sync(), which thus must be called before any use of _metrics
   }
   
-  /** Paints the glyphs representing the given range. Assumes ReadLock is already held. */
+  /** Paints the glyphs representing the given range. Only runs in the event thread. */
   public void paint(GlyphView v, Graphics g, Shape a, int start, int end) {
     
     // If there's nothing to show, don't do anything!
@@ -145,7 +145,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     catch(BadLocationException ble) { /* don't continue rendering if such an exception is found */ }
   }
   
-  /** Determines the span the glyphs given a start location (for tab expansion).  Assumes ReadLock is held. */
+  /** Determines the span the glyphs given a start location (for tab expansion).  Only runs in event thread. */
   public float getSpan(GlyphView v, int start, int end, TabExpander e, float x) {
     sync(v);
     Segment text = v.getText(start, end);
@@ -153,14 +153,14 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return width;
   }
   
-  /** Assumes ReadLock is held. */
+  /** Only runs in event thread. */
   public float getHeight(GlyphView v) {
     sync(v);
     return _metrics.getHeight();
   }
   
-  /** Fetches the ascent above the baseline for the glyphs corresponding to the given range in the model.  Assumes
-    * ReadLock is held.
+  /** Fetches the ascent above the baseline for the glyphs corresponding to the given range in the model.  Only runs
+    * in event thread.
     */
   public float getAscent(GlyphView v) {
     sync(v);
@@ -175,7 +175,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return _metrics.getDescent();
   }
   
-  /** Assumes ReadLock is held. */
+  /** Only runs in event thread. */
   public Shape modelToView(GlyphView v, int pos, Position.Bias bias, Shape a) throws BadLocationException {
     
     sync(v);
@@ -200,8 +200,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     throw new BadLocationException("modelToView - can't convert", end);
   }
   
-  /** Provides a mapping from the view coordinate space to the logical coordinate space of the model.  Assumes ReadLock
-    * is held.
+  /** Provides a mapping from the view coordinate space to the logical coordinate space of the model.  Only runs in
+    * event thread.
     * @param v the view containing the view coordinates
     * @param x the X coordinate
     * @param y the Y coordinate
@@ -232,7 +232,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
 
   /** Determines the best location (in the model) to break the given view.  This method attempts to break on a 
     * whitespace location.  If a whitespace location can't be found, the nearest character location is returned.
-    * Assumes ReadLock is held.
+    * Only runs in event thread.
     *
     * @param v  The view 
     * @param start  The location in the model where the fragment should start its representation >= 0
@@ -251,7 +251,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return end;
   }
   
-  /** Assumes ReadLock is held. */
+  /** Only runs in event thread. */
   void sync(GlyphView v) {
     Font f = v.getFont();
     if ((_metrics == null) || (! f.equals(_metrics.getFont()))) {

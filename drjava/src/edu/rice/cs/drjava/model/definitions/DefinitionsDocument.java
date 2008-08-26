@@ -157,15 +157,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _undoManager = undoManager;
   }
   
-//  public void setUndoManager(CompoundUndoManager undoManager) {
-//    if (undoManager != null)
-//      _undoManager = undoManager;
-//  }
-  
   /** Returns a new indenter. */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
-  
-  /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from AbstractDJDocument. */
   
   /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
     * @param odd the OpenDefinitionsDocument to set as this DD's holder
@@ -303,7 +296,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * Assumes that write lock is already held. 
     */
   private void _setModifiedSinceSave() {
-//    assert isWriteLocked();
+//    assert EventQueue.isDispatchThread();
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
       if (_odd != null) _odd.documentModified();  // null test required for some unit tests
@@ -417,7 +410,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Comments out a single line with wing comments -- "// ".  Assumes that _currentLocation is the beginning of the
-    * line to be commented out.  Also assumes that this.writeLock() and _reduced lock are already held. */
+    * line to be commented out.  Only runs in event thread. */
   private void _commentLine() {
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
@@ -510,7 +503,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Assumes that read lock is already held. */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     
-//    assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     int i;
     int reducedPos = pos;
     
@@ -549,7 +542,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
     
-//    assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     int i;
     int reducedPos = pos;
@@ -621,7 +614,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public String _getEnclosingClassName(final int pos, final boolean qual) throws BadLocationException, 
     ClassNameNotFoundException {    
     
-//    assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.EnclosingClassName(pos, qual);
@@ -730,7 +723,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return name;
   }
   
-  /** Returns true if this position is the instantiation of an anonymous inner class.  Assumes readLock is already held.
+  /** Returns true if this position is the instantiation of an anonymous inner class.  Only runs in the event thread.
     * @param newPos position of "new"
     * @param openCurlyPos position of the next '{'
     * @return true if anonymous inner class instantiation
@@ -828,15 +821,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns the index of the anonymous inner class being instantiated at the specified position (where openining brace
-    * for anonymous inner class is pos).
-    * ASSUMES readLock and _reduced lock are already held.
+    * for anonymous inner class is pos).  Only runs in event thread.
     * @param pos is position of the opening curly brace of the anonymous inner class
     * @return anonymous class index
     */
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
 //    boolean oldLog = true; // log; log = false;
     
-//    assert isReadLocked();
+//    assert EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.AnonymousInnerClassIndex(pos);
@@ -845,8 +837,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      log = oldLog;
       return cached.intValue();
     }
-    
-    // readLock assumed to be held
 
     int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outside
 

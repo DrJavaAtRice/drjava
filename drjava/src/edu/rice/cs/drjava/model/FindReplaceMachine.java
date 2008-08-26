@@ -297,7 +297,7 @@ public class FindReplaceMachine {
 //      Utilities.show(fr + " returned by call on findNext()");
     
     while (! fr.getWrapped()) {
-      replaceCurrent();  // sets writeLock so that other threads do not see inconsistent state
+      replaceCurrent();
       count++;
 //        Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
       fr = findNext(false);           // find next match in current doc
@@ -419,8 +419,8 @@ public class FindReplaceMachine {
   
   
   /** Finds next match in specified doc only.  If searching forward, len must be doc.getLength().  If searching backward,
-    * start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be deferred.  Assumes
-    * acquireReadLock is already held.  Note than this method does a wrapped search if specified search fails.
+    * start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be deferred.  Only
+    * runs in the event thread.  Note than this method does a wrapped search if specified search fails.
     */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     // search from current position to "end" of document ("end" is start if searching backward)
@@ -433,7 +433,7 @@ public class FindReplaceMachine {
   }
   
   /** Helper method for findNext that looks for a match after searching has wrapped off the "end" (start if searching
-    * backward) of the document. Assumes acquireReadLock is already held!  
+    * backward) of the document.  Only runs in event thread.  
     * INVARIANT (! _isForward => start = 0) && (_isForward => start + len = doc.getLength()).
     * @param doc  the document in which search wrapped
     * @param start the location of preceding text segment where search FAILED.  
@@ -481,8 +481,8 @@ public class FindReplaceMachine {
     return _findNextInDocSegment(doc, start, len, false, false);
   }
   
-  /** Main helper method for findNext... that searches for _findWord inside the specified document segment.  Assumes
-    * acquireReadLock is already held!
+  /** Main helper method for findNext... that searches for _findWord inside the specified document segment.  Only runs
+    * in the event thread.
     * @param doc document to be searched
     * @param start the location (offset/left edge) of the text segment to be searched 
     * @param len the requested length of the text segment to be searched
@@ -613,7 +613,7 @@ public class FindReplaceMachine {
 //      System.err.println("Next doc is: '" + _doc.getText() + "'");
     }
     
-    // No valid match found; perform wrapped search.  _findWrapped assumes acquireReadLock is held.
+    // No valid match found; perform wrapped search.  Only runs in event thread.
     return _findWrapped(startDoc, start, len, true);  // last arg is true because searching all docs has wrapped
   } 
   

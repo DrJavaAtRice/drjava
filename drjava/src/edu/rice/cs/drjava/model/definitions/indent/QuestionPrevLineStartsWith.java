@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
   private String _prefix;
   
-  /** Constructs a new rule for the given prefix string.  ALWAYS looks inside comments.  Assumes ReadLock is already held.
+  /** Constructs a new rule for the given prefix string.  ALWAYS looks inside comments.  Only runs in the event thread.
     * @param prefix String to search for
     * @param yesRule Rule to use if this rule holds
     * @param noRule Rule to use if this rule does not hold

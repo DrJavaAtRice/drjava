@@ -104,17 +104,17 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     */
   private List<Pair<Pair<Integer,Integer>,String>> _stylesList = new LinkedList<Pair<Pair<Integer,Integer>,String>>();
   
-  /** Adds the given coloring style to the styles list.  Assumes that the document ReadLock is already held. */
+  /** Adds the given coloring style to the styles list.  Only runs in event thread. */
   public void addColoring(int start, int end, String style) {
-    synchronized(_stylesList) {  // unnecessary since WriteLock already held
-      if (_toClear) {
-        _stylesList.clear();    
-        _toClear = false;
-      }
-      if (style != null)
-        _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
-                        (new Pair<Integer,Integer>(Integer.valueOf(start),Integer.valueOf(end)), style));
+//    synchronized(_stylesList) {
+    if (_toClear) {
+      _stylesList.clear();    
+      _toClear = false;
     }
+    if (style != null)
+      _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
+                      (new Pair<Integer,Integer>(Integer.valueOf(start),Integer.valueOf(end)), style));
+//    }
   }
   
   /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */
@@ -129,7 +129,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   }
   
   /** Attempts to set the coloring on the graphics based upon the content of the styles list
-    * returns false if the point is not in the list.  Assumes that ReadLock is already held.
+    * returns false if the point is not in the list.  Only runs in event thread.
     */
   public boolean setColoring(int point, Graphics g) {
     synchronized(_stylesList) {
@@ -186,8 +186,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** Attempts to set the font on the graphics context based upon the styles held in the styles list. Assumes that
-    * ReadLock is already held. 
+  /** Attempts to set the font on the graphics context based upon the styles held in the styles list. Only runs in
+    * event thread. 
     */
   public void setBoldFonts(int point, Graphics g) {
     synchronized(_stylesList) {
@@ -205,11 +205,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** Called when the Interactions pane is reset.  Assumes that ReadLock is already held. */
+  /** Called when the Interactions pane is reset.  Only runs in event thread. */
   public void clearColoring() { synchronized(_stylesList) { _toClear = true; } }
   
-  /** Returns true iff the end of the current interaction is an open comment block
-    * @return true iff the end of the current interaction is an open comment block
+  /** @return true iff the end of the current interaction is an open comment block
     */
   public boolean _inBlockComment() {
         boolean toReturn = _inBlockComment(getLength());

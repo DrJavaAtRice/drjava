@@ -275,9 +275,10 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     * @param index the index where the region should be inserted
     */
   public void addRegion(final R r, final int index) {
+    assert EventQueue.isDispatchThread();
     // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
-      public void run() {
+//    Runnable doCommand = new Runnable() {
+//      public void run() {
 //        edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("RegionsListPanel.addRegion: in list were...");
 //        for(int i=0;i<_listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
         
@@ -290,9 +291,9 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
         _list.ensureIndexIsVisible(_listModel.indexOf(userObj));
         
         updateButtons();
-      }
-    };
-    Utilities.invokeLater(doCommand);
+//      }
+//    };
+//    Utilities.invokeLater(doCommand);
   }
   
   /** Remove a region from the tree. Must be executed in event thread.

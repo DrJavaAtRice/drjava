@@ -58,15 +58,8 @@ import java.util.HashMap;
   */
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
-////  /** The lock state.  See ReadersWritersLocking interface for documentation. */
-//  protected volatile int _lockState = UNREADLOCKED;
-  
   /** The modified state. */
   protected volatile boolean _isModifiedSinceSave = false;
-  
-//  /** The visible locking state. */
-//  protected volatile boolean _readLocked = false;
-//  protected volatile boolean _writeLocked = false;
   
   /** Maps names to attribute sets */
   final protected HashMap<String, AttributeSet> _styles;
@@ -99,9 +92,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
   
-  /** Adds the given coloring style to the styles list.  Not supported in SwingDocument. 
-    * Assumes that WriteLock is already held.
-    */
+  /** Adds the given coloring style to the styles list.  Not supported in SwingDocument.  ONly runs in event thread. */
   public void addColoring(int start, int end, String style) { }
   
   /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.
@@ -171,7 +162,6 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * @throws EditDocumentException if the offset or length are illegal
     */
   public void forceRemoveText(int offs, int len) {
-    /* Using a writeLock is unnecessary because remove is already thread-safe */
     try { super.remove(offs, len); }
     catch (BadLocationException e) { throw new EditDocumentException(e); }
   }

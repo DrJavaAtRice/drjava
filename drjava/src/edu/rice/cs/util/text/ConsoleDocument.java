@@ -183,8 +183,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
   
-  /** Gets the position immediately before the prompt, or the doc length if there is no prompt. Assumes that ReadLock or
-    * WriteLock is already held.*/
+  /** Gets the position immediately before the prompt, or the doc length if there is no prompt.  Only runs in the event
+    * thread. */
   private int _getPositionBeforePrompt() {
     int len = _document.getLength();
     if (_document.hasPrompt()) {
@@ -247,7 +247,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document.forceInsertText(offs, str, style);
   }
   
-  /** Adds style specifier to _stylelists. Assumes that ReadLock or WriteLock is already held. */
+  /** Adds style specifier to _stylelists. Only runs in event thread. */
   private void _addToStyleLists(int offs, String str, String style) {
     if (_document instanceof SwingDocument)
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);
@@ -344,26 +344,4 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
       return true;
     }
   }
-  
-  /* Locking operations */
-  
-//  /** Swing-style readLock(). */
-//  public void acquireReadLock() { _document.acquireReadLock(); }
-//  
-//  /** Swing-style readLock(). */
-//  public void releaseReadLock() { _document.releaseReadLock(); }
-//  
-//  /** Swing-style writeLock(). */
-//  public void acquireWriteLock() { _document.acquireWriteLock(); }
-//  
-//  /** Swing-style writeUnlock(). */
-//  public void releaseWriteLock() { _document.releaseWriteLock(); }
-//  
-//  /** Returns true iff this thread holds a read lock or write lock. */
-//  public boolean isReadLocked() { return _document.isReadLocked(); }
-//  
-//  /** Returns true iff this thread holds a write lock. */
-//  public boolean isWriteLocked() { return _document.isWriteLocked(); }
-  
-//  public int getLockState() { return _document.getLockState(); }
 }

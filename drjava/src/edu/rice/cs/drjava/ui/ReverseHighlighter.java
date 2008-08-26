@@ -671,9 +671,9 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
     
     /** Adds range to be damaged to the range queue. If the range queue is empty (the first call or run() was already
-     * invoked) then adds this class instance into EventDispatch queue. The method also tracks if the current document
-     * changed or component is null. In this case it removes all ranges added before from range queue.
-     */
+      * invoked) then adds this class instance into EventDispatch queue. The method also tracks if the current document
+      * changed or component is null. In this case it removes all ranges added before from range queue.
+      */
     public synchronized void damageRange(Position pos0, Position pos1) {
       if (component == null) {
         p0.clear();
@@ -693,7 +693,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       p0.add(pos0);
       p1.add(pos1);
       
-      if (addToQueue) EventQueue.invokeLater(this);
+      if (addToQueue) EventQueue.invokeLater(this);  // Why invokeLater here?  Context switches are costly.
     }
   }
 }

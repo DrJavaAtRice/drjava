@@ -109,7 +109,7 @@ public class InteractionsDocument extends ConsoleDocument {
     */
   public void setInProgress(boolean inProgress) { _document.setHasPrompt(! inProgress); }
   
-  /** Returns whether an interaction is currently in progress. Should use ReadLock? */
+  /** Returns whether an interaction is currently in progress. */
   public boolean inProgress() { return ! _document.hasPrompt(); }
   
   /** Sets the banner in an empty docuemnt. */
@@ -140,8 +140,7 @@ public class InteractionsDocument extends ConsoleDocument {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
   
-  /** Replaces any text entered past the prompt with the current item in the history. Assumes that WriteLock is 
-    * already held! */
+  /** Replaces any text entered past the prompt with the current item in the history. Only runs in event thread. */
   private void _replaceCurrentLineFromHistory() {
     try {
       _clearCurrentInputText();
@@ -207,10 +206,10 @@ public class InteractionsDocument extends ConsoleDocument {
     _replaceCurrentLineFromHistory();
   }
   
-  /** Returns whether there is a previous command in the history.  Assumes that WriteLock is already held!*/
+  /** Returns whether there is a previous command in the history.  Only runs in event thread. */
   private boolean hasHistoryPrevious() { return _history.hasPrevious(); }
   
-  /** Returns whether there is a next command in the history.  Assumes that WriteLock is already held!*/
+  /** Returns whether there is a next command in the history.  Only runs in event thread. */
   public boolean hasHistoryNext() { return _history.hasNext(); }
   
   /** Reverse searches the history for the given string.
@@ -230,7 +229,7 @@ public class InteractionsDocument extends ConsoleDocument {
   }
   
   /** Gets the previous interaction in the history and replaces whatever is on the current interactions input
-    * line with this interaction.  Assumes that the WriteLock is already held!
+    * line with this interaction.  Only runs in event thread.
     */
   public boolean recallPreviousInteractionInHistory() {   
     if (hasHistoryPrevious()) {

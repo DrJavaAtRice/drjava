@@ -52,7 +52,7 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
   public ActionStartPrevLinePlus(String suffix) { _suffix = suffix; }
 
   /** Indents the line according to the previous line, with the suffix string added. On the first line, indent is set
-    * to 0.  Assumes that WriteLock and reduced lock are already held.
+    * to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return true if the caller should update the current location, false if the indenter has already done it

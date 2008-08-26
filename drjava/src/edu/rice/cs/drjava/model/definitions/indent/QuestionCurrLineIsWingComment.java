@@ -53,7 +53,7 @@ public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
   public QuestionCurrLineIsWingComment(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
   /** Determines whether or not the current line in the document starts with the wing comment prefix "//". Does NOT
-    * check if this line is embedded in a block comment.  Assumes that ReadLock is already held.
+    * check if this line is embedded in a block comment.  Only runs in event thread.
     * @param doc The AbstractDJDocument containing the current line.
     * @param reason The reason that the indentation is being done
     * @return true iff the current line is a wing comment.
