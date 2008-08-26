@@ -2473,16 +2473,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-//  /** Selects the next recent document. */
-//  private final Action _nextRecentDocumentAction = new Abstract Action("Select Next Recent Document") {
-//    public void actionPerformed(ActionEvent ae) { nextRecentDoc(); }
-//  };
-//  
-//  /** Selects the previous recent document. */
-//  private final Action _prevRecentDocumentAction = new Abstract Action("Select Previous Recent Document") {
-//    public void actionPerformed(ActionEvent ae) { prevRecentDoc(); }
-//  };
-  
   /** Toggles a bookmark. */
   private final Action _toggleBookmarkAction = new AbstractAction("Toggle Bookmark") {
     public void actionPerformed(ActionEvent ae) { toggleBookmark(); }
@@ -2543,7 +2533,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        Utilities.show("The retrieved highlight is " + highlight);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
-        // The following is done in ??
         // close the panel and dispose of its MainFrame resources when all regions have been removed.
         if (rm.getDocuments().isEmpty()) {
           panel._close(); // _close removes the panel from _tabs and pair from _findResults
@@ -2568,7 +2557,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void disableFindAgainOnClose(List<OpenDefinitionsDocument> projDocs) {
     for(TabbedPanel t: _tabs) {
       if (t instanceof FindResultsPanel) {
-        FindResultsPanel p = (FindResultsPanel)t;
+        FindResultsPanel p = (FindResultsPanel) t;
         if (projDocs.contains(p.getDocument())) { p.disableFindAgain(); }
       }
     }
@@ -2577,8 +2566,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that shows a find results tab. Only runs in event thread. */
   public void showFindResultsPanel(final FindResultsPanel panel) {
     assert EventQueue.isDispatchThread();
-    if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
-      _mainSplit.resetToPreferredSizes(); 
+    if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes(); 
     showTab(panel, true);
     panel.updatePanel();
 //    panel.setVisible(true);

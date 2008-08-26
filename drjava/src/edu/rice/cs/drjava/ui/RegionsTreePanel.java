@@ -646,7 +646,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     while (iterator.hasNext()) {
       R r = iterator.next();
       if (r.compareTo(endRegion) > 0) break; 
-      System.err.println("Reloading region '" + r.getString() + "'");
+//      System.err.println("Reloading region '" + r.getString() + "'");
       _regTreeModel.reload(getNode(r));
     }
   }
