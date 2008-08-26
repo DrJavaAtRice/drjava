@@ -93,8 +93,8 @@ public class ParseError extends Error {
         pe = e;
     }
     
-    public ParseError(TokenMgrError e) {
-        this(e.getMessage(), "", -1, -1);
+    public ParseError(Throwable t) {
+        this(t.getMessage(), "", -1, -1);
     }
     
     /**

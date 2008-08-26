@@ -101,6 +101,14 @@ public class JavaCCParser implements SourceCodeParser {
     catch (TokenMgrError e) {
       throw new ParseError(e);
     }
+    catch (Error e) {
+      // JavaCharStream does not use a useful exception type for escape character errors
+      String msg = e.getMessage();
+      if (msg != null && msg.startsWith("Invalid escape character")) {
+        throw new ParseError(e);
+      }
+      else { throw e; }
+    }
   }
   
   /**
@@ -116,6 +124,14 @@ public class JavaCCParser implements SourceCodeParser {
     }
     catch (TokenMgrError e) {
       throw new ParseError(e);
+    }
+    catch (Error e) {
+      // JavaCharStream does not use a useful exception type for escape character errors
+      String msg = e.getMessage();
+      if (msg != null && msg.startsWith("Invalid escape character")) {
+        throw new ParseError(e);
+      }
+      else { throw e; }
     }
   }
 }
