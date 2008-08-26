@@ -94,7 +94,11 @@ public class JavaCCParser implements SourceCodeParser {
   public List<Node> parseStream() {
     try {
       return parser.parseStream();
-    } catch (ParseException e) {
+    }
+    catch (ParseException e) {
+      throw new ParseError(e);
+    }
+    catch (TokenMgrError e) {
       throw new ParseError(e);
     }
   }
@@ -106,7 +110,11 @@ public class JavaCCParser implements SourceCodeParser {
   public List<Node> parseCompilationUnit() {
     try {
       return parser.parseCompilationUnit();
-    } catch (ParseException e) {
+    }
+    catch (ParseException e) {
+      throw new ParseError(e);
+    }
+    catch (TokenMgrError e) {
       throw new ParseError(e);
     }
   }

@@ -30,6 +30,7 @@ package koala.dynamicjava.parser.wrapper;
 
 
 import koala.dynamicjava.parser.impl.ParseException;
+import koala.dynamicjava.parser.impl.TokenMgrError;
   
 /**
  * This error is thrown when an unexpected error append while
@@ -90,6 +91,10 @@ public class ParseError extends Error {
     public ParseError(ParseException e) {
         this(CustomParseException.makeCustom(e).getShortMessage(), "", -1, -1);
         pe = e;
+    }
+    
+    public ParseError(TokenMgrError e) {
+        this(e.getMessage(), "", -1, -1);
     }
     
     /**
