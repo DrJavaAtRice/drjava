@@ -40,8 +40,9 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.lang.ref.WeakReference;
 
 import javax.swing.*;
@@ -561,7 +562,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     String replaceStr = _replaceField.getText();
     _machine.setReplaceWord(replaceStr);
     _frame.clearStatusMessage();
-    final LinkedList<FindResult> results = new LinkedList<FindResult>();
+    final List<FindResult> results = new ArrayList<FindResult>();
     
     _frame.hourglassOn();
     try {

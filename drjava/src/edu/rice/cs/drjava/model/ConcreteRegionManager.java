@@ -456,7 +456,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     if (tail.size() == 0) return;
     OrderedDocumentRegion[] tailRegions = tail.toArray(new OrderedDocumentRegion[0]);
 
-    LinkedList<R> toBeRemoved = new LinkedList<R>();  // nonsense to avoid concurrent modification exception
+    List<R> toBeRemoved = new ArrayList<R>();  // nonsense to avoid concurrent modification exception
     // tail can be empty if r is a constructed DocumentRegion
     for (R region: tail) {
       if (region.compareTo(lastRegion) > 0) break;

@@ -185,14 +185,15 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     * is not inserted.  If we try to dispatchEvent from the EventDispatchingThread, it hangs...?
     */
   public void testTypeEnterNotInCode() throws BadLocationException, InterruptedException, InvocationTargetException {
-    final DefinitionsPane defPane = _frame.getCurrentDefPane();
-//    _frame.setVisible(true);
-    final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
-    _assertDocumentEmpty(doc, "before testing");
+    
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-
+        
+        final DefinitionsPane defPane = _frame.getCurrentDefPane();
+//        _frame.setVisible(true);
+        final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
         try { 
+          _assertDocumentEmpty(doc, "before testing");
           doc.insertString(0, "/**", null);
           defPane.setCaretPosition(3);
           // The following is the sequence of key events for Enter
@@ -202,12 +203,13 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
           _frame.validate();
         }
         catch(Throwable t) { listenerFail(t.getMessage()); }
+        
         _log.log("Completed processing of keyEvents");
+        
+        _assertDocumentContents(doc, "/**\n * ", "Enter should indent in a comment");
+        _log.log("testTypeEnterNotInCode completed");
       }
     });
-    Utilities.clearEventQueue();
-    _assertDocumentContents(doc, "/**\n * ", "Enter should indent in a comment");
-    _log.log("testTypeEnterNotInCode completed");
   }
   
   /** Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586. */
@@ -663,7 +665,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       System.gc();
       ct++; 
     }
-    while (ct < 10 && (_finalDocCt != 6  /* || _finalPaneCt != 6 */));
+    while (ct < 10 && (_finalDocCt != 6 && _finalPaneCt != 6));
     
     if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
                        (6 - _finalDocCt));
