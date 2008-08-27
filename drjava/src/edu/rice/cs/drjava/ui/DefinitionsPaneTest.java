@@ -81,23 +81,16 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-    DrJava.getConfig().resetToDefaults();
-    _frame = new MainFrame();
     
-    /* The following two lines were added in an attempt to avoid ConcurrentModificationExceptions during setup in some
-     * runs of the unit tests. The second is preferred (as long as it works) because it is lighter weight.  The first
-     * is currently installed because the second occasionally produced java.lang.InterruptedExceptions. */
-     Utilities.invokeAndWait(new Runnable() { public void run() { _frame.pack(); }});
-//    _frame.pack();
-    
-//    super.setUp();
-//    Utilities.invokeAndWait(new Runnable() { 
-//      public void run() { 
-//        DrJava.getConfig().resetToDefaults();
-//        _frame = new MainFrame(); 
-//      } 
-//    });
-//    Utilities.clearEventQueue();
+    /* The following use of invokeAndWait has been motivated by occasional test failures in set up (particularly in
+     * MainFrame creation and packing) among different test methods in this test class. */
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        DrJava.getConfig().resetToDefaults();
+        _frame = new MainFrame();
+        _frame.pack(); 
+      }
+    });
   }
   
   public void tearDown() throws Exception {
@@ -542,31 +535,35 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   
   
   public void testActiveAndInactive() {
-    SingleDisplayModel _model = _frame.getModel();  // creates a frame with a new untitled document and makes it active
-    
-    DefinitionsPane pane1, pane2;
-    DJDocument doc1, doc2;
-    
-    pane1 = _frame.getCurrentDefPane(); 
-    doc1 = pane1.getDJDocument();
-    assertTrue("the active pane should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
-    
-    _model.newFile();  // creates a new untitled document and makes it active
-    pane2 = _frame.getCurrentDefPane();  
-    doc2 = pane2.getDJDocument();
-    
-    assertTrue("the active pane should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
-    
-    _model.setActiveNextDocument();    // makes doc1 active
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    assertEquals("Confirm that next pane is the other pane", pane1, pane);
-    
-    assertTrue("pane2 should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
-    assertTrue("pane1 should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
-    
-    _log.log("testActiveAndInactive completed");
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        SingleDisplayModel _model = _frame.getModel();  // creates a frame with a new untitled document and makes it active
+        
+        DefinitionsPane pane1, pane2;
+        DJDocument doc1, doc2;
+        
+        pane1 = _frame.getCurrentDefPane(); 
+        doc1 = pane1.getDJDocument();
+        assertTrue("the active pane should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
+        
+        _model.newFile();  // creates a new untitled document and makes it active
+        pane2 = _frame.getCurrentDefPane();  
+        doc2 = pane2.getDJDocument();
+        
+        assertTrue("the active pane should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
+        
+        _model.setActiveNextDocument();    // makes doc1 active
+        DefinitionsPane pane = _frame.getCurrentDefPane();
+        assertEquals("Confirm that next pane is the other pane", pane1, pane);
+        
+        assertTrue("pane2 should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
+        assertTrue("pane1 should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
+        
+        _log.log("testActiveAndInactive completed");
+      }
+    });
   }
-  
+      
   
   private volatile int _finalPaneCt;
   private volatile int _finalDocCt;
@@ -752,12 +749,13 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
  * This shows that we clearly needs a test for this.
  */
   public void testBackspace() {
-    final DefinitionsPane defPane = _frame.getCurrentDefPane();
-    final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
-    _assertDocumentEmpty(doc, "before testing");
-
+   
     Utilities.invokeAndWait(new Runnable() { 
+      
       public void run() { 
+        final DefinitionsPane defPane = _frame.getCurrentDefPane();
+        final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
+        _assertDocumentEmpty(doc, "before testing");
         doc.append("test", null);
         defPane.setCaretPosition(4);
         final int VK_BKSP = KeyEvent.VK_BACK_SPACE;
@@ -766,13 +764,12 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
         defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0, VK_BKSP, UNDEFINED));
         defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, '\b'));
         _frame.validate();
+        _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
+        _log.log("testBackSpace completed");
       }
     });
-    Utilities.clearEventQueue();
     
-    _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
-    
-    _log.log("testBackSpace completed");
+  
   }
   
   private volatile String _result;
