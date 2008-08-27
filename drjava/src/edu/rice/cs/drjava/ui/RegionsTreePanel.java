@@ -72,6 +72,8 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 import edu.rice.cs.util.swing.Utilities;
 
+import edu.rice.cs.plt.lambda.Thunk;
+
 /** Panel for displaying regions in a tree sorted by class name and line number.  Only accessed from event thread.
   * @version $Id$
   */
@@ -371,46 +373,50 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       
 //      _setColors(this);
       
-      // set tooltip
-      String tooltip = null;
+      // set tooltip as thunk
+      Thunk<String> tooltip = null;
       if (DrJava.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
         if (leaf) {
           DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-          Object o = node.getUserObject();
+          final Object o = node.getUserObject();
           
           if (o instanceof RegionTreeUserObj) {
-            @SuppressWarnings("unchecked")
-            RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) o;
-            R r = userObject.region();
+            tooltip = new Thunk<String>() {
+              public String value() {
+                @SuppressWarnings("unchecked")
+                RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) o;
+                R r = userObject.region();
             
-            OpenDefinitionsDocument doc = r.getDocument();
-            try {
-              int lnr = doc.getLineOfOffset(r.getStartOffset()) + 1;
-              int startOffset = doc._getOffset(lnr - 3);
-              if (startOffset < 0) { startOffset = 0; }
-              int endOffset = doc._getOffset(lnr + 3);
-              if (endOffset < 0) { endOffset = doc.getLength() - 1; }
-              
-              // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
-              String s = doc.getText(startOffset, endOffset - startOffset);
-              
-              // this highlights the actual region in red
-              int rStart = r.getStartOffset() - startOffset;
-              if (rStart < 0) { rStart = 0; }
-              int rEnd = r.getEndOffset() - startOffset;
-              if (rEnd > s.length()) { rEnd = s.length(); }
-              if ((rStart <= s.length()) && (rEnd >= rStart)) {
-                String t1 = StringOps.encodeHTML(s.substring(0, rStart));
-                String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
-                String t3 = StringOps.encodeHTML(s.substring(rEnd));
-                s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+                OpenDefinitionsDocument doc = r.getDocument();
+                try {
+                  int lnr = doc.getLineOfOffset(r.getStartOffset()) + 1;
+                  int startOffset = doc._getOffset(lnr - 3);
+                  if (startOffset < 0) { startOffset = 0; }
+                  int endOffset = doc._getOffset(lnr + 3);
+                  if (endOffset < 0) { endOffset = doc.getLength() - 1; }
+                  
+                  // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
+                  String s = doc.getText(startOffset, endOffset - startOffset);
+                  
+                  // this highlights the actual region in red
+                  int rStart = r.getStartOffset() - startOffset;
+                  if (rStart < 0) { rStart = 0; }
+                  int rEnd = r.getEndOffset() - startOffset;
+                  if (rEnd > s.length()) { rEnd = s.length(); }
+                  if ((rStart <= s.length()) && (rEnd >= rStart)) {
+                    String t1 = StringOps.encodeHTML(s.substring(0, rStart));
+                    String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
+                    String t3 = StringOps.encodeHTML(s.substring(rEnd));
+                    s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+                  }
+                  else {
+                    s = StringOps.encodeHTML(s);
+                  }
+                  return "<html><pre>"+s+"</pre></html>";
+                }
+                catch(javax.swing.text.BadLocationException ble) { return ""; /* just display an empty tool tip*/ }
               }
-              else {
-                s = StringOps.encodeHTML(s);
-              }
-              tooltip = "<html><pre>"+s+"</pre></html>";
-            }
-            catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
+            };
             setText(node.getUserObject().toString());
             setIcon(null);
 //            renderer = this;
@@ -419,6 +425,32 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       }
       setToolTipText(tooltip);
       return /* renderer */ this;
+    }
+    
+    /** Alternative version of setToolTipText that accepts a thunk. */
+    public void setToolTipText(Thunk<String> text) {
+      Object oldText = getClientProperty(TOOL_TIP_TEXT_KEY);
+      putClientProperty(TOOL_TIP_TEXT_KEY, text);
+      ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+      if (text != null) {
+        if (oldText == null) {
+          toolTipManager.registerComponent(this);
+        }
+      } else {
+        toolTipManager.unregisterComponent(this);
+      }
+    }
+    
+    /** Overridden version of getToolTipText that evaluates a thunk if necessary. */
+    @SuppressWarnings("unchecked")
+    public String getToolTipText() {
+      Object o = getClientProperty(TOOL_TIP_TEXT_KEY);
+      if (o instanceof Thunk) {
+        String s = ((Thunk<String>)o).value();
+        putClientProperty(TOOL_TIP_TEXT_KEY, s);
+        return s;
+      }
+      return (String)o;
     }
   }
   
