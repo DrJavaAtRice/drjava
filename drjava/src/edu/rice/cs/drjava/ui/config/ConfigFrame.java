@@ -989,8 +989,10 @@ public class ConfigFrame extends SwingFrame {
                                                   "the user modifies, saved with a '~' at the end of the filename.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.RESET_CLEAR_CONSOLE, "Clear Console After Interactions Reset", this,
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
+    /* Disabled until this is implemented:
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.ALLOW_PRIVATE_ACCESS, "Allow Access of Private Members in Interactions Pane", this,
                                                   "Whether to allow users to access private (and protected) fields and methods."));
+    */
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, "Show sample of source code when fast switching", this,
                                                   "Whether to show a sample of the source code under the document's filename when fast switching documents."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 

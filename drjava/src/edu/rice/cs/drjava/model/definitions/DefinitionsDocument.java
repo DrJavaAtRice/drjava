@@ -54,6 +54,7 @@ import java.io.IOException;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import koala.dynamicjava.parser.impl.Parser;
 import koala.dynamicjava.parser.impl.ParseException;
+import koala.dynamicjava.parser.impl.TokenMgrError;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -813,7 +814,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch (ParseException e) { return ""; }
     // addresses bug [ 1815387 ] Editor should discard parse errors for now
     // we should upgrade our parser to handle @
-    catch (koala.dynamicjava.parser.impl.TokenMgrError e) { return ""; }
+    catch (TokenMgrError e) { return ""; }
+    catch (Error e) {
+      // JavaCharStream does not use a useful exception type for escape character errors
+      String msg = e.getMessage();
+      if (msg != null && msg.startsWith("Invalid escape character")) {
+        return "";
+      }
+      else { throw e; }
+    }
     finally {
       try { r.close(); }
       catch (IOException e) { /* ignore */ }
