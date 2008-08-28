@@ -29,6 +29,7 @@
 package koala.dynamicjava.tree;
 
 import java.util.*;
+import java.lang.reflect.Modifier;
 
 import koala.dynamicjava.tree.visitor.*;
 
@@ -101,59 +102,52 @@ public class EnumDeclaration extends ClassDeclaration {
           makeEnumBodyDeclarationsFromEnumConsts(name, body)),
         body.getConstants()),
       fn, bl, bc, el, ec);
-    // Do all Enum checks here? /**/
   }
 
   static List<Node> AddValues(String enumTypeName, List<Node> body, List<EnumConstant> consts){
-    String[] consts_names = new String[consts.size()];
-    for(int i = 0; i < consts_names.length; i++)
-      consts_names[i] = consts.get(i).getName();
-
     List<Node> newbody = body;
 
-    int accessFlags  = java.lang.reflect.Modifier.PRIVATE | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
-
+    // public static Foo[] values() { return new Foo[]{ Foo.FIRST, Foo.SECOND, Foo.THIRD }; }
     ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
-    TypeName valuesType = new ArrayTypeName(enumType, 1, false);
-    List<Expression> sizes = new LinkedList<Expression>();
-    sizes.add(new IntegerLiteral(String.valueOf(consts_names.length)));
     List<Expression> cells = new LinkedList<Expression>();
-    for( int i = 0; i < consts_names.length; i++ )
-      cells.add(new StaticFieldAccess(enumType, consts_names[i]));
-    ArrayAllocation allocExpr = new ArrayAllocation(enumType, new ArrayAllocation.TypeDescriptor(sizes, 1, new ArrayInitializer(cells), 0, 0));
-    newbody.add(new FieldDeclaration(accessFlags, valuesType, "$VALUES", allocExpr));
-
-    accessFlags  = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
-    List<FormalParameter> vparams = new LinkedList<FormalParameter>();
-    ///*for testing jlugo code*/vparams.add(new FormalParameter(false, new ReferenceTypeName("String"), "s"));
-    List<Node> stmts = new LinkedList<Node>();
-    stmts.add(new ReturnStatement(new CastExpression(enumType, new ObjectMethodCall(new StaticFieldAccess(enumType, "$VALUES"), "clone", null))));
-    newbody.add(new MethodDeclaration(accessFlags, valuesType, "values", vparams, new LinkedList<ReferenceTypeName>(), new BlockStatement(stmts)));
-
-    List<FormalParameter> voparams = new LinkedList<FormalParameter>();
-    voparams.add(new FormalParameter(false, new ReferenceTypeName("String"), "s"));
-    accessFlags  = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC;
+    for(EnumConstant c : consts) {
+      cells.add(new StaticFieldAccess(enumType, c.getName()));
+    }
     
-    //  for( int i = 0; i < $VALUES.length; i++ )
-    //    if($VALUES[i].name().equals(s))
-    //      return $VALUES[i];
-    //  throw new IllegalArgumentException(s);
-    List<Node> stmtsOf = new LinkedList<Node>();
-    List<Node> init = new LinkedList<Node>();
-    init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
-    AmbiguousName iId = new AmbiguousName("i");
-    Expression cond = new LessExpression(iId, new ObjectFieldAccess(new StaticFieldAccess(enumType, "$VALUES"), "length"));
-    List<Node> updt = new LinkedList<Node>();
-    updt.add(new PostIncrement(iId));
-    ArrayAccess arrCell = new ArrayAccess(new StaticFieldAccess(enumType, "$VALUES"), iId);
-    List<Expression> args = new LinkedList<Expression>();
-    AmbiguousName sId = new AmbiguousName("s");
-    args.add(new AmbiguousName("s"));
-    IfThenStatement bodyOf = new IfThenStatement(new ObjectMethodCall(new ObjectMethodCall(arrCell, "name", null), "equals", args), new ReturnStatement(arrCell));
-    stmtsOf.add(new ForStatement(init, cond, updt, bodyOf));
-    stmtsOf.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("IllegalArgumentException"), args)));
-    newbody.add(new MethodDeclaration(accessFlags, enumType, "valueOf", voparams, new LinkedList<ReferenceTypeName>(), new BlockStatement(stmtsOf)));
-
+    Expression alloc = new ArrayAllocation(enumType,
+                                           new ArrayAllocation.TypeDescriptor(Collections.<Expression>emptyList(), 1,
+                                                                              new ArrayInitializer(cells), 0, 0));
+    Statement valuesBody = new ReturnStatement(alloc);
+    newbody.add(new MethodDeclaration(Modifier.PUBLIC | Modifier.STATIC,
+                                      new ArrayTypeName(enumType, 1, false),
+                                      "values",
+                                      Collections.<FormalParameter>emptyList(),
+                                      Collections.<ReferenceTypeName>emptyList(),
+                                      new BlockStatement(Collections.<Node>singletonList(valuesBody))));
+               
+    // public static Foo valueOf(String name) {
+    //   if ("FIRST".equals(name)) return Foo.FIRST;
+    //   if ("SECOND".equals(name)) return Foo.SECOND;
+    //   if ("THIRD".equals(name)) return Foo.THIRD;
+    //   throw new IllegalArgumentException();
+    // }
+    FormalParameter nameParam = new FormalParameter(false, new ReferenceTypeName("java", "lang", "String"), "name");
+    List<Node> valueOfBody = new LinkedList<Node>();
+    for (EnumConstant c : consts) {
+      String cn = c.getName();
+      Expression cond = new ObjectMethodCall(new StringLiteral("\"" + cn + "\""), "equals",
+                                             Collections.singletonList(new VariableAccess("name")));
+      Statement ret = new ReturnStatement(new StaticFieldAccess(enumType, cn));
+      valueOfBody.add(new IfThenStatement(cond, ret));
+    }
+    valueOfBody.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("IllegalArgumentException"),
+                                                            Collections.<Expression>emptyList())));
+    newbody.add(new MethodDeclaration(Modifier.PUBLIC | Modifier.STATIC,
+                                      enumType,
+                                      "valueOf",
+                                      Collections.singletonList(nameParam),
+                                      Collections.<ReferenceTypeName>emptyList(),
+                                      new BlockStatement(valueOfBody)));
     return newbody;
   }
 
@@ -189,7 +183,7 @@ public class EnumDeclaration extends ClassDeclaration {
     }
 
     if (noConstructor) {
-      body.add(new ConstructorDeclaration(java.lang.reflect.Modifier.PRIVATE, name, addToConsDeclaration,
+      body.add(new ConstructorDeclaration(Modifier.PRIVATE, name, addToConsDeclaration,
                                           new LinkedList<ReferenceTypeName>(),
                                           new ConstructorCall(null, args, true),
                                           new LinkedList<Node>()));
@@ -235,10 +229,10 @@ public class EnumDeclaration extends ClassDeclaration {
     List<EnumConstant> consts = body.getConstants();
     List<Node> decls = body.getDeclarations();
 
-    int accessFlags  = java.lang.reflect.Modifier.PUBLIC;
-        accessFlags |= java.lang.reflect.Modifier.STATIC;
-        accessFlags |= java.lang.reflect.Modifier.FINAL;
-        accessFlags |= 0x4000; // java.lang.reflect.Modifier.ENUM; /**/ or ACC_ENUM
+    int accessFlags  = Modifier.PUBLIC;
+        accessFlags |= Modifier.STATIC;
+        accessFlags |= Modifier.FINAL;
+        accessFlags |= 0x4000; // Modifier.ENUM; /**/ or ACC_ENUM
 
     ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
 

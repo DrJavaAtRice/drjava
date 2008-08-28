@@ -182,18 +182,21 @@ public class TreeCompiler {
     List<? extends ReferenceTypeName> implementsTs = CollectUtil.emptyList();
     List<Node> members = CollectUtil.emptyList();
     int accessFlags = 0;
+    final boolean isInterface;
     if (ast instanceof ClassDeclaration) {
       ClassDeclaration cd = (ClassDeclaration) ast;
       extendsT = NodeProperties.getType(cd.getSuperclass());
       if (cd.getInterfaces() != null) { implementsTs = cd.getInterfaces(); }
       members = cd.getMembers();
       accessFlags = cd.getAccessFlags();
+      isInterface = false;
     }
     else if (ast instanceof InterfaceDeclaration) {
       InterfaceDeclaration id = (InterfaceDeclaration) ast;
       if (id.getInterfaces() != null) { implementsTs = id.getInterfaces(); }
       members = id.getMembers();
-      accessFlags = id.getAccessFlags();
+      accessFlags = id.getAccessFlags() | Modifier.INTERFACE;
+      isInterface = true;
     }
     else if (ast instanceof AnonymousAllocation) {
       AnonymousAllocation aa = (AnonymousAllocation) ast;
@@ -202,11 +205,14 @@ public class TreeCompiler {
       if (extractClass(parentT).isInterface()) { implementsTs = Collections.singletonList(parent); }
       else { extendsT = parentT; }
       members = aa.getMembers();
+      isInterface = false;
     }
     else if (ast instanceof AnonymousInnerAllocation) {
       extendsT = NodeProperties.getSuperType(ast);
       members = ((AnonymousInnerAllocation) ast).getMembers();
+      isInterface = false;
     }
+    else { throw new RuntimeException("Unexpected class AST node type: " + ast); }
     
     // Promote default access to public -- a reference may logically appear in the same
     // package but, due to implementation constraints, be loaded by a different class loader.
@@ -236,9 +242,14 @@ public class TreeCompiler {
     _classWriter.visit(_java5 ? V1_5 : V1_4, accessFlags, _name, classSig,
                        className(extractClass(extendsT)), extractClassNames(implementsTs));
     
-    _classWriter.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL | ACC_SYNTHETIC, ADAPTER_FIELD,
-                            EVALUATION_ADAPTER_DESCRIPTOR, null, null).visitEnd();
-    if (!(ast instanceof InterfaceDeclaration)) {
+    if (isInterface) {
+      // interface fields must be public (adapter is necessary to interpret declared field initializers)
+      _classWriter.visitField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL | ACC_SYNTHETIC, ADAPTER_FIELD,
+                              EVALUATION_ADAPTER_DESCRIPTOR, null, null).visitEnd();
+    }
+    else {
+      _classWriter.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL | ACC_SYNTHETIC, ADAPTER_FIELD,
+                              EVALUATION_ADAPTER_DESCRIPTOR, null, null).visitEnd();
       _classWriter.visitField(ACC_PRIVATE | ACC_FINAL | ACC_SYNTHETIC, BINDINGS_FACTORY_FIELD,
                               BINDINGS_FACTORY_DESCRIPTOR, null, null).visitEnd();
     }
@@ -256,10 +267,10 @@ public class TreeCompiler {
           constructors.add(member); return null;
         }
         @Override public Void visit(MethodDeclaration member) {
-          compileMethod(member); return null;
+          compileMethod(member, isInterface); return null;
         }
         @Override public Void visit(FieldDeclaration member) {
-          compileField(member); return null;
+          compileField(member, isInterface); return null;
         }
         @Override public Void visit(ClassInitializer member) {
           compileInitializerBlock(member, true); return null;
@@ -582,11 +593,13 @@ public class TreeCompiler {
     mv.visitEnd();
   }
   
-  private void compileMethod(MethodDeclaration ast) {
+  private void compileMethod(MethodDeclaration ast, boolean isInterface) {
+    int access = ast.getAccessFlags();
+    if (isInterface) { access = defaultToPublicAccess(access) | Modifier.ABSTRACT; }
     List<FormalParameter> params = ast.getParameters();
     Type returnT = NodeProperties.getType(ast.getReturnType());
     List<? extends ReferenceTypeName> exceptions = ast.getExceptions();
-    boolean isStatic = Modifier.isStatic(ast.getAccessFlags());
+    boolean isStatic = Modifier.isStatic(access);
     String extraArg = isStatic ? RUNTIME_BINDINGS_DESCRIPTOR : "";
     String methodDescriptor = paramListDescriptor(extraArg, extractVars(params)) + typeDescriptor(returnT);
 
@@ -608,10 +621,10 @@ public class TreeCompiler {
       methodSig = sigBuilder.toString();
     }
     
-    final MethodVisitor mv = _classWriter.visitMethod(ast.getAccessFlags(), ast.getName(), methodDescriptor,
+    final MethodVisitor mv = _classWriter.visitMethod(access, ast.getName(), methodDescriptor,
                                                       methodSig, extractClassNames(exceptions));
     
-    if (!Modifier.isAbstract(ast.getAccessFlags())) {
+    if (!Modifier.isAbstract(access)) {
       String key = ast.getName() + methodDescriptor;
       _methods.put(key, ast);
       
@@ -635,7 +648,7 @@ public class TreeCompiler {
       stack.mark();
       emitConvert(mv, returnT, stack);
       _opt.typeSystem().erase(returnT).apply(new TypeAbstractVisitor_void() {
-        @Override public void forClassType(ClassType t) { mv.visitInsn(ARETURN); }
+        @Override public void forReferenceType(ReferenceType t) { mv.visitInsn(ARETURN); }
         @Override public void forPrimitiveType(PrimitiveType t) { mv.visitInsn(IRETURN); }
         @Override public void forLongType(LongType t) { mv.visitInsn(LRETURN); }
         @Override public void forFloatType(FloatType t) { mv.visitInsn(FRETURN); }
@@ -649,13 +662,15 @@ public class TreeCompiler {
     mv.visitEnd();
   }
   
-  private void compileField(final FieldDeclaration ast) {
-    final boolean isStatic = Modifier.isStatic(ast.getAccessFlags());
+  private void compileField(final FieldDeclaration ast, boolean isInterface) {
+    int access = ast.getAccessFlags();
+    if (isInterface) { access = defaultToPublicAccess(access) | Modifier.STATIC | Modifier.FINAL; }
+    final boolean isStatic = Modifier.isStatic(access);
     final Type t = NodeProperties.getType(ast.getType());
     Expression init = ast.getInitializer();
     Object val = null;
     if (isStatic && init != null) { val = expressionConstantVal(init); }
-    _classWriter.visitField(ast.getAccessFlags(), ast.getName(), typeDescriptor(t), typeSignature(t),
+    _classWriter.visitField(access, ast.getName(), typeDescriptor(t), typeSignature(t),
                             val).visitEnd();
 
     if (init != null && val == null) {
@@ -924,6 +939,10 @@ public class TreeCompiler {
   /** Convert the value on the stack to the given type, casting or unboxing if necessary. */
   private void emitConvert(final MethodVisitor mv, Type expectedT, final StackSizeTracker stack) {
     _opt.typeSystem().erase(expectedT).apply(new TypeAbstractVisitor_void() {
+      // do nothing for NullType -- it should be erased to Object, so no cast is needed
+      @Override public void forArrayType(ArrayType t) {
+        mv.visitTypeInsn(CHECKCAST, typeDescriptor(t));
+      }
       @Override public void forClassType(ClassType t) {
         if (!t.equals(TypeSystem.OBJECT)) {
           mv.visitTypeInsn(CHECKCAST, className(t.ofClass()));

@@ -2,6 +2,8 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import edu.rice.cs.plt.iter.IterUtil;
 
+import java.lang.reflect.Modifier;
+
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -31,13 +33,23 @@ public class ClassMemberChecker {
     _opt = opt;
   }
   
-  public void checkMembers(Iterable<Node> nodes) {
-    checkSignatures(nodes);
+  public void checkClassMembers(Iterable<Node> nodes) {
+    checkClassSignatures(nodes);
     checkBodies(nodes);
   }
   
-  private void checkSignatures(Iterable<Node> nodes) {
-    SignatureVisitor sig = new SignatureVisitor();
+  public void checkInterfaceMembers(Iterable<Node> nodes) {
+    checkInterfaceSignatures(nodes);
+    checkBodies(nodes);
+  }
+  
+  private void checkClassSignatures(Iterable<Node> nodes) {
+    ClassMemberSignatureVisitor sig = new ClassMemberSignatureVisitor();
+    for (Node n : nodes) { n.acceptVisitor(sig); }
+  }
+  
+  private void checkInterfaceSignatures(Iterable<Node> nodes) {
+    InterfaceMemberSignatureVisitor sig = new InterfaceMemberSignatureVisitor();
     for (Node n : nodes) { n.acceptVisitor(sig); }
   }
   
@@ -47,14 +59,14 @@ public class ClassMemberChecker {
   }
   
   
-  private class SignatureVisitor extends AbstractVisitor<Void> {
+  private abstract class SignatureVisitor extends AbstractVisitor<Void> {
     
     @Override public Void visit(ClassDeclaration node) {
-      throw new UnsupportedOperationException("Not yet implemented");
+      throw new ExecutionError("not.implemented", node);
     }
     
     @Override public Void visit(InterfaceDeclaration node) {
-      throw new UnsupportedOperationException("Not yet implemented");
+      throw new ExecutionError("not.implemented", node);
     }
     
     @Override public Void visit(MethodDeclaration node) {
@@ -82,6 +94,32 @@ public class ClassMemberChecker {
       }
       
       for (TypeName tn : node.getExceptions()) { sigChecker.check(tn); }
+      return null;
+    }
+    
+    @Override public Void visit(FieldDeclaration node) {
+      new TypeNameChecker(_context, _opt).check(node.getType());
+      return null;
+    }
+    
+    @Override public abstract Void visit(ConstructorDeclaration node);
+    @Override public abstract Void visit(ClassInitializer node);
+    @Override public abstract Void visit(InstanceInitializer node);
+  }
+  
+  private class ClassMemberSignatureVisitor extends SignatureVisitor {
+    
+    @Override public Void visit(MethodDeclaration node) {
+      super.visit(node);
+      int access = node.getAccessFlags();
+      if (Modifier.isAbstract(access) && node.getBody() != null) {
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("abstract.method.body", node);
+      }
+      else if (!Modifier.isAbstract(access) && node.getBody() == null) {
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("missing.method.body", node);
+      }
       return null;
     }
     
@@ -115,27 +153,76 @@ public class ClassMemberChecker {
       return null;
     }
     
-    @Override public Void visit(FieldDeclaration node) {
-      new TypeNameChecker(_context, _opt).check(node.getType());
+    @Override public Void visit(ClassInitializer node) {
       return null;
+    }
+    
+    @Override public Void visit(InstanceInitializer node) {
+      return null;
+    }
+    
+  }
+  
+  private class InterfaceMemberSignatureVisitor extends SignatureVisitor {
+
+    @Override public Void visit(MethodDeclaration node) {
+      int access = node.getAccessFlags();
+      if (Modifier.isProtected(access) || Modifier.isPrivate(access) || Modifier.isStatic(access) ||
+          Modifier.isStrict(access) || Modifier.isNative(access) || Modifier.isSynchronized(access) ||
+          Modifier.isFinal(access)) {
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("interface.method.modifier", node);
+      }
+      super.visit(node);
+      if (node.getBody() != null) {
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("abstract.method.body", node);
+      }
+      return null;
+    }
+    
+    @Override public Void visit(FieldDeclaration node) {
+      int access = node.getAccessFlags();
+      if (Modifier.isProtected(access) || Modifier.isPrivate(access)) {
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("interface.field.modifier", node);
+      }
+      super.visit(node);
+      if (node.getInitializer() == null) {
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("uninitialized.variable", node);
+      }
+      return null;
+    }
+    
+    @Override public Void visit(ConstructorDeclaration node) {
+      throw new ExecutionError("interface.member", node);
+    }
+    @Override public Void visit(ClassInitializer node) {
+      throw new ExecutionError("interface.member", node);
+    }
+    @Override public Void visit(InstanceInitializer node) {
+      throw new ExecutionError("interface.member", node);
     }
     
   }
   
   private class BodyVisitor extends AbstractVisitor<Void> {
     @Override public Void visit(ClassDeclaration node) {
-      throw new UnsupportedOperationException("Not yet implemented");
+      throw new ExecutionError("not.implemented", node);
     }
     
     @Override public Void visit(InterfaceDeclaration node) {
-      throw new UnsupportedOperationException("Not yet implemented");
+      throw new ExecutionError("not.implemented", node);
     }
     
     @Override public Void visit(MethodDeclaration node) {
-      DJMethod m = getMethod(node);
-      TypeContext sigContext = new FunctionSignatureContext(_context, m);
-      TypeContext bodyContext = new FunctionContext(sigContext, m);
-      node.getBody().acceptVisitor(new StatementChecker(bodyContext, _opt));
+      if (node.getBody() != null) {
+        DJMethod m = getMethod(node);
+        TypeContext sigContext = new FunctionSignatureContext(_context, m);
+        TypeContext bodyContext = new FunctionContext(sigContext, m);
+        node.getBody().acceptVisitor(new StatementChecker(bodyContext, _opt));
+      }
       return null;
     }
     
@@ -154,9 +241,9 @@ public class ClassMemberChecker {
     
     @Override public Void visit(FieldDeclaration node) {
       // TODO: static context
-      Type expectedT = getType(node.getType());
       Expression init = node.getInitializer();
       if (init != null) {
+        Type expectedT = getType(node.getType());
         Type initT = new ExpressionChecker(_context, _opt).check(init, expectedT);
         TypeSystem ts = _opt.typeSystem();
         try {

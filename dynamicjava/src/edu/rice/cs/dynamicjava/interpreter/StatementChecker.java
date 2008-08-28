@@ -296,13 +296,24 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   }
   
   @Override public TypeContext visit(ClassDeclaration node) {
+    return handleTypeDeclaration(node);
+  }
+  
+  @Override public TypeContext visit(InterfaceDeclaration node) {
+    return handleTypeDeclaration(node);
+  }
+  
+  private TypeContext handleTypeDeclaration(TypeDeclaration node) {
     TreeClassLoader loader = new TreeClassLoader(context.getClassLoader(), opt);
     DJClass c = new TreeClass(context.makeClassName(node.getName()), null, node, loader, opt);
     setDJClass(node, c);
     
-    TypeParameter[] tparams;
+    final TypeParameter[] tparams;
     if (node instanceof GenericClassDeclaration) {
       tparams = ((GenericClassDeclaration) node).getTypeParameters();
+    }
+    else if (node instanceof GenericInterfaceDeclaration) {
+      tparams = ((GenericInterfaceDeclaration) node).getTypeParameters();
     }
     else { tparams = new TypeParameter[0]; }
     for (TypeParameter param : tparams) {
@@ -312,19 +323,22 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     TypeContext sigContext = new ClassSignatureContext(context, c, loader);
     TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
     sigChecker.setTypeParameterBounds(tparams);
-    sigChecker.check(node.getSuperclass());
+    if (node instanceof ClassDeclaration) {
+      sigChecker.check(((ClassDeclaration) node).getSuperclass());
+    }
     if (node.getInterfaces() != null) {
       for (TypeName tn : node.getInterfaces()) { sigChecker.check(tn); }
     }
 
     TypeContext bodyContext = new ClassContext(sigContext, c);
-    new ClassMemberChecker(bodyContext, opt).checkMembers(node.getMembers());
+    if (node instanceof InterfaceDeclaration) {
+      new ClassMemberChecker(bodyContext, opt).checkInterfaceMembers(node.getMembers());
+    }
+    else {
+      new ClassMemberChecker(bodyContext, opt).checkClassMembers(node.getMembers());
+    }
     
     return new LocalContext(context, loader, c);
-  }
-  
-  @Override public TypeContext visit(InterfaceDeclaration node) {
-    throw new UnsupportedOperationException("Not yet implemented");
   }
 
   /**
@@ -355,6 +369,10 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     }
     for (ReferenceTypeName n : node.getExceptions()) { sigChecker.check(n); }
     
+    if (node.getBody() == null) {
+      setErrorStrings(node, node.getName());
+      throw new ExecutionError("missing.method.body", node);
+    }
     TypeContext bodyContext = new FunctionContext(sigContext, f);
     node.getBody().acceptVisitor(new StatementChecker(bodyContext, opt));
     

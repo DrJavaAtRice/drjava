@@ -826,7 +826,7 @@ public class ExpressionChecker {
       TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node,
                                   new TreeClassLoader(context.getClassLoader(), opt), opt);
       setDJClass(node, c);
-      new ClassMemberChecker(new ClassContext(context, c), opt).checkMembers(node.getMembers());
+      new ClassMemberChecker(new ClassContext(context, c), opt).checkClassMembers(node.getMembers());
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
@@ -937,7 +937,7 @@ public class ExpressionChecker {
       TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node,
                                   new TreeClassLoader(context.getClassLoader(), opt), opt);
       setDJClass(node, c);
-      new ClassMemberChecker(new ClassContext(context, c), opt).checkMembers(node.getMembers());
+      new ClassMemberChecker(new ClassContext(context, c), opt).checkClassMembers(node.getMembers());
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
@@ -949,7 +949,7 @@ public class ExpressionChecker {
      */
     @Override public Type visit(ConstructorCall node) {
       if (node.getExpression() != null) {
-        throw new IllegalArgumentException("Qualified constructor call not implemented");
+        throw new ExecutionError("not.implemented", node);
       }
       
       Iterable<? extends Expression> args = IterUtil.empty();

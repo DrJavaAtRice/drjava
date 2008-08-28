@@ -269,9 +269,11 @@ public class TreeClass implements DJClass {
     }
     public String declaredName() { return _f.getName(); }
     public Type type() { return NodeProperties.getType(_f.getType()); }
-    public boolean isFinal() { return Modifier.isFinal(_f.getAccessFlags()); }
-    public boolean isStatic() { return Modifier.isStatic(_f.getAccessFlags()); }
-    public Access accessibility() { return extractAccessibility(_f.getAccessFlags()); }
+    public boolean isFinal() { return Modifier.isFinal(_f.getAccessFlags()) || isInterface(); }
+    public boolean isStatic() { return Modifier.isStatic(_f.getAccessFlags()) || isInterface(); }
+    public Access accessibility() {
+      return isInterface() ? Access.PUBLIC : extractAccessibility(_f.getAccessFlags());
+    }
     public Box<Object> boxForReceiver(Object receiver) {
       return _loaded.value().boxForReceiver(receiver);
     }
@@ -370,9 +372,11 @@ public class TreeClass implements DJClass {
     
     public String declaredName() { return _m.getName(); }
     public boolean isStatic() { return Modifier.isStatic(_m.getAccessFlags()); }
-    public boolean isAbstract() { return Modifier.isAbstract(_m.getAccessFlags()); }
+    public boolean isAbstract() { return Modifier.isAbstract(_m.getAccessFlags()) || isInterface(); }
     public boolean isFinal() { return Modifier.isFinal(_m.getAccessFlags()); }
-    public Access accessibility() { return extractAccessibility(_m.getAccessFlags()); }
+    public Access accessibility() {
+      return isInterface() ? Access.PUBLIC : extractAccessibility(_m.getAccessFlags());
+    }
     
     public Type returnType() { return NodeProperties.getType(_m.getReturnType()); }
       
