@@ -37,18 +37,15 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException; 
-
+import edu.rice.cs.util.swing.Utilities;
 import java.io.*;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests to ensure that compilation succeeds when expected.
- * 
- * Every test in this class is run for *each* of the compilers that is available.
- *
- * @version $Id$
- */
+/** Tests to ensure that compilation succeeds when expected.  Every test in this class is run for *each* of the
+  * available compilers.
+  * @version $Id$
+  */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
   /** Tests calling compileAll with different source roots works.
@@ -69,6 +66,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
+    
+    Utilities.clearEventQueue();
+    
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }

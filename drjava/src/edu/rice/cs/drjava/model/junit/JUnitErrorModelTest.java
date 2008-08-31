@@ -203,6 +203,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "ABC1.java");
     saveFile(doc, new FileSelector(file));
     
+    Utilities.clearEventQueue();
+    
     OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.java");
     saveFile(doc2, new FileSelector(file2));
@@ -211,6 +213,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    JUnitTestListener listener = new JUnitTestListener(false);
 //      System.out.println("compiling all");
     _model.getCompilerModel().compileAll();
+    Utilities.clearEventQueue();
     
     final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
@@ -304,6 +307,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _log.log("Testing the first document");
     listener.runJUnit(doc1); //  waits until JUnit is done
     
+    Utilities.clearEventQueue();
+    
     _log.log("First document test should be complete");
     listener.assertJUnitStartCount(1);  
     
@@ -319,10 +324,14 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
     _log.log("Testing the second document");
+    listener.resetJUnitCounts();
+    
     listener.runJUnit(doc2);
     _log.log("Second document testing should be complete");
     
-    listener.assertJUnitStartCount(2);
+    Utilities.clearEventQueue();
+    
+    listener.assertJUnitStartCount(1);
     
     assertEquals("test case has one error reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());

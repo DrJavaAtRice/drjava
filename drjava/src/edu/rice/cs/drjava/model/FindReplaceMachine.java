@@ -190,7 +190,7 @@ public class FindReplaceMachine {
     */
   public boolean onMatch() {
     
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     String findWord = _findWord;
     int wordLen, off;

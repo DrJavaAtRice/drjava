@@ -171,6 +171,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
   public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final int DIFF_THRESHOLD = 5;
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -328,7 +329,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _registerOptionListeners();
     
     setFileGroupingState(makeFlatFileGroupingState());
-    _notifier.projectRunnableChanged();
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.projectRunnableChanged(); } });
     _init();
   }
   
@@ -376,7 +377,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public void focusGained(FocusEvent e) {
 //        System.err.println("_documentNavigator.focusGained(...) called");
 //        if (_documentNavigator.getCurrent() != null) // past selection is leaf node
-        _notifier.focusOnDefinitionsPane();
+        Utilities.invokeLater(new Runnable() { public void run() { _notifier.focusOnDefinitionsPane(); } });
       }
       public void focusLost(FocusEvent e) { }
     });
@@ -1064,7 +1065,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return The new open document
     */
   public OpenDefinitionsDocument newFile(File parentDir) {
-//    assert EventQueue.isDispatchThread();
+///* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument(new NullFile());
     doc.setParentDirectory(parentDir);
     addDocToNavigator(doc);
@@ -1159,6 +1160,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     IOException, OperationCanceledException, AlreadyOpenException {
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
+    if (! closeUntitled) addToBrowserHistory();
+    
     OpenDefinitionsDocument oldDoc = _activeDocument;
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
@@ -1198,6 +1201,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
+    if (! closeUntitled) addToBrowserHistory();
     OpenDefinitionsDocument oldDoc = _activeDocument;
     
     OpenDefinitionsDocument[] openedDocs = openFilesHelper(com);
@@ -1368,9 +1372,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @exception IOException
     */
   public void saveAllFiles(FileSaveSelector com) throws IOException {
-    OpenDefinitionsDocument curdoc = getActiveDocument();
+//    OpenDefinitionsDocument curdoc = getActiveDocument();
     saveAllFilesHelper(com);
-    setActiveDocument(curdoc); // Return focus to previously active doc
+    refreshActiveDocument(); // Return focus to previously active doc
   }
   
   /** Called by saveAllFiles in DefaultGlobalModel */
@@ -1810,7 +1814,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * user will know which is being saved.
     */
   public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) {
-    if ( doc.isUntitled()) setActiveDocument(doc);
+    if (doc.isUntitled()) setActiveDocument(doc);
   }
   
   /** Closes an open definitions document, prompting to save if the document has been changed.  Returns whether
@@ -2146,7 +2150,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole() {
     _consoleDoc.reset("");
-    _notifier.consoleReset();
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.consoleReset(); } });
   }
   
   /** throw new UnsupportedOperationException */
@@ -2366,18 +2370,29 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return f.exists() ? f : FileOps.NULL_FILE;
   }
   
-  /** Add the current location to the browser history.  Aborts if not run in event thread. */
+  /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null. */
   public void addToBrowserHistory() {
     final OpenDefinitionsDocument doc = getActiveDocument();
-    assert doc != null && EventQueue.isDispatchThread();
+//    assert doc != null && EventQueue.isDispatchThread();
     
     Position startPos = null;  // required by javac
     Position endPos = null;    // required by javac
     File file = FileOps.NULL_FILE;  // required by javac
     try {
       int pos = doc.getCurrentLocation();
+//      System.err.println("addToBrowserHistory() called for lineNum " + doc.getLineOfOffset(pos) + " in " + doc);
+      BrowserDocumentRegion current = _browserHistoryManager.getCurrentRegion();
+      if (current != null) {
+        OpenDefinitionsDocument currentDoc = current.getDocument();
+        if (doc == currentDoc) {
+          int lineNum = doc.getLineOfOffset(pos);
+          int currentLineNum = currentDoc.getLineOfOffset(current.getStartOffset());
+//          System.err.println("lineNum = " + lineNum + " currentLineNum = " + currentLineNum);
+          if (Math.abs(lineNum - currentLineNum) <= DIFF_THRESHOLD) return;
+        }
+      }
       startPos = doc.createPosition(pos);
-      endPos = doc.createPosition(doc._getLineEndPos(pos));
+      endPos = startPos; // was doc.createPosition(doc._getLineEndPos(pos));
     }
     
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
@@ -3836,7 +3851,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      * unit esting.  We need to clean up unit testing and eliminate the invokeAndWait overhead.
      */
     
-//    assert EventQueue.isDispatchThread();
+///* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
@@ -3846,7 +3861,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         public void run() {
 //          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
       _documentNavigator.setNextChangeModelInitiated(true);
-      _documentNavigator.setActiveDoc(doc);
+      _documentNavigator.selectDocument(doc);
         }
       });
     }
@@ -3912,12 +3927,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  /** Sets the first document in the navigator as active. */
-  public void setActiveFirstDocument() {
-    
-    /* Selects the active document in the navigator, which signals a listener to call _setActiveDoc(...). */
-    setActiveDocument(getOpenDefinitionsDocuments().get(0));
-  }
+  /** Selects the first document as the active document. */
+  public void setActiveFirstDocument() { setActiveDocument(getOpenDefinitionsDocuments().get(0)); }
   
   private void _setActiveDoc(INavigatorItem idoc) {
 //     try { idoc.checkIfClassFileInSync(); } 
@@ -3928,10 +3939,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process
     * sets up _activeDocument as the document in the definitions pane. */
-  public void installActiveDocument() { _notifier.activeDocumentChanged(_activeDocument); }
+  public void installActiveDocument() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.activeDocumentChanged(_activeDocument); } });
+  }
   
-  /** Invokes the activedocumentRefreshed method in the global listener on the argument _activeDocument.  This process
+  /** Makes the active document (in this model) the selection in the documentNavigator and invokes the 
+    * activedocumentRefreshed method in the global listener on this document.  The latter process
     * refreshes the state of the _activeDocument as the document in the definitions pane. */
-  public void refreshActiveDocument() { _notifier.activeDocumentRefreshed(_activeDocument); }
+  public void refreshActiveDocument() { 
+    _documentNavigator.selectDocument(_activeDocument);
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.activeDocumentRefreshed(_activeDocument); } });  
+  }
 }
 

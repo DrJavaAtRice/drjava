@@ -605,7 +605,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // document in the document navigator
       // this makes sure that something is selected in the navigator after the
       // folder was closed
-      _model.getDocumentNavigator().setActiveDoc(_currentDefPane.getOpenDefDocument());
+      _model.getDocumentNavigator().selectDocument(_currentDefPane.getOpenDefDocument());
     }
   };
   
@@ -886,26 +886,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _findReplace.updateFirstDocInSearch();
     }
   };
-  
-  
-//  /** JUnit a directory. */
-//  private final Action _junitProjectAction = new AbstractAction("Test Project") {
-//    public void actionPerformed(ActionEvent e) {
-//      new Thread("Running JUnit Tests") {
-//        public void run() {
-//          if (_model.isProjectActive()) {
-//            try {
-//              // hourglassOn();  // also done in junitStarted
-//              _model.junitAll();
-//            }
-//            finally {
-//             //  hourglassOff(); // also done in junitEnded
-//            }
-//          }
-//        }
-//      }.start();
-//    }
-//  };
   
   /** Runs Javadoc on all open documents (and the files in their packages). */
   private final Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
@@ -1422,7 +1402,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (pim.getMatchingItems().size() == 1) {
       // exactly one match, go to file
       if (pim.getCurrentItem() != null) {
-        boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
+        boolean docChanged = ! pim.getCurrentItem().doc.equals(_model.getActiveDocument());
 //        if (docChanged) { addToBrowserHistory(); }
         _model.setActiveDocument(pim.getCurrentItem().doc);
         if (docChanged) { // defer executing this code until after active document switch is complete
@@ -3972,15 +3952,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     });
   }
   
-  /** Set a new painters for existing breakpoint highlights. */
+  /** Sets up new painters for existing breakpoint highlights. */
   void refreshBreakpointHighlightPainter() {
-    for(java.util.Map.Entry<Breakpoint,HighlightManager.HighlightInfo> pair: _documentBreakpointHighlights.entrySet()) {
+    for(Map.Entry<Breakpoint,HighlightManager.HighlightInfo> pair: _documentBreakpointHighlights.entrySet()) {
       if (pair.getKey().isEnabled()) pair.getValue().refresh(DefinitionsPane.BREAKPOINT_PAINTER);
       else pair.getValue().refresh(DefinitionsPane.DISABLED_BREAKPOINT_PAINTER);
     }
   }
   
-  /** Set new painter for existing bookmark highlights. */
+  /** Sets new painters for existing bookmark highlights. */
   void refreshBookmarkHighlightPainter() {
     for(HighlightManager.HighlightInfo hi: _documentBookmarkHighlights.values()) {
       hi.refresh(DefinitionsPane.BOOKMARK_PAINTER);
@@ -3988,8 +3968,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Set new painter for existing find results highlights. */
-  void refreshFindResultsHighlightPainter(FindResultsPanel panel, 
-                                          LayeredHighlighter.LayerPainter painter) {
+  void refreshFindResultsHighlightPainter(FindResultsPanel panel, LayeredHighlighter.LayerPainter painter) {
     for(Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
       if (pair.first() == panel) {
         Map<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.second();
@@ -4846,19 +4825,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           success = true;
         }
       }
-      // _model.refreshActiveDocument() is not sufficient here; it does not re-select
-      // the same document in flat-file mode
-      _model.setActiveDocument(_model.getActiveDocument());
+      // Is _model.refreshActiveDocument() sufficient here? Before this action selected the document in navigator
+      // it was not in flat-file mode
+      _model.refreshActiveDocument();
       return success;
-//      if (_model.getActiveDocument().saveFile(_saveSelector)) {
-//        _currentDefPane.hasWarnedAboutModified(false); 
-//        
-//        /**This highlights the document in the navigator */
-//        _model.setActiveDocument(_model.getActiveDocument());
-//        
-//        return true;
-//      }
-//      else return false;
     }
     catch (IOException ioe) { 
       _showIOError(ioe);
@@ -4870,7 +4840,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     updateStatusField("Saving File Under New Name");
     try {
       boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
-      _model.setActiveDocument(_model.getActiveDocument());  // highlights the document in the navigator
+      _model.refreshActiveDocument();  // highlights the document in the navigator
       return toReturn;
     }
     catch (IOException ioe) {
@@ -4891,7 +4861,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // TODO: what if delete() fails? (mgricken)
         if (toReturn && ! _model.getActiveDocument().getFile().equals(fileToDelete)) fileToDelete.delete();
         /** this highlights the document in the navigator */
-        _model.setActiveDocument(_model.getActiveDocument());
+        _model.refreshActiveDocument();
         return toReturn;
       }
     }
@@ -5153,6 +5123,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * thread. 
     */
   private void _storePositionInfo() {
+    assert EventQueue.isDispatchThread();
     Configuration config = DrJava.getConfig();
     
     // Window bounds.
@@ -5724,6 +5695,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
 //  /** Displays all breakpoints currently set in the debugger. */
 //  void _printBreakpoints() { _model.getDebugger().printBreakpoints(); }
+
   
   /** Clears all breakpoints from the debugger. */
   void debuggerClearAllBreakpoints() {
@@ -7431,11 +7403,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private volatile Object _updateLock = new Object();
   private volatile boolean _tabUpdatePending = false;
+  private volatile boolean _waitAgain = false;
   private volatile Runnable _pendingUpdate = null;
   private volatile OpenDefinitionsDocument _pendingDocument = null;
   private volatile OrderedDocumentRegion _firstRegion = null;
   private volatile OrderedDocumentRegion _lastRegion = null;
-  public static long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
+
+  public static long UPDATE_DELAY = 500L;  // update delay threshold in milliseconds
   public static int UPDATER_PRIORITY = 2;   // priority in [1..10] of the updater thread.
   
 //  /** Updates the tabbed panel in a granular fashion to avoid swamping the event thread.  */
@@ -7494,7 +7468,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         
         final RegionManager<R> rm = p._regionManager;
         SortedSet<R> regions = rm.getRegions(doc);
-        if (regions == null) return;
+        if (regions == null || regions.size() == 0) return;
         
         // Adjust line numbers and line bounds if insert involves newline
         final int numLinesChangedAfter = doc.getDocument().getAndResetNumLinesChangedAfter();
@@ -7517,9 +7491,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         final R last = interval.second();
             
         synchronized(_updateLock) {
-          if (_tabUpdatePending && _pendingDocument == doc) {  // revise existing task
+          if (_tabUpdatePending && _pendingDocument == doc) {  // revise and delay existing task
             _firstRegion = _firstRegion.compareTo(first) <= 0 ? _firstRegion : first;
             _lastRegion = _lastRegion.compareTo(last) >= 0 ? _lastRegion : last;
+            _waitAgain = true;
             return;
           }
           else {  // create a new update task
@@ -7527,7 +7502,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             _lastRegion = last;
             _pendingDocument = doc;
             _tabUpdatePending = true;
-            
             _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
               @SuppressWarnings("unchecked") 
               public void run() {
@@ -7547,7 +7521,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           public void run() {
             Thread.currentThread().setPriority(UPDATER_PRIORITY);
             synchronized (_updateLock) {
-              try { _updateLock.wait(UPDATE_DELAY); }  // _pendingUpdate can be updated during wait
+              try { // _pendingUpdate can be updated during waits
+                do { 
+                  _waitAgain = false;
+                  _updateLock.wait(UPDATE_DELAY); 
+                } 
+                while (_waitAgain);
+              }
               catch(InterruptedException e) { /* fall through */ }
               _tabUpdatePending = false;
             } // end synchronized
@@ -7645,6 +7625,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Switch to the JScrollPane containing the DefinitionsPane for the active document. Must run in event thread.*/
   void _switchDefScrollPane() {
+    assert EventQueue.isDispatchThread();
     // demoted to package private protection to test the disabling editing while compiling functionality.
     // and to support brute force fix to DefinitionsPane bug on return from compile with errors
     // Added 2004-May-27
@@ -7848,7 +7829,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         pane.setFont(f);
         // Update the font of the line enumeration rule
         if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
-          scroll.setRowHeaderView( new LineEnumRule(pane) );
+          scroll.setRowHeaderView(new LineEnumRule(pane));
         }
       }
     }
@@ -7993,7 +7974,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ensures that the interactions pane is editable after an interaction completes. */
   protected void _enableInteractionsPane() {
-    
+    assert EventQueue.isDispatchThread();
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     _interactionsPane.setEditable(true);
     _interactionsController.moveToEnd();
@@ -8003,6 +7984,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Comment current selection using wing commenting.  public for testing purposes only. Runs in event thread. */
   public void commentLines() {
+    assert EventQueue.isDispatchThread();
+    
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
     int caretPos = _currentDefPane.getCaretPosition();
@@ -8019,6 +8002,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Uncomment current selection using wing commenting.  Public for testing purposes only.  Runs in event thread. */
   public void uncommentLines() {
+    assert EventQueue.isDispatchThread();
+    
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
     int caretPos = _currentDefPane.getCaretPosition();
@@ -8058,7 +8043,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
     * @param doc Document to display
     * @param offset Offset to display
-    * @param shouldHighlight true iff the line should be highlighted.
+    * @param shouldHighlight true iff the line should be highlighted.  Only done in debugger.
     */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
                                         final boolean shouldHighlight) {
@@ -8066,13 +8051,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   public void goToRegionAndHighlight(final IDocumentRegion r) {
+    assert EventQueue.isDispatchThread();
     addToBrowserHistory();
-    OpenDefinitionsDocument doc = r.getDocument();
+    final OpenDefinitionsDocument doc = r.getDocument();
     boolean toSameDoc = doc == _model.getActiveDocument();
     Runnable command = new Runnable() {
       public void run() {
         int startOffset = r.getStartOffset();
         int endOffset = r.getEndOffset();
+        doc.setCurrentLocation(startOffset);
         _currentLocationHighlight = _currentDefPane.getHighlightManager().
           addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
         _currentDefPane.centerViewOnOffset(startOffset);
@@ -8090,6 +8077,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.refreshActiveDocument();
       command.run();
     }
+    EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });  // after command completes
   }
   
   /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
@@ -8104,35 +8092,31 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     assert duringInit() || EventQueue.isDispatchThread();
     
     if (shouldAddToHistory) addToBrowserHistory();
-    final boolean toSameDoc = _model.getActiveDocument().equals(doc);
+    OpenDefinitionsDocument activeDoc =  _model.getActiveDocument();
+    final boolean toSameDoc = (activeDoc == doc);
     
     Runnable command = new Runnable() {
       public void run() {
-        
-        // get the line number after the switch of documents was made
-        int lineNumber = doc.getLineOfOffset(offset) + 1;
-        
-        // this block occurs if the documents is already open and as such has a positive size
-        if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) { 
-          EventQueue.invokeLater(new Runnable() { 
-            public void run() { 
-              if (! toSameDoc) Utilities.clearEventQueue();  // pause to let async aspects of active document switch complete
-              _currentDefPane.centerViewOnOffset(offset);
-              _currentDefPane.requestFocusInWindow();
-            }
-          });
-        }
-        
+
         if (shouldHighlight) {
           removeCurrentLocationHighlight();
-          int startOffset = doc._getOffset(lineNumber);  // Much faster to directly search back from offset!
-          if (startOffset > -1) {
-            int endOffset = doc._getLineEndPos(startOffset);
-            if (endOffset > -1) {
+          int startOffset = doc._getLineStartPos(offset);
+          if (startOffset >= 0) {
+            int endOffset = doc._getLineEndPos(offset);
+            if (endOffset >= 0) {
               _currentLocationHighlight = _currentDefPane.getHighlightManager().
                 addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
             }
           }
+        }
+        // Is the following test necessary?
+        if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
+          EventQueue.invokeLater(new Runnable() { 
+            public void run() {
+              _currentDefPane.centerViewOnOffset(offset);
+              _currentDefPane.requestFocusInWindow();
+            }
+          });
         }
         
         if (_showDebugger) {
@@ -8159,15 +8143,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Listens to events from the debugger. */
   private class UIDebugListener implements DebugListener {
     /* Must be executed in evevt thread.*/
-    public void debuggerStarted() { showDebugger(); }
+    public void debuggerStarted() { EventQueue.invokeLater(new Runnable() { public void run() { showDebugger(); } }); }
     
     /* Must be executed in evevt thread.*/
     public void debuggerShutdown() {
-      _disableStepTimer();
-      
-      hideDebugger();
-      removeCurrentLocationHighlight();
-    }
+      EventQueue.invokeLater(new Runnable() {
+        public void run() {
+          _disableStepTimer();
+          hideDebugger();
+          removeCurrentLocationHighlight();
+        }
+      } );
+    }                        
     
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
@@ -8317,7 +8304,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                      OptionConstants.heapSizeChoices.toArray(),
                                                      DrJava.getConfig().getSetting(MASTER_JVM_XMX));
     
-    if (res!=null) {
+    if (res != null) {
       // temporarily make MainFrame the parent of the dialog that pops up
       DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
       final ConfigOptionListeners.MasterJVMXMXListener l = new ConfigOptionListeners.MasterJVMXMXListener(MainFrame.this);
@@ -8606,7 +8593,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void interactionEnded() {
-      assert EventQueue.isDispatchThread();  // overkill; this method is a listener invocation wrapped in invokeLater
+      assert EventQueue.isDispatchThread();
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
       final edu.rice.cs.drjava.config.FileConfiguration config = DrJava.getConfig();
@@ -8671,6 +8658,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           (_model.getBuildDirectory() != null)) {
         _scanClassFiles();
       }
+      if (_junitErrorPanel.isDisplayed()) _resetJUnit();
       _model.refreshActiveDocument();
     }
     
@@ -8695,6 +8683,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       showTab(_interactionsContainer, true);
       _lastFocusOwner = _interactionsContainer;
     }
+    
     /** Only runs in event thread. */
     public void junitStarted() {
       assert EventQueue.isDispatchThread();
@@ -8748,7 +8737,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
       _restoreJUnitActionsEnabled();
-      _junitErrorPanel.reset();
+      // Use EventQueue invokeLater to ensure that JUnitErrorPanel is "reset" after it is updated with test results
+      EventQueue.invokeLater(new Runnable() { public void run() { _junitErrorPanel.reset(); } });
       _model.refreshActiveDocument();
     }
     

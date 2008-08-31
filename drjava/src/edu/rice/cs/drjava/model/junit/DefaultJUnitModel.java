@@ -274,7 +274,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       
 //        Utilities.show("Notifying JUnitModelListener");
       _testInProgress = true;
-      _notifier.compileBeforeJUnit(testAfterCompile);
+      _notifyCompileBeforeJUnit(testAfterCompile);
       _testInProgress = false;
     }
     
@@ -460,12 +460,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         public void run() { 
           try {
 //              Utilities.show("Starting JUnit");
-            _notifier.junitStarted(); 
+            _notifyJUnitStarted(); 
             boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
             if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
           }
           catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOf already called in junitStarted
-            _notifier.junitEnded();  // balances junitStarted()
+            _notifyJUnitEnded();  // balances junitStarted()
             _testInProgress = false;
           }
         }
@@ -474,6 +474,28 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
 //-------------------------------- Helpers --------------------------------//
+  
+  /** Helper method to notify JUnitModel listeners that JUnit test suite execution has started. */
+  private void _notifyJUnitStarted() { 
+    // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitStarted(); } });
+  }
+  
+  /** Helper method to notify JUnitModel listeners that JUnit test suite execution has just ended. */
+  private void _notifyJUnitEnded() { 
+    // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitEnded(); } });
+  }
+  
+  /** Helper method to notify JUnitModel listeners that all open files must be compiled before JUnit is run. */
+  private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileBeforeJUnit(testAfterCompile); } });
+  }
+  
+  /** Helper method to notify JUnitModel listeners that JUnit aborted before any tests could be run. */
+  private void _notifyNonTestCase(final boolean testAll) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll); } });
+  }
   
   private String getCanonicalPath(File f) throws IOException {
     if (f == null) return "";
@@ -499,24 +521,30 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // NOTE: junitStarted is called in a different thread from the testing thread.  The _testInProgress flag
     //       is used to prevent a new test from being started and overrunning the existing one.
 //      Utilities.show("DefaultJUnitModel.nonTestCase(" + isTestAll + ") called");
-    _notifier.nonTestCase(isTestAll);
+    _notifyNonTestCase(isTestAll);
     _testInProgress = false;  // redundant but doesn't hurt
   }
   
   /** Called to indicate that an illegal class file was encountered
     * @param e the ClassFileObject describing the error.
     */
-  public void classFileError(ClassFileError e) { _notifier.classFileError(e); }
+  public void classFileError(final ClassFileError e) { 
+    Utilities.invokeLater(new Runnable() { public void run() {_notifier.classFileError(e); } });
+  }
   
   /** Called to indicate that a suite of tests has started running.
     * @param numTests The number of tests in the suite to be run.
     */
-  public void testSuiteStarted(final int numTests) { _notifier.junitSuiteStarted(numTests); }
+  public void testSuiteStarted(final int numTests) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitSuiteStarted(numTests); } });
+  }
   
   /** Called when a particular test is started.
     * @param testName The name of the test being started.
     */
-  public void testStarted(final String testName) { _notifier.junitTestStarted(testName); }
+  public void testStarted(final String testName) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitTestStarted(testName); } });
+  }
   
   /** Called when a particular test has ended.
     * @param testName The name of the test that has ended.
@@ -524,16 +552,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param causedError If not successful, whether the test caused an error or simply failed.
     */
   public void testEnded(final String testName, final boolean wasSuccessful, final boolean causedError) {
-    _notifier.junitTestEnded(testName, wasSuccessful, causedError);
+    EventQueue.invokeLater(new Runnable() { 
+      public void run() { _notifier.junitTestEnded(testName, wasSuccessful, causedError); }
+    });
   }
   
-  /** Called when a full suite of tests has finished running.
+  /** Called when a full suite of tests has finished running.  Does not necessarily run in event thread.
     * @param errors The array of errors from all failed tests in the suite.
     */
   public void testSuiteEnded(JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-    _notifier.junitEnded();
+    _notifyJUnitEnded();
     _testInProgress = false;  // redundant but doesn't hurt
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
   }
@@ -547,14 +577,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
   public Iterable<File> getClassPath() {  return _jvm.getClassPath(); }
   
-  /** Called when the JVM used for unit tests has registered. */
+  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in even thread. */
   public void junitJVMReady() {
     if (! _testInProgress) return;
     
     JUnitError[] errors = new JUnitError[1];
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-    _notifier.junitEnded();
+    _notifyJUnitEnded();
     _testInProgress = false;   // may be redundant
   }
 }

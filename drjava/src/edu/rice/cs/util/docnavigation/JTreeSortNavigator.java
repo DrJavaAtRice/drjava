@@ -387,7 +387,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Sets the specified document to be active (current).  Only executes in the event thread. */
-  public void setActiveDoc(ItemT doc) {
+  public void selectDocument(ItemT doc) {
     assert EventQueue.isDispatchThread();
 //    synchronized (_model) {  // lock out mutation
     DefaultMutableTreeNode node = _doc2node.get(doc);

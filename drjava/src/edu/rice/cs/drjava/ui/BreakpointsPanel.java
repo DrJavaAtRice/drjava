@@ -197,7 +197,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   /** Toggle breakpoint's enable/disable flag. */
   protected void enableDisableBreakpoint() {
     final ArrayList<Breakpoint> bps = getSelectedRegions();
-    if (bps.size()>0) {
+    if (bps.size() > 0) {
       final boolean newState = !bps.get(0).isEnabled();
       for (Breakpoint bp: bps) {
         _regionManager.changeRegion(bp, new Lambda<Breakpoint,Object>() {

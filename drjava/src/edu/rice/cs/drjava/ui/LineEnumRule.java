@@ -81,11 +81,9 @@ public class LineEnumRule extends JComponent {
     SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
   }
 
-  /** Return a new Dimension using our set width, and the height of the def. pane
-   * return Dimension
-   */
+  /** Return a new Dimension using our set width, and the height of the definitions pane */
   public Dimension getPreferredSize() {
-    return new Dimension( SIZE, (int)_pane.getPreferredSize().getHeight());
+    return new Dimension(SIZE, (int)_pane.getPreferredSize().getHeight());
   }
 
   /** Updates the row header's font information.
@@ -100,8 +98,7 @@ public class LineEnumRule extends JComponent {
     SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
   }
 
-  /** Paints the line enumeration component.
-   */
+  /** Paints the line enumeration component.*/
   public void paintComponent(Graphics g) {
     Rectangle drawHere = g.getClipBounds();
 

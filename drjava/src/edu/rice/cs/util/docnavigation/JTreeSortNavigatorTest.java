@@ -126,7 +126,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         tree.setNextChangeModelInitiated(true);
-        tree.setActiveDoc(i1);
+        tree.selectDocument(i1);
       }
     });
     assertSame("getCurrent test", i1, tree.getCurrent());

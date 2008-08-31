@@ -216,11 +216,11 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     }
   }
   
-  /** Sets the specified document as selected.  Only executes in event thread.
+  /** Sets the specified document as selected in the navigator.  Only executes in event thread.
     * @param doc the document to select
     */
-  public void setActiveDoc(ItemT doc) { 
-//    assert EventQueue.isDispatchThread();
+  public void selectDocument(ItemT doc) { 
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     boolean found;
 //    synchronized(_model) {
     if (_current == doc) return; // doc is already _current (the active doc)
@@ -307,7 +307,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
       final int idx = locationToIndex(new java.awt.Point(x,y));
       java.awt.Rectangle rect = getCellBounds(idx, idx);
       if (rect.contains(x, y)) {
-        setActiveDoc(getFromModel(idx));
+        selectDocument(getFromModel(idx));
         return true;
       }
       return false;

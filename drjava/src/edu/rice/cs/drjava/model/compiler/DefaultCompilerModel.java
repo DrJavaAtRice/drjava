@@ -211,9 +211,9 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Compile the given documents. */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
-    ArrayList<File> filesToCompile = new ArrayList<File>();
-    ArrayList<File> excludedFiles = new ArrayList<File>();
-    ArrayList<CompilerError> packageErrors = new ArrayList<CompilerError>();
+    final ArrayList<File> filesToCompile = new ArrayList<File>();
+    final ArrayList<File> excludedFiles = new ArrayList<File>();
+    final ArrayList<CompilerError> packageErrors = new ArrayList<CompilerError>();
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
@@ -229,9 +229,9 @@ public class DefaultCompilerModel implements CompilerModel {
       else excludedFiles.add(doc.getFile());
     }
     
-    _notifier.compileStarted();
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
     try {
-      if (!packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
+      if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
       else {
         try {
           File buildDir = _model.getBuildDirectory();
@@ -253,7 +253,10 @@ public class DefaultCompilerModel implements CompilerModel {
         }
       }
     }
-    finally { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
+    finally { 
+      Utilities.invokeLater(new Runnable() { 
+        public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); } });
+    }
   }
   
   

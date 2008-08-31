@@ -227,7 +227,7 @@ public class JPDADebugger implements Debugger {
 
       // re-set breakpoints that have already been set
       ArrayList<Breakpoint> oldBreakpoints = new ArrayList<Breakpoint>(_model.getBreakpointManager().getRegions());
-      _model.getBreakpointManager().clearRegions();
+      _model.getBreakpointManager().clearRegions();  // oldBreakpoints are removed from the breakpoint manager
       for (int i = 0; i < oldBreakpoints.size(); i++) {
         Breakpoint bp = oldBreakpoints.get(i);
         int lnr = bp.getLineNumber();
@@ -476,19 +476,19 @@ public class JPDADebugger implements Debugger {
     */
   public boolean toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
-        assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread();
     // ensure that offset is at line start and falls within the document
     offset = doc._getLineStartPos(offset);
-    if (offset < 0 || offset > doc.getLength()) return false;
+    if (offset < 0) return false;
     
     Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset);
     
-    if (breakpoint == null) {
-      if (offset == doc._getLineEndPos(offset)) {
+    if (breakpoint == null) {  // no breakpoint on this line
+      if (offset == doc._getLineEndPos(offset)) {  // line is empty
         Utilities.show("Cannot set a breakpoint on an empty line.");
         return false;
       }
-      else {
+      else {  // set breakpoint
         try { 
           setBreakpoint(new JPDABreakpoint(doc, offset, lineNum, isEnabled, this));
           return true;
@@ -499,7 +499,7 @@ public class JPDADebugger implements Debugger {
         }
       }
     }
-    else {
+    else { // breakpoint already set on this line
       _model.getBreakpointManager().removeRegion(breakpoint);
       return false;
     }

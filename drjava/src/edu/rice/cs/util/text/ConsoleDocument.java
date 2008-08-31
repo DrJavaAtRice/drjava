@@ -199,7 +199,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @param style name of style to format the string
     */
   public void insertBeforeLastPrompt(String text, String style) {
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
     try {
       int pos = _getPositionBeforePrompt();
 //      System.err.println("_promptPos before update = " + _promptPos);
@@ -229,7 +229,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @throws EditDocumentException if the offset is illegal
     */
   public void append(String str, String style) throws EditDocumentException {
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
     int offs = _document.getLength();
     _addToStyleLists(offs, str, style);
     _document.insertText(offs, str, style);

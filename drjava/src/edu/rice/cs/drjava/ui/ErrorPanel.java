@@ -463,7 +463,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       catch (BadLocationException e) { throw new UnexpectedException(e); }
       
       // Force UI to redraw
-//      revalidate();
+      repaint();
     }
     
     abstract protected void _updateNoErrors(boolean done) throws BadLocationException;

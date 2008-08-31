@@ -202,7 +202,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     */
   protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
     TestListener listener = new TestListener() {
-      public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
+      public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
     };
 
     _model.addListener(listener);
@@ -1199,6 +1199,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       activeCompilerChangedCount = 0;
     }
     
+    public void resetJUnitCounts() { 
+      junitStartCount = 0;
+      junitSuiteStartedCount = 0;
+      junitTestStartedCount = 0;
+      junitTestEndedCount = 0;
+      junitEndCount = 0;
+    }
+     
     @Override public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");
       synchronized(this) { junitStartCount++; }

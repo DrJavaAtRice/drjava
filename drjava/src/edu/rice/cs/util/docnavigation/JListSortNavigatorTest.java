@@ -72,7 +72,7 @@ public class JListSortNavigatorTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         list.setNextChangeModelInitiated(true);
-        list.setActiveDoc(i1); 
+        list.selectDocument(i1); 
       } 
     });
 

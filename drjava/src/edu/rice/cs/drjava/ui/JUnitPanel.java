@@ -176,6 +176,7 @@ public class JUnitPanel extends ErrorPanel {
     } 
     else _numErrors = 0;
     _errorListPane.updateListPane(testsHaveRun); //changed!!
+    repaint();
   }
   
   /** Resets the progress bar to start counting the given number of tests. */

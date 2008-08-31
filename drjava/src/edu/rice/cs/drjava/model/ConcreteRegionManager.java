@@ -131,7 +131,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * @return the DocumentRegion at the given offset, or null if it does not exist.
     */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset) { 
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset. */
     @SuppressWarnings("unchecked")
@@ -152,7 +152,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   
   /** Finds the interval of regions in odd such that the line label (excerpt) for the region contains offset. */
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset) {
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
     
@@ -276,7 +276,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     */
   public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
     
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     LinkedList<R> result = new LinkedList<R>();
     if (startOffset == endOffset) return result;
     
@@ -448,7 +448,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * regions.  Removes empty regions.  firstRegion and lastRegion are not necessarily regions in this manager.  
     */
   public void updateLines(R firstRegion, R lastRegion) { 
-//    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     /* Get the tailSet consisting of the ordered set of regions >= r. */
     @SuppressWarnings("unchecked")

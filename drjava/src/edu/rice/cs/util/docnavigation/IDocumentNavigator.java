@@ -84,7 +84,7 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** Sets the active document as specified.
     * @param doc the document to select
     */
-  public void setActiveDoc(ItemT doc);
+  public void selectDocument(ItemT doc);
   
   /** The following five operations impose a natural ordering on the documents in the navigator.
     * For lists, it is order of insertion. For trees, it is depth-first enumeration.

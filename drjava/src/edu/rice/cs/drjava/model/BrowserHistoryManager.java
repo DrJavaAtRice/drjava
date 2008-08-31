@@ -51,11 +51,12 @@ import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Browser history manager for the entire model.  Follows readers/writers locking protocol of EventNotifier.  This 
-  * history is simply a list together with a current pointer. 
+  * history is simply a list together with a current pointer.  TODO: Use a simple stack rather than a TreeSet to 
+  * represent the collection; a browser region should simply be a position in a document.
   */
 public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<BrowserDocumentRegion>> {
   
-  /** List of regions.  Public operations are thread safe. */
+  /** List of regions. */
   private volatile TreeSet<BrowserDocumentRegion> _regions = new TreeSet<BrowserDocumentRegion>();
   
   private volatile BrowserDocumentRegion _current = null;
@@ -90,7 +91,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   
   public void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) {
     
-    assert EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    Utilities.show("addBrowserRegion(" + r + ") called with regions = " + _regions + " and current = " + _current);
     if (_current != null) {
@@ -102,12 +103,12 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
       if (it.hasNext()) {
         BrowserDocumentRegion nr = it.next();  // skip over current
         assert nr == _current;
-//        Utilities.show("Skipped " + nr);
+//        System.err.println("Skipped " + nr.getDocument().getLineOfOffset(nr.getStartOffset()));
       }
       while (it.hasNext()) { 
         BrowserDocumentRegion nr = it.next(); 
         it.remove(); 
-//        Utilities.show("Removed " + nr + ", leaving " + _regions);
+//        System.err.println("Removed " + nr.getDocument().getLineOfOffset(nr.getStartOffset()));
       }
     }
 //    Utilities.show("Before adding, regions = " + _regions);

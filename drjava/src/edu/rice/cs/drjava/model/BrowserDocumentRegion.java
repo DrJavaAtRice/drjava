@@ -42,7 +42,8 @@ import javax.swing.tree.MutableTreeNode;
 import java.io.File;
 
 /** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
-  * required for OrderedDocumentRegions.
+  * required for OrderedDocumentRegions.  TODO: Use a simple stack rather than a TreeSet to represent the collection 
+  * of accumulated regions.
   * @version $Id$
   */
 public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
