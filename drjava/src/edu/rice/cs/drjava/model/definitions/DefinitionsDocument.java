@@ -298,7 +298,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * Assumes that write lock is already held. 
     */
   private void _setModifiedSinceSave() {
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
       if (_odd != null) _odd.documentModified();  // null test required for some unit tests
@@ -505,7 +505,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Assumes that read lock is already held. */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     int i;
     int reducedPos = pos;
     
@@ -544,7 +544,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     int i;
     int reducedPos = pos;
@@ -616,7 +616,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public String _getEnclosingClassName(final int pos, final boolean qual) throws BadLocationException, 
     ClassNameNotFoundException {    
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.EnclosingClassName(pos, qual);
@@ -838,7 +838,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
 //    boolean oldLog = true; // log; log = false;
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.AnonymousInnerClassIndex(pos);

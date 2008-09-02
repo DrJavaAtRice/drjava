@@ -143,7 +143,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     * which sees a null style name.
     */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     if (_condition.canInsertText(offs)) super.insertString(offs, str, set);
   }
   

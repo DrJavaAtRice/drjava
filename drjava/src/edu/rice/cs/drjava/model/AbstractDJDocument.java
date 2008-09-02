@@ -509,7 +509,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState getStateAtCurrent() { 
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     return _reduced.getStateAtCurrent(); 
   }
   
@@ -676,7 +676,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipBracePhrases)
     throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
@@ -762,7 +762,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean findCharInStmtBeforePos(char findChar, int position) {
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     if (position == -1) {
       String msg = 
@@ -808,7 +808,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _findPrevCharPos(final int pos, final char[] whitespace) throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PrevCharPos(pos, whitespace);
@@ -921,7 +921,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param selEnd the offset of the last character of the region to indent
     */
   public void indentLines(int selStart, int selEnd) {
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     try { indentLines(selStart, selEnd, Indenter.IndentReason.OTHER, null); }
     catch (OperationCanceledException oce) {
       // Indenting without a ProgressMonitor should never be cancelled!
@@ -941,7 +941,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException {
     
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
@@ -1026,7 +1026,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param currPos A position on the current line
     */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
-/* */ assert Utilities.TEST_MODE || Utilities.TEST_MODE || EventQueue.isDispatchThread();
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     String prefix;
     int firstChar;
