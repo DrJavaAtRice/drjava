@@ -86,43 +86,44 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     */
   public void setUp() throws Exception {
     super.setUp();
-    
-    // create temp directory for this test
-    _base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
-    _parent = IOUtil.createAndMarkTempDirectory("proj", "", _base);
-    _srcDir = new File(_parent, "src");
-    _srcDir.mkdir(); // create the src directory
-
-    // create project in a directory with an auxiliary file outside of it
-    _auxFile = File.createTempFile("aux", ".java").getCanonicalFile();
-    File auxFileParent = _auxFile.getParentFile();
-    _projFile = new File(_parent, "test.pjt");
-    
-    _file1 = new File(_srcDir, "test1.java");
-    IOUtil.writeStringToFile(_file1, "");  // create dummy file
-    _file2 = new File(_srcDir, "test2.java");
-    IOUtil.writeStringToFile(_file2, "");// create dummy file
-    
+    // Perform Swing setup in event thread because the event thread is ALREADY running
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+      
+          // create temp directory for this test
+          _base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
+          _parent = IOUtil.createAndMarkTempDirectory("proj", "", _base);
+          _srcDir = new File(_parent, "src");
+          _srcDir.mkdir(); // create the src directory
+          
+          // create project in a directory with an auxiliary file outside of it
+          _auxFile = File.createTempFile("aux", ".java").getCanonicalFile();
+          File auxFileParent = _auxFile.getParentFile();
+          _projFile = new File(_parent, "test.pjt");
+          
+          _file1 = new File(_srcDir, "test1.java");
+          IOUtil.writeStringToFile(_file1, "");  // create dummy file
+          _file2 = new File(_srcDir, "test2.java");
+          IOUtil.writeStringToFile(_file2, "");// create dummy file
+          
 //    System.err.println("test1.java and test1.java created");
-    
-//    // generate the relative path names for the files in the project file
-//    String temp = _file1.getParentFile().getCanonicalPath();
-//    _file1RelName = _file1.getCanonicalPath().substring(temp.length() + 1);
-//    temp = _file2.getParentFile().getCanonicalPath();
-//    _file2RelName = _file2.getCanonicalPath().substring(temp.length() + 1);
-
-    _projFileText =
-      ";; DrJava project file.  Written with build: 20040623-1933\n" +
-      "(source ;; comment\n" +
-      "   (file (name \"src/test1.java\")(select 32 32))" +
-      "   (file (name \"src/test2.java\")(select 32 32)))";
-    
-    IOUtil.writeStringToFile(_projFile, _projFileText);
-    
-    _frame = new MainFrame();
-
-    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.pack(); } });
-    _model = _frame.getModel();
+          
+          _projFileText =
+            ";; DrJava project file.  Written with build: 20040623-1933\n" +
+            "(source ;; comment\n" +
+            "   (file (name \"src/test1.java\")(select 32 32))" +
+            "   (file (name \"src/test2.java\")(select 32 32)))";
+          
+          IOUtil.writeStringToFile(_projFile, _projFileText);
+          
+          _frame = new MainFrame();
+          _frame.pack();
+          _model = _frame.getModel();
+        }
+        catch(IOException e) { throw new UnexpectedException(e); }
+      }
+    });
   }
 
   public void tearDown() throws Exception {

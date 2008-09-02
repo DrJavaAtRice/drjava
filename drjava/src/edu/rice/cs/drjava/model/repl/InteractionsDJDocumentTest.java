@@ -57,13 +57,17 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
   /** Initialize fields for each test. */
   protected void setUp() throws Exception {
     super.setUp();
-    mf = new MainFrame();
-    GlobalModel gm = mf.getModel();
-    _model = gm.getInteractionsModel();
-    _adapter = gm.getSwingInteractionsDocument();
-    _doc = gm.getInteractionsDocument();
-    assert _model._pane != null;  // MainFrame creates an interactions controller which creates the pane.
-    Utilities.clearEventQueue();
+    // MainFrame creation must run in event thread because event thread is already running
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        mf = new MainFrame();
+        GlobalModel gm = mf.getModel();
+        _model = gm.getInteractionsModel();
+        _adapter = gm.getSwingInteractionsDocument();
+        _doc = gm.getInteractionsDocument();
+        assert _model._pane != null;  // MainFrame creates an interactions controller which creates the pane.
+      }
+    });
   }
   
   private boolean _interpreterRestarted = false;

@@ -88,12 +88,17 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-    _log.log("super.setUp() for next test completed");
-    
-    _frame  = new MainFrame();
-    _log.log("new MainFrame() for next test completed");
-    EventQueue.invokeLater(new Runnable() { public void run() { _frame.pack(); } });
-    _log.log("setUp complete for next test");
+    // Perform ainFrame initialization in the event thread because the event thread is ALREADY running
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+//        _log.log("super.setUp() for next test completed");
+        
+        _frame  = new MainFrame();
+//        _log.log("new MainFrame() for next test completed");
+        EventQueue.invokeLater(new Runnable() { public void run() { _frame.pack(); } });
+//        _log.log("setUp complete for next test");
+      }
+    });
   }
   
   public void tearDown() throws Exception {

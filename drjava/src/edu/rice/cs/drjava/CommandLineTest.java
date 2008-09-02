@@ -113,7 +113,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     super.setUp();
     
 //    _log.log("INVOKing DrJava._initConfig() for " + this);
-//    DrJava._initConfig();
+//  Perform Swing initialization in event thread because the event thread is already running
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
         
