@@ -176,7 +176,7 @@
     <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
          on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
          check should probably still be done. -->
-    <echo message="Generating 1.4 versions of the classes directories (this may take awhile after a large compile)" />
+    <echo message="Generating 1.4 versions of the classes directories (this may take a while after a large compile)" />
     
     <!-- Convert lib classes -->
     <mkdir dir="classes/lib-14" />
