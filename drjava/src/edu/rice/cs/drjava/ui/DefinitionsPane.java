@@ -240,7 +240,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for BOOKMARK_COLOR. */
   private class BookmarkColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      BOOKMARK_PAINTER = new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, BOOKMARK_PAINTER.getThickness());
+      BOOKMARK_PAINTER = 
+        new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, BOOKMARK_PAINTER.getThickness());
       _mainFrame.refreshBookmarkHighlightPainter();
     }
   }
@@ -543,7 +544,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, temp);
 
     OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
-    Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
+    Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = 
+      new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
     _booleanOptionListeners.add(aaPair);
     DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS, aaTemp);
 
@@ -646,7 +648,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
             }
           }
           
-          /* If the KeyEvent is not a pressed event, process it before we do granular undo or _inCompoundEdit may 
+          /* If the KeyEvent is not a KEY_TYPED event, process it before we do granular undo or _inCompoundEdit may 
            * get set incorrectly. This code breaks Alt-F4, and may break other system keybindings since the event 
            * is consumed by us. */
           if (e.getID() != KeyEvent.KEY_TYPED) {

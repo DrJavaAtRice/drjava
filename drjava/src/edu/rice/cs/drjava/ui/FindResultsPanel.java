@@ -367,7 +367,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   public OpenDefinitionsDocument getDocument() { return _doc.get(); }
 
   /** Disables "Find Again", e.g. because the document was closed. */
-  public void disableFindAgain() {_doc.clear(); updateButtons(); }
+  public void disableFindAgain() {
+    _doc.clear(); 
+    updateButtons(); 
+  }
   
   /** The OptionListener for FIND_RESULTS_COLOR. */
   private class FindResultsColorOptionListener implements OptionListener<Color> {

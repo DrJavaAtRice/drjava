@@ -2898,15 +2898,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public String getName(INavigatorItem name) { return name.getName(); }
   };
   
-  /** These listeners support the travel operations that cycle through recent documents. */
-  KeyListener _historyListener = new KeyListener() {
+  /** These listeners support the traversal operations that cycle through recent documents. */
+  public KeyListener _historyListener = new KeyListener() {
     public void keyPressed(KeyEvent e) {
       int backQuote = java.awt.event.KeyEvent.VK_BACK_QUOTE;
-      if (e.getKeyCode() == backQuote && e.isControlDown() && ! e.isShiftDown()) nextRecentDoc();
-      if (e.getKeyCode() == backQuote && e.isControlDown() && e.isShiftDown()) prevRecentDoc();
-//    else if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE) {
-//        transferFocusUpCycle();
-//    }
+      if (e.getKeyCode() == backQuote && e.isControlDown()) {
+        if (e.isShiftDown()) prevRecentDoc();
+        else nextRecentDoc();
+      }
     }
     public void keyReleased(KeyEvent e) {
       if (e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL) hideRecentDocFrame();
@@ -2914,7 +2913,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void keyTyped(KeyEvent e) { /* noop */ }
   };
   
-  FocusListener _focusListenerForRecentDocs = new FocusListener() {
+  public FocusListener _focusListenerForRecentDocs = new FocusListener() {
     public void focusLost(FocusEvent e) { hideRecentDocFrame();  }
     public void focusGained(FocusEvent e) { }
   };
@@ -2931,6 +2930,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public MainFrame() {
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig(); 
+    
+    // _historyListener (declared and initialized above) required by new FindReplacePanel(...)
+    assert _historyListener != null;
     
     // create our model
     _model = new DefaultGlobalModel();
@@ -3445,12 +3447,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
       catch(IOException ioe) {
-        try {
-          RemoteControlClient.openFile(null);
-        }
-        catch(IOException ignored) {
-          // ignore
-        }
+        try { RemoteControlClient.openFile(null); }
+        catch(IOException ignored) { /* ignore */ }
         if (!Utilities.TEST_MODE && !System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
           Object[] options = {"Disable","Ignore"};
           String msg = "<html>Could not start DrJava's remote control server";
@@ -7394,7 +7392,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _recentDocFrame.setVisible(false);
       OpenDefinitionsDocument doc = _recentDocFrame.getDocument();
       if (doc != null) {
-//        addToBrowserHistory();
+        addToBrowserHistory();
         _model.setActiveDocument(doc);
 //        addToBrowserHistory();
       }

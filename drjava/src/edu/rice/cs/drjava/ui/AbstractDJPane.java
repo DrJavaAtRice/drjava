@@ -46,9 +46,11 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.BadLocationException;
 import java.awt.dnd.*;
 import java.awt.datatransfer.*;
@@ -62,6 +64,7 @@ public abstract class AbstractDJPane extends JTextPane
   
   /* The amount of the visible pane to scroll on a single click (Swing's default is .1) */
   private static final double SCROLL_UNIT = .05;
+
   
   /** Paren/brace/bracket matching highlight color. */
   static ReverseHighlighter.DrJavaHighlightPainter MATCH_PAINTER;
@@ -74,6 +77,8 @@ public abstract class AbstractDJPane extends JTextPane
   /** Highlight painter for selected errors in the defs doc. */
   static ReverseHighlighter.DrJavaHighlightPainter ERROR_PAINTER =
     new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+  
+  private static final int ALT_CTRL_META_MASK = Event.ALT_MASK | Event.CTRL_MASK | Event.META_MASK;
   
   protected volatile HighlightManager _highlightManager;
   
@@ -114,9 +119,22 @@ public abstract class AbstractDJPane extends JTextPane
     
     // Add listener that checks if highlighting matching braces must be updated
     addCaretListener(_matchListener);
+    disableAltCntlMetaChars(this);
   }
   
   //--------- METHODS -----------
+  
+  /** Create a null default action for Cntl/Alt/Meta chars in the keymap for p. */
+  public static void disableAltCntlMetaChars(JTextComponent p) {
+    Keymap km = p.getKeymap();
+    final Action defaultAction = km.getDefaultAction();
+    km.setDefaultAction(new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        if ((e.getModifiers() & ALT_CTRL_META_MASK) != 0) return;
+        defaultAction.actionPerformed(e);
+      }
+    });
+  }
  
   /** Adds a highlight to the document.  Called by _updateMatchHighlight().
    *  @param from start of highlight

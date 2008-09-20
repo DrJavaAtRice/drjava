@@ -101,7 +101,7 @@ import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException ;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument.WrappedPosition;

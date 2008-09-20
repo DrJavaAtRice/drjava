@@ -216,6 +216,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _findField = new JTextPane(new DefaultStyledDocument());
     _replaceField = new JTextPane(new SwingDocument());
     
+    // Make a null action the default for Cntl/Alt/Meta chars entered in Find/Replace fields
+    AbstractDJPane.disableAltCntlMetaChars(_findField);
+    AbstractDJPane.disableAltCntlMetaChars(_replaceField);
+    
+    //Install document traversal listeners in Find/Replace fields
+    _findField.addKeyListener(frame._historyListener);
+    _findField.addFocusListener(frame._focusListenerForRecentDocs);
+    _replaceField.addKeyListener(frame._historyListener);
+    _findField.addFocusListener(frame._focusListenerForRecentDocs);
+    
     // Ignore special treatment of 'tab' in text panes
     int tabForward = KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
     int tabBackward = KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
@@ -504,9 +514,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   /** Performs "find all" command. */
   private void _findAll() {
-    _machine.setSearchBackwards(false);
+    // The following two line was moved to _findAll(...) so it is executed by FindResultsPanel._findAgain
+//    _machine.setSearchBackwards(false);
+    
     _findLabelBot.setText("Next");
-
     String searchStr = _findField.getText();
     String title = searchStr;
     OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
@@ -533,6 +544,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                       final boolean wholeWord, final boolean noComments, final boolean noTestCases,
                       final OpenDefinitionsDocument startDoc, final RegionManager<MovingDocumentRegion> rm,
                       final FindResultsPanel panel) {
+    
+    _machine.setSearchBackwards(false);
+
     int searchLen = searchStr.length();
     if (searchLen == 0) return;
     

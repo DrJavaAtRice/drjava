@@ -61,15 +61,14 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
   }
   
   /** This method abstracts the common processes of the tests so that the tests
-   * themselves may only contain information about original conditions and
-   * expected results.
-   * @param start The text that should be in the document at time rule is called
-   * @param loc the location of the cursor when rule is called
-   * @param endLoc the expected final size of the document
-   * @param finish the text string that remaining after the rule is called
-   */
-  public void helperCommentTest(String start, int loc, int endLoc, String finish) throws 
-    BadLocationException {
+    * themselves may only contain information about original conditions and
+    * expected results.
+    * @param start The text that should be in the document at time rule is called
+    * @param loc the location of the cursor when rule is called
+    * @param endLoc the expected final size of the document
+    * @param finish the text string that remaining after the rule is called
+    */
+  public void helperCommentTest(String start, int loc, int endLoc, String finish) throws BadLocationException {
       _setDocText(start);
       _doc.setCurrentLocation(loc);
       makeAction(new String[]{" * \n", " */"},0,3,0,3).testIndentLine(_doc, Indenter.IndentReason.ENTER_KEY_PRESS);
@@ -149,7 +148,7 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
                       "/* This \n * is a comment block\n */\n * That is already closed \n */");
   }
   
-  public void xtest8() throws BadLocationException {
+  public void test8() throws BadLocationException {
 ///* ABC | */
 //
 //---------------------------------
@@ -188,7 +187,7 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
                       "/** This is \n * bad */ **/\n */");
   }
 
-  public void xtest11() throws BadLocationException {
+  public void test11() throws BadLocationException {
 ///** ABC **/ | /** ABC **/
 //
 //---------------------------------
@@ -196,8 +195,8 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
 //|/** ABC **/
 
     helperCommentTest("/** ABC **/ \n /** ABC **/",
-                      13, 13,
-                      "/** ABC **/ \n/** ABC **/");
+                      13, 16,
+                      "/** ABC **/ \n *  /** ABC **/\n */");
   }
   
 }
