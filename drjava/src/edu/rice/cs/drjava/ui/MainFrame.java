@@ -9917,9 +9917,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             toFrontAction.run(we);
             // then we remove the window that trumped w from the set of trump windows
             Window o = we.getOppositeWindow();
-            trumpedBy.remove(o);
-            // and we remove this listener
-            o.removeWindowListener(this);
+            if (o!=null) {
+              trumpedBy.remove(o);
+              // and we remove this listener
+              o.removeWindowListener(this);
+            }
           }
         };
         public void toFront(WindowEvent we) {
