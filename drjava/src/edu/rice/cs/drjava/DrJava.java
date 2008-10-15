@@ -88,7 +88,10 @@ public class DrJava {
   /** true if a new instance of DrJava should be started instead of
     * connecting to an already running instance. */
   static volatile boolean _forceNewInstance = false;
-  
+
+  /** Time in millisecond before restarting DrJava to change the heap size, etc. is deemed a success. */
+  private static final int WAIT_BEFORE_DECLARING_SUCCESS = 5000;
+
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
    * prevent others from assigning new values. */
@@ -168,49 +171,111 @@ public class DrJava {
         }      
       }
       
-      // Restart if there are custom JVM args
-      boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
-        || ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))) &&
-            (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))));
-      
-      LinkedList<String> classArgsList = new LinkedList<String>();
-      classArgsList.addAll(_filesToOpen);
-      
-      // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
-      if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
-      
-      if (! _propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
-        // Placed in reversed order to get "-config filename"
-        classArgsList.addFirst(_propertiesFile.getAbsolutePath());
-        classArgsList.addFirst("-config");
-      }
-      
-      String[] classArgs = classArgsList.toArray(new String[0]);
-      
-      if (restart) {
-        String classPath = System.getProperty("java.class.path");
+      // The code below is in a loop so that DrJava can retry launching itself
+      // if it fails the first time after resetting the configuration file.
+      // This helps for example when the main JVM heap size is too large, and
+      // the JVM cannot be created.
+      int failCount = 0;
+      while(failCount<2) {
+        // Restart if there are custom JVM args
+        boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
+          || ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))) &&
+              (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))));
         
-        // Run a new copy of DrJava and exit
-        try {
+        LinkedList<String> classArgsList = new LinkedList<String>();
+        classArgsList.addAll(_filesToOpen);
+        
+        // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
+        if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
+        
+        if (! _propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
+          // Placed in reversed order to get "-config filename"
+          classArgsList.addFirst(_propertiesFile.getAbsolutePath());
+          classArgsList.addFirst("-config");
+        }
+        
+        String[] classArgs = classArgsList.toArray(new String[0]);
+        
+        if (restart) {
+          String classPath = System.getProperty("java.class.path");
+          
+          // Run a new copy of DrJava and exit
+          try {
 //          Utilities.showDebug("Starting DrJavaRoot with classArgs = " + Arrays.toString(classArgs) + "; classPath = " + classPath + 
 //                             "; jvmArgs = " + _jvmArgs + "; workDir = " + workDir);
-          ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, _jvmArgs.toArray(new String[0]), null);
+            Process p = ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, _jvmArgs.toArray(new String[0]), null);
+            final Thread mainThread = Thread.currentThread();
+            // this thread waits some time for something to go wrong in the spawned JVM (p)
+            // then it interrupts the main thread, which is waiting for the JVM to end
+            Thread sleepThread = new Thread(new Runnable() {
+              public void run() {
+                try {
+                  Thread.sleep(WAIT_BEFORE_DECLARING_SUCCESS); // wait 5 seconds for something to go wrong.
+                  mainThread.interrupt();
+                }
+                catch(InterruptedException e) { /* just check if something has gone wrong now, even if it's not 5 seconds later */ }
+              }
+            });
+            sleepThread.setDaemon(true);
+            sleepThread.start(); // this will wait 5 seconds and then interrupt the main thread waiting for the other JVM to quit
+            // let the main threat wait for the JVM to end
+            try {
+              p.waitFor();
+              sleepThread.interrupt();
+            }
+            catch(InterruptedException e) { /* we got interrupted by the sleepThread */ }
+            try {
+              // check how the JVM ended
+              if (p.exitValue()!=0) {
+                // ended in failure
+                if (failCount>0) {
+                  // 2nd time that spawning has failed, give up
+                  JOptionPane.showMessageDialog(null,
+                                                "DrJava was unable to start, and resetting your configuration\n"+
+                                                "did not help. Please file a support request at\n"+
+                                                "https://sourceforge.net/projects/drjava/",
+                                                "Could Not Start DrJava",
+                                                JOptionPane.ERROR_MESSAGE);
+                  System.exit(0);
+                }
+                else {
+                  // 1st time that spawning has failred, offer to reset configuration
+                  int result = JOptionPane.showConfirmDialog(null,
+                                                             "DrJava was unable to start. Your configuration file (.drjava)\n"+
+                                                             "might be corrupt. Do you want to reset your configuration?",
+                                                             "Could Not Start DrJava",
+                                                             JOptionPane.YES_NO_OPTION);
+                  if (result != JOptionPane.YES_OPTION) { System.exit(0); }
+                  // reset configuration, save, and reload it
+                  getConfig().resetToDefaults();
+                  getConfig().saveConfiguration();
+                  if (!handleCommandLineArgs(args)) { System.exit(0); }
+                  ++failCount;
+                  continue;
+                }
+              }
+            }
+            catch(IllegalThreadStateException e) {
+              // the other JVM hasn't finished yet, assume it's running well
+            }
+          }
+          catch (IOException ioe) {
+            // Display error
+            final String[] text = {
+              "DrJava was unable to load its compiler and debugger.  Would you ",
+              "like to start DrJava without a compiler and debugger?", "\nReason: " + ioe.toString()
+            };
+            int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
+                                                       JOptionPane.YES_NO_OPTION);
+            if (result != JOptionPane.YES_OPTION) { System.exit(0); }
+          }
         }
-        catch (IOException ioe) {
-          // Display error
-          final String[] text = {
-            "DrJava was unable to load its compiler and debugger.  Would you ",
-            "like to start DrJava without a compiler and debugger?", "\nReason: " + ioe.toString()
-          };
-          int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
-                                                     JOptionPane.YES_NO_OPTION);
-          if (result != JOptionPane.YES_OPTION) { System.exit(0); }
+        
+        else {
+          // No restart -- just invoke DrJavaRoot.main.
+          DrJavaRoot.main(classArgs);
         }
-      }
-      
-      else {
-        // No restart -- just invoke DrJavaRoot.main.
-        DrJavaRoot.main(classArgs);
+        break;
       }
     }
     catch(Throwable t) {
