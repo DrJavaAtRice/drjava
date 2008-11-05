@@ -42,8 +42,7 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-//import edu.rice.cs.drjava.model.DefaultDJDocument;
-import edu.rice.cs.drjava.model.compiler.CompilerError;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.UnexpectedException;
@@ -80,8 +79,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   protected volatile int _numErrors;
   protected volatile JCheckBox _showHighlightsCheckBox;
   
-  // TODO: is this necessary, or can we get by with installing a domain-specific
-  //       model in the constructor - e.g. JavadocModel
   protected SingleDisplayModel _model;
   
   private JScrollPane _scroller;
@@ -249,7 +246,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     protected Position[] _errorListPositions;
     
     /** Table mapping Positions in the error list to CompilerErrors. */
-    protected final HashMap<Position, CompilerError> _errorTable = new HashMap<Position, CompilerError>();
+    protected final HashMap<Position, DJError> _errorTable = new HashMap<Position, DJError>();
     
     // when we create a highlight we get back a tag we can use to remove it
     private HighlightManager.HighlightInfo _listHighlightTag = null;
@@ -259,15 +256,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     protected MouseAdapter defaultMouseListener = new MouseAdapter() {
       public void mousePressed(MouseEvent e) { selectNothing(); }
       public void mouseReleased(MouseEvent e) {
-        CompilerError error = _errorAtPoint(e.getPoint());
+        DJError error = _errorAtPoint(e.getPoint());
         
         if (_isEmptySelection() && error != null) getErrorListPane().switchToError(error);
         else  selectNothing();
       }
     };
     
-//    private Hashtable<Position, CompilerError> _setUpErrorTable() {
-//      return new Hashtable<Position, CompilerError>();
+//    private Hashtable<Position, DJError> _setUpErrorTable() {
+//      return new Hashtable<Position, DJError>();
 //    }
     
     /** Constructs the CompilerErrorListPane.*/
@@ -418,8 +415,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Get the index of the current error in the error array.  */
     public int getSelectedIndex() { return _selectedIndex; }
     
-    /** Returns CompilerError associated with the given visual coordinates. Returns null if none. */
-    protected CompilerError _errorAtPoint(Point p) {
+    /** Returns DJError associated with the given visual coordinates. Returns null if none. */
+    protected DJError _errorAtPoint(Point p) {
       int modelPos = viewToModel(p);
       
       if (modelPos == -1) return null;
@@ -435,13 +432,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return null;
     }
     
-    /** Returns the index into _errorListPositions corresponding to the given CompilerError. */
-    private int _getIndexForError(CompilerError error) {
+    /** Returns the index into _errorListPositions corresponding to the given DJError. */
+    private int _getIndexForError(DJError error) {
       
       if (error == null) throw new IllegalArgumentException("Couldn't find index for null error");
       
       for (int i = 0; i < _errorListPositions.length; i++) {
-        CompilerError e= _errorTable.get(_errorListPositions[i]);
+        DJError e= _errorTable.get(_errorListPositions[i]);
         if (error.equals(e))  return i;
       }
       
@@ -569,7 +566,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();
-        CompilerError err = cem.getError(errorNum);
+        DJError err = cem.getError(errorNum);
         
         if (!err.isWarning()){
           _insertErrorText(err, doc);
@@ -585,7 +582,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();
-        CompilerError err = cem.getError(errorNum);
+        DJError err = cem.getError(errorNum);
         
         if (err.isWarning()){
           _insertErrorText(err, doc);
@@ -601,7 +598,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  @param error the error to print
      *  @param doc the document in the error pane
      */
-    protected void _insertErrorText(CompilerError error, SwingDocument doc) throws BadLocationException {
+    protected void _insertErrorText(DJError error, SwingDocument doc) throws BadLocationException {
       // Show file and line number
       doc.append("File: ", BOLD_ATTRIBUTES);
       String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
@@ -640,7 +637,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
     
     /** Selects the given error inside the error list pane. */
-    public void selectItem(CompilerError error) {
+    public void selectItem(DJError error) {
 //      Utilities.showDebug("selectItem(" + error + ") called");
       try {
         // Find corresponding index
@@ -661,7 +658,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         else { 
           endPos = _errorListPositions[i + 1].getOffset();
 //          Utilities.showDebug("endPos(before) = " + endPos);
-          CompilerError nextError = _errorTable.get(_errorListPositions[i+1]);
+          DJError nextError = _errorTable.get(_errorListPositions[i+1]);
 //          Utilities.showDebug("nextError = " + nextError);
           if (!error.isWarning() && nextError.isWarning()) endPos = endPos - _getWarningTitle().length();
 //          Utilities.showDebug("endPos(after) = " + endPos);
@@ -727,7 +724,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  exists.
      *  @param error The error to switch to
      */
-    void switchToError(CompilerError error) {
+    void switchToError(DJError error) {
 //      Utilities.showDebug("ErrorPanel.switchToError called");
       if (error == null) return;
       
@@ -794,7 +791,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     void switchToError(int index) {
       if ((index >= 0) && (index < _errorListPositions.length)) {
         Position pos = _errorListPositions[index];
-        CompilerError error= _errorTable.get(pos);
+        DJError error= _errorTable.get(pos);
         switchToError(error);
       }
     }

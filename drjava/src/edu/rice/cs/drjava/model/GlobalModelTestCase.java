@@ -200,7 +200,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     * done newCount is reset to 0.
     * @return the new modified document
     */
-  protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
+  protected OpenDefinitionsDocument setupDocument(final String text) throws BadLocationException {
     TestListener listener = new TestListener() {
       public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
     };
@@ -209,9 +209,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     // Open a new document
     int numOpen = _model.getOpenDefinitionsDocuments().size();
-//    Utilities.invokeAndWait(new Runnable() { public void run () { 
-    _doc = _model.newFile(); 
-//    } });
+    
+    // newFile() accesses and modifies Swing objects
+    Utilities.invokeAndWait(new Runnable() { public void run () { _doc = _model.newFile(); } });
     
     assertNumOpenDocs(numOpen + 1);
 
@@ -219,7 +219,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     assertLength(0, _doc);
     assertModified(false, _doc);
 
-    changeDocumentText(text, _doc);
+    Utilities.invokeAndWait(new Runnable() { public void run() { changeDocumentText(text, _doc); } });
+    
     assertModified(true, _doc);
     _model.removeListener(listener); 
 
@@ -467,7 +468,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void assertCompileErrorsPresent(boolean b) { assertCompileErrorsPresent("", b); }
 
   protected void assertCompileErrorsPresent(String name, boolean b) {
-    //CompilerError[] errors = _model.getCompileErrors();
+    //DJError[] errors = _model.getCompileErrors();
     int numErrors = _model.getCompilerModel().getNumErrors();
 
     if (name.length() > 0)  name += ": ";
@@ -1015,7 +1016,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
     private void _notifyCompileDone() {
       synchronized(_compileLock) {
-        _compileDone = true;
+        _compileDone = true;  // modify flag first so that notified threads will see that compilation is done
         _compileLock.notifyAll();
       }
     }

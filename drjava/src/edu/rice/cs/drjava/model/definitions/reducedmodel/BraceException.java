@@ -34,60 +34,13 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.junit;
+/** An exception class used by methods in this class. */
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.model.DJError;
+public class BraceException extends RuntimeException {
 
-import java.io.File;
-import java.io.Serializable;
-
-/** A class to represent JUnit errors.  This class enables DrJava to highlight the exact error text.
-  * @version $Id$
-  */
-public class JUnitError extends DJError implements Comparable, Serializable {
-  private String _test;
-  private String _className;
-  private String _stackTrace;
-  
-  /** Constructor.
-   * @param file the file where the error occurred
-   * @param lineNumber the line number of the error
-   * @param startColumn the starting column of the error
-   * @param message  the error message
-   * @param isWarning true if the error is a warning
-   * @param test the name of the test that failed
-   */
-  public JUnitError(File file, int lineNumber, int startColumn, String message, boolean isWarning, String test, 
-                    String className, String stackTrace) {
-    super(file, lineNumber, startColumn, message, isWarning);
-    _test = test;
-    _className = className;
-    _stackTrace = stackTrace;
-  }
-
-  /** Constructor for an error with no associated location.  This constructor also
-    * provides a default stackTrace.
-    * @param message  the error message
-    * @param isWarning true if the error is a warning
-    * @param test the name of the test that failed
+  /** Creates a new BraceException
+    * @param s the message
     */
-  public JUnitError(String message, boolean isWarning, String test) {
-    this(null, -1, -1, message, isWarning, test, "", "No associated stack trace");
-  }
-
-  /** Gets the test name
-    * @return the test name
-    */
-  public String testName() { return _test; }
-
-  /** Gets the class name
-    * @return the class name
-    */
-  public String className() { return _className; }
-
-  /** All JUnit errors are Throwables that have been thrown, so all have
-    * a stack trace
-    * @return the stack trace associated with the error
-    */
-  public String stackTrace() { return _stackTrace; }
+  public BraceException(String s) { super(s); }
 }

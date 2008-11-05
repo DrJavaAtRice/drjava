@@ -36,8 +36,9 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import  junit.framework.*;
+import junit.framework.*;
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceException;
 
 /**
  * Tests the Brace class.

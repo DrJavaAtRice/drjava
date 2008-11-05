@@ -292,7 +292,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //  /** Completion monitor for loading the files of a project (as OpenDefinitionsDocuments). */
 //  public final CompletionMonitor projectLoading = new CompletionMonitor();
   
-// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+// Lightweight parsing is disabled until we have something that is beneficial and works better in the background.
 //  /** Light-weight parsing controller. */
 //  protected LightWeightParsingControl _parsingControl;
 //  
@@ -336,7 +336,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private void _init() {
     
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
-    final NodeDataVisitor<OpenDefinitionsDocument, Boolean>  _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
+    final NodeDataVisitor<OpenDefinitionsDocument, Boolean>  _gainVisitor = 
+      new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
       public Boolean itemCase(OpenDefinitionsDocument doc, Object... p) {
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
 //        addToBrowserHistory();
@@ -423,7 +424,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                                  File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refresh) {
-    return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags, refresh);
+    return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags,
+                                        refresh);
   }
   
   /** @return true if the class path state has been changed. */
@@ -581,7 +583,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
-      this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], IterUtil.<File>empty(), null, 0, false);
+      this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
+           IterUtil.<File>empty(), null, 0, false);
     }
     
     ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
@@ -598,8 +601,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       for(File f: excludedFiles) { _exclFiles.add(f); }
       _projExtraClassPath = cp;
       
-      if (_projectFiles != null) try {  for (File file : _projectFiles) { _projFilePaths.add( file.getCanonicalPath()); } }
-      catch(IOException e) { /*do nothing */ }
+      if (_projectFiles != null) {
+        try { for (File file : _projectFiles) { _projFilePaths.add(file.getCanonicalPath()); } }
+        catch(IOException e) { /*do nothing */ }
+      }
       
       _createJarFile = cjf;
       _createJarFlags = cjflags;
@@ -1299,9 +1304,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   
   
-  public File[] getFilesInFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
-    if (dir == null || !dir.isDirectory()) return null; // just in case
+  public File[] getFilesInFolder(File dir, boolean rec) throws IOException, OperationCanceledException, 
+    AlreadyOpenException {
     
+    if (dir == null || !dir.isDirectory()) return null; // just in case
     
     Iterable<File> filesIterable;
     
@@ -1584,7 +1590,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
     * @param file where to save the project
     */
-  public void exportOldProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+  public void exportOldProject(File file, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException {
     ProjectProfile builder = _makeProjectProfile(file, info);
     
     // write to disk
@@ -2428,9 +2434,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile String _image;
     private volatile File _file;
     private volatile long _timestamp;
-    
-//    /** Caret position, as set by the view. (What does this mean?  Only updated explicitly by setCurrentLocation(...) */
-//    private volatile int _caretPosition;
     
     /** The folder containing this document */
     private volatile File _parentDir;
@@ -3279,7 +3282,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean quitFile() {
       assert EventQueue.isDispatchThread();
       File f = _file;
-      if (isModifiedSinceSave() || (f != null && ! f.exists() && _cacheAdapter.isReady())) return _notifier.quitFile(this);
+      if (isModifiedSinceSave() || (f != null && ! f.exists() && _cacheAdapter.isReady())) 
+        return _notifier.quitFile(this);
       return true;
     }
     
@@ -3514,7 +3518,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    public boolean posInParenPhrase() { return getDocument().posInParenPhrase(); }
     
-    public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException {
+    public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, 
+      ClassNameNotFoundException {
       return getDocument().getEnclosingClassName(pos, fullyQualified);
     }
     
@@ -3859,7 +3864,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try {
       Utilities.invokeAndWait(new Runnable() {  
         public void run() {
-//          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
+//          doc.makePositions();  // reconstruct embedded postions in document (reconstructing document if necesarry)
       _documentNavigator.setNextChangeModelInitiated(true);
       _documentNavigator.selectDocument(doc);
         }

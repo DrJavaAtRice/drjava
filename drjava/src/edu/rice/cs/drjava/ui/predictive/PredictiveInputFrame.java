@@ -797,20 +797,28 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
     public void removeUpdate(DocumentEvent e) {
 //      System.err.println("removeUpdate fired!");
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
           removeListener();
           _pim.setMask(_textField.getText());
           updateExtensionLabel();
           updateList();
           addListener();
+        }
+      });
     }
 
     public void changedUpdate(DocumentEvent e) {
 //      System.err.println("changedUpdate fired!");
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
           removeListener();
           _pim.setMask(_textField.getText());
           updateExtensionLabel();
           updateList();
           addListener();
+        }
+      });
     }
 
     public void caretUpdate(CaretEvent e) { }

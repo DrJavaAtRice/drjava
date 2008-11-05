@@ -47,6 +47,7 @@ import java.util.HashMap;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.FileGroupingState;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -70,7 +71,7 @@ public class CompilerErrorModel {
     * (ii) Errors with line numbers, in order.
     * In all cases, where all else is equal, warnings are sorted below errors.
     */
-  private final CompilerError[] _errors;
+  private final DJError[] _errors;
   
   /** An array of file offsets, parallel to the _errors array. NOTE: If there is no position associated with an error,
     * its entry here should be set to null.
@@ -116,7 +117,7 @@ public class CompilerErrorModel {
       public boolean hasModifiedDocuments() { return false; }
       public boolean hasUntitledDocuments() { return false; }
     };
-    _errors = new CompilerError[0];
+    _errors = new DJError[0];
     _numErrors = 0;
     _numWarnings = 0;
     _numCompilerErrors = 0;
@@ -125,10 +126,12 @@ public class CompilerErrorModel {
   
   /** Constructs a new CompilerErrorModel with specified global model.  Performed in DefaultGlobalModel construction 
     * and after compilation has been performed.
-    * @param errors the list of CompilerError's (or a subclass).
+    * @param errors the list of DJError's (or a subclass).
     * @param model is the model to find documents from
     */
-  public CompilerErrorModel(CompilerError[] errors, GlobalModel model) {
+  public CompilerErrorModel(DJError[] errors, GlobalModel model) {
+    
+//    System.err.println("Constructing CompilerErrorModel for errors: " + Arrays.toString(errors));
     _model = model;
     
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
@@ -157,10 +160,10 @@ public class CompilerErrorModel {
    * @throws NullPointerException if this object was improperly initialized
    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
    */
-  public CompilerError getError(int idx) { return _errors[idx]; }
+  public DJError getError(int idx) { return _errors[idx]; }
   
   /** Returns the position of the given error in the document representing its file. */
-  public Position getPosition(CompilerError error) {
+  public Position getPosition(DJError error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }
@@ -188,9 +191,9 @@ public class CompilerErrorModel {
   /** This method finds and returns the error that is at the given offset
     * @param odd the OpenDefinitionsDocument where you want to find the error at the caret
     * @param offset the offset into the document
-    * @return the CompilerError at the given offset, null if no error corresponds to this location
+    * @return the DJError at the given offset, null if no error corresponds to this location
     */
-  public CompilerError getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
+  public DJError getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
     File file;
     try { 
       file = odd.getFile(); 

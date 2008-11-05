@@ -50,6 +50,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -60,8 +61,9 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.drjava.model.compiler.CompilerError;
+
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.DirectorySelector;
@@ -318,7 +320,7 @@ public class DefaultJavadocModel implements JavadocModel {
     File javaCommand = (_javaCommand == null) ? new File(System.getProperty("java.home", "")) : _javaCommand;
     Iterable<File> jvmClassPath = (_toolsPath == null) ? IterUtil.<File>empty() : _toolsPath;
     
-    List<CompilerError> errors = new ArrayList<CompilerError>();
+    List<DJError> errors = new ArrayList<DJError>();
     try {
       Process p = ConcurrentUtil.runJavaProcess(javaCommand, "com.sun.tools.javadoc.Main", args, 
                                                 jvmClassPath, new File(System.getProperty("user.dir", "")),
@@ -330,13 +332,13 @@ public class DefaultJavadocModel implements JavadocModel {
       errors.addAll(_extractErrors(errorString.value()));
     }
     catch (IOException e) {
-      errors.add(new CompilerError("IOException: " + e.getMessage(), false));
+      errors.add(new DJError("IOException: " + e.getMessage(), false));
     }
     catch (InterruptedException e) {
-      errors.add(new CompilerError("InterruptedException: " + e.getMessage(), false));
+      errors.add(new DJError("InterruptedException: " + e.getMessage(), false));
     }
     
-    _javadocErrorModel = new CompilerErrorModel(IterUtil.toArray(errors, CompilerError.class), _model);
+    _javadocErrorModel = new CompilerErrorModel(IterUtil.toArray(errors, DJError.class), _model);
     
     // waitFor() exit value is 1 for both errors and warnings, so it's no use
     boolean success = _javadocErrorModel.hasOnlyWarnings();
@@ -370,9 +372,9 @@ public class DefaultJavadocModel implements JavadocModel {
    * This code works for both JDK 1.3 and 1.4, assuming you pass in data from the correct stream.  (Be safe 
    * and check both.)
    */
-  private List<CompilerError> _extractErrors(String text) {
+  private List<DJError> _extractErrors(String text) {
     BufferedReader r = new BufferedReader(new StringReader(text));
-    List<CompilerError> result = new ArrayList<CompilerError>();
+    List<DJError> result = new ArrayList<DJError>();
     
     String[] errorIndicators = new String[]{ "Error: ", "Exception: ", "invalid flag:" };
     
@@ -380,12 +382,12 @@ public class DefaultJavadocModel implements JavadocModel {
       String output = r.readLine();
       while (output != null) {
         if (TextUtil.containsAny(output, errorIndicators)) {
-          // If we found one, put the remaining stream contents in one CompilerError.
-          result.add(new CompilerError(output + '\n' + IOUtil.toString(r), false));
+          // If we found one, put the remaining stream contents in one DJError.
+          result.add(new DJError(output + '\n' + IOUtil.toString(r), false));
         }
         else {
           // Otherwise, parser for a normal error message.
-          CompilerError error = _parseJavadocErrorLine(output);
+          DJError error = _parseJavadocErrorLine(output);
           if (error != null) { result.add(error); }
         }
         output = r.readLine();
@@ -396,8 +398,8 @@ public class DefaultJavadocModel implements JavadocModel {
     return result;
   }
   
-  /** Convert a line of Javadoc text to a CompilerError.  If unable to do so, returns {@code null}. */
-  private CompilerError _parseJavadocErrorLine(String line) {
+  /** Convert a line of Javadoc text to a DJError.  If unable to do so, returns {@code null}. */
+  private DJError _parseJavadocErrorLine(String line) {
     int errStart = line.indexOf(".java:");
     if (errStart == -1) { return null; /* ignore the line if it doesn't have file info */ }
     // filename is everything up to and including the '.java'
@@ -433,8 +435,8 @@ public class DefaultJavadocModel implements JavadocModel {
       isWarning = true;
     }
     
-    if (lineno >= 0) { return new CompilerError(new File(fileName), lineno, 0, errMessage, isWarning); }
-    else { return new CompilerError(new File(fileName), errMessage, isWarning); }
+    if (lineno >= 0) { return new DJError(new File(fileName), lineno, 0, errMessage, isWarning); }
+    else { return new DJError(new File(fileName), errMessage, isWarning); }
   }
   
   

@@ -104,11 +104,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument doc1 = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file1 = new File(aDir, "DrJavaTestFoo.java");
-    saveFile(doc1, new FileSelector(file1));
+    saveFile(doc1, new FileSelector(file1));  // runs synchronously in event thread
     
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    saveFile(doc2, new FileSelector(file2));
+    saveFile(doc2, new FileSelector(file2));  // runs synchronously in event thread
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     
@@ -267,8 +267,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     CompilerErrorModel cme = cm.getCompilerErrorModel();
     assertEquals("Should have had two errors", 2, cme.getNumErrors());
     
-    CompilerError ce1 = cme.getError(0);
-    CompilerError ce2 = cme.getError(1);
+    DJError ce1 = cme.getError(0);
+    DJError ce2 = cme.getError(1);
     assertEquals("first doc should have an error", file.getCanonicalFile(), ce1.file().getCanonicalFile());
     assertEquals("second doc should have an error", file2.getCanonicalFile(), ce2.file().getCanonicalFile());
     

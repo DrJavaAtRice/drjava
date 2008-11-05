@@ -48,21 +48,14 @@ import javax.swing.text.BadLocationException;
  */
 public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTestCase {
   
-  /** This is a clever (IMHO) factory trick to reuse these methods in TestCases
-   * for logically similar IndentActions.
-   * @see ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
-   */
-  private IndentRuleAction makeAction(String[] suffices,
-                                      int cursorLine, int cursorPos,
-                                      int psrvLine, int psrvPos) {
-    return new ActionStartPrevLinePlusMultilinePreserve(suffices,
-                                                        cursorLine, cursorPos,
-                                                        psrvLine, psrvPos);
+  /** A factory method that constructs the specified instance of IndentRuleAction.  @see 
+    * ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
+    */
+  private IndentRuleAction makeAction(String[] suffices, int cursorLine, int cursorPos, int psrvLine, int psrvPos) {
+    return new ActionStartPrevLinePlusMultilinePreserve(suffices, cursorLine, cursorPos, psrvLine, psrvPos);
   }
   
-  /** This method abstracts the common processes of the tests so that the tests
-    * themselves may only contain information about original conditions and
-    * expected results.
+  /** This method abstracts the common behavior in subsequent tests.
     * @param start The text that should be in the document at time rule is called
     * @param loc the location of the cursor when rule is called
     * @param endLoc the expected final size of the document

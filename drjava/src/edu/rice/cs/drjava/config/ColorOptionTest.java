@@ -41,8 +41,8 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import java.awt.*;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class ColorOption.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public final class ColorOptionTest extends DrJavaTestCase {
   
   /** @param name The name of this test case.*/
@@ -74,7 +74,7 @@ public final class ColorOptionTest extends DrJavaTestCase {
     ColorOption io1 = new ColorOption("max_files",null);
     ColorOption io2 = new ColorOption("indent_size",null);
     
-    assertEquals("#000000",  io1.format(Color.black));
+    assertEquals("#000000", io1.format(Color.black));
     assertEquals("#ff00ff",  io2.format(Color.magenta));
     assertEquals("#ffffff", io1.format(Color.white));
 

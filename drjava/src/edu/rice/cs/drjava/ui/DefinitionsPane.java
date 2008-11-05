@@ -45,7 +45,6 @@ import java.awt.event.*;
 import java.util.List;
 import java.util.LinkedList;
 
-// TODO: Check synchronization.
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;

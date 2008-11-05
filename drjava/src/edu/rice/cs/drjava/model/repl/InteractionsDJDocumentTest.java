@@ -73,12 +73,12 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
   private boolean _interpreterRestarted = false;
   
   public void test1() {
-    try { xtestStylesListContentAndReset(); }
+    try { helpTestStylesListContentAndReset(); }
     catch(Throwable t) { t.printStackTrace(); }
   }
   
   /** Tests that the styles list is updated and reset properly */
-  public void xtestStylesListContentAndReset() throws EditDocumentException, InterruptedException {
+  public void helpTestStylesListContentAndReset() throws EditDocumentException, InterruptedException {
 //    System.err.println("testStylesList started");
     /* The banner and the prompt are inserted in the styles list when the document is constructed; the corresponding
        offsets are computed in the tests below. 
@@ -165,11 +165,11 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
   }
 
   public void test2() {
-    try { xtestCannotAddNullStyleToList(); }
+    try { helpTestCannotAddNullStyleToList(); }
     catch(Throwable t) { t.printStackTrace(); }
   }
   /** Tests that a null style is not added to the list. Fix for bug #995719. */
-  public void xtestCannotAddNullStyleToList() throws EditDocumentException {
+  public void helpTestCannotAddNullStyleToList() throws EditDocumentException {
 //    System.err.println("testCannotAddNull started");
     // the banner and the prompt are inserted in the styles list when the document is constructed
     assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStyles().length);

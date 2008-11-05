@@ -233,14 +233,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public void shrink(int delta) { throw new BraceException("Braces can't shrink."); }
 }
 
-/** An exception class used by methods in this class. */
-class BraceException extends RuntimeException {
 
-  /** Creates a new BraceException
-    * @param s the message
-    */
-  public BraceException(String s) { super(s); }
-}
 
 
 

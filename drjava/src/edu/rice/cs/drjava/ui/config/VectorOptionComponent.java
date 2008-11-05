@@ -66,10 +66,10 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected static final int PIXELS_PER_ROW = 18;
 
   /** Builds a new VectorOptionComponent.
-   * @param opt the option
-   * @param text the label to display
-   * @param parent the parent frame
-   */
+    * @param opt the option
+    * @param text the label to display
+    * @param parent the parent frame
+    */
   public VectorOptionComponent(VectorOption<T> opt, String text, SwingFrame parent) {
     super(opt, text, parent);
 

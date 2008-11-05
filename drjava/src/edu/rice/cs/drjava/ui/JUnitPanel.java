@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.compiler.CompilerError;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
@@ -451,7 +451,7 @@ public class JUnitPanel extends ErrorPanel {
     /** Overrides selectItem in ErrorListPane to update the current _error selected
       * and enabling the _showStackTraceButton.
       */
-    public void selectItem(CompilerError error) {
+    public void selectItem(DJError error) {
       super.selectItem(error);
       _error = (JUnitError) error;
       _showStackTraceButton.setEnabled(true);
@@ -464,46 +464,37 @@ public class JUnitPanel extends ErrorPanel {
       _showStackTraceButton.setEnabled(false);
     }
     
-    /**
-     * Updates the UI to a new look and feel.
-     * Need to update the contained popup menu as well.
-     *
-     * Currently, we don't support changing the look and feel
-     * on the fly, so this is disabled.
-     *
-     public void updateUI() {
-     super.updateUI();
-     if (_popMenu != null) {
-     SwingUtilities.updateComponentTreeUI(_popMenu);
-     }
-     }*/
+//    /** Updates the UI to a new look and feel.  Need to update the contained popup menu as well.
+//      * Currently, we don't support changing the look and feel on the fly, so this is disabled.
+//      */     
+//    public void updateUI() {
+//      super.updateUI();
+//      if (_popMenu != null) {
+//        SwingUtilities.updateComponentTreeUI(_popMenu);
+//      }
+//    }
     
     private class PopupAdapter extends RightClickMouseAdapter {
-      /**
-       * Show popup if the click is on an error.
-       * @param e the MouseEvent correponding to this click
-       */
+      /** Show popup if the click is on an error.
+        * @param e the MouseEvent correponding to this click
+        */
       public void mousePressed(MouseEvent e) {
         if (_selectError(e)) {
           super.mousePressed(e);
         }
       }
       
-      /**
-       * Show popup if the click is on an error.
-       * @param e the MouseEvent correponding to this click
-       */
+      /** Show popup if the click is on an error.
+        * @param e the MouseEvent correponding to this click
+        */
       public void mouseReleased(MouseEvent e) {
-        if (_selectError(e)) {
-          super.mouseReleased(e);
-        }
+        if (_selectError(e)) super.mouseReleased(e);
       }
       
-      /**
-       * Select the error at the given mouse event.
-       * @param e the MouseEvent correponding to this click
-       * @return true iff the mouse click is over an error
-       */
+      /** Select the error at the given mouse event.
+        * @param e the MouseEvent correponding to this click
+        * @return true iff the mouse click is over an error
+        */
       private boolean _selectError(MouseEvent e) {
         //TODO: get rid of cast in the next line, if possible
         _error = (JUnitError)_errorAtPoint(e.getPoint());
@@ -518,17 +509,10 @@ public class JUnitPanel extends ErrorPanel {
         }
       }
       
-      /**
-       * Shows the popup menu for this mouse adapter.
-       * @param e the MouseEvent correponding to this click
-       */
-      protected void _popupAction(MouseEvent e) {
-        _popMenu.show(e.getComponent(), e.getX(), e.getY());
-      }
-      
-//      public JUnitError getError() {
-//        return _error;
-//      }
+      /** Shows the popup menu for this mouse adapter.
+        * @param e the MouseEvent correponding to this click
+        */
+      protected void _popupAction(MouseEvent e) { _popMenu.show(e.getComponent(), e.getX(), e.getY()); }
     }
   }
   

@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.File;
 import java.util.List;
 import java.util.Arrays;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
@@ -53,10 +54,10 @@ public class NoCompilerAvailable implements CompilerInterface {
   
   public boolean isAvailable() { return false; }
   
-  public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+  public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-    return Arrays.asList(new CompilerError(MESSAGE, false));
+    return Arrays.asList(new DJError(MESSAGE, false));
   }
   
   public JavaVersion version() { return JavaVersion.UNRECOGNIZED; }

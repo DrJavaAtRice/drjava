@@ -115,7 +115,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
                           boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
                           FindReplacePanel findReplace) {
     super(frame, title, regionManager);
-//    _regionManager = regionManager;
+    
+//  _regionManager is inherited from RegionsTreePanel
     _searchString = searchString;
     _searchAll    = searchAll;
     _matchCase    = matchCase;
@@ -125,7 +126,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _doc          = doc;
     _findReplace  = findReplace;
     
-    // TODO: hoist this into RegionsTreePanel; repeated in BookmarksPanel and BreakpointsPanel
+    // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
     _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r) { 

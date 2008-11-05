@@ -57,13 +57,13 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   private File[] files;
   private String[] texts;
   private TestDocGetter getter;       // subclass of DummyGlobalModel
-  private CompilerError[] errors;
+  private DJError[] errors;
   private CompilerErrorModel model;
   
   /** Tests CompilerErrorModel setup code with no compiler errors. */
   public void testConstructNoErrors() {
     getter = new TestDocGetter();
-    model = new CompilerErrorModel(new CompilerError[0], getter);
+    model = new CompilerErrorModel(new DJError[0], getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have no compiler errors.", 0, model.getNumErrors());
@@ -75,9 +75,9 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with only warnings without files. Also tests hasOnlyWarnings logic. */
   public void testConstructOnlyWarnings() {
     getter = new TestDocGetter();
-    errors = new CompilerError[] { 
-      new CompilerError("Test warning without File", true),
-      new CompilerError("Test warning without File", true) 
+    errors = new DJError[] { 
+      new DJError("Test warning without File", true),
+      new DJError("Test warning without File", true) 
     };
     model = new CompilerErrorModel(errors, getter);
     
@@ -91,13 +91,13 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with only errors without files. */
   public void testConstructDoclessErrors() {
     getter = new TestDocGetter();
-    errors = new CompilerError[] { 
-      new CompilerError("Test error without File", false),
-      new CompilerError("Test warning without File", true),
-      new CompilerError("Test error without File", false) 
+    errors = new DJError[] { 
+      new DJError("Test error without File", false),
+      new DJError("Test warning without File", true),
+      new DJError("Test error without File", false) 
     };
     
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
     
@@ -113,13 +113,13 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with one file and only errors without line numbers. */
   public void testConstructOneDocWithoutLineNums() {
     setupDoc();
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], "Test error with File", false),
-      new CompilerError(files[0], "Test warning with File", true),
-      new CompilerError(files[0], "Test error with File", false) 
+    errors = new DJError[] { 
+      new DJError(files[0], "Test error with File", false),
+      new DJError(files[0], "Test warning with File", true),
+      new DJError(files[0], "Test error with File", false) 
     };
     
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++)  copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
     
@@ -134,14 +134,14 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with one file and only errors with line numbers. */
   public void testConstructOneDocWithLineNums() {
     setupDoc();
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], 2, 0, "Test error with File and line", false),
-      new CompilerError(files[0], 1, 0, "Test warning with File and line", true),
-      new CompilerError(files[0], 3, 0, "Test error with File and line", false),
-      new CompilerError(files[0], 1, 0, "Test error with File and line", false) 
+    errors = new DJError[] { 
+      new DJError(files[0], 2, 0, "Test error with File and line", false),
+      new DJError(files[0], 1, 0, "Test warning with File and line", true),
+      new DJError(files[0], 3, 0, "Test error with File and line", false),
+      new DJError(files[0], 1, 0, "Test error with File and line", false) 
     };
     
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
     
@@ -159,17 +159,17 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with one file and errors both with and without line numbers. */
   public void testConstructOneDocWithBoth() {
     setupDoc();
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], 2, 0, "Test error with File and line", false),
-      new CompilerError(files[0], "Test warning with File (no line)", true),
-      new CompilerError(files[0], 3, 0, "Test error with File and line", false),
-      new CompilerError("Test error without File or line", false),
-      new CompilerError(files[0], 3, 0, "Test warning with File and line", true),
-      new CompilerError(files[0], "Test error with File (no line)", false),
-      new CompilerError(files[0], 1, 0, "Test error with File and line", false) 
+    errors = new DJError[] { 
+      new DJError(files[0], 2, 0, "Test error with File and line", false),
+      new DJError(files[0], "Test warning with File (no line)", true),
+      new DJError(files[0], 3, 0, "Test error with File and line", false),
+      new DJError("Test error without File or line", false),
+      new DJError(files[0], 3, 0, "Test warning with File and line", true),
+      new DJError(files[0], "Test error with File (no line)", false),
+      new DJError(files[0], 1, 0, "Test error with File and line", false) 
     };
     
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
     
@@ -190,18 +190,18 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with several files and only errors without line numbers. */
   public void testConstructManyDocsWithoutLineNums() {
     setupDocs();
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], "Test error with File", false),
-      new CompilerError(files[2], "Test warning with File", true),
-      new CompilerError(files[4], "Test warning with File", true),
-      new CompilerError(files[1], "Test error with File", false),
-      new CompilerError(files[3], "Test warning with File", true),
-      new CompilerError(files[3], "Test error with File", false),
-      new CompilerError(files[4], "Test error with File", false),
-      new CompilerError(files[0], "Test error with File", false) 
+    errors = new DJError[] { 
+      new DJError(files[0], "Test error with File", false),
+      new DJError(files[2], "Test warning with File", true),
+      new DJError(files[4], "Test warning with File", true),
+      new DJError(files[1], "Test error with File", false),
+      new DJError(files[3], "Test warning with File", true),
+      new DJError(files[3], "Test error with File", false),
+      new DJError(files[4], "Test error with File", false),
+      new DJError(files[0], "Test error with File", false) 
     };
     
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
     
@@ -223,18 +223,18 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel setup code with several files and only errors with line numbers. */
   public void testConstructManyDocsWithLineNums() {
     setupDocs();
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], 2, 0, "Test error with File", false),
-      new CompilerError(files[2], 3, 0, "Test warning with File", true),
-      new CompilerError(files[4], 1, 0, "Test warning with File", true),
-      new CompilerError(files[1], 2, 0, "Test error with File", false),
-      new CompilerError(files[2], 2, 0, "Test warning with File", true),
-      new CompilerError(files[3], 3, 0, "Test error with File", false),
-      new CompilerError(files[4], 3, 0, "Test error with File", false),
-      new CompilerError(files[0], 1, 0, "Test error with File", false) 
+    errors = new DJError[] { 
+      new DJError(files[0], 2, 0, "Test error with File", false),
+      new DJError(files[2], 3, 0, "Test warning with File", true),
+      new DJError(files[4], 1, 0, "Test warning with File", true),
+      new DJError(files[1], 2, 0, "Test error with File", false),
+      new DJError(files[2], 2, 0, "Test warning with File", true),
+      new DJError(files[3], 3, 0, "Test error with File", false),
+      new DJError(files[4], 3, 0, "Test error with File", false),
+      new DJError(files[0], 1, 0, "Test error with File", false) 
     };
     
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
     
@@ -279,7 +279,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel.getPosition(CompilerError). */
+  /** Tests CompilerErrorModel.getPosition(DJError). */
   public void testGetPosition() {
     fullSetup();
     
@@ -329,9 +329,9 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     };
     getter = new TestDocGetter(files, texts);
     
-    errors = new CompilerError[] { 
-      new CompilerError(files[1], 0, 0, "Test error with File", false),
-      new CompilerError(files[0], 0, 0, "Test error with File", false) 
+    errors = new DJError[] { 
+      new DJError(files[1], 0, 0, "Test error with File", false),
+      new DJError(files[0], 0, 0, "Test error with File", false) 
     };
     model = new CompilerErrorModel(errors, getter);
     model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 25);
@@ -339,9 +339,9 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     texts[0] = texts[1];
     texts[1] = temp;
     getter = new TestDocGetter(files, texts);
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], 0, 0, "Test error with File", false),
-      new CompilerError(files[1], 2, 0, "Test error with File", false)
+    errors = new DJError[] { 
+      new DJError(files[0], 0, 0, "Test error with File", false),
+      new DJError(files[1], 2, 0, "Test error with File", false)
     };
     model = new CompilerErrorModel(errors, getter);
     model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 10);
@@ -382,25 +382,25 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Extra setup for test cases with several documents. */
   private void fullSetup() {
     setupDocs();
-    errors = new CompilerError[] { 
-      new CompilerError(files[0], "Test error with File (no line)", false),
-      new CompilerError(files[4], 3, 0, "Test error with File", false),
-      new CompilerError(files[2], "Test warning with File (no line)", true),
-      new CompilerError(files[4], "Test warning with File (no line)", true),
-      new CompilerError(files[2], 3, 0, "Test warning with File", true),
-      new CompilerError(files[4], 1, 0, "Test warning with File", true),
-      new CompilerError(files[1], "Test warning with File (no line)", true),
-      new CompilerError(files[1], "Test error with File (no line)", false),
-      new CompilerError(files[2], "Test error with File (no line)", false),
-      new CompilerError(files[3], "Test error with File (no line)", false),
-      new CompilerError(files[3], 3, 0, "Test error with File", false),
-      new CompilerError(files[4], "Test error with File (no line)", false),
-      new CompilerError(files[0], 2, 0, "Test error with File", false),
-      new CompilerError(files[2], 2, 0, "Test warning with File", true),
-      new CompilerError(files[0], 1, 0, "Test error with File", false) 
+    errors = new DJError[] { 
+      new DJError(files[0], "Test error with File (no line)", false),
+      new DJError(files[4], 3, 0, "Test error with File", false),
+      new DJError(files[2], "Test warning with File (no line)", true),
+      new DJError(files[4], "Test warning with File (no line)", true),
+      new DJError(files[2], 3, 0, "Test warning with File", true),
+      new DJError(files[4], 1, 0, "Test warning with File", true),
+      new DJError(files[1], "Test warning with File (no line)", true),
+      new DJError(files[1], "Test error with File (no line)", false),
+      new DJError(files[2], "Test error with File (no line)", false),
+      new DJError(files[3], "Test error with File (no line)", false),
+      new DJError(files[3], 3, 0, "Test error with File", false),
+      new DJError(files[4], "Test error with File (no line)", false),
+      new DJError(files[0], 2, 0, "Test error with File", false),
+      new DJError(files[2], 2, 0, "Test warning with File", true),
+      new DJError(files[0], 1, 0, "Test error with File", false) 
     };
         
-    CompilerError[] copy = new CompilerError[errors.length];
+    DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
   }

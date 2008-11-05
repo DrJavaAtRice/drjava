@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.util.List;
 import java.io.File;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
@@ -59,7 +60,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   
   public abstract boolean isAvailable();
   
-  public abstract List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+  public abstract List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                         List<? extends File> sourcePath, File destination, 
                                                         List<? extends File> bootClassPath, String sourceVersion, 
                                                         boolean showWarnings);

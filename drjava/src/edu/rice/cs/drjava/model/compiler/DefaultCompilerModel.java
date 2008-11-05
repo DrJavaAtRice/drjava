@@ -49,18 +49,16 @@ import java.util.Iterator;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
@@ -105,7 +103,7 @@ public class DefaultCompilerModel implements CompilerModel {
     else { _active = NoCompilerAvailable.ONLY; }
     
     _model = m;
-    _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
+    _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
     _workDir = _model.getWorkingDirectory();
   }
   
@@ -213,7 +211,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
     final ArrayList<File> filesToCompile = new ArrayList<File>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
-    final ArrayList<CompilerError> packageErrors = new ArrayList<CompilerError>();
+    final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
@@ -223,7 +221,7 @@ public class DefaultCompilerModel implements CompilerModel {
         
         try { doc.getSourceRoot(); }
         catch (InvalidPackageException e) {
-          packageErrors.add(new CompilerError(f, e.getMessage(), false));
+          packageErrors.add(new DJError(f, e.getMessage(), false));
         }
       }
       else excludedFiles.add(doc.getFile());
@@ -236,7 +234,7 @@ public class DefaultCompilerModel implements CompilerModel {
         try {
           File buildDir = _model.getBuildDirectory();
           if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs()) {
-            throw new IOException("Could not create build directory: "+buildDir);
+            throw new IOException("Could not create build directory: " + buildDir);
           }
           
 //          File workDir = _model.getWorkingDirectory();
@@ -248,7 +246,9 @@ public class DefaultCompilerModel implements CompilerModel {
           _compileFiles(filesToCompile, buildDir);
         }
         catch (Throwable t) {
-          CompilerError err = new CompilerError(t.toString(), false);
+//          t.printStackTrace();
+//          throw new UnexpectedException(t);
+          DJError err = new DJError(t.toString(), false);
           _distributeErrors(Arrays.asList(err));
         }
       }
@@ -263,20 +263,20 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------------- Helpers --------------------------------//
   
   /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
-  private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
-    final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+  private LinkedList<DJError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
+    final LinkedList<DJError> errors = new LinkedList<DJError>();
     Iterator<JExprParseException> iter = pes.iterator();
     while (iter.hasNext()) {
       JExprParseException pe = iter.next();
-      errors.addLast(new CompilerError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
+      errors.addLast(new DJError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
                                        pe.getMessage(), false));
     }
     return errors;
   }
   
   /** Converts errors thrown by the language level visitors to CompilerErrors. */
-  private LinkedList<CompilerError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
-    final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+  private LinkedList<DJError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
+    final LinkedList<DJError> errors = new LinkedList<DJError>();
     Iterator<Pair<String, JExpressionIF>> iter = visitorErrors.iterator();
     while (iter.hasNext()) {
       Pair<String, JExpressionIF> pair = iter.next();
@@ -288,7 +288,7 @@ public class DefaultCompilerModel implements CompilerModel {
       if (jexpr == null) si = JExprParser.NO_SOURCE_INFO;
       else si = pair.getSecond().getSourceInfo();
       
-      errors.addLast(new CompilerError(si.getFile(), si.getStartLine()-1, si.getStartColumn()-1, message, false));
+      errors.addLast(new DJError(si.getFile(), si.getStartLine()-1, si.getStartColumn()-1, message, false));
     }
     return errors;
   }
@@ -313,7 +313,7 @@ public class DefaultCompilerModel implements CompilerModel {
       String bootProp = System.getProperty("drjava.bootclasspath");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
       
-      final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+      final LinkedList<DJError> errors = new LinkedList<DJError>();
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
@@ -334,7 +334,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     else { 
       // TODO: Is this necessary?
-      _distributeErrors(Collections.<CompilerError>emptyList());
+      _distributeErrors(Collections.<DJError>emptyList());
     }
   }
   
@@ -343,7 +343,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<CompilerError> errors,
+  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<DJError> errors,
                                                            Iterable<File> classPath, Iterable<File> bootClassPath) {
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Options llOpts;
@@ -380,9 +380,10 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Sorts the given array of CompilerErrors and divides it into groups based on the file, giving each group to the
     * appropriate OpenDefinitionsDocument, opening files if necessary.  Called immediately after compilations finishes.
     */
-  private void _distributeErrors(List<? extends CompilerError> errors) throws IOException {
+  private void _distributeErrors(List<? extends DJError> errors) throws IOException {
 //    resetCompilerErrors();  // Why is this done?
-    _compilerErrorModel = new CompilerErrorModel(errors.toArray(new CompilerError[0]), _model);
+//    System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
+    _compilerErrorModel = new CompilerErrorModel(errors.toArray(new DJError[0]), _model);
     _model.setNumCompErrors(_compilerErrorModel.getNumCompErrors());  // cache number of compiler errors in global model
   }
   
@@ -403,7 +404,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
-    _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
+    _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
   }
   
   //-------------------------- Compiler Management --------------------------//

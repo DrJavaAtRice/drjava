@@ -52,8 +52,7 @@ import javax.swing.*;
  */
 public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> implements Comparable {
   private static final int DIALOG_HEIGHT = 185;
-  /** TODO: should this be synchronized?
-   */
+
   public static final HashMap<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
     new HashMap<KeyStroke, KeyStrokeOptionComponent>();
   private JButton _button;

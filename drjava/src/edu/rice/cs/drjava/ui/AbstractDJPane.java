@@ -89,20 +89,25 @@ public abstract class AbstractDJPane extends JTextPane
       * document--not any GUI classes.
       * @param e the event fired by the caret position change
       */
-    public void caretUpdate(CaretEvent ce) { 
-      _removePreviousHighlight();
-      
-      int offset = ce.getDot();
-      if (offset < 1) return;
-      DJDocument doc = getDJDocument();
-      try { 
-        char prevChar = doc.getText(offset - 1, 1).charAt(0);
-        if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);
-        else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
-        
-      }
-      catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
+    public void caretUpdate(final CaretEvent ce) { 
+      Utilities.invokeLater(new Runnable() { 
+        public void run() {
+          _removePreviousHighlight();
+          
+          int offset = ce.getDot();
+          if (offset < 1) return;
+          DJDocument doc = getDJDocument();
+          try { 
+            char prevChar = doc.getText(offset - 1, 1).charAt(0);
+            if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);
+            else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
+            
+          }
+          catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
+        }
+      });
     }
+    
   };
   
   /** Our current paren/brace/bracket matching highlight. */

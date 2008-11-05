@@ -36,8 +36,9 @@
 
 package edu.rice.cs.drjava.model.compiler;
 
-import  java.io.File;
+import java.io.File;
 import java.util.List;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** The minimum interface that a compiler must meet to be used by DrJava.
@@ -63,7 +64,7 @@ public interface CompilerInterface {
     * @param showWarnings  Whether compiler warnings should be shown or ignored.
     * @return Errors that occurred. If no errors, should be zero length (not null).
     */
-  List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+  List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
                                         List<? extends File> sourcePath, File destination, 
                                         List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings);
   

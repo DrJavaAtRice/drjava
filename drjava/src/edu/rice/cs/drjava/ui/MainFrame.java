@@ -6814,27 +6814,32 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     private int _line;
     private int _col;
     
-    // The following method only runs in the event thread because it is called from DefinitionsPane
+    // The following method does not necessarity run in the event thread.  Yuck!
     public void caretUpdate(final CaretEvent ce) {
-//      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
-      int offset = ce.getDot();
-      try { 
-        if (offset == _offset + 1 && _currentDefDoc.getText(_offset, 1).charAt(0) != '\n') {
-          _col += 1;
-          _offset += 1;
+      
+      Utilities.invokeLater(new Runnable() { 
+        public void run() {
+
+          int offset = ce.getDot();
+          try { 
+            if (offset == _offset + 1 && _currentDefDoc.getText(_offset, 1).charAt(0) != '\n') {
+              _col += 1;
+              _offset += 1;
+            }
+            else {
+              Element root = _currentDefDoc.getDefaultRootElement();
+              int line = root.getElementIndex(offset); 
+              _line = line + 1;     // line numbers are 1-based
+              _col = offset - root.getElement(line).getStartOffset();
+            }
+          }
+          catch(BadLocationException e) { /* do nothing; should never happen */ }
+          finally { 
+            _offset = offset;
+            updateLocation(_line, _col);
+          }
         }
-        else {
-          Element root = _currentDefDoc.getDefaultRootElement();
-          int line = root.getElementIndex(offset); 
-          _line = line + 1;     // line numbers are 1-based
-          _col = offset - root.getElement(line).getStartOffset();
-        }
-      }
-      catch(BadLocationException e) { /* do nothing; should never happen */ }
-      finally { 
-        _offset = offset;
-        updateLocation(_line, _col);
-      }
+      });
     }
     
     // This method appears safe outside the event thread
@@ -8121,7 +8126,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocusInWindow();
 //          System.err.println("Showing Interactions Tab" );
-//          showTab(_interactionsContainer); // Note: disabled to avoid switching to interactions when browsing findall results
+//          showTab(_interactionsContainer); // disabled to avoid switch to interactions when browsing findall results
           _updateDebugStatus();
         }
       }
@@ -8292,9 +8297,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     String res = (String)JOptionPane.showInputDialog(MainFrame.this,
-                                                     "DrJava ran out of memory. You may try to enter a larger\n"+
-                                                     "maximum heap size for the main JVM. The maximum heap size is\n"+
-                                                     "currently "+value+".\n"+
+                                                     "DrJava ran out of memory. You may try to enter a larger\n" +
+                                                     "maximum heap size for the main JVM. The maximum heap size is\n" +
+                                                     "currently " + value + ".\n" +
                                                      "A restart is required after changing this setting.",
                                                      "Increase Maximum Heap Size?",
                                                      JOptionPane.QUESTION_MESSAGE,
@@ -8305,7 +8310,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (res != null) {
       // temporarily make MainFrame the parent of the dialog that pops up
       DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
-      final ConfigOptionListeners.MasterJVMXMXListener l = new ConfigOptionListeners.MasterJVMXMXListener(MainFrame.this);
+      final ConfigOptionListeners.MasterJVMXMXListener l = 
+        new ConfigOptionListeners.MasterJVMXMXListener(MainFrame.this);
       DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, l);
       // change the setting
       DrJava.getConfig().setSetting(MASTER_JVM_XMX,res.trim());
@@ -9214,7 +9220,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     for (TabbedPanel t: _tabs) {
       if (t == panel) {
         Icon icon = (panel instanceof FindResultsPanel) ? FIND_ICON : null;
-        _tabbedPane.insertTab(panel.getName(), icon, panel, null, numVisible + 2);  // interactions, console always shown
+        _tabbedPane.insertTab(panel.getName(), icon, panel, null, numVisible + 2);  // interactions + console permanent
         panel.setVisible(true);
         panel.setDisplayed(true);
         panel.repaint();
@@ -9908,7 +9914,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _modalWindowAdapterOwner = w;
       // create a window adapter performs the specified actions after delegating to the modal window adapter
       wa = new WindowAdapter() {
-        final HashSet<Window> trumpedBy = new HashSet<Window>(); // set of windows that trumped this window in getting to the front
+        final HashSet<Window> trumpedBy = new HashSet<Window>(); 
+        // set of windows that trumped this window in getting to the front
         final WindowAdapter regainFront = new WindowAdapter() {
           public void windowClosed(WindowEvent we) {
             // the window that trumped w was closed, so we're moving w back to the front

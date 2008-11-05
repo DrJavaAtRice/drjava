@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -70,8 +70,12 @@ public class ErrorCaretListener implements CaretListener {
    */
   public void caretUpdate(final CaretEvent evt) {
     // Now we can assume at least one error.
-    if (_frame.getSelectedErrorPanel() == null) return;
-    updateHighlight(evt.getDot()); // invokeLater unnecessary here; this method runs in the event thread!
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        if (_frame.getSelectedErrorPanel() == null) return;
+        updateHighlight(evt.getDot());
+      }
+    });
   }
   
   /** Update the highlight appropriately. */
@@ -85,7 +89,7 @@ public class ErrorCaretListener implements CaretListener {
     
 //    Utilities.showDebug("ErrorCaretListener.updateHighlight invoked");
     
-    CompilerError error = model.getErrorAtOffset(_openDoc, curPos);
+    DJError error = model.getErrorAtOffset(_openDoc, curPos);
     
     ErrorPanel.ErrorListPane errorListPane = panel.getErrorListPane();
     // if no error is on this line, select the (none) item
@@ -95,7 +99,7 @@ public class ErrorCaretListener implements CaretListener {
         // No need to move the caret since it's already here!
         _highlightErrorInSource(model.getPosition(error));
       }
-      // Select item wants the CompilerError
+      // Select item wants the DJError
       errorListPane.selectItem(error);
     }
   }

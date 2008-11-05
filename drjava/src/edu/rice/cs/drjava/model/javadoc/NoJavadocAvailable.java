@@ -37,11 +37,11 @@
 package edu.rice.cs.drjava.model.javadoc;
 
 import java.io.File;
+import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.util.DirectorySelector;
 
 /** Javadoc model to use when javadoc is unavailable.
@@ -53,8 +53,8 @@ public class NoJavadocAvailable implements JavadocModel {
   private final CompilerErrorModel _javadocErrorModel;
   
   public NoJavadocAvailable(GlobalModel model) {
-    CompilerError e = new CompilerError("The javadoc feature is not available.", false);
-    _javadocErrorModel = new CompilerErrorModel(new CompilerError[]{e}, model);
+    DJError e = new DJError("The javadoc feature is not available.", false);
+    _javadocErrorModel = new CompilerErrorModel(new DJError[]{e}, model);
   }
   
   public boolean isAvailable() { return false; }

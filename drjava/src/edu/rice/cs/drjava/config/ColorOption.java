@@ -48,9 +48,7 @@ public class ColorOption extends Option<Color>{
   public Color parse(String s) {
     try { return Color.decode(s); }
     catch (NumberFormatException nfe) {
-      throw new OptionParseException(name, s,
-                                     "Must be a string that represents an " +
-                                     "opaque color as a 24-bit integer.");
+      throw new OptionParseException(name, s, "Must be a string that represents an opaque color as a 24-bit integer.");
     }
   }
   

@@ -50,8 +50,6 @@ import javax.swing.text.*;
 public class JavadocErrorPanel extends ErrorPanel {
 
   protected JavadocErrorListPane _errorListPane;
-  // TODO:  Is this field necessary?
-//  private boolean _successful;
 
   /** Constructor.
    * @param model SingleDisplayModel in which we are running

@@ -66,14 +66,6 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
 //    System.err.println("setUp complete");
   }
-  
-//  public void test1() { 
-//    try { xtestCancelDoesNotChangeConfig(); }
-//    catch(Exception e) { 
-//      e.printStackTrace(); 
-//      throw new UnexpectedException(e);
-//    }
-//  }
 
   public void testCancelDoesNotChangeConfig() {
 
@@ -91,14 +83,6 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
 
   }
 
-//  public void test2() { 
-//    try { xtestApplyDoesChangeConfig(); }
-//    catch(Exception e) { 
-//      e.printStackTrace(); 
-//      throw new UnexpectedException(e);
-//    }
-//  }
-
   public void testApplyDoesChangeConfig() {
     File testFile = FileOps.NULL_FILE;
 
@@ -110,14 +94,6 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
                  testFile,
                  DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
   }
-
-//  public void test3() { 
-//    try { xtestApplyThenResetDefault(); }
-//    catch(Exception e) { 
-//      e.printStackTrace(); 
-//      throw new UnexpectedException(e);
-//    }
-//  }
   
   public void testApplyThenResetDefault() {
     File testFile = FileOps.NULL_FILE;

@@ -50,11 +50,6 @@ public class HistorySaveDialog extends DrJavaScrollableDialog /* implements Seri
   /** Reference to the history text being edited. */
   private String _history;
   
-  /** Lock to ensure this history is only edited by one user at a time.
-    * TODO: Is this necessary?
-    */
-//  private Object _historyLock = new Object();
-  
   /** Creates a new HistorySaveDialog.
     * @param parent Parent frame for this dialog
     */
