@@ -1,42 +1,39 @@
 /*BEGIN_COPYRIGHT_BLOCK
- *
- * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software is Open Source Initiative approved Open Source Software.
- * Open Source Initative Approved is a trademark of the Open Source Initiative.
- * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
- * 
- * END_COPYRIGHT_BLOCK*/
+*
+* This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+* or http://sourceforge.net/projects/drjava/
+*
+* DrJava Open Source License
+* 
+* Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+*
+* Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+* documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+* to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+* 
+*     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+*       following disclaimers.
+*     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+*       following disclaimers in the documentation and/or other materials provided with the distribution.
+*     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+*       endorse or promote products derived from this Software without specific prior written permission.
+*     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+*       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+* THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+* CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+* WITH THE SOFTWARE.
+* 
+*END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
-import java.io.*;
+import java.io.File;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -44,14 +41,15 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
-import java.io.FileFilter;
 
 // Uses JDK 1.6.0 tools classes
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
+
+// DJError class is not in the same package as this
+import edu.rice.cs.drjava.model.DJError;
 
 // Uses JDK 1.6.0 compiler classes
 import com.sun.tools.javac.main.JavaCompiler;
@@ -78,70 +76,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  *  @version $Id$
  */
 public class Javac160Compiler extends JavacCompiler {
-
-  private final boolean _filterExe;
-  private File _tempJUnit = null;
-  private final String PREFIX = "drjava-junit";
-  private final String SUFFIX = ".jar";  
-
+  
   public Javac160Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
-    _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.0_04")) >= 0;
-    if (_filterExe) {
-      // if we need to filter out exe files from the classpath, we also need to
-      // extract junit.jar and create a temporary file
-      try {
-	// edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
-        // LOG.log("Filtering exe files from classpath.");
-        InputStream is = Javac160Compiler.class.getResourceAsStream("/junit.jar");
-	if (is!=null) {
-	  // LOG.log("\tjunit.jar found");
-	  _tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
-	  FileOutputStream fos = new FileOutputStream(_tempJUnit);
-	  int size = edu.rice.cs.plt.io.IOUtil.copyInputStream(is,fos);
-	  // LOG.log("\t"+size+" bytes written to "+_tempJUnit.getAbsolutePath());
-	}
-	else {
-	  // LOG.log("\tjunit.jar not found");
-	  if (_tempJUnit!=null) {
-	    _tempJUnit.delete();
-	    _tempJUnit = null;
-	    }
-	  }
-      }
-      catch(IOException ioe) {
-	if (_tempJUnit!=null) {
-	    _tempJUnit.delete();
-	    _tempJUnit = null;
-	}
-      }
-      // sometimes this file may be left behind, so create a shutdown hook
-      // that deletes temporary files matching our pattern
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-        public void run() {
-	  try {
-	    File temp = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);;
-  	    File[] toDelete = temp.getParentFile().listFiles(new FilenameFilter() {
-	      public boolean accept(File dir, String name) {
-	        if ((!name.startsWith(PREFIX)) || (!name.endsWith(SUFFIX))) return false;
-	        String rest = name.substring(PREFIX.length(), name.length()-SUFFIX.length());
-	        try {
-	          Integer i = new Integer(rest);
-		  // we could create an integer from the rest, this is one of our temporary files
-		  return true;
-	        }
-	        catch(NumberFormatException e) { /* couldn't convert, ignore this file */ }
-	        return false;
-	      }
-	    });
-	    for(File f: toDelete) {
-	      f.delete();
-	    }
-	  }
-	  catch(IOException ioe) { /* could not delete temporary files, ignore */ }
-	}
-      }));
-    }
   }
   
   public boolean isAvailable() {
@@ -149,7 +86,6 @@ public class Javac160Compiler extends JavacCompiler {
       // Diagnostic was intruced in the Java 1.6 compiler
       Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
-      Class.forName("com.sun.tools.javac.main.JavaCompiler");
       return true;
     }
     catch (Exception e) { return false; }
@@ -169,25 +105,16 @@ public class Javac160Compiler extends JavacCompiler {
     *  @param showWarnings  Whether compiler warnings should be shown or ignored.
     *  @return Errors that occurred. If no errors, should be zero length (not null).
     */
-  public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+  public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
     debug.logStart("compile()");
     debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
                                   "sourceVersion", "showWarnings" },
                               this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
-    List<File> filteredClassPath = new LinkedList<File>(classPath);
 
-    if (_filterExe) {
-      FileFilter filter = IOUtil.extensionFilePredicate("exe");
-      Iterator<? extends File> i = filteredClassPath.iterator();
-      while (i.hasNext()) {
-	if (filter.accept(i.next())) { i.remove(); }
-      }
-      if (_tempJUnit!=null) { filteredClassPath.add(_tempJUnit); }
-    }
-    Context context = _createContext(filteredClassPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
-    LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+    Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    LinkedList<DJError> errors = new LinkedList<DJError>();
     new CompilerErrorListener(context, errors);
     
     JavaCompiler compiler = JavaCompiler.instance(context);
@@ -199,7 +126,7 @@ public class Javac160Compiler extends JavacCompiler {
     
     try { compiler.compile(fileObjects); }
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
-      errors.addFirst(new CompilerError("Compile exception: " + t, false));
+      errors.addFirst(new DJError("Compile exception: " + t, false));
       error.log(t);
     }
     
@@ -234,9 +161,9 @@ public class Javac160Compiler extends JavacCompiler {
   /** We need to embed a DiagnosticListener in our own Context.  This listener will build a CompilerError list. */
   private static class CompilerErrorListener implements DiagnosticListener<JavaFileObject> {
     
-    private List<? super CompilerError> _errors;
+    private List<? super DJError> _errors;
     
-    public CompilerErrorListener(Context context, List<? super CompilerError> errors) {
+    public CompilerErrorListener(Context context, List<? super DJError> errors) {
       _errors = errors;
       context.put(DiagnosticListener.class, this);
     }
@@ -260,7 +187,7 @@ public class Javac160Compiler extends JavacCompiler {
         * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
       
       
-      _errors.add(new CompilerError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+      _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
                                     ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
                                     ((int) d.getColumnNumber()) - 1, 
                                     d.getMessage(null),    // null is the locale

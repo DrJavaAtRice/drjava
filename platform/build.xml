@@ -18,8 +18,8 @@
 
   <property environment="env" />
   <property name="java14-home" value="${env.JAVA14_HOME}" />
-  <property name="java15-home" value="${env.JAVA5_HOME}" />
-  <property name="java16-home" value="${env.JAVA6_HOME}" />
+  <property name="java15-home" value="${env.JAVA15_HOME}" />
+  <property name="java16-home" value="${env.JAVA16_HOME}" />
   <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
   
   <!-- Testing defaults -->
@@ -597,7 +597,7 @@
   
   <target name="resolve-java14-tools">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java15-tools will only be set the *first* time. -->
+         are immutable and so java14-tools will only be set the *first* time. -->
 
     <property name="java14-tools-1" location="${java14-home}/lib/tools.jar" />
     <available property="java14-tools" value="${java14-tools-1}" file="${java14-tools-1}" />
@@ -697,7 +697,7 @@
   
   <target name="resolve-java16-tools">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java15-tools will only be set the *first* time. -->
+         are immutable and so java16-tools will only be set the *first* time. -->
 
     <property name="java16-tools-1" location="${java16-home}/lib/tools.jar" />
     <available property="java16-tools" value="${java16-tools-1}" file="${java16-tools-1}" />
