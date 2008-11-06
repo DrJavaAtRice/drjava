@@ -69,7 +69,7 @@ public class DJError implements Comparable, Serializable {
     */
   public DJError(File file, int lineNumber, int startColumn, String message, boolean isWarning) {
 //    System.err.println("instance of DJError (or subclass) constructed; file = " + file + "; message = " + message);
-    if (message != null && message.contains("CompilerError")) throw new UnexpectedException(message);
+    if (message != null && (message.indexOf("CompilerError")>=0)) throw new UnexpectedException(message);
     _file = file;
     _lineNumber = lineNumber;
     _startColumn = startColumn;
