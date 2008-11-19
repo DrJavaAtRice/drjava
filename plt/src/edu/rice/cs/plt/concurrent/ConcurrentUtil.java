@@ -59,6 +59,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.io.VoidOutputStream;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -585,7 +586,7 @@ public final class ConcurrentUtil {
    * method providing the following defaults:
    * <ul>
    * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is the {@code java.class.path} system property</li>
+   * <li>{@code classPath} is {@link ReflectUtil#SYSTEM_CLASS_PATH}</li>
    * <li>{@code workingDir} is the {@code user.dir} system property</li>
    * <li>{@code properties} is empty</li>
    * <li>{@code jvmParams} is empty</li>
@@ -598,7 +599,7 @@ public final class ConcurrentUtil {
    */
   public static Process runJavaProcess(String mainClass, String... classParams) throws IOException {
     File javaCommand = new File(System.getProperty("java.home", ""));
-    Iterable<File> classPath = IOUtil.parsePath(System.getProperty("java.class.path", ""));
+    Iterable<File> classPath = ReflectUtil.SYSTEM_CLASS_PATH;
     File workingDir = new File(System.getProperty("user.dir", ""));
     Properties properties = new Properties();
     Iterable<String> jvmParams = IterUtil.empty();
@@ -611,7 +612,7 @@ public final class ConcurrentUtil {
    * method providing the following defaults:
    * <ul>
    * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is the {@code java.class.path} system property</li>
+   * <li>{@code classPath} is {@link ReflectUtil.SYSTEM_CLASS_PATH}</li>
    * <li>{@code workingDir} is the {@code user.dir} system property</li>
    * <li>{@code properties} is empty</li>
    * <li>{@code jvmParams} is empty</li>
@@ -624,7 +625,7 @@ public final class ConcurrentUtil {
    */
   public static Process runJavaProcess(String mainClass, Iterable<? extends String> classParams) throws IOException {
     File javaCommand = new File(System.getProperty("java.home", ""));
-    Iterable<File> classPath = IOUtil.parsePath(System.getProperty("java.class.path", ""));
+    Iterable<File> classPath = ReflectUtil.SYSTEM_CLASS_PATH;
     File workingDir = new File(System.getProperty("user.dir", ""));
     Properties properties = new Properties();
     Iterable<String> jvmParams = IterUtil.empty();
@@ -661,7 +662,7 @@ public final class ConcurrentUtil {
    * method providing the following defaults:
    * <ul>
    * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is the {@code java.class.path} system property, converted to an absolute form</li>
+   * <li>{@code classPath} is {@link ReflectUtil.SYSTEM_CLASS_PATH}, converted to an absolute form</li>
    * <li>{@code properties} is empty</li>
    * <li>{@code jvmParams} is empty</li>
    * </ul>
@@ -676,8 +677,7 @@ public final class ConcurrentUtil {
   public static Process runJavaProcess(String mainClass, Iterable<? extends String> classParams, File workingDir) 
     throws IOException {
     File javaCommand = new File(System.getProperty("java.home", ""));
-    Iterable<File> classPath = IOUtil.attemptAbsoluteFiles(
-                               IOUtil.parsePath(System.getProperty("java.class.path", "")));
+    Iterable<File> classPath = IOUtil.attemptAbsoluteFiles(ReflectUtil.SYSTEM_CLASS_PATH);
     Properties properties = new Properties();
     Iterable<String> jvmParams = IterUtil.empty();
     return runJavaProcess(javaCommand, mainClass, classParams, classPath, workingDir, properties, jvmParams);

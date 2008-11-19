@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 import static edu.rice.cs.plt.reflect.ReflectException.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -62,6 +63,12 @@ public final class ReflectUtil {
    * simply use {@code null} as the parent parameter.
    */
   public static final ClassLoader BOOT_CLASS_LOADER = new ClassLoader(null) {};
+  
+  /**
+   * The value of system property "java.class.path", parsed as a list of files.  Consistent with most
+   * other uses of JVM properties in Java libraries, does not reflect subsequent changes to the property.
+   */
+  public static final Iterable<File> SYSTEM_CLASS_PATH = IOUtil.parsePath(System.getProperty("java.class.path", ""));
   
   /**
    * Produce the simple name of the given class, as specified by {@link Class#getSimpleName},

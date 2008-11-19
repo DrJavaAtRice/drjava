@@ -48,6 +48,7 @@ import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.RecursionStack;
+import edu.rice.cs.plt.text.TextUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
@@ -854,15 +855,8 @@ public final class IOUtil {
     * are interpreted according to the {@code File} constructor.
     */
   public static Iterable<File> parsePath(String path) {
-    /* StringTokenizer documentation recommends using String.split() instead.
-     * The problem with doing that is that the path separator might not translate into
-     * a regex without escaping.  So we need a general way to translate a literal
-     * String into an escaped regex String (better would be a way to compile a regex
-     * directly from a literal String).
-     */
-    StringTokenizer tokenizer = new StringTokenizer(path, File.pathSeparator);
-    Iterable<String> filenames = IterUtil.snapshot(IterUtil.asIterator(tokenizer));
-    return IterUtil.map(filenames, FILE_FACTORY);
+    String[] filenames = path.split(TextUtil.regexEscape(File.pathSeparator));
+    return IterUtil.mapSnapshot(IterUtil.asIterable(filenames), FILE_FACTORY);
   }
       
   /** Produce a path string from a list of files.  Filenames in the result are delimited

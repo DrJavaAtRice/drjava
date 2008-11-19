@@ -48,9 +48,10 @@ import edu.rice.cs.plt.tuple.*;
  * <li>{@code compose}: define the lambda that takes the result of one lambda and applies it
  *     to another, or a runnable that executes a sequence of runnables</li>
  * <li>{@code bindFirst}, {@code bindSecond}, etc.: set one of the arguments to a lambda</li>
- * <li>{@code flatten}, {@code unary}: convert between lambdas, etc., that take multiple arguments
- *     and equivalent lambdas that take exactly one argument.</li>
  * <li>{@code curry}: convert an n-ary lambda to a unary lambda whose result is another lambda</li>
+ * <li>{@code flatten}, {@code unary}: convert between lambdas, etc., that take multiple arguments
+ *     and equivalent lambdas that take exactly one tuple argument.</li>
+ * <li>{@code lift}: extend a lambda to handle option values (see {@link Option})</li>
  * <li>{@code negate}: define a predicate whose result is the opposite of the given predicate</li>
  * <li>{@code and}: define a conjunction of predicates</li>
  * <li>{@code or}: define a disjunction of predicates</li>
@@ -1500,6 +1501,87 @@ public final class LambdaUtil {
     }
   }
   
+
+  /** A Lambda that accepts and produces {@link Option} values. Defined for conciseness. */
+  public interface LiftedLambda<T, R> extends Lambda<Option<? extends T>, Option<R>> {}
+  
+  /** Lift a Lambda to accept an option value, returning {@link Option#none()} in the "none" case. */
+  public static <T, R> LiftedLambda<T, R> lift(Lambda<? super T, ? extends R> lambda) {
+    return new WrappedLiftedLambda<T, R>(lambda);
+  }
+  
+  private static final class WrappedLiftedLambda<T, R> implements LiftedLambda<T, R>, Serializable {
+    private final Lambda<? super T, ? extends R> _lambda;
+    public WrappedLiftedLambda(Lambda<? super T, ? extends R> lambda) { _lambda = lambda; }
+    public Option<R> value(Option<? extends T> arg) {
+      if (arg.isSome()) { return Option.some(_lambda.value(arg.unwrap())); }
+      else { return Option.none(); }
+    }
+  }
+  
+  /** A Lambda2 that accepts and produces {@link Option} values. Defined for conciseness. */
+  public interface LiftedLambda2<T1, T2, R>
+    extends Lambda2<Option<? extends T1>, Option<? extends T2>, Option<R>> {}
+  
+  /** Lift a Lambda2 to accept option values, returning {@link Option#none()} if any argument is "none". */
+  public static <T1, T2, R> LiftedLambda2<T1, T2, R> lift(Lambda2<? super T1, ? super T2, ? extends R> lambda) {
+    return new WrappedLiftedLambda2<T1, T2, R>(lambda);
+  }
+  
+  private static final class WrappedLiftedLambda2<T1, T2, R> implements LiftedLambda2<T1, T2, R>, Serializable {
+    private final Lambda2<? super T1, ? super T2, ? extends R> _lambda;
+    public WrappedLiftedLambda2(Lambda2<? super T1, ? super T2, ? extends R> lambda) { _lambda = lambda; }
+    public Option<R> value(Option<? extends T1> arg1, Option<? extends T2> arg2) {
+      if (arg1.isSome() && arg2.isSome()) { return Option.some(_lambda.value(arg1.unwrap(), arg2.unwrap())); }
+      else { return Option.none(); }
+    }
+  }
+  
+  /** A Lambda3 that accepts and produces {@link Option} values. Defined for conciseness. */
+  public interface LiftedLambda3<T1, T2, T3, R>
+    extends Lambda3<Option<? extends T1>, Option<? extends T2>, Option<? extends T3>, Option<R>> {}
+  
+  /** Lift a Lambda3 to accept option values, returning {@link Option#none()} if any argument is "none". */
+  public static <T1, T2, T3, R> LiftedLambda3<T1, T2, T3, R>
+    lift(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda) {
+    return new WrappedLiftedLambda3<T1, T2, T3, R>(lambda);
+  }
+  
+  private static final class WrappedLiftedLambda3<T1, T2, T3, R> implements LiftedLambda3<T1, T2, T3, R>, Serializable {
+    private final Lambda3<? super T1, ? super T2, ? super T3, ? extends R> _lambda;
+    public WrappedLiftedLambda3(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda) { _lambda = lambda; }
+    public Option<R> value(Option<? extends T1> arg1, Option<? extends T2> arg2, Option<? extends T3> arg3) {
+      if (arg1.isSome() && arg2.isSome() && arg3.isSome()) {
+        return Option.some(_lambda.value(arg1.unwrap(), arg2.unwrap(), arg3.unwrap()));
+      }
+      else { return Option.none(); }
+    }
+  }
+  
+  /** A Lambda4 that accepts and produces {@link Option} values. Defined for conciseness. */
+  public interface LiftedLambda4<T1, T2, T3, T4, R>
+    extends Lambda4<Option<? extends T1>, Option<? extends T2>, Option<? extends T3>, Option<? extends T4>, Option<R>> {}
+  
+  /** Lift a Lambda4 to accept option values, returning {@link Option#none()} if any argument is "none". */
+  public static <T1, T2, T3, T4, R> LiftedLambda4<T1, T2, T3, T4, R>
+    lift(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> lambda) {
+    return new WrappedLiftedLambda4<T1, T2, T3, T4, R>(lambda);
+  }
+  
+  private static final class WrappedLiftedLambda4<T1, T2, T3, T4, R>
+      implements LiftedLambda4<T1, T2, T3, T4, R>, Serializable {
+    private final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> _lambda;
+    public WrappedLiftedLambda4(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> lambda) {
+      _lambda = lambda;
+    }
+    public Option<R> value(Option<? extends T1> arg1, Option<? extends T2> arg2, Option<? extends T3> arg3,
+                           Option<? extends T4> arg4) {
+      if (arg1.isSome() && arg2.isSome() && arg3.isSome() && arg4.isSome()) {
+        return Option.some(_lambda.value(arg1.unwrap(), arg2.unwrap(), arg3.unwrap(), arg4.unwrap()));
+      }
+      else { return Option.none(); }
+    }
+  }
   
   
   /** Produce the negation ({@code !}) of {@code pred}. */
