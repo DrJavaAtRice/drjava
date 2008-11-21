@@ -51,7 +51,7 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public class DrJavaTestCase extends TestCase {
   /** System property with the name of an alternative DrJava configuration file used during testing. */
-  public static final String TEST_DRJAVA_CONFIG_PROPERTY = "test.drjava.config";
+  public static final String TEST_DRJAVA_CONFIG_PROPERTY = "drjava.test.config";
   
   /** Create a new DrJava test case. */
   public DrJavaTestCase() { super(); }

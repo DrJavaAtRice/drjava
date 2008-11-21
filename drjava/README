@@ -26,11 +26,11 @@ If not, follow the instructions at http://www.drjava.org/devdocs/ for
 setting up a DrJava development environment.
 
 1) Make a directory to be the top-level container for you drjava code
-   tree.  I recommend "drjava".
+   tree.  I recommend "dj".
 
 2) Descend into this new directory by typing the command
 
-   cd ~/drjava
+   cd ~/dj
 
 3) Download the drjava source code base by typing the command
 
@@ -39,19 +39,19 @@ setting up a DrJava development environment.
 4) After this download completes, descend into the root directory of
    the dowloaded code base by typing the command
 
-   cd ~/drjava
+   cd drjava
 
 5) To compile the code base and generate a jar file containing the
    compiled program, enter the command
 
    ant jar
 
-   which builds a jar filed named drjava-15.jar
+   which builds a jar filed named drjava.jar
 
 If the build is successful, you can execute the built program by
 entering the command
 
-  java -jar drjava-15.jar
+  java -jar drjava.jar
 
 If you encounter any problems, consult the Developer Docs at
 drjava.org by visiting http://www.drjava.org/devdocs/.
