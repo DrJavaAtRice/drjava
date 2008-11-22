@@ -1140,7 +1140,7 @@
     <property name="java6-tools-1" location="${java6-home}/lib/tools.jar" />
     <available property="java6-tools" value="${java6-tools-1}" file="${java6-tools-1}" />
 
-    <property name="java6-tools-2" location="${java6-home}/jre/lib/tools.jar" />
+    <property name="java6-tools-2" location="${java6-home}/../lib/tools.jar" />
     <available property="java6-tools" value="${java6-tools-2}" file="${java6-tools-2}" />
 
     <property name="java6-tools-3" location="${java6-home}/../Classes/classes.jar" />
@@ -1153,7 +1153,7 @@
     <property name="java5-tools-1" location="${java5-home}/lib/tools.jar" />
     <available property="java5-tools" value="${java5-tools-1}" file="${java5-tools-1}" />
 
-    <property name="java5-tools-2" location="${java5-home}/jre/lib/tools.jar" />
+    <property name="java5-tools-2" location="${java5-home}/../lib/tools.jar" />
     <available property="java5-tools" value="${java5-tools-2}" file="${java5-tools-2}" />
 
     <property name="java5-tools-3" location="${java5-home}/../Classes/classes.jar" />
@@ -1166,7 +1166,7 @@
     <property name="current-tools-1" location="${java.home}/lib/tools.jar" />
     <available property="current-tools" value="${current-tools-1}" file="${current-tools-1}" />
 
-    <property name="current-tools-2" location="${java.home}/jre/lib/tools.jar" />
+    <property name="current-tools-2" location="${java.home}/../lib/tools.jar" />
     <available property="current-tools" value="${current-tools-2}" file="${current-tools-2}" />
 
     <property name="current-tools-3" location="${java.home}/../Classes/classes.jar" />
