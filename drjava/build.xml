@@ -276,24 +276,27 @@
        Testing Targets
        *************** -->
   
-  <target name="test" depends="compile" unless="skip-test"
+  <target name="test" depends="compile, resolve-current-tools" unless="skip-test"
           description="Run all tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
+      <param name="test-tools" value="${current-tools}" />
     </antcall>
   </target>
 
-  <target name="test-6" depends="compile, resolve-java6-exec" unless="skip-test"
+  <target name="test-6" depends="compile, resolve-java6-exec, resolve-java6-tools" unless="skip-test"
           description="Run all tests under Java 6 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java6-exec}" />
+      <param name="test-tools" value="${java6-tools}" />
     </antcall>
   </target>
   
-  <target name="test-5" depends="compile, resolve-java5-exec" unless="skip-test"
+  <target name="test-5" depends="compile, resolve-java5-exec, resolve-java5-tools" unless="skip-test"
           description="Run all tests under Java 5 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java5-exec}" />
+      <param name="test-tools" value="${java5-tools}" />
     </antcall>
   </target>
   
@@ -382,12 +385,12 @@
   </target>
   
   
-  <target name="do-test" depends="resolve-jvm-args, resolve-java5-tools">
+  <target name="do-test" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}'" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="512M" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
-        <pathelement location="${java5-tools}" />
+        <pathelement location="${test-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="${clover-jar}" />
@@ -1133,6 +1136,19 @@
     <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
   </target>
     
+  <target name="resolve-java6-tools">
+    <property name="java6-tools-1" location="${java6-home}/lib/tools.jar" />
+    <available property="java6-tools" value="${java6-tools-1}" file="${java6-tools-1}" />
+
+    <property name="java6-tools-2" location="${java6-home}/jre/lib/tools.jar" />
+    <available property="java6-tools" value="${java6-tools-2}" file="${java6-tools-2}" />
+
+    <property name="java6-tools-3" location="${java6-home}/../Classes/classes.jar" />
+    <available property="java6-tools" value="${java6-tools-3}" file="${java6-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
+  </target>
+  
   <target name="resolve-java5-tools">
     <property name="java5-tools-1" location="${java5-home}/lib/tools.jar" />
     <available property="java5-tools" value="${java5-tools-1}" file="${java5-tools-1}" />
@@ -1144,6 +1160,19 @@
     <available property="java5-tools" value="${java5-tools-3}" file="${java5-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 5 home: ${java5-home}" unless="java5-tools" />
+  </target>
+  
+  <target name="resolve-current-tools">
+    <property name="current-tools-1" location="${java.home}/lib/tools.jar" />
+    <available property="current-tools" value="${current-tools-1}" file="${current-tools-1}" />
+
+    <property name="current-tools-2" location="${java.home}/jre/lib/tools.jar" />
+    <available property="current-tools" value="${current-tools-2}" file="${current-tools-2}" />
+
+    <property name="current-tools-3" location="${java.home}/../Classes/classes.jar" />
+    <available property="current-tools" value="${current-tools-3}" file="${current-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java home: ${java.home}" unless="current-tools" />
   </target>
   
           
