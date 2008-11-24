@@ -192,7 +192,7 @@
   
   <target name="do-compile" depends="resolve-java5-runtime, resolve-java5-tools">
   
-    <echo message="Compiling src directory to classes/base and classes/test with javac ${java.version}" />
+    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
@@ -203,8 +203,9 @@
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java5-runtime}" sourcepath="" debug="on" optimize="off"
-           deprecation="on" includeAntRuntime="no" fork="yes" memoryMaximumSize="512M">
+           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="javac" fork="yes" memoryMaximumSize="512M"
+           debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
