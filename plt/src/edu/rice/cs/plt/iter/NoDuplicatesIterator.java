@@ -37,33 +37,57 @@ package edu.rice.cs.plt.iter;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.HashSet;
-import edu.rice.cs.plt.collect.PredicateSet;
-import edu.rice.cs.plt.collect.CollectUtil;
-import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.object.Composite;
+import edu.rice.cs.plt.object.ObjectUtil;
+
 /**
  * An Iterator that returns each value only once.  Values are compared via {@code equals()} and
  * hashed in order to detect duplicates.  A set of previously-seen values is maintained, which
  * requires space linear in the number of times {@code next()} has been invoked.
  */
-public class NoDuplicatesIterator<T> extends FilteredIterator<T> {
+public class NoDuplicatesIterator<T> extends ReadOnlyIterator<T> implements Composite {
   
+  private final Iterator<? extends T> _i;
   private final Set<T> _seen;
+  private T _lookahead;
   
   public NoDuplicatesIterator(Iterator<? extends T> i) {
-    this(i, CollectUtil.asPredicateSet(new HashSet<T>()));
+    _i = i;
+    _seen = new HashSet<T>();
+    advanceLookahead();
   }
   
-  /** Declared to allow {@code seen} to be created before calling {@code super()} */
-  private NoDuplicatesIterator(Iterator<? extends T> i, Set<T> seen) {
-    super(i, LambdaUtil.negate(CollectUtil.asPredicateSet(seen)));
-    _seen = seen;
-  }
+  public int compositeHeight() { return ObjectUtil.compositeHeight(_i) + 1; }
+  public int compositeSize() { return ObjectUtil.compositeSize(_i) + 1; }
+  
+  public boolean hasNext() { return _lookahead != null; }
   
   public T next() {
-    T result = super.next();
-    _seen.add(result);
+    T result = _lookahead;
+    advanceLookahead();
     return result;
   }
+  
+  /**
+   * Finds the next unique value in {@code _i}.  Ignores the previous value of
+   * {@code _lookahead}.  If a value is found, sets {@code _lookahead} to that
+   * value; otherwise, sets it to {@code null}.
+   */
+  private void advanceLookahead() {
+    // This class is similar to FilteredIterator, but can't be implemented
+    // as an instance because we need to manipulate the "seen" set here, before 
+    // a "next" value is returned.  Otherwise, the lookahead test fails to
+    // consider the most recently-seen value.
+    _lookahead = null;
+    while (_i.hasNext() && _lookahead == null) {
+      T next = _i.next();
+      if (!_seen.contains(next)) {
+        _lookahead = next;
+        _seen.add(next);
+      }
+    }
+  }
+  
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> NoDuplicatesIterator<T> make(Iterator<? extends T> i) {

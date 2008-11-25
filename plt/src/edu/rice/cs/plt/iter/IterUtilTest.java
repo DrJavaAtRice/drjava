@@ -44,6 +44,30 @@ import static edu.rice.cs.plt.iter.IterUtil.*;
  * Tests for the IterUtil methods
  */
 public class IterUtilTest extends TestCase {
+  
+  /**
+   * Verify that the iterator contents exactly match the given sequence.  Tests both
+   * {@code hasNext()} and {@code next()} at each step.
+   */
+  public static void assertIterator(Iterator<?> iter, Object... expected) {
+    for (Object exp : expected) {
+      assertTrue("Iterator shorter than expected", iter.hasNext());
+      assertEquals("Unexpected iterator element", exp, iter.next());
+    }
+    assertFalse("Iterator longer than expected", iter.hasNext());
+  }
+
+  /**
+   * Verify that the iterator contents exactly match the given sequence.  Does <em>not</em>
+   * invoke {@code hasNext()} until iteration is complete.  This allows bugs related
+   * to state change occuring in {@code hasNext()} to be detected.
+   */
+  public static void assertIteratorUnchecked(Iterator<?> iter, Object... expected) {
+    for (Object exp : expected) {
+      assertEquals("Unexpected iterator element", exp, iter.next());
+    }
+    assertFalse("Iterator longer than expected", iter.hasNext());
+  }
 
   private void assertEquals(int expected, Integer actual) {
     assertEquals(expected, actual.intValue());
@@ -61,10 +85,7 @@ public class IterUtilTest extends TestCase {
     is.add(3);
     Iterator<Integer> iIter = is.iterator();
     Iterator<Number> nIter = IterUtil.<Number>relax(iIter);
-    assertEquals(Integer.valueOf(1), nIter.next());
-    assertEquals(Integer.valueOf(2), nIter.next());
-    assertEquals(Integer.valueOf(3), nIter.next());
-    assertFalse(nIter.hasNext());
+    assertIterator(nIter, 1, 2, 3);
   }
   
   public void testToArray() {
@@ -108,55 +129,21 @@ public class IterUtilTest extends TestCase {
     
     int[] ints = { 1, 1, 2, 3, 5 };
     Iterator<Integer> intIter = asIterable(ints).iterator();
-    assertTrue(intIter.hasNext());
-    assertEquals(1, intIter.next());
-    assertTrue(intIter.hasNext());
-    assertEquals(1, intIter.next());
-    assertTrue(intIter.hasNext());
-    assertEquals(2, intIter.next());
-    assertTrue(intIter.hasNext());
-    assertEquals(3, intIter.next());
-    assertTrue(intIter.hasNext());
-    assertEquals(5, intIter.next());
-    assertFalse(intIter.hasNext());
+    assertIterator(intIter, 1, 1, 2, 3, 5);
   }
   
   public void testCharSequenceIterable() {
     assertTrue(isEmpty(asIterable("")));
 
     Iterator<Character> iter = asIterable("Happy day").iterator();
-    assertTrue(iter.hasNext());
-    assertEquals('H', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('a', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('p', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('p', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('y', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals(' ', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('d', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('a', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('y', iter.next());
-    assertFalse(iter.hasNext());
+    assertIterator(iter, 'H', 'a', 'p', 'p', 'y', ' ', 'd', 'a', 'y');
   }
   
   public void testReaderAsIterator() {
     assertFalse(asIterator(new StringReader("")).hasNext());
     
     Iterator<Character> iter = asIterator(new StringReader("Foo"));
-    assertTrue(iter.hasNext());
-    assertEquals('F', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('o', iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals('o', iter.next());
-    assertFalse(iter.hasNext());
+    assertIterator(iter, 'F', 'o', 'o');
   }
   
   public void testInputStreamAsIterator() {
@@ -164,13 +151,7 @@ public class IterUtilTest extends TestCase {
     
     byte[] bytes = { 1, 15, 3 };
     Iterator<Byte> iter = asIterator(new ByteArrayInputStream(bytes));
-    assertTrue(iter.hasNext());
-    assertEquals(1, (byte) iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals(15, (byte) iter.next());
-    assertTrue(iter.hasNext());
-    assertEquals(3, (byte) iter.next());
-    assertFalse(iter.hasNext());
+    assertIterator(iter, (byte) 1, (byte) 15, (byte) 3);
   }
   
 }
