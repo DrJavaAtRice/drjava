@@ -128,7 +128,7 @@ public class ReflectUtilTest extends TestCase {
     assertEquals((Integer) 23, i);
     assertEquals("foo", t.value());
     assertEquals("foo", t2.value());
-    try { Integer dummy = t3.value(); fail("Expected exception"); }
+    try { @SuppressWarnings("unused") Integer dummy = t3.value(); fail("Expected exception"); }
     catch (ClassCastException e) {/* expected behavior */ }
   }
   
@@ -149,7 +149,8 @@ public class ReflectUtilTest extends TestCase {
   
   
   public void testLoadObject() throws Exception {
-    ReflectUtilTest t = (ReflectUtilTest) loadObject("edu.rice.cs.plt.reflect.ReflectUtilTest");
+	@SuppressWarnings("unused") ReflectUtilTest t =
+		(ReflectUtilTest) loadObject("edu.rice.cs.plt.reflect.ReflectUtilTest");
     PathClassLoader l = (PathClassLoader) loadObject("edu.rice.cs.plt.reflect.PathClassLoader",
                                                      new Object[]{new File[]{INTBOX_DIR, A_DIR, B_DIR, C_DIR, D_DIR}});
     Object d1 = loadObject(l, "D");
@@ -337,14 +338,15 @@ public class ReflectUtilTest extends TestCase {
   
   
   public void testStaticMethodLambdas() {
-    Thunk<Thunk> nullLambda = staticMethodAsThunk(LambdaUtil.class, "nullLambda", Thunk.class);
+	@SuppressWarnings("unchecked") Thunk<Thunk> nullLambda =
+		staticMethodAsThunk(LambdaUtil.class, "nullLambda", Thunk.class);
     assertEquals(null, nullLambda.value().value());
     
-    Lambda<Object, Thunk> valueLambda = staticMethodAsLambda(LambdaUtil.class, "valueLambda", 
-                                                                Object.class, Thunk.class);
+    @SuppressWarnings("unchecked") Lambda<Object, Thunk> valueLambda =
+    	staticMethodAsLambda(LambdaUtil.class, "valueLambda", Object.class, Thunk.class);
     assertEquals("foo", valueLambda.value("foo").value());
     
-    Lambda2<Predicate, Predicate, Predicate> and =
+    @SuppressWarnings("unchecked") Lambda2<Predicate, Predicate, Predicate> and =
       staticMethodAsLambda2(LambdaUtil.class, "and", Predicate.class, Predicate.class, Predicate.class);
     Predicate<?> p1 = and.value(LambdaUtil.IS_NULL, LambdaUtil.IS_NULL);
     assertTrue(p1.contains(null));
@@ -353,7 +355,7 @@ public class ReflectUtilTest extends TestCase {
     Predicate<?> p3 = and.value(LambdaUtil.NOT_NULL, LambdaUtil.NOT_NULL);
     assertFalse(p3.contains(null));
     
-    Lambda3<Predicate, Predicate, Predicate, Predicate> or =
+    @SuppressWarnings("unchecked") Lambda3<Predicate, Predicate, Predicate, Predicate> or =
       staticMethodAsLambda3(LambdaUtil.class, "or", Predicate.class, Predicate.class, Predicate.class, Predicate.class);
     Predicate<?> p4 = or.value(LambdaUtil.IS_NULL, LambdaUtil.IS_NULL, LambdaUtil.IS_NULL);
     assertTrue(p4.contains(null));
@@ -436,7 +438,8 @@ public class ReflectUtilTest extends TestCase {
       constructorAsLambda3(String.class, char[].class, int.class, int.class);
     assertEquals("bc", l2.value(new char[]{'a', 'b', 'c', 'd'}, 1, 2));
     
-    Lambda<Object, SimpleBox> l3 = constructorAsLambda(SimpleBox.class, Object.class);
+    @SuppressWarnings("unchecked") Lambda<Object, SimpleBox> l3 =
+    	constructorAsLambda(SimpleBox.class, Object.class);
     assertEquals(23, l3.value(23).value());
     
     Thunk<Cloneable> t3 = constructorAsThunk(Cloneable.class);

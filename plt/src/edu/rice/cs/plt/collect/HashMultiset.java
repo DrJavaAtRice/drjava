@@ -36,7 +36,6 @@ package edu.rice.cs.plt.collect;
 
 import java.util.Collection;
 import java.util.AbstractCollection;
-import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,7 +74,7 @@ public class HashMultiset<T> extends AbstractCollection<T> implements Multiset<T
   @Override public boolean contains(Object obj) { return _counts.containsKey(obj); }
   
   @Override public boolean containsAll(Collection<?> c) {
-    for (Object obj : asMultiset(c).asSet()) { if (!contains(c)) { return false; } }
+    for (Object obj : asMultiset(c).asSet()) { if (!contains(obj)) { return false; } }
     return true;
   }
   
@@ -233,9 +232,9 @@ public class HashMultiset<T> extends AbstractCollection<T> implements Multiset<T
   }
   
   /** Convert {@code coll} to a multiset by casting or, where necessary, allocation */
-  private <T> Multiset<T> asMultiset(Collection<T> coll) {
-    if (coll instanceof Multiset<?>) { return (Multiset<T>) coll; }
-    else { return new HashMultiset<T>(coll); }
+  private <S> Multiset<S> asMultiset(Collection<S> coll) {
+    if (coll instanceof Multiset<?>) { return (Multiset<S>) coll; }
+    else { return new HashMultiset<S>(coll); }
   }
   
 }

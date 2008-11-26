@@ -110,8 +110,8 @@ public class IterableCollection<E> extends AbstractCollection<E>
   public String toString() { return _iter.toString(); }
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (!(o instanceof IterableCollection)) { return false; }
-    else { return _iter.equals(((IterableCollection) o)._iter); }
+    else if (!(o instanceof IterableCollection<?>)) { return false; }
+    else { return _iter.equals(((IterableCollection<?>) o)._iter); }
   }
   public int hashCode() { return IterableCollection.class.hashCode() ^ _iter.hashCode(); }
 }

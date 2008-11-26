@@ -79,7 +79,7 @@ public final class IterUtil {
     else if (iter instanceof Collection<?>) { return ((Collection<?>) iter).size(); }
     else {
       int result = 0;
-      for (Object o : iter) { result++; if (result == Integer.MAX_VALUE) break; }
+      for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == Integer.MAX_VALUE) break; }
       return result;
     }
   }
@@ -98,7 +98,7 @@ public final class IterUtil {
     }
     else {
       int result = 0;
-      for (Object o : iter) { result++; if (result == bound) break; }
+      for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == bound) break; }
       return result;
     }
   }
@@ -337,7 +337,7 @@ public final class IterUtil {
     
   /** Produce a lambda that invokes {@link #compose(Object, Iterable)}. */
   @SuppressWarnings("unchecked") public static <T> Lambda2<T, Iterable<? extends T>, Iterable<T>> composeLeftLambda() {
-    return (Lambda2<T, Iterable<? extends T>, Iterable<T>>) ComposeLeftLambda.INSTANCE;
+    return (Lambda2<T, Iterable<? extends T>, Iterable<T>>) (Lambda2<?, ?, ?>) ComposeLeftLambda.INSTANCE;
   }
   
   private static class ComposeLeftLambda<T> implements Lambda2<T, Iterable<? extends T>, Iterable<T>>, Serializable {
@@ -355,7 +355,7 @@ public final class IterUtil {
     
   /** Produce a lambda that invokes {@link #compose(Iterable, Object)}. */
   @SuppressWarnings("unchecked") public static <T> Lambda2<Iterable<? extends T>, T, Iterable<T>> composeRightLambda() {
-    return (Lambda2<Iterable<? extends T>, T, Iterable<T>>) ComposeRightLambda.INSTANCE;
+    return (Lambda2<Iterable<? extends T>, T, Iterable<T>>) (Lambda2<?, ?, ?>) ComposeRightLambda.INSTANCE;
   }
   
   private static class ComposeRightLambda<T> implements Lambda2<Iterable<? extends T>, T, Iterable<T>>, Serializable {
@@ -374,7 +374,8 @@ public final class IterUtil {
   /** Produce a lambda that invokes {@link #compose(Object, Iterable)}. */
   @SuppressWarnings("unchecked") 
   public static <T> Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>> composeLambda() {
-    return (Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>>) ComposeLambda.INSTANCE;
+    return (Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>>) (Lambda2<?, ?, ?>)
+           ComposeLambda.INSTANCE;
   }
   
   private static class ComposeLambda<T> 

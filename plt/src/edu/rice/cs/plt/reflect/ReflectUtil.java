@@ -38,8 +38,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
 import java.io.File;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
@@ -210,7 +208,7 @@ public final class ReflectUtil {
    * @see #loadObject(String, Object[])
    * @see #loadObject(ClassLoader, String, Class[], Object[])
    */
-  public static Object loadObject(String className, Class[] constructorSig, Object... constructorArgs) 
+  public static Object loadObject(String className, Class<?>[] constructorSig, Object... constructorArgs) 
     throws ReflectException {
     return loadObject(CURRENT_LOADER, className, constructorSig, constructorArgs);
   }
@@ -276,7 +274,7 @@ public final class ReflectUtil {
    * @see #loadObject(String, Object[])
    * @see #loadObject(String, Class[], Object[])
    */
-  public static Object loadObject(ClassLoader loader, String className, Class[] constructorSig, 
+  public static Object loadObject(ClassLoader loader, String className, Class<?>[] constructorSig, 
                                   Object... constructorArgs) throws ReflectException {
     try {
       Class<?> c = Class.forName(className, true, loader);
@@ -321,12 +319,12 @@ public final class ReflectUtil {
     return invokeStaticMethod(loader, className, methodName, getClasses(args), args);
   }
   
-  public static Object invokeStaticMethod(String className, String methodName, Class[] signature, Object... args) 
+  public static Object invokeStaticMethod(String className, String methodName, Class<?>[] signature, Object... args) 
     throws ReflectException {
     return invokeStaticMethod(CURRENT_LOADER, className, methodName, signature, args);
   }
   
-  public static Object invokeStaticMethod(ClassLoader loader, String className, String methodName, Class[] signature,
+  public static Object invokeStaticMethod(ClassLoader loader, String className, String methodName, Class<?>[] signature,
                                           Object... args) throws ReflectException {
     try {
       Class<?> c = Class.forName(className, true, loader);
@@ -383,7 +381,7 @@ public final class ReflectUtil {
    * 
    */
   public static Object loadLibraryAdapter(Iterable<? extends File> libraryPath, String adapterName, 
-                                          Class[] constructorSig,Object... constructorArgs) throws ReflectException {
+                                          Class<?>[] constructorSig,Object... constructorArgs) throws ReflectException {
     return loadLibraryAdapter(CURRENT_LOADER, libraryPath, adapterName, constructorSig, constructorArgs);
   }
 
@@ -426,7 +424,7 @@ public final class ReflectUtil {
    * 
    */
   public static Object loadLibraryAdapter(ClassLoader baseLoader, Iterable<? extends File> libraryPath, 
-                                          String adapterName, Class[] constructorSig, Object... constructorArgs) 
+                                          String adapterName, Class<?>[] constructorSig, Object... constructorArgs) 
     throws ReflectException {
     ClassLoader libraryLoader = new PathClassLoader(baseLoader, libraryPath);
     ClassLoader adapterLoader = new PreemptingClassLoader(libraryLoader, adapterName);

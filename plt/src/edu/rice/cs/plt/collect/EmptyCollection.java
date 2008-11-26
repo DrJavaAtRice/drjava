@@ -62,7 +62,7 @@ public abstract class EmptyCollection<T> implements Collection<T>, SizedIterable
   
   public Object[] toArray() { return new Object[0]; }
   
-  public <T> T[] toArray(T[] a) {
+  public <S> S[] toArray(S[] a) {
     if (a.length > 0) { a[0] = null; }
     return a;
   }

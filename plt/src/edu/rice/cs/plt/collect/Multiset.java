@@ -35,7 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.Iterator;
 import edu.rice.cs.plt.iter.SizedIterable;
 
@@ -91,7 +90,7 @@ public interface Multiset<T> extends Collection<T>, SizedIterable<T> {
   public Object[] toArray();
   
   /** Fill an array with the contents of the multiset. */
-  public <T> T[] toArray(T[] fill);
+  public <S> S[] toArray(S[] fill);
   
   /**
    * Add a single instance of {@code val} to the multiset.

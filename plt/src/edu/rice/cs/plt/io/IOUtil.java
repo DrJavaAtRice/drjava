@@ -35,7 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.io;
 
 import java.io.*;
-import java.util.StringTokenizer;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.regex.Pattern;

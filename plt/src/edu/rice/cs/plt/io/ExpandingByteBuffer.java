@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.LinkedList;
 
 /**
  * <p>A byte buffer of arbitrary size to be used with InputStreams and OutputStreams.  The

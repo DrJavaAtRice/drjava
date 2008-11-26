@@ -132,7 +132,7 @@ public class PathClassLoaderTest extends ClassLoaderTestCase {
     try {
       Class<?> c = l.loadClass(className);
       Object instance = c.newInstance();
-      int result = (Integer) c.getMethod("get").invoke(instance);
+      @SuppressWarnings("unused") int result = (Integer) c.getMethod("get").invoke(instance);
     }
     catch (Exception e) { return; }
     fail("Able to invoke get() in class " + className);

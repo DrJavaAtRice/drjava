@@ -35,13 +35,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.*;
-import java.util.Map.Entry;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.iter.ImmutableIterator;
-import edu.rice.cs.plt.iter.ImmutableIterable;
 import edu.rice.cs.plt.iter.MappedIterator;
-import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.object.Composite;
 import edu.rice.cs.plt.object.ObjectUtil;
 

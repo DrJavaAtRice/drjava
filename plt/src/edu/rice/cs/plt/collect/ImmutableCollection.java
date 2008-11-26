@@ -76,7 +76,7 @@ public class ImmutableCollection<T> extends AbstractCollection<T>
   @Override public boolean contains(Object o) { return _delegate.contains(o); }
   @Override public boolean containsAll(Collection<?> c) { return _delegate.containsAll(c); }
   @Override public Object[] toArray() { return _delegate.toArray(); }
-  @Override public <T> T[] toArray(T[] a) { return _delegate.toArray(a); }
+  @Override public <S> S[] toArray(S[] a) { return _delegate.toArray(a); }
   
   @Override public boolean add(T o) { throw new UnsupportedOperationException(); }
   @Override public boolean addAll(Collection<? extends T> c) { throw new UnsupportedOperationException(); }
@@ -88,7 +88,7 @@ public class ImmutableCollection<T> extends AbstractCollection<T>
   protected boolean abstractCollectionIsEmpty() { return super.isEmpty(); }
   protected boolean abstractCollectionContains(Object o) { return super.contains(o); }
   protected Object[] abstractCollectionToArray() { return super.toArray(); }
-  protected <T> T[] abstractCollectionToArray(T[] a) { return super.toArray(a); }
+  protected <S> S[] abstractCollectionToArray(S[] a) { return super.toArray(a); }
   protected boolean abstractCollectionRemove(T o) { return super.remove(o); }
   protected boolean abstractCollectionContainsAll(Collection<?> c) { return super.containsAll(c); }
   protected boolean abstractCollectionAddAll(Collection<? extends T> c) { return super.addAll(c); }

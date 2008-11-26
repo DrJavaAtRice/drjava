@@ -62,7 +62,7 @@ public abstract class AbstractPredicateSet<T> extends AbstractSet<T> implements 
   /** Computes the size by traversing the iterator (requires linear time). */
   public int size(int bound) {
     int result = 0;
-    for (T elt : this) { result++; if (result == bound) break; }
+    for (@SuppressWarnings("unused") T elt : this) { result++; if (result == bound) break; }
     return result;
   }
   

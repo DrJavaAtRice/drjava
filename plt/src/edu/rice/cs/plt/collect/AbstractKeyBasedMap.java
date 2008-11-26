@@ -35,7 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Collection;
 import java.util.Set;
 import java.util.Iterator;

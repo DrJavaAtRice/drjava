@@ -68,9 +68,6 @@ public final class DebugUtil {
    */
   public static volatile Log error;
   
-  private static final File DEFAULT_DEBUG_FILE = new File("debug-log.txt");
-  private static final File DEFAULT_ERROR_FILE = new File("error-log.txt");
-  
   static { initializeLogs(); }
   
   /**

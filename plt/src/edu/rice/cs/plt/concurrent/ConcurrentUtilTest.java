@@ -69,7 +69,7 @@ public class ConcurrentUtilTest extends TestCase {
     long time = w.stop();
     assertInRange(300, 700, time);
     
-    DelayedInterrupter i = new DelayedInterrupter(500);
+    new DelayedInterrupter(500);
     w.start();
     sleep(1000);
     time = w.stop();
@@ -82,7 +82,7 @@ public class ConcurrentUtilTest extends TestCase {
     long time = w.stop();
     assertInRange(300, 700, time);
     
-    DelayedInterrupter i = new DelayedInterrupter(500);
+    new DelayedInterrupter(500);
     w.start();
     work(1000);
     time = w.stop();

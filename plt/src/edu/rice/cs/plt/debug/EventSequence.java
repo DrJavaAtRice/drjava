@@ -203,7 +203,7 @@ public class EventSequence<T> extends AbstractIterable<T> implements SizedIterab
       }
     }
     if (expected.hasNext()) {
-      return Option.some(Pair.make(expected.next(), Option.<T>none()));
+      return Option.some(Pair.<T, Option<T>>make(expected.next(), Option.<T>none()));
     }
     return Option.none();
   }

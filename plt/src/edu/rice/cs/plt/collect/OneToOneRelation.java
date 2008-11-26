@@ -34,7 +34,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.collect;
 
-import java.util.Set;
 import edu.rice.cs.plt.tuple.Pair;
 
 /**
@@ -50,6 +49,7 @@ public interface OneToOneRelation<T1, T2> extends FunctionalRelation<T1, T2>, In
    *                                   {@code containsSecond(pair.second())} but not {@code contains(pair)}.
    */
   public boolean add(Pair<T1, T2> pair);
+  
   /**
    * Add {@code Pair.make(first, second)} to the set.  If the pair violates the cardinality constraint,
    * throw an exception.

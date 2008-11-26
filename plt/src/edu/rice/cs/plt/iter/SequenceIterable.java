@@ -36,7 +36,6 @@ package edu.rice.cs.plt.iter;
 
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda;
-import edu.rice.cs.plt.recur.RecurUtil;
 
 /**
  * <p>An iterable representing an infinite sequence.  The sequence is defined by an initial

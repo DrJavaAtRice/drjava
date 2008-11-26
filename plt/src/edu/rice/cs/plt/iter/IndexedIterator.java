@@ -34,8 +34,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.iter;
 
-import java.util.Iterator;
-
 /**
  * An iterator for index-based data structures.  Subclasses are only required to
  * implement {@link #size} and {@link #get}.

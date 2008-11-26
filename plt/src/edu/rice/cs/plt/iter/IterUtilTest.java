@@ -60,7 +60,7 @@ public class IterUtilTest extends TestCase {
   /**
    * Verify that the iterator contents exactly match the given sequence.  Does <em>not</em>
    * invoke {@code hasNext()} until iteration is complete.  This allows bugs related
-   * to state change occuring in {@code hasNext()} to be detected.
+   * to state change occurring in {@code hasNext()} to be detected.
    */
   public static void assertIteratorUnchecked(Iterator<?> iter, Object... expected) {
     for (Object exp : expected) {
@@ -69,17 +69,9 @@ public class IterUtilTest extends TestCase {
     assertFalse("Iterator longer than expected", iter.hasNext());
   }
 
-  private void assertEquals(int expected, Integer actual) {
-    assertEquals(expected, actual.intValue());
-  }
-  
-  private void assertEquals(char expected, Character actual) {
-    assertEquals(expected, actual.charValue());
-  }
-  
   public void testRelax() {
     List<Integer> is = new LinkedList<Integer>();
-    Iterable<Number> ns = IterUtil.<Number>relax(is);
+    @SuppressWarnings("unused") Iterable<Number> ns = IterUtil.<Number>relax(is);
     is.add(1);
     is.add(2);
     is.add(3);

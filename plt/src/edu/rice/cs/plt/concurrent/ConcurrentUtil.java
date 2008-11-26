@@ -74,7 +74,7 @@ public final class ConcurrentUtil {
   
   private static final class SleepingRunnable implements Runnable1<Long>, Serializable {
     public void run(Long delay) {
-      try { Thread.currentThread().sleep(delay); }
+      try { Thread.sleep(delay); }
       catch (InterruptedException e) { /* discard */ }
     }
   }
@@ -89,8 +89,8 @@ public final class ConcurrentUtil {
     public void run(Long delay) {
       long finished = System.currentTimeMillis() + delay;
       while (System.currentTimeMillis() < finished) {
-        if (Thread.currentThread().interrupted()) break;
-        for (int i = 0; i < 1000; i++) { long junk = delay * (delay - i); }
+        if (Thread.interrupted()) break;
+        for (int i = 0; i < 1000; i++) { @SuppressWarnings("unused") long junk = delay * (delay - i); }
       }
     }
   }

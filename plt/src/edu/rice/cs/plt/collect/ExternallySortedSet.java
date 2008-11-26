@@ -156,7 +156,7 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
    * @return  An array of the set elements in their sorted order.  As in the {@link Set} interface,
    *          changes to the array will not be reflected in the set.
    */
-  public <T> T[] toArray(T[] a) { return _set.toArray(a); }
+  public <S> S[] toArray(S[] a) { return _set.toArray(a); }
   
   /**
    * Add {@code element} to the set, sorted by {@code orderBy}.
@@ -272,7 +272,7 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
   public boolean removeAll(Iterable<?> i) {
     boolean result = false;
     // "|" instead of "||" to avoid short-circuit
-    for (Object o : i) { result = result | remove(i); }
+    for (Object o : i) { result = result | remove(o); }
     return result;
   }
   

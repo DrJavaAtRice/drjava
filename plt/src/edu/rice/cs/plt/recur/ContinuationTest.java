@@ -35,7 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.recur;
 
 import junit.framework.TestCase;
-import edu.rice.cs.plt.lambda.Lambda;
 
 public class ContinuationTest extends TestCase {
   

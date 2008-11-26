@@ -111,7 +111,6 @@ public abstract class ConsVisitor<T, Ret> implements Lambda<ConsList<? extends T
   
   
   /** Appends the given list to the end of another list */
-  @SuppressWarnings("unchecked")
   public static <T> ConsVisitor<T, ConsList<? extends T>> append(final ConsList<? extends T> rest) {
     return new Append<T>(rest);
   }

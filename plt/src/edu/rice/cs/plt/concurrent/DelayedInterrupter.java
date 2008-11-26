@@ -71,7 +71,7 @@ public class DelayedInterrupter {
   public void abort() {
     _interrupter.interrupt();
     if (Thread.currentThread() == _worker) {
-      Thread.interrupted(); // clear the interrupted status, in case it occured but wasn't detected
+      Thread.interrupted(); // clear the interrupted status, in case it occurred but wasn't detected
     }
   }
   

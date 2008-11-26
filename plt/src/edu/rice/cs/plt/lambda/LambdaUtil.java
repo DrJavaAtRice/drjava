@@ -317,7 +317,7 @@ public final class LambdaUtil {
   /** Create a lambda that applies its first argument to its second argument. */
   @SuppressWarnings("unchecked")
   public static <R> Lambda<Thunk<? extends R>, R> thunkValueLambda() {
-    return (Lambda<Thunk<? extends R>, R>) ThunkValueLambda.INSTANCE;
+    return (Lambda<Thunk<? extends R>, R>) (Lambda<?, ?>) ThunkValueLambda.INSTANCE;
   }
   
   private static final class ThunkValueLambda<R> implements Lambda<Thunk<? extends R>, R>, Serializable {
@@ -329,7 +329,7 @@ public final class LambdaUtil {
   /** Create a lambda that applies its first argument to its second argument. */
   @SuppressWarnings("unchecked")
   public static <T, R> Lambda2<Lambda<? super T, ? extends R>, T, R> applicationLambda() {
-    return (Lambda2<Lambda<? super T, ? extends R>, T, R>) ApplicationLambda.INSTANCE;
+    return (Lambda2<Lambda<? super T, ? extends R>, T, R>) (Lambda2<?, ?, ?>) ApplicationLambda.INSTANCE;
   }
   
   private static final class ApplicationLambda<T, R>
@@ -342,7 +342,8 @@ public final class LambdaUtil {
   /** Create a lambda that applies its first argument to its second argument. */
   @SuppressWarnings("unchecked")
   public static <T1, T2, R> Lambda3<Lambda2<? super T1, ? super T2, ? extends R>, T1, T2, R> binaryApplicationLambda() {
-    return (Lambda3<Lambda2<? super T1, ? super T2, ? extends R>, T1, T2, R>) BinaryApplicationLambda.INSTANCE;
+    return (Lambda3<Lambda2<? super T1, ? super T2, ? extends R>, T1, T2, R>) (Lambda3<?, ?, ?, ?>)
+           BinaryApplicationLambda.INSTANCE;
   }
   
   private static final class BinaryApplicationLambda<T1, T2, R>
@@ -357,7 +358,7 @@ public final class LambdaUtil {
   @SuppressWarnings("unchecked")
   public static <T1, T2, T3, R> 
     Lambda4<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, T1, T2, T3, R> ternaryApplicationLambda() {
-    return (Lambda4<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, T1, T2, T3, R>) 
+    return (Lambda4<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, T1, T2, T3, R>) (Lambda4<?, ?, ?, ?, ?>)
       TernaryApplicationLambda.INSTANCE;
   }
   
@@ -1213,8 +1214,8 @@ public final class LambdaUtil {
   }
   
   /** Treat a lambda accepting a 0-tuple argument as a Thunk. */
-  public static <R> Thunk<R> flatten0(Lambda<? super Null, ? extends R> lambda) {
-    return new BindFirstThunk<Null, R>(lambda, Null.INSTANCE);
+  public static <T, R> Thunk<R> flatten0(Lambda<? super Null<T>, ? extends R> lambda) {
+    return new BindFirstThunk<Null<T>, R>(lambda, Null.<T>make());
   }
   
   /** Treat a lambda accepting a Pair argument as a Lambda2. */
@@ -1298,8 +1299,8 @@ public final class LambdaUtil {
   }
 
   /** Treat a runnable accepting a 0-tuple argument as a Runnable. */
-  public static Runnable flatten0(Runnable1<? super Null> runnable) {
-    return new BindFirstRunnable<Null>(runnable, Null.INSTANCE);
+  public static <T> Runnable flatten0(Runnable1<? super Null<T>> runnable) {
+    return new BindFirstRunnable<Null<T>>(runnable, Null.<T>make());
   }
   
   /** Treat a runnable accepting a Pair argument as a Runnable2. */
@@ -1343,14 +1344,14 @@ public final class LambdaUtil {
   }
   
   /** Treat a Thunk as a unary lambda accepting a 0-tuple argument. */
-  public static <R> Lambda<Null, R> unary(Thunk<? extends R> thunk) {
+  public static <R> Lambda<Null<?>, R> unary(Thunk<? extends R> thunk) {
     return new UnaryThunk<R>(thunk);
   }
   
-  private static final class UnaryThunk<R> implements Lambda<Null, R>, Serializable {
+  private static final class UnaryThunk<R> implements Lambda<Null<?>, R>, Serializable {
     private final Thunk<? extends R> _thunk;
     public UnaryThunk(Thunk<? extends R> thunk) { _thunk = thunk; }
-    public R value(Null arg) { return _thunk.value(); }
+    public R value(Null<?> arg) { return _thunk.value(); }
   }
   
   /** Treat a Lambda2 as a unary lambda accepting a Pair argument. */
@@ -1446,14 +1447,14 @@ public final class LambdaUtil {
   }
   
   /** Treat a Runnable as a Runnable1 accepting a 0-tuple argument. */
-  public static Runnable1<Null> unary(Runnable runnable) {
+  public static Runnable1<Null<?>> unary(Runnable runnable) {
     return new UnaryRunnable(runnable);
   }
   
-  private static final class UnaryRunnable implements Runnable1<Null>, Serializable {
+  private static final class UnaryRunnable implements Runnable1<Null<?>>, Serializable {
     private final Runnable _runnable;
     public UnaryRunnable(Runnable runnable) { _runnable = runnable; }
-    public void run(Null arg) { _runnable.run(); }
+    public void run(Null<?> arg) { _runnable.run(); }
   }
   
   /** Treat a Runnable2 as a Runnable1 accepting a Pair argument. */
@@ -1514,7 +1515,7 @@ public final class LambdaUtil {
     private final Lambda<? super T, ? extends R> _lambda;
     public WrappedLiftedLambda(Lambda<? super T, ? extends R> lambda) { _lambda = lambda; }
     public Option<R> value(Option<? extends T> arg) {
-      if (arg.isSome()) { return Option.some(_lambda.value(arg.unwrap())); }
+      if (arg.isSome()) { return Option.<R>some(_lambda.value(arg.unwrap())); }
       else { return Option.none(); }
     }
   }
@@ -1532,7 +1533,7 @@ public final class LambdaUtil {
     private final Lambda2<? super T1, ? super T2, ? extends R> _lambda;
     public WrappedLiftedLambda2(Lambda2<? super T1, ? super T2, ? extends R> lambda) { _lambda = lambda; }
     public Option<R> value(Option<? extends T1> arg1, Option<? extends T2> arg2) {
-      if (arg1.isSome() && arg2.isSome()) { return Option.some(_lambda.value(arg1.unwrap(), arg2.unwrap())); }
+      if (arg1.isSome() && arg2.isSome()) { return Option.<R>some(_lambda.value(arg1.unwrap(), arg2.unwrap())); }
       else { return Option.none(); }
     }
   }
@@ -1552,7 +1553,7 @@ public final class LambdaUtil {
     public WrappedLiftedLambda3(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda) { _lambda = lambda; }
     public Option<R> value(Option<? extends T1> arg1, Option<? extends T2> arg2, Option<? extends T3> arg3) {
       if (arg1.isSome() && arg2.isSome() && arg3.isSome()) {
-        return Option.some(_lambda.value(arg1.unwrap(), arg2.unwrap(), arg3.unwrap()));
+        return Option.<R>some(_lambda.value(arg1.unwrap(), arg2.unwrap(), arg3.unwrap()));
       }
       else { return Option.none(); }
     }
@@ -1577,7 +1578,7 @@ public final class LambdaUtil {
     public Option<R> value(Option<? extends T1> arg1, Option<? extends T2> arg2, Option<? extends T3> arg3,
                            Option<? extends T4> arg4) {
       if (arg1.isSome() && arg2.isSome() && arg3.isSome() && arg4.isSome()) {
-        return Option.some(_lambda.value(arg1.unwrap(), arg2.unwrap(), arg3.unwrap(), arg4.unwrap()));
+        return Option.<R>some(_lambda.value(arg1.unwrap(), arg2.unwrap(), arg3.unwrap(), arg4.unwrap()));
       }
       else { return Option.none(); }
     }
@@ -2155,8 +2156,8 @@ public final class LambdaUtil {
     }
     public Option<R> value() {
       try {
-        if (_filterNull) { return Option.wrap(_thunk.value()); }
-        else { return Option.some(_thunk.value()); }
+        if (_filterNull) { return Option.<R>wrap(_thunk.value()); }
+        else { return Option.<R>some(_thunk.value()); }
       }
       catch (RuntimeException e) {
         if (_filterException.contains(e)) { return Option.none(); }
@@ -2186,8 +2187,8 @@ public final class LambdaUtil {
     }
     public Option<R> value(T arg) {
       try {
-        if (_filterNull) { return Option.wrap(_lambda.value(arg)); }
-        else { return Option.some(_lambda.value(arg)); }
+        if (_filterNull) { return Option.<R>wrap(_lambda.value(arg)); }
+        else { return Option.<R>some(_lambda.value(arg)); }
       }
       catch (RuntimeException e) {
         if (_filterException.contains(e)) { return Option.none(); }
@@ -2218,8 +2219,8 @@ public final class LambdaUtil {
     }
     public Option<R> value(T1 arg1, T2 arg2) {
       try {
-        if (_filterNull) { return Option.wrap(_lambda.value(arg1, arg2)); }
-        else { return Option.some(_lambda.value(arg1, arg2)); }
+        if (_filterNull) { return Option.<R>wrap(_lambda.value(arg1, arg2)); }
+        else { return Option.<R>some(_lambda.value(arg1, arg2)); }
       }
       catch (RuntimeException e) {
         if (_filterException.contains(e)) { return Option.none(); }
@@ -2250,8 +2251,8 @@ public final class LambdaUtil {
     }
     public Option<R> value(T1 arg1, T2 arg2, T3 arg3) {
       try {
-        if (_filterNull) { return Option.wrap(_lambda.value(arg1, arg2, arg3)); }
-        else { return Option.some(_lambda.value(arg1, arg2, arg3)); }
+        if (_filterNull) { return Option.<R>wrap(_lambda.value(arg1, arg2, arg3)); }
+        else { return Option.<R>some(_lambda.value(arg1, arg2, arg3)); }
       }
       catch (RuntimeException e) {
         if (_filterException.contains(e)) { return Option.none(); }
@@ -2283,8 +2284,8 @@ public final class LambdaUtil {
     }
     public Option<R> value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
       try {
-        if (_filterNull) { return Option.wrap(_lambda.value(arg1, arg2, arg3, arg4)); }
-        else { return Option.some(_lambda.value(arg1, arg2, arg3, arg4)); }
+        if (_filterNull) { return Option.<R>wrap(_lambda.value(arg1, arg2, arg3, arg4)); }
+        else { return Option.<R>some(_lambda.value(arg1, arg2, arg3, arg4)); }
       }
       catch (RuntimeException e) {
         if (_filterException.contains(e)) { return Option.none(); }

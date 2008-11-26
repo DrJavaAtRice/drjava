@@ -35,11 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.reflect;
 
 import java.net.URL;
-import java.util.Enumeration;
 import java.io.InputStream;
-
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.iter.EmptyIterator;
 
 /**
  * A class loader that will load no classes.  Useful as the root of class loader trees

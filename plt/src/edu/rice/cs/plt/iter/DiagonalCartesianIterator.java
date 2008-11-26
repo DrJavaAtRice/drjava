@@ -35,7 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.LinkedList;
 import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.plt.object.Composite;

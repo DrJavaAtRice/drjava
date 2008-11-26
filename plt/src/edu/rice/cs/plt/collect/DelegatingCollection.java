@@ -73,7 +73,7 @@ public class DelegatingCollection<T> extends AbstractCollection<T> implements Si
   public boolean containsAll(Collection<?> c) { return _delegate.containsAll(c); }
   public Iterator<T> iterator() { return _delegate.iterator(); }
   public Object[] toArray() { return _delegate.toArray(); }
-  public <T> T[] toArray(T[] a) { return _delegate.toArray(a); }
+  public <S> S[] toArray(S[] a) { return _delegate.toArray(a); }
   
   public boolean add(T o) { return _delegate.add(o); }
   public boolean addAll(Collection<? extends T> c) { return _delegate.addAll(c); }
@@ -87,7 +87,7 @@ public class DelegatingCollection<T> extends AbstractCollection<T> implements Si
   protected boolean abstractCollectionIsEmpty() { return super.isEmpty(); }
   protected boolean abstractCollectionContains(Object o) { return super.contains(o); }
   protected Object[] abstractCollectionToArray() { return super.toArray(); }
-  protected <T> T[] abstractCollectionToArray(T[] a) { return super.toArray(a); }
+  protected <S> S[] abstractCollectionToArray(S[] a) { return super.toArray(a); }
   protected boolean abstractCollectionRemove(T o) { return super.remove(o); }
   protected boolean abstractCollectionContainsAll(Collection<?> c) { return super.containsAll(c); }
   protected boolean abstractCollectionAddAll(Collection<? extends T> c) { return super.addAll(c); }

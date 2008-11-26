@@ -162,18 +162,11 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
       ExternallySortedSet<V, C> set = _map.get(e.getKey());
       if (set == null) { set = new ExternallySortedSet<V, C>(); _map.put(e.getKey(), set); }
       _size -= set.size();
-      // capture: e is Map.Entry<k, s>; getValue() is s
-      K k = e.getKey();
       
-      // The following generates an apparently incorrect type error:
+      // The following generates an incorrect type error (javac 5, fixed in javac 6):
       //result = result | set.addAll(e.getValue()); // "|" instead of "||" to avoid short-circuit
-
-      // So does this:
-      //ExternallySortedSet<? extends V, ? extends C> s = e.getValue();
-      //result = result | set.addAll(s); // "|" instead of "||" to avoid short-circuit
-      
       // The workaround:
-      ExternallySortedSet s = e.getValue();
+      @SuppressWarnings("unchecked") ExternallySortedSet s = e.getValue();
       @SuppressWarnings("unchecked") boolean newResult = set.addAll(s);
       result = result | newResult;
       

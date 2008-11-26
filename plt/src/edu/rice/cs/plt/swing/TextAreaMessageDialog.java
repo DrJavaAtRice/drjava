@@ -34,7 +34,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.swing;
 
-import java.awt.Point;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Component;

@@ -38,7 +38,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.LinkedList;
 
 /**
  * <p>A character buffer of arbitrary size to be used with Readers and Writers.  The

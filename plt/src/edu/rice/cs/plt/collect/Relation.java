@@ -34,8 +34,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.collect;
 
-import java.util.Set;
-import java.util.Map;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Predicate2;
 

@@ -36,7 +36,6 @@ package edu.rice.cs.plt.swing;
 
 import java.io.File;
 import java.io.Reader;
-import java.io.IOException;
 // import java.io.FileFilter;  not imported to avoid ambiguity
 import java.util.Map;
 import java.util.HashMap;

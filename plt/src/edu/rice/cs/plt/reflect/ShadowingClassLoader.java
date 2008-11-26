@@ -34,14 +34,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.reflect;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.NoSuchElementException;
 import java.net.URL;
-
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.io.IOUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 

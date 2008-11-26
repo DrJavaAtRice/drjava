@@ -44,8 +44,6 @@ import java.util.Date;
 
 import edu.rice.cs.plt.text.TextUtil;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.lambda.WrappedException;

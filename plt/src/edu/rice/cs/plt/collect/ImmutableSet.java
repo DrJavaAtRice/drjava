@@ -35,9 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.Set;
-import java.util.Collection;
-import java.util.Iterator;
-import edu.rice.cs.plt.iter.ImmutableIterator;
 
 /**
  * Wraps a set in an immutable interface.  Similar to {@link java.util.Collections#unmodifiableSet},

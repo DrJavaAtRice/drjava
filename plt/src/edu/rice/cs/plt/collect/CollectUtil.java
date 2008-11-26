@@ -38,7 +38,6 @@ import java.util.*;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.Option;
-import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -62,7 +61,7 @@ public final class CollectUtil {
    * @see HashSet#HashSet()
    */
   @SuppressWarnings("unchecked") public static <T> Thunk<Set<T>> hashSetFactory() {
-    return (Thunk<Set<T>>) DefaultHashSetFactory.INSTANCE;
+    return (Thunk<Set<T>>) (Thunk<?>) DefaultHashSetFactory.INSTANCE;
   }
   
   private static final class DefaultHashSetFactory<T> implements Thunk<Set<T>>, Serializable {
@@ -90,7 +89,7 @@ public final class CollectUtil {
    * @see LinkedHashSet#LinkedHashSet()
    */
   @SuppressWarnings("unchecked") public static <T> Thunk<Set<T>> linkedHashSetFactory() {
-    return (Thunk<Set<T>>) DefaultLinkedHashSetFactory.INSTANCE;
+    return (Thunk<Set<T>>) (Thunk<?>) DefaultLinkedHashSetFactory.INSTANCE;
   }
   
   private static final class DefaultLinkedHashSetFactory<T> implements Thunk<Set<T>>, Serializable {
@@ -149,7 +148,7 @@ public final class CollectUtil {
    * @see HashMap#HashMap()
    */
   @SuppressWarnings("unchecked") public static <K, V> Thunk<Map<K, V>> hashMapFactory() {
-    return (Thunk<Map<K, V>>) DefaultHashMapFactory.INSTANCE;
+    return (Thunk<Map<K, V>>) (Thunk<?>) DefaultHashMapFactory.INSTANCE;
   }
   
   private static final class DefaultHashMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
@@ -178,7 +177,7 @@ public final class CollectUtil {
    * @see LinkedHashMap#LinkedHashMap()
    */
   @SuppressWarnings("unchecked") public static <K, V> Thunk<Map<K, V>> linkedHashMapFactory() {
-    return (Thunk<Map<K, V>>) DefaultLinkedHashMapFactory.INSTANCE;
+    return (Thunk<Map<K, V>>) (Thunk<?>) DefaultLinkedHashMapFactory.INSTANCE;
   }
   
   private static final class DefaultLinkedHashMapFactory<K, V> implements Thunk<Map<K, V>>, Serializable {
@@ -239,7 +238,7 @@ public final class CollectUtil {
    * @see ArrayList#ArrayList()
    */
   @SuppressWarnings("unchecked") public static <T> Thunk<List<T>> arrayListFactory() {
-    return (Thunk<List<T>>) DefaultArrayListFactory.INSTANCE;
+    return (Thunk<List<T>>) (Thunk<?>) DefaultArrayListFactory.INSTANCE;
   }
   
   private static final class DefaultArrayListFactory<T> implements Thunk<List<T>>, Serializable {
@@ -267,7 +266,7 @@ public final class CollectUtil {
    * @see LinkedList#LinkedList()
    */
   @SuppressWarnings("unchecked") public static <T> Thunk<List<T>> linkedListFactory() {
-    return (Thunk<List<T>>) DefaultLinkedListFactory.INSTANCE;
+    return (Thunk<List<T>>) (Thunk<?>) DefaultLinkedListFactory.INSTANCE;
   }
   
   private static final class DefaultLinkedListFactory<T> implements Thunk<List<T>>, Serializable {
@@ -669,7 +668,7 @@ public final class CollectUtil {
   
   public static <T> Set<T> functionClosure(Set<? extends T> base, final Lambda<? super T, ? extends T> function) {
     Lambda<T, Set<T>> neighbors = new Lambda<T, Set<T>>() {
-      public Set<T> value(T node) { return Collections.singleton(function.value(node)); }
+      public Set<T> value(T node) { return Collections.<T>singleton(function.value(node)); }
     };
     return graphClosure(base, neighbors);
   }

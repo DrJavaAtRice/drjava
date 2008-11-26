@@ -34,9 +34,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.tuple;
 
-import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.plt.lambda.LambdaUtil;
-
 /**
  * A wrapper for optional values.  This provides a strictly-typed alternative to using
  * {@code null} to represent the absence of a value.  Options have two variants: "some"

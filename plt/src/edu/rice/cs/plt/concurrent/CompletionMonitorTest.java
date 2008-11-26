@@ -68,7 +68,7 @@ public class CompletionMonitorTest extends TestCase {
     
     as.reset();
     assertFalse(as.isSignalled());
-    DelayedInterrupter interrupter3 = new DelayedInterrupter(50);
+    @SuppressWarnings("unused") DelayedInterrupter interrupter3 = new DelayedInterrupter(50);
     try { as.ensureSignalled(); fail("Monitor should not be signalled"); }
     catch (InterruptedException e) { /* expected behavior */ }
   }

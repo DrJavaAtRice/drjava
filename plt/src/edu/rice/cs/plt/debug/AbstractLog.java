@@ -42,7 +42,6 @@ import java.text.SimpleDateFormat;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.iter.BinaryMappedIterable;
-import edu.rice.cs.plt.iter.SkipFirstIterable;
 import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.plt.lambda.LambdaUtil;

@@ -37,8 +37,8 @@ package edu.rice.cs.plt.tuple;
 /**
  * An empty tuple.  There is only one accessible instance, the {@code INSTANCE} singleton, which has
  * arbitrarily-chosen type argument {@code Void} ({@code Option<null>} would make more sense, but is 
- * not expressible).  Clients needing a specific kind of {@code Option} can perform an unsafe cast on 
- * the singleton to produce the desired type (this is done in {@link Option#none}).
+ * not expressible).  Clients needing a specific kind of {@code Null} can perform an unsafe cast on 
+ * the singleton to produce the desired type (this is done in {@link Null#make}).
  */
 public class Null<T> extends Option<T> {
   
@@ -68,4 +68,7 @@ public class Null<T> extends Option<T> {
   /** Defined in terms of identity (since the singleton is the only accessible instance) */
   protected int generateHashCode() { return System.identityHashCode(this); }
   
+  /** Return a singleton, cast to the appropriate type. */
+  @SuppressWarnings("unchecked")
+  public static <T> Null<T> make() { return (Null<T>) INSTANCE; }
 }  

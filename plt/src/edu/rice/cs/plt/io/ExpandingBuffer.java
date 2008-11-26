@@ -34,10 +34,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.io;
 
-import java.io.Reader;
-import java.io.Writer;
-import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.Serializable;
 import java.util.LinkedList;
 

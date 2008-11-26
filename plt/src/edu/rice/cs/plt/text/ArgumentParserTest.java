@@ -41,8 +41,6 @@ import junit.framework.TestCase;
 
 public class ArgumentParserTest extends TestCase {
   
-  private static final Iterable<String> EMPTY = IterUtil.empty();
-  
   public void testParseEmpty() {
     ArgumentParser empty = new ArgumentParser();
 
