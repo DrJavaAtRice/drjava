@@ -37,9 +37,9 @@ package edu.rice.cs.plt.collect;
 import edu.rice.cs.plt.tuple.Pair;
 
 /**
- * An relation that delegates all operations to a wrapped relation.  Subclasses can be defined that
+ * A relation that delegates all operations to a wrapped relation.  Subclasses can be defined that
  * override a few of the methods, while maintaining the default delegation behavior in most cases.
- * Subclasses can also invoke the overridden methods in {@link AbstractCollection} to use the
+ * Subclasses can also invoke the overridden methods in {@link java.util.AbstractCollection} to use the
  * default implementations there by invoking, for example, {@link #abstractCollectionAddAll}
  * (see {@link java.util.AbstractCollection} for details on the default implementations).
  */

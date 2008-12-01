@@ -181,7 +181,7 @@ public final class ReflectUtil {
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
    * the object.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
@@ -200,7 +200,7 @@ public final class ReflectUtil {
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
    * the object.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
@@ -226,7 +226,7 @@ public final class ReflectUtil {
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
    * the object.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
@@ -247,7 +247,7 @@ public final class ReflectUtil {
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
    * the object.</p>
    * 
    * @param loader  A class loader used to load the specified class

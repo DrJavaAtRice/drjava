@@ -45,7 +45,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 /**
  * <p>A RelationIndex implementation that maintains concrete data structures to index the contents of
  * the relation.  To support mutation in <em>other</em> indices to reflect changes made directly to
- * sets and iterators produced by this index, clients should override the {@link addToRelation},
+ * sets and iterators produced by this index, clients should override the {@link #addToRelation},
  * {@link #removeFromRelation}, and {@link #clearRelation} methods.</p>
  * 
  * <p>Keys must have a valid {@code hashCode()} implementation.</p>

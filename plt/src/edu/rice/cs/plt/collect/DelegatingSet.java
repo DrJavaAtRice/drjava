@@ -40,9 +40,9 @@ import java.util.Set;
  * An implementation of {@link PredicateSet} that delegates all operations to a wrapped
  * set.  Subclasses can be defined that override a few of the methods, while maintaining
  * the default delegation behavior in most cases.  Subclasses can also invoke the overridden
- * methods in {@link AbstractCollection} to use the default implementations there by invoking,
- * for example, {@link #abstractCollectionAddAll} (see {@link java.util.AbstractCollection}
- * for details on the default implementations).
+ * methods in {@link java.util.AbstractCollection} to use the default implementations there by 
+ * invoking, for example, {@link #abstractCollectionAddAll} (see 
+ * {@link java.util.AbstractCollection} for details on the default implementations).
  */
 public class DelegatingSet<T> extends DelegatingCollection<T> implements PredicateSet<T> {
   

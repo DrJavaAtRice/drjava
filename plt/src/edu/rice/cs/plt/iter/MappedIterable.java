@@ -43,8 +43,8 @@ import edu.rice.cs.plt.object.ObjectUtil;
  * An Iterable containing all the values in the provided Iterable after applying some 
  * specified transformation.
  * 
- * @param S  The element type of the original list
- * @param T  The element type of the transformed list
+ * @param <S>  The element type of the original list
+ * @param <T>  The element type of the transformed list
  */
 public class MappedIterable<S, T> extends AbstractIterable<T>
                                   implements SizedIterable<T>, OptimizedLastIterable<T>,

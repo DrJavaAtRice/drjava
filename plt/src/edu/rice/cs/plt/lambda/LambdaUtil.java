@@ -85,7 +85,7 @@ public final class LambdaUtil {
   
   /** An object that functions as a predicate for all arities. */
   public static interface GeneralPredicate
-    extends Predicate<Object>, Predicate2<Object, Object>, Predicate3<Object, Object, Object>, 
+    extends Condition, Predicate<Object>, Predicate2<Object, Object>, Predicate3<Object, Object, Object>, 
             Predicate4<Object, Object, Object, Object> {}
   
   /** A runnable that does nothing. */
@@ -105,6 +105,7 @@ public final class LambdaUtil {
   
   private static final class True implements GeneralPredicate, Serializable {
     private True() {}
+    public boolean isTrue() { return true; }
     public boolean contains(Object o) { return true; }
     public boolean contains(Object o1, Object o2) { return true; }
     public boolean contains(Object o1, Object o2, Object o3) { return true; }
@@ -116,6 +117,7 @@ public final class LambdaUtil {
   
   private static final class False implements GeneralPredicate, Serializable {
     private False() {}
+    public boolean isTrue() { return true; }
     public boolean contains(Object o) { return false; }
     public boolean contains(Object o1, Object o2) { return false; }
     public boolean contains(Object o1, Object o2, Object o3) { return false; }
@@ -468,6 +470,21 @@ public final class LambdaUtil {
     public R value(T1 arg1, T2 arg2, T3 arg3, Object arg4) { return _l.value(arg1, arg2, arg3); }
   }
   
+  
+  /** Create a {@code GeneralPredicate} equivalent to {@code cond} that ignores any arguments. */
+  public static GeneralPredicate promote(Condition cond) {
+    return new PromotedGeneralPredicate(cond);
+  }
+
+  private static final class PromotedGeneralPredicate implements GeneralPredicate, Serializable {
+    private final Condition _c;
+    public PromotedGeneralPredicate(Condition c) { _c = c; }
+    public boolean isTrue() { return _c.isTrue(); }
+    public boolean contains(Object arg) { return _c.isTrue(); }
+    public boolean contains(Object arg1, Object arg2) { return _c.isTrue(); }
+    public boolean contains(Object arg1, Object arg2, Object arg3) { return _c.isTrue(); }
+    public boolean contains(Object arg1, Object arg2, Object arg3, Object arg4) { return _c.isTrue(); }
+  }
   
   /** Create a {@code Predicate2} equivalent to {@code pred} with an additional, ignored argument. */
   public static <T> Predicate2<T, Object> promote(Predicate<? super T> pred) {
@@ -881,6 +898,18 @@ public final class LambdaUtil {
   }
   
   
+  /** Bind a fixed argument to the given predicate, producing a condition. */
+  public static <T> Condition bindFirst(Predicate<? super T> pred, T arg) {
+    return new BindFirstCondition<T>(pred, arg);
+  }
+  
+  private static final class BindFirstCondition<T> implements Condition, Serializable {
+    private final Predicate<? super T> _pred;
+    private final T _arg;
+    public BindFirstCondition(Predicate<? super T> pred, T arg) { _pred = pred; _arg = arg; }
+    public boolean isTrue() { return _pred.contains(_arg); }
+  }
+  
   /** Bind a fixed argument to the given binary predicate, producing a unary prediate. */
   public static <T1, T2> Predicate<T2> bindFirst(Predicate2<? super T1, ? super T2> pred, T1 arg1) {
     return new BindFirstPredicate<T1, T2>(pred, arg1);
@@ -1258,6 +1287,11 @@ public final class LambdaUtil {
     }
   }
   
+  /** Treat a predicate accepting a 0-tuple argument as a Condition. */
+  public static <T> Condition flatten0(Predicate<? super Null<T>> pred) {
+    return new BindFirstCondition<Null<T>>(pred, Null.<T>make());
+  }
+  
   /** Treat a predicate accepting a Pair argument as a Predicate2. */
   public static <T1, T2> Predicate2<T1, T2> flatten2(Predicate<? super Pair<T1, T2>> pred) {
     return new FlattenedPredicate2<T1, T2>(pred);
@@ -1398,6 +1432,17 @@ public final class LambdaUtil {
     public R value(Quad<T1, T2, T3, T4> arg) {
       return _lambda.value(arg.first(), arg.second(), arg.third(), arg.fourth());
     }
+  }
+  
+  /** Treat a Condition as a unary predicate accepting a 0-tuple argument. */
+  public static Predicate<Null<?>> unary(Condition cond) {
+    return new UnaryCondition(cond);
+  }
+  
+  private static final class UnaryCondition implements Predicate<Null<?>>, Serializable {
+    private final Condition _cond;
+    public UnaryCondition(Condition cond) { _cond = cond; }
+    public boolean contains(Null<?> arg) { return _cond.isTrue(); }
   }
   
   /** Treat a Predicate2 as a unary predicate accepting a Pair argument. */
@@ -1585,8 +1630,19 @@ public final class LambdaUtil {
   }
   
   
+  /** Produce the negation ({@code !}) of {@code cond}. */
+  public static Condition negate(Condition cond) {
+    return new NegationCondition(cond);
+  }
+  
+  private static final class NegationCondition implements Condition, Serializable {
+    private final Condition _c; 
+    public NegationCondition(Condition c) { _c = c; }
+    public boolean isTrue() { return !_c.isTrue(); }
+  }
+  
   /** Produce the negation ({@code !}) of {@code pred}. */
-  public static <T> Predicate<T> negate(final Predicate<? super T> pred) {
+  public static <T> Predicate<T> negate(Predicate<? super T> pred) {
     return new NegationPredicate<T>(pred);
   }
   
@@ -1630,6 +1686,30 @@ public final class LambdaUtil {
     public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return !_p.contains(arg1, arg2, arg3, arg4); }
   }
   
+  
+  /** Produce the conjunction ({@code &&}) of {@code c1} and {@code c2}. */
+  public static Condition and(Condition c1, Condition c2) {
+    return new AndCondition(IterUtil.make(c1, c2));
+  }
+  
+  /** Produce the conjunction ({@code &&}) of {@code c1}, {@code c2}, and {@code c3}. */
+  public static Condition and(Condition c1, Condition c2, Condition c3) {
+    return new AndCondition(IterUtil.make(c1, c2, c3));
+  }
+  
+  /** Produce the conjunction ({@code &&}) of the given conditions. */
+  public static Condition and(Iterable<? extends Condition> conds) {
+    return new AndCondition(conds);
+  }
+  
+  private static final class AndCondition implements Condition, Serializable {
+    private final Iterable<? extends Condition> _conds;
+    public AndCondition(Iterable<? extends Condition> conds) { _conds = conds; }
+    public boolean isTrue() {
+      for (Condition c : _conds) { if (!c.isTrue()) { return false; } }
+      return true;
+    }
+  }
   
   /** Produce the conjunction ({@code &&}) of {@code p1} and {@code p2}. */
   public static <T> Predicate<T> and(Predicate<? super T> p1, Predicate<? super T> p2) {
@@ -1766,6 +1846,30 @@ public final class LambdaUtil {
   }
 
 
+  /** Produce the disjunction ({@code ||}) of {@code c1} and {@code c2}. */
+  public static Condition or(Condition c1, Condition c2) {
+    return new OrCondition(IterUtil.make(c1, c2));
+  }
+  
+  /** Produce the disjunction ({@code ||}) of {@code c1}, {@code c2}, and {@code c3}. */
+  public static Condition or(Condition c1, Condition c2, Condition c3) {
+    return new OrCondition(IterUtil.make(c1, c2, c3));
+  }
+  
+  /** Produce the disjunction ({@code ||}) of the given conditions. */
+  public static Condition or(Iterable<? extends Condition> conds) {
+    return new OrCondition(conds);
+  }
+  
+  private static final class OrCondition implements Condition, Serializable {
+    private final Iterable<? extends Condition> _conds;
+    public OrCondition(Iterable<? extends Condition> conds) { _conds = conds; }
+    public boolean isTrue() {
+      for (Condition c : _conds) { if (c.isTrue()) { return true; } }
+      return false;
+    }
+  }
+  
   /** Produce the disjunction ({@code ||}) of {@code p1} and {@code p2}. */
   public static <T> Predicate<T> or(Predicate<? super T> p1, Predicate<? super T> p2) {
     // explicit type argument required due to compiler (or language) bug
@@ -2041,6 +2145,17 @@ public final class LambdaUtil {
     public R value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { _r.run(arg1, arg2, arg3, arg4); return _result; }
   }
   
+  /** Create a condition based on an input that acts as a condition but is not typed as one. */
+  public static Condition asCondition(Thunk<? extends Boolean> thunk) {
+    return new ThunkCondition(thunk);
+  }
+  
+  private static final class ThunkCondition implements Condition, Serializable {
+    private final Thunk<? extends Boolean> _thunk;
+    public ThunkCondition(Thunk<? extends Boolean> thunk) { _thunk = thunk; }
+    public boolean isTrue() { return _thunk.value(); }
+  }
+  
   /** Create a predicate based on an input that acts as a predicate but is not typed as one. */
   public static <T> Predicate<T> asPredicate(Lambda<? super T, ? extends Boolean> lambda) {
     return new LambdaPredicate<T>(lambda);
@@ -2087,6 +2202,17 @@ public final class LambdaUtil {
     public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return _l.value(arg1, arg2, arg3, arg4); }
   }
   
+  
+  /** Create a Boolean thunk based on a condition. */
+  public static Thunk<Boolean> asThunk(Condition cond) {
+    return new ConditionThunk(cond);
+  }
+  
+  private static final class ConditionThunk implements Thunk<Boolean>, Serializable {
+    private final Condition _c;
+    public ConditionThunk(Condition c) { _c = c; }
+    public Boolean value() { return _c.isTrue(); }
+  }
   
   /** Create a Boolean lambda based on a predicate. */
   public static <T> Lambda<T, Boolean> asLambda(Predicate<? super T> predicate) {

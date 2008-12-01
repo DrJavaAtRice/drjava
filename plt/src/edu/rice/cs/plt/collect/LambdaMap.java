@@ -41,7 +41,7 @@ import edu.rice.cs.plt.lambda.Lambda;
  * A Map that can be treated as a Lambda.  The result of {@code value(x)} must always be the same
  * as the result of {@code get(x)}.  {@code keySet()} is also overridden to return a
  * {@link PredicateSet}s.
- * @see LambdaUtil#wrapPartial
+ * @see edu.rice.cs.plt.lambda.LambdaUtil#wrapPartial
  */
 public interface LambdaMap<K, V> extends Map<K, V>, Lambda<K, V> {
   public PredicateSet<K> keySet();

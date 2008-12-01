@@ -37,7 +37,7 @@ package edu.rice.cs.plt.lambda;
 /**
  * A lambda that doesn't have a return value (relying instead on side effects).
  * 
- * @param T  the argument type
+ * @param <T>  the argument type
  *
  * @see Runnable
  * @see Runnable2

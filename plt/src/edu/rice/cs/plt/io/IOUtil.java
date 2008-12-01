@@ -436,7 +436,7 @@ public final class IOUtil {
     return deleteRecursively(f, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
-  /** Helper method for {@link deleteRecursively(File)} */
+  /** Helper method for {@link #deleteRecursively(File)} */
   private static boolean deleteRecursively(File f, final RecursionStack<File> stack) {
     if (f.isDirectory()) {
       try {
@@ -465,7 +465,7 @@ public final class IOUtil {
     deleteOnExitRecursively(f, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
-  /** Helper method for {@link deleteRecursively(File)} */
+  /** Helper method for {@link #deleteRecursively(File)} */
   private static void deleteOnExitRecursively(File f, final RecursionStack<File> stack) {
     attemptDeleteOnExit(f);
     if (f.isDirectory()) {

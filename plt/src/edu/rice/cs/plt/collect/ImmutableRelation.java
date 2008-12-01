@@ -41,7 +41,7 @@ import edu.rice.cs.plt.tuple.Pair;
  * Wraps a relation in an immutable interface.  Analogous to {@link java.util.Collections#unmodifiableMap}.
  * Note that only only <em>this</em> interface with the data is immutable -- if the original data
  * structure is mutable, a client with direct access to that structure can still mutate it.
- * Subclasses can invoke the overridden methods in {@link AbstractCollection} to use the
+ * Subclasses can invoke the overridden methods in {@link java.util.AbstractCollection} to use the
  * default implementations there by invoking, for example, {@link #abstractCollectionAddAll}
  * (see {@link java.util.AbstractCollection} for details on the default implementations).
  */

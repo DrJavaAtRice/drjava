@@ -252,7 +252,9 @@ public class ConcurrentUtilTest extends TestCase {
     BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
     try {
       assertEquals("Test process", in.readLine());
-      assertTrue(TextUtil.contains(in.readLine(), classPath));
+      Iterable<File> expectedPath = IOUtil.parsePath(classPath);
+      Iterable<File> actualPath = IOUtil.parsePath(in.readLine());
+      assertTrue(IterUtil.containsAll(actualPath, expectedPath));
       assertEquals(workingDir, in.readLine());
       assertEquals(IterUtil.toString(args), in.readLine());
     }

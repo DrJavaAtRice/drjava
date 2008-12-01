@@ -52,7 +52,7 @@ public class WeakHashSet<T> extends AbstractSet<T> {
   /**
    * This set is implemented on top of a WeakHashMap. The elements of
    * the set are stored as the keys of the WeakHashMap, while the value
-   * is set to {@link NOT_NULL}
+   * is set to {@link #NOT_NULL}
    */
   private WeakHashMap<T, Object> _items;
   

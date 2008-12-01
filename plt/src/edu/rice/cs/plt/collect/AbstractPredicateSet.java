@@ -40,7 +40,7 @@ import java.util.AbstractSet;
  * An extension of AbstractSet that implements the PredicateSet interface.  Subclasses must
  * define {@link #contains}, {@link #iterator}, {@link #isInfinite}, {@link #hasFixedSize},
  * and {@link #isStatic}.  Mutable sets must also implement {@link #add} and the iterator's
- * {@link Iterator#remove} method.  Subclasses may also find it useful to override
+ * {@link java.util.Iterator#remove} method.  Subclasses may also find it useful to override
  * {@link #size(int)}, {@link #isEmpty}, {@link #remove}, and {@link #clear} for improved
  * efficiency.
  */

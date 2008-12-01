@@ -47,8 +47,8 @@ import edu.rice.cs.plt.object.ObjectUtil;
  * complexity of enumerating all permutations, this class is probably not suitable
  * for applications in which n is unbounded (or just intractably large).
  * 
- * @param T  The element type of the permuted lists; note that the iterator returns
- *           {@code Iterable<T>}s, not {@code T}s.
+ * @param <T>  The element type of the permuted lists; note that the iterator returns
+ *             {@code Iterable<T>}s, not {@code T}s.
  */
 public class PermutationIterable<T> extends AbstractIterable<Iterable<T>> 
                                     implements SizedIterable<Iterable<T>>, OptimizedLastIterable<Iterable<T>>,

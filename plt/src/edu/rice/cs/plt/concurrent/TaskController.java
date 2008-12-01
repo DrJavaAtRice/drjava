@@ -34,6 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
+import java.lang.reflect.InvocationTargetException;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.WrappedException;
 
@@ -77,7 +78,7 @@ public abstract class TaskController<R> implements Thunk<R> {
    * and block until it finishes.
    * @throws IllegalStateException  If the task is {@code CANCELLED}.
    * @throws WrappedException  Wraps an {@link InterruptedException} if the current thread is interrupted
-   *                           while waiting for the result, an {@link java.lang.reflect.InvocationTargetException} 
+   *                           while waiting for the result, an {@link InvocationTargetException} 
    *                           containing any error that was triggered while executing the task, or any other 
    *                           exception related to the implementation of the controller.
    */
@@ -112,8 +113,7 @@ public abstract class TaskController<R> implements Thunk<R> {
    * @throws InterruptedException  If the current thread is interrupted while waiting for a result
    * @throws InvocationTargetException  If <em>any</em> {@code Throwable} is thrown while executing the task.
    *                                    This follows the precedent of the {@code java.reflect} APIs, which wrap
-   *                                    exceptions, errors, and throwables in 
-   *                                    {@code java.lang.reflect.InvocationTargetException}s.
+   *                                    exceptions, errors, and throwables in {@code InvocationTargetException}s.
    * @throws Exception  If anything goes wrong in the task-running implementation.
    */
   protected abstract R getValue() throws Exception;

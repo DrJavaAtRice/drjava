@@ -39,7 +39,7 @@ import java.net.URL;
 import junit.framework.TestCase;
 
 /** Helpful assert methods for testing class loaders */
-public class ClassLoaderTestCase extends TestCase {
+public abstract class ClassLoaderTestCase extends TestCase {
   
   public static void assertLoadsClass(ClassLoader l, String name) {
     try { l.loadClass(name); }

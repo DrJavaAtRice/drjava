@@ -39,7 +39,7 @@ import java.util.Set;
 /**
  * Wraps a set in an immutable interface.  Similar to {@link java.util.Collections#unmodifiableSet},
  * but this class also implements {@link PredicateSet} and allows subclassing.
- * Subclasses can invoke the overridden methods in {@link AbstractCollection} to use the
+ * Subclasses can invoke the overridden methods in {@link java.util.AbstractCollection} to use the
  * default implementations there by invoking, for example, {@link #abstractCollectionAddAll}
  * (see {@link java.util.AbstractCollection} for details on the default implementations).
  */

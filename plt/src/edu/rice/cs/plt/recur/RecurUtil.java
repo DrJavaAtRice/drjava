@@ -117,7 +117,7 @@ public final class RecurUtil {
   
   /** 
    * Invokes {@link #safeToString(Object, Lambda, int, ArrayStringMode)} using a default 
-   * {@code infiniteString} like {@code "ClassName..."} or {@code "{ ... }"}, a default 
+   * {@code infiniteString} like {@code "ClassName..."} or <code>"{ ... }"</code>, a default 
    * {@code depth} of {@code 1}, and {@link ArrayStringMode#DEEP_BRACED} as a default array 
    * string mode.
    */
@@ -146,7 +146,7 @@ public final class RecurUtil {
 
   /** 
    * Invokes {@link #safeToString(Object, Lambda, int, ArrayStringMode)} using a default 
-   * {@code infiniteString} like {@code "ClassName..."} or {@code "{ ... }"}, and a default 
+   * {@code infiniteString} like {@code "ClassName..."} or <code>"{ ... }"</code>, and a default 
    * {@code depth} of {@code 1}.
    */
   public static String safeToString(Object obj, ArrayStringMode arrayMode) {
@@ -172,7 +172,7 @@ public final class RecurUtil {
   
   /** 
    * Invokes {@link #safeToString(Object, Lambda, int, ArrayStringMode)} using a default 
-   * {@code infiniteString} like {@code "ClassName..."} or {@code "{ ... }"}, and 
+   * {@code infiniteString} like {@code "ClassName..."} or <code>"{ ... }"</code>, and 
    * {@link ArrayStringMode#DEEP_BRACED} as a default array string mode.
    */
   public static String safeToString(Object obj, int depth) {
@@ -199,7 +199,7 @@ public final class RecurUtil {
 
   /** 
    * Invokes {@link #safeToString(Object, Lambda, int, ArrayStringMode)} using a default 
-   * {@code infiniteString} like {@code "ClassName..."} or {@code "{ ... }"}.
+   * {@code infiniteString} like {@code "ClassName..."} or <code>"{ ... }"</code>.
    */
   public static String safeToString(Object obj, int depth, ArrayStringMode arrayMode) {
     return safeToString(obj, DEFAULT_INF_STRING_GENERATOR.value(arrayMode), depth, arrayMode);
@@ -892,7 +892,7 @@ public final class RecurUtil {
       protected ArrayStringMode nestedMode() { return DEEP_BRACKETED; }
     },
     /**
-     * Arrays are printed like array initializers, using braces ({@code "{ 1, 2, 3 }"}); 
+     * Arrays are printed like array initializers, using braces (<code>"{ 1, 2, 3 }"</code>); 
      * nested arrays use {@link #TYPE_AND_SIZE}
      */
     SHALLOW_BRACED { 
@@ -902,7 +902,7 @@ public final class RecurUtil {
       protected ArrayStringMode nestedMode() { return TYPE_AND_SIZE; }
     }, 
     /**
-     * Arrays are printed like array initializers, using braces ({@code "{ 1, 2, 3 }"}); 
+     * Arrays are printed like array initializers, using braces (<code>"{ 1, 2, 3 }"</code>); 
      * nested arrays also use {@link #DEEP_BRACED}
      */
     DEEP_BRACED {

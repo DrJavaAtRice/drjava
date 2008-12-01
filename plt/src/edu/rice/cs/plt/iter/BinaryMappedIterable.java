@@ -44,9 +44,9 @@ import edu.rice.cs.plt.object.ObjectUtil;
  * An Iterable containing the results of some binary operation on two input lists 
  * (assumed to always have the same size).
  * 
- * @param T1  The element type of the first input list
- * @param T2  The element type of the second input list
- * @param R  The element type of the result list
+ * @param <T1>  The element type of the first input list
+ * @param <T2>  The element type of the second input list
+ * @param <R>  The element type of the result list
  */
 public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R> 
                                              implements SizedIterable<R>, OptimizedLastIterable<R>,

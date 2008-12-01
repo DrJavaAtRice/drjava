@@ -149,19 +149,53 @@ public final class IterUtil {
    */
   public static boolean contains(Iterable<?> iter, Object o) {
     if (iter instanceof Collection<?>) { return ((Collection<?>) iter).contains(o); }
+    else { return iteratedContains(iter, o); }
+  }
+  
+  /**
+   * Test whether the given objects all appear in when iterating over {@code iter}.  Uses the
+   * {@link Collection#containsAll} and {@link Collection#contains} methods where possible;
+   * otherwise, may take quadratic time.
+   * @see CollectUtil#containsAll
+   * @see #and
+   */
+  public static boolean containsAll(Iterable<?> iter, Iterable<?> subset) {
+    if (iter instanceof Collection<?>) { return CollectUtil.containsAll((Collection<?>) iter, subset); }
     else {
-      if (o == null) {
-        for (Object elt : iter) {
-          if (elt == null) { return true; }
-        }
-        return false;
+      for (Object o : subset) {
+        if (!iteratedContains(iter, o)) { return false; }
       }
-      else {
-        for (Object elt : iter) {
-          if (o.equals(elt)) { return true; }
-        }
-        return false;
+      return true;
+    }
+  }
+  
+  /**
+   * Test whether one of the given objects appears in an iteration of {@code iter}.  Uses the
+   * {@link Collection#contains} method where possible; otherwise, may take quadratic time.
+   * @see #or
+   */
+  public static boolean containsAny(Iterable<?> iter, Iterable<?> candidates) {
+    if (iter instanceof Collection<?>) { return CollectUtil.containsAny((Collection<?>) iter, candidates); }
+    else {
+      for (Object o : candidates) {
+        if (iteratedContains(iter, o)) { return true; }
       }
+      return false;
+    }
+  }
+  
+  private static boolean iteratedContains(Iterable<?> iter, Object o) {
+    if (o == null) {
+      for (Object elt : iter) {
+        if (elt == null) { return true; }
+      }
+      return false;
+    }
+    else {
+      for (Object elt : iter) {
+        if (o.equals(elt)) { return true; }
+      }
+      return false;
     }
   }
   

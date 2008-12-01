@@ -91,12 +91,12 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
   /** Create an empty list (via {@link Empty#make}) */
   public static <T> Empty<T> empty() { return Empty.<T>make(); }
     
-  /** Create a nonempty list (via {@link ConsList#ConsList}) */
+  /** Create a nonempty list (via {@link ConsList#ConsList()}) */
   public static <T> Nonempty<T> cons(T first, ConsList<? extends T> rest) {
     return new Nonempty<T>(first, rest);
   }
   
-  /** Create a singleton nonempty list (via {@link ConsList#ConsList}) */
+  /** Create a singleton nonempty list (via {@link ConsList#ConsList()}) */
   public static <T> Nonempty<T> singleton(T value) {
     return new Nonempty<T>(value, Empty.<T>make());
   }

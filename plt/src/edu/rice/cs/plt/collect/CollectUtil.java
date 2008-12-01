@@ -662,6 +662,24 @@ public final class CollectUtil {
     return false;
   }
 
+  /**
+   * Test whether a collection contains all the elements of a list.  Unlike {@link Collection#containsAll},
+   * defined for arbitrary {@code Iterable}s.  When possible, delegates to {@code c.containsAll()}.  
+   * @see IterUtil#and
+   * @see IterUtil#containsAll
+   */
+  public static boolean containsAll(Collection<?> c, Iterable<?> subset) {
+    if (subset instanceof Collection<?>) {
+      return c.containsAll((Collection<?>) subset);
+    }
+    else {
+      for (Object o : subset) {
+        if (!c.contains(o)) { return false; }
+      }
+      return true;
+    }
+  }
+
   public static <T> Set<T> functionClosure(T base, Lambda<? super T, ? extends T> function) {
     return functionClosure(Collections.singleton(base), function);
   }

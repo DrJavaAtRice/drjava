@@ -45,7 +45,7 @@ import edu.rice.cs.plt.iter.SizedIterable;
  * to an external {@code orderBy} value.  The {@code subSet()}, etc., methods are also adjusted 
  * to take in {@code orderBy} values rather than set elements.</p>
  * 
- * <p>The result is a set that works essentially like a {@link java.util.OrderedSet}
+ * <p>The result is a set that works essentially like a {@link java.util.TreeSet}
  * of {@link edu.rice.cs.plt.tuple.Pair}s in which one of the Pair elements is a Comparable, 
  * and for which a Comparator is correctly defined.  One significant difference is that this
  * implementation does not return {@code true} for the expression {@code add(1, 1) && add(1, 2)},
@@ -216,7 +216,7 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
     }
   }
   
-  /** Add the elements by invoking {@link #add(T, C)} on each one. */
+  /** Add the elements by invoking {@link #add} on each one. */
   private boolean checkedAddAll(ExternallySortedSet<? extends T, ? extends C> s) {
     boolean result = false;
     for (T t : s) {
@@ -227,7 +227,7 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
   }
   
   /** 
-   * Add the elements without calling {@link #add(T, C)} on each one, by simply taking the union 
+   * Add the elements without calling {@link #add} on each one, by simply taking the union 
    * of the two data structures.  This avoids a bounds check on each element.  Assumes that each 
    * element of {@code s} is within this set's bounds.
    */

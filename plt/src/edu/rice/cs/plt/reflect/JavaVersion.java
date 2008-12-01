@@ -104,7 +104,7 @@ public enum JavaVersion {
    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
    * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
    * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html">Sun's version specification</a>
+   * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
    */
   public static FullVersion parseFullVersion(String text) {
     String number;
@@ -155,7 +155,7 @@ public enum JavaVersion {
   /**
    * A full Java version, implemented for the sake of comparison between version numbers.
    * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html">Sun's version specification</a>
+   * @see <a href="http://java.sun.com/j2se/versioning_naming.html">The Sun version specification</a>
    */
   public static class FullVersion implements Comparable<FullVersion>, Serializable {
     private JavaVersion _majorVersion;

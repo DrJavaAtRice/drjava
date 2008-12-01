@@ -612,7 +612,7 @@ public final class ConcurrentUtil {
    * method providing the following defaults:
    * <ul>
    * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is {@link ReflectUtil.SYSTEM_CLASS_PATH}</li>
+   * <li>{@code classPath} is {@link ReflectUtil#SYSTEM_CLASS_PATH}</li>
    * <li>{@code workingDir} is the {@code user.dir} system property</li>
    * <li>{@code properties} is empty</li>
    * <li>{@code jvmParams} is empty</li>
@@ -662,7 +662,7 @@ public final class ConcurrentUtil {
    * method providing the following defaults:
    * <ul>
    * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is {@link ReflectUtil.SYSTEM_CLASS_PATH}, converted to an absolute form</li>
+   * <li>{@code classPath} is {@link ReflectUtil#SYSTEM_CLASS_PATH}, converted to an absolute form</li>
    * <li>{@code properties} is empty</li>
    * <li>{@code jvmParams} is empty</li>
    * </ul>

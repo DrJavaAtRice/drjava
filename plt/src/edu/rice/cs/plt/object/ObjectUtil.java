@@ -49,21 +49,21 @@ public final class ObjectUtil {
   /** Prime number used for hashing (approximately 2^32 divided by the golden ratio). */
   private static final int KNUTH_CONST = -1640531535; // 2654435761 (unsigned)
   
-  /** Optimized implementation of {@link hash(int[])} with 0 args. */
+  /** Optimized implementation of {@link #hash(int[])} with 0 args. */
   public static int hash() { return 1; }
   
-  /** Optimized implementation of {@link hash(int[])} with 1 arg. */
+  /** Optimized implementation of {@link #hash(int[])} with 1 arg. */
   public static int hash(int a) { return KNUTH_CONST ^ a; }
   
-  /** Optimized implementation of {@link hash(int[])}) with 2 args. */
+  /** Optimized implementation of {@link #hash(int[])}) with 2 args. */
   public static int hash(int a, int b) { return ((KNUTH_CONST ^ a) * KNUTH_CONST) ^ b; }
   
-  /** Optimized implementation of {@link hash(int[])} with 3 args. */
+  /** Optimized implementation of {@link #hash(int[])} with 3 args. */
   public static int hash(int a, int b, int c) {
     return ((((KNUTH_CONST ^ a) * KNUTH_CONST) ^ b) * KNUTH_CONST) ^ c;
   }
   
-  /** Optimized implementation of {@link hash(int[])} with 4 args. */
+  /** Optimized implementation of {@link #hash(int[])} with 4 args. */
   public static int hash(int a, int b, int c, int d) {
     return ((((((KNUTH_CONST ^ a) * KNUTH_CONST) ^ b) * KNUTH_CONST) ^ c) * KNUTH_CONST) ^ d;
   }
@@ -81,27 +81,27 @@ public final class ObjectUtil {
     return result;
   }
 
-  /** Optimized implementation of {@link hash(Object[])} with 1 arg. */
+  /** Optimized implementation of {@link #hash(Object[])} with 1 arg. */
   public static int hash(Object a) { return hash((a == null) ? 0 : a.hashCode()); }
   
-  /** Optimized implementation of {@link hash(Object[])}) with 2 args. */
+  /** Optimized implementation of {@link #hash(Object[])}) with 2 args. */
   public static int hash(Object a, Object b) {
     return hash((a == null) ? 0 : a.hashCode(), (b == null) ? 0 : b.hashCode());
   }
   
-  /** Optimized implementation of {@link hash(Object[])} with 3 args. */
+  /** Optimized implementation of {@link #hash(Object[])} with 3 args. */
   public static int hash(Object a, Object b, Object c) {
     return hash((a == null) ? 0 : a.hashCode(), (b == null) ? 0 : b.hashCode(),
                 (c == null) ? 0 : c.hashCode());
   }
   
-  /** Optimized implementation of {@link hash(Object[])} with 4 args. */
+  /** Optimized implementation of {@link #hash(Object[])} with 4 args. */
   public static int hash(Object a, Object b, Object c, Object d) {
     return hash((a == null) ? 0 : a.hashCode(), (b == null) ? 0 : b.hashCode(),
                 (c == null) ? 0 : c.hashCode(), (d == null) ? 0 : d.hashCode());
   }
   
-  /** Produce a hash code for an object in which {@code equals()} depends on the given values. */
+  /** Produce a hash code for an object in which {@code #equals()} depends on the given values. */
   public static int hash(Object... objs) {
     int len = objs.length;
     int[] keys = new int[len];

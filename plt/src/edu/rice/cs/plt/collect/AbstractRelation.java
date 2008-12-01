@@ -75,7 +75,7 @@ public abstract class AbstractRelation<T1, T2> extends AbstractPredicateSet<Pair
   /** Invokes {@link #add(Object, Object)}. */
   public boolean add(Pair<T1, T2> p) { return add(p.first(), p.second()); }
   
-  /** Invokes {@link #removeObjects} if the argument is a pair. */
+  /** Invokes {@link #remove(Object, Object)} if {@code contains(o)} is {@code true}. */
   public boolean remove(Object o) {
     Option<Pair<T1, T2>> cast = CollectUtil.castIfContains(this, o);
     if (cast.isSome()) { return remove(cast.unwrap().first(), cast.unwrap().second()); }
@@ -100,9 +100,10 @@ public abstract class AbstractRelation<T1, T2> extends AbstractPredicateSet<Pair
   /**
    * An inverse of the enclosing relation, defined in terms of {@link Pair#inverse}.  Mutation is
    * supported, with changes reflected in the enclosing relation.  Inherits the AbstractSet implementations
-   * of {@link AbstractSet#toArray()}, {@link AbstractSet#toArray(Object[])}, {@link AbstractSet#containsAll},
-   * {@link AbstractSet#addAll}, {@link AbstractSet#retainAll}, {@link AbstractSet#removeAll},
-   * {@code AbstractSet#toString()}, {@code equals(Object)}, and {@code hashCode()}.  All other
+   * of {@link java.util.AbstractSet#toArray()}, {@link java.util.AbstractSet#toArray(Object[])},
+   * {@link java.util.AbstractSet#containsAll}, {@link java.util.AbstractSet#addAll},
+   * {@link java.util.AbstractSet#retainAll}, {@link java.util.AbstractSet#removeAll},
+   * {@code java.util.AbstractSet#toString()}, {@code equals(Object)}, and {@code hashCode()}.  All other
    * methods delegate to their corresponding methods in the enclosing AbstractRelation (inverting pairs
    * as necessary).
    */

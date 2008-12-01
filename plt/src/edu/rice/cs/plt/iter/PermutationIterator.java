@@ -46,8 +46,8 @@ import java.util.Iterator;
  * factorial complexity of enumerating all permutations, this class is probably not suitable
  * for applications in which n is unbounded (or just intractably large).
  * 
- * @param T  The element type of the permuted lists; note that {@code next()} returns
- *           {@code Iterable<T>}s, not {@code T}s.
+ * @param <T>  The element type of the permuted lists; note that {@code next()} returns
+ *             {@code Iterable<T>}s, not {@code T}s.
  */
 public class PermutationIterator<T> extends ReadOnlyIterator<Iterable<T>> {
   

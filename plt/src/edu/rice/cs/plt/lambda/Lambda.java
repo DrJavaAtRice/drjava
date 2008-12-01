@@ -37,8 +37,8 @@ package edu.rice.cs.plt.lambda;
 /**
  * An arbitrary piece of code parameterized by an argument.
  * 
- * @param T  the argument type
- * @param R  the return type
+ * @param <T>  the argument type
+ * @param <R>  the return type
  * 
  * @see Thunk
  * @see Lambda2

@@ -36,7 +36,7 @@ package edu.rice.cs.plt.collect;
 
 import junit.framework.TestCase;
 
-import edu.rice.cs.plt.lambda.Thunk;
+import edu.rice.cs.plt.lambda.Condition;
 
 /**
  * A JUnit test case class for {@link WeakHashSet}.
@@ -227,10 +227,8 @@ public class WeakHashSetTest extends TestCase {
     
     one = null;
     final WeakHashSet<Integer> intSetForThunk1 = intSet;
-    runGCUntil(new Thunk<Boolean>() {
-      public Boolean value() {
-        return intSetForThunk1.size() == 2;
-      }
+    runGCUntil(new Condition() {
+      public boolean isTrue() { return intSetForThunk1.size() == 2; }
     });
     
     assertSame("one removed", 2, intSet.size());
@@ -240,10 +238,8 @@ public class WeakHashSetTest extends TestCase {
     two = null;
     three = null;
     final WeakHashSet<Integer> intSetForThunk2 = intSet;
-    runGCUntil(new Thunk<Boolean>() {
-      public Boolean value() {
-        return intSetForThunk2.size() == 0;
-      }
+    runGCUntil(new Condition() {
+      public boolean isTrue() { return intSetForThunk2.size() == 0; }
     });
     
     assertSame("Set empty again", 0, intSet.size());
@@ -253,13 +249,13 @@ public class WeakHashSetTest extends TestCase {
    * Asks the system to GC until doneP returns {@code true} or
    * a GC has been requested more than MAX_GC_COUNT times.
    * 
-   * @param doneP A thunk that should return {@code true} when enough GCs have occured
-   * @see System.gc()
+   * @param done A thunk that should return {@code true} when enough GCs have occurred
+   * @see System#gc()
    */
-  private void runGCUntil(Thunk<Boolean> doneP) {
+  private void runGCUntil(Condition done) {
     int gcCount = 0;
     
-    while (!doneP.value() && gcCount < MAX_GC_COUNT) {
+    while (!done.isTrue() && gcCount < MAX_GC_COUNT) {
       System.runFinalization();
       System.gc();
       gcCount++;

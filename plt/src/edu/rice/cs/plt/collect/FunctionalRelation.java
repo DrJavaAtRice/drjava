@@ -73,9 +73,9 @@ public interface FunctionalRelation<T1, T2> extends Relation<T1, T2>, Lambda<T1,
 
   /**
    * Produce the inverse of the relation, derived by swapping the elements of each pair.  The result <em>must</em>
-   * be an {@link InjectiveRelation}; however, limitations in Java's overriding rules prevent this assertion from
-   * being expressed in the return type, because a {@link OneToOneMap} must be allowed to extend both interfaces.
-   * Need not allow mutation, but must reflect subsequent changes.
+   * be an {@link InjectiveRelation}; however, limitations in Java's overriding rules (possible just a javac bug)
+   * prevent this assertion from being expressed in the return type, because a {@link OneToOneRelation} must be
+   * allowed to extend both interfaces.  Need not allow mutation, but must reflect subsequent changes.
    */
   public Relation<T2, T1> inverse();
 

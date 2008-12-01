@@ -37,9 +37,9 @@ package edu.rice.cs.plt.lambda;
 /**
  * A ternary lambda that doesn't have a return value (relying instead on side effects).
  * 
- * @param T1  the first argument type
- * @param T2  the second argument type
- * @param T3  the third argument type
+ * @param <T1>  the first argument type
+ * @param <T2>  the second argument type
+ * @param <T3>  the third argument type
  *
  * @see Runnable
  * @see Runnable1
