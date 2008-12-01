@@ -149,8 +149,8 @@ public class ReflectUtilTest extends TestCase {
   
   
   public void testLoadObject() throws Exception {
-	@SuppressWarnings("unused") ReflectUtilTest t =
-		(ReflectUtilTest) loadObject("edu.rice.cs.plt.reflect.ReflectUtilTest");
+    @SuppressWarnings("unused") ReflectUtilTest t =
+      (ReflectUtilTest) loadObject("edu.rice.cs.plt.reflect.ReflectUtilTest");
     PathClassLoader l = (PathClassLoader) loadObject("edu.rice.cs.plt.reflect.PathClassLoader",
                                                      new Object[]{new File[]{INTBOX_DIR, A_DIR, B_DIR, C_DIR, D_DIR}});
     Object d1 = loadObject(l, "D");
@@ -338,12 +338,12 @@ public class ReflectUtilTest extends TestCase {
   
   
   public void testStaticMethodLambdas() {
-	@SuppressWarnings("unchecked") Thunk<Thunk> nullLambda =
-		staticMethodAsThunk(LambdaUtil.class, "nullLambda", Thunk.class);
+    @SuppressWarnings("unchecked") Thunk<Thunk> nullLambda =
+      staticMethodAsThunk(LambdaUtil.class, "nullLambda", Thunk.class);
     assertEquals(null, nullLambda.value().value());
     
     @SuppressWarnings("unchecked") Lambda<Object, Thunk> valueLambda =
-    	staticMethodAsLambda(LambdaUtil.class, "valueLambda", Object.class, Thunk.class);
+      staticMethodAsLambda(LambdaUtil.class, "valueLambda", Object.class, Thunk.class);
     assertEquals("foo", valueLambda.value("foo").value());
     
     @SuppressWarnings("unchecked") Lambda2<Predicate, Predicate, Predicate> and =
@@ -439,7 +439,7 @@ public class ReflectUtilTest extends TestCase {
     assertEquals("bc", l2.value(new char[]{'a', 'b', 'c', 'd'}, 1, 2));
     
     @SuppressWarnings("unchecked") Lambda<Object, SimpleBox> l3 =
-    	constructorAsLambda(SimpleBox.class, Object.class);
+      constructorAsLambda(SimpleBox.class, Object.class);
     assertEquals(23, l3.value(23).value());
     
     Thunk<Cloneable> t3 = constructorAsThunk(Cloneable.class);

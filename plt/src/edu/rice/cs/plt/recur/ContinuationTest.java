@@ -40,9 +40,9 @@ public class ContinuationTest extends TestCase {
   
   /** Simulates a small bounded stack by failing if the stack exceeds a certain size. */
   private static void checkStack() {
-	// stack trace is automatically filled in by the constructor
+    // stack trace is automatically filled in by the constructor
     RuntimeException e = new RuntimeException();
-	if (e.getStackTrace().length > 100) { throw e; }
+    if (e.getStackTrace().length > 100) { throw e; }
   }
     
   
