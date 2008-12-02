@@ -77,22 +77,23 @@
     <echo message="" />
     <echo message="For this build file to function properly, the following environment" />
     <echo message="variables may need to be defined (depending on the target invoked):" />
+    <echo message="PATH: The 'javac' command is used for compilation;" />
+    <echo message="      the 'java' command is used by default in testing/running; " />
+    <echo message="      the 'svn' command is used to generate version numbers and " />
+    <echo message="      in Subversion targets" />
     <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
     <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
-    <echo message="PATH: The 'java' command is used by default in testing/running; " />
-    <echo message="      the 'svn' command is used to generate version numbers and " />
-    <echo message="      in Subversion targets" />
     <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
     <echo message="               release a Windows application)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
-    <echo message="For control over the version of Java and javac used by Ant, set " />
-    <echo message="JAVA_HOME.  Ant may also require ANT_HOME to be set.  Note that " />
-    <echo message="the value of CLASSPATH will be ignored -- classes on the system " />
-    <echo message="class path will not be visible during the build process." />
+    <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
+    <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
+    <echo message="CLASSPATH will be ignored -- classes on the system class path will " />
+    <echo message="not be visible during the build process." />
   </target>
   
   <target name="options" description="Print the list of customizable options">
@@ -108,7 +109,7 @@
     <echo message="props: An external properties file (default: 'ant.properties')" />
     <echo message="test-spec: A matching string for filtering the tests to be run; may be" />
     <echo message="           comma-delimited to run multiple test sets" />
-    <echo message="test-repeat: The number (&gt;=1) of times the tests should be repeated" />
+    <echo message="test-repeat: The number of times the tests should be repeated" />
     <echo message="test-timeout: A time limit (in minutes) for running a test set" />
     <echo message="test-formatter: The kind of formatter to use for test results: one of" />
     <echo message="                 'quiet', 'oneline', 'brief', 'plain', or 'xml'" />
@@ -125,11 +126,13 @@
     <echo message="findbugs-timeout: A time limit (in minutes) for running findbugs " />
     <echo message="                  (default: 30)" />
     <echo message="debug: Type of the debug log when running or testing: one of 'stdout'," />
-    <echo message="       'stderr', 'file', 'assert', 'popup', or 'void' (equivalent to" />
-    <echo message="       setting the property 'plt.debug.log'; default: void)" />
+    <echo message="       'stderr', 'file', 'assert', 'popup', 'tree', or 'void'" />
+    <echo message="       (equivalent to setting the property 'plt.debug.log'; default: " />
+    <echo message="       void)" />
     <echo message="error: Type of the error log when running or testing: one of 'stdout'," />
-    <echo message="       'stderr', 'file', 'assert', 'popup', or 'void' (equivalent to" />
-    <echo message="       setting the property 'plt.error.log'; default: popup)" />
+    <echo message="       'stderr', 'file', 'assert', 'popup', 'tree', or 'void'" />
+    <echo message="       (equivalent to setting the property 'plt.error.log'; default: " />
+    <echo message="       popup)" />
     <echo message="benchmark-count: Number of revisions to test during benchmarking"/>
     <echo message="                 (default: 5)" />
     <echo message="benchmark-skip: Number of 'PREV' updates to perform between benchmark" />
@@ -405,6 +408,7 @@
       <syspropertyset>
         <propertyref prefix="plt." />
         <propertyref prefix="drjava." />
+        <!-- Add any properties that should be passed on -->
       </syspropertyset>
       <jvmarg line="${jvm-args}" />
       <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
@@ -452,6 +456,7 @@
       <syspropertyset>
         <propertyref prefix="plt." />
         <propertyref prefix="drjava." />
+        <!-- Add any properties that should be passed on -->
       </syspropertyset>
       <jvmarg line="${jvm-args}" />
     </java>
@@ -486,6 +491,7 @@
       <syspropertyset>
         <propertyref prefix="plt." />
         <propertyref prefix="drjava." />
+        <!-- Add any properties that should be passed on -->
       </syspropertyset>
       <jvmarg line="${jvm-args}" />
     </java>
