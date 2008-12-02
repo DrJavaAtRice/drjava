@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.model.definitions;
 
 import javax.swing.text.*;
 import java.awt.*;
-import javax.swing.event.DocumentEvent;
 // TODO: Check synchronization.
 import java.util.ArrayList;
 
@@ -314,11 +313,11 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   }
   
   
-  /** Called when a change occurs.
-    * @param changes document changes
-    * @param a a Shape
-    * @param f a ViewFactory
-    */
+//  /** Called when a change occurs.
+//    * @param changes document changes
+//    * @param a a Shape
+//    * @param f a ViewFactory
+//    */
 //  public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
 //    super.changedUpdate(changes, a, f);
 //    // Make sure we redraw since something changed in the formatting

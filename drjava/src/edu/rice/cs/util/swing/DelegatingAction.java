@@ -40,7 +40,6 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.beans.*;
 import java.util.HashMap;
-import java.util.ListIterator;
 import java.util.LinkedList;
 
 public class DelegatingAction implements Action {
@@ -91,12 +90,9 @@ public class DelegatingAction implements Action {
     else {
       Object old = _localProperties.get(key);
       _localProperties.put(key, value);
-      ListIterator itor = _listenerList.listIterator();
 
       PropertyChangeEvent event = new PropertyChangeEvent(this, key, old, value);
-
-      while (itor.hasNext()) {
-        PropertyChangeListener listener = (PropertyChangeListener) itor.next();
+      for (PropertyChangeListener listener : _listenerList) {
         listener.propertyChange(event);
       }
     }
@@ -157,10 +153,7 @@ public class DelegatingAction implements Action {
     }
 
     // remove listeners from old and add to new
-    ListIterator itor = _listenerList.listIterator();
-    while (itor.hasNext()) {
-      PropertyChangeListener listener = (PropertyChangeListener) itor.next();
-
+    for (PropertyChangeListener listener : _listenerList) {
       if (_delegatee != null) {
         _delegatee.removePropertyChangeListener(listener);
       }

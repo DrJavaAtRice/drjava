@@ -40,13 +40,8 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import java.awt.event.KeyEvent;
 import java.awt.datatransfer.*;
-
-import java.util.List;
-//import java.util.LinkedList;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.UnexpectedException;

@@ -40,9 +40,6 @@ import java.awt.GraphicsConfiguration;
 
 import javax.swing.JFrame;
 
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
-
 /** An extension of javax.swing.JFrame that supports querying whether frame initialization is in progress.  Subclasses
   * MUST call initDone() in all of their constructors when all pre-realization code has been executed. 
   */

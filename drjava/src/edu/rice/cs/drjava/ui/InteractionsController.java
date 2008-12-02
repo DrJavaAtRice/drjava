@@ -57,17 +57,13 @@ import javax.swing.BorderFactory;
 import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import javax.swing.event.CaretListener;
-import javax.swing.event.CaretEvent;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.DefaultStyledDocument;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -79,11 +75,9 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
@@ -194,7 +188,7 @@ public class InteractionsController extends AbstractConsoleController {
           StyleConstants.setComponent(inputAttributes, _box);
           
           /* Insert box in document. */
-          _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+          _doc.insertBeforeLastPrompt(" ", InteractionsDocument.DEFAULT_STYLE);
           
           // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
           _interactionsDJDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
@@ -202,7 +196,7 @@ public class InteractionsController extends AbstractConsoleController {
           // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
           _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
           
-          _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+          _doc.insertBeforeLastPrompt("\n", InteractionsDocument.DEFAULT_STYLE);
           
           _box.setVisible(true);
           EventQueue.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
@@ -258,7 +252,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public InteractionsController(InteractionsModel model, InteractionsDJDocument adapter, InteractionsPane pane) {
     super(adapter, pane);
-    DefaultEditorKit d = pane.EDITOR_KIT;
+    DefaultEditorKit d = InteractionsPane.EDITOR_KIT;
     
     for (Action a : d.getActions()) {
       if (a.getValue(Action.NAME).equals(DefaultEditorKit.upAction))  defaultUpAction = a;

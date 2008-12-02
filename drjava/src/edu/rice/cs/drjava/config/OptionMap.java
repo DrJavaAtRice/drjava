@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.config;
 
-import java.util.Iterator;
 public interface OptionMap {
   
   public <T> T getOption(OptionParser<T> o);
@@ -49,7 +48,7 @@ public interface OptionMap {
   
   public <T> T removeOption(OptionParser<T> o);
   
-  public Iterator<OptionParser<?>> keys();
+  public Iterable<OptionParser<?>> keys();
 }
 
 

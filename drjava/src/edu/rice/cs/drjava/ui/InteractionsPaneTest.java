@@ -37,15 +37,10 @@
 package edu.rice.cs.drjava.ui;
 
 
-import java.io.File;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;

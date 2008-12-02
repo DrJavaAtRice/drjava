@@ -36,12 +36,10 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.drjava.ui.MainFrame;
 import java.awt.EventQueue;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.datatransfer.*;
 
 import edu.rice.cs.util.UnexpectedException;

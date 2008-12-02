@@ -37,8 +37,6 @@
 package edu.rice.cs.drjava.model.repl;
 
 import java.awt.EventQueue;
-import java.io.Serializable;
-import javax.swing.SwingUtilities;
 
 import java.util.List;
 import edu.rice.cs.util.UnexpectedException;
@@ -114,7 +112,7 @@ public class InteractionsScriptModel /* implements Serializable */ {
     try {
       _doc.clearCurrentInteraction();
       String text = _interactions.get(_currentInteraction);
-      _doc.insertText(_doc.getLength(), text, _doc.DEFAULT_STYLE);
+      _doc.insertText(_doc.getLength(), text, InteractionsDocument.DEFAULT_STYLE);
     }
     catch (EditDocumentException dae) {
       throw new UnexpectedException(dae);

@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.javadoc;
 
 import java.io.File;
+import java.io.IOException;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -97,7 +98,7 @@ public class NoJavadocAvailable implements JavadocModel {
     * 
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocAll(DirectorySelector select, FileSaveSelector saver) {
+  public void javadocAll(DirectorySelector select, FileSaveSelector saver) throws IOException {
     _notifier.javadocStarted();
     _notifier.javadocEnded(false, null, true);
   }
@@ -108,7 +109,7 @@ public class NoJavadocAvailable implements JavadocModel {
     * @param saver a command object for saving the document (if it moved/changed)
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) {
+  public void javadocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException {
     _notifier.javadocStarted();
     _notifier.javadocEnded(false, null, true);
   }

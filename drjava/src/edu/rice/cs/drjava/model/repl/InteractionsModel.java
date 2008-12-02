@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.awt.EventQueue;
 import java.io.*;
 import java.net.ServerSocket;
 import java.util.List;
@@ -44,9 +43,7 @@ import java.util.ArrayList;
 
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.drjava.ui.InteractionsPane;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
@@ -124,9 +121,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected volatile String _secondToLastError = null;
   
   /** Constructs an InteractionsModel.  The InteractionsPane is created later by the InteractionsController.
-    * As a reult, the posting of a banner at the top of InteractionsDocument must be deferred
+    * As a result, the posting of a banner at the top of InteractionsDocument must be deferred
     * until after the InteracationsPane has been set up.
-    * @param adapter DocumentAdapter to use in the InteractionsDocument
+    * @param cDoc document to use in the InteractionsDocument
     * @param wd Working directory for the interpreter
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println

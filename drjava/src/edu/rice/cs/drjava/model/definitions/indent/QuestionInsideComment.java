@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /** Asks whether the beginning of the current line is inside a C-style comment.
   * @version $Id$

@@ -38,12 +38,7 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.font.*;
-import java.io.*;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -53,24 +48,16 @@ import java.util.SortedSet;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
-import javax.swing.table.*;
-import javax.swing.text.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.basic.BasicToolTipUI;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
-import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.plt.lambda.Thunk;
 
@@ -118,10 +105,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     new IdentityHashMap<R, DefaultMutableTreeNode>();
   
   /** State variable used to control the granular updating of the tabbed panel. */
-  private volatile long _lastChangeTime;
+//  private volatile long _lastChangeTime;
 //  private volatile Object _updateLock = new Object();  // commented out when update delay in this class was disabled
-  private volatile boolean _updatePending = false;
-  public static final long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
+//  private volatile boolean _updatePending = false;
+//  public static final long UPDATE_DELAY = 2000L;  // update delay threshold in milliseconds
   
   /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
     * from the event thread.
@@ -152,7 +139,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     
     _buttonPanel = new JPanel(new BorderLayout());
 
-    _lastChangeTime = _frame.getLastChangeTime();
+//    _lastChangeTime = _frame.getLastChangeTime();
     
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
@@ -331,7 +318,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     // Traverse children
     TreeNode node = (TreeNode)parent.getLastPathComponent();
     if (node.getChildCount() >= 0) {
-      for (Enumeration e=node.children(); e.hasMoreElements(); ) {
+      for (Enumeration<?> e=node.children(); e.hasMoreElements(); ) {
         TreeNode n = (TreeNode)e.nextElement();
         TreePath path = parent.pathByAddingChild(n);
         expandRecursive(tree, path, expand);

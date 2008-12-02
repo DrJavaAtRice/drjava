@@ -44,7 +44,6 @@ import java.io.Serializable;
 public class NullFile extends File implements Serializable {
   
   private static volatile int ct = 0;
-  private final String _lexiName;
 
   public NullFile() { 
     this("*NullFile<" + ct + ">"); 
@@ -53,7 +52,6 @@ public class NullFile extends File implements Serializable {
   
   private NullFile(String lexiName) {
     super(lexiName);
-    _lexiName = lexiName;
   }
   
   /* The following two method hide the fact that the name field of this file has the form "*NullFile<ct>".  They can

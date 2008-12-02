@@ -38,40 +38,26 @@ package edu.rice.cs.drjava.ui;
 
 import java.util.LinkedList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.io.File;
 import java.lang.ref.WeakReference;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.LayeredHighlighter;
 import java.awt.event.*;
 import java.awt.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
 
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.DocumentRegion;
-import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Panel for displaying find results. This class is a swing class which should only be accessed from the event thread.
@@ -103,7 +89,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   
   /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
     * @param frame the MainFrame
-    * @param rm the region manager associated with this panel
+    * @param regionManager the region manager associated with this panel
     * @param title for the panel
     * @param searchString string that was searched for
     * @param searchAll whether all files were searched

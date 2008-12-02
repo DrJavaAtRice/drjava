@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Question rule in the indentation decision tree.  Determines if the current line starts a new "phrase" within a 
   * parenthesized expression.  Specifically, this rule determines if the previous line ends in a comma, semicolon, 

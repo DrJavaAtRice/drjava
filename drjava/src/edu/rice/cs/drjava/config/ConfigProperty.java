@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.drjava.DrJava;
 
 import java.util.Vector;
-import java.util.Iterator;
 
 /** Class representing values from the DrJava configuration file that can be inserted as variables in external processes.
   * @version $Id$
@@ -58,9 +57,7 @@ public class ConfigProperty extends EagerProperty {
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
     OptionMap om = DrJava.getConfig().getOptionMap();
-    Iterator<OptionParser<?>> it = om.keys();
-    while(it.hasNext()) {
-      OptionParser<?> op = it.next();
+    for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
       String value = om.getString(op);
       if (_name.equals("config."+key)) {
@@ -102,9 +99,7 @@ public class ConfigProperty extends EagerProperty {
   public void resetAttributes() {
     _attributes.clear();
     OptionMap om = DrJava.getConfig().getOptionMap();
-    Iterator<OptionParser<?>> it = om.keys();
-    while(it.hasNext()) {
-      OptionParser<?> op = it.next();
+    for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
       if (_name.equals("config."+key)) {
         if (op instanceof VectorOption) {

@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.rmi.*;
 import java.io.*;
-import java.net.MalformedURLException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -55,9 +54,6 @@ import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.util.ArgumentTokenizer;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.Log;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -65,9 +61,6 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.swing.ScrollableDialog;
-
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 

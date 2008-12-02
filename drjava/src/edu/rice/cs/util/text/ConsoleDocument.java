@@ -41,7 +41,6 @@ import java.awt.print.*;
 
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;

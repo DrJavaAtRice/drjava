@@ -43,12 +43,10 @@ import com.sun.jdi.event.*;
 import com.sun.jdi.request.*;
 
 import java.io.*;
-import java.util.*;
 import javax.swing.SwingUtilities;  // used in instead of java.awt.EventQueue because of class name clash
 
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 /** A thread that listens and responds to events from JPDA when the debugger has attached to another JVM.
   * @version $Id$
@@ -225,7 +223,7 @@ public class EventHandlerThread extends Thread {
   /** Responds when a class of interest has been prepared. Allows the debugger to set a pending breakpoint before any 
     * code in the class is executed.
     * @param e class prepare event from JPDA
-    * @throws DebugException if actions performed on the prepared class fail
+    * @throws UnexpectedException wrapping a DebugException if actions performed on the prepared class fail
     */
   private void _handleClassPrepareEvent(final ClassPrepareEvent e) /* throws DebugException */ {
 //    synchronized(_debugger) {
@@ -266,9 +264,7 @@ public class EventHandlerThread extends Thread {
           if (e.thread().equals(running)) {
             // Delete any step requests pending on this thread
             EventRequestManager erm = _vm.eventRequestManager();
-            List steps = erm.stepRequests();
-            for (int i = 0; i < steps.size(); i++) {
-              StepRequest step = (StepRequest)steps.get(i);
+            for (StepRequest step : erm.stepRequests()) {
               if (step.thread().equals(e.thread())) {
                 erm.deleteEventRequest(step);
                 

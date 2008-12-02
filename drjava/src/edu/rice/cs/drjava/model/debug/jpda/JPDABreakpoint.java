@@ -40,24 +40,19 @@ import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
 import java.awt.EventQueue;
-import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.io.*;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-import static edu.rice.cs.plt.object.ObjectUtil.hash;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest.  See the
   * WARNING below about hashing on this type or its subtypes.
@@ -141,13 +136,13 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
         }
         
         // Get locations for the line number, use the first
-        List lines = rt.locationsOfLine(_lineNumber);
+        List<Location> lines = rt.locationsOfLine(_lineNumber);
         if (lines.size() == 0) {
           // Can't find a location on this line
           setEnabled(false);          
           throw new DebugException("Could not find line number: " + _lineNumber);
         }
-        Location loc = (Location) lines.get(0);
+        Location loc = lines.get(0);
         
         BreakpointRequest request = _manager.getEventRequestManager().createBreakpointRequest(loc);
         request.setEnabled(_isEnabled);
@@ -232,7 +227,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
    * be inconsisent with equals to produce an invariant value.  Hence, you must use IdentityHashMap instead of HashMap
    * or Hashtable. 
    */
-//  public int hashCode() { return hash(_doc, getStartOffset(), getEndOffset()); }
+//  public int hashCode() { return ObjectUtil.hash(_doc, getStartOffset(), getEndOffset()); }
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled) {

@@ -43,6 +43,7 @@ import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
@@ -308,9 +309,7 @@ public class DrJavaErrorWindow extends JDialog {
     b.append("\n\n");
     java.util.Properties props = System.getProperties();
 //    int size = props.size();
-    java.util.Iterator entries = props.entrySet().iterator();
-    while(entries.hasNext()) {
-      java.util.Map.Entry entry = (java.util.Map.Entry)entries.next();
+    for (Map.Entry<Object, Object> entry : props.entrySet()) { 
       b.append(entry.getKey());
       b.append(" = ");
       if (entry.getKey().equals("line.separator")) {

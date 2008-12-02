@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.text.Position;
 
-import junit.framework.TestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.OperationCanceledException;

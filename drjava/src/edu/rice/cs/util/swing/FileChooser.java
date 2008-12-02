@@ -37,15 +37,10 @@
 package edu.rice.cs.util.swing;
 
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
 
 import javax.swing.JFileChooser;
-//import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileView;
-
-import java.awt.Component;
 
 public class FileChooser extends JFileChooser {
   

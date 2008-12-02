@@ -40,8 +40,8 @@ import javax.swing.tree.*;
 
 /** This is an unsynchronized swing class and hence should only be accessed from the
  *  event-handling thread.
- *  @param T  The type of the value wrapped by this node.
- *  @param ItemT  
+ *  @param <T>  The type of the value wrapped by this node.
+ *  @param <ItemT>  
  */
 public abstract class InnerNode<T, ItemT extends INavigatorItem> 
     extends DefaultMutableTreeNode implements NodeData<ItemT> {

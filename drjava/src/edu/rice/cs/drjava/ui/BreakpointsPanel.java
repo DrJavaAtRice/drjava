@@ -37,28 +37,17 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.ArrayList;
-import java.io.File;
 
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.tree.*;
-import javax.swing.table.*;
 import javax.swing.text.BadLocationException;
 import java.awt.event.*;
 import java.awt.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
 
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.*;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.UnexpectedException;
 
 /** Panel for displaying the breakpoints.  This class is a swing view class and hence should only be accessed from the 
   * event-handling thread.
@@ -91,13 +80,10 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       /** Called when a breakpoint is changed.
         * Removes the breakpoint from the tree of breakpoints.
         * @param bp the breakpoint
-        * @param index the index of the breakpoint
         */
       public void regionChanged(final Breakpoint bp) {
         assert EventQueue.isDispatchThread();
 
-        File file = bp.getDocument().getRawFile();
-        
         DefaultMutableTreeNode regNode = _regionToTreeNode.get(bp);
         ((DefaultTreeModel)_regTree.getModel()).nodeChanged(regNode);
       }

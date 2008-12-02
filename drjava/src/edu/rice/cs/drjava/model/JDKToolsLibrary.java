@@ -120,8 +120,8 @@ public class JDKToolsLibrary {
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
       try {
-        Class[] sig = new Class[]{ FullVersion.class, String.class, List.class };
-        Object[] args = new Object[]{ version, "the runtime class path", bootClassPath };
+        Class<?>[] sig = { FullVersion.class, String.class, List.class };
+        Object[] args = { version, "the runtime class path", bootClassPath };
         CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(compilerAdapter, sig, args);
         if (attempt.isAvailable()) { compiler = attempt; }
       }
@@ -133,7 +133,7 @@ public class JDKToolsLibrary {
     String debuggerAdapter = adapterForDebugger(version.majorVersion());
     if (debuggerAdapter != null) {
       try {
-        Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class[]{GlobalModel.class}, model);
+        Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
         if (attempt.isAvailable()) { debugger = attempt; }
       }
       catch (ReflectException e) { /* can't load */ }

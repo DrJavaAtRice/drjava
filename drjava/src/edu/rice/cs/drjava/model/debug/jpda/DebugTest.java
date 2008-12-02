@@ -785,10 +785,10 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     assertEquals("package dir with package",
                  "edu" + sep + "rice" + sep + "cs" + sep +
                  "drjava" + sep + "model" + sep,
-                 _debugger.getPackageDir(class1));
+                 JPDADebugger.getPackageDir(class1));
     assertEquals("package dir without package",
                  "",
-                 _debugger.getPackageDir(class2));
+                 JPDADebugger.getPackageDir(class2));
   }
 }
 

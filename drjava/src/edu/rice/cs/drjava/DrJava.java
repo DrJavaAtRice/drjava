@@ -40,32 +40,20 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.ArgumentTokenizer;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.plt.debug.DebugUtil;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
   * one if none exists) to get the critical information required to start the main JVM for DrJava: 
@@ -156,7 +144,7 @@ public class DrJava {
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size()>0)) {
         try {
-          boolean ret = RemoteControlClient.openFile(null);
+          RemoteControlClient.openFile(null);
           if (RemoteControlClient.isServerRunning()) {
             // existing instance is running and responding
             for (int i=0; i<_filesToOpen.size(); ++i) {

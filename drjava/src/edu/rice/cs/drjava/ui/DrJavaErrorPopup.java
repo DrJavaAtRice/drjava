@@ -38,16 +38,12 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.text.*;
 import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Displays a popup window for the first uncaught exception or logged conditions.
@@ -60,7 +56,7 @@ public class DrJavaErrorPopup extends JDialog {
   private JCheckBox _keepDisplaying;
   /** compresses the buttonPanel into the east */
   private JPanel _bottomPanel;
-  /** contains the butons */
+  /** contains the buttons */
   private JPanel _buttonPanel;
   /** the button that closes this window */
   private JButton _okButton;
@@ -127,7 +123,7 @@ public class DrJavaErrorPopup extends JDialog {
     public void actionPerformed(ActionEvent e) {
       if (! Utilities.TEST_MODE) {
         DrJavaErrorPopup.this.dispose();
-        MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getFrame());
+        MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.getFrame());
         DrJavaErrorWindow.singleton().setVisible(true);
       }
     }

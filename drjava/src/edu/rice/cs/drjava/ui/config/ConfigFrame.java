@@ -50,8 +50,6 @@ import java.util.Iterator;
 import javax.swing.tree.*;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
@@ -59,10 +57,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.lambda.Runnable1;
-
-import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$
@@ -1226,7 +1221,7 @@ public class ConfigFrame extends SwingFrame {
         return false;
       }
 
-      Enumeration childNodes = children();
+      Enumeration<?> childNodes = children();
       while (childNodes.hasMoreElements()) {
         boolean isValidUpdateChildren = ((PanelTreeNode)childNodes.nextElement()).update();
         //if any of the children nodes encountered an error, return false
@@ -1244,7 +1239,7 @@ public class ConfigFrame extends SwingFrame {
     public void resetToCurrent() {
       _panel.resetToCurrent();
 
-      Enumeration childNodes = children();
+      Enumeration<?> childNodes = children();
       while (childNodes.hasMoreElements()) {
         ((PanelTreeNode)childNodes.nextElement()).resetToCurrent();
       }

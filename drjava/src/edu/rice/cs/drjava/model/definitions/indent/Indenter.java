@@ -75,7 +75,6 @@ public class Indenter {
   public void buildTree(int indentLevel) {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
-    final String oneLevel = new String(indent);
     
     boolean autoCloseComments = false;
     try { autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }

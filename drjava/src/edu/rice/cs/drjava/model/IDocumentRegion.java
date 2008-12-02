@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import javax.swing.text.Position;
-
 /** Interface supported by all bona fide document regions (e.g., region classes other than DummyDocumentRegion). */
 public interface IDocumentRegion extends Region {
   

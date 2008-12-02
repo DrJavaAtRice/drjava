@@ -44,9 +44,7 @@ import java.util.LinkedList;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.swing.DisplayManager;
-import edu.rice.cs.util.StringOps;
 
 /** This class extends a Swing view class.  Hence it should only be accessed from the event-handling thread. */
 public class RecentDocFrame extends JWindow {
@@ -54,7 +52,7 @@ public class RecentDocFrame extends JWindow {
   MainFrame _frame;
   
   // The manager that gives filenames and icons
-  DisplayManager<OpenDefinitionsDocument> _displayManager = _frame.getOddDisplayManager30();
+  DisplayManager<OpenDefinitionsDocument> _displayManager = MainFrame.getOddDisplayManager30();
   
   // the label that shows the icon and filename
   JLabel _label;

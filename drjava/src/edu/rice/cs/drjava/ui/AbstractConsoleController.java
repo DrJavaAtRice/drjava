@@ -44,14 +44,7 @@ import java.awt.Font;
 
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.event.CaretListener;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
 
-import java.io.Serializable;
-
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 
 import edu.rice.cs.drjava.DrJava;

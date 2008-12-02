@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * This class abstracts out process creation, similar to ProcessCreator,
@@ -70,7 +69,7 @@ public class GeneralProcessCreator extends ProcessCreator {
 
   /** Constructor for a process creator with the given command line already split up, and
     * the work directory.
-    * @param cmdline command line
+    * @param seqs a sequence of commands to pipe
     * @param workdir working directory
     * @param pm PropertyMaps object used for substitution
     */

@@ -41,7 +41,6 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 import java.rmi.RemoteException;
 

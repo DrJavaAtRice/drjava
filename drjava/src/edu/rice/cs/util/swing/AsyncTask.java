@@ -36,8 +36,6 @@
 
 package edu.rice.cs.util.swing;
 
-import javax.swing.ProgressMonitor;
-
 /**
  * The AsyncTask base class is a framework that facilitates execution of
  * operations asynchronously in order to free up the event-handling thread. This

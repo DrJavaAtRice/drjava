@@ -37,11 +37,7 @@
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.MalformedURLException;
 import java.util.LinkedList;
-import java.util.List;
 import java.lang.ClassLoader;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;

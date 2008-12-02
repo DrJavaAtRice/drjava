@@ -37,8 +37,6 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
-import edu.rice.cs.drjava.ui.InteractionsController;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.io.File;
@@ -57,7 +55,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   
   /** Constructs an InteractionsModel which can communicate with another JVM.
     * @param jvm RMI interface to the slave JVM
-    * @param adapter InteractionsDJDocument to use in the InteractionsDocument
+    * @param cDoc document to use in the InteractionsDocument
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println
     */

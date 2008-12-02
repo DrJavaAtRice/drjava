@@ -49,17 +49,12 @@ import org.w3c.dom.Node;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.FileRegion;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.util.XMLConfig;
 
 import static edu.rice.cs.util.StringOps.*;
@@ -559,7 +554,7 @@ public class ProjectProfile implements ProjectFileIR {
 
   /* Private Methods */
   
-  /** @param getter The getter that can get all the info needed to make the document file
+  /** @param g The getter that can get all the info needed to make the document file
    *  @return the document that contains the information retrieved from the getter
    */
   private DocFile docFileFromGetter(DocumentInfoGetter g) throws IOException {    
@@ -570,7 +565,7 @@ public class ProjectProfile implements ProjectFileIR {
   /** This encodes a normal file relative to File base.  None of the special tags are added.
    *  @param f the file to encode
    *  @param prefix the indent level to place the s-expression at
-   *  @param relative whether this file should be made relative to the project path
+   *  @param base Directory to be made relative to
    *  @return the s-expression syntax to describe the given file.
    */
   private String encodeFileRelative(File f, String prefix, File base) throws IOException {

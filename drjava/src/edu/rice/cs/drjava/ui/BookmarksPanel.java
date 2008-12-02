@@ -39,22 +39,11 @@ package edu.rice.cs.drjava.ui;
 import java.util.ArrayList;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
-import javax.swing.text.BadLocationException;
 import java.awt.event.*;
-import java.awt.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.UnexpectedException;
 
 /** Panel for displaying bookmarks. Only runs in the event thread.
   * @version $Id$

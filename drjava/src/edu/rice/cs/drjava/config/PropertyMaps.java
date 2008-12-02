@@ -57,11 +57,8 @@ public class PropertyMaps implements Cloneable {
     }
     
     OptionMap om = DrJava.getConfig().getOptionMap();
-    Iterator<OptionParser<?>> it = om.keys();
-    while(it.hasNext()) {
-      OptionParser<?> op = it.next();
+    for (OptionParser<?> op : om.keys()) {
       String key = "config."+op.getName();
-      String value = om.getString(op);
       TEMPLATE.setProperty("Config", new ConfigProperty(key));
     }
   }

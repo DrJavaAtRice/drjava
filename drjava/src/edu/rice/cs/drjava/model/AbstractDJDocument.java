@@ -41,15 +41,11 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
-//import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
@@ -59,14 +55,11 @@ import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import javax.swing.ProgressMonitor;
@@ -488,7 +481,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int balanceForward() {
     int origPos = _currentLocation;
     try {
-      int docLen = getLength();
       if (_currentLocation == 0) return -1;
       char prevChar = _getText(_currentLocation - 1, 1).charAt(0);
 //      System.err.println("_currentLocation = " + _currentLocation + "; prevChar = '" + prevChar + "'");
@@ -1310,8 +1302,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
-    int result = -1;  // correct result if no non-whitespace chars are found
-    
     final int docLen = getLength();
     final int origPos = _currentLocation;
     final int endPos = _getLineEndPos(pos);
@@ -1437,7 +1427,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-    int origPos = _currentLocation;
     // Check cache
     final int lineStart = _getLineStartPos(_currentLocation);
 //    System.err.println("_currentLocation = " + origPos + " lineStart = " + lineStart);
@@ -1577,7 +1566,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     //check all positions in the prefix to determine if there are any blank chars
     int pos = prefixSize - 1;
-    char lastChar = ' ';
     while (pos >= 0 && prefix.charAt(pos) == ' ') pos--;
     return (pos < 0);
   }
@@ -1591,7 +1579,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-    String text = "";
     int lineEnd = _getLineEndPos(_currentLocation);  // index of next '\n' char or end of document
     int lineLen = lineEnd - _currentLocation;
     String line = getText(_currentLocation, lineLen);
@@ -1605,7 +1592,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * Assumes that the read lock is already held.
     * @return true if there are only blank characters before the current location on the current line.
     */
-  private int _getWhiteSpacePrefix() throws BadLocationException{
+  private int _getWhiteSpacePrefix() throws BadLocationException {
     
 //    System.err.println("lockState = " + _lockState);
     
@@ -1620,7 +1607,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     //check all positions in the prefix to determine if there are any blank chars
     int pos = prefixSize - 1;
-    char lastChar = ' ';
     while (pos >= 0 && prefix.charAt(pos) == ' ') pos--;
     return (pos < 0) ? prefixSize : 0;
   }

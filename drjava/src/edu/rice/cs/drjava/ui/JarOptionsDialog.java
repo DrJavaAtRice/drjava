@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.UnexpectedException;
@@ -60,7 +59,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;

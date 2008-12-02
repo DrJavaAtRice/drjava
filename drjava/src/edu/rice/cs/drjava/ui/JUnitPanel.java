@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.DJDocument;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.junit.JUnitError;
@@ -55,8 +53,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /** The panel that displays all the testing errors.
@@ -98,7 +94,6 @@ public class JUnitPanel extends ErrorPanel {
   private boolean _testsSuccessful;
   
   private JUnitProgressBar _progressBar;
-  private List<OpenDefinitionsDocument> _odds = new ArrayList<OpenDefinitionsDocument>();
   
   private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
     public void actionPerformed(ActionEvent ae) {

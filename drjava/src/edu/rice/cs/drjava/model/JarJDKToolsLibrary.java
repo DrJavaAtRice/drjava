@@ -152,8 +152,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
 
         try {
-          Class[] sig = new Class[]{ FullVersion.class, String.class, List.class };
-          Object[] args = new Object[]{ version, f.toString(), bootClassPath };
+          Class<?>[] sig = { FullVersion.class, String.class, List.class };
+          Object[] args = { version, f.toString(), bootClassPath };
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
@@ -166,7 +166,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
       if (debuggerAdapter != null) {
         try {
-          Class[] sig = new Class[]{ GlobalModel.class };
+          Class<?>[] sig = { GlobalModel.class };
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        

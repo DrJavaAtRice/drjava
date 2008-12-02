@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 
 import javax.swing.event.HyperlinkListener;

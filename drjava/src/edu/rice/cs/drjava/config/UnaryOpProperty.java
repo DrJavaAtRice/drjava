@@ -36,11 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.lambda.Lambda;
-
-import java.util.HashSet;
-import java.util.Iterator;
 
 /** Class representing unary operations that can be inserted as variables in external processes.
   * @version $Id$

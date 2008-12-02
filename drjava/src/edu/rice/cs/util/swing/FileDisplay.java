@@ -45,7 +45,6 @@ public class FileDisplay {
   
   private File _file;
   private String _rep;
-  private boolean _repIsDifferent; // if the representation is different from the child string
   private boolean _isNew;
   
   protected FileDisplayManager _fdm;

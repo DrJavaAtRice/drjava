@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.List;
 
 import edu.rice.cs.drjava.model.compiler.CompilerListener;

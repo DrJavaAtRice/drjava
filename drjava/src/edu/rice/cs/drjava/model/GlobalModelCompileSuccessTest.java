@@ -63,7 +63,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     saveFile(doc2, new FileSelector(file2));
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
     
@@ -102,7 +102,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     final File fooFile = new File(_tempDir, "DrJavaTestFoo.java");
     
     saveFile(doc1, new FileSelector(fooFile));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     testStartCompile(doc1);
     listener.waitCompileDone();
@@ -116,7 +116,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     final File foo2File = new File(_tempDir, "DrJavaTestFoo2.java");
     saveFile(doc2, new FileSelector(foo2File));
 
-    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
     testStartCompile(doc2);
     listener2.waitCompileDone();
@@ -157,7 +157,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     assertEquals("Check package name of doc1", "a", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc1)._packageName); 
 //    System.err.println("doc1 = " + doc1);
 //    System.err.println("doc1 has source root " + doc1.getSourceRoot());
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     
     testStartCompile(doc1);
@@ -178,7 +178,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     assertEquals("Check packangeName of doc2", "b", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc2)._packageName); 
 //    System.err.println("doc2 = " + doc2);
 
-    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
     
     testStartCompile(doc2);

@@ -37,11 +37,6 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.FileOps;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.io.*;
 
 /** Property that evaluates to a file, can be mutated, and that can be inserted

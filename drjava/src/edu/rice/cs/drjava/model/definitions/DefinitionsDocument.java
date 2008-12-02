@@ -40,14 +40,12 @@ import java.awt.EventQueue;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.lang.ref.WeakReference;
 
-import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.IOException;
@@ -103,8 +101,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   // end debug code
   
-  /** Cached document image as updated on last modification. */
-  private volatile String _image;
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
   /** Specifies if tabs are removed on open and converted to spaces. */
@@ -726,7 +722,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns true if this position is the instantiation of an anonymous inner class.  Only runs in the event thread.
-    * @param newPos position of "new"
+    * @param pos position of "new"
     * @param openCurlyPos position of the next '{'
     * @return true if anonymous inner class instantiation
     */
@@ -749,7 +745,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       cached = false;
 
       String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
-      int origNewPos = newPos;
       newPos += "new".length();
       int classStart = getFirstNonWSCharPos(newPos);
       if (classStart != -1) { 
@@ -783,7 +778,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
         if (parenStart != -1) {
           if (text.charAt(parenStart) == '(') {
-            final int origLocation = _currentLocation;
             setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
             int parenEnd = balanceForward();
             if (parenEnd > -1) {

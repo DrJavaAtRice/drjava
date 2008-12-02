@@ -36,12 +36,8 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.plt.lambda.Lambda;
-
-import java.util.HashSet;
-import java.util.Iterator;
 
 /** Class representing ternary operations that can be inserted as variables in external processes.
   * @version $Id$

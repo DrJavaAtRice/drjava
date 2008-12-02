@@ -38,8 +38,6 @@ package edu.rice.cs.drjava.model;
 
 import java.util.List;
 
-import edu.rice.cs.drjava.model.definitions.*;
-
 /** Light-weight parsing control.
  *  @version $Id$
  */

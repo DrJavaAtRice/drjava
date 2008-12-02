@@ -108,7 +108,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public String toString() {
     //String val = "Brace(size: "+ getSize() +"): ";
     final StringBuilder val = new StringBuilder("Brace<");
-    int i;
+//    int i;
 //    for (i = 0; i < getSize(); i++) {
 //      val.append(getType().charAt(i));
 //    }

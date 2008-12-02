@@ -40,7 +40,6 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.dnd.*;
-import java.awt.datatransfer.*;
 import edu.rice.cs.drjava.DrJavaRoot;
 
 /** Extended by all panels that can dynamically be added or removed from the _tabbedPane in MainFrame. Provides a

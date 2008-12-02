@@ -39,26 +39,20 @@ package edu.rice.cs.drjava.ui;
 import java.awt.EventQueue;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.FontMetrics;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.text.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DropDownButton;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.Utilities;
 
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 
@@ -549,7 +543,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     _exportAction.setEnabled(names.size()>0);
   }
 
-  /** Lambda that calls _cancel. */
+  /** Lambda that calls _ok. */
   protected final Runnable1<WindowEvent> OK = new Runnable1<WindowEvent>() {
     public void run(WindowEvent e) { _ok(); }
   };

@@ -59,7 +59,6 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
@@ -312,10 +311,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   };
 
-  /** The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
-   *  disabled depending on Debug Mode.
-   */
-  private volatile JMenuItem _toggleBreakpointMenuItem;
+//  /** The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
+//   *  disabled depending on Debug Mode.
+//   */
+//  private volatile JMenuItem _toggleBreakpointMenuItem;
 
 //  /** The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
 //   *  disabled depending on Debug Mode.
@@ -357,7 +356,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
      *  instance. Not used currently, but there for readability and possible
      *  future use, e.g., debugging add-ons or the rewrite of the indention code.
      */
-    private final String _key;
+    @SuppressWarnings("unused") private final String _key;
 
     /** The default action to take when the specified key is pressed. */
     private final Action _defaultAction;
@@ -757,7 +756,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           _mainFrame.debuggerToggleBreakpoint();
         }
       });
-      _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
+//      _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
     }
   }
 

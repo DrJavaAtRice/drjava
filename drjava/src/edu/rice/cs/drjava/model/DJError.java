@@ -47,7 +47,7 @@ import edu.rice.cs.util.UnexpectedException;
   * to highlight the error text.
   * @version $Id: DJError.java 4504 2008-06-03 06:19:20Z rcartwright $
   */
-public class DJError implements Comparable, Serializable {
+public class DJError implements Comparable<DJError>, Serializable {
   private File _file;
   
   /** zero-based line number. */
@@ -151,8 +151,7 @@ public class DJError implements Comparable, Serializable {
   /** Compares by file, then by line, then by column.  Errors without files are considered equal, but less than any 
     * errors with files.  Warnings are considered greater than errors when they are otherwise equal.
     */
-  public int compareTo(Object o) {
-    DJError other = (DJError) o;
+  public int compareTo(DJError other) {
     
     // Determine if I have a file
     if (_file != null) {

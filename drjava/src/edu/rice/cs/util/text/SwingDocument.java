@@ -44,10 +44,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import static edu.rice.cs.util.text.AbstractDocumentInterface.*;
 
 import java.util.HashMap;
 

@@ -40,8 +40,6 @@ import java.util.ArrayList;
 
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
-
 /** This class provides an implementation of the BraceReduction interface for brace matching.  In order to correctly
   * match, this class keeps track of what is commented (line and block) and what is inside double quotes (strings).
   * To avoid unnecessary complication, this class maintains a few invariants for its  consistent states, i.e., between

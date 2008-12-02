@@ -116,7 +116,7 @@ public interface PlatformSupport {
     * @param obj the component whose mnemonic should be set
     * @param tabIndex the index of the tab that the mnemonic refers to
     * @param mnemonic the key code which represents the mnemonic
-    * @see javax.swing.JTabbedPane#setMnemonic(int,int)
+    * @see javax.swing.JTabbedPane#setMnemonicAt(int,int)
     * @see java.awt.event.KeyEvent */
   public void setMnemonicAt(javax.swing.JTabbedPane obj, int tabIndex, int mnemonic);
 }

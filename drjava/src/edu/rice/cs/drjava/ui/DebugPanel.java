@@ -36,11 +36,9 @@
 
 package edu.rice.cs.drjava.ui;
 
-import java.util.Vector;
 import java.util.ArrayList;
 
 import javax.swing.*;
-import javax.swing.tree.*;
 import javax.swing.table.*;
 import java.awt.event.*;
 import java.awt.*;

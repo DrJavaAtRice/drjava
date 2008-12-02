@@ -36,13 +36,8 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
-
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-
-import javax.swing.text.BadLocationException;
 
 /** Indents the current line in the document to the indent level of the start of the brace enclosing the start of the
   * current line, plus the given suffix.

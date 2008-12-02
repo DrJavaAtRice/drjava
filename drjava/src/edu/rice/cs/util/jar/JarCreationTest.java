@@ -184,7 +184,6 @@ public class JarCreationTest extends DrJavaTestCase {
               "\t\treturn \"JarTest\";" +
               "\t}" +
               "}";
-      byte[] b = new byte[fileContents.getBytes("UTF-8").length];
 
       add = File.createTempFile("JarTest",".java").getCanonicalFile();
       add.deleteOnExit();

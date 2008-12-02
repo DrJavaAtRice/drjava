@@ -136,7 +136,6 @@ public class StreamRedirectThread extends Thread {
    * @param name         thread name
    * @param in           stream to copy from
    * @param out          stream to copy to
-   * @param close        true if the streams should be closed after copying has ended
    * @param tg           thread group for this thread
    * @param keepRunning  true if the thread should keep running and not terminate when a stream ends
    */

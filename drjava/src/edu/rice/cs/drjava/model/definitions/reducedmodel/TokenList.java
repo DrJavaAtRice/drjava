@@ -173,8 +173,6 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       */
     private int _move(int count, int currentOffset) {
       if (count == 0) return currentOffset;
-      int retval = currentOffset; // default value if an exception is thrown in _moveRight/_moveLeft
-      
       Iterator it = this;
       
       //make copy of cursor and return new iterator?

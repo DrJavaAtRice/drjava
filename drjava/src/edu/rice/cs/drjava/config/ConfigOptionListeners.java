@@ -356,7 +356,6 @@ public class ConfigOptionListeners implements OptionConstants {
     if ((!value.equals("")) &&
         (!value.equals(OptionConstants.heapSizeChoices.get(0)))) {
       String size = value.trim();
-      long factor = 1;
       long heapSize;
       try {
         heapSize = new Long(size);

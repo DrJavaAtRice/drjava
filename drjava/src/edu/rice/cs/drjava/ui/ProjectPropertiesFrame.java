@@ -46,12 +46,9 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
-import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
@@ -75,7 +72,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
   private MainFrame _mainFrame;      
   private SingleDisplayModel _model; 
-  private File _projFile;
 
   private final JButton _okButton;
   private final JButton _applyButton;
@@ -104,7 +100,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
     _mainFrame = mf;
     _model = _mainFrame.getModel();
-    _projFile = _model.getProjectFile();
     _mainPanel= new JPanel();
     
     Action okAction = new AbstractAction("OK") {

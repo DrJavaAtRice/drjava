@@ -42,8 +42,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
-import java.awt.*;
-
 /**
  * Tests functionality of this OptionComponent
  */

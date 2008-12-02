@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.

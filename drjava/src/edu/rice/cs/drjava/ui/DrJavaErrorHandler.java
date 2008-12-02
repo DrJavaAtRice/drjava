@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.JButton;
-import java.util.List;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 

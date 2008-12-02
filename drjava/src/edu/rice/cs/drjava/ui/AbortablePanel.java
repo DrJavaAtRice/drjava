@@ -36,20 +36,8 @@
 
 package edu.rice.cs.drjava.ui;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.io.*;
-
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
-import javax.swing.text.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.basic.BasicToolTipUI;
 import java.awt.event.*;
-import java.awt.font.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;

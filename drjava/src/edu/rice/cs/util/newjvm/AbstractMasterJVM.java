@@ -39,7 +39,6 @@ package edu.rice.cs.util.newjvm;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 
 import java.rmi.*;

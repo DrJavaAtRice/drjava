@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /** This state pattern is used by the global model to store any information pertaining to the currently open project.  

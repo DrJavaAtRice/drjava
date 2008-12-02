@@ -57,7 +57,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // Open one empty doc
     _model.newFile();
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     Utilities.invokeLater(new Runnable() { 
       public void run() { 
@@ -88,7 +88,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // Use the interpreter so resetInteractions is not optimized to a no-op
     interpret("0");
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.setResetAfterCompile(true);
     _model.addListener(listener);
      Utilities.invokeLater(new Runnable() { 
@@ -175,7 +175,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = tempFile();
     final File file2 = tempFile(2);
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveBeforeCompile() {
         assertModified(true, doc);
         assertModified(true, doc2);
@@ -241,7 +241,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = tempFile();
     final File file2 = tempFile(1);
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveBeforeCompile() {
         assertModified(false, doc);
         assertModified(true, doc2);

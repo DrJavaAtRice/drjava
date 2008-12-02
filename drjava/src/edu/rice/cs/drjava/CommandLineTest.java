@@ -50,7 +50,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-import edu.rice.cs.plt.debug.DebugUtil;
 /**
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$

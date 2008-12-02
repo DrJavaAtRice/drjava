@@ -42,7 +42,6 @@ import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;

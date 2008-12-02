@@ -47,8 +47,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -85,9 +83,6 @@ public class DefaultCompilerModel implements CompilerModel {
   /** The error model containing all current compiler errors. */
   private CompilerErrorModel _compilerErrorModel;
   
-  /** The working directory corresponding to the last compilation */
-  private File _workDir;
-  
   /** The lock providing mutual exclustion between compilation and unit testing */
   private Object _compilerLock = new Object();
   
@@ -104,7 +99,6 @@ public class DefaultCompilerModel implements CompilerModel {
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
-    _workDir = _model.getWorkingDirectory();
   }
   
   //--------------------------------- Locking -------------------------------//

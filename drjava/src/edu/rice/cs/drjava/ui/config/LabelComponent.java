@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
-import java.awt.*;
 
 import edu.rice.cs.util.swing.SwingFrame;
 

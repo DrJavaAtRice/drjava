@@ -53,7 +53,6 @@ import java.util.List;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
@@ -175,7 +174,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   
   private String _data;
-  private String _newData;
   
   /** Tests that the clipboard is unmodified after a "clear line" action. */
   public void testClearLine() throws BadLocationException, UnsupportedFlavorException, IOException {
@@ -367,7 +365,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     assertEquals("Should have undone.", text, doc.getText());
     
-    int rePos = doc.getCurrentLocation();
+//    int rePos = doc.getCurrentLocation();
 //    System.err.println("Restored position is: " + rePos);
     // cursor will be located at beginning of first line that is changed
 //    assertEquals("Undo should have restored cursor position.", oldPos, rePos);
@@ -943,8 +941,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     
     SingleDisplayModel model = _frame.getModel();
-    OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
-    OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
     model.setActiveDocument(model.getDocumentForFile(goto1_file));
     
     assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());

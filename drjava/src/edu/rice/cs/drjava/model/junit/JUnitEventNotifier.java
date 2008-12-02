@@ -36,12 +36,9 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import java.util.List;
 import edu.rice.cs.drjava.model.EventNotifier;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Keeps track of all listeners to a JUnitModel, and has the ability

@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model;
 
 import javax.swing.text.Highlighter;
-import edu.rice.cs.plt.tuple.Pair;
 
 /** Interface for highlighted regions.
   * @version $Id$ */

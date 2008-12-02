@@ -39,10 +39,8 @@ package edu.rice.cs.drjava.model.definitions;
 import java.awt.EventQueue;
 import java.util.LinkedList;
 import javax.swing.undo.*;
-import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Extended UndoManager with increased functionality.  Can handle aggregating multiple edits into one for the purposes
   * of undoing and redoing.  It exposes editToBeUndone and editToBeRedone (under new names); they are protected methods

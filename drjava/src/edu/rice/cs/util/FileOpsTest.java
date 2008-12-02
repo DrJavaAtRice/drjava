@@ -36,17 +36,13 @@
 
 package edu.rice.cs.util;
 
-import junit.framework.*;
 import java.io.*;
 
 import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.FileOps;
@@ -242,7 +238,7 @@ public class FileOpsTest extends DrJavaTestCase {
     File javaroot = new File(rootDir, "someclass.java");
     FileOps.writeStringToFile(javaroot, "i can write anything i want here");
     
-    LinkedList packages = FileOps.packageExplore("hello", rootDir);
+    LinkedList<String> packages = FileOps.packageExplore("hello", rootDir);
     assertEquals("package count a", 3, packages.size());
     assertTrue("packages contents a0", packages.contains("hello.sub0.subsub0"));
     assertTrue("packages contents a1", packages.contains("hello.sub1"));

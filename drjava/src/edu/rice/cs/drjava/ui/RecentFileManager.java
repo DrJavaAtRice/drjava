@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.config.*;
 
 import edu.rice.cs.util.FileOpenSelector;

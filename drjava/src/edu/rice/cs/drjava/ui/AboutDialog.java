@@ -44,7 +44,6 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.text.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.datatransfer.Clipboard;
@@ -55,6 +54,8 @@ import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
+import java.util.Properties;
+
 /** About dialog.
   * @version $Id$
   */
@@ -141,13 +142,11 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   private JComponent createSysPropTab() {
-    java.util.Properties props = System.getProperties();
+    Properties props = System.getProperties();
     int size = props.size();
     String[][] rowData = new String[size][2];
-    java.util.Iterator entries = props.entrySet().iterator();
     int rowNum = 0;
-    while (entries.hasNext()) {
-      Map.Entry entry = (Map.Entry) entries.next();
+    for (Map.Entry<Object, Object> entry : props.entrySet()) {
       rowData[rowNum][0] = (String) entry.getKey();
       rowData[rowNum][1] = (String) entry.getValue();
       rowNum++;
@@ -210,9 +209,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     final JPanel logoPanel = new JPanel();
     logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS));
     logoPanel.add(Box.createHorizontalGlue());
-    java.util.Iterator it = logos.iterator();
-    while(it.hasNext()) {
-      final JComponent l = (JComponent) it.next();
+    for (JComponent l : logos) {
       logoPanel.add(l);
       l.setCursor(new Cursor(Cursor.HAND_CURSOR));
       final String url = (String)l.getClientProperty("url");
@@ -250,10 +247,8 @@ public class AboutDialog extends JDialog implements ActionListener {
     }
 
     private void resizeLogos() {
-      java.util.Iterator it = iterator();
       Dimension d = new Dimension(width,height);
-      while(it.hasNext()) {
-        JComponent i = (JComponent) it.next();
+      for (JComponent i : this) {
         i.setMinimumSize(d);
         i.setMaximumSize(d);
         i.setPreferredSize(d);

@@ -1,7 +1,5 @@
 package edu.rice.cs.drjava.model;
 
-import junit.framework.TestCase;
-
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;

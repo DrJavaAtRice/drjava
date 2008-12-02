@@ -43,7 +43,6 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingFrame;
 
-import java.awt.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 

@@ -36,10 +36,6 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
-import java.util.HashSet;
-import java.util.Iterator;
-
 /** Class representing user-defined variables that can be inserted as variables in external processes.
   * @version $Id$
   */

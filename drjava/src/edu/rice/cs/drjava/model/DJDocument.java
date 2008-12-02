@@ -39,13 +39,11 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.text.SwingDocumentInterface;
 import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import java.util.ArrayList;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
 import javax.swing.ProgressMonitor;
 
 /** Interface shared by the Definitions Document, Open Definitions Document, and Interactions Document. Characteristic

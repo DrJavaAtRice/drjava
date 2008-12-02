@@ -44,7 +44,6 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
-import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.plt.iter.IterUtil;

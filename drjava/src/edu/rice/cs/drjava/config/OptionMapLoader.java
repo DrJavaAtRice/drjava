@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.UnexpectedException;
 
 import java.util.Properties;
-import java.util.Iterator;
 import java.io.*;
 import java.lang.reflect.*;
 public class OptionMapLoader implements OptionConstants {
@@ -96,9 +95,7 @@ public class OptionMapLoader implements OptionConstants {
   }
   
   public void loadInto(OptionMap map) {
-    Iterator<OptionParser<?>> options = DEFAULTS.keys();
-    while(options.hasNext()) {
-      OptionParser<?> option = options.next();
+    for (OptionParser<?> option : DEFAULTS.keys()) {
       String val = prop.getProperty(option.name);
       map.setString(option, val);
     }

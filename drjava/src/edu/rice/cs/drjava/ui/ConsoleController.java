@@ -36,21 +36,8 @@
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.Toolkit;
-import java.awt.Event;
-import java.awt.EventQueue;
-
-import javax.swing.text.DefaultEditorKit;
-import java.io.Serializable;
-
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.swing.Utilities;
 
 /** A Swing specific console controller class that includes both a Swing InteractionsDJDocument and a GUI agnostic
   * ConsoleDocument (wrapping the former).

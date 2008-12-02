@@ -36,13 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.io.StringWriter;
-import java.io.PrintWriter;
-
 import edu.rice.cs.drjava.DrJavaTestCase;
-//import edu.rice.cs.drjava.config.FileOption;
-
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;

@@ -18,5 +18,5 @@ plt.jar:                  plt-20080709-1847
 buildlib/ant-contrib.jar:           ANT Contrib 1.0b3
 buildlib/cenquatasks.jar:           Distributed with Clover 1.3.9
 buildlib/findbugs-ant.jar:          FindBugs 1.3.1
-buildlib/junit.jar:                 JUnit 4.4
+buildlib/junit.jar:                 JUnit 3.8.1
 buildlib/plt-ant.jar:               plt-ant-20070212-2001

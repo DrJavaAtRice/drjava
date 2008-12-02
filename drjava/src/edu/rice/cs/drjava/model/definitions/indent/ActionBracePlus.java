@@ -47,7 +47,7 @@ public class ActionBracePlus extends IndentRuleAction {
   /** int holding the number of additional blanks to be inserted. */
   private int _suffixCt;
 
-  /** @param suffix The additional whitespaces to be inserted. */
+  /** @param ct The additional whitespaces to be inserted. */
   public ActionBracePlus(int ct) { _suffixCt = ct; }
 
   /** Properly indents the line that the caret is currently on.  Replaces all whitespace characters at the beginning of

@@ -67,7 +67,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     final File file2 = tempFile(1);
     saveFile(doc, new FileSelector(file));
     saveFile(doc2, new FileSelector(file2));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     listener.compile(doc);
     if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -75,7 +75,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     }
     listener.checkCompileOccurred();
     _model.removeListener(listener);
-    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
     listener2.compile(doc2);
     if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -125,7 +125,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
         DrJava.getConfig().setSetting(OptionConstants.RUN_WITH_ASSERT,
                                       Boolean.TRUE);
         
-        CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
+        CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
         _model.addListener(listener2);
         listener2.compile(doc);
         if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -160,7 +160,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       final File file = new File(_tempDir, "DrJavaTestFooGenerics.java");
       saveFile(doc, new FileSelector(file));
       
-      CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+      CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
       _model.addListener(listener);
       _model.getCompilerModel().compileAll();
       Utilities.clearEventQueue();

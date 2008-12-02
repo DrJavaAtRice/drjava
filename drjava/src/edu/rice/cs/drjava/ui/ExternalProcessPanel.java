@@ -38,27 +38,15 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.font.*;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedList;
-
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
-import javax.swing.text.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.basic.BasicToolTipUI;
 
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.ProcessCreator;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.ui.predictive.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import static edu.rice.cs.drjava.ui.MainFrame.GoToFileListEntry;
 
@@ -428,7 +416,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     if (_p!=null) {
       try {
         // try to get exitValue() to see if process has terminated; exit value is not otherwise important
-        int ignored = _p.exitValue();
+        _p.exitValue();
         // if no exception is thrown, then the process has finished
         ended = true;
       }
@@ -496,7 +484,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         if ((_p!=null) && (_is==null)) {
           try {
             // try to get exitValue() to see if process has terminated; exit value is not otherwise important
-            int ignored = _p.exitValue();
+            _p.exitValue();
             // if no exception is thrown, then the process has finished, and the stream may be null
           }
           catch(IllegalThreadStateException e) {
@@ -507,7 +495,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         if ((_p!=null) && (_erris==null)) { 
           try {
             // try to get exitValue() to see if process has terminated; exit value is not otherwise important
-            int ignored = _p.exitValue();
+            _p.exitValue();
             // if no exception is thrown, then the process has finished, and the stream may be null
           }
           catch(IllegalThreadStateException e) {

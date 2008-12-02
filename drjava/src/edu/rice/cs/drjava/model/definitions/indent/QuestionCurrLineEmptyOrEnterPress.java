@@ -36,11 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import javax.swing.text.*;
-
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-
-import edu.rice.cs.util.UnexpectedException;
 
 /** @version $Id$
   * Asks whether the current line is empty (contains only whitespace), or indentation was

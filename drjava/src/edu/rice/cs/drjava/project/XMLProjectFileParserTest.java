@@ -37,12 +37,6 @@
 package edu.rice.cs.drjava.project;
 
 import java.io.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import org.w3c.dom.Node;
-
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.drjava.DrJavaTestCase;

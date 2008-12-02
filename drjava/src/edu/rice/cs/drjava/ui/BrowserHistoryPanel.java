@@ -39,23 +39,11 @@ package edu.rice.cs.drjava.ui;
 import java.util.ArrayList;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
 import javax.swing.text.BadLocationException;
 import java.awt.event.*;
-import java.awt.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.BrowserHistoryManager;
-import edu.rice.cs.drjava.model.RegionManager;
-import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.BrowserDocumentRegion;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.UnexpectedException;
 
 /** Panel for displaying browser history.
   * Currently not used because of synchronization problems.
@@ -77,7 +65,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<BrowserDocumentRegion>
     */
   public BrowserHistoryPanel(final MainFrame frame) {
     super(frame, "Browser History");  // initializes inherited field _frame
-    final BrowserHistoryManager rm = _model.getBrowserHistoryManager();
+//    final BrowserHistoryManager rm = _model.getBrowserHistoryManager();
 //    rm.addListener(new RegionManagerListener<BrowserDocumentRegion>() {
 //      public void regionAdded(BrowserDocumentRegion r) { rm.addBrowserRegion(r, frame.getModel().getNotifier()); }
 //      public void regionChanged(BrowserDocumentRegion r) { 

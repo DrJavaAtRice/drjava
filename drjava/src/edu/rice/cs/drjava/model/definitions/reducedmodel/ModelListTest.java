@@ -87,7 +87,7 @@ public final class ModelListTest extends DrJavaTestCase {
 
   public void testRemove() {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
-    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
+    //ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
     assertTrue("#0.0", fEmpty.isEmpty());
     assertEquals("#0.1", 0, fEmpty.length());
     assertEquals("#0.2", 0, fFull.length());
@@ -102,7 +102,7 @@ public final class ModelListTest extends DrJavaTestCase {
 
   public void testNext() {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
-    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
+    //ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
 
     itFull.insert(Integer.valueOf(6));
     itFull.insert(Integer.valueOf(5));
@@ -118,7 +118,7 @@ public final class ModelListTest extends DrJavaTestCase {
 
   public void testPrev() {
     ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
-    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
+    //ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
 
     itFull.insert(Integer.valueOf(6));
     itFull.insert(Integer.valueOf(5));

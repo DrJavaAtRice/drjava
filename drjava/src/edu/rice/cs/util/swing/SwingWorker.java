@@ -37,7 +37,6 @@
 package edu.rice.cs.util.swing;
 
 import java.awt.EventQueue;
-import javax.swing.SwingUtilities;
 
 /** SwingWorker, adapted from Sun's Java Tutorial.  This is the 3rd version of SwingWorker (also known as 
   * SwingWorker 3), an abstract class that you subclass to perform GUI-related work in a dedicated thread.  For

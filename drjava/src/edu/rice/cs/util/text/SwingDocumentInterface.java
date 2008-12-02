@@ -30,10 +30,7 @@
 
 package edu.rice.cs.util.text;
 
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.Position;
 
 /** DefaultStyledDocument interface augmented by AbstractDocumentInterface. */
 public interface SwingDocumentInterface extends AbstractDocumentInterface, StyledDocument { }

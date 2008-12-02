@@ -360,7 +360,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     }
 
     // TODO: Why is this call being made?
-    DebugThreadData threadA = new JPDAThreadData(_debugger.getCurrentThread());
+    @SuppressWarnings("unused") DebugThreadData threadA = new JPDAThreadData(_debugger.getCurrentThread());
     DebugThreadData threadB = new JPDAThreadData(_debugger.getThreadAt(1));
 //    _log.log("----After breakpoint:\n" + getInteractionsText());
 
@@ -754,7 +754,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("DrJavaThreadDeathTest.java", THREAD_DEATH_CLASS);
+    _startupDebugger("DrJavaThreadDeathTest.java", THREAD_DEATH_CLASS);
 
     // Before bugs 697825 and 779111 were fixed, this line would just
     //  hang, since dead threads remained suspended indefinitely.

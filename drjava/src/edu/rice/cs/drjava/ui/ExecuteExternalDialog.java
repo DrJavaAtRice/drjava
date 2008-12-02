@@ -40,9 +40,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
 
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
@@ -53,22 +51,17 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.FileChooser;
-import edu.rice.cs.util.swing.DropDownButton;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.FontMetrics;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.text.*;
 
 public class ExecuteExternalDialog extends SwingFrame implements OptionConstants {
@@ -282,7 +275,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       };
       _runCommandButton = new JButton(runCommandAction);
       _runCommandButton.addFocusListener(new FocusAdapter() {
-        @SuppressWarnings("unchecked")
         public void focusGained(FocusEvent e) {
           _insertCommandButton.setEnabled(false);
         }
@@ -669,7 +661,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _lastCommandFocus = _commandLine;
     // do not allow preview to have focus
     _commandLine.addFocusListener(new FocusAdapter() {
-      @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastCommandFocus = (JTextPane)e.getComponent();
         _insertCommandButton.setEnabled(true);
@@ -682,7 +673,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       }
     });
     _commandWorkDirLine.addFocusListener(new FocusAdapter() {
-      @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastCommandFocus = (JTextPane)e.getComponent();
         _insertCommandButton.setEnabled(true);

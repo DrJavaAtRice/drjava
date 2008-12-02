@@ -40,10 +40,8 @@ import edu.rice.cs.drjava.config.PropertyMaps;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * This class abstracts out process creation, similar to ProcessCreator,
@@ -125,20 +123,17 @@ public class ProcessCreator {
     return _workdir;
   }
   
-  /** Return the command line after evaluation, or null if it hasn't been replaced yet.
-    * @param command line after replacement, or null */
+  /** Return the command line after evaluation, or null if it hasn't been replaced yet. */
   public String evaluatedCommandLine() {
     return _evaluatedCmdLine;
   }
   
-  /** Return the work directory after evaluation, or null if it hasn't been replaced yet.
-    * @param command line after replacement, or null */
+  /** Return the work directory after evaluation, or null if it hasn't been replaced yet. */
   public String evaluatedWorkDir() {
     return _evaluatedWorkDir;
   }
   
-  /** Return the PropertyMaps object used for substitution.
-    * @param PropertyMaps object */
+  /** Return the PropertyMaps object used for substitution. */
   public PropertyMaps getPropertyMaps() { return _props; }
   
   /** Starts a new process using the attributes of this process creator.

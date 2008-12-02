@@ -39,7 +39,6 @@ package edu.rice.cs.util.docnavigation;
 import java.io.File;
 import java.util.*;
 import java.awt.Container;
-import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 /** <code>IDocumentNavigator</code> provides a framework through which individual <code>IDocuments</code> can be 

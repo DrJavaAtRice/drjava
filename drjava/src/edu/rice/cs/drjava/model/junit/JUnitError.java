@@ -44,7 +44,7 @@ import java.io.Serializable;
 /** A class to represent JUnit errors.  This class enables DrJava to highlight the exact error text.
   * @version $Id$
   */
-public class JUnitError extends DJError implements Comparable, Serializable {
+public class JUnitError extends DJError implements Serializable {
   private String _test;
   private String _className;
   private String _stackTrace;

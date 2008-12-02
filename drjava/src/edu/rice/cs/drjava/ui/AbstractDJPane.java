@@ -53,7 +53,6 @@ import javax.swing.text.*;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.BadLocationException;
 import java.awt.dnd.*;
-import java.awt.datatransfer.*;
 import edu.rice.cs.drjava.DrJavaRoot;
 
 /** This pane class for a SwingDocument. */
@@ -87,7 +86,7 @@ public abstract class AbstractDJPane extends JTextPane
     
     /** Checks caret position to see if it needs to set or remove a highlight from the document. Only modifies the 
       * document--not any GUI classes.
-      * @param e the event fired by the caret position change
+      * @param ce the event fired by the caret position change
       */
     public void caretUpdate(final CaretEvent ce) { 
       Utilities.invokeLater(new Runnable() { 

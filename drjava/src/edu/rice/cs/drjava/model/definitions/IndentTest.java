@@ -46,7 +46,6 @@ import  javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.DJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
@@ -481,7 +480,6 @@ public final class IndentTest extends DrJavaTestCase {
     * @exception BadLocationException
     */
   public void testIndentInfoPrevNewline () throws BadLocationException {
-    BraceReduction _reduced = _doc.getReduced();
 //    System.err.println("***** reduced before insert = " + _doc.getReduced().simpleString());
     _doc.insertString(0, "{\n  {\nhello", null);
 //    System.err.println("***** reduced after insert = " + _doc.getReduced().simpleString());
@@ -1469,7 +1467,7 @@ public final class IndentTest extends DrJavaTestCase {
   
   
   public void testNoParameters() throws BadLocationException {
-    IndentRuleAction _action = new ActionBracePlus(0);
+    //IndentRuleAction _action = new ActionBracePlus(0);
     
     String _text =
       "method(\n"+

@@ -53,7 +53,6 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.AsyncTask;
 import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.text.EditDocumentInterface;
 
 import javax.swing.text.BadLocationException;
 import java.io.File;
@@ -278,7 +277,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     
     _model.setResetAfterCompile(true);
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     
     listener.logCompileStart();
@@ -985,11 +984,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   };
   
   
-  /** A model listener for situations expecting a compilation to succeed.  The _expectReset flag determines if interactions
-   *  are reset after a compilation. The interactionsReset() method notifies when reset has occurred.
-   */
+  /** A model listener for situations expecting a compilation to succeed. */
   public static class CompileShouldSucceedListener extends InteractionListener {
-    private volatile boolean _expectReset;
     
     private volatile boolean _compileDone = false;        // records when compilaton is done
     private final Object _compileLock = new Object();     // lock for _compileDone
@@ -1020,15 +1016,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         _compileLock.notifyAll();
       }
     }
-    
-    /** Standard constructor.
-     *  @param expectReset Whether to listen for interactions being
-     */
-    public CompileShouldSucceedListener(boolean expectReset) { _expectReset = expectReset; }
-    
-    public CompileShouldSucceedListener() { this(false); }
-    
-//    public boolean notDone() { return ! _interactionsReset; }
     
     @Override public void newFileCreated(OpenDefinitionsDocument doc) { /* ingore this operation */ }
     
@@ -1069,17 +1056,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertCompileEndCount(1);
       assertActiveCompilerChangedCount(0);
       assertCompileStartCount(1);
-//      if (_expectReset) {
-//        assertInterpreterResettingCount(1);
-//        assertInterpreterReadyCount(1);
-//      }
-//      else {
-//        assertInterpreterResettingCount(0);
-//        assertInterpreterReadyCount(0);
-//      }
-      
-      // Note: console is no longer reset after a compile
-      //assertConsoleResetCount(1);
     }
   }
     
@@ -1154,10 +1130,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile boolean printMessages = GlobalModelJUnitTest.printMessages;
     
     /** Construct JUnitTestListener without resetting interactions */
-    public JUnitTestListener() { this(false, false);  }
-    public JUnitTestListener(boolean shouldResetAfterCompile) {  this(shouldResetAfterCompile, false); }
-    public JUnitTestListener(boolean shouldResetAfterCompile, boolean printListenerMessages) {
-      super(shouldResetAfterCompile);
+    public JUnitTestListener() { this(false);  }
+    public JUnitTestListener(boolean printListenerMessages) {
       this.printMessages = printListenerMessages;
     }
     

@@ -36,8 +36,6 @@
 
 package edu.rice.cs.util.swing;
 
-import javax.swing.ProgressMonitor;
-
 /** The base class of the component that launches an AsyncTask. It manages the multi-threading and ensures that the
   * correct methods of the task are performed on the correct thread. 
   * @author jlugo

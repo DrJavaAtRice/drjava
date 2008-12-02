@@ -43,8 +43,6 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
@@ -491,7 +489,6 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   /** Tests that the interactions history is stored correctly. See bug # 992455 */
   public void testInteractionsHistoryStoredCorrectly() throws Exception {
     _log.log("testInteractionsHistoryStoredCorrectly started");
-    final Object _lock = new Object();
     final String code = "public class A {\n";
     
     _model = new BadSyntaxInteractionsModel(_adapter);  // replaces model created by setUp()

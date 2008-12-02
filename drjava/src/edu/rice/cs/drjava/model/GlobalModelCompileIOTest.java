@@ -60,7 +60,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     
     saveFile(doc, new FileSelector(file));
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
 //    System.err.println("Cached class file is " + doc.getCachedClassFile().getAbsolutePath());
     assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
@@ -102,7 +102,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     
     saveFile(doc, new FileSelector(file));
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
 //    System.err.println("cached class file is " + doc.getCachedClassFile());
     assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);

@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 

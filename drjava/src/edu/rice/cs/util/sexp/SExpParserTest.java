@@ -130,7 +130,7 @@ public class SExpParserTest extends DrJavaTestCase {
     // Test an illegal top-level s-exp
     String text = "true";
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -140,7 +140,7 @@ public class SExpParserTest extends DrJavaTestCase {
     }
     text = "123 ((help) me)";
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -150,7 +150,7 @@ public class SExpParserTest extends DrJavaTestCase {
     }
     text = "[help me]"; // right now, I haven't allowed other brace types
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -164,7 +164,7 @@ public class SExpParserTest extends DrJavaTestCase {
     
     String text = "(abcdefg";
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -174,7 +174,7 @@ public class SExpParserTest extends DrJavaTestCase {
     
     text = "(ab\ncdefg";
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -184,7 +184,7 @@ public class SExpParserTest extends DrJavaTestCase {
     
     text = "(ab\ncdefg))";
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -195,7 +195,7 @@ public class SExpParserTest extends DrJavaTestCase {
     
     text = "(\")";  //  (") <-- unclosed string
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
@@ -206,7 +206,7 @@ public class SExpParserTest extends DrJavaTestCase {
     
     text = "(;)";  // <-- last ) is commented out
     try {
-      SExp exp = SExpParser.parse(text).get(0);
+      SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 

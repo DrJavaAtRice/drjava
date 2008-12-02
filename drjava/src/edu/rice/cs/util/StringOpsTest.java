@@ -42,9 +42,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Lambda;
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Properties;
 import java.util.List;
 
 /** Test functions of StringOps. */
@@ -179,7 +176,7 @@ public class StringOpsTest extends DrJavaTestCase {
   
   private static class TestGetSimpleNameInner {
     public static class Nested {
-      public static Class anonClass() {
+      public static Class<?> anonClass() {
         java.awt.event.ActionListener l = new java.awt.event.ActionListener() {
           public void actionPerformed(java.awt.event.ActionEvent e) { }
         };
@@ -187,7 +184,7 @@ public class StringOpsTest extends DrJavaTestCase {
       }
     }
     public class Inner {
-      public Class anonClass() {
+      public Class<?> anonClass() {
         java.awt.event.ActionListener l = new java.awt.event.ActionListener() {
           public void actionPerformed(java.awt.event.ActionEvent e) { }
         };
@@ -197,15 +194,15 @@ public class StringOpsTest extends DrJavaTestCase {
     public Inner getInner() {
       return new Inner();
     }
-    public static Class anonClass() {
+    public static Class<?> anonClass() {
       java.awt.event.ActionListener l = new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent e) { }
       };
       return l.getClass();
     }
-    public static Lambda<Object, Class> getLambda() {
-      return new Lambda<Object, Class>() {
-        public Class value(Object param) {
+    public static Lambda<Object, Class<?>> getLambda() {
+      return new Lambda<Object, Class<?>>() {
+        public Class<?> value(Object param) {
           java.awt.event.ActionListener l = new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) { }
           };

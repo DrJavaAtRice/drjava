@@ -38,7 +38,6 @@ package edu.rice.cs.util.text;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 /** Tests the SwingDocument.

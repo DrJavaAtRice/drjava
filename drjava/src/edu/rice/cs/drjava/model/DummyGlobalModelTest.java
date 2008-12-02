@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import junit.framework.*;
-
 import java.io.File;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
@@ -82,7 +80,6 @@ public class DummyGlobalModelTest extends DrJavaTestCase {
   /** Creates a new instance of DummyGetDocuments, calls
     * getOpenDefinitionsDocuments() and ensures the method throws an
     * UnsupportedOperationException.
-    * @exception java.io.IOException if an error occurs
     */
   public void testGetDefinitionsDocuments() {
     DummyGlobalModel dummy = new DummyGlobalModel();
@@ -97,7 +94,6 @@ public class DummyGlobalModelTest extends DrJavaTestCase {
   
   /** Creates a new instance of DummyGetDocuments, calls hasModifiedDocuments() and ensures the method throws an
     * UnsupportedOperationException.
-    * @exception java.io.IOException if an error occurs
     */
   public void testHasModifiedDocuments() {
     DummyGlobalModel dummy = new DummyGlobalModel();

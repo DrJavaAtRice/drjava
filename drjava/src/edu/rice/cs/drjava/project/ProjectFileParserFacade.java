@@ -37,21 +37,6 @@
 package edu.rice.cs.drjava.project;
 
 import java.io.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.sexp.*;
-//import edu.rice.cs.drjava.model.DocumentRegion;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 
 /** Abstract project file parser. */

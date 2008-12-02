@@ -56,8 +56,8 @@ public class DocumentCacheTest extends DrJavaTestCase {
   private DocumentCache _cache;
   private HashMap<OpenDefinitionsDocument, DCacheAdapter> _adapterTable;
   
-  private int _doc_made;
-  private int _doc_saved;
+//  private int _doc_made;
+//  private int _doc_saved;
   
   protected File _tempDir;
   
@@ -76,8 +76,8 @@ public class DocumentCacheTest extends DrJavaTestCase {
         _adapterTable.put(odd, a);
       }
     });
-    _doc_made = 0;
-    _doc_saved = 0;
+//    _doc_made = 0;
+//    _doc_saved = 0;
   }
   
   public void tearDown() throws Exception {
@@ -409,25 +409,25 @@ public class DocumentCacheTest extends DrJavaTestCase {
   }
   
   
-  private DefinitionsDocument _saved; // used for testReconstructor()
+//  private DefinitionsDocument _saved; // used for testReconstructor()
   
-  public void testReconstructor() throws IOException{
-    DDReconstructor d = new DDReconstructor() {
-      public DefinitionsDocument make() {
-        _doc_made++;
-        return _saved;
-      }
-      public void saveDocInfo(DefinitionsDocument doc) { _doc_saved++; }
-      public void addDocumentListener(javax.swing.event.DocumentListener dl) { /* do nothing */ }
-      public String getText() { return null; }
-      public String getText(int offset, int length) { return null; }
-    };
-    
-    OpenDefinitionsDocument doc1 =  _model.newFile();
-    assertFalse("The document should not be in the cache", _adapterTable.get(doc1).isReady());
-    _saved = _adapterTable.get(doc1).getDocument();
-    assertTrue("The document should be in the cache", _adapterTable.get(doc1).isReady());
-    
+//  public void testReconstructor() throws IOException{
+//    DDReconstructor d = new DDReconstructor() {
+//      public DefinitionsDocument make() {
+//        _doc_made++;
+//        return _saved;
+//      }
+//      public void saveDocInfo(DefinitionsDocument doc) { _doc_saved++; }
+//      public void addDocumentListener(javax.swing.event.DocumentListener dl) { /* do nothing */ }
+//      public String getText() { return null; }
+//      public String getText(int offset, int length) { return null; }
+//    };
+//    
+//    OpenDefinitionsDocument doc1 =  _model.newFile();
+//    assertFalse("The document should not be in the cache", _adapterTable.get(doc1).isReady());
+//    _saved = _adapterTable.get(doc1).getDocument();
+//    assertTrue("The document should be in the cache", _adapterTable.get(doc1).isReady());
+//    
 //    _adapterTable.get(doc1).setReconstructor(d);
 //    assertFalse("The document should not be in the cache after an update", _adapterTable.get(doc1).isReady());
 //    
@@ -435,7 +435,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
 //
 //    assertEquals("The make in the reconstructor was called 1nce", 1, _doc_made);
 //    assertEquals("The save in the reconstructor was not called", 0, _doc_saved);
-  }
+//  }
   
   // not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
   // This should be dealt with.

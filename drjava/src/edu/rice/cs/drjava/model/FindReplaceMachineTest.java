@@ -41,12 +41,9 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
 
-import java.awt.EventQueue;
 import javax.swing.text.BadLocationException;
 import java.io.File;
-import java.io.IOException;
 
 /** Tests the FindReplaceMachine.
   * @version $Id$

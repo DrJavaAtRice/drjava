@@ -39,17 +39,10 @@ package edu.rice.cs.drjava;
 import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.dnd.*;
-import java.awt.datatransfer.*;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.MalformedURLException;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
 
@@ -57,19 +50,14 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
-import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.drjava.ui.SplashScreen;
-import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.DrJavaErrorWindow;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 
 import com.jgoodies.looks.plastic.PlasticLookAndFeel;
@@ -100,7 +88,6 @@ public class DrJavaRoot {
   
 //  /** This field is only used in the instance of this class in the Interpreter JVM. */
   
-  private static boolean _attemptingAugmentedClassPath = false;
   private static SimpleInteractionsWindow _debugConsole = null;
   
   private static boolean anyLineNumbersSpecified = false;
@@ -362,7 +349,7 @@ public class DrJavaRoot {
     * @param w window trying to get the modal window listener
     * @param toFrontAction action to be performed after the window has been moved to the front again
     * @param closeAction action to be performed when the window is closing
-    * @return window listener */
+    */
   public static void installModalWindowAdapter(final Window w,
                                                final Runnable1<? super WindowEvent> toFrontAction,
                                                final Runnable1<? super WindowEvent> closeAction) {

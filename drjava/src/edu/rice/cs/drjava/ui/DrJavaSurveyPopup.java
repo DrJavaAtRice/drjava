@@ -38,21 +38,16 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.text.*;
-import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.*;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.UneditableTableModel;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.plt.lambda.Runnable1;
@@ -76,8 +71,6 @@ public class DrJavaSurveyPopup extends JDialog {
   private JOptionPane _questionPanel;
   /** the table with the information that DrJava will send */
   private JTable _propertiesTable;
-  /** the panel with the buttons and combobox */
-  private JPanel _bottomPanel;
   /** don't ask user again */
   private JCheckBox _neverAskAgain;
   
@@ -160,8 +153,7 @@ public class DrJavaSurveyPopup extends JDialog {
 
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("survey.txt",false);
 
-  /** Return the URL that would be used to answer the DrJava survey.
-    * @param URL used to answer the DrJava survey */
+  /** Return the URL that would be used to answer the DrJava survey. */
   public static String getSurveyURL() {
     final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
     StringBuilder sb = new StringBuilder();
@@ -183,10 +175,10 @@ public class DrJavaSurveyPopup extends JDialog {
   public static boolean maySubmitSurvey() {
     // check how many days have passed since the last survey
     int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);
-    java.util.Date nextCheck = 
-      new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
-                           + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
-    return (new java.util.Date().after(nextCheck)) ||
+    Date nextCheck = 
+      new Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY) +
+               days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
+    return (new Date().after(nextCheck)) ||
       (!DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT).equals(getSurveyURL()));
   }
   
@@ -197,11 +189,6 @@ public class DrJavaSurveyPopup extends JDialog {
       String result = getSurveyURL()+"&buildtime="+Version.getBuildTimeString();
       LOG.log(result);
       
-      // check how many days have passed since the last survey
-      int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);
-      java.util.Date nextCheck = 
-        new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY)
-                             + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
       if (!maySubmitSurvey()) {
         // not enough days have passed, or the configuration has not changed, quietly terminate
         return;

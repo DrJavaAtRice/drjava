@@ -37,7 +37,6 @@
 package edu.rice.cs.util.docnavigation;
 
 import java.awt.dnd.*;
-import java.awt.datatransfer.*;
 import edu.rice.cs.drjava.DrJavaRoot;
 
 class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<ItemT> 

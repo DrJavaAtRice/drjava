@@ -44,9 +44,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.SortedSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-
 /** Interface for a region manager.  Region ordering (as in DocumentRegion) is not required, but it facilitates 
   * efficient implementation.
   * @version $Id$
@@ -70,8 +67,6 @@ public interface RegionManager<R extends IDocumentRegion> {
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset);
   
   /** Returns the rightmost region starting on the same line containing the specified selection
-   *  @param odd the document
-   *  @param offset the offset in the document
    *  @return the rightmost DocumentRegion containing the given selection, or null if it does not exist.
    */
   public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset);
@@ -95,11 +90,9 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** Remove the given DocumentRegions from the manager.
    *  @param regions the DocumentRegions to be removed.
    */
-  public void removeRegions(Collection<R> regions);
+  public void removeRegions(Iterable<? extends R> regions);
   
-  /** Remove the given OpenDefinitionsDocument and all of its regions from the manager.
-   *  @param the OpenDefinitionsDocument to be removed.
-   */
+  /** Remove the given OpenDefinitionsDocument and all of its regions from the manager. */
   public void removeRegions(OpenDefinitionsDocument odd);
 
   /** Apply the given command to the specified region to change it.

@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.model.definitions.*;
-
 /** Light-weight parsing visitor.
  *  @version $Id$
  */

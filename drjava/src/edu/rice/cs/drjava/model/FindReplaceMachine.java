@@ -36,22 +36,16 @@
 
 package edu.rice.cs.drjava.model;   
 
-import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
-
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 
 import java.awt.EventQueue;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
-
-import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** Implementation of logic of find/replace over a document.
   * @version $Id$
@@ -82,7 +76,6 @@ public class FindReplaceMachine {
   /** Standard Constructor.
     * Creates new machine to perform find/replace operations on a particular document starting from a given position.
     * @param docIterator an object that allows navigation through open Swing documents (it is DefaultGlobalModel)
-    * @exception BadLocationException
     */
   public FindReplaceMachine(SingleDisplayModel model, DocumentIterator docIterator) {    
     _skipText = false;
@@ -257,8 +250,7 @@ public class FindReplaceMachine {
     */
   private int replaceAll(boolean searchAll) {
     if (searchAll) {
-      OpenDefinitionsDocument startDoc = _doc;
-      int count = 0;           // the number of replacements done so farr
+      int count = 0;           // the number of replacements done so far
       int n = _docIterator.getDocumentCount();
       for (int i = 0; i < n; i++) {
         // replace all in the rest of the documents
@@ -324,8 +316,7 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     if (searchAll) {
-      OpenDefinitionsDocument startDoc = _doc;
-      int count = 0;           // the number of replacements done so farr
+      int count = 0;           // the number of replacements done so far
       int n = _docIterator.getDocumentCount();
       for (int i = 0; i < n; i++) {
         // process all in the rest of the documents
@@ -486,7 +477,6 @@ public class FindReplaceMachine {
     * @param doc document to be searched
     * @param start the location (offset/left edge) of the text segment to be searched 
     * @param len the requested length of the text segment to be searched
-    * @param whether this search should span all documents
     * @param wrapped whether this search is after wrapping around the document
     * @param allWrapped whether this seach is after wrapping around all documents
     * @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search. The
@@ -656,7 +646,7 @@ public class FindReplaceMachine {
     * because it does not match the whole word when either or both of those conditions are set to true).  Only executes 
     * in event thread.
     * @param foundOffset the location of the instance found
-    * @param doc the current document where the instance was found
+    * @param odd the current document where the instance was found
     * @return true if the location should be ignored, false otherwise
     */
   private boolean _shouldIgnore(int foundOffset, OpenDefinitionsDocument odd) {

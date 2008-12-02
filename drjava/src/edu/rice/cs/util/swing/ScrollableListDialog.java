@@ -145,7 +145,6 @@ public class ScrollableListDialog<T> extends JDialog {
     * @throws IllegalArgumentException if {@code listItems} is {@code null.}
     * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
     */
-  @SuppressWarnings("unchecked")
   private ScrollableListDialog(Frame owner, String dialogTitle, String leaderText, List<T> listItems, List<T> selItems,
                                int messageType, int width, int height, Icon icon, boolean fitToScreen, 
                                List<JButton> buttons, boolean selectable) {

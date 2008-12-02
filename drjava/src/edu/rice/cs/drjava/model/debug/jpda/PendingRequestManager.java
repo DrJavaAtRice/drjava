@@ -43,7 +43,6 @@ import com.sun.jdi.event.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
-import java.io.*;
 
 import edu.rice.cs.drjava.model.debug.DebugException;
 
@@ -163,7 +162,7 @@ public class PendingRequestManager {
       int lineNumber = a.getLineNumber();
       if (lineNumber != DebugAction.ANY_LINE) {
         try {
-          List lines = rt.locationsOfLine(lineNumber);
+          List<Location> lines = rt.locationsOfLine(lineNumber);
           if (lines.size() == 0) {
             // Do not disable action; the line number might just be in another class in the same file
             String exactClassName = a.getExactClassName();

@@ -46,12 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
-import java.util.StringTokenizer;
 import java.util.Vector;
-import javax.swing.SwingUtilities;
 
 // DrJava stuff
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -59,7 +56,6 @@ import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
-import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -68,7 +64,6 @@ import edu.rice.cs.drjava.model.debug.*;
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.request.*;
-import com.sun.jdi.event.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -752,8 +747,6 @@ public class JPDADebugger implements Debugger {
     _log("Error in EventHandlerThread: " + t);
     _eventHandlerError = t;
   }
-  
-  private volatile Runnable _command = null;
   
   /** Handles the details of attaching to the interpreterJVM. Only runs in the event thread. */
   private void _attachToVM() throws DebugException {

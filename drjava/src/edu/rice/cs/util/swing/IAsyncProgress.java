@@ -36,8 +36,6 @@
 
 package edu.rice.cs.util.swing;
 
-import javax.swing.ProgressMonitor;
-
 public interface IAsyncProgress {
   public void close();
   public int  getMaximum();

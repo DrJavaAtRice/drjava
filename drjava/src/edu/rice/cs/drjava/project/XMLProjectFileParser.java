@@ -43,19 +43,13 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import org.w3c.dom.Node;
 
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.FileRegion;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.StringOps;
 
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;

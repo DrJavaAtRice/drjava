@@ -36,9 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import  junit.framework.*;
-
-import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**

@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.ui.DefinitionsPaneTest;
-import edu.rice.cs.util.Log;
 
 import junit.framework.AssertionFailedError;
 
@@ -53,7 +52,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   protected volatile static boolean _testFailed = false;
 
   /** Initialize test state to not failed. 
-    * @throws Exception.  This convenion is mandated by the JUnit TestCase class which is an ancestor of this class. 
+    * @throws Exception  This convention is mandated by the JUnit TestCase class which is an ancestor of this class. 
     */
   public void setUp() throws Exception {
     super.setUp();
@@ -74,7 +73,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     * the test to fail, because the listener is often called from another thread.
     */
   protected static void listenerFail(String s) {
-    StackTraceElement[] trace = Thread.getAllStackTraces().get(Thread.currentThread());
+//    StackTraceElement[] trace = Thread.getAllStackTraces().get(Thread.currentThread());
 //    System.err.println("TEST FAILED in a listener thread");
 //    System.err.println("Failing thread stack trace:\n " + Log.traceToString(trace));
 //    new AssertionFailedError(s).printStackTrace(System.out);

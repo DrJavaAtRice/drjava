@@ -37,8 +37,6 @@
 package edu.rice.cs.util;
 
 import java.io.*;
-import java.util.Set;
-import java.util.HashSet;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 

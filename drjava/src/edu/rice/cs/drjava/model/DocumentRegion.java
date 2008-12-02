@@ -36,14 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.UnexpectedException;
-
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-import java.io.File;
-
 /** Class for a simple document region that only records region offsets, not positions.  Instances of this class represent
   * dummy regions used in searching SortSets of DocumentRegions.  Hence, getLineStart() and getLineEnd() should never be
   * called.  WARNING: this class overrides the equals method but does not override the hashCode method to maintain 
@@ -51,7 +43,7 @@ import java.io.File;
   * are mutable, a hashCode method consistent with equals WOULD NOT WORK anyway.
   * @version $Id$
   */
-public class DocumentRegion implements OrderedDocumentRegion, Comparable<OrderedDocumentRegion> {
+public class DocumentRegion implements OrderedDocumentRegion {
   protected final OpenDefinitionsDocument _doc;
   // The following two fields are ignored in subclasses of DocumentRegion
   protected volatile int _start; 
@@ -68,11 +60,6 @@ public class DocumentRegion implements OrderedDocumentRegion, Comparable<Ordered
     _doc = doc;
     _start = start;
     _end = end;
-  }
-  
-  private static Position createPosition(OpenDefinitionsDocument doc, int i) {
-    try { return doc.createPosition(i); }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
   
   /** Defines the equality relation on DocumentRegions.  This equivalence relation is consistent with the equivalence

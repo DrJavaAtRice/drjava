@@ -133,7 +133,7 @@ public class ProcessChain extends Process {
 
     // _deathThreads = new Thread[_creators.length];
     for(int i=0; i<_processes.length; ++i) {
-      final int index = i;
+//      final int index = i;
       try {
         _processes[i] = _creators[i].start();
 //        _deathThreads[i] = new Thread(new Runnable() {

@@ -36,12 +36,9 @@
 
 package edu.rice.cs.util.docnavigation;
 
-import junit.framework.TestCase;
-
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-import java.io.*;
 import java.util.*;
 
 public class JListSortNavigatorTest extends DrJavaTestCase {

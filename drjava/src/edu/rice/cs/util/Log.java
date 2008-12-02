@@ -38,7 +38,6 @@ package edu.rice.cs.util;
 
 import java.io.*;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -83,7 +82,6 @@ public class Log {
   }
   
   /** Creates the log file, if enabled. */
-  @SuppressWarnings("deprecation") 
   protected void _init() {
     if (_writer == null) {
       if (_isEnabled || ENABLE_ALL) {
@@ -110,7 +108,6 @@ public class Log {
   /** Prints a message to the log, if enabled.
     * @param message Message to print.
     */
-  @SuppressWarnings("deprecation") 
   public synchronized void log(String message) {
     if (isEnabled()) {
       if (_writer == null) {

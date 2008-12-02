@@ -43,7 +43,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 /** This class contains a server that monitors incoming datagrams on port 4444
   * (default; can be changed in OptionConstants.REMOTE_CONTROL_PORT).

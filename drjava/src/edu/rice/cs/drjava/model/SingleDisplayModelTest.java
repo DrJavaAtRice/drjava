@@ -44,9 +44,7 @@ import java.util.Arrays;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Test functions of the single display model.
@@ -345,7 +343,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     String txt = "This is some test text";
     File f = writeToNewTempFile(txt);
     OpenDefinitionsDocument doc1 = _model.openFile(new FileSelector(f));
-    OpenDefinitionsDocument doc2 = _model.newFile();
+    @SuppressWarnings("unused") OpenDefinitionsDocument doc2 = _model.newFile();
     f.delete();
     _model.closeFile(doc1);
      _log.log("testDeleteFileWhileOpen completed");

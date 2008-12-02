@@ -44,16 +44,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.FileRegion;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** This parser uses the s-expression parser defined in the util pacakge.  The SExp tree given by the parser is 
  *  interpreted into a ProjectFileIR that is given to the user.  This class must also deal with different
@@ -73,7 +70,6 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   /** Singleton instance of ProjectFileParser */
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
-  private File _projectFile;
   private String _parent;
   private String _srcFileBase;
   
@@ -234,9 +230,6 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   }
   
   private Pair<Integer,Integer> parseIntPair(SExp s) {
-    int row;
-    int col;
-    
     /* we're getting in a "(select # #)" */
     if (!(s instanceof Cons)) {
       throw new PrivateProjectException("expected name tag, found string");
@@ -558,12 +551,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   }
   
-  /** Given a top-level s-expression, this method checks the name of the node and configures the given pfir 
-    * appropriately.  If the expression is empty, it is ignored.
-    * @param e the top-level s-expression to check
-    * @param pfir the ProjectFileIR to update
-    */
-  private static class PrivateProjectException extends RuntimeException{
+  private static class PrivateProjectException extends RuntimeException {
     public PrivateProjectException(String message) { super(message); }
   }
 }

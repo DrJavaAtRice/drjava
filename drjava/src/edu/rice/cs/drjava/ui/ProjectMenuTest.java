@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
@@ -53,7 +52,6 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.List;
 
 /** Test functions of Project Facility working through the main frame and model. */
@@ -67,14 +65,10 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   private volatile File _base;
   private volatile File _parent;
   private volatile File _srcDir;
-  private volatile File _projDir;
   private volatile File _auxFile;
   private volatile File _projFile;
   private volatile File _file1;
   private volatile File _file2;
-  
-  private volatile String _file1RelName;
-  private volatile String _file2RelName;
   
   /* The reader which reads the test project file */
   volatile BufferedReader reader = null;
@@ -82,7 +76,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   private volatile String _projFileText = null;
   
   /** Setup method for each JUnit test case in this Test class.
-    * @throws Exception.  This convention is mandated by the JUnit TestClass which is an ancestor of this class. 
+    * @throws Exception  This convention is mandated by the JUnit TestClass which is an ancestor of this class. 
     */
   public void setUp() throws Exception {
     super.setUp();
@@ -99,7 +93,6 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
           
           // create project in a directory with an auxiliary file outside of it
           _auxFile = File.createTempFile("aux", ".java").getCanonicalFile();
-          File auxFileParent = _auxFile.getParentFile();
           _projFile = new File(_parent, "test.pjt");
           
           _file1 = new File(_srcDir, "test1.java");

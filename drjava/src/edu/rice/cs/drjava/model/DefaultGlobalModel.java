@@ -40,34 +40,25 @@ package edu.rice.cs.drjava.model;
 import java.awt.EventQueue;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.*;
 
 import java.rmi.RemoteException;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-import java.util.StringTokenizer;
 import java.util.Map;
 import java.util.TreeMap;
-
-import javax.swing.text.BadLocationException;
-import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;
@@ -91,7 +82,6 @@ import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
-import edu.rice.cs.drjava.ui.MainFrame;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -102,8 +92,6 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.newjvm.AbstractMasterJVM;
-import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;

@@ -38,8 +38,6 @@ package edu.rice.cs.util.swing;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;   // TODO: move this class to the model package
 
-import edu.rice.cs.util.text.AbstractDocumentInterface;
-
 /** Used to get the next or previous open document given the current one. */
 public interface DocumentIterator {
   /** Gets the next document.

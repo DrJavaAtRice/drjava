@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.IOException;
-import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 

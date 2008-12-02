@@ -36,7 +36,6 @@
 
 package edu.rice.cs.util.text;
 
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;

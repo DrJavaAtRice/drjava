@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 

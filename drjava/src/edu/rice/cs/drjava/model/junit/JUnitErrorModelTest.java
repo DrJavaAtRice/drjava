@@ -38,11 +38,9 @@ package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
-import java.io.IOException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 

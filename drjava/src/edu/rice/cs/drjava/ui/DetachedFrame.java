@@ -36,35 +36,12 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.jar.JarBuilder;
-import edu.rice.cs.util.jar.ManifestWriter;
-import edu.rice.cs.util.swing.FileChooser;
-import edu.rice.cs.util.swing.FileSelectorStringComponent;
-import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.StreamRedirectThread;
 import edu.rice.cs.plt.lambda.Runnable1;
-
-import javax.swing.*;
-//import javax.swing.border.EmptyBorder;
-//import javax.swing.event.DocumentEvent;
-//import javax.swing.event.DocumentListener;
-//import javax.swing.filechooser.FileFilter;
-import java.awt.*;
-//import java.awt.event.ActionEvent;
+import java.awt.Point;
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-//import java.io.File;
-//import java.io.IOException;
-//import java.util.Iterator;
-//import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 

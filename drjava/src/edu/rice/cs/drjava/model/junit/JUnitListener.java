@@ -36,11 +36,7 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import java.util.List;
-
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
-
 import edu.rice.cs.util.classloader.ClassFileError;
 
 /**

@@ -40,10 +40,7 @@ import junit.framework.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Arrays;
-import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.junit.*;

@@ -37,31 +37,19 @@ package edu.rice.cs.drjava.model;
 
 import java.awt.EventQueue;
 import java.io.File;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Set;
-import java.util.LinkedHashSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList; 
 import java.util.List;
-import java.util.ListIterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.swing.SwingUtilities;
-//import javax.swing.tree.DefaultMutableTreeNode;
-//import javax.swing.tree.MutableTreeNode;
-
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. 
@@ -100,7 +88,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   }
   
   /** Gets the sorted set of regions less than r. */
-  private SortedSet<R> getHeadSet(R r) {
+  public SortedSet<R> getHeadSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());
     if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
     return oddRegions.headSet(r);
@@ -143,10 +131,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 
     if (tail.size() == 0) return null;
     R r = tail.first();
-    int start = r.getStartOffset();
-    int end = r.getEndOffset();
     
-    if (start <= offset) return r;
+    if (r.getStartOffset() <= offset) return r;
     else return null;
   }
   
@@ -296,7 +282,6 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   
   /** Add the supplied DocumentRegion to the manager.  Only runs in event thread after initialization?
     * @param region the DocumentRegion to be inserted into the manager
-    * @param index the index at which the DocumentRegion was inserted
     */
   public void addRegion(final R region) {
     final OpenDefinitionsDocument odd = region.getDocument();
@@ -344,11 +329,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     if (wasRemoved) _notifyRegionRemoved(region);
   }
   
-  /** Remove the given IDocumentRegion from the manager.  If any document's regions are emptied, remove the document
-    * from the keys in _regions.  Notification removes the panel node for the region.
-    * @param region the IDocumentRegion to be removed.
-    */
-  public void removeRegions(Collection<R> regions) {
+  /** Invoke {@link #removeRegion} on all of the given regions. */
+  public void removeRegions(Iterable<? extends R> regions) {
     for (R r: regions) removeRegion(r);
   }
   
@@ -357,21 +339,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
     finally { _lock.endRead(); }
   }
-  
-  private void _notifyRegionsRemoved(Collection<R> regions) {
-//    System.err.println("notifyRegionsRemoved(" + regions + ")");
-    _lock.startRead();
-    try { 
-      for (R r: regions) {
-        for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(r); } } 
-    }
-    catch(Exception e) { DrJavaErrorHandler.record(e); } 
-    finally { _lock.endRead(); }
-  }
-
-  
+    
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
-  @SuppressWarnings("unchecked")
   public void removeRegions(final OpenDefinitionsDocument doc) {
     assert doc != null;
 //    System.err.println("Removing regions from ODD " + doc + " in " + this);
@@ -451,10 +420,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     /* Get the tailSet consisting of the ordered set of regions >= r. */
-    @SuppressWarnings("unchecked")
     SortedSet<R> tail = getTailSet(firstRegion);
     if (tail.size() == 0) return;
-    OrderedDocumentRegion[] tailRegions = tail.toArray(new OrderedDocumentRegion[0]);
 
     List<R> toBeRemoved = new ArrayList<R>();  // nonsense to avoid concurrent modification exception
     // tail can be empty if r is a constructed DocumentRegion
@@ -464,6 +431,6 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
       else region.update();  // The bounds of this region must be recomputed.
 
     }
-    for (R r: toBeRemoved) removeRegion(r);
+    removeRegions(toBeRemoved);
   }
 } 

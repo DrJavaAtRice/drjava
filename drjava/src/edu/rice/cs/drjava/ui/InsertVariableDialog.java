@@ -39,10 +39,10 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.DrJavaProperty;
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.swing.SwingFrame;
 
 import javax.swing.*;
@@ -85,8 +85,8 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   /** Main frame. */
   private MainFrame _mainFrame;
   
-  /** Selected entry, or null of cancelled. */
-  private edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> _selected = null;
+  /** Selected entry, or null if canceled. */
+  private Pair<String,DrJavaProperty> _selected = null;
   
   /** Completion monitor to tell the calling dialog that we're done. */
   private CompletionMonitor _cm;
@@ -146,7 +146,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
         _helpPane.setCaretPosition(0);
-        _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
+        _selected = Pair.make(key, value);
       }
     });
     
@@ -227,7 +227,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
       public void valueChanged(ListSelectionEvent e) {
         String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
         DrJavaProperty value = PropertyMaps.TEMPLATE.getProperty(category,key);
-        _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
+        _selected = Pair.make(key, value);
         _varValueField.setText(value.getLazy(PropertyMaps.TEMPLATE));
         _helpPane.setText(value.getHelp());
         _helpPane.setCaretPosition(0);
@@ -266,7 +266,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   
   /** Update the properties in all the panes. */
   protected void updatePanes() {
-    edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> sel = getSelected();
+    Pair<String,DrJavaProperty> sel = getSelected();
     String selCategory = null;
     if (sel!=null) {
       selCategory = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
@@ -282,7 +282,6 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
           if (_tabbedPane.getTitleAt(i).equals(selCategory)) { _tabbedPane.setSelectedIndex(i); break; }
         }
         if (i==_tabbedPane.getTabCount()) { sel = null; } else {
-          Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(selCategory);
           DefaultTableModel tm = _varTableModel.get(selCategory);
           for (i=0; i<tm.getRowCount(); ++i) {
             String key = tm.getValueAt(i,0).toString();
@@ -312,12 +311,12 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
       _varValueField.setText(value.toString());
       _helpPane.setText(value.getHelp());
       _helpPane.setCaretPosition(0);
-      _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
+      _selected = Pair.make(key, value);
     }
   }
 
   /** Return a pair consisting of the name of the property and the property itself. */
-  public edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> getSelected() { return _selected; }
+  public Pair<String,DrJavaProperty> getSelected() { return _selected; }
   
   /** Runnable1 that calls _cancel. */
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {

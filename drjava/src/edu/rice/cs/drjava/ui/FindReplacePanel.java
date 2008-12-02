@@ -39,9 +39,7 @@ package edu.rice.cs.drjava.ui;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.lang.ref.WeakReference;
 
@@ -51,24 +49,18 @@ import javax.swing.text.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
-import edu.rice.cs.drjava.model.FileMovedException;
 
 import edu.rice.cs.plt.lambda.Runnable1;
-import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.SwingDocument;
 
 /** The tabbed panel that handles requests for finding and replacing text.

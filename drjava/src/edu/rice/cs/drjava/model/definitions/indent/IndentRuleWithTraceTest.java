@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import javax.swing.text.BadLocationException;
 

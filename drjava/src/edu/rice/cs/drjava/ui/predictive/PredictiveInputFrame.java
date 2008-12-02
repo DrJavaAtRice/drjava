@@ -104,7 +104,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
         throw new IllegalArgumentException("Wrong FrameState string: " + nfe);
       }
     }
-    public FrameState(PredictiveInputFrame comp) {
+    public FrameState(PredictiveInputFrame<?> comp) {
       _dim = comp.getSize();
       _loc = comp.getLocation();
       _currentStrategyIndex = comp._strategies.indexOf(comp._currentStrategy);

@@ -37,8 +37,6 @@
 package edu.rice.cs.drjava.model;
 
 
-import java.util.Vector;
-import java.util.List;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.event.DocumentListener;
@@ -46,10 +44,8 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.docnavigation.*;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;

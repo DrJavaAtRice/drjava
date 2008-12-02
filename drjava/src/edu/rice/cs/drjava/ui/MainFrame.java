@@ -48,11 +48,9 @@ import java.awt.dnd.*;
 import java.beans.*;
 
 import java.io.*;
-import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -60,7 +58,6 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -74,20 +71,16 @@ import java.lang.ref.WeakReference;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.RemoteControlClient;
+import edu.rice.cs.drjava.RemoteControlServer;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.ClipboardHistoryModel;
-import edu.rice.cs.drjava.model.ConcreteRegionManager;
-import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
-import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
@@ -100,7 +93,6 @@ import edu.rice.cs.drjava.project.*;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Thunk;
 
@@ -112,24 +104,10 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
-import edu.rice.cs.util.swing.AsyncTask;
-import edu.rice.cs.util.swing.AsyncTaskLauncher;
-import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.BorderlessSplitPane;
-import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
-import edu.rice.cs.util.swing.DelegatingAction;
-import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.util.swing.FileDisplayManager;
-import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.util.swing.RightClickMouseAdapter;
-import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
-import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
@@ -613,7 +591,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _openAllFolderAction = new AbstractAction("Open All Files") {
     public void actionPerformed(ActionEvent ae) {
       // now works with multiple selected folders
-      java.util.List<File> l= _model.getDocumentNavigator().getSelectedFolders();
+      List<File> l= _model.getDocumentNavigator().getSelectedFolders();
       for(File f: l) {
         File fAbs = new File(_model.getProjectRoot(), f.toString());
         _openFolder(fAbs, false);  
@@ -726,7 +704,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       
       int rc;
-      String fileName = null;
       Object[] options = {"Yes", "No"};  
       rc = JOptionPane.showOptionDialog(MainFrame.this, message, title, JOptionPane.YES_NO_OPTION,
                                         JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
@@ -1723,7 +1700,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       else {
         // not exactly one match
         pim.setMask(mask);
-        JavaAPIListEntry foundItem = null;
         int found = 0;
         if (pim.getMatchingItems().size() == 0) {
           // if there are no matches, shorten the mask until there is at least one
@@ -1739,7 +1715,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           for(JavaAPIListEntry e: pim.getMatchingItems()) {
             if (e.toString().equalsIgnoreCase(mask)) {
               ++found;
-              foundItem = e;
             }
           }
         }
@@ -1829,7 +1804,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
-              String mask = "";
               int loc = getCurrentDefPane().getCaretPosition();
               String s = odd.getText(0, loc);
               
@@ -1869,7 +1843,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
-              String mask = "";
               int loc = getCurrentDefPane().getCaretPosition();
               String s = odd.getText(0, loc);
               
@@ -2003,7 +1976,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PredictiveInputModel<ClassNameAndPackageEntry> pim = 
       new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    boolean uniqueMatch = true;
     try {
       String mask = "";
       int loc = getCurrentDefPane().getCaretPosition();
@@ -2042,7 +2014,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       else {
         // not exactly one match
-        uniqueMatch = false;
         pim.setMask(mask);
         if (pim.getMatchingItems().size() == 0) {
           // if there are no matches, shorten the mask until there is at least one
@@ -2463,7 +2434,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    Utilities.show("MainFrame.toggleBookmark called");
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
-    OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
     showTab(_bookmarksPanel, true);
   }
@@ -3443,7 +3413,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // start remote control server if no server is running
       try {
         if (! RemoteControlClient.isServerRunning()) {
-          edu.rice.cs.drjava.RemoteControlServer rcServer = new edu.rice.cs.drjava.RemoteControlServer(this);
+          new RemoteControlServer(this);
         }
       }
       catch(IOException ioe) {
@@ -3538,7 +3508,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       setProperty("DrJava", 
                   new FileProperty("drjava.current.file", new Thunk<File>() {
       public File value() { return _model.getActiveDocument().getRawFile(); }
-      public boolean isCurrent() { return false; }
     }, 
                                    "Returns the current document in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3570,7 +3539,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       setProperty("DrJava", 
                   new FileProperty("drjava.working.dir", new Thunk<File>() {
       public File value() { return _model.getInteractionsModel().getWorkingDirectory(); }
-      public boolean isCurrent() { return false; }
     },
                                    "Returns the current working directory of DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3583,7 +3551,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       setProperty("DrJava", 
                   new FileProperty("drjava.master.working.dir", new Thunk<File>() {
       public File value() { return _model.getMasterWorkingDirectory(); }
-      public boolean isCurrent() { return false; }
     },
                                    "Returns the working directory of the DrJava master JVM.\n"+
                                    "Optional attributes:\n"+
@@ -3752,7 +3719,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.file", 
                                    new Thunk<File>() {
       public File value() { return _model.getProjectFile(); }
-      public boolean isCurrent() { return false; }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3767,7 +3733,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.main.class", 
                                    new Thunk<File>() {
       public File value() { return _model.getMainClass(); }
-      public boolean isCurrent() { return false; }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3781,7 +3746,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.root", 
                                    new Thunk<File>() {
       public File value() { return _model.getProjectRoot(); }
-      public boolean isCurrent() { return false; }
     },
                                    "Returns the current project root in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -3795,7 +3759,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("project.build.dir", 
                                    new Thunk<File>() {
       public File value() { return _model.getBuildDirectory(); }
-      public boolean isCurrent() { return false; }
     },
                                    "Returns the current build directory in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -4495,7 +4458,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) the 
     * clean up the state of the global model.  It also restores the list view navigator
-    * @ param quitting whether the project is being closed as part of quitting DrJava
+    * @param quitting whether the project is being closed as part of quitting DrJava
     * @return true if the project is closed, false if cancelled
     */
   boolean _closeProject(boolean quitting) {
@@ -4586,16 +4549,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (AlreadyOpenException aoe) {
       OpenDefinitionsDocument[] openDocs = aoe.getOpenDocuments();
       for(OpenDefinitionsDocument openDoc : openDocs) {
-        String fileName;
-        try { fileName = openDoc.getFile().getName(); }
-        catch (IllegalStateException ise) {
-          // Can't happen: this open document must have a file
-          throw new UnexpectedException(ise);
-        }
-        catch (FileMovedException fme) {
-          // File was deleted, but use the same name anyway
-          fileName = fme.getFile().getName();
-        }
         try {
           File f = openDoc.getFile();
           if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
@@ -4666,7 +4619,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     //    _model.closeFiles(l);
     
     // this works with multiple selected files now
-    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();    
+    List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();    
     boolean queryNecessary = false; // is a query necessary because the files are project or auxiliary files?
     for (OpenDefinitionsDocument doc: l) {
       if ((_model.isProjectActive() && doc.inProjectPath()) || doc.isAuxiliaryFile()) {
@@ -4714,7 +4667,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _closeFolder() {
-    OpenDefinitionsDocument d;
     ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
     
@@ -5023,7 +4975,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JScrollPane s = _defScrollPanes.get(doc);
     if (s == null) s = _createDefScrollPane(doc);
     
-    final JScrollPane scroller = s;
     final DefinitionsPane pane = _currentDefPane; // rhs was (DefinitionsPane)scroller.getViewport().getView();
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() {
@@ -5048,7 +4999,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private void _revert() {
     // this works with multiple selected files now
-    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
+    List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
     for(OpenDefinitionsDocument d: l) { _revert(d); }
   }
   
@@ -5229,7 +5180,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _cleanUpDebugger();
     hourglassOn();
     try {
-      OpenDefinitionsDocument d;
       ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
       final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
       if (_model.getDocumentNavigator().isGroupSelected()) {
@@ -5429,7 +5379,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     new Thread("Run JUnit on specified folder") {
       public void run() { 
-        INavigatorItem n;
         _disableJUnitActions();
 //        hourglassOn();  // turned off when JUnitStarted event is fired
         if (_model.getDocumentNavigator().isGroupSelected()) {
@@ -6079,9 +6028,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Sets up the components of the menu bar and links them to the private fields within MainFrame.  This method 
     * serves to make the code more legible on the higher calling level, i.e., the constructor.
-    * @param frame frame for which the menu bar should be set
-    * @param menuBar menu bar to which the individual menus should be added
-    * @param menus menus to add
     */
   private void _setUpMenuBar() {
     _menuBar.add(_fileMenu);
@@ -7458,16 +7404,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       private void updateUI(OpenDefinitionsDocument doc, int offset) {
 //        System.err.println("updateUI(" + doc + ", " + offset + ")");
         
-        JComponent c = (JComponent) _tabbedPane.getSelectedComponent();
-        if (c instanceof RegionsTreePanel) reloadPanel((RegionsTreePanel<? extends OrderedDocumentRegion>) c, doc, offset);
+        Component c = _tabbedPane.getSelectedComponent();
+        if (c instanceof RegionsTreePanel<?>) {
+           reloadPanel((RegionsTreePanel<?>) c, doc, offset);
+        }
         
 //        _lastChangeTime = System.currentTimeMillis();  // TODO: what about changes to file names?
       }
       
       // coarsely update the displayed RegionsTreePanel
-      @SuppressWarnings("unchecked") 
-      private <R extends OrderedDocumentRegion> void 
-        reloadPanel(final RegionsTreePanel<R> p, final OpenDefinitionsDocument doc, int offset) {
+      private <R extends OrderedDocumentRegion> void reloadPanel(final RegionsTreePanel<R> p,
+                                                                 final OpenDefinitionsDocument doc,
+                                                                 int offset) {
         
         final RegionManager<R> rm = p._regionManager;
         SortedSet<R> regions = rm.getRegions(doc);
@@ -7476,13 +7424,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // Adjust line numbers and line bounds if insert involves newline
         final int numLinesChangedAfter = doc.getDocument().getAndResetNumLinesChangedAfter();
         
-        Pair<R, R> lineNumInterval = null;  // interval regions that need line number updating
+        // interval regions that need line number updating
+        Pair<R, R> lineNumInterval = null;
         
         if (numLinesChangedAfter >= 0)  {  // insertion/deletion included a newline
-          int len = doc.getLength();
           // Update the bounds of the affected regions
-          lineNumInterval = new Pair<R, R> ((R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter), 
-                                            (R) new DocumentRegion(doc, len, len));
+          
+          // TODO: These casts are bad!  R is not always DocumentRegion (of course).
+          // The code only works because the RegionManager implementations happen to not strictly
+          // require values of type R.  Either the interface for RegionManager.updateLines()
+          // and RegionManager.reload() needs to be generalized, or a means for creating
+          // values that are truly of type R needs to be provided.
+          @SuppressWarnings("unchecked") R start =
+            (R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter);
+          int len = doc.getLength();
+          @SuppressWarnings("unchecked") R end = (R) new DocumentRegion(doc, len, len);
+          lineNumInterval = Pair.make(start, end); 
         }
 
         Pair<R, R> interval = rm.getRegionInterval(doc, offset);
@@ -7506,10 +7463,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             _pendingDocument = doc;
             _tabUpdatePending = true;
             _pendingUpdate = new Runnable() { // this Runnable only runs in the event thread
-              @SuppressWarnings("unchecked") 
               public void run() {
-                R first = (R) _firstRegion;
-                R last = (R) _lastRegion;
+                // TODO: Bad casts!  There's probably no guarantee that R is consistent between invocations,
+                // and even if there were, this is a confusing way to go about this process.
+                // See above discussion for alternatives.
+                @SuppressWarnings("unchecked") R first = (R) _firstRegion;
+                @SuppressWarnings("unchecked") R last = (R) _lastRegion;
                 rm.updateLines(first, last); // recompute _lineStartPos, _lineEndPos in affected regions
                 p.reload(first, last);  // reload the entries whose length may have changed
                 p.repaint();
@@ -7578,7 +7537,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     R j1 = j.first();
     R j2 = j.second();
              
-    return new Pair<R, R>(i1.compareTo(j1) <= 0 ? i1 : j1, i2.compareTo(j2) >= 0 ? i2 : j2);
+    return Pair.make(i1.compareTo(j1) <= 0 ? i1 : j1, i2.compareTo(j2) >= 0 ? i2 : j2);
   }
   
   private void _setUpPanes() {
@@ -8380,7 +8339,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                       JOptionPane.ERROR_MESSAGE);
       }
       else {
-        final java.util.List<String> filePaths = new ArrayList<String>();
+        final List<String> filePaths = new ArrayList<String>();
         for (File f : files) { filePaths.add(f.getPath()); }
         
         ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
@@ -8404,7 +8363,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final ArrayList<String> choices = new java.util.ArrayList<String>();
       choices.add("Yes");
       choices.add("No");
-      final java.util.List<String> filePaths = new ArrayList<String>();
+      final List<String> filePaths = new ArrayList<String>();
       for (File f : files) { filePaths.add(f.getPath()); }
       ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
         .setOwner(MainFrame.this)
@@ -9242,8 +9201,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     assert EventQueue.isDispatchThread();
     try {
       if (c instanceof TabbedPanel) _createTab((TabbedPanel) c);
-      if (c instanceof RegionsTreePanel) {
-        RegionsTreePanel p = (RegionsTreePanel) c;
+      if (c instanceof RegionsTreePanel<?>) {
+        RegionsTreePanel<?> p = (RegionsTreePanel<?>) c;
         DefaultTreeModel model = p._regTreeModel;
         // Update all JTree labels in p (equivalent to performing updateLines on p._regionManager with a [0,0] region)
         model.reload(); 
@@ -9560,20 +9519,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
           ((uriListFlavor!=null) && (tr.isDataFlavorSupported(uriListFlavor)))) {
         dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        java.util.List<File> fileList;
+        List<File> fileList;
         if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
           @SuppressWarnings("unchecked")
-          java.util.List<File> data = (java.util.List<File>)tr.getTransferData(DataFlavor.javaFileListFlavor);
+          List<File> data = (List<File>) tr.getTransferData(DataFlavor.javaFileListFlavor);
           fileList = data;
         }
         else {
           // work-around for Linux drag-and-drop; see Java bug 4899516
-          @SuppressWarnings("unchecked")
-          String data = (String)tr.getTransferData(uriListFlavor);
+          String data = (String) tr.getTransferData(uriListFlavor);
           fileList = textURIListToFileList(data);
         }
         java.util.Iterator<File> iterator = fileList.iterator();
-        java.util.List<File> filteredFileList = new java.util.ArrayList<File>();
+        List<File> filteredFileList = new java.util.ArrayList<File>();
         while (iterator.hasNext()) {
           File file = iterator.next();
           if (file.isFile() && (file.getName().endsWith(".java") || file.getName().endsWith(".dj0") || 
@@ -9649,8 +9607,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param data string with URIs
     * @return list of files
     */
-  private static java.util.List<File> textURIListToFileList(String data) {
-    java.util.List<File> list = new java.util.ArrayList<File>();
+  private static List<File> textURIListToFileList(String data) {
+    List<File> list = new java.util.ArrayList<File>();
     java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n");
     while(st.hasMoreTokens()) {
       String s = st.nextToken();
@@ -9738,8 +9696,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       };
       
-      java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
-        new java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>>();
+      ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
+        new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
       strategies.add(new FragmentStrategy<JavaAPIListEntry>());
       strategies.add(new PrefixStrategy<JavaAPIListEntry>());
       strategies.add(new RegExStrategy<JavaAPIListEntry>());
@@ -9899,7 +9857,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param w window trying to get the modal window listener
     * @param toFrontAction action to be performed after the window has been moved to the front again
     * @param closeAction action to be performed when the window is closing
-    * @return window listener */
+    */
   public void installModalWindowAdapter(final Window w, final Runnable1<? super WindowEvent> toFrontAction,
                                         final Runnable1<? super WindowEvent> closeAction) {
     assert EventQueue.isDispatchThread();

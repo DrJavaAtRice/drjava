@@ -36,10 +36,8 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +80,6 @@ public abstract class FileListProperty extends DrJavaProperty {
     if (q!=null) {
       if (q.toLowerCase().equals("true")) { quot = "'"; }
     }
-    boolean doubleQuote = false;
     q = _attributes.get("dquote");
     if (q!=null) {
       if (q.toLowerCase().equals("true")) { quot = "\"" + quot; }

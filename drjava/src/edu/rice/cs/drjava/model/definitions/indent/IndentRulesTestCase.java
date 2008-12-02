@@ -39,8 +39,6 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-import edu.rice.cs.util.swing.Utilities;
-
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;

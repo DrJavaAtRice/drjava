@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.platform;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.util.ArgumentTokenizer;
@@ -47,7 +46,6 @@ import edu.rice.cs.util.StringOps;
 
 import javax.swing.*;
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.List;
 

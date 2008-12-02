@@ -49,9 +49,7 @@ import edu.rice.cs.util.sexp.SExpParser;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-//import java.text.SimpleDateFormat;
 
 /** Test class for project files */
 public class ProjectTest extends DrJavaTestCase {
@@ -220,7 +218,6 @@ public class ProjectTest extends DrJavaTestCase {
     File pf = new File(parent, "test3.pjt");
     IOUtil.writeStringToFile(pf, "");
     ProjectProfile fb = new ProjectProfile(pf);
-    String sr = pf.getCanonicalFile().getParent();
 
     fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
     fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
@@ -259,8 +256,6 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
 
-    String base = pf.getParent();
-    
 //    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
 //                 pfir.getSourceFiles()[0].getPath());
 //    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
@@ -409,7 +404,6 @@ public class ProjectTest extends DrJavaTestCase {
     File pf = new File(parent, "test3.pjt");
     IOUtil.writeStringToFile(pf, "");
     ProjectProfile fb = new ProjectProfile(pf);
-    String sr = pf.getCanonicalFile().getParent();
 
     fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
     fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
@@ -448,8 +442,6 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
 
-    String base = pf.getParent();
-    
 //    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
 //                 pfir.getSourceFiles()[0].getPath());
 //    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
@@ -470,7 +462,6 @@ public class ProjectTest extends DrJavaTestCase {
     File pf = new File(parent, "test3.xml");
     IOUtil.writeStringToFile(pf, "");
     ProjectProfile fb = new ProjectProfile(pf);
-    String sr = pf.getCanonicalFile().getParent();
 
     fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
     fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
@@ -509,8 +500,6 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
 
-    String base = pf.getParent();
-    
 //    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
 //                 pfir.getSourceFiles()[0].getPath());
 //    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 

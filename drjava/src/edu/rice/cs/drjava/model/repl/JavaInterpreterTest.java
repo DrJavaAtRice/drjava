@@ -36,15 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
-import edu.rice.cs.util.swing.Utilities;
-
-import junit.framework.*;
 
 /** Tests the functionality of the repl interpreter.
   * @version $Id$

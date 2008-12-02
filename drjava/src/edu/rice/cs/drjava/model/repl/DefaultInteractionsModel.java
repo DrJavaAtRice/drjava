@@ -44,11 +44,9 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
-import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
-//import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Interactions model which can notify GlobalModelListeners on events.
@@ -66,7 +64,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Creates a new InteractionsModel.
     * @param model DefaultGlobalModel to do the interpretation
     * @param jvm  the RMI interface used by the Main JVM to access the Interpreter JVM
-    * @param adapter InteractionsDJDocument to use for the document
+    * @param cDoc document
     * @param wd  the working directory for interactions i/o
     */
   public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface cDoc, File wd) {

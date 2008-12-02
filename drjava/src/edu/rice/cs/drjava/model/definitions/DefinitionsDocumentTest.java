@@ -45,14 +45,12 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedToken;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import javax.swing.text.BadLocationException;
-import java.util.ArrayList;
 import java.util.List;
 
 /** Tests the functionality of the definitions document.
@@ -472,7 +470,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   public void textRemoveTabs1() {
     _doc.setIndent(1);
     String test = "\t this \t\tis a \t\t\t\t\ttest\t\t";
-    String result = _doc._removeTabs(test);
+    String result = DefinitionsDocument._removeTabs(test);
     assertEquals( "  this   is a      test  ", result);
   }
   
@@ -499,7 +497,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       bigExp.append(expected);
     }
     
-    String result = _doc._removeTabs(bigIn.toString());
+    String result = DefinitionsDocument._removeTabs(bigIn.toString());
     assertEquals(bigExp.toString(), result);
   }
   
@@ -745,7 +743,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     // No enclosing class at start
     try {
-      String result = _doc.getEnclosingTopLevelClassName(3);
+      @SuppressWarnings("unused") String result = _doc.getEnclosingTopLevelClassName(3);
       fail("no enclosing class should be found at start");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -762,7 +760,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
     
     try {
-      String result = _doc.getEnclosingTopLevelClassName(186);
+      @SuppressWarnings("unused") String result = _doc.getEnclosingTopLevelClassName(186);
       fail("no enclosing class should be found at end of file");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -795,7 +793,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     // No enclosing class at end
     try {
-      String result = _doc.getEnclosingTopLevelClassName(186);
+      @SuppressWarnings("unused") String result = _doc.getEnclosingTopLevelClassName(186);
       fail("no enclosing class should be found at end");
     }
     catch (ClassNameNotFoundException cnnfe) {

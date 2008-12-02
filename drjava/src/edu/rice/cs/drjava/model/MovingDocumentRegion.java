@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 
@@ -93,7 +91,6 @@ public class MovingDocumentRegion extends DocumentRegion {
           
           int excerptEnd = getLineEndOffset();
           int excerptStart = getLineStartOffset();
-          int exceptLength = excerptEnd - excerptStart;
           
           // the offsets within the excerpted string of the selection (figuratively in "Red")
           int startRed = startSel - excerptStart;

@@ -37,11 +37,9 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.io.*;
 
 /** Property that evaluates to a file and that can be inserted as variables in external processes.
@@ -85,7 +83,6 @@ public class FileProperty extends DrJavaProperty {
     if (q!=null) {
       if (q.toLowerCase().equals("true")) { quot = "'"; }
     }
-    boolean doubleQuote = false;
     q = _attributes.get("dquote");
     if (q!=null) {
       if (q.toLowerCase().equals("true")) { quot = "\"" + quot; }

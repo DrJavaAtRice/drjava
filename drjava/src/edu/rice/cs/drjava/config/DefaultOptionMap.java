@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 import java.util.Vector;
-import java.util.Iterator;
+import edu.rice.cs.plt.iter.IterUtil;
 
 public class DefaultOptionMap implements OptionMap {
   
@@ -63,7 +63,7 @@ public class DefaultOptionMap implements OptionMap {
     return o.remove(this);
   }
   
-  public Iterator<OptionParser<?>> keys() { return keys.iterator(); }
+  public Iterable<OptionParser<?>> keys() { return IterUtil.immutable(keys); }
   
   public String toString() {
     final StringBuilder result = new StringBuilder("\n{ ");

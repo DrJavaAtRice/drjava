@@ -40,7 +40,6 @@ import javax.swing.text.*;
 import java.util.ArrayList;
 import java.awt.*;
 import javax.swing.plaf.*;
-import javax.swing.*;
 
 /** Implements the Highlighter interfaces.  Implements a simple highlight painter, but stores
   * the highlights in reverse order. That means that the selection (for copying) is always

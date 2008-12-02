@@ -46,8 +46,6 @@ import java.io.File;
 import java.awt.*;
 import java.util.*;
 import java.awt.dnd.*;
-import java.awt.datatransfer.*;
-import java.io.File;
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.plt.collect.OneToOneRelation;
 import edu.rice.cs.plt.collect.IndexedOneToOneRelation;
@@ -485,7 +483,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     
     synchronized(_model) { // locks out mutation
       // e has a raw type because depthFirstEnumeration() has a raw type signature
-      Enumeration e = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+      Enumeration<?> e = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
       
       while(e.hasMoreElements()) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
@@ -509,7 +507,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         if (gn.getData().equals(binName)) {
           // found the bin with the right name
           // e has a raw type because depthFirstEnumeration() has a raw type signature
-          Enumeration e = gn.depthFirstEnumeration();
+          Enumeration<?> e = gn.depthFirstEnumeration();
           
           while(e.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
@@ -702,7 +700,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof FileNode) {
-        l.add(((FileNode)n).getData());
+        l.add(((FileNode<?>)n).getData());
       }
     }
     return l;
@@ -888,7 +886,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
     // We use a raw type here because depthFirstEnumeration() has a raw type signature
-    Enumeration nodes = rootNode.depthFirstEnumeration();
+    Enumeration<?> nodes = rootNode.depthFirstEnumeration();
 //    ArrayList<String> list = new ArrayList<String>();
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
@@ -912,7 +910,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    synchronized (_model) {
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
     // We use a raw type here because depthFirstEnumeration() has a raw type signature
-    Enumeration nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
+    Enumeration<?> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
       if (tn instanceof InnerNode && ((InnerNode<?, ?>)tn).isCollapsed()) {

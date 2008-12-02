@@ -36,11 +36,9 @@
 
 package edu.rice.cs.util;
 
-import junit.framework.TestCase;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.FileWriter;
 import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
@@ -48,7 +46,6 @@ import java.util.Random;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.UnexpectedException;
 
 /** Test cases for {@link Log}.
  *  @version $Id$

@@ -41,7 +41,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
-import java.awt.*;
 import java.awt.event.*;
 import java.util.Iterator;
 

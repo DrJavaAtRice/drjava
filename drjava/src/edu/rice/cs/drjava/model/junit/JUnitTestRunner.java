@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import java.io.PrintStream;
-
 import junit.runner.*;
 import junit.framework.*;
 

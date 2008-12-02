@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.IOException;
-import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.text.SwingDocument;

@@ -38,11 +38,9 @@ package edu.rice.cs.util.swing;
 
 import java.awt.GraphicsConfiguration;
 
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.Utilities;
 
-/** A default implementation of SwingFrame (to use in place of defautl JFrame and Frame implementations).*/
+/** A default implementation of SwingFrame (to use in place of default JFrame and Frame implementations).*/
 public class DefaultSwingFrame extends SwingFrame {
   
   /* Constructors analogous to JFrame. */

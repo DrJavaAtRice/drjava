@@ -88,12 +88,12 @@ public class HighlightManagerTest extends DrJavaTestCase {
   }
   
   public void testHighlightInfoEquals() {
-    HighlightManager.HighlightInfo hi1, hi2, hi3, hi4, hi5;
+    HighlightManager.HighlightInfo hi1, hi2, hi3, hi4;//, hi5;
     hi1 = hm.new HighlightInfo(0,0,p);
     hi2 = hm.new HighlightInfo(0,0,p);
     hi3 = hm.new HighlightInfo(0,1,p);
     hi4 = hm.new HighlightInfo(0,0,p1);
-    hi5 = hm.new HighlightInfo(0,0,p2);
+//    hi5 = hm.new HighlightInfo(0,0,p2);
     assertEquals("HighlightInfo equals test 1", hi1, hi2);
     assertFalse("HighlightInfo equals test 2", hi1.equals(hi3));
     assertFalse("HighlightInfo equals test 3", hi1.equals(hi4));

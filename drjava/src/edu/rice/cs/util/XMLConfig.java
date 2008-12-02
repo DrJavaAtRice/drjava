@@ -36,8 +36,6 @@
 
 package edu.rice.cs.util;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
@@ -87,10 +85,6 @@ public class XMLConfig {
    */
   private Node _startNode = null;
   
-  /** Path where this XMLConfig starts, or null.
-   */
-  private String _startPath = null;
-  
   /** Creates an empty configuration.
    */
   public XMLConfig() {
@@ -127,7 +121,6 @@ public class XMLConfig {
     if ((parent==null) || (node==null)) { throw new XMLConfigException("Error in ctor: parent or node is null"); }
     _parent = parent;
     _startNode = node;
-    _startPath = getNodePath(node);
     _document = null;
   }
   

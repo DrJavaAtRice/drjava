@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.text.AbstractDocumentInterface;
-
 /** Returned to FindMachineDialog with the location of the found string
   * (or -1 if the string was not found) as well as a flag indicating
   * whether the machine wrapped around the end of the document.

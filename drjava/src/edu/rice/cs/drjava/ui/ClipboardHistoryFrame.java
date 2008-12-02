@@ -38,12 +38,9 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.Keymap;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 

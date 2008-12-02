@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.config;
 
 import java.io.*;
-import java.util.Iterator;
 import java.util.Date;
 
 /** A Configuration object that can be read and saved from a Stream.
@@ -65,7 +64,6 @@ public class SavableConfiguration extends Configuration {
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
     Writer w = new BufferedWriter(new OutputStreamWriter(os));
-    Iterator<OptionParser<?>> keys = map.keys();
     //Properties p = new Properties();
 //    String tmpString;
 //    StringBuffer buff;
@@ -81,9 +79,7 @@ public class SavableConfiguration extends Configuration {
     w.write((int)'\n');
 
     // Write each option
-    while (keys.hasNext()) {
-      
-      OptionParser<?> key = keys.next();
+    for (OptionParser<?> key : map.keys()) {
 
       if (!key.getDefault().equals(map.getOption(key))) {
 

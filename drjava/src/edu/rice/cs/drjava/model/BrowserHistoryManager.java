@@ -38,12 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import java.awt.EventQueue;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -85,8 +80,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Add the supplied DocumentRegion r to the manager just above _current and set _current to refer to r.  Only runs
     * in event thread after initialization.  Notifies regionAdded listeners if _currentIndex is changed.  Assumes 
     * _regions.isEmpty() || _regions.contains(_current) and _regions.isEmpty() == (_current == null)
-    * @param region the DocumentRegion to be inserted into the manager
-    * @param index the index at which the DocumentRegion was inserted
+    * @param r the DocumentRegion to be inserted into the manager
     */
   
   public void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) {
@@ -106,7 +100,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
 //        System.err.println("Skipped " + nr.getDocument().getLineOfOffset(nr.getStartOffset()));
       }
       while (it.hasNext()) { 
-        BrowserDocumentRegion nr = it.next(); 
+        it.next(); 
         it.remove(); 
 //        System.err.println("Removed " + nr.getDocument().getLineOfOffset(nr.getStartOffset()));
       }
@@ -141,7 +135,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   }
   
   /** Remove the given DocumentRegion from the manager.
-    * @param region  the DocumentRegion to be removed.
+    * @param r  the DocumentRegion to be removed.
     */
   public /* synchronized */ void remove(final BrowserDocumentRegion r) {
     OpenDefinitionsDocument doc = r.getDocument();
@@ -175,8 +169,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
   public /* synchronized */ boolean isCurrentRegionLast() { return (! _regions.isEmpty()) && _current == _regions.last();  }
   
-  /** Set the current region. 
-    * @param index  the index of the new current region, may be -1. */
+  /** Set the current region. */ 
   public void setCurrentRegion(BrowserDocumentRegion r) { _current = r; }
   
   /** Make the region that is more recent the current region.  If _current is null, set it to refer to first.

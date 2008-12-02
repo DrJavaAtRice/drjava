@@ -165,13 +165,13 @@ public class InteractionsDocument extends ConsoleDocument {
   
   /** Saves the edited version of the current history to a file
     * @param selector File to save to
-    * @param editedVersion Edited verison of the history which will be
+    * @param editedVersion Edited version of the history which will be
     * saved to file instead of the lines saved in the history. The saved
     * file will still include any tags needed to recognize it as a saved
     * interactions file.
     */
   public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
-    _history.writeToFile(selector, editedVersion); 
+    History.writeToFile(selector, editedVersion); 
   }
   
   /** Returns the entire history as a single string.  Commands should be separated by semicolons. If an entire

@@ -42,7 +42,6 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collection;
 import java.util.Properties;
 
 import edu.rice.cs.plt.lambda.Thunk;
@@ -60,14 +59,11 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.DirectorySelector;
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
 
@@ -207,7 +203,6 @@ public class DefaultJavadocModel implements JavadocModel {
   /** This method handles most of the logic of performing a Javadoc operation, once we know that it won't be canceled.
     * @param destDirFile the destination directory for the doc files
     * @param saver a command object for saving a document (if it moved/changed)
-    * @param classpath an array of classpath elements to be used by Javadoc
     */
   private void _javadocAllWorker(File destDirFile, FileSaveSelector saver) {
     // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something

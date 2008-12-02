@@ -42,15 +42,11 @@ import java.io.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
 
-import java.util.Arrays;
-
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.swing.Utilities;
 
-import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
@@ -83,16 +79,16 @@ public final class SlaveJVMRunner {
   
   protected static final Log _log  = new Log("MasterSlave.txt", false);
   
-  private static final long RMI_TIMEOUT = 5000L;
-  
-  private static Thread _main;
-  
-  private static volatile boolean _notDone;
+//  private static final long RMI_TIMEOUT = 5000L;
+//  
+//  private static Thread _main;
+//  
+//  private static volatile boolean _notDone;
   
   /** Private constructor to prevent instantiation. */
   private SlaveJVMRunner() { }
   
-  private static AbstractSlaveJVM _getInstance(Class clazz) throws Exception {
+  private static AbstractSlaveJVM _getInstance(Class<?> clazz) throws Exception {
     try { return (AbstractSlaveJVM) clazz.getField("ONLY").get(null); }
     catch (Throwable t) { 
       _log.log("SlaveRemote class does not have an ONLY field!");
@@ -113,9 +109,9 @@ public final class SlaveJVMRunner {
       
       assert (args.length == 3) || (args.length == 2);
       
-      _notDone = true;
+//      _notDone = true;
       
-      _main = Thread.currentThread();
+//      _main = Thread.currentThread();
       
       
       // get the master remote
@@ -154,7 +150,7 @@ public final class SlaveJVMRunner {
 //      Class psi = Class.forName("java.net.PlainSocketImpl");
       
       final MasterRemote masterRemote = (MasterRemote) ostream.readObject();
-      _notDone = false;
+//      _notDone = false;
       _log.log("SlaveJVMRunner completed reading " + masterRemote);
       debug.logValue("masterRemote", masterRemote);
       
@@ -165,7 +161,7 @@ public final class SlaveJVMRunner {
       
       debug.log();
       try {
-        Class slaveClass = Class.forName(args[1]);
+        Class<?> slaveClass = Class.forName(args[1]);
 //        _log.log("Slave JVM created singleton of " + args[1]);
         slave = _getInstance(slaveClass);
         debug.logValue("slave", slave);

@@ -40,11 +40,9 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-import java.util.Enumeration;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -195,7 +193,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     final DummyINavigatorItem item = new DummyINavigatorItem(name);
     final DummyINavigatorItem newItem = new DummyINavigatorItem(newName);
     Utilities.invokeAndWait(new Runnable() { public void run() { tree.addDocument(item, "folder3"); } });
-    InnerNode folder3 = (InnerNode)source.getChildAt(2);
+    InnerNode<?,?> folder3 = (InnerNode<?,?>)source.getChildAt(2);
     assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
     Utilities.invokeAndWait(new Runnable() { public void run() { tree.refreshDocument(item, "folder3"); } });
     assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
@@ -207,7 +205,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
         tree.addDocument(newItem, "folder3");
       }
     });
-    folder3 = (InnerNode) source.getChildAt(2);
+    folder3 = (InnerNode<?,?>) source.getChildAt(2);
     LeafNode<?> newNode = (LeafNode<?>) folder3.getChildAt(0);
     
 //      tree.refreshDocument(newItem, "folder3")

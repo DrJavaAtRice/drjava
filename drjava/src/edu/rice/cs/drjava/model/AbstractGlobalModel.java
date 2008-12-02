@@ -45,13 +45,10 @@ import java.awt.print.PageFormat;
 import java.awt.print.Pageable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
@@ -68,11 +65,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AttributeSet;
@@ -86,7 +81,6 @@ import javax.swing.ProgressMonitor;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
-import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -104,13 +98,11 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-//import edu.rice.cs.drjava.model.definitions.DefinitionsDocument.WrappedPosition;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener ;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
-//import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo ;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
@@ -126,8 +118,6 @@ import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.drjava.ui.SplashScreen;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
@@ -136,7 +126,6 @@ import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 
-//import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
@@ -159,9 +148,7 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
-//import edu.rice.cs.util.ReaderWriterLock;
 
-import static java.lang.Math.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
@@ -1627,7 +1614,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Loads the specified project into the document navigator and opens all of the files (if not already open).
     * Assumes that any prior project has been closed.  Only runs in event thread.
-    * @param projectFile The project file to parse
+    * @param ir The project file to load
     */
   private void _loadProject(final ProjectFileIR ir) throws IOException {
     
@@ -1936,9 +1923,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean closeAllFilesOnQuit() {
     
     List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
-    
-    // first see if the user wants to cancel on any of them
-    OpenDefinitionsDocument retainedDoc = null;
     
     for (OpenDefinitionsDocument doc : docs) {
       if (! doc.canAbandonFile()) { return false; }
@@ -2366,7 +2350,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Gets the file named filename from the given path, if it exists.  Returns NULL_FILE if it's not there.
-    * @param filename the file to look for
+    * @param fileName the file to look for
     * @param path the path to look for it in
     * @return the file if it exists
     */
@@ -2381,9 +2365,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final OpenDefinitionsDocument doc = getActiveDocument();
 //    assert doc != null && EventQueue.isDispatchThread();
     
-    Position startPos = null;  // required by javac
-    Position endPos = null;    // required by javac
-    File file = FileOps.NULL_FILE;  // required by javac
+    Position startPos = null;
+    Position endPos = null;
     try {
       int pos = doc.getCurrentLocation();
 //      System.err.println("addToBrowserHistory() called for lineNum " + doc.getLineOfOffset(pos) + " in " + doc);
@@ -3331,7 +3314,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return the bookmark region manager. */
     public RegionManager<MovingDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
     
-    /** @return clear the browser history regions for this document. */
+    /** Clear the browser history regions for this document. */
     public void clearBrowserRegions() { 
       BrowserDocumentRegion[] regions = _browserRegions.toArray(new BrowserDocumentRegion[0]);
       for (BrowserDocumentRegion r: regions) _browserHistoryManager.remove(r);
@@ -3750,7 +3733,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    * File.separator. TODO: convert this method to take a File argument. */
   public String fixPathForNavigator(String path) throws IOException {
     String parent = path.substring(0, path.lastIndexOf(File.separator ));
-    String topLevelPath;
     String rootPath = getProjectRoot().getCanonicalPath();
     
     if (! parent.equals(rootPath) && ! parent.startsWith(rootPath + File.separator))

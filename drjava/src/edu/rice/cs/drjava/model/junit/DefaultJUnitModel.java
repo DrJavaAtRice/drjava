@@ -44,15 +44,12 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -73,7 +70,6 @@ import edu.rice.cs.util.swing.Utilities;
 
 import org.objectweb.asm.*;
 
-import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Manages unit testing via JUnit.

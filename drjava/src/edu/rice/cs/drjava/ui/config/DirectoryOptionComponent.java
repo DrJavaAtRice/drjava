@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import java.awt.*;
 import java.io.File;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -46,7 +45,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a FileOption.

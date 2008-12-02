@@ -43,10 +43,7 @@ import edu.rice.cs.drjava.config.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
-import java.io.StreamTokenizer;
 import java.io.StringReader;
-import java.util.Map;
-import java.util.Properties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -278,7 +275,7 @@ public abstract class StringOps {
    * @param c class to check
    * @return true if anonymous inner class
    */
-  public static boolean isAnonymousClass(Class c) {
+  public static boolean isAnonymousClass(Class<?> c) {
     String simpleName = c.getName();
     int idx = simpleName.lastIndexOf('$');
     if (idx >= 0) {
@@ -298,7 +295,7 @@ public abstract class StringOps {
    * @param c class to check
    * @return true if member class
    */
-  public static boolean isMemberClass(Class c) {
+  public static boolean isMemberClass(Class<?> c) {
     String simpleName = c.getName();
     int idx = simpleName.lastIndexOf('$');
     if (idx == -1) {
@@ -312,7 +309,7 @@ public abstract class StringOps {
    * @param c class for which to get the simple name
    * @return simple name
    */
-  public static String getSimpleName(Class c) {
+  public static String getSimpleName(Class<?> c) {
     if (c.isArray())
       return getSimpleName(c.getComponentType())+"[]";
 
@@ -718,8 +715,7 @@ public abstract class StringOps {
     final String ESCAPED_ESCAPE = ESCAPE+ESCAPE;
     tok.addKeyword(ESCAPED_ESCAPE); // escaped escape
     // read tokens; concatenate tokens until keyword is found
-    String n = null, p = null;
-    BalancingStreamTokenizer.Token pTok = BalancingStreamTokenizer.Token.NONE;
+    String n = null;
     StringBuilder sb = new StringBuilder();
     List<List<List<String>>> lll = new ArrayList<List<List<String>>>();
     List<List<String>> ll = new ArrayList<List<String>>();
@@ -773,7 +769,6 @@ public abstract class StringOps {
         else {
           sb.append(n);
         }
-        p = n;
       }
     }
     catch(IOException e) { /* ignore, return what we have */ }

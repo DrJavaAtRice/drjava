@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
-import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.drjava.model.GlobalModel;

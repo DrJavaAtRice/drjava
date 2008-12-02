@@ -49,7 +49,6 @@ import java.rmi.*;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
@@ -65,7 +64,6 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
-import edu.rice.cs.drjava.model.repl.*;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
@@ -95,7 +93,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   private static final Log _log = new Log("MasterSlave.txt", false);
-  private static final boolean printMessages = false;
   
   // As RMI can lead to parallel threads, all fields must be thread-safe.  Collections are wrapped
   // in synchronized versions.
@@ -139,11 +136,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _busyInterpreters = new HashSet<Interpreter>();
     _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
     _activeInterpreter = Pair.make("", _defaultInterpreter);
-  }
-  
-  private static void _dialog(String s) {
-    //javax.swing.JOptionPane.showMessageDialog(null, s);
-    _log.log(s);
   }
   
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM).  Contract from 

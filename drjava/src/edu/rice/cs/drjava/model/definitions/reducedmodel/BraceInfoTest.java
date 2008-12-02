@@ -38,8 +38,6 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.DJDocument;
-import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
 import javax.swing.text.AbstractDocument;
@@ -50,9 +48,6 @@ import javax.swing.text.BadLocationException;
   */
 public final class BraceInfoTest extends DrJavaTestCase {
   private String _text;
-//  private DefinitionsDocument _document;
-  private BraceReduction _reduced;
-  private BraceInfo _info;
   private AbstractDJDocument _document;
   
   public void setUp() throws Exception {
@@ -68,7 +63,6 @@ public final class BraceInfoTest extends DrJavaTestCase {
         /* Do nothing */
       }
       protected void _styleChanged() { /* Do nothing. */ }
-      protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
     };
   }
   

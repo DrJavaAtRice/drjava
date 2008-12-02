@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.model.junit;
 import junit.framework.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
@@ -48,7 +47,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.tuple.Pair;
@@ -110,7 +108,6 @@ public class JUnitTestManager {
     _testFiles = new ArrayList<File>();
     _suite = new TestSuite();
     
-    int i = 0;
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
       try {
@@ -151,19 +148,19 @@ public class JUnitTestManager {
       
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
       
-      Enumeration failures = result.failures();
-      Enumeration errEnum = result.errors();
+      Enumeration<TestFailure> failures = result.failures();
+      Enumeration<TestFailure> errEnum = result.errors();
       
       int i = 0;
       
       while (errEnum.hasMoreElements()) {
-        TestFailure tErr = (TestFailure) errEnum.nextElement();
+        TestFailure tErr = errEnum.nextElement();
         errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
         i++;
       }
       
       while (failures.hasMoreElements()) {
-        TestFailure tFail = (TestFailure) failures.nextElement();
+        TestFailure tFail = failures.nextElement();
         errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
         i++;
       }
@@ -193,7 +190,7 @@ public class JUnitTestManager {
     * @param c the class to check
     * @return true iff the given class is an instance of junit.framework.Test
     */
-  private boolean _isJUnitTest(Class c) {
+  private boolean _isJUnitTest(Class<?> c) {
     boolean result = Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
       !Modifier.isInterface(c.getModifiers());
     //debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);

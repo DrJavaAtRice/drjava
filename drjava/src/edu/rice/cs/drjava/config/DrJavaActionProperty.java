@@ -36,11 +36,6 @@
 
 package edu.rice.cs.drjava.config;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Iterator;
-
 /** Class representing actions that are executed as side effect of command line
   * evaluation for variables in external processes.
  *

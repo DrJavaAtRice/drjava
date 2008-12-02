@@ -35,7 +35,6 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import junit.framework.TestCase;
 import java.io.*;
 
 import edu.rice.cs.drjava.DrJavaTestCase;

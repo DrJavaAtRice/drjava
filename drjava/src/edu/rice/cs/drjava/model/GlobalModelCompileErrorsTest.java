@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import  junit.framework.*;
-
 import java.io.*;
 
 import javax.swing.text.BadLocationException;

@@ -38,7 +38,6 @@ package edu.rice.cs.util.swing;
 
 import junit.framework.TestCase;
 
-import java.util.Collection;
 import java.util.Arrays;
 
 import javax.swing.JOptionPane;

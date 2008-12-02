@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.definitions.ColoringGlyphPainter;
 import javax.swing.text.*;
-import java.awt.*;
 
 
 /**

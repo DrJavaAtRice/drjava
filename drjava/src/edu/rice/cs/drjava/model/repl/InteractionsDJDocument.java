@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
@@ -46,7 +45,6 @@ import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 
-import java.io.*;
 import java.awt.*;
 import java.util.List;
 import java.util.LinkedList;

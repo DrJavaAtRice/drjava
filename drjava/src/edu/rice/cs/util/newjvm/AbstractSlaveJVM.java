@@ -39,9 +39,7 @@ package edu.rice.cs.util.newjvm;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
-import java.io.Serializable;
 import java.rmi.*;
-import java.rmi.server.UnicastRemoteObject;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;

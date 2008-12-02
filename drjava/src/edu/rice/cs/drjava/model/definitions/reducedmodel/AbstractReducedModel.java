@@ -46,14 +46,10 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   /** The character that represents the cursor in toString(). @see #toString() */
   public static final char PTR_CHAR = '#';
   
-  /** The reduced model for a document is a list of ReducedTokens (braces and gaps).
-    * @see ModelList
-    */
+  /** The reduced model for a document is a list of ReducedTokens (braces and gaps). */
   TokenList _tokens;
   
-  /** Keeps track of cursor position in document.
-    * @see ModelList.Iterator
-    */
+  /** Keeps track of cursor position in document. */
   TokenList.Iterator _cursor;
   
   /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */

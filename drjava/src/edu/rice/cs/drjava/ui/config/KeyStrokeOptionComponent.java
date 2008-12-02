@@ -50,7 +50,8 @@ import javax.swing.*;
  * Graphical form of a KeyStrokeOption.
  * @version $Id$
  */
-public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> implements Comparable {
+public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
+                                      implements Comparable<KeyStrokeOptionComponent> {
   private static final int DIALOG_HEIGHT = 185;
 
   public static final HashMap<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
@@ -130,12 +131,8 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
   /** Compares two KeyStrokeOptionComponents based on the text of their labels.
    * @return Comparison based on labels, or 1 if o is not a KeyStrokeOptionComponent
    */
-  public int compareTo(Object o) {
-    if (o instanceof KeyStrokeOptionComponent) {
-      KeyStrokeOptionComponent other = (KeyStrokeOptionComponent)o;
-      return this.getLabelText().compareTo(other.getLabelText());
-    }
-    else return 1;
+  public int compareTo(KeyStrokeOptionComponent other) {
+    return this.getLabelText().compareTo(other.getLabelText());
   }
 
   /** Returns the currently selected KeyStroke.

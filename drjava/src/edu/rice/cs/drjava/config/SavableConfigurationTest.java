@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;

@@ -37,9 +37,6 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.util.UnexpectedException;
-
-import javax.swing.text.BadLocationException;
 
 /** Indents the current line in the document to the indent level of the start of the statement that the cursor is
   * currently on, plus the given suffix string.

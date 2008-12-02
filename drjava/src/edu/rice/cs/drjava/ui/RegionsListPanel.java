@@ -36,31 +36,19 @@
 
 package edu.rice.cs.drjava.ui;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.io.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.table.*;
 import javax.swing.text.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.basic.BasicToolTipUI;
 import java.awt.event.*;
-import java.awt.font.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 

@@ -36,9 +36,6 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import javax.swing.text.*;
-import edu.rice.cs.util.UnexpectedException;
-
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
@@ -76,7 +73,6 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
     int startPos   = doc._getLineFirstCharPos(origPos);
     int endPos     = doc._getLineEndPos(origPos);
     int lineLength = endPos - startPos;
-    int prefixLen = _prefix.length();
     
     char prevChar = '\0';
     String text = doc._getText(startPos, lineLength);

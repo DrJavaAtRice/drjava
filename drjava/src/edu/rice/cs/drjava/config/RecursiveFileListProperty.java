@@ -36,17 +36,11 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.io.*;
-import java.util.regex.Pattern;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
 /** Class representing a lazy lists of files that are found recursively inside a start directory.

@@ -40,7 +40,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Arrays;
 import edu.rice.cs.drjava.model.DJError;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** A CompilerInterface implementation for signifying that no compiler is available.

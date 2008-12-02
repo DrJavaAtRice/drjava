@@ -457,7 +457,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Rename directory back to clean up
     tempDir = makeCanonical(new File(tempPath + "a"));
-    boolean renamed = tempDir.renameTo(makeCanonical(new File(tempPath)));
+    tempDir.renameTo(makeCanonical(new File(tempPath)));
     
     _log.log("testInteractionsLiveUpdateClasspath() completed");
   }

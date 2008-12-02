@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
