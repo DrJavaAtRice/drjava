@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DrJava Plug-in
+Bundle-SymbolicName: edu.rice.cs.drjava; singleton:=true
+Bundle-Activator: edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.debug.ui,
+ org.eclipse.ui.console,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.eclipse.search
+Eclipse-AutoStart: true
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

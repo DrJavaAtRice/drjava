@@ -6,14 +6,11 @@
      
 <project name="eclipse" default="help">
 
-  <property name="eclipse-version" value="0.9.8" />
-
   <property name="readable-project-name" value="DrJava Eclipse Plug-in" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
   <property environment="env" />
-  <property name="java14-home" value="${env.JAVA14_HOME}" />
   <property name="eclipse-home" value="${env.ECLIPSE_HOME}" />
   <property name="drjava-src" value="${env.DRJAVA_SRC}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
@@ -36,11 +33,6 @@
   
   <fileset id="eclipse-libs" dir="${eclipse-home}/plugins" includes="org.eclipse.*.jar" />
 
-  <!-- Retroweaver task, used to convert Java 5.0 class files to be compatible with an earlier JVM;
-       also checks class references to insure that there are no dependencies on 1.5 APIs -->
-  <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-all-1.2.3.jar" 
-           classname="com.rc.retroweaver.ant.RetroWeaverTask" />
-  
   <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
        as long as it's not, we can use this extension from the Clover developers. -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
@@ -53,7 +45,7 @@
        Help Target
        *********** -->
   
-  <target name="help" depends="assert-fail" description="Print general build script information">
+  <target name="help" description="Print general build script information">
     <echo message="--------------------------------------------------------------------" />
     <echo message="${readable-project-name} Build Scripts" />
     <echo message="--------------------------------------------------------------------" />
@@ -61,7 +53,6 @@
     <echo message="" />
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
-    <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
     <echo message="ECLIPSE_HOME: Location of the 'eclipse' application folder" />
     <echo message="DRJAVA_SRC: Location of the DrJava sources.  These are included on the " />
     <echo message="            sourcepath during compilation; any sources referenced by the" />
@@ -82,11 +73,11 @@
        Build Target
        ************ -->
   
-  <target name="build" depends="jar-14" description="Shortcut for 'jar-14'">
+  <target name="build" depends="jar" description="Shortcut for 'jar'">
   </target>
-  <!-- test-14-in-15 should be here, but has been removed until testing works correctly
-  <target name="build" depends="test-14-in-15, jar-14" 
-          description="Shortcut for 'test-14-in-15' and 'jar-14'">
+  <!-- test should be here, but has been removed until testing works correctly
+  <target name="build" depends="test, jar" 
+          description="Shortcut for 'test' and 'jar'">
   </target>
   -->
   
@@ -95,14 +86,11 @@
        Compilation Targets
        ******************* -->
        
-  <target name="compile" depends="compile-15" description="Shortcut for 'compile-15'">
-  </target>
-  
-  <target name="compile-15" depends="check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs"
+  <target name="compile" depends="do-compile, copy-resources, unjar-libs"
           description="Compile all source files">
   </target>
   
-  <target name="do-compile" depends="assert-eclipse-exists, assert-drjava-src-exists, assert-15, assert-fail">
+  <target name="do-compile" depends="assert-eclipse-exists, assert-drjava-src-exists">
     <echo message="Compiling src directory to classes/base and classes/test" />
     <echo message="NOTE: The 'generate-source' target of the drjava build script is assumed to" />
     <echo message="have been run.  Otherwise, you may encounter unexpected compilation errors." />
@@ -116,15 +104,13 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <!--<javac srcdir="src" destdir="classes/base" source="1.5" target="1.5" sourcepath="${drjava-src}" 
-           debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">-->
-          <!-- (Have to specify additional explicit srcdirs - see below) -->
     <javac destdir="classes/base" source="1.5" target="1.5" sourcepath="${drjava-src}" 
            debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
       <src>
         <pathelement location="src" />
-        <!-- These classes won't automatically compile, because they aren't in files matching their name -->
-        <pathelement location="${drjava-src}/edu/rice/cs/util/sexp" />
+        <!-- Some interpreter JVM classes aren't directly referenced, so must be explicitly included -->
+        <pathelement location="${drjava-src}/edu/rice/cs/drjava/model/repl/newjvm" />
+        <pathelement location="${drjava-src}/edu/rice/cs/util/newjvm" />
       </src>
       <classpath>
         <fileset refid="libs" />
@@ -135,10 +121,6 @@
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
       <compilerarg value="-Xlint:-serial" /> 
-      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
-           This can be useful in creating a pruned version of a jar file for the lib directory.
-           (You must also clear the sourcepath="" option.)
-      <include name="${src-working-dir}/**/*.java" /> -->
     </javac>
     
     <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
@@ -152,72 +134,6 @@
       </fileset>
     </move>
     
-  </target>
-  
-  
-  <!-- Matches base class files that should be RMI compiled.  Search is relative to "classes/base". -->
-  <patternset id="rmi-base-classes">
-    <include name="edu/rice/cs/drjava/model/repl/newjvm/InterpreterJVM.class" />
-    <include name="edu/rice/cs/drjava/model/repl/newjvm/MainJVM.class" />
-    <include name="edu/rice/cs/util/newjvm/RemoteClassLoader.class" />
-    <!-- Additional base RMI classes should be listed here -->
-  </patternset>
-  
-  <!-- Matches test class files that should be RMI compiled.  Search is relative to "classes/test". -->
-  <patternset id="rmi-test-classes">
-    <exclude name="**" />
-    <!-- Additional test RMI classes should be listed here -->
-  </patternset>
-  
-  <!-- This check has to happen *before* do-compile; otherwise, the rmi class files will
-       always be up to date -->
-  <target name="check-rmi-compile">
-    <condition property="rmi-classes-uptodate">
-      <and>
-        <available file="classes/base" type="dir" />
-        <available file="classes/test" type="dir" />
-        <not>
-          <or>
-            <!-- If a source is "up to date" with respect to its class file
-                (reversing the usual order), the class file is out of date.  This
-                allows for a one-to-many relationship between a source and its classes.  -->
-            <uptodate>
-              <srcfiles dir="classes/base">
-                <patternset refid="rmi-base-classes" />
-              </srcfiles>
-              <!-- Regular expression copied from the Ant manual; they say it maps from
-                   classes to their sources -->
-              <mapper type="regexp" from="^(.*?)(\$$[^/\\\.]*)?\.class$$" to="\1.java" />
-            </uptodate>
-            <uptodate>
-              <srcfiles dir="classes/test">
-                <patternset refid="rmi-test-classes" />
-              </srcfiles>
-              <mapper type="regexp" from="^(.*?)(\$$[^/\\\.]*)?\.class$$" to="\1.java" />
-            </uptodate>
-          </or>
-        </not>
-      </and>
-    </condition>
-  </target>
-  
-  <target name="rmi-compile" depends="check-rmi-compile" unless="rmi-classes-uptodate">
-    <echo message="Compiling RMI classes" />
-    <rmic base="classes/base" includeAntRuntime="no">
-      <patternset refid="rmi-base-classes" />
-      <classpath>
-        <fileset refid="libs" />
-        <pathelement location="classes/base" />
-      </classpath>
-    </rmic>
-    <rmic base="classes/test" includeAntRuntime="no">
-      <patternset refid="rmi-test-classes" />
-      <classpath>
-        <fileset refid="libs" />
-        <pathelement location="classes/base" />
-        <pathelement location="classes/test" />
-      </classpath>
-    </rmic>
   </target>
   
   
@@ -255,85 +171,16 @@
     </unjar>
   </target>
   
-  
-  <target name="compile-14" depends="compile-15, resolve-java14-runtime, assert-eclipse-exists"
-          description="Create 1.4 versions of the classes (after compiling)">
-    <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
-         on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
-         check should probably still be done. -->
-    <echo message="Generating 1.4 versions of the classes directories (this may take awhile after a large compile)" />
-    
-    <!-- Convert lib classes -->
-    <mkdir dir="classes/lib-14" />
-    <retroweaver srcdir="classes/lib" destdir="classes/lib-14" target="1.4" verify="no" />
-    <copy todir="classes/lib-14">
-      <fileset dir="classes/lib" excludes="**/*.class" />
-    </copy>
-    
-    <!-- Convert base classes -->
-    <mkdir dir="classes/base-14" />
-    <pathconvert property="retroweaver-base-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
-      <path>
-        <pathelement location="${java14-runtime}" />
-        <pathelement location="${clover-jar}" />
-        <pathelement location="classes/base-14" />
-        <pathelement location="classes/lib-14" />
-        <fileset refid="eclipse-libs" />
-      </path>
-    </pathconvert>
-    <retroweaver srcdir="classes/base" destdir="classes/base-14" target="1.4" verify="yes"
-                 classpath="${retroweaver-base-classpath}" />
-    <copy todir="classes/base-14">
-      <fileset dir="classes/base" excludes="**/*.class" />
-    </copy>
-                 
-    <!-- Convert test classes -->
-    <mkdir dir="classes/test-14" />
-    <pathconvert property="retroweaver-test-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
-      <path>
-        <pathelement location="${java14-runtime}" />
-        <pathelement location="${clover-jar}" />
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="classes/base-14" />
-        <pathelement location="classes/lib-14" />
-        <pathelement location="classes/test-14" />
-        <fileset refid="eclipse-libs" />
-      </path>
-    </pathconvert>
-    <retroweaver srcdir="classes/test" destdir="classes/test-14" target="1.4" verify="yes"
-                 classpath="${retroweaver-test-classpath}" />
-    <copy todir="classes/test-14">
-      <fileset dir="classes/test" excludes="**/*.class" />
-    </copy>
-    
-  </target>
 
 
   <!-- ***************
        Testing Targets
        *************** -->
   
-  <target name="test" depends="test-15" description="Shortcut for 'test-15'">
-  </target>
-
-  <target name="test-15" depends="compile-15"
+  <target name="test" depends="compile"
           description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="do-test-target" value="do-test-15" />
-    </antcall>
-  </target>
-  
-  <target name="test-14" depends="compile-14"
-          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="do-test-target" value="do-test-14" />
-    </antcall>
-  </target>
-  
-  <target name="test-14-in-15" depends="compile-14, assert-15"
-          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="do-test-target" value="do-test-14-in-15" />
     </antcall>
   </target>
   
@@ -368,7 +215,7 @@
     </and>
   </selector>
  
-  <target name="do-test-15" depends="assert-eclipse-exists, assert-15">
+  <target name="do-test-15" depends="assert-eclipse-exists">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
@@ -388,56 +235,28 @@
     </junit>
   </target>
 
-  <target name="do-test-14" depends="resolve-java14-exec, assert-eclipse-exists">
-    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
-      <classpath>
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="${clover-jar}" />
-        <pathelement location="classes/test-14" />
-        <pathelement location="classes/base-14" />
-        <pathelement location="classes/lib-14" />
-        <fileset refid="eclipse-libs" />
-      </classpath>
-      <formatter type="brief" usefile="false" />
-      <batchtest>
-        <fileset dir="classes/test-14">
-          <selector refid="tests-to-run" />
-        </fileset>
-      </batchtest>
-    </junit>
-  </target>
-
-  <target name="do-test-14-in-15" depends="assert-eclipse-exists, assert-15">
-    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
-      <classpath>
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="${clover-jar}" />
-        <pathelement location="classes/test-14" />
-        <pathelement location="classes/base-14" />
-        <pathelement location="classes/lib-14" />
-        <fileset refid="eclipse-libs" />
-      </classpath>
-      <formatter type="brief" usefile="false" />
-      <batchtest>
-        <fileset dir="classes/test-14">
-          <selector refid="tests-to-run" />
-        </fileset>
-      </batchtest>
-    </junit>
-  </target>
 
 
   <!-- ***********
        Jar Targets
        *********** -->
        
-  <target name="jar" depends="jar-15" description="Shortcut for 'jar-15'" />
+  <target name="jar" depends="compile, resolve-version-tag" 
+          description="Create the plugin jar file with all classes and libs (compiling first)">
+    <jar jarfile="edu.rice.cs.drjava_${eclipse-version}.jar" manifest="packaging/jar/META-INF/MANIFEST.MF">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+        <attribute name="Bundle-Version" value="${eclipse-version}" />
+      </manifest>
+      <fileset dir="packaging/jar" />
+      <fileset dir="classes/lib" />
+      <fileset dir="classes/base" />
+    </jar>
+  </target>
   
-  <target name="jar-15" depends="compile-15, resolve-version-tag" 
-          description="Create the 5.0 jar file with all classes and libs (compiling first)">
-    <jar jarfile="drjava-eclipse-15.jar">
+  <target name="jar-code" depends="compile, resolve-version-tag">
+    <jar jarfile="drjava-eclipse.jar">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
@@ -446,47 +265,14 @@
       <fileset dir="classes/base" />
     </jar>
   </target>
-
-  <target name="jar-base-15" depends="compile-15, resolve-version-tag" 
-          description="Create the 5.0 jar file without any support libs (compiling first)">
-    <jar jarfile="drjava-eclipse-base-15.jar">
-      <manifest>
-        <attribute name="Built-By" value="${user.name}" />
-        <attribute name="Build-Version" value="${version-tag}" />
-      </manifest>
-      <fileset dir="classes/base" />
-    </jar>
-  </target>
-
-  <target name="jar-14" depends="compile-14, resolve-version-tag" 
-          description="Create the 1.4 jar file with all classes and libs (compiling first)">
-    <jar jarfile="drjava-eclipse.jar">
-      <manifest>
-        <attribute name="Built-By" value="${user.name}" />
-        <attribute name="Build-Version" value="${version-tag}" />
-      </manifest>
-      <fileset dir="classes/lib-14" />
-      <fileset dir="classes/base-14" />
-    </jar>
-  </target>
-
-  <target name="jar-base-14" depends="compile-14, resolve-version-tag" 
-          description="Create the 1.4 jar file without any support libs (compiling first)">
-    <jar jarfile="drjava-eclipse-base-14.jar">
-      <manifest>
-        <attribute name="Built-By" value="${user.name}" />
-        <attribute name="Build-Version" value="${version-tag}" />
-      </manifest>
-      <fileset dir="classes/base-14" />
-    </jar>
-  </target>
+  
 
 
   <!-- *********************
        Documentation Targets
        ********************* -->
   
-  <target name="javadoc" depends="assert-eclipse-exists, assert-drjava-src-exists, assert-15, resolve-version-tag"
+  <target name="javadoc" depends="assert-eclipse-exists, assert-drjava-src-exists, resolve-version-tag"
           description="Generate javadocs from the source folder">
     <antcall target="do-javadoc">
       <param name="generate-sourcedir" value="src" />
@@ -523,17 +309,8 @@
   </target>
   
   
-  <target name="clover" depends="clover-15" description="Shortcut for 'clover-15'">
-  </target>
-  
-  <target name="clover-15" depends="clean, setup-clover, test-15, report-clover" 
-          description="Generate a Clover test coverage report (using 'test-15')" />
-  
-  <target name="clover-14" depends="clean, setup-clover, test-14, report-clover" 
-          description="Generate a Clover test coverage report (using 'test-14')" />
-  
-  <target name="clover-14-in-15" depends="clean, setup-clover, test-14-in-15, report-clover" 
-          description="Generate a Clover test coverage report (using 'test-14-in-15')" />
+  <target name="clover" depends="clean, setup-clover, test, report-clover" 
+          description="Generate a Clover test coverage report (using 'test')" />
   
   <target name="report-clover" depends="resolve-version-tag">
     <echo message="Generating Clover report" />
@@ -694,20 +471,13 @@
   </target>
   
   <target name="eclipse-plugin-zip" depends="assert-jar-exists, resolve-version-tag">
-    <echo message="Creating drjava-eclipse-${eclipse-version}.zip" />
-    <property name="eclipse-plugin-dir" value="${version-tag}/plugin" />
-    <mkdir dir="${eclipse-plugin-dir}" />
-    <filter token="VERSION" value="${version-tag}" />
-    <filter token="ECLIPSE_VERSION" value="${eclipse-version}" />
-    <copy todir="${eclipse-plugin-dir}" filtering="yes" >
-      <fileset dir="packaging" excludes="**/*jar-goes-here" />
-    </copy>
-    <copy file="drjava-eclipse.jar" todir="${eclipse-plugin-dir}" />
-    <zip destfile="drjava-eclipse-${eclipse-version}.zip">
-      <zipfileset dir="${eclipse-plugin-dir}" prefix="edu.rice.cs.drjava_${eclipse-version}" />
+    <echo message="Creating drjava-${version-tag}.zip" />
+    <zip destfile="drjava-${version-tag}.zip">
+      <zipfileset dir="packaging/release" />
+      <zipfileset file="edu.rice.cs.drjava_${eclipse-version}.jar" />
     </zip>
   </target>
-  
+
   <target name="src-zip" depends="resolve-version-tag">
     <echo message="Creating ${version-tag}-src.zip" />
     <exec executable="svn" failonerror="yes">
@@ -730,7 +500,7 @@
   <!-- We don't include this in the standard release process, because we don't want to
        include instrumented files in the release, and because Clover must be run on a
        licensed machine -->
-  <target name="clover-zip" depends="clover-14-in-15, resolve-version-tag">
+  <target name="clover-zip" depends="clover, resolve-version-tag">
     <echo message="Creating ${version-tag}-clover.zip" />
     <zip destfile="${version-tag}-clover.zip">
       <zipfileset dir="docs/clover" prefix="${version-tag}/clover" />
@@ -816,26 +586,9 @@
     <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
   </target>
   
-  <target name="assert-15">
-    <fail message="The specified target requires Ant to be run under Java 5.0 or later">
-      <condition>
-        <not>
-          <or>
-            <contains string="${java.version}" substring="1.5." />
-            <contains string="${java.version}" substring="1.6." />
-          </or>
-        </not>
-      </condition>
-    </fail>
-  </target>
-  
-  <target name="assert-fail">
-    <fail message="This build script is using an obsolete version of the source tree, and needs to be rewritten. Build the plugin inside eclipse."/>
-  </target>
-  
-  <target name="assert-jar-exists">
-    <available property="jar-exists" file="drjava-eclipse.jar" />
-    <fail message="Can't find drjava-eclipse.jar" unless="jar-exists" />
+  <target name="assert-jar-exists" depends="resolve-version-tag">
+    <available property="jar-exists" file="edu.rice.cs.drjava_${eclipse-version}.jar" />
+    <fail message="Can't find edu.rice.cs.drjava_${eclipse-version}.jar" unless="jar-exists" />
   </target>
   
   <target name="assert-clover-jar-exists">
@@ -848,12 +601,12 @@
     <fail message="${drjava-src} does not exist" unless="drjava-src-exists" />
   </target>
   
-  <target name="assert-eclipse-exists" depends="assert-fail">
+  <target name="assert-eclipse-exists">
     <available property="eclipse-exists" file="${eclipse-home}" />
     <fail message="${eclipse-home} does not exist" unless="eclipse-exists" />
   </target>
   
-  <target name="resolve-version-tag">
+  <target name="resolve-version-tag" depends="resolve-svn-revision">
     <!-- Get a timestamp based on GMT, rather than local time -->
     <tstamp>
       <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
@@ -861,8 +614,40 @@
       <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
     </tstamp>
     <property name="version-tag"
-              value="drjava-eclipse${tag-append}-${DSTAMP}-${TSTAMP}" />
-  </target>  
+              value="${ant.project.name}${tag-append}-${DSTAMP}-r${svn-revision}" />
+    <property name="eclipse-version"
+              value="0.9.9.${DSTAMP}-r${svn-revision}" />
+  </target>
+  
+  <!-- Sets is-modified if "svn status" has non-empty output. -->
+  <target name="resolve-is-modified" depends="clean">
+    <exec executable="svn" failonerror="yes" outputproperty="svn-status">
+      <arg value="status" />
+    </exec>
+    <condition property="is-modified">
+      <not>
+        <equals arg1="${svn-status}" arg2="" />
+      </not>
+    </condition>
+  </target>
+  
+  <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
+  <target name="resolve-svn-revision">
+    <exec executable="svn" failonerror="yes" output="svn-info.txt">
+      <arg value="info" />
+    </exec>
+    <loadfile property="svn-revision" srcfile="svn-info.txt">
+      <filterchain>
+        <linecontains>
+          <contains value="Last Changed Rev: " />
+        </linecontains>
+        <replacestring from="Last Changed Rev: " to="" />
+        <striplinebreaks/>
+      </filterchain>
+    </loadfile>
+    <delete file="svn-info.txt" />
+  </target>
+
 
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
        otherwise, the out-of-date target file is deleted (if it exists).  Note that, since

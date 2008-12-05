@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="DrJava"
+            id="edu.rice.cs.drjava">
+      </category>
+      <view
+            name="Interactions"
+            icon="icons/drjava16.png"
+            category="edu.rice.cs.drjava"
+            class="edu.rice.cs.drjava.plugins.eclipse.views.InteractionsView"
+            id="edu.rice.cs.drjava.plugins.eclipse.views.InteractionsView">
+      </view>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="DrJava"
+            icon="icons/drjava16.png"
+            class="edu.rice.cs.drjava.plugins.eclipse.DrJavaPerspective"
+            id="edu.rice.cs.drjava.plugins.eclipse.DrJavaPerspective">
+      </perspective>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <perspectiveShortcut
+               id="edu.rice.cs.drjava.plugins.eclipse.DrJavaPerspective">
+         </perspectiveShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <perspectiveShortcut
+               id="edu.rice.cs.drjava.plugins.eclipse.DrJavaPerspective">
+         </perspectiveShortcut>
+      </perspectiveExtension>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page id="edu.rice.cs.drjava.Page1"
+            class="edu.rice.cs.drjava.plugins.eclipse.DrJavaPreferencePage"
+            name="DrJava">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.fontDefinitions">
+      <fontDefinition
+         id="edu.rice.cs.drjava.InteractionsFont"
+         label="DrJava Interactions Font"
+         defaultsTo="org.eclipse.jdt.ui.editors.textfont">
+         <description>
+            The font used in DrJava's Interactions Pane.
+         </description>
+      </fontDefinition>
+   </extension>
+
+</plugin>
