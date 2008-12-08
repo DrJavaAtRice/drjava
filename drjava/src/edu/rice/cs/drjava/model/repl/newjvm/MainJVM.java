@@ -598,6 +598,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @param status Status returned by the dead process.
     */
   protected void handleSlaveQuit(int status) {
+    debug.logStart();
     // Only restart the slave if _restart is true
 //    Utilities.showDebug("MainJVM: slaveJVM has quit with status " + status + " _workDir = " + _workDir + 
 //      " _cleanlyRestarting = " + _cleanlyRestarting);
@@ -610,6 +611,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     if (!_cleanlyRestarting) _interactionsModel.replCalledSystemExit(status);
     _cleanlyRestarting = false;
+    debug.logEnd();
   }
   
   
@@ -653,6 +655,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Called when Interpreter JVM connects to us after being started. Assumes that _masterJVMLock is already held. */
   protected void handleSlaveConnected() {
+    debug.logStart();
     // we reset the enabled flag since, unless told otherwise via
     // killInterpreter(false), we want to automatically respawn
 //    System.out.println("handleSlaveConnected() called in MainJVM");  // DEBUG
@@ -671,7 +674,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // notify a thread that is waiting in ensureInterpreterConnected
     synchronized(_interpreterLock) {
       _interpreterLock.notifyAll();
-    } 
+    }
+    debug.logEnd();
   }
   
   /** ReEnables restarting the slave if it has been turned off by repeated startup failures. */

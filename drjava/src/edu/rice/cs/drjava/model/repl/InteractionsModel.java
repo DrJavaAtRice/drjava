@@ -56,6 +56,8 @@ import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.tuple.Pair;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** A Swing specific model for the DrJava InteractionsPane.  It glues together an InteractionsDocument, an 
   * InteractionsPane and a JavaInterpreter.  This abstract class provides common functionality for all such models.
   * The methods in this class generally can be executed only in the event thread once the model has been constructed.
@@ -110,6 +112,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * where the next input expression (in progress) begins and where the cursor is within that expression.  In Swing, the
     * view contains the cursor.  Our InteractionsDocument (a form of ConsoleDocument) contains the prompt.  Public only for
     * testing purposes; otherwise protected.
+    * 
+    * TODO: The Eclipse plug-in doesn't use Swing, and so has no InteractionsPane.  In that case, _pane is always null.
+    * This should be redesigned to eliminate the strong coupling with Swing.
     */
   public volatile InteractionsPane _pane;  // initially null
   
@@ -709,6 +714,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(final File wd) {
+    debug.logStart();
 //    System.err.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
 //    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
     if (! _waitingForFirstInterpreter) {
@@ -716,12 +722,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         public void run() {
           _document.reset(generateBanner(wd));
           _document.setInProgress(false);
-          _pane.setCaretPosition(_document.getLength());
+          if (_pane != null) _pane.setCaretPosition(_document.getLength());
           _notifyInterpreterReady(wd);
         }
       });
     }
     _waitingForFirstInterpreter = false;
+    debug.logEnd();
   }
   
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */

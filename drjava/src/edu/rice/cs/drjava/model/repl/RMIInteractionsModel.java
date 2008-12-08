@@ -67,8 +67,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Interprets the given command.
     * @param toEval command to be evaluated
     */
-  protected 
-    void _interpret(String toEval) {
+  protected void _interpret(String toEval) {
     debug.logStart("Interpret " + toEval);
     _jvm.interpret(toEval);
     debug.logEnd();
