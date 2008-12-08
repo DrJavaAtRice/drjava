@@ -44,16 +44,18 @@ import java.io.File;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.dnd.Clipboard;
+///import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
@@ -64,6 +66,8 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.ActionFactory;
 
 import edu.rice.cs.drjava.plugins.eclipse.DrJavaConstants;
 import edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin;
@@ -203,7 +207,7 @@ public class InteractionsController {
     _colorDarkGreen.dispose();
     _colorDarkBlue.dispose();
     _colorYellow.dispose();
-    _clipboard.dispose();
+    ///_clipboard.dispose();
     
     // Remove preference listener
     Preferences store = EclipsePlugin.getDefault().getPluginPreferences();
@@ -243,8 +247,8 @@ public class InteractionsController {
       String confirmMessage =
         "Specifying the command-line arguments to the Interactions JVM is an\n" +
         "advanced option, and incorrect arguments may cause the Interactions\n" +
-        "Pane to stop responding. Are you sure you want to set this option?\n" +
-        "(You must reset the Interactions Pane before changes will take effect.)";
+        "View to stop responding. Are you sure you want to set this option?\n" +
+        "(You must reset the Interactions View before changes will take effect.)";
       if (_view.showConfirmDialog("Setting JVM Arguments", confirmMessage)) {
         _model.setOptionArgs(jvmArgs);
       }
@@ -445,45 +449,38 @@ public class InteractionsController {
     _view.getTextPane().addVerifyKeyListener(new KeyUpdateListener());
 //    _view.getTextPane().setKeyBinding(((int) '\t') | SWT.SHIFT, SWT.NULL);
     
-    _clipboard = new Clipboard(_view.getSite().getShell().getDisplay());
-    
     // Set up menu
     _setupMenu();
   }
   
-  Clipboard _clipboard;
   /** Adds actions to the toolbar menu. */
   protected void _setupMenu() {
-    final Action copyAction = new CopyAction(_view.getTextPane(), _clipboard);
+    IWorkbenchWindow window = _view.getSite().getWorkbenchWindow();
+    final IAction copyAction = ActionFactory.COPY.create(window);
     copyAction.setEnabled(false);
-    
-    _view.addAction(IWorkbenchActionConstants.COPY, copyAction);
-    
-    _view.addAction(IWorkbenchActionConstants.PASTE, 
-                    new PasteAction(_view.getTextPane(), _clipboard));
     _view.addSelectionListener(new SelectionAdapter() { 
       public void widgetSelected(SelectionEvent e) {
-        //System.out.println("About to Show:" + 
-        //     _view.getTextPane().getSelectionCount());
-        copyAction.setEnabled(
-                              (_view.getTextPane().getSelectionCount() > 0));
+        copyAction.setEnabled(_view.getTextPane().getSelectionCount() > 0);
       }
     });
+    _view.addMenuItem(copyAction);
     
-    Action resetInteractionsAction = new Action() {
+    IAction resetInteractionsAction = new Action() {
       public void run() {
         String title = "Confirm Reset Interactions";
-        String message = "Are you sure you want to reset the Interactions Pane?";
+        String message = "Are you sure you want to reset the Interactions View?";
         if (!_promptToReset || _view.showConfirmDialog(title, message)) {
           _model.resetInterpreter(EclipseInteractionsModel.WORKING_DIR);
         }
       }
     };
     resetInteractionsAction.setText("Reset Interactions");
-    resetInteractionsAction.setToolTipText("Resets the Interactions Pane");
+    resetInteractionsAction.setToolTipText("Reset the Interactions View");
+    resetInteractionsAction.setImageDescriptor(_getStandardIcon(ActionFactory.DELETE, window));
     _view.addMenuItem(resetInteractionsAction);
+    _view.addToolbarItem(resetInteractionsAction);
     
-    Action showClasspathAction = new Action() {
+    IAction showClasspathAction = new Action() {
       public void run() {
         String title = "Interpreter Classpath";
         StringBuffer cpBuf = new StringBuffer();
@@ -497,8 +494,18 @@ public class InteractionsController {
       }
     };
     showClasspathAction.setText("Show Interpreter Classpath");
-    showClasspathAction.setToolTipText("Shows the classpath used in the interactions pane.");
+    showClasspathAction.setToolTipText("Show the classpath used in the Interactions View");
     _view.addMenuItem(showClasspathAction);
+  }
+  
+  /**
+   * Get the icon used by a standard action.  (There may be a better way to get to standard icons,
+   * but I haven't found it.)  Note that many standard ActionFactories don't produce actions with icons.
+   */
+  private ImageDescriptor _getStandardIcon(ActionFactory f, IWorkbenchWindow w) {
+    ActionFactory.IWorkbenchAction a = f.create(w);
+    try { return a.getImageDescriptor(); }
+    finally { a.dispose(); }
   }
   
   /**
@@ -710,56 +717,5 @@ public class InteractionsController {
       _updatePreferences();
     }
   }
-  
-  
-  public class CopyAction extends Action {
-    protected StyledText _text;
-    protected Clipboard _clipboard;
-    public CopyAction(StyledText text, Clipboard cp) { 
-      _text = text;
-      _clipboard = cp;
-      setText("Copy");
-      setAccelerator(SWT.CTRL | 'C');
-    }
-    
-    
-    public void run() { 
-      //get selection
-      //TODO: need to disable Copy if selection is empty
-      if (_text.getSelectionCount() > 0) {
-        String selection = _text.getSelectionText();
-        
-        _clipboard.setContents(
-                               new Object[] { selection },
-                               new Transfer[] {TextTransfer.getInstance() }
-                               );
-      }
-    }
-  }
-  
-  public class PasteAction extends Action {
-    protected StyledText _text;
-    protected Clipboard _clipboard;
-    public PasteAction(StyledText text, Clipboard cp) { 
-      _text = text;
-      _clipboard = cp;
-      setText("Paste");
-      setAccelerator(SWT.CTRL | 'V');
-    }
-    
-    
-    public void run() { 
-      //get selection
-      Object selection = _clipboard.getContents(TextTransfer.getInstance());
-      if (selection != null) {
-        _text.insert(selection.toString());
-      }
-      //if (selection instanceof String) {
-      //_text.insert( (String)selection);
-      //}
-      
-    }
-  }
-  
   
 }

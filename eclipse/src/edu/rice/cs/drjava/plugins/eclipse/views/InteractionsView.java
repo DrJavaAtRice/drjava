@@ -40,9 +40,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
@@ -94,9 +95,14 @@ public class InteractionsView extends ViewPart {
    * A runnable command to sound a beep as an alert.
    */
   protected Runnable _beep;
+  
+  /**
+   * Toolbar for this view.
+   */
+  protected IToolBarManager _toolbar;
 
   /**
-   * Toolbar menu for this view.
+   * Drop-down toolbar menu for this view.
    */
   protected IMenuManager _toolbarMenu;
 
@@ -182,6 +188,7 @@ public class InteractionsView extends ViewPart {
 	 new CutAction(_styledText, _clipboard));
     */
 
+    _toolbar = _bars.getToolBarManager();
     _toolbarMenu = _bars.getMenuManager();
     _contextMenu = new MenuManager("#PopupMenu");
     Menu menu = _contextMenu.createContextMenu(_styledText);
@@ -286,12 +293,12 @@ public class InteractionsView extends ViewPart {
    * Add a menu item to both the toolbar menu and context menu.
    * @param action Menu item to add
    */
-  public void addMenuItem(Action action) {
+  public void addMenuItem(IAction action) {
     addToolbarMenuItem(action);
     addContextMenuItem(action);
   }
   
-  public void addAction(String op, Action action) {
+  public void addAction(String op, IAction action) {
 	  _bars.setGlobalActionHandler(op, action); 
 	  addToolbarMenuItem(action);
 	  addContextMenuItem(action);
@@ -301,7 +308,7 @@ public class InteractionsView extends ViewPart {
    * Add a menu item to the toolbar.
    * @param action Menu item to add
    */
-  public void addToolbarMenuItem(Action action) {
+  public void addToolbarMenuItem(IAction action) {
     _toolbarMenu.add(action);
   }
 
@@ -313,8 +320,13 @@ public class InteractionsView extends ViewPart {
    * Add a menu item to the context menu.
    * @param action Menu item to add
    */
-  public void addContextMenuItem(Action action) {
+  public void addContextMenuItem(IAction action) {
     _contextMenu.add(action);
+  }
+  
+  /** Add a top-level action to the toolbar. */
+  public void addToolbarItem(IAction action) {
+    _toolbar.add(action);
   }
     	    
 }

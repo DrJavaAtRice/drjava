@@ -122,7 +122,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    * @param adapter SWTDocumentAdapter to use for the document
    */
  public EclipseInteractionsModel(MainJVM control, SWTDocumentAdapter adapter) {
-   super(control, adapter, null, HISTORY_SIZE, WRITE_DELAY);  // null has type java.io.File; working directory
+   super(control, adapter, WORKING_DIR, HISTORY_SIZE, WRITE_DELAY);
    _listeners = new LinkedList<InteractionsListener>();
    _warnedToReset = false;
    if (DEBUG) _debugSystemOutAndErr();
@@ -161,8 +161,10 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
  
  /** Called when the Java interpreter is ready to use. Adds any open documents to the classpath. */
  public void interpreterReady(File wd) {
+   debug.logStart();
    _resetInteractionsClasspath();
    super.interpreterReady(wd);
+   debug.logEnd();
  }
  
  /** Resets the warning flag after the Interactions Pane is reset. */
