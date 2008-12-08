@@ -57,6 +57,7 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.concurrent.DelayedInterrupter;
 
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -70,6 +71,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Name of the class to use in the remote JVM. */
   private static final String SLAVE_CLASS_NAME = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
+  
+  /** Number of milliseconds to block while waiting for the slave to register. */
+  private static final int REGISTRATION_TIMEOUT = 10000;
   
   public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
@@ -665,7 +669,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _log.log("Main JVM Thread for slave connection is: " + Thread.currentThread());
     
     // notify a thread that is waiting in ensureInterpreterConnected
-    synchronized(_interpreterLock) { _interpreterLock.notifyAll(); } 
+    synchronized(_interpreterLock) {
+      _interpreterLock.notifyAll();
+    } 
   }
   
   /** ReEnables restarting the slave if it has been turned off by repeated startup failures. */
@@ -707,24 +713,32 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** If an interpreter has not registered itself, this method will block until one does.*/
   public InterpreterJVMRemoteI ensureInterpreterConnected() {
 //    _log.log("ensureInterpreterConnected called by Main JVM");
-    try {
-      synchronized(_interpreterLock) {
-        /* Now we silently fail if interpreter is disabled instead of throwing an exception. This situation
-         * occurs only in test cases and when DrJava is about to quit. 
-         */
-        if (! _restart) { throw new IllegalStateException("Interpreter is disabled"); }
-        InterpreterJVMRemoteI slave = _interpreterJVM();
-        while (slave == null) {
-          debug.log("Interpreter is null, waiting for it to register");
-          _interpreterLock.wait();
-          slave = _interpreterJVM();
+    synchronized(_interpreterLock) {
+      /* Now we silently fail if interpreter is disabled instead of throwing an exception. This situation
+       * occurs only in test cases and when DrJava is about to quit. 
+       */
+      if (! _restart) { throw new IllegalStateException("Interpreter is disabled"); }
+      InterpreterJVMRemoteI slave = _interpreterJVM();
+      // Use a DelayedInterrupter for timeout rather than wait(timeout) because the latter doesn't
+      // trigger an exception, so it's indistinguishable from a spurious wakeup
+      if (slave == null) {
+        try {
+          DelayedInterrupter timeout = new DelayedInterrupter(REGISTRATION_TIMEOUT);
+          while (slave == null) {
+            debug.logStart("Interpreter is null, waiting for it to register");
+            _interpreterLock.wait();
+            slave = _interpreterJVM();
+          }
+          timeout.abort();
+          debug.logEnd("Interpreter registered");
         }
-        debug.log("Interpreter registered");
-        
-        return slave;
+        catch (InterruptedException ie) {
+          debug.logEnd("Interpreter failed to register");
+          throw new UnexpectedException(ie, "Wait for interpreter to register was interrupted (probably timed out)");
+        }
       }
+      return slave;
     }
-    catch (InterruptedException ie) { throw new UnexpectedException(ie); }
   }
   
   /** Asks the main jvm for input from the console.

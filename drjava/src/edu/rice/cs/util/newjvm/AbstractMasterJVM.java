@@ -49,6 +49,9 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Map;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import static edu.rice.cs.plt.debug.DebugUtil.error;
+
 /** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
   * machine. This class is used by subclassing it. (See package documentation for more details.)
   * This class runs in both the master and the slave JVMs.
@@ -191,8 +194,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
     
     LinkedList<String> fullJVMArgs = new LinkedList<String>(Arrays.asList(jvmArgs));
     Properties propagate = ConcurrentUtil.getProperties("plt.", "drjava.", "edu.rice.cs.");
-    if (propagate.containsKey("plt.debug.log") || propagate.containsKey("plt.error.log") || 
-        propagate.containsKey("plt.log.factory")) {
+    if (!propagate.containsKey("plt.log.working.dir") &&
+        (propagate.containsKey("plt.debug.log") || propagate.containsKey("plt.error.log") || 
+         propagate.containsKey("plt.log.factory"))) {
       propagate.put("plt.log.working.dir", System.getProperty("user.dir", ""));
     }
     for (Map.Entry<Object, Object> entry : propagate.entrySet()) {
@@ -206,6 +210,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
       public void run() {
         try { /* Create the slave JVM. */ 
           
+          debug.logValues("Starting slave JVM",
+                          new String[]{"RUNNER", "args", "cp", "jvmArgsArray", "workDir"},
+                          RUNNER, args, cp, jvmArgsArray, workDir);
           _log.log(AbstractMasterJVM.this + " is STARTING a Slave JVM with args " + Arrays.asList(args));
           
           final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgsArray, workDir);
@@ -215,6 +222,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
 //          System.err.println(process + " DIED under control of " + asString() + " with status " + status);
           synchronized(_masterJVMLock) {
             if (_startupInProgress) {
+              error.log("Slave process died without registering");
 //              System.err.println("Process " + process + " died while starting up");
               /* If we get here, the process died without registering.  One possible cause is the intermittent funky 3 minute
                * pause in readObject in RUNNER.  Other possible causes are errors in the classpath or the absence of a 

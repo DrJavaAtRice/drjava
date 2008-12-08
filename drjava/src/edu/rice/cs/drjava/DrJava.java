@@ -55,6 +55,8 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
   * one if none exists) to get the critical information required to start the main JVM for DrJava: 
   * (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler

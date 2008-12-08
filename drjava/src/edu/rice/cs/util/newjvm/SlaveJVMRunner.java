@@ -175,7 +175,7 @@ public final class SlaveJVMRunner {
         
         debug.logStart("invoking masterRemote.registerSlave");
         masterRemote.registerSlave(slave);
-        debug.logEnd();
+        debug.logEnd("Slave is registered");
       }
       catch (Throwable e) {
         debug.log(e);
