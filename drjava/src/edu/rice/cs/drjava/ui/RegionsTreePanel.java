@@ -654,6 +654,11 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    expandTree();
     _changeState.updateButtons();
 //    System.err.println("_regionManager.getDocuments() = " + _regionManager.getDocuments());
+    closeIfEmpty();
+  }
+  
+  /** Close the panel if the tree becomes empty. */
+  protected void closeIfEmpty() {
     if (_regionManager.getDocuments().isEmpty()) _close(); // _regTreeModel.getChildCount(_regTreeModel.getRoot()) == 0
   }
   

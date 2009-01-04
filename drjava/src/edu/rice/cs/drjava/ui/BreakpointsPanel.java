@@ -158,6 +158,11 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
   }
   
+  /** Overloaded for BreakpointsPanel, do not close the panel if the tree becomes empty. */
+  protected void closeIfEmpty() {
+    // do not close the panel if the tree becomes empty
+  }
+  
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
   protected AbstractAction[] makePopupMenuActions() {
     AbstractAction[] acts = new AbstractAction[] {

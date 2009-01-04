@@ -4058,11 +4058,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (! debugger.isAvailable()) return;
     
     updateStatusField("Toggling Debugger Mode");
-    
     try { 
       if (isDebuggerReady()) {
         debugger.shutdown();
-        _breakpointsPanel._close();
       }
       else {
         // Turn on debugger
