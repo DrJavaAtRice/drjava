@@ -32,7 +32,7 @@
       <para>For Rice students wishing to work with the DrJava developer team, you should also do the following:
         <itemizedlist>
           <listitem><para>Get a Computer Science Department Unix account, if you don't already have one.  This account is distinct from the Owlnet account given to all undergraduates, and will allow you to login and develop in the PLT computer lab.  You can pick up an application from the department secretaries; have it signed by Corky Cartwright.</para></listitem>
-          <listitem><para>Subscribe to the <literal>javaplt</literal> mailing list.  You can do so here: <ulink url="https://mailman.rice.edu/mailman/listinfo/javaplt">https://mailman.rice.edu/mailman/listinfo/javaplt</ulink>.  This list is the main electronic forum for communication among the team members (like a course discussion board).  Feel free to post your ideas or ask for help here.</para></listitem>
+          <listitem><para>Subscribe to the <literal>drjava</literal> mailing list.  You can do so here: <ulink url="https://mailman.rice.edu/mailman/listinfo/drjava-l">https://mailman.rice.edu/mailman/listinfo/drjava-l</ulink>.  This list is the main electronic forum for communication among the team members (like a course discussion board).  Feel free to post your ideas or ask for help here.</para></listitem>
         </itemizedlist>
       </para>
     </section>
@@ -47,7 +47,7 @@
     
     <section id="installJDK">
       <title>Sun Java Development Kit</title>
-      <para>If it's not already installed on your system, you can download the JDK from <ulink url="http://java.sun.com">Sun's Web site</ulink>.  You will need to have installed both the J2SE JDK 5 and the J2SE SDK 1.4 (note the distinction on the download pages between a Java <emphasis>Runtime Environment</emphasis>, which just contains the tools needed to <emphasis>run</emphasis> Java programs, and a Java <emphasis>Development Kit</emphasis>, which contains a compiler and other tools, in addition to the runtime application).  The DrJava sources are written in the Java 5 language.  However, in order to support users who only have Java 1.4 installed, the 1.4 SDK is also used in the build process.  (Note: theoretically, any Java 5.0 compiler should be able to handle the DrJava sources.  However, there are currently some dependencies on Sun's tools in the main DrJava code module, so you will need to have those tools available.)</para>
+      <para>If it's not already installed on your system, you can download the JDK from <ulink url="http://java.sun.com">Sun's Web site</ulink>.  You will need to have installed the J2SE JDK 5 (note the distinction on the download pages between a Java <emphasis>Runtime Environment</emphasis>, which just contains the tools needed to <emphasis>run</emphasis> Java programs, and a Java <emphasis>Development Kit</emphasis>, which contains a compiler and other tools, in addition to the runtime application).  The DrJava sources are written in the Java 5 language. (Note: theoretically, any Java 5.0 compiler should be able to handle the DrJava sources.  However, there are currently some dependencies on Sun's tools in the main DrJava code module, so you will need to have those tools available.)</para>
       
       <para>If you like, you can set up your command-line environment to better support Java, but it's not strictly necessary.  See <link linkend="environmentSettings">Command-Line Environment Settings</link> for details.</para>
       
@@ -72,7 +72,7 @@
       
       <note>
         <title>Rice Java PLT</title>
-        <para>On the Rice Computer Science department network, the Subversion client is located at <filename>/home/javaplt/packages/RHE4/subversion-1.3.2/subversion/clients/cmdline</filename>.</para>
+        <para>On the Rice Computer Science department network, the Subversion client is located at <filename>/home/javaplt/packages/subversion-1.5.4/bin</filename>.</para>
       </note>
       
     </section>
@@ -85,7 +85,7 @@
       
       <note>
         <title>Rice Java PLT</title>
-        <para>On the Rice Computer Science department network, Ant is installed in the <filename>/home/javaplt/packages</filename> directory.</para>
+        <para>On the Rice Computer Science department network, Ant is installed in the <filename>/home/javaplt/packages/ant/bin</filename> directory.</para>
       </note>
       
       <note>
@@ -141,21 +141,46 @@
             <tbody>
               
               <row>
-                <entry><literal>JAVA_HOME</literal></entry>
+                <entry><literal>JAVA5_HOME</literal></entry>
                 <entry>Location of the Java 5 installation.  The specified directory should have a <filename>bin</filename> subdirectory containing <command>java</command>, <command>javac</command>, <command>javadoc</command>, etc.</entry>
-                <entry>Specifies which Java installation Ant should use (not strictly necessary if the correct <command>java</command> command is on the command path).</entry>
+                <entry>Specifies which Java 5 installation Ant should use. <!-- (not strictly necessary if the correct <command>java</command> command is on the command path) --> On CSnet, this should be set to <filename>/home/javaplt/java/Linux-i686/1.5</filename>.</entry>
               </row>
-              
+
+              <row>
+                <entry><literal>JAVA6_HOME</literal></entry>
+                <entry>Location of the Java 6 installation.  The specified directory should have a <filename>bin</filename> subdirectory containing <command>java</command>, <command>javac</command>, <command>javadoc</command>, etc.</entry>
+                <entry>Specifies which Java 6 installation Ant should use. <!-- (not strictly necessary if the correct <command>java</command> command is on the command path) --> On CSnet, this should be set to <filename>/home/javaplt/java/Linux-i686/1.6</filename>.</entry>
+              </row>
+
+<!--              
               <row>
                 <entry><literal>JAVA14_HOME</literal></entry>
                 <entry>Location of the Java 1.4 installation.  The specified directory should have a <filename>bin</filename> subdirectory similar to that of <literal>JAVA_HOME</literal>.</entry>
                 <entry>The DrJava build scripts use this variable to locate the 1.4 installation.</entry>
               </row>
-              
+-->              
               <row>
                 <entry><literal>ANT_HOME</literal></entry>
                 <entry>Location of the Ant installation.  The specified directory should contain the <filename>bin</filename> and <filename>lib</filename> subdirectories.</entry>
-                <entry>The Ant command generally needs this in order to work correctly (although on some platforms Ant will work fine without it).</entry>
+                <entry>The Ant command generally needs this in order to work correctly (although on some platforms Ant will work fine without it). On CSnet, this should be set to <filename>/home/javaplt/packages/ant</filename>.</entry>
+              </row>
+
+              <row>
+                <entry><literal>LAUNCH4J_HOME</literal></entry>
+                <entry>Location of the Launch4J installation.  The specified directory should contain the <filename>bin</filename> subdirectory.</entry>
+                <entry>This is not necessary for normal building, only for making release builds. On CSnet, this should be set to <filename>/home/javaplt/packages/launch4j</filename>.</entry>
+              </row>
+
+              <row>
+                <entry><literal>CLOVER_JAR</literal></entry>
+                <entry>Location of the Clover jar file.</entry>
+                <entry>This is not necessary for normal building, only for creating code coverage reports. On CSnet, this should be set to <filename>/home/javaplt/packages/clover-ant-1.3.14/lib/clover.jar</filename>.</entry>
+              </row>
+
+              <row>
+                <entry><literal>FINDBUGS_HOME</literal></entry>
+                <entry>Location of the Findbugs installation.  The specified directory should contain the <filename>bin</filename> and <filename>lib</filename> subdirectories.</entry>
+                <entry>This is not necessary for normal building, only for creating static analysis reports. On CSnet, this should be set to <filename>/home/javaplt/packages/findbugs</filename>.</entry>
               </row>
               
               <row>
@@ -264,7 +289,7 @@
         
         <informalexample><para><literal>ant -p</literal></para></informalexample>
         
-        You will see a list of all the documented targets in the project.  Note that, due to the dependencies between targets, the <literal>build</literal> target will run <literal>generate-source</literal>, <literal>compile-15</literal>, <literal>compile-14</literal>, <literal>test-14-in-15</literal>, and <literal>jar-14</literal>.  That is, it will do everything required to build and test a new application.  Try it out:
+        You will see a list of all the documented targets in the project.  Note that, due to the dependencies between targets, the <literal>build</literal> target will run <literal>generate-source</literal>, <literal>compile</literal>, <literal>test</literal>, and <literal>jar</literal>.  That is, it will do everything required to build and test a new application.  Try it out:
         
         <informalexample><para><literal>ant build</literal></para></informalexample>
         
@@ -285,13 +310,14 @@
               <para>Invokes the <command>javac</command> compiler.  Generated class files will be placed in a new <filename>classes</filename> directory, with the subdirectories <filename>base</filename> and <filename>test</filename> for standard and test classes, respectively.  Any compiler errors or warnings will be printed to the console.  Where warnings are expected, they will be tagged in the code with a <literal>@SuppressWarnings</literal> annotation.  Thus, any warnings you see during compilation highlight a problem that should be addressed.</para>
             </formalpara>
           </listitem>
-        
+<!--        
           <listitem>
             <formalpara>
               <title><literal>rmi-compile</literal></title>
               <para>Invokes <command>rmic</command>, the <firstterm>Remote Method Invocation</firstterm> compiler.  This allows (relatively) transparent communication to occur between the main DrJava process and the Interactions Pane helper process.</para>
             </formalpara>
           </listitem>
+-->
         
           <listitem>
             <formalpara>
@@ -299,25 +325,26 @@
               <para>Expands the <filename>*.jar</filename> files in the <filename>lib</filename> directory into <filename>classes/lib</filename>.  These library classes will be bundled with the finished product.</para>
             </formalpara>
           </listitem>
-        
+<!--        
           <listitem>
             <formalpara>
               <title><literal>compile-14</literal></title>
               <para>Invokes the Retroweaver tool on the <filename>classes</filename> directories, generating class files compatible with Java 1.4 in the <filename>classes/base-14</filename>, <filename>classes/test-14</filename>, and <filename>classes/lib-14</filename> directories.  This allows us to support users who only have Java 1.4 available on their systems.  If there are any references to unavailable classes (such as <literal>java.util.Queue</literal>, which was introduced in the Java 5 APIs), a warning will be generated and should be immediately addressed.</para>
             </formalpara>
           </listitem>
+-->
         
           <listitem>
             <formalpara>
-              <title><literal>test-14-in-15</literal></title>
-              <para>Runs the JUnit tests in <filename>classes/test-14</filename> under Java 5.  This will constitute the bulk of the build time.  A summary of the running time for each test will be logged, and if a failure occurs, testing will halt immediately.  Note that there are also a <literal>test-14</literal> target and a <literal>test-15</literal> target that will not be run by <literal>build</literal>, but that can be invoked manually.</para>
+              <title><literal>test</literal></title>
+              <para>Runs the JUnit tests in <filename>classes/test</filename> under Java 5.  This will constitute the bulk of the build time.  A summary of the running time for each test will be logged, and if a failure occurs, testing will halt immediately.  Note that there are also a <literal>test-6</literal> target that will not be run by <literal>build</literal>, but that can be invoked manually.</para>
             </formalpara>
           </listitem>
         
           <listitem>
             <formalpara>
-              <title><literal>jar-14</literal></title>
-              <para>Creates the <filename>drjava.jar</filename> file using the Java 1.4-compatible classes.  This is the executable application.  It will contain a <filename>MANIFEST.MF</filename> file listing the build's unique version number and your user name.</para>
+              <title><literal>jar</literal></title>
+              <para>Creates the <filename>drjava.jar</filename> file using the Java 5-compatible classes.  This is the executable application.  It will contain a <filename>MANIFEST.MF</filename> file listing the build's unique version number and your user name.</para>
             </formalpara>
           </listitem>
         </itemizedlist>
