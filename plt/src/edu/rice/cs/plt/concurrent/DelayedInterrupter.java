@@ -35,8 +35,15 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.concurrent;
 
 /**
- * Sets a "time bomb" on a specific thread: if the {@link #abort} method is not invoked within a specified
- * amount of time (in milliseconds), the thread will be interrupted.
+ * <p>Sets a "time bomb" on a specific thread: if the {@link #abort} method is not invoked within a specified
+ * amount of time (in milliseconds), the thread will be interrupted.  In contrast to {@link Object#wait(long)},
+ * implementing a timeout in this way clearly distinguishes between a timeout-triggered wake-up and a
+ * {@link Object#notify()}-triggered or spurious wake-up.  This alternative is also useful where the thread to
+ * timeout performs multiple blocking operations, invokes blocking APIs that don't support timeouts
+ * (like {@link java.io.InputStream#read}), or polls for an interrupted state.</p>
+ * 
+ * <p>The timeout is implemented with a separate daemon thread: an outstanding DelayedInterrupter will not
+ * prevent the program from terminating.</p>
  */
 public class DelayedInterrupter {
   
@@ -64,10 +71,14 @@ public class DelayedInterrupter {
         catch (InterruptedException e) { /* abort has occurred */ }
       }
     };
+    _interrupter.setDaemon(true);
     _interrupter.start();
   }
   
-  /** Abort the request to interrupt the thread.  Should be called from the worker thread. */
+  /**
+   * Abort the request to interrupt the thread.  When called from the worker thread (this is the intended usage),
+   * clears the interrupted status, in case the interrupt occurred but was not detected.
+   */
   public void abort() {
     _interrupter.interrupt();
     if (Thread.currentThread() == _worker) {

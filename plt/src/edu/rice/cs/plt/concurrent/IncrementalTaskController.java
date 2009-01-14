@@ -52,7 +52,7 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
   public void pause() {
     switch (_status) {
       case RUNNING: doPause(); break;
-      case CANCELLED: throw new IllegalStateException("Task is cancelled");
+      case CANCELED: throw new IllegalStateException("Task is cancelled");
     }
   }
   
@@ -66,7 +66,7 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
    *                           instead be thrown by {@link #value}.)
    */
   public List<I> intermediateValues() {
-    if (_status != Status.CANCELLED) {
+    if (_status != Status.CANCELED) {
       try { return getIntermediateValues(); }
       catch (InterruptedException e) { throw new WrappedException(e); }
     }

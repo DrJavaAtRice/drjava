@@ -52,6 +52,11 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  * via the {@link #override} method; these mappings can be undone via {@link #revert}.
  * Optionally, the results of {@link #get} queries that call the lambda can be automatically 
  * cached with the other overriding mappings.</p>
+ * 
+ * <p>This class is not thread safe (to reduce overhead in sequenential applications, and because
+ * external references to {@code _overrides} make it difficult to make safety guarantees).  It is
+ * possible, for example, for a TotalMap with caching enabled to still compute a result more than 
+ * once.</p>  
  */
 public class TotalMap<K, V> {
   

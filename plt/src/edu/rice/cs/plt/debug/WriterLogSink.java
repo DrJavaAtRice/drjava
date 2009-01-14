@@ -32,43 +32,30 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.tuple;
+package edu.rice.cs.plt.debug;
 
-/**
- * An empty tuple.  There is only one accessible instance, the {@code INSTANCE} singleton, which has
- * arbitrarily-chosen type argument {@code Void} ({@code Option<null>} would make more sense, but is 
- * not expressible).  Clients needing a specific kind of {@code Null} can perform an unsafe cast on 
- * the singleton to produce the desired type (this is done in {@link Null#make}).
- */
-public final class Null<T> extends Option<T> {
+import java.io.IOException;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import edu.rice.cs.plt.io.IOUtil;
+
+/** A log that writes tagged, indented text to the given {@code Writer}. */
+public class WriterLogSink extends IndentedTextLogSink {
   
-  /** Forces access through the singleton */
-  private Null() {}
+  private final BufferedWriter _w;
   
-  /** A singleton null tuple */
-  public static final Null<Void> INSTANCE = new Null<Void>();
-  
-  /** Invokes {@code visitor.forNone()} */
-  public <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor) {
-    return visitor.forNone();
+  public WriterLogSink(Writer w) {
+    super();
+    _w = IOUtil.asBuffered(w);
   }
   
-  public boolean isSome() { return false; }
+  public WriterLogSink(Writer w, int idealLineWidth) {
+    super(idealLineWidth);
+    _w = IOUtil.asBuffered(w);
+  }
   
-  public T unwrap() { throw new OptionUnwrapException(); }
+  @Override protected BufferedWriter writer(Message m) { return _w; }
   
-  public T unwrap(T forNone) { return forNone; }
+  public void close() throws IOException { _w.close(); }
   
-  /** Produces {@code "()"} */
-  public String toString() { return "()"; }
-  
-  /** Defined in terms of identity (since the singleton is the only accessible instance) */
-  public boolean equals(Object o) { return this == o; }
-  
-  /** Defined in terms of identity (since the singleton is the only accessible instance) */
-  protected int generateHashCode() { return System.identityHashCode(this); }
-  
-  /** Return a singleton, cast to the appropriate type. */
-  @SuppressWarnings("unchecked")
-  public static <T> Null<T> make() { return (Null<T>) INSTANCE; }
-}  
+}

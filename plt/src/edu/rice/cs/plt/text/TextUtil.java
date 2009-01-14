@@ -34,15 +34,23 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.text;
 
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.recur.RecurUtil;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.collect.OneToOneRelation;
 import edu.rice.cs.plt.collect.IndexedOneToOneRelation;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -51,7 +59,11 @@ import edu.rice.cs.plt.lambda.LazyThunk;
 
 public final class TextUtil {
   
+  /** The system-dependent "line.separator" property. */
   public static final String NEWLINE = System.getProperty("line.separator", "\n");
+  
+  /** A regex matching any line break: {@code \r\n}, {@code \n}, or {@code \r}. */
+  public static final String NEWLINE_PATTERN = "\\r\\n|\\n|\\r";
   
   /** Prevents instance creation */
   private TextUtil() {}
@@ -195,7 +207,25 @@ public final class TextUtil {
   }
   
   /**
-   * Find the first occurance of any of the given characters in {@code s}.  If none are present, the result is 
+   * Determine if any of the given strings is a prefix of {@code s}.  Defined in terms of
+   * {@link String#startsWith}.
+   */
+  public static boolean startsWithAny(String s, String... prefixes) {
+    for (String prefix : prefixes) { if (s.startsWith(prefix)) { return true; } }
+    return false;
+  }
+  
+  /**
+   * Determine if any of the given strings is a suffix of {@code s}.  Defined in terms of
+   * {@link String#endsWith}.
+   */
+  public static boolean endsWithAny(String s, String... suffixes) {
+    for (String suffix : suffixes) { if (s.endsWith(suffix)) { return true; } }
+    return false;
+  }
+  
+  /**
+   * Find the first occurrence of any of the given characters in {@code s}.  If none are present, the result is 
    * {@code -1}.  Defined in terms of {@link String#indexOf(int)}.
    */
   public static int indexOfFirst(String s, int... characters) {
@@ -208,7 +238,7 @@ public final class TextUtil {
   }
   
   /**
-   * Find the first occurance of any of the given strings in {@code s}.  If none are present, the result is 
+   * Find the first occurrence of any of the given strings in {@code s}.  If none are present, the result is 
    * {@code -1}.  Defined in terms of {@link String#indexOf(String)}.
    */
   public static int indexOfFirst(String s, String... pieces) {
@@ -221,7 +251,7 @@ public final class TextUtil {
   }
   
   /**
-   * Extract the portion of {@code s} before the first occurance of the given delimiter.  {@code s} if the
+   * Extract the portion of {@code s} before the first occurrence of the given delimiter.  {@code s} if the
    * delimiter is not found.
    */
   public static String prefix(String s, int delim) {
@@ -230,7 +260,7 @@ public final class TextUtil {
   }
   
   /**
-   * Extract the portion of {@code s} after the first occurance of the given delimiter.  {@code s} if the
+   * Extract the portion of {@code s} after the first occurrence of the given delimiter.  {@code s} if the
    * delimiter is not found.
    */
   public static String removePrefix(String s, int delim) {
@@ -239,7 +269,7 @@ public final class TextUtil {
   }
     
   /**
-   * Extract the portion of {@code s} after the last occurance of the given delimiter.  {@code s} if the
+   * Extract the portion of {@code s} after the last occurrence of the given delimiter.  {@code s} if the
    * delimiter is not found.
    */
   public static String suffix(String s, int delim) {
@@ -248,12 +278,255 @@ public final class TextUtil {
   }
   
   /**
-   * Extract the portion of {@code s} before the last occurance of the given delimiter.  {@code s} if the
+   * Extract the portion of {@code s} before the last occurrence of the given delimiter.  {@code s} if the
    * delimiter is not found.
    */
   public static String removeSuffix(String s, int delim) {
     int index = s.lastIndexOf(delim);
     return (index == -1) ? s : s.substring(0, index);
+  }
+  
+  /**
+   * An extended version of {@link String#split} that recognizes nested parentheses and only splits
+   * where the delimiter occurs at the top level.  This convenience method sets {@code limit} to {@code 0}
+   * (unlimited number of matches) and {@code brackets} to {@link Bracket#PARENTHESES}.  See
+   * {@link #split(String, String, int, Bracket[])} for a full specification.
+   */
+  public static SplitString splitWithParens(String s, String delimRegex) {
+    return new StringSplitter(s, delimRegex, 0, Bracket.PARENTHESES).split();
+  }
+  
+  /**
+   * An extended version of {@link String#split} that recognizes nested parentheses and only splits
+   * where the delimiter occurs at the top level.  This convenience method sets {@code brackets} to 
+   * {@link Bracket#PARENTHESES}.  See {@link #split(String, String, int, Bracket[])} for a full
+   * specification.
+   */
+  public static SplitString splitWithParens(String s, String delimRegex, int limit) {
+    return new StringSplitter(s, delimRegex, limit, Bracket.PARENTHESES).split();
+  }
+  
+  /**
+   * An extended version of {@link String#split} that recognizes nested matched brackets and only splits
+   * where the delimiter occurs at the top level.  This convenience method sets {@code limit} to {@code 0}
+   * (unlimited number of matches).  See {@link #split(String, String, int, Bracket[])} for a full
+   * specification.
+   */
+  public static SplitString split(String s, String delimRegex, Bracket... brackets) {
+    return new StringSplitter(s, delimRegex, 0, brackets).split();
+  }
+  
+  /**
+   * An extended version of {@link String#split} that recognizes nested matched brackets and only splits
+   * where the delimiter occurs at the top level.  For convenience when the delimiter is a nontrivial
+   * regular expression, the result includes both the split strings and the matched delimiters.  Ignoring
+   * these extensions, the behavior is roughly equivalent: {@code s.split(delimRegex, limit)} is equivalent
+   * to {@code TextUtil.split(s, delimRegex, limit).array()}, with the exception that trailing empty strings
+   * (separated by delimiters) are never discarded here.
+   * @param s  A string to split
+   * @param delimRegex  A regular expression recognizing delimiters
+   * @param limit  The number of non-delimiter pieces to produce.  Consistent with {@code String.split()},
+   *               {@code limit-1} is the number of delimiters to search for.  If {@code 0} or negative, the
+   *               search continues until the string is exhausted.  Unlike {@code String.split()}, trailing
+   *               empty strings (separated by delimiters) are never discarded, even when {@code limit == 0}.
+   * @param brackets  Bracket pairs that should be recognized.  A delimiter match that occurs within one of
+   *                  these bracket pairs (at any nonzero nesting depth) is not considered a delimiter.
+   *                  A left bracket increases the nesting level only if it is at the top level or follows
+   *                  another left bracket that supports nesting; a right bracket reduces the nesting level
+   *                  only if it matches the most recent left bracket.  If {@code delimRegex} recognizes part
+   *                  of a valid bracket (e.g., {@code "*"} is the delimiter and {@code "/*"} is a bracket),
+   *                  how relevant text is handled is unspecified (it would be nice, but difficult, to fix this).
+   *                  If multiple brackets overlap, an expected right bracket will match before a left bracket,
+   *                  and the first left bracket listed in {@code brackets} has priority over later left
+   *                  brackets.
+   */
+  public static SplitString split(String s, String delimRegex, int limit, Bracket... brackets) {
+    return new StringSplitter(s, delimRegex, limit, brackets).split();
+  }
+  
+  /**
+   * The result of a {@code split()} invocation.  The original string can be formed by concatenating
+   * {@code splits()}, {@code delims()} (interleaved), and {@code rest()}.
+   */
+  public static class SplitString implements Serializable {
+    private final List<String> _splits;
+    private final List<String> _delims;
+    private final String _rest;
+    
+    private SplitString(List<String> splits, List<String> delims, String rest) {
+      _splits = Collections.unmodifiableList(splits);
+      _delims = Collections.unmodifiableList(delims);
+      _rest = rest;
+    }
+    
+    /**
+     * The sequence of strings that were followed by a recognized delimiter.
+     * {@code splits().size() == delims().size()}.
+     */
+    public List<String> splits() { return _splits; }
+    /**
+     * The delimiters that followed the corresponding members of {@code splits()}.
+     * {@code splits().size() == delims().size()}.
+     */
+    public List<String> delimiters() { return _delims; }
+    /**
+     * The tail portion of the input string.  Either this string contains no delimiters, or it was
+     * left unsearched.
+     */
+    public String rest() { return _rest; }
+    
+    /**
+     * Fill an array with the non-delimiter portions of the original string.  The array has the same
+     * form as the result of {@code String#split}.  It always has length {@code >= 1} and
+     * {@code <= limit}, if {@code limit} (a parameter of the {@code split} method) was positive.
+     */
+    public String[] array() {
+      String[] result = new String[_splits.size() + 1];
+      _splits.toArray(result);
+      result[_splits.size()] = _rest;
+      return result;
+    }
+    
+    public String toString() {
+      StringBuilder result = new StringBuilder();
+      result.append("SplitString: ");
+      for (Pair<String, String> pair : IterUtil.zip(_splits, _delims)) {
+        result.append("(").append(pair.first()).append(") ");
+        result.append("[").append(pair.second()).append("] ");
+      }
+      result.append("+ (").append(_rest).append(")");
+      return result.toString();
+    }
+  }
+  
+  /** Implementation of the split algorithm. */
+  private static class StringSplitter {
+    private final List<String> _splits;
+    private final List<String> _delims;
+    private final String _s;
+    
+    private final Matcher _delim;
+    private final Bracket[] _brackets;
+    private final Matcher[] _lefts;
+    private final Matcher[] _rights;
+    private final LinkedList<Integer> _stack; // grows left -- use addFirst and removeFirst
+    
+    private int _remaining;
+    
+    public StringSplitter(String s, String delimRegex, int limit, Bracket... brackets) {
+      if (limit > 0 && limit < 10) { // 10 is the specified default capacity
+        _splits = new ArrayList<String>(limit);
+        _delims = new ArrayList<String>(limit);
+      }
+      else {
+        _splits = new ArrayList<String>();
+        _delims = new ArrayList<String>();
+      }
+      _s = s;
+      _delim = Pattern.compile(delimRegex).matcher(_s);
+      _brackets = brackets;
+      _lefts = new Matcher[_brackets.length];
+      _rights = new Matcher[_brackets.length];
+      for (int i = 0; i < _brackets.length; i++) {
+        _lefts[i] = _brackets[i].left().matcher(_s);
+        _rights[i] = _brackets[i].right().matcher(_s);
+      }
+      _stack = new LinkedList<Integer>();
+      _remaining = limit;
+    }
+    
+    public SplitString split() {
+      int rest = 0; // text not yet added to _splits or _delims
+      int cursor = 0; // current start location for search; >= rest
+      while (_remaining != 1) {
+        if (_delim.find()) {
+          int dStart = _delim.start();
+          int dEnd = _delim.end();
+          processStack(cursor, dStart, false);
+          if (_stack.isEmpty()) {
+            _splits.add(_s.substring(rest, dStart));
+            _delims.add(_s.substring(dStart, dEnd));
+            if (_remaining > 1) { _remaining--; }
+            rest = dEnd;
+            cursor = dEnd;
+          }
+          else {
+            cursor = processStack(dStart, _s.length(), true);
+            _delim.region(cursor, _s.length()); // skip delimiter search ahead past right brackets
+          }
+        }
+        else { _remaining = 1; /* end search */ }
+      }
+      return new SplitString(_splits, _delims, _s.substring(rest));
+    }
+    
+    /**
+     * Push and pop brackets on the stack until {@code rangeEnd} is reached or, if
+     * {@code stopWhenEmpty}, the stack is empty.
+     */
+    private int processStack(int rangeStart, int rangeEnd, boolean stopWhenEmpty) {
+      // Match doesn't have a state query method, so we have to keep track here
+      // null -> haven't tried; true -> successful match; false -> no match
+      Boolean[] leftMatches = new Boolean[_lefts.length];
+      Boolean[] rightMatches = new Boolean[_rights.length];
+      int cursor = rangeStart;
+      boolean searchLefts = _stack.isEmpty() || _brackets[_stack.getFirst()].nests();
+      
+      while (cursor < rangeEnd && !(stopWhenEmpty && _stack.isEmpty())) {
+        // possible next brackets are any rights in the stack and, if searchLefts, all lefts
+        int first = rangeEnd;
+        int firstIndex = -1;
+        boolean firstIsLeft = false;
+        if (!_stack.isEmpty()) { // look for a right bracket
+          int i = _stack.getFirst();
+          Matcher m = _rights[i];
+          Boolean matched = rightMatches[i];
+          if (matched == null || (matched && m.start() < cursor) || (!matched && m.regionEnd() < first)) {
+            matched = m.region(cursor, first).find();
+            rightMatches[i] = matched;
+          }
+          if (matched && m.start() < first) {
+            first = m.start();
+            firstIndex = i;
+            firstIsLeft = false;
+          }
+        }
+        if (searchLefts) { // rights take priority; earlier lefts take priority
+          for (int i = 0; i < _lefts.length; i++) {
+            Matcher m = _lefts[i];
+            Boolean matched = leftMatches[i];
+            if (matched == null || (matched && m.start() < cursor) || (!matched && m.regionEnd() < first)) {
+              // minimize search region so we don't perform needless work (but this does impact behavior
+              // where different brackets overlap)
+              matched = m.region(cursor, first).find();
+              leftMatches[i] = matched;
+            }
+            if (matched && m.start() < first) {
+              first = m.start();
+              firstIndex = i;
+              firstIsLeft = true;
+            }
+          }
+        }
+        
+        if (first < rangeEnd) { // at least one bracket was found
+          if (firstIsLeft) {
+            _stack.addFirst(firstIndex);
+            cursor = _lefts[firstIndex].end();
+            searchLefts = _brackets[firstIndex].nests();
+          }
+          else {
+            _stack.removeFirst();
+            cursor = _rights[firstIndex].end();
+            searchLefts = true; // either the stack is empty or the top supports nesting
+          }
+        }
+        else { cursor = rangeEnd; }
+        
+      }
+      return cursor;
+    }
+    
   }
 
   /** Express a byte array as a sequence of unsigned hexadecimal bytes. */
@@ -376,9 +649,9 @@ public final class TextUtil {
    * As suggested by JLS, an additional {@code u} is added to existing escapes in the string;
    * instances of {@code \} that precede a non-ASCII character or a malformed Unicode escape will
    * be encoded as {@code &#92;u005c}.  The original string may be safely reconstructed with 
-   * {@link #unicodeUnescapeOnce}; to safely interpret <em>all</em> unicode escapes, including 
+   * {@link #unicodeUnescapeOnce}; to safely interpret <em>all</em> Unicode escapes, including 
    * those in the original string, use {@link #unicodeUnescape} (in either case, this method
-   * guarantees an absense of {@code IllegalArgumentException}s).
+   * guarantees an absence of {@code IllegalArgumentException}s).
    */
   public static String unicodeEscape(String s) {
     return new UnicodeTranslator() {
@@ -565,14 +838,18 @@ public final class TextUtil {
   }
 
   /**
-   * Produce a regular expression that matches the given string.  Backslash escape sequences are
+   * <p>Produce a regular expression that matches the given string.  Backslash escape sequences are
    * used for all characters that potentially clash with regular expression syntax.  For simplicity,
    * escapes are applied to all control characters ({@code &#92;u0000} to {@code &#92;u001F} and 
    * {@code &#92;u007F}) and to all non-alphanumeric, non-space ASCII characters (in the range
    * {@code &#92;u0020} to {@code &#92;u007E}), including those that have no special meaning in
    * the regular expression syntax (such as {@code @}, {@code "}, and {@code ~}).  Where a
    * mnemonic escape for control characters exists, it is used; otherwise, the hexadecimal {@code \xhh}
-   * notation is used.
+   * notation is used.</p>
+   * 
+   * <p>Note: a similar method is available in Java 5: {@link Pattern#quote}.  It has the same basic 
+   * contract &mdash; produce a regex to match the given string &mdash; but produces different (equivalent)
+   * results.</p>
    */
   public static String regexEscape(String s) {
     return new StringTranslator() {

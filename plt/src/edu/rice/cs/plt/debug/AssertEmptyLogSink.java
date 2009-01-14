@@ -34,39 +34,37 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.debug;
 
-import java.util.Date;
 import edu.rice.cs.plt.iter.SizedIterable;
-import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /**
- * A log that triggers an assertion failure whenever it is written to.  If necessary, a filter can be used so that
- * only logging that occurs in a certain location or thread leads to a failure.  (If assertions are disabled, no 
+ * A log sink that triggers an assertion failure whenever it is written to.  (If assertions are disabled, no 
  * failures will occur, and this degenerates into a slightly more-expensive {@link VoidLog}.)
  */
-public class AssertEmptyLog extends AbstractLog {
+public final class AssertEmptyLogSink extends TextLogSink {
   
-  public AssertEmptyLog() { super(); }
+  public static final AssertEmptyLogSink INSTANCE = new AssertEmptyLogSink();
   
-  public AssertEmptyLog(Predicate2<? super Thread, ? super StackTraceElement> filter) {
-    super(filter);
+  private AssertEmptyLogSink() { super(); }
+  
+  public void close() {}
+  
+  @Override protected void write(Message m, SizedIterable<String> text) {
+    assert false : makeMessage(m, text);
   }
-
-  /** Trigger an assertion failure with a descriptive message */
-  protected void write(Date time, Thread thread, StackTraceElement location, SizedIterable<? extends String> messages) {
-    assert false : makeMessage(time, thread, location, messages);
+  
+  @Override protected void writeStart(StartMessage m, SizedIterable<String> text) {
+    assert false : makeMessage(m, text);
   }
   
-  private String makeMessage(Date time, Thread thread, StackTraceElement location, 
-                             SizedIterable<? extends String> messages) {
-    String first = "[" + formatLocation(location) + " - " + formatThread(thread) + " - " + formatTime(time) + "]";
+  @Override protected void writeEnd(EndMessage m, SizedIterable<String> text) {
+    assert false : makeMessage(m, text);
+  }
+  
+  private String makeMessage(Message m, SizedIterable<String> messages) {
+    String first = "[" + formatLocation(m.caller()) + " - " + formatThread(m.thread()) + " - " +
+                   formatTime(m.time()) + "]";
     return IterUtil.multilineToString(IterUtil.compose(first, messages));
   }
   
-  /** Do nothing */
-  protected void push() {}
-  
-  /** Do nothing */
-  protected void pop() {}
-
 }

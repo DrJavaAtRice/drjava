@@ -106,6 +106,27 @@ public final class ReflectUtil {
   }
   
   /**
+   * Gets the base component type of an array of arbitrary dimensions.  For example, for each of {@code String},
+   * {@code String[]}, and {@code String[][]}, this is {@code String}.
+   */
+  public static Class<?> arrayBaseClass(Class<?> c) {
+    Class<?> result = c;
+    while (result.isArray()) { result = result.getComponentType(); }
+    return result;
+  }
+  
+  /**
+   * Return the number of array dimensions represented by the given class.  For {@code String[][]}, this is 2.
+   * For {@code String}, this is 0.
+   */
+  public static int arrayDimensions(Class<?> c) {
+    Class<?> rest = c;
+    int result = 0;
+    while (rest.isArray()) { rest = rest.getComponentType(); result++; }
+    return result;
+  }
+  
+  /**
    * <p>An implementation of {@link Class#cast}, which is unavailable prior to Java 5.0.  Unlike the
    * Java API method, this version allows a boxed value to be cast to its unboxed equivalent &mdash; for
    * example, {@code ReflectUtil.cast(int.class, 23)} will succeed (see SDN bug 6456930).</p>

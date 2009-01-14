@@ -34,116 +34,103 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.debug;
 
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.object.Composite;
-import edu.rice.cs.plt.object.ObjectUtil;
+import edu.rice.cs.plt.debug.LogSink.*;
 
-/** 
- * A log that sends messages to all the logs it contains.  This allows, for example, logging to be
- * viewed at runtime while, at the same time, being recorded to a file.
- */
-public class LogSplitter implements Log, Composite {
+/** A log that acts as a front end for a LogSink. */
+public class StandardLog implements Log {
   
-  private final Iterable<Log> _logs;
+  private static final String[] EMPTY = new String[0];
   
-  /** Create a log that will send its messages to each of {@code logs} */
-  public LogSplitter(Log... logs) {
-    _logs = IterUtil.asIterable(logs);
-  }
+  private final LogSink _sink;
   
-  public LogSplitter(Iterable<? extends Log> logs) {
-    _logs = IterUtil.snapshot(logs);
-  }
-  
-  public int compositeHeight() { return ObjectUtil.compositeHeight(_logs) + 1; }
-  public int compositeSize() { return ObjectUtil.compositeSize(_logs) + 1; }
-  
+  public StandardLog(LogSink sink) { _sink = sink; }
+
   public void log() {
-    for (Log l : _logs) { l.log(); }
+    _sink.log(new StandardMessage(new ThreadSnapshot(), EMPTY, EMPTY));
   }
-  
+
   public void log(String message) {
-    for (Log l : _logs) { l.log(message); }
+    _sink.log(new StandardMessage(new ThreadSnapshot(), message, EMPTY, EMPTY));
   }
-    
+
   public void log(Throwable t) {
-    for (Log l : _logs) { l.log(t); }
+    _sink.logError(new ErrorMessage(new ThreadSnapshot(), t));
   }
-  
+
   public void log(String message, Throwable t) {
-    for (Log l : _logs) { l.log(message, t); }
+    _sink.logError(new ErrorMessage(new ThreadSnapshot(), message, t));
   }
-  
-  public void logStart() {
-    for (Log l : _logs) { l.logStart(); }
-  }
-  
-  public void logStart(String message) {
-    for (Log l : _logs) { l.logStart(message); }
-  }
-  
-  public void logStart(String name, Object value) {
-    for (Log l : _logs) { l.logStart(name, value); }
-  }
-  
-  public void logStart(String message, String name, Object value) {
-    for (Log l : _logs) { l.logStart(message, name, value); }
-  }
-  
-  public void logStart(String[] names, Object... values) {
-    for (Log l : _logs) { l.logStart(names, values); }
-  }
-  
-  public void logStart(String message, String[] names, Object... values) {
-    for (Log l : _logs) { l.logStart(message, names, values); }
-  }
-  
+
   public void logEnd() {
-    for (Log l : _logs) { l.logEnd(); }
+    _sink.logEnd(new EndMessage(new ThreadSnapshot(), EMPTY, EMPTY));
   }
-  
+
   public void logEnd(String message) {
-    for (Log l : _logs) { l.logEnd(message); }
+    _sink.logEnd(new EndMessage(new ThreadSnapshot(), message, EMPTY, EMPTY));
   }
-  
+
   public void logEnd(String name, Object value) {
-    for (Log l : _logs) { l.logEnd(name, value); }
+    _sink.logEnd(new EndMessage(new ThreadSnapshot(), new String[]{ name }, new Object[]{ value }));
   }
-  
+
   public void logEnd(String message, String name, Object value) {
-    for (Log l : _logs) { l.logEnd(message, name, value); }
+    _sink.logEnd(new EndMessage(new ThreadSnapshot(), message, new String[]{ name }, new Object[]{ value }));
   }
-  
+
   public void logEnd(String[] names, Object... values) {
-    for (Log l : _logs) { l.logEnd(names, values); }
+    _sink.logEnd(new EndMessage(new ThreadSnapshot(), names, values));
   }
-  
+
   public void logEnd(String message, String[] names, Object... values) {
-    for (Log l : _logs) { l.logEnd(message, names, values); }
+    _sink.logEnd(new EndMessage(new ThreadSnapshot(), message, names, values));
   }
-  
+
   public void logStack() {
-    for (Log l : _logs) { l.logStack(); }
+    _sink.logStack(new StackMessage(new ThreadSnapshot()));
   }
-  
+
   public void logStack(String message) {
-    for (Log l : _logs) { l.logStack(message); }
+    _sink.logStack(new StackMessage(new ThreadSnapshot(), message));
   }
-  
+
+  public void logStart() {
+    _sink.logStart(new StartMessage(new ThreadSnapshot(), EMPTY, EMPTY));
+  }
+
+  public void logStart(String message) {
+    _sink.logStart(new StartMessage(new ThreadSnapshot(), message, EMPTY, EMPTY));
+  }
+
+  public void logStart(String name, Object value) {
+    _sink.logStart(new StartMessage(new ThreadSnapshot(), new String[]{ name }, new Object[]{ value }));
+  }
+
+  public void logStart(String message, String name, Object value) {
+    _sink.logStart(new StartMessage(new ThreadSnapshot(), message, new String[]{ name }, new Object[]{ value }));
+  }
+
+  public void logStart(String[] names, Object... values) {
+    _sink.logStart(new StartMessage(new ThreadSnapshot(), names, values));
+  }
+
+  public void logStart(String message, String[] names, Object... values) {
+    _sink.logStart(new StartMessage(new ThreadSnapshot(), message, names, values));
+  }
+
   public void logValue(String name, Object value) {
-    for (Log l : _logs) { l.logValue(name, value); }
+    _sink.log(new StandardMessage(new ThreadSnapshot(), new String[]{ name }, new Object[]{ value }));
   }
-  
+
   public void logValue(String message, String name, Object value) {
-    for (Log l : _logs) { l.logValue(message, name, value); }
+    _sink.log(new StandardMessage(new ThreadSnapshot(), message, new String[]{ name }, new Object[]{ value }));
   }
-  
+
   public void logValues(String[] names, Object... values) {
-    for (Log l : _logs) { l.logValues(names, values); }
+    _sink.log(new StandardMessage(new ThreadSnapshot(), names, values));
   }
-  
+
   public void logValues(String message, String[] names, Object... values) {
-    for (Log l : _logs) { l.logValues(message, names, values); }
+    _sink.log(new StandardMessage(new ThreadSnapshot(), message, names, values));
   }
-  
+
 }

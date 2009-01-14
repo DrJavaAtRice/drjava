@@ -36,17 +36,11 @@ package edu.rice.cs.plt.concurrent;
 
 import java.io.Serializable;
 import java.io.NotSerializableException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.File;
 import java.util.Iterator;
 import java.lang.reflect.InvocationTargetException;
 import junit.framework.TestCase;
 import edu.rice.cs.plt.debug.Stopwatch;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.text.TextUtil;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.WrappedException;
 
@@ -54,7 +48,6 @@ import static edu.rice.cs.plt.concurrent.ConcurrentUtil.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ConcurrentUtilTest extends TestCase {
-//  static { edu.rice.cs.plt.debug.DebugUtil.debug = new edu.rice.cs.plt.debug.FileLog(new java.io.File("debug-log.txt")); }
   
   private static volatile Object _obj; // used to communicate between threads
   
@@ -232,42 +225,5 @@ public class ConcurrentUtilTest extends TestCase {
     }
   }
   
-  
-  public void testRunJavaProcess() throws IOException {
-    String currentCP = System.getProperty("java.class.path");
-    Iterable<File> currentCPFiles = IOUtil.parsePath(currentCP);
-    Process p = runJavaProcess(TestProcess.class.getName(), "a", "b", "c");
-    checkProcessOutput(p, currentCP, System.getProperty("user.dir"), IterUtil.make("a", "b", "c"));
-    
-    Process p2 = runJavaProcess(TestProcess.class.getName(), IterUtil.make("d", "e"),
-                                IterUtil.compose(currentCPFiles, new File("xx")));
-    checkProcessOutput(p2, currentCP + ":xx", System.getProperty("user.dir"), IterUtil.make("d", "e"));
-    
-    Process p3 = runJavaProcess(TestProcess.class.getName(), IterUtil.<String>empty(), File.listRoots()[0]);
-    checkProcessOutput(p3, currentCP, File.listRoots()[0].getPath(), IterUtil.<String>empty());
-  }
-
-  private void checkProcessOutput(Process p, String classPath, String workingDir, Iterable<String> args) 
-    throws IOException {
-    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    try {
-      assertEquals("Test process", in.readLine());
-      Iterable<File> expectedPath = IOUtil.parsePath(classPath);
-      Iterable<File> actualPath = IOUtil.parsePath(in.readLine());
-      assertTrue(IterUtil.containsAll(actualPath, expectedPath));
-      assertEquals(workingDir, in.readLine());
-      assertEquals(IterUtil.toString(args), in.readLine());
-    }
-    finally { in.close(); }
-  }
-  
-  private static final class TestProcess {
-    public static void main(String... args) {
-      System.out.println("Test process");
-      System.out.println(System.getProperty("java.class.path"));
-      System.out.println(IOUtil.attemptAbsoluteFile(new File(""))); // demonstrates working dir
-      System.out.println(IterUtil.asIterable(args));
-    }
-  }
   
 }

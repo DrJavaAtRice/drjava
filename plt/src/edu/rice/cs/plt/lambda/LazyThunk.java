@@ -35,9 +35,16 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.lambda;
 
 /**
- * A thunk providing call-by-need evaluation of the nested Thunk, {@code value}.  The first 
- * invocation of {@link #value()} evaluates the thunk; subsequent invocations return the same 
- * value as returned previously.
+ * <p>A thunk providing call-by-need evaluation of the nested thunk, {@code value}. The first invocation of
+ * {@link #value()} evaluates the thunk; subsequent invocations return the same value as returned previously.
+ * (If an exception occurs during evaluation, no result is cached and the nested thunk will be evaluated again
+ * on a subsequent invocation.)</p>
+ * 
+ * <p>Evaluation is thread-safe: locking guarantees that the nested thunk will never be evaluated (and
+ * terminate normally) twice. Thus, if two threads invoke {@code value()} simultaneously (and a result has not
+ * yet been cached), one will block until the other resolves the nested thunk.</p>
+ * 
+ * @see LazyRunnable
  */
 public class LazyThunk<R> implements Thunk<R> {
 
@@ -50,11 +57,18 @@ public class LazyThunk<R> implements Thunk<R> {
   }
   
   public R value() {
-    if (_thunk != null) {
+    // double-checked locking is generally incorrect without "volatile"; in this case, though,
+    // it works because we're setting a field to "null", not allocating a new object -- in the
+    // worst case, threads don't see the null update and we call resolve() more than necessary
+    if (_thunk != null) { resolve(); }
+    return _val;
+  }
+  
+  private synchronized void resolve() {
+    if (_thunk != null) { // verify that the result is still unresolved now that we have a lock
       _val = _thunk.value();
       _thunk = null;
     }
-    return _val;
   }
   
   public static <R> LazyThunk<R> make(Thunk<R> value) { return new LazyThunk<R>(value); }

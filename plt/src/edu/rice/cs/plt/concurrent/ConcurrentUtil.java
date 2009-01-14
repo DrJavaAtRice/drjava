@@ -34,32 +34,19 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.EOFException;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Properties;
 import java.util.Map;
 import java.util.List;
 import java.util.LinkedList;
 import java.lang.reflect.InvocationTargetException;
-import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.plt.lambda.LazyThunk;
-import edu.rice.cs.plt.lambda.Box;
-import edu.rice.cs.plt.lambda.Runnable1;
-import edu.rice.cs.plt.lambda.LambdaUtil;
-import edu.rice.cs.plt.lambda.WrappedException;
+import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.io.VoidOutputStream;
-import edu.rice.cs.plt.text.TextUtil;
-import edu.rice.cs.plt.reflect.ReflectUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -159,7 +146,7 @@ public final class ConcurrentUtil {
     // invoked by the task thread
     protected void done(R result, Throwable exception) {
       // may occur after a cancel()
-      if (_status != Status.CANCELLED) {
+      if (_status != Status.CANCELED) {
         _result = result;
         _exception = exception;
         _status = Status.FINISHED;
@@ -169,7 +156,7 @@ public final class ConcurrentUtil {
     protected void doStart() { _t.start(); _status = Status.RUNNING; }
     
     protected void doCancel() {
-      _status = Status.CANCELLED;
+      _status = Status.CANCELED;
       _t.interrupt();
       _t = null;
       _result = null;
@@ -288,7 +275,7 @@ public final class ConcurrentUtil {
     
     // Assumes that the task thread will no longer access the controller
     protected void aborting() {
-      _status = Status.CANCELLED;
+      _status = Status.CANCELED;
       _t = null;
       _continueMonitor = null;
       _intermediateResults = null;
@@ -336,142 +323,81 @@ public final class ConcurrentUtil {
     }
     
   }
-  
-  
+
+
   /**
-   * Execute the given task in a separate process, and provide access to its result.  The task and the return 
-   * value must be serializable.  This is a convenience method that sets {@code start} to {@code true}.  Default 
-   * parameters for the process are as documented in {@link #runJavaProcess(String, String[])}.
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and sets {@code start} to {@code true}.</p>
    */
-  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task) {
-    return computeInProcess(task, true);
+  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task) {
+    return computeInProcess(task, JVMBuilder.DEFAULT, true);
+  }
+
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the return
+   * value must be serializable. Typically, the subprocess terminates when the TaskController enters a
+   * finished state. However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT}.</p>
+   * 
+   * @param start If {@code true}, the task will be started before returning; otherwise, the client should
+   *              invoke {@link TaskController#start} on the returned controller.
+   */
+  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, boolean start) {
+    return computeInProcess(task, JVMBuilder.DEFAULT, true);
   }
   
   /**
-   * Execute the given task in a separate process, and provide access to its result.  The task and the return 
-   * value must be serializable.  Default parameters for the process are as documented in 
-   * {@link #runJavaProcess(String, String[])}.
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the return
+   * value must be serializable. Typically, the subprocess terminates when the TaskController enters a
+   * finished state. However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
    * 
-   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
-   *               {@link TaskController#start} on the returned controller.
+   * <p>This is a convenience method that sets {@code start} to {@code true}.</p>
+   * 
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
    */
-  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, boolean start) {
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(new Thunk<Process>() {
-      public Process value() {
-        try { return runJavaProcess(TaskProcess.class.getName()); }
-        catch (IOException e) { throw new WrappedException(e); }
-      }
-    }));
-    if (start) { controller.start(); }
-    return controller;
+  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder) {
+    return computeInProcess(task, jvmBuilder, true);
   }
   
   /**
-   * Execute the given task in a separate process, and provide access to its result.  The task and the return 
-   * value must be serializable.  Default parameters for the process are as documented in 
-   * {@link #runJavaProcess(String, Iterable, Iterable)}.
-   * 
-   * @param classPath  The class path of the new JVM
+   * Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
    */
-  public static <R> TaskController<R>
-    computeInProcess(final Thunk<? extends R> task,final Iterable<? extends File> classPath, boolean start) {
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(new Thunk<Process>() {
-      public Process value() {
-        try { return runJavaProcess(TaskProcess.class.getName(), IterUtil.<String>empty(), classPath); }
-        catch (IOException e) { throw new WrappedException(e); }
-      }
-    }));
-    if (start) { controller.start(); }
-    return controller;
-  }
-  
-  /**
-   * Execute the given task in a separate process, and provide access to its result.  The task and the return 
-   * value must be serializable.  Default parameters for the process are as documented in 
-   * {@link #runJavaProcess(String, Iterable, File)}.
-   * 
-   * @param workingDir  The working directory of the new JVM (interpreted relative to the current JVM's working directory)
-   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
-   *               {@link TaskController#start} on the returned controller.
-   */
-  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, final File workingDir, 
+  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, final JVMBuilder jvmBuilder,
                                                        boolean start) {
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(new Thunk<Process>() {
-      public Process value() {
-        try { return runJavaProcess(TaskProcess.class.getName(), IterUtil.<String>empty(), workingDir); }
-        catch (IOException e) { throw new WrappedException(e); }
-      }
-    }));
+    String mainName = TaskProcess.class.getName();
+    Iterable<String> mainArgs = IterUtil.empty();
+    Thunk<Process> factory = LambdaUtil.bindFirst(LambdaUtil.bindFirst(jvmBuilder, mainName), mainArgs);
+    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(factory));
     if (start) { controller.start(); }
     return controller;
   }
-  
-  /**
-   * Execute the given task in a separate process, and provide access to its result.  The task and the return 
-   * value must be serializable.  Default parameters for the process are as documented in 
-   * {@link #runJavaProcess(String, Iterable, Iterable, File, Properties, Iterable)}.
-   * 
-   * @param workingDir  The working directory of the new JVM (interpreted relative to the current JVM's working directory)
-   * @param properties  Properties to set in the new JVM
-   * @param jvmParams  Additional command-line parameters to pass to the new JVM
-   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
-   *               {@link TaskController#start} on the returned controller.
-   */
-  public static <R> TaskController<R>
-    computeInProcess(final Thunk<? extends R> task, final Iterable<? extends File> classPath, final File workingDir, 
-                     final Properties properties, final Iterable<? extends String> jvmParams, boolean start) {
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(new Thunk<Process>() {
-      public Process value() {
-        try {
-          return runJavaProcess(TaskProcess.class.getName(), IterUtil.<String>empty(), classPath, workingDir, 
-                                properties, jvmParams);
-        }
-        catch (IOException e) { throw new WrappedException(e); }
-      }
-    }));
-    if (start) { controller.start(); }
-    return controller;
-  }
-  
-  /**
-   * Execute the given task in a separate process, and provide access to its result.  The task and the return 
-   * value must be serializable.
-   * 
-   * @param javaCommand  Location of the {@code java} command &mdash; either the executable or a directory locating
-   *                     the executable (the paths {@code ../bin}, {@code bin}, and {@code .} are searched)
-   * @param workingDir  The working directory of the new JVM (interpreted relative to the current JVM's working directory)
-   * @param properties  Properties to set in the new JVM
-   * @param jvmParams  Additional command-line parameters to pass to the new JVM
-   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
-   *               {@link TaskController#start} on the returned controller.
-   */
-  public static <R>
-    TaskController<R> computeInProcess(final Thunk<? extends R> task, final File javaCommand, 
-                                       final Iterable<? extends File> classPath, final File workingDir, 
-                                       final Properties properties, final Iterable<? extends String> jvmParams, 
-                                       boolean start) {
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(new Thunk<Process>() {
-      public Process value() {
-        try {
-          return runJavaProcess(javaCommand, TaskProcess.class.getName(), IterUtil.<String>empty(), classPath,
-                                workingDir, properties, jvmParams);
-        }
-        catch (IOException e) { throw new WrappedException(e); }
-      }
-    }));
-    if (start) { controller.start(); }
-    return controller;
-  }
-  
+   
   // Declared statically to allow cancel to discard the parameters.
   private static class ProcessController<R> extends TaskController<R> {
     private Thunk<? extends R> _task;
-    private Thunk<Process> _process;
+    private LazyThunk<Process> _process;
     private Exception _exception; // allows an exception in doStart() to be stored
     
-    public ProcessController(Thunk<? extends R> task, Thunk<Process> process) {
+    public ProcessController(Thunk<? extends R> task, LazyThunk<Process> process) {
       _task = task;
       _process = process;
       _exception = null;
@@ -492,6 +418,7 @@ public final class ConcurrentUtil {
       }
       
       if (_exception == null) {
+        // The process has started; in the event of any exception, we must destroy the process
         try {
           ObjectOutputStream objOut = new ObjectOutputStream(_process.value().getOutputStream());
           try { objOut.writeObject(_task); }
@@ -502,6 +429,8 @@ public final class ConcurrentUtil {
           _process.value().destroy();
           _status = Status.FINISHED;
         }
+        catch (RuntimeException e) { _process.value().destroy(); throw e; }
+        catch (Error e) { _process.value().destroy(); throw e; }
       }
     }
     
@@ -510,13 +439,14 @@ public final class ConcurrentUtil {
       _task = null;
       _process = null;
       _exception = null;
-      _status = Status.CANCELLED;
+      _status = Status.CANCELED;
     }
     
     protected R getValue() throws Exception {
       start(); // make sure the process is running
       R result = null;
       if (_exception == null) {
+        // The process has started; in the event of any exception, we must destroy the process
         try {
           ObjectInputStream objIn = new ObjectInputStream(_process.value().getInputStream());
           try {
@@ -529,14 +459,17 @@ public final class ConcurrentUtil {
         catch (InterruptedIOException e) {
           _exception = new InterruptedException(e.getMessage());
           _exception.setStackTrace(e.getStackTrace());
+          _process.value().destroy();
         }
         catch (EOFException e) {
           if (processIsTerminated(_process.value())) {
             _exception = new IOException("Unable to run process; class path may need to be adjusted");
           }
-          else { _exception = e; }
+          else { _exception = e; _process.value().destroy(); }
         }
-        catch (IOException e) { _exception = e; }
+        catch (IOException e) { _exception = e; _process.value().destroy(); }
+        catch (RuntimeException e) { _process.value().destroy(); throw e; }
+        catch (Error e) { _process.value().destroy(); throw e; }
       }
       _status = Status.FINISHED;
       if (_exception != null) { throw _exception; }
@@ -554,19 +487,17 @@ public final class ConcurrentUtil {
           Object result = null;
           Exception exception = null;
           
+          IOUtil.replaceSystemOut(VoidOutputStream.INSTANCE);
           try {
-            IOUtil.replaceSystemOut(VoidOutputStream.INSTANCE);
+            ObjectInputStream objIn = new ObjectInputStream(System.in);
             try {
-              ObjectInputStream objIn = new ObjectInputStream(System.in);
-              try {
-                Thunk<?> task = (Thunk<?>) objIn.readObject();
-                try { result = task.value(); }
-                catch (Throwable e) { exception = new InvocationTargetException(e); }
-              }
-              finally { objIn.close(); }
+              Thunk<?> task = (Thunk<?>) objIn.readObject();
+              try { result = task.value(); }
+              catch (Throwable e) { exception = new InvocationTargetException(e); }
             }
-            catch (Exception e) { exception = e; } // problem with objIn
+            finally { objIn.close(); }
           }
+          catch (Exception e) { exception = e; } // problem with objIn
           finally { IOUtil.revertSystemOut(); }
           
           objOut.writeObject(result);
@@ -582,194 +513,57 @@ public final class ConcurrentUtil {
   
   
   /**
-   * Create a new process by invoking the {@code java} command with the specified parameters.  This is a convenience
-   * method providing the following defaults:
-   * <ul>
-   * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is {@link ReflectUtil#SYSTEM_CLASS_PATH}</li>
-   * <li>{@code workingDir} is the {@code user.dir} system property</li>
-   * <li>{@code properties} is empty</li>
-   * <li>{@code jvmParams} is empty</li>
-   * </ul>
-   * 
-   * @param mainClass  Name of the class to run
-   * @param classParams  Parameters to pass to the main class
-   * 
-   * @throws IOException  If the invocation of {@link Runtime#exec(String[], String[], File)} fails.
+   * Export the given RMI object in a new process and return the exported stub.  If any exception occurs,
+   * the process is destroyed.  This convenience method uses {@link JVMBuilder#DEFAULT} to start the new process.
+   * @param factory  A thunk to evaluate in the remote JVM, producing an object that can be exported via
+   *                 {@link UnicastRemoteObject#exportObject(Remote, int)}.  The factory must be serializable.
+   * @return  An RMI proxy that can be cast to the remote interface type of the object returned by
+   *          {@code factory}.  (See {@link Remote} for the definition of "remote interface.")
+   * @throws IOException  If a problem occurs in starting the new process or serializing {@code factory}.
+   * @throws InvocationTargetException  If an exception occurs in {@code factory} or while exporting the result.
+   * @throws InterruptedException  If this thread is interrupted while waiting for the result to be produced.
    */
-  public static Process runJavaProcess(String mainClass, String... classParams) throws IOException {
-    File javaCommand = new File(System.getProperty("java.home", ""));
-    Iterable<File> classPath = ReflectUtil.SYSTEM_CLASS_PATH;
-    File workingDir = new File(System.getProperty("user.dir", ""));
-    Properties properties = new Properties();
-    Iterable<String> jvmParams = IterUtil.empty();
-    return runJavaProcess(javaCommand, mainClass, IterUtil.asIterable(classParams), classPath, workingDir, 
-                          properties, jvmParams);
-  }
-
-  /**
-   * Create a new process by invoking the {@code java} command with the specified parameters.  This is a convenience
-   * method providing the following defaults:
-   * <ul>
-   * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is {@link ReflectUtil#SYSTEM_CLASS_PATH}</li>
-   * <li>{@code workingDir} is the {@code user.dir} system property</li>
-   * <li>{@code properties} is empty</li>
-   * <li>{@code jvmParams} is empty</li>
-   * </ul>
-   * 
-   * @param mainClass  Name of the class to run
-   * @param classParams  Parameters to pass to the main class
-   * 
-   * @throws IOException  If the invocation of {@link Runtime#exec(String[], String[], File)} fails.
-   */
-  public static Process runJavaProcess(String mainClass, Iterable<? extends String> classParams) throws IOException {
-    File javaCommand = new File(System.getProperty("java.home", ""));
-    Iterable<File> classPath = ReflectUtil.SYSTEM_CLASS_PATH;
-    File workingDir = new File(System.getProperty("user.dir", ""));
-    Properties properties = new Properties();
-    Iterable<String> jvmParams = IterUtil.empty();
-    return runJavaProcess(javaCommand, mainClass, classParams, classPath, workingDir, properties, jvmParams);
+  public static Remote exportInProcess(Thunk<? extends Remote> factory)
+      throws InterruptedException, InvocationTargetException, IOException {
+    return exportInProcess(factory, JVMBuilder.DEFAULT);
   }
   
   /**
-   * Create a new process by invoking the {@code java} command with the specified parameters.  This is a convenience
-   * method providing the following defaults:
-   * <ul>
-   * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code workingDir} is the {@code user.dir} system property</li>
-   * <li>{@code properties} is empty</li>
-   * <li>{@code jvmParams} is empty</li>
-   * </ul>
-   * 
-   * @param mainClass  Name of the class to run
-   * @param classParams  Parameters to pass to the main class
-   * @param classPath  The class path of the new JVM (interpreted relative to {@code workingDir})
-   * 
-   * @throws IOException  If the invocation of {@link Runtime#exec(String[], String[], File)} fails.
+   * Export the given RMI object in a new process and return the exported stub.  If any exception occurs,
+   * the process is destroyed.
+   * @param factory  A thunk to evaluate in the remote JVM, producing an object that can be exported via
+   *                 {@link UnicastRemoteObject#exportObject(Remote, int)}.  The factory must be serializable.
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the factory's class, ConcurrentUtil, and their dependencies.
+   * @return  An RMI proxy that can be cast to the remote interface type of the object returned by
+   *          {@code factory}.  (See {@link Remote} for the definition of "remote interface.")
+   * @throws IOException  If a problem occurs in starting the new process or serializing {@code factory}.
+   * @throws InvocationTargetException  If an exception occurs in {@code factory} or while exporting the result.
+   * @throws InterruptedException  If this thread is interrupted while waiting for the result to be produced.
    */
-  public static Process runJavaProcess(String mainClass, Iterable<? extends String> classParams, 
-                                       Iterable<? extends File> classPath) throws IOException {
-    File javaCommand = new File(System.getProperty("java.home", ""));
-    File workingDir = new File(System.getProperty("user.dir", ""));
-    Properties properties = new Properties();
-    Iterable<String> jvmParams = IterUtil.empty();
-    return runJavaProcess(javaCommand, mainClass, classParams, classPath, workingDir, properties, jvmParams);
-  }
-  
-  /**
-   * Create a new process by invoking the {@code java} command with the specified parameters.  This is a convenience
-   * method providing the following defaults:
-   * <ul>
-   * <li>{@code javaCommand} is the {@code java.home} system property</li>
-   * <li>{@code classPath} is {@link ReflectUtil#SYSTEM_CLASS_PATH}, converted to an absolute form</li>
-   * <li>{@code properties} is empty</li>
-   * <li>{@code jvmParams} is empty</li>
-   * </ul>
-   * 
-   * @param mainClass  Name of the class to run
-   * @param classParams  Parameters to pass to the main class
-   * @param workingDir  The working directory of the new JVM (interpreted relative to the current JVM's working 
-   *                    directory)
-   * 
-   * @throws IOException  If the invocation of {@link Runtime#exec(String[], String[], File)} fails.
-   */
-  public static Process runJavaProcess(String mainClass, Iterable<? extends String> classParams, File workingDir) 
-    throws IOException {
-    File javaCommand = new File(System.getProperty("java.home", ""));
-    Iterable<File> classPath = IOUtil.attemptAbsoluteFiles(ReflectUtil.SYSTEM_CLASS_PATH);
-    Properties properties = new Properties();
-    Iterable<String> jvmParams = IterUtil.empty();
-    return runJavaProcess(javaCommand, mainClass, classParams, classPath, workingDir, properties, jvmParams);
-  }
-  
-  
-  /**
-   * Create a new process by invoking the {@code java} command with the specified parameters.  This is a convenience
-   * method that uses the {@code java.home} system property as {@code javaCommand}.
-   * 
-   * @param mainClass  Name of the class to run
-   * @param classParams  Parameters to pass to the main class
-   * @param classPath  The class path of the new JVM (interpreted relative to {@code workingDir})
-   * @param workingDir  The working directory of the new JVM (interpreted relative to the current JVM's working 
-   *                    directory)
-   * @param properties  Properties to set in the new JVM
-   * @param jvmParams  Additional command-line parameters to pass to the new JVM
-   * 
-   * @throws IOException  If the invocation of {@link Runtime#exec(String[], String[], File)} fails.
-   */
-  public static Process runJavaProcess(String mainClass, Iterable<? extends String> classParams, 
-                                       Iterable<? extends File> classPath, File workingDir,
-                                       Properties properties, Iterable<? extends String> jvmParams) 
-    throws IOException {
-    File javaCommand = new File(System.getProperty("java.home", ""));
-    return runJavaProcess(javaCommand, mainClass, classParams, classPath, workingDir, properties, jvmParams);
-  }
-  
-  /**
-   * Create a new process by invoking the {@code java} command with the specified parameters.
-   * 
-   * @param javaCommand  Location of the {@code java} command &mdash; either the executable or a directory locating
-   *                     the executable (the paths {@code ../bin}, {@code bin}, and {@code .} are searched)
-   * @param mainClass  Class to run
-   * @param classParams  Parameters to pass to the main class
-   * @param classPath  The class path of the new JVM (interpreted relative to {@code workingDir})
-   * @param workingDir  The working directory of the new JVM (interpreted relative to the current JVM's working 
-   *                    directory)
-   * @param properties  Properties to set in the new JVM
-   * @param jvmParams  Additional command-line parameters to pass to the new JVM
-   * 
-   * @throws IOException  If the invocation of {@link Runtime#exec(String[], String[], File)} fails.
-   */
-  public static Process runJavaProcess(File javaCommand, String mainClass, Iterable<? extends String> classParams, 
-                                       Iterable<? extends File> classPath, File workingDir,
-                                       Properties properties, Iterable<? extends String> jvmParams) 
-    throws IOException {
-    List<String> propArgs = new LinkedList<String>();
-    for (Map.Entry<Object, Object> prop : properties.entrySet()) {
-      propArgs.add("-D" + prop.getKey() + "=" + prop.getValue());
-    }
-    
-    Iterable<String> args = IterUtil.singleton(_findJavaExecutable(javaCommand));
-    args = IterUtil.compose(args, IterUtil.make("-classpath", IOUtil.pathToString(classPath)));
-    args = IterUtil.compose(args, propArgs);
-    args = IterUtil.compose(args, jvmParams);
-    args = IterUtil.compose(args, IterUtil.compose(mainClass, classParams));
-    
-    return Runtime.getRuntime().exec(IterUtil.toArray(args, String.class), null, workingDir);
-  }
-
-  /** Find the java executable command.  (This logic originally came from Ant.) */
-  private static String _findJavaExecutable(File f) {
-    if (IOUtil.attemptIsFile(f)) { return f.getPath(); }
-    else {
-      f = IOUtil.attemptAbsoluteFile(f);
-      String os = System.getProperty("os.name", "");
-      File[] candidates = new File[]{ new File(f, "../bin"), new File(f, "bin"), f };
-      
-      if (TextUtil.containsIgnoreCase(os, "netware")) {
-        return "java"; // based on comments from Ant's code
-      }
-      else if (TextUtil.containsIgnoreCase(os, "windows")) {
-        for (File dir : candidates) {
-          File result = new File(dir, "javaw.exe");
-          if (IOUtil.attemptExists(result)) { return result.getPath(); }
-          result = new File(dir, "java.exe");
-          if (IOUtil.attemptExists(result)) { return result.getPath(); }
-        }
-      }
-      else {
-        for (File dir : candidates) {
-          File result = new File(dir, "java");
-          if (IOUtil.attemptExists(result)) { return result.getPath(); }
-        }
-      }
-      
-      // If nothing works, use the system path
-      return "java";
+  public static Remote exportInProcess(Thunk<? extends Remote> factory, JVMBuilder jvmBuilder)
+      throws InterruptedException, InvocationTargetException, IOException {
+    try { return computeInProcess(new ExportRemoteTask(factory), jvmBuilder).value(); }
+    catch (WrappedException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof InterruptedException) { throw (InterruptedException) cause; }
+      else if (cause instanceof InvocationTargetException) { throw (InvocationTargetException) cause; }
+      else if (cause instanceof IOException) { throw (IOException) cause; }
+      else { throw e; }
     }
   }
   
+  private static class ExportRemoteTask implements Thunk<Remote>, Serializable {
+    private final Thunk<? extends Remote> _factory;
+    public ExportRemoteTask(Thunk<? extends Remote> factory) { _factory = factory; }
+    public Remote value() {
+      Remote server = _factory.value();
+      try { return UnicastRemoteObject.exportObject(server, 0); }
+      catch (RemoteException e) { throw new WrappedException(e); }
+    }
+  }
+
+
   /** Test whether the given process has terminated. */
   public static boolean processIsTerminated(Process p) {
     try { p.exitValue(); return true; }
@@ -780,7 +574,7 @@ public final class ConcurrentUtil {
    * Create two threads to continually discard the contents of the given process's output and error streams.
    * If, instead, the streams are simply ignored, the system buffers may fill up, causing the process to block (see 
    * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
-   * approximately 4 Kb).
+   * approximately 4 KB).
    */
   public static void discardProcessOutput(Process p) {
     copyProcessOut(p, VoidOutputStream.INSTANCE);
@@ -801,16 +595,16 @@ public final class ConcurrentUtil {
    * Create a thread that will continually discard the contents of the given process's standard output.
    * If, instead, the stream is simply ignored, the system buffer may fill up, causing the process to block (see 
    * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
-   * approximately 4 Kb).
+   * approximately 4 KB).
    */
   public static void discardProcessOut(Process p) { copyProcessOut(p, VoidOutputStream.INSTANCE); }
   
   /**
    * Create a thread that will continually copy the contents of the given process's standard output to another
-   * output stream.  This is a convenience method that sets {@code closeStream} to {@code false}.
+   * output stream.  This is a convenience method that sets {@code close} to {@code true}.
    * @return  The thread performing the copy operation, already started.
    */
-  public static Thread copyProcessOut(Process p, OutputStream out) { return copyProcessOut(p, out, false); }
+  public static Thread copyProcessOut(Process p, OutputStream out) { return copyProcessOut(p, out, true); }
   
   /**
    * Create a thread that will continually copy the contents of the given process's standard output to another
@@ -838,13 +632,13 @@ public final class ConcurrentUtil {
    * Create a thread that will continually discard the contents of the given process's standard output.
    * If, instead, the stream is simply ignored, the system buffer may fill up, causing the process to block (see 
    * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
-   * approximately 4 Kb).
+   * approximately 4 KB).
    */
   public static void discardProcessErr(Process p) { copyProcessErr(p, VoidOutputStream.INSTANCE); }
   
   /**
    * Create a thread that will continually copy the contents of the given process's error output to another
-   * output stream.  This is a convenience method that sets {@code closeStream} to {@code false}.
+   * output stream.  This is a convenience method that sets {@code close} to {@code false}.
    * @return  The thread performing the copy operation, already started.
    */
   public static Thread copyProcessErr(Process p, OutputStream err) { return copyProcessErr(p, err, false); }
@@ -871,7 +665,7 @@ public final class ConcurrentUtil {
     return computeInThread(new StreamToString(p.getErrorStream()));
   }
   
-  /** Shared code for copying and closing a stream */
+  /** Shared code for copying and closing a stream. */
   private static final class CopyStream implements Runnable, Serializable {
     private final InputStream _in;
     private final OutputStream _out;
@@ -886,7 +680,7 @@ public final class ConcurrentUtil {
     }
   }
 
-  /** Shared code for reading a stream as a string */
+  /** Shared code for reading a stream as a string. */
   private static final class StreamToString implements Thunk<String> {
     private final InputStream _stream;
     public StreamToString(InputStream stream) { _stream = stream; }

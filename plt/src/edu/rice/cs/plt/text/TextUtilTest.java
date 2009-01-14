@@ -34,6 +34,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.text;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 import edu.rice.cs.plt.iter.IterUtil;
 
@@ -116,6 +119,47 @@ public class TextUtilTest extends TestCase {
     assertEquals("", removePrefix("pre:", ':'));
     assertEquals("", suffix("pre:", ':'));
     assertEquals("pre", removeSuffix("pre:", ':'));
+  }
+  
+  public void testSplit() {
+    assertSplitString(split("abc", "\\$"), "abc");
+    
+    assertSplitString(split("a$b$c", "\\$"), "a", "$", "b", "$", "c");
+    assertSplitString(split("a$b$c", "\\$", 0), "a", "$", "b", "$", "c");
+    assertSplitString(split("a$b$c", "\\$", 1), "a$b$c");
+    assertSplitString(split("a$b$c", "\\$", 2), "a", "$", "b$c");
+    assertSplitString(split("a$b$c", "\\$", 3), "a", "$", "b", "$", "c");
+    assertSplitString(split("a$b$c", "\\$", 4), "a", "$", "b", "$", "c");
+    
+    assertSplitString(split("a$(b$c)$d", "\\$"), "a", "$", "(b", "$", "c)", "$", "d");
+    assertSplitString(splitWithParens("a$(b$c)$d", "\\$"), "a", "$", "(b$c)", "$", "d");
+    assertSplitString(splitWithParens("a$(b$c)$d", "\\$", 0), "a", "$", "(b$c)", "$", "d");
+    assertSplitString(splitWithParens("a$(b$c)$d", "\\$", 1), "a$(b$c)$d");
+    assertSplitString(splitWithParens("a$(b$c)$d", "\\$", 2), "a", "$", "(b$c)$d");
+    assertSplitString(splitWithParens("a$(b$c)$d", "\\$", 3), "a", "$", "(b$c)", "$", "d");
+    assertSplitString(splitWithParens("a$(b$c)$d", "\\$", 4), "a", "$", "(b$c)", "$", "d");
+
+    assertSplitString(split("a$((b$c)$d)$e", "\\$"), "a", "$", "((b", "$", "c)", "$", "d)", "$", "e");
+    assertSplitString(splitWithParens("a$((b$c)$d)$e", "\\$"), "a", "$", "((b$c)$d)", "$", "e");
+    assertSplitString(splitWithParens("a$((b$c)$d)$e", "\\$", 0), "a", "$", "((b$c)$d)", "$", "e");
+    assertSplitString(splitWithParens("a$((b$c)$d)$e", "\\$", 1), "a$((b$c)$d)$e");
+    assertSplitString(splitWithParens("a$((b$c)$d)$e", "\\$", 2), "a", "$", "((b$c)$d)$e");
+    assertSplitString(splitWithParens("a$((b$c)$d)$e", "\\$", 3), "a", "$", "((b$c)$d)", "$", "e");
+    assertSplitString(splitWithParens("a$((b$c)$d)$e", "\\$", 4), "a", "$", "((b$c)$d)", "$", "e");
+    
+    // TODO: use multiple brackets, nontrivial delimiters/brackets
+  }
+  
+  private void assertSplitString(SplitString result, String... expected) {
+    List<String> splits = new ArrayList<String>();
+    List<String> delims = new ArrayList<String>();
+    for (int i = 0; i < expected.length - 1; i++) {
+      ((i%2 == 0) ? splits : delims).add(expected[i]);
+    }
+    String rest = expected[expected.length-1];
+    assertEquals(splits, result.splits());
+    assertEquals(delims, result.delimiters());
+    assertEquals(rest, result.rest());
   }
   
 }

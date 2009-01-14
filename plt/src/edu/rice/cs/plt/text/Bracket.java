@@ -32,43 +32,35 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.tuple;
+package edu.rice.cs.plt.text;
 
-/**
- * An empty tuple.  There is only one accessible instance, the {@code INSTANCE} singleton, which has
- * arbitrarily-chosen type argument {@code Void} ({@code Option<null>} would make more sense, but is 
- * not expressible).  Clients needing a specific kind of {@code Null} can perform an unsafe cast on 
- * the singleton to produce the desired type (this is done in {@link Null#make}).
- */
-public final class Null<T> extends Option<T> {
+import java.util.regex.Pattern;
+
+public class Bracket {
+  private final Pattern _left;
+  private final Pattern _right;
+  private final boolean _nests;
   
-  /** Forces access through the singleton */
-  private Null() {}
-  
-  /** A singleton null tuple */
-  public static final Null<Void> INSTANCE = new Null<Void>();
-  
-  /** Invokes {@code visitor.forNone()} */
-  public <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor) {
-    return visitor.forNone();
+  public Bracket(String leftRegex, String rightRegex, boolean nests) {
+    _left = Pattern.compile(leftRegex); _right = Pattern.compile(rightRegex); _nests = nests;
   }
   
-  public boolean isSome() { return false; }
+  public Pattern left() { return _left; }
+  public Pattern right() { return _right; }
+  public boolean nests() { return _nests; }
   
-  public T unwrap() { throw new OptionUnwrapException(); }
+  public static Bracket literal(String leftLiteral, String rightLiteral, boolean nests) {
+    return new Bracket(Pattern.quote(leftLiteral), Pattern.quote(rightLiteral), nests);
+  }
   
-  public T unwrap(T forNone) { return forNone; }
-  
-  /** Produces {@code "()"} */
-  public String toString() { return "()"; }
-  
-  /** Defined in terms of identity (since the singleton is the only accessible instance) */
-  public boolean equals(Object o) { return this == o; }
-  
-  /** Defined in terms of identity (since the singleton is the only accessible instance) */
-  protected int generateHashCode() { return System.identityHashCode(this); }
-  
-  /** Return a singleton, cast to the appropriate type. */
-  @SuppressWarnings("unchecked")
-  public static <T> Null<T> make() { return (Null<T>) INSTANCE; }
-}  
+  public static final Bracket PARENTHESES = literal("(", ")", true);
+  public static final Bracket SQUARE_BRACKETS = literal("[", "]", true);
+  public static final Bracket BRACES = literal("{", "}", true);
+  public static final Bracket ANGLE_BRACKETS = literal("<", ">", true);
+  public static final Bracket QUOTES = literal("\"", "\"", false);
+  public static final Bracket APOSTROPHES = literal("'", "'", false);
+  public static final Bracket C_LINE_COMMENT = new Bracket("//", TextUtil.NEWLINE_PATTERN, false);
+  public static final Bracket PERL_LINE_COMMENT = new Bracket("#", TextUtil.NEWLINE_PATTERN, false);
+  public static final Bracket C_BLOCK_COMMENT = literal("/*", "*/", false);
+  public static final Bracket ML_BLOCK_COMMENT = literal("(*", "*)", true);
+}

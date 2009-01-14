@@ -462,10 +462,6 @@ public final class IterUtil {
     return new ImmutableIterator<T>(iter);
   }
     
-  // varargs doesn't work for make() for two reasons.  First, it doesn't support non-reifiable types for
-  // T.  Second, it can't guarantee that there is no external reference to the array, thus potentially
-  // violating the assertion that the result is immutable.
-  
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make() {
     @SuppressWarnings("unchecked") EmptyIterable<T> result = (EmptyIterable<T>) EmptyIterable.INSTANCE;
@@ -531,6 +527,34 @@ public final class IterUtil {
     return new ObjectArrayWrapper<T>(values, false);
   }
   
+  /**
+   * Create an immutable SizedIterable containing the given values.  Requires linear time to make a copy
+   * (necessary because {@code vals} can be mutated by the caller).  Note that restrictions on array
+   * creation may lead to errors or warnings at the invocation site where {@code T} is a non-reifiable type.
+   */
+  public static <T> SizedIterable<T> make(T... vals) {
+    return snapshot(new ObjectArrayWrapper<T>(vals));
+  }
+
+  /**
+   * Create an immutable SizedIterable containing the given values, from index {@code start} through the end
+   * of the array. Requires linear time to make a copy (necessary because {@code vals} can be mutated by the
+   * caller).
+   */
+  public static <T> SizedIterable<T> make(T[] vals, int start) {
+    return snapshot(new ObjectArrayWrapper<T>(vals, start));
+  }
+
+  /**
+   * Create an immutable SizedIterable containing the given values, from array index {@code start} through
+   * {@code end-1}, inclusive (the size of the result is {@code end-start}). Requires linear time to make a
+   * copy (necessary because {@code vals} can be mutated by the caller).
+   */
+  public static <T> SizedIterable<T> make(T[] vals, int start, int end) {
+    return snapshot(new ObjectArrayWrapper<T>(vals, start, end));
+  }
+
+  
   /** Create an infinite sequence defined by an initial value and a successor function. */
   public static <T> SequenceIterable<T> infiniteSequence(T initial, Lambda<? super T, ? extends T> successor) {
     return new SequenceIterable<T>(initial, successor);
@@ -558,29 +582,76 @@ public final class IterUtil {
   
   /**
    * Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
-   * result.  (If that is not the desired behavior, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * result.  (If that is not the desired behavior, make a copy instead with {@link #make(Object[])}.)
    */
   public static <T> SizedIterable<T> asIterable(T... array) {
     return new ObjectArrayWrapper<T>(array);
   }
   
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, make a copy instead with {@link #make(Object[], int)}.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static <T> SizedIterable<T> arraySegment(T[] array, int start) {
+    return new ObjectArrayWrapper<T>(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, make a copy instead with 
+   * {@link #make(Object[], int, int)}.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static <T> SizedIterable<T> arraySegment(T[] array, int start, int end) {
+    return new ObjectArrayWrapper<T>(array, start, end);
+  }
+  
   private static final class ObjectArrayWrapper<T> extends AbstractIterable<T> 
       implements SizedIterable<T>, OptimizedLastIterable<T>, Serializable {
     private final T[] _array;
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
     private final boolean _refs; // whether there may be other references to _array (allowing mutation)
-    public ObjectArrayWrapper(T[] array) { _array = array; _refs = true; }
-    public ObjectArrayWrapper(T[] array, boolean refs) { _array = array; _refs = refs; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+
+    public ObjectArrayWrapper(T[] array) { this(array, 0, array.length, true); }
+    
+    public ObjectArrayWrapper(T[] array, int start) {
+      this(array, start, array.length, true);
+      if (_start < 0 || _start > _end) { throw new IndexOutOfBoundsException(); }
+    }
+    
+    public ObjectArrayWrapper(T[] array, int start, int end) {
+      this(array, start, end, true);
+      if (_start < 0 || _start > _end || _end > _array.length) { throw new IndexOutOfBoundsException(); }
+    }
+    
+    public ObjectArrayWrapper(T[] array, boolean refs) { this(array, 0, array.length, refs); }
+    
+    public ObjectArrayWrapper(T[] array, int start, int end, boolean refs) {
+      _array = array;
+      _start = start;
+      _end = end;
+      _refs = refs;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return !_refs; }
-    public T last() { return _array[_array.length-1]; }
+    public T last() { return _array[_end-1]; }
+    
     public Iterator<T> iterator() {
       return new IndexedIterator<T>() {
-        protected int size() { return _array.length; }
-        protected T get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected T get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -589,25 +660,60 @@ public final class IterUtil {
    * Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
    * result.  (If that is not the desired behavior, {@link #snapshot(Iterable)} may be invoked on the result.)
    */
-  public static SizedIterable<Boolean> asIterable(boolean[] values) {
-    return new BooleanArrayWrapper(values);
+  public static SizedIterable<Boolean> asIterable(boolean[] array) {
+    return new BooleanArrayWrapper(array);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Boolean> arraySegment(boolean[] array, int start) {
+    return new BooleanArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Boolean> arraySegment(boolean[] array, int start, int end) {
+    return new BooleanArrayWrapper(array, start, end);
   }
   
   private static final class BooleanArrayWrapper extends AbstractIterable<Boolean> 
       implements SizedIterable<Boolean>, OptimizedLastIterable<Boolean>, Serializable {
     private final boolean[] _array;
-    public BooleanArrayWrapper(boolean[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public BooleanArrayWrapper(boolean[] array) { _array = array; _start = 0; _end = _array.length; }
+    public BooleanArrayWrapper(boolean[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public BooleanArrayWrapper(boolean[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Boolean last() { return _array[_array.length-1]; }
+    public Boolean last() { return _array[_end-1]; }
     public Iterator<Boolean> iterator() {
       return new IndexedIterator<Boolean>() {
-        protected int size() { return _array.length; }
-        protected Boolean get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Boolean get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -616,25 +722,60 @@ public final class IterUtil {
    * Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
    * result.  (If that is not the desired behavior, {@link #snapshot(Iterable)} may be invoked on the result.)
    */
-  public static SizedIterable<Character> asIterable(char[] values) {
-    return new CharArrayWrapper(values);
+  public static SizedIterable<Character> asIterable(char[] array) {
+    return new CharArrayWrapper(array);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Character> arraySegment(char[] array, int start) {
+    return new CharArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Character> arraySegment(char[] array, int start, int end) {
+    return new CharArrayWrapper(array, start, end);
   }
   
   private static final class CharArrayWrapper extends AbstractIterable<Character> 
       implements SizedIterable<Character>, OptimizedLastIterable<Character>, Serializable {
     private final char[] _array;
-    public CharArrayWrapper(char[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public CharArrayWrapper(char[] array) { _array = array; _start = 0; _end = _array.length; }
+    public CharArrayWrapper(char[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public CharArrayWrapper(char[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Character last() { return _array[_array.length-1]; }
+    public Character last() { return _array[_end-1]; }
     public Iterator<Character> iterator() {
       return new IndexedIterator<Character>() {
-        protected int size() { return _array.length; }
-        protected Character get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Character get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -646,22 +787,56 @@ public final class IterUtil {
   public static SizedIterable<Byte> asIterable(byte[] values) {
     return new ByteArrayWrapper(values);
   }
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Byte> arraySegment(byte[] array, int start) {
+    return new ByteArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Byte> arraySegment(byte[] array, int start, int end) {
+    return new ByteArrayWrapper(array, start, end);
+  }
   
   private static final class ByteArrayWrapper extends AbstractIterable<Byte> 
       implements SizedIterable<Byte>, OptimizedLastIterable<Byte>, Serializable {
     private final byte[] _array;
-    public ByteArrayWrapper(byte[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public ByteArrayWrapper(byte[] array) { _array = array; _start = 0; _end = _array.length; }
+    public ByteArrayWrapper(byte[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public ByteArrayWrapper(byte[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Byte last() { return _array[_array.length-1]; }
+    public Byte last() { return _array[_end-1]; }
     public Iterator<Byte> iterator() {
       return new IndexedIterator<Byte>() {
-        protected int size() { return _array.length; }
-        protected Byte get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Byte get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -673,22 +848,56 @@ public final class IterUtil {
   public static SizedIterable<Short> asIterable(short[] values) {
     return new ShortArrayWrapper(values);
   }
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Short> arraySegment(short[] array, int start) {
+    return new ShortArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Short> arraySegment(short[] array, int start, int end) {
+    return new ShortArrayWrapper(array, start, end);
+  }
   
   private static final class ShortArrayWrapper extends AbstractIterable<Short> 
       implements SizedIterable<Short>, OptimizedLastIterable<Short>, Serializable {
     private final short[] _array;
-    public ShortArrayWrapper(short[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public ShortArrayWrapper(short[] array) { _array = array; _start = 0; _end = _array.length; }
+    public ShortArrayWrapper(short[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public ShortArrayWrapper(short[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Short last() { return _array[_array.length-1]; }
+    public Short last() { return _array[_end-1]; }
     public Iterator<Short> iterator() {
       return new IndexedIterator<Short>() {
-        protected int size() { return _array.length; }
-        protected Short get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Short get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -701,21 +910,56 @@ public final class IterUtil {
     return new IntArrayWrapper(values);
   }
   
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Integer> arraySegment(int[] array, int start) {
+    return new IntArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Integer> arraySegment(int[] array, int start, int end) {
+    return new IntArrayWrapper(array, start, end);
+  }
+  
   private static final class IntArrayWrapper extends AbstractIterable<Integer> 
       implements SizedIterable<Integer>, OptimizedLastIterable<Integer>, Serializable {
     private final int[] _array;
-    public IntArrayWrapper(int[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public IntArrayWrapper(int[] array) { _array = array; _start = 0; _end = _array.length; }
+    public IntArrayWrapper(int[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public IntArrayWrapper(int[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Integer last() { return _array[_array.length-1]; }
+    public Integer last() { return _array[_end-1]; }
     public Iterator<Integer> iterator() {
       return new IndexedIterator<Integer>() {
-        protected int size() { return _array.length; }
-        protected Integer get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Integer get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -728,21 +972,56 @@ public final class IterUtil {
     return new LongArrayWrapper(values);
   }
   
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Long> arraySegment(long[] array, int start) {
+    return new LongArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Long> arraySegment(long[] array, int start, int end) {
+    return new LongArrayWrapper(array, start, end);
+  }
+  
   private static final class LongArrayWrapper extends AbstractIterable<Long> 
       implements SizedIterable<Long>, OptimizedLastIterable<Long>, Serializable {
     private final long[] _array;
-    public LongArrayWrapper(long[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public LongArrayWrapper(long[] array) { _array = array; _start = 0; _end = _array.length; }
+    public LongArrayWrapper(long[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public LongArrayWrapper(long[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Long last() { return _array[_array.length-1]; }
+    public Long last() { return _array[_end-1]; }
     public Iterator<Long> iterator() {
       return new IndexedIterator<Long>() {
-        protected int size() { return _array.length; }
-        protected Long get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Long get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -755,21 +1034,56 @@ public final class IterUtil {
     return new FloatArrayWrapper(values);
   }
   
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Float> arraySegment(float[] array, int start) {
+    return new FloatArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Float> arraySegment(float[] array, int start, int end) {
+    return new FloatArrayWrapper(array, start, end);
+  }
+  
   private static final class FloatArrayWrapper extends AbstractIterable<Float> 
       implements SizedIterable<Float>, OptimizedLastIterable<Float>, Serializable {
     private final float[] _array;
-    public FloatArrayWrapper(float[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public FloatArrayWrapper(float[] array) { _array = array; _start = 0; _end = _array.length; }
+    public FloatArrayWrapper(float[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public FloatArrayWrapper(float[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Float last() { return _array[_array.length-1]; }
+    public Float last() { return _array[_end-1]; }
     public Iterator<Float> iterator() {
       return new IndexedIterator<Float>() {
-        protected int size() { return _array.length; }
-        protected Float get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Float get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -782,21 +1096,56 @@ public final class IterUtil {
     return new DoubleArrayWrapper(values);
   }
   
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+   * and potential memory leaks, {@link #snapshot(Iterable)} may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+   */
+  public static SizedIterable<Double> arraySegment(double[] array, int start) {
+    return new DoubleArrayWrapper(array, start);
+  }
+  
+  /**
+   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through 
+   * {@code end-1} are included (and the size is thus {@code end-start}).  Subsequent changes to the array
+   * will be reflected in the result; also note that entire array will remain in memory until references to 
+   * this segment are discarded.  (To prevent mutation and potential memory leaks, {@link #snapshot(Iterable)}
+   * may be invoked on the result.)
+   * @throws IndexOutOfBoundsException  If {@code start} and {@code end} are inconsistent with each other or
+   *                                    with the length of the array.
+   */
+  public static SizedIterable<Double> arraySegment(double[] array, int start, int end) {
+    return new DoubleArrayWrapper(array, start, end);
+  }
+  
   private static final class DoubleArrayWrapper extends AbstractIterable<Double> 
       implements SizedIterable<Double>, OptimizedLastIterable<Double>, Serializable {
     private final double[] _array;
-    public DoubleArrayWrapper(double[] array) { _array = array; }
-    public boolean isEmpty() { return _array.length == 0; }
-    public int size() { return _array.length; }
-    public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    private final int _start; // start index
+    private final int _end; // 1 + the last index
+    public DoubleArrayWrapper(double[] array) { _array = array; _start = 0; _end = _array.length; }
+    public DoubleArrayWrapper(double[] array, int start) {
+      if (start < 0 || start > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = array.length;
+    }
+    public DoubleArrayWrapper(double[] array, int start, int end) {
+      if (start < 0 || start > end || end > array.length) { throw new IndexOutOfBoundsException(); }
+      _array = array; _start = start; _end = end;
+    }
+    
+    public boolean isEmpty() { return _start == _end; }
+    public int size() { return _end-_start; }
+    public int size(int bound) { int result = _end-_start; return result <= bound ? result : bound; }
     public boolean isInfinite() { return false; }
     public boolean hasFixedSize() { return true; }
     public boolean isStatic() { return false; }
-    public Double last() { return _array[_array.length-1]; }
+    public Double last() { return _array[_end-1]; }
     public Iterator<Double> iterator() {
       return new IndexedIterator<Double>() {
-        protected int size() { return _array.length; }
-        protected Double get(int i) { return _array[i]; }
+        protected int size() { return _end-_start; }
+        protected Double get(int i) { return _array[_start+i]; }
       };
     }
   }
@@ -1694,7 +2043,7 @@ public final class IterUtil {
   
   
   /** Lazily create an iterable containing the values of the given thunks. */
-  public static <R> Iterable<R> valuesOf(Iterable<? extends Thunk<? extends R>> iter) {
+  public static <R> SizedIterable<R> valuesOf(Iterable<? extends Thunk<? extends R>> iter) {
     return new MappedIterable<Thunk<? extends R>, R>(iter, LambdaUtil.<R>thunkValueLambda());
   }
   
@@ -1705,7 +2054,7 @@ public final class IterUtil {
   }
     
   /** Lazily create an iterable containing the values of the application of the given lambdas. */
-  public static <T1, T2, R> Iterable<R> 
+  public static <T1, T2, R> SizedIterable<R> 
     valuesOf(Iterable<? extends Lambda2<? super T1, ? super T2, ? extends R>> iter, T1 arg1, T2 arg2) {
     Lambda<Lambda2<? super T1, ? super T2, ? extends R>, R> l = 
       LambdaUtil.bindSecond(LambdaUtil.bindThird(LambdaUtil.<T1, T2, R>binaryApplicationLambda(), arg2), arg1);
@@ -1713,7 +2062,7 @@ public final class IterUtil {
   }
   
   /** Lazily create an iterable containing the values of the application of the given lambdas. */
-  public static <T1, T2, T3, R> Iterable<R>
+  public static <T1, T2, T3, R> SizedIterable<R>
     valuesOf(Iterable<? extends Lambda3<? super T1, ? super T2, ? super T3, ? extends R>> iter, 
              T1 arg1, T2 arg2, T3 arg3) {
     Lambda<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, R> l = 
@@ -1724,47 +2073,47 @@ public final class IterUtil {
   
 
   /** Lazily create an iterable containing the first values of the given tuples. */
-  public static <T> Iterable<T> pairFirsts(Iterable<? extends Pair<? extends T, ?>> iter) {
+  public static <T> SizedIterable<T> pairFirsts(Iterable<? extends Pair<? extends T, ?>> iter) {
     return new MappedIterable<Pair<? extends T, ?>, T>(iter, Pair.<T>firstGetter());
   }
   
   /** Lazily create an iterable containing the second values of the given tuples. */
-  public static <T> Iterable<T> pairSeconds(Iterable<? extends Pair<?, ? extends T>> iter) {
+  public static <T> SizedIterable<T> pairSeconds(Iterable<? extends Pair<?, ? extends T>> iter) {
     return new MappedIterable<Pair<?, ? extends T>, T>(iter, Pair.<T>secondGetter());
   }
   
   /** Lazily create an iterable containing the first values of the given tuples. */
-  public static <T> Iterable<T> tripleFirsts(Iterable<? extends Triple<? extends T, ?, ?>> iter) {
+  public static <T> SizedIterable<T> tripleFirsts(Iterable<? extends Triple<? extends T, ?, ?>> iter) {
     return new MappedIterable<Triple<? extends T, ?, ?>, T>(iter, Triple.<T>firstGetter());
   }
   
   /** Lazily create an iterable containing the second values of the given tuples. */
-  public static <T> Iterable<T> tripleSeconds(Iterable<? extends Triple<?, ? extends T, ?>> iter) {
+  public static <T> SizedIterable<T> tripleSeconds(Iterable<? extends Triple<?, ? extends T, ?>> iter) {
     return new MappedIterable<Triple<?, ? extends T, ?>, T>(iter, Triple.<T>secondGetter());
   }
   
   /** Lazily create an iterable containing the third values of the given tuples. */
-  public static <T> Iterable<T> tripleThirds(Iterable<? extends Triple<?, ?, ? extends T>> iter) {
+  public static <T> SizedIterable<T> tripleThirds(Iterable<? extends Triple<?, ?, ? extends T>> iter) {
     return new MappedIterable<Triple<?, ?, ? extends T>, T>(iter, Triple.<T>thirdGetter());
   }
   
   /** Lazily create an iterable containing the first values of the given tuples. */
-  public static <T> Iterable<T> quadFirsts(Iterable<? extends Quad<? extends T, ?, ?, ?>> iter) {
+  public static <T> SizedIterable<T> quadFirsts(Iterable<? extends Quad<? extends T, ?, ?, ?>> iter) {
     return new MappedIterable<Quad<? extends T, ?, ?, ?>, T>(iter, Quad.<T>firstGetter());
   }
   
   /** Lazily create an iterable containing the second values of the given tuples. */
-  public static <T> Iterable<T> quadSeconds(Iterable<? extends Quad<?, ? extends T, ?, ?>> iter) {
+  public static <T> SizedIterable<T> quadSeconds(Iterable<? extends Quad<?, ? extends T, ?, ?>> iter) {
     return new MappedIterable<Quad<?, ? extends T, ?, ?>, T>(iter, Quad.<T>secondGetter());
   }
   
   /** Lazily create an iterable containing the third values of the given tuples. */
-  public static <T> Iterable<T> quadThirds(Iterable<? extends Quad<?, ?, ? extends T, ?>> iter) {
+  public static <T> SizedIterable<T> quadThirds(Iterable<? extends Quad<?, ?, ? extends T, ?>> iter) {
     return new MappedIterable<Quad<?, ?, ? extends T, ?>, T>(iter, Quad.<T>thirdGetter());
   }
   
   /** Lazily create an iterable containing the fourth values of the given tuples. */
-  public static <T> Iterable<T> quadFourths(Iterable<? extends Quad<?, ?, ?, ? extends T>> iter) {
+  public static <T> SizedIterable<T> quadFourths(Iterable<? extends Quad<?, ?, ?, ? extends T>> iter) {
     return new MappedIterable<Quad<?, ?, ?, ? extends T>, T>(iter, Quad.<T>fourthGetter());
   }
   
@@ -1773,7 +2122,7 @@ public final class IterUtil {
    * Lazily create an iterable of {@code Pair}s of corresponding values from the given iterables (assumed to always 
    * have the same length).  Useful for simultaneous iteration of multiple lists in a {@code for} loop.
    */
-  public static <T1, T2> Iterable<Pair<T1, T2>> zip(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2) {
+  public static <T1, T2> SizedIterable<Pair<T1, T2>> zip(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2) {
     return new BinaryMappedIterable<T1, T2, Pair<T1, T2>>(iter1, iter2, Pair.<T1, T2>factory());
   }
     
@@ -1781,9 +2130,9 @@ public final class IterUtil {
    * Lazily create an iterable of {@code Triple}s of corresponding values from the given iterables (assumed to  
    * always have the same length).  Useful for simultaneous iteration of multiple lists in a {@code for} loop.
    */
-  public static <T1, T2, T3> Iterable<Triple<T1, T2, T3>> zip(Iterable<? extends T1> iter1, 
-                                                              Iterable<? extends T2> iter2,
-                                                              Iterable<? extends T3> iter3) {
+  public static <T1, T2, T3> SizedIterable<Triple<T1, T2, T3>> zip(Iterable<? extends T1> iter1, 
+                                                                   Iterable<? extends T2> iter2,
+                                                                   Iterable<? extends T3> iter3) {
     return map(iter1, iter2, iter3, Triple.<T1, T2, T3>factory());
   }
     
@@ -1791,10 +2140,10 @@ public final class IterUtil {
    * Lazily create an iterable of {@code Quad}s of corresponding values from the given iterables (assumed to  
    * always have the same length).  Useful for simultaneous iteration of multiple lists in a {@code for} loop.
    */
-  public static <T1, T2, T3, T4> Iterable<Quad<T1, T2, T3, T4>> zip(Iterable<? extends T1> iter1, 
-                                                                    Iterable<? extends T2> iter2,
-                                                                    Iterable<? extends T3> iter3,
-                                                                    Iterable<? extends T4> iter4) {
+  public static <T1, T2, T3, T4> SizedIterable<Quad<T1, T2, T3, T4>> zip(Iterable<? extends T1> iter1, 
+                                                                         Iterable<? extends T2> iter2,
+                                                                         Iterable<? extends T3> iter3,
+                                                                         Iterable<? extends T4> iter4) {
     return map(iter1, iter2, iter3, iter4, Quad.<T1, T2, T3, T4>factory());
   }
   

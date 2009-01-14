@@ -32,43 +32,31 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.tuple;
+package edu.rice.cs.plt.debug;
 
-/**
- * An empty tuple.  There is only one accessible instance, the {@code INSTANCE} singleton, which has
- * arbitrarily-chosen type argument {@code Void} ({@code Option<null>} would make more sense, but is 
- * not expressible).  Clients needing a specific kind of {@code Null} can perform an unsafe cast on 
- * the singleton to produce the desired type (this is done in {@link Null#make}).
- */
-public final class Null<T> extends Option<T> {
+import edu.rice.cs.plt.swing.SwingUtil;
+import edu.rice.cs.plt.iter.SizedIterable;
+import edu.rice.cs.plt.iter.IterUtil;
+
+public class PopupLogSink extends TextLogSink {
   
-  /** Forces access through the singleton */
-  private Null() {}
+  private String _name;
   
-  /** A singleton null tuple */
-  public static final Null<Void> INSTANCE = new Null<Void>();
-  
-  /** Invokes {@code visitor.forNone()} */
-  public <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor) {
-    return visitor.forNone();
+  public PopupLogSink(String name) {
+    super(40); // tailor line width to a relatively narrow dialog box
+    _name = name;
   }
   
-  public boolean isSome() { return false; }
+  @Override protected void write(Message m, SizedIterable<String> messages) {
+    Iterable<String> header = IterUtil.make("[" + formatLocation(m.caller()) + "]",
+                                            "[" + formatThread(m.thread()) + "]",
+                                            "[" + formatTime(m.time()) + "]");
+    String text = IterUtil.multilineToString(IterUtil.compose(header, messages));
+    SwingUtil.showPopup(_name, text);
+  }
   
-  public T unwrap() { throw new OptionUnwrapException(); }
+  @Override protected void writeStart(StartMessage m, SizedIterable<String> messages) { write(m, messages); }
+  @Override protected void writeEnd(EndMessage m, SizedIterable<String> messages) { write(m, messages); }
   
-  public T unwrap(T forNone) { return forNone; }
-  
-  /** Produces {@code "()"} */
-  public String toString() { return "()"; }
-  
-  /** Defined in terms of identity (since the singleton is the only accessible instance) */
-  public boolean equals(Object o) { return this == o; }
-  
-  /** Defined in terms of identity (since the singleton is the only accessible instance) */
-  protected int generateHashCode() { return System.identityHashCode(this); }
-  
-  /** Return a singleton, cast to the appropriate type. */
-  @SuppressWarnings("unchecked")
-  public static <T> Null<T> make() { return (Null<T>) INSTANCE; }
-}  
+  public void close() {}
+}

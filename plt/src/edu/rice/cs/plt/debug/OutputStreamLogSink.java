@@ -34,37 +34,38 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.debug;
 
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.util.Date;
+import java.io.*;
 
-import edu.rice.cs.plt.lambda.Predicate2;
-import edu.rice.cs.plt.iter.SizedIterable;
-import edu.rice.cs.plt.io.IOUtil;
-
-/** 
- * A log that writes tagged, indented text to the given {@code Writer}.  If needed, log messages coming from a certain
- * thread or code location may be ignored by providing a filter predicate.
- */
-public class WriterLog extends TextLog {
+/** A log sink that writes tagged, indented text to an output stream. */
+public class OutputStreamLogSink extends IndentedTextLogSink {
   
-  private final BufferedWriter _w;
-  
-  /** Create a writer-based log without filtering */
-  public WriterLog(Writer w) {
+  private final BufferedWriter _writer;
+    
+  public OutputStreamLogSink(OutputStream out) {
     super();
-    _w = IOUtil.asBuffered(w);
+    _writer = new BufferedWriter(new OutputStreamWriter(out));
   }
   
-  /** Create a writer-based log with the given filter */
-  public WriterLog(Writer w, Predicate2<? super Thread, ? super StackTraceElement> filter) {
-    super(filter);
-    _w = IOUtil.asBuffered(w);
+  public OutputStreamLogSink(OutputStream out, String charset) throws UnsupportedEncodingException {
+    super();
+    _writer = new BufferedWriter(new OutputStreamWriter(out, charset));
   }
   
-  protected synchronized void write(Date time, Thread thread, StackTraceElement location, 
-                                    SizedIterable<? extends String> messages) {
-    writeText(_w, time, thread, location, messages);
+  public OutputStreamLogSink(OutputStream out, int idealLineWidth) {
+    super(idealLineWidth);
+    _writer = new BufferedWriter(new OutputStreamWriter(out));
+  }
+
+  public OutputStreamLogSink(OutputStream out, String charset, int idealLineWidth)
+      throws UnsupportedEncodingException {
+    super(idealLineWidth);
+    _writer = new BufferedWriter(new OutputStreamWriter(out, charset));
   }
   
+  public void close() throws IOException { _writer.close(); }
+  
+  @Override protected BufferedWriter writer(Message m) {
+    return _writer;
+  }
+
 }

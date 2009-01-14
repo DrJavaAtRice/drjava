@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.DataFlavor;
@@ -75,15 +77,44 @@ public class SwingUtil {
   }
   
   /**
-   * Create a JFrame to be used as the main application window.  Sets the title and preferred
-   * size to the given values.  Sets the default close operation to "exit on close."
+   * Boilerplate for creating a JFrame to be used as the main application window.  Sets the title and
+   * preferred size to the given values.  Sets the default close operation to "exit on close."
    */
   public static JFrame makeMainApplicationFrame(String title, int width, int height) {
     JFrame result = new JFrame(title);
     result.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    // cast is necessary for 1.4 compatibility
-    ((JComponent) result.getContentPane()).setPreferredSize(new Dimension(width, height));
+    result.getContentPane().setPreferredSize(new Dimension(width, height));
     return result;
+  }
+  
+  /**
+   * Boilerplate for creating a JFrame.  Sets the title and preferred size to the given values.  Sets the 
+   * default close operation to "dispose on close."
+   */
+  public static JFrame makeDisposableFrame(String title, int width, int height) {
+    JFrame result = new JFrame(title);
+    result.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    // cast is necessary for 1.4 compatibility
+    result.getContentPane().setPreferredSize(new Dimension(width, height));
+    return result;
+  }
+  
+  /**
+   * Boilerplate for creating a JFrame.  Sets the title and preferred size to the given values.  Sets the 
+   * default close operation to "hide on close."
+   */
+  public static JFrame makeReusableFrame(String title, int width, int height) {
+    JFrame result = new JFrame(title);
+    result.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+    // cast is necessary for 1.4 compatibility
+    result.getContentPane().setPreferredSize(new Dimension(width, height));
+    return result;
+  }
+  
+  public static void onWindowClosed(Window w, final Runnable r) {
+    w.addWindowListener(new WindowAdapter() {
+      public void windowClosed(WindowEvent e) { r.run(); }
+    });
   }
   
   /** Shortcut for the boilerplate code to pack and display a window (such as a {@code JFrame}). */

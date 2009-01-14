@@ -520,7 +520,7 @@ public final class CollectUtil {
     else { return rel; }
   }
   
-  /** Invoke the {@code HashMap#HashMap(Map)} constructor. */
+  /** Invoke the {@code HashMap#HashMap(Map)} constructor, and wrap the result as a LambdaMap. */
   public static <K, V> LambdaMap<K, V> snapshot(Map<? extends K, ? extends V> map) {
     return new DelegatingMap<K, V>(new HashMap<K, V>(map));
   }
@@ -680,10 +680,52 @@ public final class CollectUtil {
     }
   }
 
+  /**
+   * Add the given elements to a collection.  Unlike {@link Collection#addAll}, defined for arbitrary
+   * {@code Iterable}s.  When possible, delegates to {@code c.addAll()}.
+   * @return  {@code true} if {@code c} changed as a result of the call
+   */
+  public static <E> boolean addAll(Collection<E> c, Iterable<? extends E> elts) {
+    if (elts instanceof Collection<?>) {
+      @SuppressWarnings("unchecked")  // should be legal, but javac 6 doesn't like it
+      Collection<? extends E> eltsColl = (Collection<? extends E>) elts;
+      return c.addAll(eltsColl);
+    }
+    else {
+      boolean result = false;
+      for (E elt : elts) { result |= c.add(elt); }
+      return result;
+    }
+  }
+
+  /**
+   * Remove the given elements from a collection.  Unlike {@link Collection#removeAll}, defined for arbitrary
+   * {@code Iterable}s.  When possible, delegates to {@code c.removeAll()}.
+   * @return  {@code true} if {@code c} changed as a result of the call
+   */
+  public static boolean removeAll(Collection<?> c, Iterable<?> elts) {
+    if (elts instanceof Collection<?>) {
+      return c.removeAll((Collection<?>) elts);
+    }
+    else {
+      boolean result = false;
+      for (Object elt : elts) { result |= c.remove(elt); }
+      return result;
+    }
+  }
+
+  /**
+   * Produce the set containing {@code base} and all values produced an arbitrary number of applications
+   * of {@code function} to {@code base}.
+   */
   public static <T> Set<T> functionClosure(T base, Lambda<? super T, ? extends T> function) {
     return functionClosure(Collections.singleton(base), function);
   }
   
+  /**
+   * Produce the set containing the elements in {@code base} and all values produced an arbitrary number
+   * of applications of {@code function} to one of these elements.
+   */
   public static <T> Set<T> functionClosure(Set<? extends T> base, final Lambda<? super T, ? extends T> function) {
     Lambda<T, Set<T>> neighbors = new Lambda<T, Set<T>>() {
       public Set<T> value(T node) { return Collections.<T>singleton(function.value(node)); }
@@ -691,10 +733,18 @@ public final class CollectUtil {
     return graphClosure(base, neighbors);
   }
   
+  /**
+   * Produce the set containing {@code base} and all values produced an arbitrary number of applications
+   * of {@code function} to {@code base}.
+   */
   public static <T> Set<T> partialFunctionClosure(T base, Lambda<? super T, ? extends Option<? extends T>> function) {
     return partialFunctionClosure(Collections.singleton(base), function);
   }
   
+  /**
+   * Produce the set containing the elements in {@code base} and all values produced an arbitrary number
+   * of applications of {@code function} to one of these elements.
+   */
   public static <T> Set<T> partialFunctionClosure(Set<? extends T> base,
                                                   final Lambda<? super T, ? extends Option<? extends T>> function) {
     Lambda<T, Set<T>> neighbors = new Lambda<T, Set<T>>() {
@@ -703,10 +753,15 @@ public final class CollectUtil {
     return graphClosure(base, neighbors);
   }
   
+  /** Produce the set of all nodes reachable from {@code base} in a directed graph defined by {@code neighbors}. */
   public static <T> Set<T> graphClosure(T base, Lambda<? super T, ? extends Iterable<? extends T>> neighbors) {
     return graphClosure(Collections.singleton(base), neighbors);
   }
   
+  /**
+   * Produce the set of all nodes reachable from the elements in {@code base} in a directed graph defined by
+   * {@code neighbors}.
+   */
   public static <T> Set<T> graphClosure(Set<? extends T> base,
                                         Lambda<? super T, ? extends Iterable<? extends T>> neighbors) {
     Set<T> result = new LinkedHashSet<T>(base);

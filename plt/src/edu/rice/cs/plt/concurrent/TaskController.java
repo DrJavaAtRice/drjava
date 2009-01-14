@@ -42,7 +42,7 @@ import edu.rice.cs.plt.lambda.WrappedException;
  * Provides access to a concurrent task that produces a value.  Implementations may concurrently modify
  * the controller's status, but clients should not assume thread safety (for example, problems may occur
  * if one thread invokes {@link #cancel} while another performs operations that assume the task is not
- * cancelled).
+ * canceled).
  */
 public abstract class TaskController<R> implements Thunk<R> {
   
@@ -56,12 +56,12 @@ public abstract class TaskController<R> implements Thunk<R> {
   
   /**
    * Request that the task be run.  If the task is {@code RUNNING} or {@code FINISHED}, has no effect.
-   * @throws IllegalStateException  If the task is {@code CANCELLED}.
+   * @throws IllegalStateException  If the task is {@code CANCELED}.
    */
   public void start() {
     switch (_status) {
       case PAUSED: doStart(); break;
-      case CANCELLED: throw new IllegalStateException("Task is cancelled");
+      case CANCELED: throw new IllegalStateException("Task is cancelled");
     }
   }
   
@@ -70,24 +70,24 @@ public abstract class TaskController<R> implements Thunk<R> {
    * that if the task is {@code RUNNING}, it may not be possible to dispose of it until after it finishes.
    */
   public void cancel() {
-    if (_status != Status.CANCELLED) { doCancel(); }
+    if (_status != Status.CANCELED) { doCancel(); }
   }
   
   /**
    * Get the result.  If the task is not {@code FINISHED}, request that the task be {@code RUNNING}
    * and block until it finishes.
-   * @throws IllegalStateException  If the task is {@code CANCELLED}.
+   * @throws IllegalStateException  If the task is {@code CANCELED}.
    * @throws WrappedException  Wraps an {@link InterruptedException} if the current thread is interrupted
    *                           while waiting for the result, an {@link InvocationTargetException} 
    *                           containing any error that was triggered while executing the task, or any other 
    *                           exception related to the implementation of the controller.
    */
   public R value() {
-    if (_status != Status.CANCELLED) {
+    if (_status != Status.CANCELED) {
       try { return getValue(); }
       catch (Exception e) { throw new WrappedException(e); }
     }
-    else { throw new IllegalStateException("Task is cancelled"); }
+    else { throw new IllegalStateException("Task is canceled"); }
   }
   
   /** Check whether the task has produced a value (equivalently, whether the status is {@code FINISHED}). */
@@ -100,16 +100,16 @@ public abstract class TaskController<R> implements Thunk<R> {
   protected abstract void doStart();
   
   /**
-   * Implementation for cancelling the task.  Should dispose of any unneeded resources and cause the 
-   * status to be updated to {@code CANCELLED} (but need not do so directly).  May assume the current 
-   * status is <em>not</em> {@code CANCELLED}.
+   * Implementation for canceling the task.  Should dispose of any unneeded resources and cause the 
+   * status to be updated to {@code CANCELED} (but need not do so directly).  May assume the current 
+   * status is <em>not</em> {@code CANCELED}.
    */
   protected abstract void doCancel();
   
   /**
    * Implementation for producing the result.  If the task is not {@code FINISHED}, should block until it 
    * is (a resulting {@code InterruptedException} need not be handled).  May assume the current status is 
-   * <em>not</em> {@code CANCELLED}.
+   * <em>not</em> {@code CANCELED}.
    * @throws InterruptedException  If the current thread is interrupted while waiting for a result
    * @throws InvocationTargetException  If <em>any</em> {@code Throwable} is thrown while executing the task.
    *                                    This follows the precedent of the {@code java.reflect} APIs, which wrap
@@ -126,7 +126,7 @@ public abstract class TaskController<R> implements Thunk<R> {
     /** The task has completed, and the result is available. */
     FINISHED,
     /** The task has been stopped and cannot be restarted.  No result is available. */
-    CANCELLED;
+    CANCELED;
   }
   
 }

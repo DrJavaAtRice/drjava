@@ -43,13 +43,15 @@ import edu.rice.cs.plt.lambda.LazyThunk;
  * repeated a variable number of times.  By default, the token string is {@code "  "} (two spaces), but
  * a different string may be provided if needed.  Initially, the indentation level (the number of repeats)
  * is set to {@code 0}; {@link #push} and {@link #pop} are used to adjust this value.</p>
- * <p>This class is thread-safe.</p>
+ * 
+ * <p>If thread safety is required, alternative {@link #atomicPop} and {@link #atomicPush} methods are
+ * provided as well.  These use locking to prevent concurrent changes to the indentation level.</p>
  */
 public class Indenter {
   
   private final String _token;
-  private volatile int _level;
-  private volatile Thunk<String> _stringFactory;
+  private int _level;
+  private Thunk<String> _stringFactory;
   
   /** Create an indenter with the default token string: {@code "  "} (two spaces) */
   public Indenter() { this("  "); }
@@ -69,6 +71,21 @@ public class Indenter {
   
   /** Decrease the indentation level */
   public void pop() { _level--; _stringFactory = makeThunk(); }
+  
+  /**
+   * Increase the indentation level atomically.  Locking prevents other {@code atomicPush()} and
+   * {@code atomicPop()} invocations from adjusting the level simultaneously.
+   */
+  public void atomicPush() { adjust(1); _stringFactory = makeThunk(); }
+  
+  /**
+   * Decrease the indentation level atomically.  Locking prevents other {@code atomicPush()} and
+   * {@code atomicPop()} invocations from adjusting the level simultaneously.
+   */
+  public void atomicPop() { adjust(-1); _stringFactory = makeThunk(); }
+  
+  /** Atomically adjust {@code _level}. */
+  private synchronized void adjust(int delta) { _level += delta; }
 
   /**
    * Produce a string based on the token string and current indentation level.  If the level is {@code <= 0},

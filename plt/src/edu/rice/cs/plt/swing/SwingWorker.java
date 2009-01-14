@@ -95,7 +95,7 @@ public abstract class SwingWorker<T> {
    */
   public final boolean isDone() {
     Status status = _controller.status();
-    return status.equals(Status.CANCELLED) || status.equals(Status.FINISHED);
+    return status.equals(Status.CANCELED) || status.equals(Status.FINISHED);
   }
   
   /**

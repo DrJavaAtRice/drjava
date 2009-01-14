@@ -32,39 +32,37 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.debug;
+package edu.rice.cs.plt.lambda;
 
-import java.util.Date;
-import edu.rice.cs.plt.swing.SwingUtil;
-import edu.rice.cs.plt.iter.SizedIterable;
-import edu.rice.cs.plt.lambda.Predicate2;
-import edu.rice.cs.plt.iter.IterUtil;
+/**
+ * <p>A block of code that executes at most once. The first invocation of {@code run()} runs the code;
+ * subsequent invocations are no-ops. (If an exception occurs during evaluation, the nested runnable will be
+ * evaluated again on a subsequent invocation.)</p>
+ * 
+ * <p>Evaluation is thread-safe: locking guarantees that the nested code will never be run (and terminate
+ * normally) twice. Thus, if two threads invoke {@code run()} for the first time simultaneously, one will
+ * block until the other completes, and then act as a no-op.</p>
+ * 
+ * @see LazyThunk
+ */
+public class LazyRunnable implements Runnable {
 
-public class PopupLog extends AbstractLog {
+  private Runnable _block;
   
-  private String _name;
+  public LazyRunnable(Runnable block) { _block = block; }
   
-  public PopupLog(String name) {
-    super();
-    _name = name;
+  public void run() {
+    // double-checked locking is generally incorrect without "volatile"; in this case, though,
+    // it works because we're setting a field to "null", not allocating a new object -- in the
+    // worst case, threads don't see the null update and we call resolve() more than necessary
+    if (_block != null) { resolve(); }
   }
   
-  public PopupLog(String name, Predicate2<? super Thread, ? super StackTraceElement> filter) {
-    super(filter);
-    _name = name;
-  }
-
-  /** Create a pop-up dialog with the given message */
-  protected void write(Date time, Thread thread, StackTraceElement location, SizedIterable<? extends String> messages) {
-    String first = "[" + formatLocation(location) + " - " + formatThread(thread) + " - " + formatTime(time) + "]";
-    String text = IterUtil.multilineToString(IterUtil.compose(first, messages));
-    SwingUtil.showPopup(_name, text);
+  private synchronized void resolve() {
+    if (_block != null) { // verify that the block is still unresolved now that we have a lock
+      _block.run();
+      _block = null;
+    }
   }
   
-  /** Do nothing */
-  protected void push() {}
-  
-  /** Do nothing */
-  protected void pop() {}
-
 }

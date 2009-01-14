@@ -35,18 +35,23 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.io;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import edu.rice.cs.plt.debug.ThreadSnapshot;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.lambda.Predicate;
-import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.plt.lambda.LazyThunk;
-import edu.rice.cs.plt.lambda.Lambda;
-import edu.rice.cs.plt.lambda.WrappedException;
-import edu.rice.cs.plt.lambda.LambdaUtil;
-import edu.rice.cs.plt.tuple.Wrapper;
+import edu.rice.cs.plt.iter.SizedIterable;
+import edu.rice.cs.plt.lambda.*;
+import edu.rice.cs.plt.tuple.*;
 import edu.rice.cs.plt.recur.RecursionStack;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -83,7 +88,7 @@ public final class IOUtil {
    * @throws SecurityException  If any of the {@code getAbsoluteFile()} invocations triggers
    *                            a {@code SecurityException}
    */
-  public static Iterable<File> getAbsoluteFiles(Iterable<? extends File> files) {
+  public static SizedIterable<File> getAbsoluteFiles(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, GET_ABSOLUTE_FILE);
   }
   
@@ -92,7 +97,7 @@ public final class IOUtil {
   };
   
   /** Apply {@link #attemptAbsoluteFile} to all files in a list */
-  public static Iterable<File> attemptAbsoluteFiles(Iterable<? extends File> files) {
+  public static SizedIterable<File> attemptAbsoluteFiles(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, ATTEMPT_ABSOLUTE_FILE);
   }
   
@@ -119,7 +124,7 @@ public final class IOUtil {
    * @throws SecurityException  If any of the {@code getCanonicalFile()} invocations triggers
    *                            a {@code SecurityException}
    */
-  public static Iterable<File> getCanonicalFiles(Iterable<? extends File> files) throws IOException {
+  public static SizedIterable<File> getCanonicalFiles(Iterable<? extends File> files) throws IOException {
     try { return IterUtil.mapSnapshot(files, GET_CANONICAL_FILE); }
     catch (WrappedException e) { 
       if (e.getCause() instanceof IOException) { throw (IOException) e.getCause(); }
@@ -135,7 +140,7 @@ public final class IOUtil {
   };
   
   /** Apply {@link #attemptCanonicalFile} to all files in a list */
-  public static Iterable<File> attemptCanonicalFiles(Iterable<? extends File> files) {
+  public static SizedIterable<File> attemptCanonicalFiles(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, ATTEMPT_CANONICAL_FILE);
   }
   
@@ -284,7 +289,7 @@ public final class IOUtil {
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
    */
-  public static Iterable<File> attemptListFilesAsIterable(File f) {
+  public static SizedIterable<File> attemptListFilesAsIterable(File f) {
     File[] result = attemptListFiles(f);
     if (result == null) { return IterUtil.empty(); }
     else { return IterUtil.asIterable(result); }
@@ -295,7 +300,7 @@ public final class IOUtil {
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
    */
-  public static Iterable<File> attemptListFilesAsIterable(File f, FileFilter filter) {
+  public static SizedIterable<File> attemptListFilesAsIterable(File f, FileFilter filter) {
     File[] result = attemptListFiles(f, filter);
     if (result == null) { return IterUtil.empty(); }
     else { return IterUtil.asIterable(result); }
@@ -306,7 +311,7 @@ public final class IOUtil {
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.  The given predicate is converted to a {@code FileFilter}.
    */
-  public static Iterable<File> attemptListFilesAsIterable(File f, Predicate<? super File> filter) {
+  public static SizedIterable<File> attemptListFilesAsIterable(File f, Predicate<? super File> filter) {
     return attemptListFilesAsIterable(f, (FileFilter) asFilePredicate(filter));
   }
   
@@ -316,7 +321,7 @@ public final class IOUtil {
    * the result here is an empty iterable.  (Defined to resolve method ambiguity when called with
    * a FilePredicate.)
    */
-  public static Iterable<File> attemptListFilesAsIterable(File f, FilePredicate filter) {
+  public static SizedIterable<File> attemptListFilesAsIterable(File f, FilePredicate filter) {
     return attemptListFilesAsIterable(f, (FileFilter) filter);
   }
   
@@ -390,7 +395,7 @@ public final class IOUtil {
   }
   
   /** Apply {@link #canonicalCase} to all files in a list */
-  public static Iterable<File> canonicalCases(Iterable<? extends File> files) {
+  public static SizedIterable<File> canonicalCases(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, CANONICAL_CASE);
   }
   
@@ -417,8 +422,8 @@ public final class IOUtil {
    * produced by repeated invocations of {@link File#getParentFile()}.  The 
    * outermost file appears first in the list, with {@code f} appearing last.
    */
-  public static Iterable<File> fullPath(File f) {
-    Iterable<File> result = IterUtil.singleton(f);
+  public static SizedIterable<File> fullPath(File f) {
+    SizedIterable<File> result = IterUtil.singleton(f);
     File parent = f.getParentFile();
     while (parent != null) {
       result = IterUtil.compose(parent, result);
@@ -489,12 +494,12 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.  If an error occurs in listing a directory, that
+   * the presence of loops in the system.  If an error occurs in listing a directory, that
    * directory will be skipped.
    * 
    * @param f  A file (generally a directory) to be listed recursively
    */
-  public static Iterable<File> listFilesRecursively(File f) {
+  public static SizedIterable<File> listFilesRecursively(File f) {
     return listFilesRecursively(f, ALWAYS_ACCEPT, ALWAYS_ACCEPT);
   }
   
@@ -502,14 +507,14 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.  If an error occurs in listing a directory, that
+   * the presence of loops in the system.  If an error occurs in listing a directory, that
    * directory will be skipped.
    * 
    * @param f  A file (generally a directory) to be listed recursively
    * @param filter  A filter for the list -- files that do not match will not be included
    *                (but directories that do not match will still be traversed)
    */
-  public static Iterable<File> listFilesRecursively(File f, FileFilter filter) {
+  public static SizedIterable<File> listFilesRecursively(File f, FileFilter filter) {
     return listFilesRecursively(f, filter, ALWAYS_ACCEPT);
   }
   
@@ -517,14 +522,14 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.  If an error occurs in listing a directory, that
+   * the presence of loops in the system.  If an error occurs in listing a directory, that
    * directory will be skipped.
    * 
    * @param f  A file (generally a directory) to be listed recursively
    * @param filter  A filter for the list -- files that do not match will not be included
    *                (but directories that do not match will still be traversed)
    */
-  public static Iterable<File> listFilesRecursively(File f, Predicate<? super File> filter) {
+  public static SizedIterable<File> listFilesRecursively(File f, Predicate<? super File> filter) {
     return listFilesRecursively(f, asFilePredicate(filter), ALWAYS_ACCEPT);
   }
   
@@ -532,7 +537,7 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.  If an error occurs in listing a directory, that
+   * the presence of loops in the system.  If an error occurs in listing a directory, that
    * directory will be skipped.  (Defined to resolve method ambiguity when a FilePredicate is
    * used.)
    * 
@@ -540,7 +545,7 @@ public final class IOUtil {
    * @param filter  A filter for the list -- files that do not match will not be included
    *                (but directories that do not match will still be traversed)
    */
-  public static Iterable<File> listFilesRecursively(File f, FilePredicate filter) {
+  public static SizedIterable<File> listFilesRecursively(File f, FilePredicate filter) {
     return listFilesRecursively(f, filter, ALWAYS_ACCEPT);
   }
   
@@ -548,7 +553,7 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.
+   * the presence of loops in the system.
    * 
    * @param f  A file (generally a directory) to be listed recursively
    * @param filter  A filter for the list -- files that do not match will not be included
@@ -556,7 +561,7 @@ public final class IOUtil {
    * @param recursionFilter  A filter controlling recursion -- directories that are rejected will
    *                         not be traversed.
    */
-  public static Iterable<File> listFilesRecursively(File f, FileFilter filter, FileFilter recursionFilter) {
+  public static SizedIterable<File> listFilesRecursively(File f, FileFilter filter, FileFilter recursionFilter) {
     return listFilesRecursively(f, filter, recursionFilter, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
@@ -564,7 +569,7 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.
+   * the presence of loops in the system.
    * 
    * @param f  A file (generally a directory) to be listed recursively
    * @param filter  A filter for the list -- files that do not match will not be included
@@ -572,8 +577,8 @@ public final class IOUtil {
    * @param recursionFilter  A filter controlling recursion -- directories that are rejected will
    *                         not be traversed.
    */
-  public static Iterable<File> listFilesRecursively(File f, Predicate<? super File> filter, 
-                                                    Predicate<? super File> recursionFilter) {
+  public static SizedIterable<File> listFilesRecursively(File f, Predicate<? super File> filter, 
+                                                         Predicate<? super File> recursionFilter) {
     return listFilesRecursively(f, asFilePredicate(filter), asFilePredicate(recursionFilter),
                                 new RecursionStack<File>(Wrapper.<File>factory()));
   }
@@ -582,7 +587,7 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
-   * the presense of loops in the system.  (Defined to resolve method ambiguity where two
+   * the presence of loops in the system.  (Defined to resolve method ambiguity where two
    * FilePredicates are used.)
    * 
    * @param f  A file (generally a directory) to be listed recursively
@@ -591,15 +596,15 @@ public final class IOUtil {
    * @param recursionFilter  A filter controlling recursion -- directories that are rejected will
    *                         not be traversed.
    */
-  public static Iterable<File> listFilesRecursively(File f, FilePredicate filter, FilePredicate recursionFilter) {
+  public static SizedIterable<File> listFilesRecursively(File f, FilePredicate filter, FilePredicate recursionFilter) {
     return listFilesRecursively(f, filter, recursionFilter, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
   /** Helper method for {@code listFilesRecursively} */
-  private static Iterable<File> listFilesRecursively(final File f, final FileFilter filter, 
-                                                     final FileFilter recursionFilter, 
-                                                     final RecursionStack<File> stack) {
-    Iterable<File> result = (filter.accept(f)) ? IterUtil.singleton(f) : IterUtil.<File>empty();
+  private static SizedIterable<File> listFilesRecursively(final File f, final FileFilter filter, 
+                                                          final FileFilter recursionFilter, 
+                                                          final RecursionStack<File> stack) {
+    SizedIterable<File> result = (filter.accept(f)) ? IterUtil.singleton(f) : IterUtil.<File>empty();
     if (f.isDirectory() && recursionFilter.accept(f)) {
       Thunk<Iterable<File>> getMembers = new Thunk<Iterable<File>>() {
         public Iterable<File> value() {
@@ -853,7 +858,7 @@ public final class IOUtil {
     * path separator character (':' in Unix, ';' in Windows).  Filename strings in the path
     * are interpreted according to the {@code File} constructor.
     */
-  public static Iterable<File> parsePath(String path) {
+  public static SizedIterable<File> parsePath(String path) {
     String[] filenames = path.split(TextUtil.regexEscape(File.pathSeparator));
     return IterUtil.mapSnapshot(IterUtil.asIterable(filenames), FILE_FACTORY);
   }
@@ -1182,91 +1187,30 @@ public final class IOUtil {
   }
   
   
-  /* Note: If we allowed use of Java 5 APIs, the following code could be simplified by just defining one method
-   * that handles Closeables.
+  private static final Thunk<List<Closeable>> TO_CLOSE = LazyThunk.make(new Thunk<List<Closeable>>() {
+    public List<Closeable> value() {
+      // On the first request, register a shutdown hook to clean up the list
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+          for (Closeable c : TO_CLOSE.value()) {
+            try { c.close(); }
+            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
+          }
+        }
+      });
+      return new LinkedList<Closeable>();
+    }
+  });
+  
+  /**
+   * Register the given resource to be closed on exit.  {@link Closeable#close} will be invoked from a
+   * shutdown hook.
    */
-  
-  private static final Thunk<List<InputStream>> INPUT_STREAMS_TO_CLOSE = LazyThunk.make(new Thunk<List<InputStream>>() {
-    public List<InputStream> value() {
-      // On the first request, register a shutdown hook to clean up the list
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        public void run() {
-          for (InputStream in : INPUT_STREAMS_TO_CLOSE.value()) {
-            try { in.close(); }
-            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
-          }
-        }
-      });
-      return new LinkedList<InputStream>();
-    }
-  });
-  
-  /** Register the given stream to be closed on exit.  {@link InputStream#close} will be invoked from a shutdown hook. */
-  public static void closeOnExit(InputStream in) {
-    INPUT_STREAMS_TO_CLOSE.value().add(in);
+  public static void closeOnExit(Closeable c) {
+    TO_CLOSE.value().add(c);
   }
   
-  private static final Thunk<List<OutputStream>> OUTPUT_STREAMS_TO_CLOSE = LazyThunk.make(new Thunk<List<OutputStream>>() {
-    public List<OutputStream> value() {
-      // On the first request, register a shutdown hook to clean up the list
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        public void run() {
-          for (OutputStream out : OUTPUT_STREAMS_TO_CLOSE.value()) {
-            try { out.close(); }
-            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
-          }
-        }
-      });
-      return new LinkedList<OutputStream>();
-    }
-  });
   
-  /** Register the given stream to be closed on exit.  {@link OutputStream#close} will be invoked from a shutdown hook. */
-  public static void closeOnExit(OutputStream out) {
-    OUTPUT_STREAMS_TO_CLOSE.value().add(out);
-  }
-  
-  private static final Thunk<List<Reader>> READERS_TO_CLOSE = LazyThunk.make(new Thunk<List<Reader>>() {
-    public List<Reader> value() {
-      // On the first request, register a shutdown hook to clean up the list
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        public void run() {
-          for (Reader r : READERS_TO_CLOSE.value()) {
-            try { r.close(); }
-            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
-          }
-        }
-      });
-      return new LinkedList<Reader>();
-    }
-  });
-  
-  /** Register the given reader to be closed on exit.  {@link Reader#close} will be invoked from a shutdown hook. */
-  public static void closeOnExit(Reader r) {
-    READERS_TO_CLOSE.value().add(r);
-  }
-  
-  private static final Thunk<List<Writer>> WRITERS_TO_CLOSE = LazyThunk.make(new Thunk<List<Writer>>() {
-    public List<Writer> value() {
-      // On the first request, register a shutdown hook to clean up the list
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-        public void run() {
-          for (Writer w : WRITERS_TO_CLOSE.value()) {
-            try { w.close(); }
-            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
-          }
-        }
-      });
-      return new LinkedList<Writer>();
-    }
-  });
-  
-  /** Register the given stream to be closed on exit.  {@link Reader#close} will be invoked from a shutdown hook. */
-  public static void closeOnExit(Writer w) {
-    WRITERS_TO_CLOSE.value().add(w);
-  }
-  
-
   /** Define a {@code FileFilter} in terms of a {@code Predicate}. */
   public static FilePredicate asFilePredicate(Predicate<? super File> p) {
     return new PredicateFilePredicate(p);
@@ -1603,6 +1547,345 @@ public final class IOUtil {
   public static void revertSystemIn() {
     if (SYSTEM_IN_STACK.isEmpty()) { error.logStack("Unbalanced call to revertSystemIn"); }
     else { System.setIn(SYSTEM_IN_STACK.removeLast()); }
+  }
+  
+  
+  /**
+   * Classes that are known to always be serializable.  (No guarantees can be made about subclasses of these,
+   * as subclasses can introduce arbitrary fields.)
+   */
+  private static final Set<Class<?>> SERIALIZABLE_CLASSES = new HashSet<Class<?>>();
+  static {
+    // Java API classes
+    SERIALIZABLE_CLASSES.add(String.class);
+    SERIALIZABLE_CLASSES.add(Boolean.class);
+    SERIALIZABLE_CLASSES.add(Character.class);
+    SERIALIZABLE_CLASSES.add(Byte.class);
+    SERIALIZABLE_CLASSES.add(Short.class);
+    SERIALIZABLE_CLASSES.add(Integer.class);
+    SERIALIZABLE_CLASSES.add(Long.class);
+    SERIALIZABLE_CLASSES.add(Float.class);
+    SERIALIZABLE_CLASSES.add(Double.class);
+    SERIALIZABLE_CLASSES.add(Date.class);
+    SERIALIZABLE_CLASSES.add(File.class);
+    SERIALIZABLE_CLASSES.add(StackTraceElement.class);
+    
+    // PLT classes
+    SERIALIZABLE_CLASSES.add(ThreadSnapshot.class);
+    SERIALIZABLE_CLASSES.add(Null.class);
+    
+    // primitive arrays
+    SERIALIZABLE_CLASSES.add(boolean[].class);
+    SERIALIZABLE_CLASSES.add(char[].class);
+    SERIALIZABLE_CLASSES.add(byte[].class);
+    SERIALIZABLE_CLASSES.add(short[].class);
+    SERIALIZABLE_CLASSES.add(int[].class);
+    SERIALIZABLE_CLASSES.add(long[].class);
+    SERIALIZABLE_CLASSES.add(float[].class);
+    SERIALIZABLE_CLASSES.add(double[].class);
+  }
+  
+  
+  /**
+   * Converts the given object to a form that will successfully serialize.  Typical serializable primitives like
+   * null, Strings and Files are left untouched; tuples, Iterables, Throwables, and arrays are processed recursively;
+   * and other types are handled by invoking {@code obj.toString()}.  Note that subsequent (or concurrent) mutation
+   * of the object may prevent successful serialization.
+   */
+  public static Object ensureSerializable(Object obj) {
+    if (obj == null) { return null; }
+    else if (SERIALIZABLE_CLASSES.contains(obj.getClass())) { return obj; }
+    else if (obj instanceof Object[]) { return ensureSerializable((Object[]) obj); }
+    else if (obj instanceof Iterable<?>) { return ensureSerializable((Iterable<?>) obj); }
+    else if (obj instanceof Throwable) { return ensureSerializable((Throwable) obj); }
+    else if (obj instanceof Tuple) { return ensureSerializable((Tuple) obj); }
+    else { return obj.toString(); }
+  }
+  
+  /**
+   * Convert the given (non-null) array to an array of objects that will successfully serialize.  If the type of
+   * the array guarantees this property, or if none of the current elements requires conversion, returns {@code arr}
+   * unchanged.  Otherwise, makes a converted copy.  Note that subsequent (or concurrent) mutation
+   * of the array may prevent successful serialization.
+   */
+  public static Object[] ensureSerializable(Object[] arr) {
+    Class<?> base = ReflectUtil.arrayBaseClass(arr.getClass());
+    if (SERIALIZABLE_CLASSES.contains(base) && Modifier.isFinal(base.getModifiers())) {
+      // if the base type is final and known to be safe, the array's type guarantees that it will
+      // never contain non-serializable elements
+      return arr;
+    }
+    else {
+      boolean keep = true;
+      Object[] result = new Object[arr.length];
+      for (int i = 0; i < arr.length; i++) {
+        result[i] = ensureSerializable(arr[i]);
+        keep &= (result[i] == arr[i]);
+      }
+      return keep ? arr : result;
+    }
+  }
+  
+  /**
+   * Convert the given (non-null) Iterable to a list of objects that will successfully serialize.  Discards any
+   * problematic fields by copying the Iterable into a List (recursively converting the elements).  Infinite Iterables
+   * are handled by truncating the list with a {@code "..."} string.  Note that subsequent (or concurrent) mutation
+   * of the elements may prevent successful serialization.
+   */
+  public static Iterable<?> ensureSerializable(Iterable<?> iter) {
+    if (IterUtil.isInfinite(iter)) { iter = IterUtil.compose(IterUtil.truncate(iter, 8), "..."); }
+    // can't make an exhaustive list of types that are okay, but at least we shouldn't make a new copy when
+    // the method is invoked on its own result
+    boolean keep = iter.getClass().equals(ArrayList.class);
+    List<Object> result = new ArrayList<Object>();
+    for (Object elt : iter) {
+      Object safe = ensureSerializable(elt);
+      keep &= (elt == safe);
+      result.add(safe);
+    }
+    return keep ? iter : result;
+  }
+  
+  /**
+   * Convert the given Throwable to a form that will successfully serialize.  If necessary, copies the throwable
+   * into a {@link SerializableException}.  Note that subsequent (or concurrent) mutation of the cause may prevent
+   * successful serialization.
+   */
+  public static Throwable ensureSerializable(Throwable t) {
+    Throwable safeCause = (t.getCause() == null) ? null : ensureSerializable(t.getCause());
+    if (t.getCause() == safeCause && isSafeThrowableClass(t.getClass())) { return t; }
+    else { return new SerializableException(t, safeCause); }
+  }
+    
+  /**
+   * Convert the given Exception to a form that will successfully serialize.  If necessary, copies the exception
+   * into a {@link SerializableException}.  Note that subsequent (or concurrent) mutation of the cause may prevent
+   * successful serialization.
+   */
+  public static Exception ensureSerializable(Exception e) {
+    Throwable safeCause = (e.getCause() == null) ? null : ensureSerializable(e.getCause());
+    if (e.getCause() == safeCause && isSafeThrowableClass(e.getClass())) { return e; }
+    else { return new SerializableException(e, safeCause); }
+  }
+    
+  /**
+   * Convert the given RuntimeException to a form that will successfully serialize.  If necessary, copies the 
+   * exception into a {@link SerializableException}.  Note that subsequent (or concurrent) mutation of the cause
+   * may prevent successful serialization.
+   */
+  public static RuntimeException ensureSerializable(RuntimeException e) {
+    Throwable safeCause = (e.getCause() == null) ? null : ensureSerializable(e.getCause());
+    if (e.getCause() == safeCause && isSafeThrowableClass(e.getClass())) { return e; }
+    else { return new SerializableException(e, safeCause); }
+  }
+  
+  /** Tests whether all fields in subclasses of Throwable have guaranteed serializable types. */
+  private static boolean isSafeThrowableClass(Class<?> c) {
+    try {
+      if (!c.getMethod("getCause").getDeclaringClass().equals(Throwable.class)) {
+        // getCause returns an arbitrary object; the actual value of the cause field may be hidden and unsafe.
+        // A lot of API classes (InvocationTargetException, RemoteException, others listed in the Throwable
+        // javadoc as having "non-standard exception chaining mechanisms") follow a convention of setting
+        // Throwable.cause to null, keeping their own cause field, and overriding getCause().  This is
+        // okay, but there's not a nice way to detect that convention, so such classes will be treated as
+        // unsafe.  We could make a list of special cases, but that list could grow arbitrarily long...
+        return false;
+      }
+    }
+    catch (NoSuchMethodException e) { return false; }
+    catch (SecurityException e) { return false; }
+    
+    Class<?> parent = c;
+    while (!parent.equals(Throwable.class) && parent != null) {
+      for (Field f : parent.getDeclaredFields()) {
+        Class<?> fType = f.getType();
+        if (!fType.isPrimitive() && !SERIALIZABLE_CLASSES.contains(f.getType())) { return false; }
+      }
+      parent = parent.getSuperclass();
+    }
+    return true;
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Tuple ensureSerializable(Tuple t) {
+    if (t instanceof Null) { return t; } // valid because Null is final
+    else if (t instanceof Wrapper<?>) { return ensureSerializable((Wrapper<?>) t); }
+    else if (t instanceof Pair<?,?>) { return ensureSerializable((Pair<?,?>) t); }
+    else if (t instanceof Triple<?,?,?>) { return ensureSerializable((Triple<?,?,?>) t); }
+    else if (t instanceof Quad<?,?,?,?>) { return ensureSerializable((Quad<?,?,?,?>) t); }
+    else if (t instanceof Quint<?,?,?,?,?>) { return ensureSerializable((Quint<?,?,?,?,?>) t); }
+    else if (t instanceof Sextet<?,?,?,?,?,?>) { return ensureSerializable((Sextet<?,?,?,?,?,?>) t); }
+    else if (t instanceof Septet<?,?,?,?,?,?,?>) { return ensureSerializable((Septet<?,?,?,?,?,?,?>) t); }
+    else if (t instanceof Octet<?,?,?,?,?,?,?,?>) { return ensureSerializable((Octet<?,?,?,?,?,?,?,?>) t); }
+    else { throw new IllegalArgumentException("Unrecognized tuple type: " + t.getClass().getName()); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to the given option value.  If the value is
+   * unchanged and the option's class is known to serialize safely, returns the option unchanged.
+   */
+  public static Option<?> ensureSerializable(Option<?> opt) {
+    if (opt instanceof Null) { return opt; } // valid because Null is final
+    else if (opt instanceof Wrapper<?>) { return ensureSerializable((Wrapper<?>) opt); }
+    else { throw new IllegalArgumentException("Unrecognized option type: " + opt.getClass().getName()); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to the given wrapped value.  If the value is
+   * unchanged and the wrapper's class is known to serialize safely, returns the wrapper unchanged.
+   */
+  public static Wrapper<?> ensureSerializable(Wrapper<?> w) {
+    Object safeVal = ensureSerializable(w.value());
+    if (w.getClass().equals(Wrapper.class) && w.value() == safeVal) { return w; }
+    else { return Wrapper.make(safeVal); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Pair<?,?> ensureSerializable(Pair<?,?> p) {
+    Object safeFirst = ensureSerializable(p.first());
+    Object safeSecond = ensureSerializable(p.second());
+    if (p.getClass().equals(Pair.class) && p.first() == safeFirst && p.second() == safeSecond) { return p; }
+    else { return Pair.make(safeFirst, safeSecond); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Triple<?,?,?> ensureSerializable(Triple<?,?,?> t) {
+    Object safeFirst = ensureSerializable(t.first());
+    Object safeSecond = ensureSerializable(t.second());
+    Object safeThird = ensureSerializable(t.third());
+    if (t.getClass().equals(Triple.class) &&
+        t.first() == safeFirst &&
+        t.second() == safeSecond &&
+        t.third() == safeThird) { 
+      return t;
+    }
+    else { return Triple.make(safeFirst, safeSecond, safeThird); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Quad<?,?,?,?> ensureSerializable(Quad<?,?,?,?> q) {
+    Object safeFirst = ensureSerializable(q.first());
+    Object safeSecond = ensureSerializable(q.second());
+    Object safeThird = ensureSerializable(q.third());
+    Object safeFourth = ensureSerializable(q.fourth());
+    if (q.getClass().equals(Quad.class) &&
+        q.first() == safeFirst &&
+        q.second() == safeSecond &&
+        q.third() == safeThird && 
+        q.fourth() == safeFourth) { 
+      return q;
+    }
+    else { return Quad.make(safeFirst, safeSecond, safeThird, safeFourth); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Quint<?,?,?,?,?> ensureSerializable(Quint<?,?,?,?,?> q) {
+    Object safeFirst = ensureSerializable(q.first());
+    Object safeSecond = ensureSerializable(q.second());
+    Object safeThird = ensureSerializable(q.third());
+    Object safeFourth = ensureSerializable(q.fourth());
+    Object safeFifth = ensureSerializable(q.fifth());
+    if (q.getClass().equals(Quint.class) &&
+        q.first() == safeFirst &&
+        q.second() == safeSecond &&
+        q.third() == safeThird && 
+        q.fourth() == safeFourth && 
+        q.fifth() == safeFifth) { 
+      return q;
+    }
+    else { return Quint.make(safeFirst, safeSecond, safeThird, safeFourth, safeFifth); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Sextet<?,?,?,?,?,?> ensureSerializable(Sextet<?,?,?,?,?,?> s) {
+    Object safeFirst = ensureSerializable(s.first());
+    Object safeSecond = ensureSerializable(s.second());
+    Object safeThird = ensureSerializable(s.third());
+    Object safeFourth = ensureSerializable(s.fourth());
+    Object safeFifth = ensureSerializable(s.fifth());
+    Object safeSixth = ensureSerializable(s.sixth());
+    if (s.getClass().equals(Quint.class) &&
+        s.first() == safeFirst &&
+        s.second() == safeSecond &&
+        s.third() == safeThird && 
+        s.fourth() == safeFourth && 
+        s.fifth() == safeFifth &&
+        s.sixth() == safeSixth) { 
+      return s;
+    }
+    else { return Sextet.make(safeFirst, safeSecond, safeThird, safeFourth, safeFifth, safeSixth); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Septet<?,?,?,?,?,?,?> ensureSerializable(Septet<?,?,?,?,?,?,?> s) {
+    Object safeFirst = ensureSerializable(s.first());
+    Object safeSecond = ensureSerializable(s.second());
+    Object safeThird = ensureSerializable(s.third());
+    Object safeFourth = ensureSerializable(s.fourth());
+    Object safeFifth = ensureSerializable(s.fifth());
+    Object safeSixth = ensureSerializable(s.sixth());
+    Object safeSeventh = ensureSerializable(s.seventh());
+    if (s.getClass().equals(Quint.class) &&
+        s.first() == safeFirst &&
+        s.second() == safeSecond &&
+        s.third() == safeThird && 
+        s.fourth() == safeFourth && 
+        s.fifth() == safeFifth &&
+        s.sixth() == safeSixth &&
+        s.seventh() == safeSeventh) { 
+      return s;
+    }
+    else { return Septet.make(safeFirst, safeSecond, safeThird, safeFourth, safeFifth, safeSixth, safeSeventh); }
+  }
+  
+  /**
+   * Apply {@code ensureSerializable()} to each of the elements of the given tuple.  If the elements
+   * are unchanged and the tuple's class is known to serialize safely, returns the tuple unchanged.
+   */
+  public static Octet<?,?,?,?,?,?,?,?> ensureSerializable(Octet<?,?,?,?,?,?,?,?> o) {
+    Object safeFirst = ensureSerializable(o.first());
+    Object safeSecond = ensureSerializable(o.second());
+    Object safeThird = ensureSerializable(o.third());
+    Object safeFourth = ensureSerializable(o.fourth());
+    Object safeFifth = ensureSerializable(o.fifth());
+    Object safeSixth = ensureSerializable(o.sixth());
+    Object safeSeventh = ensureSerializable(o.seventh());
+    Object safeEighth = ensureSerializable(o.eighth());
+    if (o.getClass().equals(Quint.class) &&
+        o.first() == safeFirst &&
+        o.second() == safeSecond &&
+        o.third() == safeThird && 
+        o.fourth() == safeFourth && 
+        o.fifth() == safeFifth &&
+        o.sixth() == safeSixth &&
+        o.seventh() == safeSeventh &&
+        o.eighth() == safeEighth) { 
+      return o;
+    }
+    else {
+      return Octet.make(safeFirst, safeSecond, safeThird, safeFourth, safeFifth, safeSixth, safeSeventh, safeEighth);
+    }
   }
   
 }
