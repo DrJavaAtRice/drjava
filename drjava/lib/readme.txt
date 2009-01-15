@@ -7,13 +7,13 @@ VERSIONS:
 
 asm-3.1.jar:              ASM 3.1 (http://asm.objectweb.org)
 docs.jar:                 docs-20060901-2010
-dynamicjava-base-15.jar:  dynamicjava-20080709
+dynamicjava-base.jar:     dynamicjava-20090115-r4705
 forms-1.0.7.jar:          JGoodies Forms
-javalanglevels.jar:       javalanglevels-20080709
+javalanglevels-base.jar:  javalanglevels-20090115-r4704
 junit.jar:                JUnit 4.4
 looks-2.1.4.jar:          JGoodies Looks
-platform.jar:             platform-20070213-2003
-plt.jar:                  plt-20080709-1847
+platform.jar:             platform-20090103-r4686
+plt.jar:                  plt-20090115-r4703
 
 buildlib/ant-contrib.jar:           ANT Contrib 1.0b3
 buildlib/cenquatasks.jar:           Distributed with Clover 1.3.9

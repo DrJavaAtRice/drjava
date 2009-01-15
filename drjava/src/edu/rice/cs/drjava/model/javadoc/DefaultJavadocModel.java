@@ -46,6 +46,7 @@ import java.util.Properties;
 
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.text.TextUtil;
@@ -79,26 +80,25 @@ public class DefaultJavadocModel implements JavadocModel {
   
   /**Manages listeners to this model. */
   private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
-  
-  /** Location of the java command to use (if not the default in {@code java.home}) */
-  private final File _javaCommand;
-  
-  /** Location of the tools library containing the javadoc code (if not on the javaCommand's boot class path) */
-  private final Iterable<File> _toolsPath;
+
+  /** Launcher for javadoc process */
+  private final JVMBuilder _jvmBuilder;
   
   /** The error model containing all current Javadoc errors. */
   private CompilerErrorModel _javadocErrorModel;
   
   /** Main constructor.
     * @param model Source of documents for this JavadocModel
-    * @param javaCommand  Location of the java command to use (if not the default in {@code java.home})
-    * @param toolsPath  Location of the tools library containing the javadoc code (if not on the 
+    * @param javaCommand  Location of the java command to use ({@code null} means the default: {@code java.home})
+    * @param toolsPath  Location of the tools library containing the javadoc code ({@code null} means the default:
     *                   javaCommand's boot class path)
     */
   public DefaultJavadocModel(GlobalModel model, File javaCommand, Iterable<File> toolsPath) {
     _model = model;
-    _javaCommand = javaCommand;
-    _toolsPath = toolsPath;
+    JVMBuilder builder = JVMBuilder.DEFAULT;
+    if (javaCommand != null) { builder = builder.javaCommand(javaCommand); }
+    if (toolsPath != null) { builder = builder.classPath(toolsPath); }
+    _jvmBuilder = builder;
     _javadocErrorModel = new CompilerErrorModel();
   }
   
@@ -312,14 +312,9 @@ public class DefaultJavadocModel implements JavadocModel {
     args = IterUtil.compose(args, ArgumentTokenizer.tokenize(custom));
     args = IterUtil.compose(args, files);
     
-    File javaCommand = (_javaCommand == null) ? new File(System.getProperty("java.home", "")) : _javaCommand;
-    Iterable<File> jvmClassPath = (_toolsPath == null) ? IterUtil.<File>empty() : _toolsPath;
-    
     List<DJError> errors = new ArrayList<DJError>();
     try {
-      Process p = ConcurrentUtil.runJavaProcess(javaCommand, "com.sun.tools.javadoc.Main", args, 
-                                                jvmClassPath, new File(System.getProperty("user.dir", "")),
-                                                new Properties(), IterUtil.<String>empty());
+      Process p = _jvmBuilder.start("com.sun.tools.javadoc.Main", args);
       Thunk<String> outputString = ConcurrentUtil.processOutAsString(p);
       Thunk<String> errorString = ConcurrentUtil.processErrAsString(p);
       p.waitFor();
