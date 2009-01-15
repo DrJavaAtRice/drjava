@@ -241,7 +241,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench-base-15.jar" />
+        <pathelement location="lib/buildlib/jlbench-base.jar" />
         <pathelement location="classes/base" />
       </classpath>
       <compilerarg value="-Xlint" />
@@ -420,7 +420,7 @@
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
-        <pathelement location="lib/buildlib/jlbench-base-15.jar" />
+        <pathelement location="lib/buildlib/jlbench-base.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
@@ -499,7 +499,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/jlbench-base-15.jar" />
+        <pathelement location="lib/buildlib/jlbench-base.jar" />
       </classpath>
       <link href="http://java.sun.com/j2se/1.5/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />
@@ -567,6 +567,7 @@
       <auxclasspath>
         <pathelement location="classes/lib" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/jlbench-base.jar" />
       </auxclasspath>
     </findbugs>
     <delete file="findbugs-excludes.xml" />

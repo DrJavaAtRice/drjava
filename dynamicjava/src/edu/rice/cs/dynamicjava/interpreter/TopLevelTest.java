@@ -32,7 +32,7 @@ public class TopLevelTest {
   
   public static Test suite() throws IOException {
     Iterable<String> excludes = IterUtil.asIterable(notYetSupported);
-    ZipFile jlbenchJar = new ZipFile("lib/buildlib/jlbench-base-14.jar");
+    ZipFile jlbenchJar = new ZipFile("lib/buildlib/jlbench-base.jar");
     LinkedList<Iterable<Benchmark>> benchmarks = new LinkedList<Iterable<Benchmark>>();
     benchmarks.add(JLBench.benchmarksForZipEntries(jlbenchJar, "edu/rice/cs/jlbench/benchmarks/java/", excludes));
     benchmarks.add(JLBench.benchmarksForZipEntries(jlbenchJar, "edu/rice/cs/jlbench/benchmarks/java5/", excludes));
