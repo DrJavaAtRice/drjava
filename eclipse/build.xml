@@ -8,7 +8,7 @@
 
   <property name="readable-project-name" value="DrJava Eclipse Plug-in" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
-  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
+  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
   <!-- Properties loaded from a file -->
   <property name="props" value="../ant.properties" />
