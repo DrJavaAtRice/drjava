@@ -62,7 +62,7 @@ public class DelayedInterrupter {
    */
   public DelayedInterrupter(Thread worker, final int timeToInterrupt) {
     _worker = worker;
-    _interrupter = new Thread() {
+    _interrupter = new Thread("DelayedInterrupter") {
       public void run() {
         try {
           sleep(timeToInterrupt);

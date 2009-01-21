@@ -332,10 +332,11 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and sets {@code start} to {@code true}.</p>
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT}, sets {@code start} to {@code true},
+   * and provides no {@code onExit} listener.</p>
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task) {
-    return computeInProcess(task, JVMBuilder.DEFAULT, true);
+    return computeInProcess(task, JVMBuilder.DEFAULT, true, null);
   }
 
   /**
@@ -345,13 +346,13 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT}.</p>
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and provides no {@code onExit} listener.</p>
    * 
    * @param start If {@code true}, the task will be started before returning; otherwise, the client should
    *              invoke {@link TaskController#start} on the returned controller.
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, boolean start) {
-    return computeInProcess(task, JVMBuilder.DEFAULT, true);
+    return computeInProcess(task, JVMBuilder.DEFAULT, start, null);
   }
   
   /**
@@ -361,13 +362,56 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that sets {@code start} to {@code true}.</p>
+   * <p>This is a convenience method that sets {@code start} to {@code true} and provides no {@code onExit}
+   * listener.</p>
    * 
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
    *                    the task's class, ConcurrentUtil, and their dependencies.
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder) {
-    return computeInProcess(task, jvmBuilder, true);
+    return computeInProcess(task, jvmBuilder, true, null);
+  }
+  
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that provides no {@code onExit} listener.</p>
+   * 
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   */
+  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, final JVMBuilder jvmBuilder,
+                                                       boolean start) {
+    return computeInProcess(task, jvmBuilder, start, null);
+  }
+
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that sets {@code start} to {@code true}.
+   * 
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
+   * @param onExit  Code to execute when the process exits after the task's successful completion.  May be null,
+   *                indicating that no action should occur.  If non-null, the TaskController's {@code value()} method
+   *                will create a listener thread (via {@link #onProcessExit}) immediately before returning
+   *                a successful result.  (In the event of an exception, the process is destroyed and {@code onExit}
+   *                is not invoked.)  Note that thread scheduling may cause {@code onExit} to be called just
+   *                <em>before</em> the controller returns a result.
+   */
+  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder,
+                                                       Runnable1<? super Process> onExit) {
+    return computeInProcess(task, jvmBuilder, true, onExit);
   }
   
   /**
@@ -380,13 +424,19 @@ public final class ConcurrentUtil {
    *                    the task's class, ConcurrentUtil, and their dependencies.
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
+   * @param onExit  Code to execute when the process exits after the task's successful completion.  May be null,
+   *                indicating that no action should occur.  If non-null, the TaskController's {@code value()} method
+   *                will create a listener thread (via {@link #onProcessExit}) immediately before returning
+   *                a successful result.  (In the event of an exception, the process is destroyed and {@code onExit}
+   *                is not invoked.)  Note that thread scheduling may cause {@code onExit} to be called just
+   *                <em>before</em> the controller returns a result.
    */
-  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, final JVMBuilder jvmBuilder,
-                                                       boolean start) {
+  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder,
+                                                       boolean start, Runnable1<? super Process> onExit) {
     String mainName = TaskProcess.class.getName();
     Iterable<String> mainArgs = IterUtil.empty();
     Thunk<Process> factory = LambdaUtil.bindFirst(LambdaUtil.bindFirst(jvmBuilder, mainName), mainArgs);
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(factory));
+    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(factory), onExit);
     if (start) { controller.start(); }
     return controller;
   }
@@ -395,11 +445,13 @@ public final class ConcurrentUtil {
   private static class ProcessController<R> extends TaskController<R> {
     private Thunk<? extends R> _task;
     private LazyThunk<Process> _process;
+    private Runnable1<? super Process> _onExit; 
     private Exception _exception; // allows an exception in doStart() to be stored
     
-    public ProcessController(Thunk<? extends R> task, LazyThunk<Process> process) {
+    public ProcessController(Thunk<? extends R> task, LazyThunk<Process> process, Runnable1<? super Process> onExit) {
       _task = task;
       _process = process;
+      _onExit = onExit;
       _exception = null;
     }
     
@@ -439,6 +491,7 @@ public final class ConcurrentUtil {
       _task = null;
       _process = null;
       _exception = null;
+      _onExit = null;
       _status = Status.CANCELED;
     }
     
@@ -453,6 +506,7 @@ public final class ConcurrentUtil {
             @SuppressWarnings("unchecked") R serializedResult = (R) objIn.readObject();
             result = serializedResult;
             _exception = (Exception) objIn.readObject();
+            if (_exception != null) { _process.value().destroy(); }
           }
           finally { objIn.close(); }
         }
@@ -473,7 +527,10 @@ public final class ConcurrentUtil {
       }
       _status = Status.FINISHED;
       if (_exception != null) { throw _exception; }
-      else { return result; }
+      else {
+        if (_onExit != null) { onProcessExit(_process.value(), _onExit); }
+        return result;
+      }
     }
     
   }
@@ -525,7 +582,7 @@ public final class ConcurrentUtil {
    */
   public static Remote exportInProcess(Thunk<? extends Remote> factory)
       throws InterruptedException, InvocationTargetException, IOException {
-    return exportInProcess(factory, JVMBuilder.DEFAULT);
+    return exportInProcess(factory, JVMBuilder.DEFAULT, null);
   }
   
   /**
@@ -543,7 +600,29 @@ public final class ConcurrentUtil {
    */
   public static Remote exportInProcess(Thunk<? extends Remote> factory, JVMBuilder jvmBuilder)
       throws InterruptedException, InvocationTargetException, IOException {
-    try { return computeInProcess(new ExportRemoteTask(factory), jvmBuilder).value(); }
+    return exportInProcess(factory, jvmBuilder, null);
+  }
+  
+  /**
+   * Export the given RMI object in a new process and return the exported stub.  If any exception occurs,
+   * the process is destroyed.
+   * @param factory  A thunk to evaluate in the remote JVM, producing an object that can be exported via
+   *                 {@link UnicastRemoteObject#exportObject(Remote, int)}.  The factory must be serializable.
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the factory's class, ConcurrentUtil, and their dependencies.
+   * @param onExit  Code to execute when the process exits, assuming a result is successfully returned.  May be
+   *                {@code null}, indicating that nothing should be run.  If an exception occurs here, the process is
+   *                destroyed immediately and this listener will not be invoked.  Handled via {@link #onProcessExit}.
+   * @return  An RMI proxy that can be cast to the remote interface type of the object returned by
+   *          {@code factory}.  (See {@link Remote} for the definition of "remote interface.")
+   * @throws IOException  If a problem occurs in starting the new process or serializing {@code factory}.
+   * @throws InvocationTargetException  If an exception occurs in {@code factory} or while exporting the result.
+   * @throws InterruptedException  If this thread is interrupted while waiting for the result to be produced.
+   */
+  public static Remote exportInProcess(Thunk<? extends Remote> factory, JVMBuilder jvmBuilder,
+                                       Runnable1<? super Process> onExit)
+      throws InterruptedException, InvocationTargetException, IOException {
+    try { return computeInProcess(new ExportRemoteTask(factory), jvmBuilder, onExit).value(); }
     catch (WrappedException e) {
       Throwable cause = e.getCause();
       if (cause instanceof InterruptedException) { throw (InterruptedException) cause; }
@@ -568,6 +647,21 @@ public final class ConcurrentUtil {
   public static boolean processIsTerminated(Process p) {
     try { p.exitValue(); return true; }
     catch (IllegalThreadStateException e) { return false; }
+  }
+  
+  /**
+   * Create a daemon thread that will invoke {@link Process#waitFor} on the given process, then run the given
+   * listener.  If the thread is interrupted while blocked on {@code waitFor()}, the listener will not be run. 
+   */
+  public static void onProcessExit(final Process p, final Runnable1<? super Process> listener) {
+    Thread t = new Thread("ConcurrentUtil.onProcessExit") {
+      public void run() {
+        try { p.waitFor(); listener.run(p); }
+        catch (InterruptedException e) { /* terminate early */ }
+      }
+    };
+    t.setDaemon(true);
+    t.start();
   }
   
   /**
@@ -613,7 +707,7 @@ public final class ConcurrentUtil {
    * @return  The thread performing the copy operation, already started.
    */
   public static Thread copyProcessOut(Process p, OutputStream out, boolean close) {
-    Thread result = new Thread(new CopyStream(p.getInputStream(), out, close));
+    Thread result = new Thread(new CopyStream(p.getInputStream(), out, close), "ConcurrentUtil.copyProcessOut");
     result.setDaemon(true); // this thread should not keep the JVM from exiting
     // TODO: If the parent process quits, can the child get stuck when its buffer fills?
     result.start();
@@ -650,7 +744,7 @@ public final class ConcurrentUtil {
    * @return  The thread performing the copy operation, already started.
    */
   public static Thread copyProcessErr(Process p, OutputStream err, boolean close) {
-    Thread result = new Thread(new CopyStream(p.getErrorStream(), err, close));
+    Thread result = new Thread(new CopyStream(p.getErrorStream(), err, close), "ConcurrentUtil.copyProcessErr");
     result.setDaemon(true); // this thread should not keep the JVM from exiting
     // TODO: If the parent process quits, can the child get stuck when its buffer fills?
     result.start();
