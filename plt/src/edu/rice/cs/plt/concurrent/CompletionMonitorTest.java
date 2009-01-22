@@ -42,10 +42,10 @@ public class CompletionMonitorTest extends TestCase {
   
   public void testDegenerateSignal() throws InterruptedException {
     CompletionMonitor as = new CompletionMonitor(true);
-    assertTrue("Flag should start out as true", as.isSignalled());
+    assertTrue("Flag should start out as true", as.isSignaled());
     
     DelayedInterrupter interrupter = new DelayedInterrupter(50);
-    as.ensureSignalled();
+    as.ensureSignaled();
     interrupter.abort();
   }
   
@@ -54,22 +54,22 @@ public class CompletionMonitorTest extends TestCase {
     
     DelayedInterrupter interrupter1 = new DelayedInterrupter(300);
     _flag = false;
-    assertFalse(as.isSignalled());
+    assertFalse(as.isSignaled());
     new Thread() { public void run() { ConcurrentUtil.sleep(100); _flag = true; as.signal(); } }.start();
-    as.ensureSignalled();
+    as.ensureSignaled();
     assertTrue(_flag);
     interrupter1.abort();
-    assertTrue(as.isSignalled());
+    assertTrue(as.isSignaled());
     
     DelayedInterrupter interrupter2 = new DelayedInterrupter(10);
-    assertTrue(as.isSignalled());
-    as.ensureSignalled(); // should not block
+    assertTrue(as.isSignaled());
+    as.ensureSignaled(); // should not block
     interrupter2.abort();
     
     as.reset();
-    assertFalse(as.isSignalled());
+    assertFalse(as.isSignaled());
     @SuppressWarnings("unused") DelayedInterrupter interrupter3 = new DelayedInterrupter(50);
-    try { as.ensureSignalled(); fail("Monitor should not be signalled"); }
+    try { as.ensureSignaled(); fail("Monitor should not be signalled"); }
     catch (InterruptedException e) { /* expected behavior */ }
   }
   

@@ -34,13 +34,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import edu.rice.cs.plt.lambda.Condition;
 
 /**
- * Enables threads to communicate with each other by signaling. Typically, this communication 
- * concerns a task which one thread must complete before other threads can proceed.
+ * Provides a convenient facility for blocking until a boolean flag is signaled.  Typically, this is used 
+ * for communication in which one thread must complete a task before other threads can proceed.
  */
-public class CompletionMonitor {
+public class CompletionMonitor implements Condition {
   private volatile boolean _signal;
   
   /** Create an unsignaled completion monitor. */
@@ -48,24 +48,28 @@ public class CompletionMonitor {
   
   /**
    * Create a completion monitor in the given initial state.  If signaled is {@code true}, invocations of
-   * {@link #ensureSignalled} will not block until {@link #reset} is invoked.
+   * {@link #ensureSignaled} will not block until {@link #reset} is invoked.
    */
   public CompletionMonitor(boolean signaled) { _signal = signaled; }
   
   /** Returns whether the flag is currently set */
-  public boolean isSignalled() { return _signal; }
+  public boolean isSignaled() { return _signal; }
+  
+  /** Returns whether the flag is currently set */
+  public boolean isTrue() { return _signal; }
   
   /** Revert to the unsignaled state */
   public void reset() { _signal = false; }
   
   /** Sets the state to signaled and alerts all blocked threads */
   synchronized public void signal() {
+    boolean changed = !_signal;
     _signal = true;
-    this.notifyAll();
+    if (changed) { this.notifyAll(); }
   }
   
   /** Ensures that the monitor has been signaled before continuing.  Blocks if necessary. */
-  synchronized public void ensureSignalled() throws InterruptedException {
+  synchronized public void ensureSignaled() throws InterruptedException {
     while (!_signal) { this.wait(); }
   }
   
@@ -73,8 +77,8 @@ public class CompletionMonitor {
    * Ensures that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait is interrupted,
    * returns {@code false}.
    */
-  public boolean attemptEnsureSignalled() {
-    try { ensureSignalled(); return true; }
+  public boolean attemptEnsureSignaled() {
+    try { ensureSignaled(); return true; }
     catch (InterruptedException e) { return false; }
   }
   

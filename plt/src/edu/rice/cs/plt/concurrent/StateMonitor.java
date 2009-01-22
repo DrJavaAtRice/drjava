@@ -34,30 +34,62 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicReference;
+
 import edu.rice.cs.plt.lambda.Box;
 
-/** 
- * <p>A thread-safe box implementation.  Extends {@link AtomicReference} so that it can be treated as a
- * {@link Box}.</p>
+/**
+ * <p>Provides a convenient facility for blocking until a change to an expected state explicitly occurs.
+ * Each time the wrapped state value changes, the blocked threads check to see if the new state matches
+ * the desired state (this test is performed with {@code equals()}).</p>
  * 
- * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
- * only if the wrapped object is serializable.</p>
- */
-public class ConcurrentBox<T> extends AtomicReference<T> implements Box<T> {
+ * <p>Ideally, this class would extend {@link ConcurrentBox}.  Unfortunately, the methods of {@link AtomicReference}
+ * are {@code final}, and so they can't be overridden here.  Also, since locking is necessary when performing thread
+ * notification, these implementations simply use synchronization, rather than relying on built-in non-blocking
+ * atomic primitives.</p>
+ */ 
+public class StateMonitor<T> implements Box<T>, Serializable {
   
-  /** Create a box initialized with {@code val} */
-  public ConcurrentBox(T val) { super(val); }
+  private volatile T _state;
   
-  /** Create a box initialized with {@code null} */
-  public ConcurrentBox() { super(null); }
+  public StateMonitor(T state) { _state = state; }
   
-  public T value() { return get(); }
+  public T value() { return _state; }
   
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make(T val) { return new ConcurrentBox<T>(val); }
-
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make() { return new ConcurrentBox<T>(); }
+  public synchronized void set(T newState) {
+    _state = newState;
+    this.notifyAll();
+  }
+  
+  public synchronized T getAndSet(T state) {
+    T result = _state;
+    _state = state;
+    this.notifyAll();
+    return result;
+  }
+  
+  public synchronized boolean compareAndSet(T expect, T update) {
+    if (_state == expect) {
+      _state = update;
+      this.notifyAll();
+      return true;
+    }
+    else { return false; }
+  }
+  
+  /** Ensures that the state equals {@code expected} before continuing.  Blocks if necessary. */
+  public synchronized void ensureState(T expected) throws InterruptedException {
+    while ((expected == null) ? _state != null : !expected.equals(_state)) { this.wait(); }
+  }
+  
+  /**
+   * Ensures that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait is interrupted,
+   * returns {@code false}.
+   */
+  public boolean attemptEnsureState(T expected) {
+    try { ensureState(expected); return true; }
+    catch (InterruptedException e) { return false; }
+  }
   
 }

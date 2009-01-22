@@ -68,7 +68,7 @@ public class AsynchronousLogSink implements LogSink {
   
   /** If any log messages have been enqueued but not yet recorded, block until they are recorded. */
   public void flush() throws InterruptedException {
-    _emptyNotifier.ensureSignalled();
+    _emptyNotifier.ensureSignaled();
   }
 
   public void log(StandardMessage m) { handle(m); }
@@ -96,7 +96,7 @@ public class AsynchronousLogSink implements LogSink {
     
     public void run() {
       while (true) {
-        _nonemptyNotifier.attemptEnsureSignalled();
+        _nonemptyNotifier.attemptEnsureSignaled();
         while (!_queue.isEmpty()) {
           _queue.remove().send(_delegate);
         }

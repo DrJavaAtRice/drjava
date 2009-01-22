@@ -247,10 +247,10 @@ public final class ConcurrentUtil {
     protected void setThread(Thread t) { _t = t; }
     
     protected void authorizeContinue() throws InterruptedException {
-      if (!_continueMonitor.isSignalled()) {
+      if (!_continueMonitor.isSignaled()) {
         _status = Status.PAUSED;
         debug.log("Waiting for signal to continue");
-        _continueMonitor.ensureSignalled();
+        _continueMonitor.ensureSignaled();
         debug.log("Received signal to continue");
         _status = Status.RUNNING;
       }

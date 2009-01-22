@@ -34,30 +34,41 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
-import java.util.concurrent.atomic.AtomicReference;
-import edu.rice.cs.plt.lambda.Box;
+import java.util.LinkedList;
+import java.util.List;
 
-/** 
- * <p>A thread-safe box implementation.  Extends {@link AtomicReference} so that it can be treated as a
- * {@link Box}.</p>
- * 
- * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
- * only if the wrapped object is serializable.</p>
- */
-public class ConcurrentBox<T> extends AtomicReference<T> implements Box<T> {
-  
-  /** Create a box initialized with {@code val} */
-  public ConcurrentBox(T val) { super(val); }
-  
-  /** Create a box initialized with {@code null} */
-  public ConcurrentBox() { super(null); }
-  
-  public T value() { return get(); }
-  
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make(T val) { return new ConcurrentBox<T>(val); }
+import edu.rice.cs.plt.lambda.Condition;
 
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make() { return new ConcurrentBox<T>(); }
+import junit.framework.TestCase;
+
+public class ConditionMonitorTest extends TestCase {
   
+  public void test() throws InterruptedException {
+    final List<String> l = new LinkedList<String>();
+    final ConditionMonitor m = new ConditionMonitor(new Condition() {
+      public boolean isTrue() { return l.isEmpty(); }
+    });
+    assertTrue(m.isTrue());
+    
+    DelayedInterrupter interrupter1 = new DelayedInterrupter(50);
+    m.ensureTrue();
+    assertEquals(0, l.size());
+    interrupter1.abort();
+    
+    l.add("x");
+    assertEquals(1, l.size());
+    assertFalse(m.isTrue());
+    DelayedInterrupter interrupter2 = new DelayedInterrupter(300);
+    new Thread() { public void run() { ConcurrentUtil.sleep(100); l.remove("x"); m.check(); } }.start();
+    m.ensureTrue();
+    assertTrue(m.isTrue());
+    assertEquals(0, l.size());
+    interrupter2.abort();
+
+    l.add("y");
+    @SuppressWarnings("unused") DelayedInterrupter interrupter4 = new DelayedInterrupter(50);
+    try { m.ensureTrue(); fail("Monitor should block until interrupted"); }
+    catch (InterruptedException e) { /* expected behavior */ }
+  }
+      
 }

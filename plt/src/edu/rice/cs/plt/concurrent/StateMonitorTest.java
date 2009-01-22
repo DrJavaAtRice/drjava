@@ -34,30 +34,35 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
-import java.util.concurrent.atomic.AtomicReference;
-import edu.rice.cs.plt.lambda.Box;
+import junit.framework.TestCase;
 
-/** 
- * <p>A thread-safe box implementation.  Extends {@link AtomicReference} so that it can be treated as a
- * {@link Box}.</p>
- * 
- * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
- * only if the wrapped object is serializable.</p>
- */
-public class ConcurrentBox<T> extends AtomicReference<T> implements Box<T> {
+public class StateMonitorTest extends TestCase {
   
-  /** Create a box initialized with {@code val} */
-  public ConcurrentBox(T val) { super(val); }
+  volatile boolean _flag; // Set and reset by tests to check for proper sequencing
   
-  /** Create a box initialized with {@code null} */
-  public ConcurrentBox() { super(null); }
+  public void test() throws InterruptedException {
+    final StateMonitor<Integer> m = new StateMonitor<Integer>(0);
+    assertEquals((Integer) 0, m.value());
+    
+    DelayedInterrupter interrupter1 = new DelayedInterrupter(50);
+    m.ensureState(0);
+    interrupter1.abort();
+    
+    DelayedInterrupter interrupter2 = new DelayedInterrupter(300);
+    _flag = false;
+    new Thread() { public void run() { ConcurrentUtil.sleep(100); _flag = true; m.set(1); } }.start();
+    m.ensureState(1);
+    assertTrue(_flag);
+    interrupter2.abort();
+    assertEquals((Integer) 1, m.value());
+    
+    DelayedInterrupter interrupter3 = new DelayedInterrupter(10);
+    m.ensureState(1); // should not block
+    interrupter3.abort();
   
-  public T value() { return get(); }
-  
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make(T val) { return new ConcurrentBox<T>(val); }
-
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make() { return new ConcurrentBox<T>(); }
-  
+    @SuppressWarnings("unused") DelayedInterrupter interrupter4 = new DelayedInterrupter(50);
+    try { m.ensureState(2); fail("Monitor should block until interrupted"); }
+    catch (InterruptedException e) { /* expected behavior */ }
+  }
+      
 }

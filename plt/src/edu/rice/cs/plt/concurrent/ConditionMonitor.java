@@ -34,30 +34,42 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
-import java.util.concurrent.atomic.AtomicReference;
-import edu.rice.cs.plt.lambda.Box;
+import edu.rice.cs.plt.lambda.Condition;
 
-/** 
- * <p>A thread-safe box implementation.  Extends {@link AtomicReference} so that it can be treated as a
- * {@link Box}.</p>
- * 
- * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
- * only if the wrapped object is serializable.</p>
- */
-public class ConcurrentBox<T> extends AtomicReference<T> implements Box<T> {
+/**
+ * Provides a convenient facility for blocking until an arbitrary condition is satisfied.
+ * Each time {@link #check} is invoked, the blocked threads check to see if the condition 
+ * has become {@code true}.  Note that there is no way for this to occur "automatically" &mdash;
+ * the only way the monitor can be made aware of a possible change is by an explicit call to {@code check()}.
+ */ 
+public class ConditionMonitor implements Condition {
+  private final Condition _condition;
   
-  /** Create a box initialized with {@code val} */
-  public ConcurrentBox(T val) { super(val); }
+  /** Create an unsignaled completion monitor. */
+  public ConditionMonitor(Condition condition) { _condition = condition; }
   
-  /** Create a box initialized with {@code null} */
-  public ConcurrentBox() { super(null); }
+  /** Returns whether the flag is currently set */
+  public boolean isTrue() { return _condition.isTrue(); }
   
-  public T value() { return get(); }
+  /** Check the condition and, if it is now {@code true}, notify all blocked threads. */
+  synchronized public void check() {
+    // each thread will check the condition again, but we can optimize the case where the condition is false
+    // by checking once here
+    if (_condition.isTrue()) { this.notifyAll(); }
+  }
   
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make(T val) { return new ConcurrentBox<T>(val); }
-
-  /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ConcurrentBox<T> make() { return new ConcurrentBox<T>(); }
+  /** Ensures that the condition is true before continuing.  Blocks if necessary. */
+  synchronized public void ensureTrue() throws InterruptedException {
+    while (!_condition.isTrue()) { this.wait(); }
+  }
+  
+  /**
+   * Ensures that the condition is true before continuing.  Blocks if necessary.  If the wait is interrupted,
+   * returns {@code false}.
+   */
+  public boolean attemptEnsureTrue() {
+    try { ensureTrue(); return true; }
+    catch (InterruptedException e) { return false; }
+  }
   
 }
