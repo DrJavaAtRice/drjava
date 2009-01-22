@@ -1,4 +1,6 @@
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 
 <!--
   Quick Start Documentation for DrJava
@@ -7,7 +9,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2005-8-03</date>
+    <date>2006-8-18</date>
     <title>A Quick Start Guide to DrJava</title>
   </bookinfo>
   <toc></toc>
@@ -26,7 +28,7 @@ introduce you to some of its key features.</para>
   </chapter>
 
 
-  <!-- ---- Chapter: Starts and Beginnings (Getting Ready to Use DrJava) ---- -->
+  <!-- **** Chapter: Starts and Beginnings (Getting Ready to Use DrJava) **** -->
   <chapter id="gettingready">
     <title>Getting Ready to Use DrJava</title>
     <para>This chapter describes how to start using DrJava, including where to get the program and how to run it.</para>
@@ -35,7 +37,7 @@ introduce you to some of its key features.</para>
       <title>Downloading the JDK</title>
       <para> To compile programs in DrJava, you must make sure you have a Java JDK (Java Development Kit) installed on your machine.  All Java distributions available for downloading come in two forms: a JDK and a JRE (Java Runtime Environment).  A JDK distribution consists of a JRE distribution (a Java Virtual Machine implementation) plus a collection of development tools including <command>javac</command>, a Java compiler, and <command>javadoc</command>, Java documentation generator. DrJava requires a JDK installation because it uses both <command>javac</command> and <command>javadoc</command> as plugin components.  Without these components, DrJava can only edit Java programs; it cannot execute them or generate documentation for them. If you do not have a JDK installed already, you can download one for Windows, Linux, or Solaris computers directly from the Sun Microsystems webite.  Apple Macintosh machines running Mac OS X already have a JDK installed.  To download a JDK from the Sun website, just follow these steps!  </para>
 
-<itemizedlist mark=number>
+<itemizedlist mark="number">
 	<listitem> <para>
    	 Go to <ulink url="http://java.sun.com">http://java.sun.com.</ulink>
 	</para> </listitem>
@@ -49,7 +51,7 @@ introduce you to some of its key features.</para>
 	Click on the link to download the JDK.
     	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="JDKDownload.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="JDKDownload.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</para></listitem>
@@ -63,7 +65,7 @@ introduce you to some of its key features.</para>
     <section id="downloading">
       <title>Downloading DrJava</title>
       <para>Follow these easy step by step instructions to download DrJava:</para>
-	<itemizedlist mark=opencircle>
+	<itemizedlist mark="opencircle">
       <listitem><para>
 	Go to <ulink url="http://www.drjava.org">http://www.drjava.org.</ulink>
 	</para></listitem>
@@ -72,7 +74,7 @@ introduce you to some of its key features.</para>
 Development Build jar instead. To do so, click on the "more download options" link.
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -81,7 +83,7 @@ Development Build jar instead. To do so, click on the "more download options" li
 	Click on one of the Download buttons to go to the download server.  Choose a site to download the file from, and then click on the corresponding icon in the "Download" column on the far right to start the download.
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DownloadServer.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DownloadServer.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</para></listitem>
@@ -95,7 +97,7 @@ Development Build jar instead. To do so, click on the "more download options" li
     </section>
 </chapter>
 
-  <!-- ---- Using DrJava: Basics ---- -->
+  <!-- **** Using DrJava: Basics **** -->
   <chapter id="usingdj">
     <title>Using DrJava, the Basics</title>
 	<para> Okay, you've downloaded DrJava.  Now, how do you use it?  You're about to find out.  This chapter will tell you how to run DrJava as well as how to do basic file editing and compilation. You'll also learn how to use the most powerful feature of DrJava: The Interactions Pane</para>   
@@ -110,14 +112,14 @@ Development Build jar instead. To do so, click on the "more download options" li
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="OpenDialog.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="OpenDialog.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	
       <para>Once you have opened an existing file or created a new file, you will notice that the names of all open files are listed on the left of the screen, and the text of one file is displayed on the right.  Select a file name on the left to have the file's text display on the right.  The right pane is called the Definitions Pane.  It is where you edit your files.</para>
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="PlainOldDrJavaDefault.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="PlainOldDrJavaDefault.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
     </section>
@@ -130,7 +132,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="SaveDialog.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="SaveDialog.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
     </section>
@@ -142,7 +144,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CompilerErrors.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="CompilerErrors.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
     </section>
@@ -152,7 +154,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPaneFull.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="InteractionsPaneFull.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -161,7 +163,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPane1Plus1.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="InteractionsPane1Plus1.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -169,14 +171,14 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPaneTom.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="InteractionsPaneTom.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
 	<para>3. In addition, you can define classes and interfaces in the Interactions Pane, and then instantiate these classes and test them.  This example shows how to create a class and call one of its methods:</para>
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPaneTryMe.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="InteractionsPaneTryMe.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -184,7 +186,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPanePackageImport.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="InteractionsPanePackageImport.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</section>
@@ -197,7 +199,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="SystemInInput.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="SystemInInput.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -205,7 +207,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="SystemInInputInteractionsPane.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="SystemInInputInteractionsPane.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -217,12 +219,12 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="FindReplace.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="FindReplace.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 	<para> The Find and Replace menu is a useful way to search for specific text in your files, and replace it, if you so choose. To launch the Find/Replace tab, either use the keyboard shortcut Ctrl-F or choose "Edit, Find and Replace" from the menu at the top of the DrJava window. Once you do this, the Find/Replace tab will appear at the bottom of the screen. Type the text you want to search for in the "Find Next" box, and if you want to replace it with anything, type that in the "Replace With" box. Then, chose which of the four options to the right of those text boxes that you want to use, and press one of the buttons at the bottom, or the Enter key. The direction of the search executed by pressing the Enter key depends on the direction of the last search. (The last direction is indicated by the label of the Find box: "Find Next" or "Find Prev").</para>
 
-	<itemizedlist mark=opencircle>
+	<itemizedlist mark="opencircle">
 	<listitem><formalpara>
 	<title>Match Case:</title> <para> Makes the search becomes case sensitive.</para>
 	</formalpara></listitem>
@@ -242,7 +244,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</itemizedlist>
 
 	<para>To go from instance to instance of your search text, use the four buttons at the bottom.  </para>
-	<itemizedlist mark=opencircle>
+	<itemizedlist mark="opencircle">
       <listitem><formalpara>
 	<title>Find Next:</title> <para>Finds the next instance. Switches the label of the Find box to "Find Next", indicating the direction of the next search.</para>
 	</formalpara></listitem>
@@ -255,7 +257,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<title>Find All:</title> <para>Find all occurrences of the search string. This opens a new "Find: word" pane, where "word" is replaced with the search string. In this pane, view all found instances and jump to their locations in the text. You can have as many "Find All" panes as you like open concurrently. The "Find All" tool also automatically underlines the occurrences. In the screenshot below, the user searched for the word "System":
         <mediaobject>
        		<imageobject>
-       		<imagedata fileref="FindAll.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="FindAll.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject></para>
 	</formalpara></listitem>
@@ -281,7 +283,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="FindReplaceTwoLines.jpg" format="jpg" scale=50 scalefit="2">
+       		<imagedata fileref="FindReplaceTwoLines.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -301,7 +303,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="TestsPassed.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="TestsPassed.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -309,7 +311,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="TestFails.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="TestFails.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
   
@@ -323,7 +325,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="JavaDocMenu.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="JavaDocMenu.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	
@@ -331,7 +333,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="Javadoc.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="Javadoc.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -345,7 +347,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="EnableDebugger.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="EnableDebugger.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -354,13 +356,13 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 		<para>The Debug Panel has three tabs to help you track control flow in your program.  These tabs are labeled Watches, Stack, and Threads.</para>
 	</formalpara>
 
-	<itemizedlist mark=opencircle>
+	<itemizedlist mark="opencircle">
 	<listitem><formalpara>
 		<title>Watches:</title> 
 		<para> This is a table that displays the instantaneous values of specified fields and variables given the current line that the debugger is on.  To add a watch, click in the leftmost column on the first empty row.  A cursor should appear and you can type in the name of the field or variable.  You can also put in expressions that require evaluation such as x + 1 or array accesses.</para> </formalpara>
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="VariableWatch2.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="VariableWatch2.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -372,7 +374,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="StackStuff.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="StackStuff.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -384,7 +386,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 		</formalpara>
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="Threads.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="Threads.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -399,7 +401,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
  	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="BreakpointsPanel.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="BreakpointsPanel.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 	</section>
@@ -410,14 +412,14 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ToggleBreakpoint.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="ToggleBreakpoint.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
 <para>Once a breakpoint is set, it is highlighted in red, like this:</para>
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="BreakpointSet.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="BreakpointSet.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -425,7 +427,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="EnableDebugMode.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="EnableDebugMode.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -433,9 +435,9 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="HitBreakpoint.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="HitBreakpoint.jpg" format="jpg" width="80%" />
        		</imageobject>
-     	</mediaobject
+     	</mediaobject>
 
 <para>At this point, the line that is about to be executed is highlighted in a special color (light blue by default), the "resume", "step into", "step over", and "step out" buttons are enabled, and a special prompt appears in the Interactions Pane.</para>
 
@@ -489,7 +491,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="FullTreeView.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="FullTreeView.jpg" format="jpg" width="80%" />
        		</imageobject>
 		</mediaobject>
 
@@ -521,7 +523,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ProjectFolderOptions.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="ProjectFolderOptions.jpg" format="jpg" width="80%" />
        		</imageobject>
 		</mediaobject>
 
@@ -534,7 +536,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="NewProjectSaveDialog.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="NewProjectSaveDialog.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -542,7 +544,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ProjectSaveDialogFromFiles.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="ProjectSaveDialogFromFiles.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -565,7 +567,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectOpen.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectOpen.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 	</section>
@@ -582,7 +584,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectCompileFromTopMenu.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectCompileFromTopMenu.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 
@@ -591,7 +593,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectCompileFromSideMenu.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectCompileFromSideMenu.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 
@@ -606,7 +608,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectTest.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectTest.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 
@@ -619,7 +621,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectRunMainDocument.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectRunMainDocument.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 
@@ -634,7 +636,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectCleanBuildDirectory.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectCleanBuildDirectory.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 	</section>
@@ -670,7 +672,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectProperties.jpg" format="jpg" scale=50 scalefit="1">
+     	<imagedata fileref="ProjectProperties.jpg" format="jpg" width="80%" />
        	</imageobject>
      	</mediaobject>
 	</section>
@@ -707,7 +709,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ResourceLocation.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="ResourceLocation.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -716,13 +718,13 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<itemizedlist>
 	<listitem><formalpara>
 	<title>JSR-14 and JSR-14 Collections Path:</title>
-	<para>The JSR-14 jar is the location of the JSR14 compiler, while the JSR-14 Collections path is a collection of the generified collection classes, such as Vector<?>.  If you are not using the JSR14 compiler, you can just leave these blank.</para>
+	<para>The JSR-14 jar is the location of the JSR14 compiler, while the JSR-14 Collections path is a collection of the generified collection classes, such as Vector&lt;?&gt;.  If you are not using the JSR14 compiler, you can just leave these blank.</para>
 	</formalpara></listitem>
 	</itemizedlist>
 
 	</section>
 
-	<section id="displayoptions"
+	<section id="displayoptions">
 	<title>Display Options</title>
 	<para>The Display Options menu allows you to control how DrJava looks. </para>
 
@@ -776,7 +778,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DisplayOptions.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DisplayOptions.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -813,7 +815,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DisplayOptionsFonts.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DisplayOptionsFonts.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -826,7 +828,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DisplayOptionsColors.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DisplayOptionsColors.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -839,7 +841,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="KeyBindings.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="KeyBindings.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -852,7 +854,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CompilerOptions.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="CompilerOptions.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
 
@@ -882,7 +884,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DebuggerPreferences.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DebuggerPreferences.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -923,7 +925,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="JavadocPreferences.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="JavadocPreferences.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -935,7 +937,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="Notifications.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="Notifications.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 
@@ -1014,7 +1016,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="Miscellaneous.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="Miscellaneous.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
 

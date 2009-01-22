@@ -8,13 +8,25 @@
 
 <chapter id="systemArchitecture">
   <title>System Architecture</title>
-  <para>[TODO]</para>
+  <para>This section is a high-level overview of the various components that make up the DrJava application.  Important design decisions, especially those that can't easily be described in a single class's comments, should be discussed here.  The scope is restricted to code that is actively developed as part of the DrJava project; third-party tools and libraries are discussed in the <link linkend="supportingTechnology">Supporting Technology</link> chapter.</para>
   
-  <!-- Clipped from the previous docs (for the description under the "docs" module):
-        <para>Emacs and modern versions of KDE's KWrite are both good editors for DocBook files.  Please try to maintain a consistent style within the documentation, both in tone (eg. somewhat informal &mdash; "you" instead of "the user") and formatting (eg. literal tags for small bits of code, paragraphs on one line, etc).</para>
--->
-
-<!-- Also clipped from the previous docs:
+  
+  <section id="architectureOverview">
+    <title>Overview</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="documentModel">
+    <title>The Document Model</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="configFramework">
+    <title>The Configuration Framework</title>
+    <para>[TODO]</para>
+<!-- Clipped from the previous docs:
 
         <formalpara>
           <title>Use of the Configuration Framework</title>
@@ -22,6 +34,49 @@
         </formalpara>
         <para>It is very important never to use the configuration framework in the Interpreter JVM, since this will instantiate a new copy of the framework inconsistent with the one in the Main JVM.  (It also causes the "SlaveJVMRunner" icon to appear in Mac OS X.)  It is also very important never to use the configuration framework in the Eclipse plug-in, because it causes Eclipse to crash.  (We're not sure why, but it's better for us to use Eclipse's preferences in that world anyway.)</para>
         -->
+  </section>
+  
+  
+  <section id="projects">
+    <title>Projects</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="compilerAdapters">
+    <title>Compiler Adapters</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="dynamicJava">
+    <title>DynamicJava Interpreter</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="debugger">
+    <title>Debugger</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="languageLevels">
+    <title>Language Levels Compiler</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <section id="eclipsePlugin">
+    <title>Eclipse Plug-in</title>
+    <para>[TODO]</para>
+  </section>
+  
+  
+  <!-- Clipped from the previous docs (for the description under the "docs" module):
+        <para>Emacs and modern versions of KDE's KWrite are both good editors for DocBook files.  Please try to maintain a consistent style within the documentation, both in tone (eg. somewhat informal &mdash; "you" instead of "the user") and formatting (eg. literal tags for small bits of code, paragraphs on one line, etc).</para>
+-->
+
 
   
 </chapter>

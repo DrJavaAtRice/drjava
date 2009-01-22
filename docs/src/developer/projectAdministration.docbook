@@ -7,10 +7,78 @@
 
 <chapter id="projectAdministration">
   <title>Project Administration</title>
-  <para>[TODO]</para>
+  <para>This section contains instructions for project administrators.</para>
+  
+  
+  <section>
+    <title>Making a File Release</title>
+    <para>
+      <orderedlist>
+      
+      <listitem><para>Make sure you have a clean, up-to-date local copy without any local modifications (<literal>ant update</literal>).</para></listitem>
+      
+      <listitem><para>Run <literal>ant release</literal> to generate the release files and create a tag in the repository (use <literal>ant release-beta</literal> or <literal>ant release-stable</literal> instead, if necessary).  This will run the tests in order to double-check that there is really nothing wrong with the current code.  Note that, to help identify the application's origin, the jar file will include your user name in its manifest.</para></listitem>
+      
+      <listitem><para>You may want to verify that the program runs and behaves as expected.</para></listitem>
+      
+      <listitem><para>Connect to your personal space on the SourceForge FTP server and upload the files.  The FTP URL includes your user name: for example, <filename>https://frs.sourceforge.net/s/so/someuser/uploads</filename>.  In OS X, you can do this in Finder using the "Connect to Server" command.  When releasing DrJava, the following files should be uploaded:
+        <itemizedlist>
+          <listitem><para>Application jar: <filename>drjava-<replaceable>version-tag</replaceable>.jar</filename></para></listitem>
+          <listitem><para>Windows application: <filename>drjava-<replaceable>version-tag</replaceable>.exe</filename></para></listitem>
+          <listitem><para>Mac application: <filename>drjava-<replaceable>version-tag</replaceable>-osx.tar.gz</filename></para></listitem>
+          <listitem><para>Sources: <filename>drjava-<replaceable>version-tag</replaceable>-src.zip</filename></para></listitem>
+        </itemizedlist>
+      Note that the javadocs should not be included in the file release (they will be posted on the Web site later).  While waiting for files to copy, you may want to assemble the release notes (see below).</para></listitem>
+      
+      <listitem><para>Go to the <ulink url="https://sourceforge.net/projects/drjava/">SourceForge project page</ulink> and, after making sure you are logged in, go to "Admin", then "File Releases".  Click "Add Release" next to the appropriate package.</para></listitem>
+      
+      <listitem><para>Set the release name to the version tag (which is the name of the <filename>.jar</filename> file).</para></listitem>
+      
+      <listitem><para>Insert the Release Notes and Change Log, check "Preserve my preformatted text," and click "Submit/Refresh."  The Release Notes is typically a one- or two-paragraph summary of the important changes since the last release of the same type (e.g., stable releases should summarize all changes since the last stable).  The Change Log, on the other hand, is an itemized list of all significant user-visible changes.  You may want to look at some older notes to help preserve a consistent style.  The best way to put together these notes is by consulting the Subversion logs, either via <literal>svn log</literal> or by clicking on a directory's version number in the <ulink url="http://drjava.svn.sourceforge.net/viewvc/drjava/trunk/">browsable source tree</ulink>.  Note that Subversion has an annoying habit of not wrapping lines when change logs are displayed.  As a result, you must manually insert line breaks, keeping the lines relatively short (no more than 80 characters).  Checking the "Preserve my preformatted text" box prevents the system from discarding these manual breaks.</para></listitem>
+      
+      <listitem><para>Check the box next to each of the four uploaded files and click "Add Files and/or Refresh View".  It is <emphasis>essential</emphasis> that the upload be complete before you take this step.  Otherwise, you'll end up releasing corrupted files.</para></listitem>
+      
+      <listitem><para>For <emphasis>each</emphasis> of the released files, select a processor and file type, then click "Update/Refresh".  Unfortunately, the interface does not allow this to be done in one step: you must submit the settings for one file before moving on to the next one.  For DrJava releases, use the following settings:
+        <itemizedlist>
+          <listitem><para>Windows application: i386, .exe (32-bit Windows)</para></listitem>
+          <listitem><para>Application jar: Platform-independent, .jar</para></listitem>
+          <listitem><para>Mac application: Mac Universal (PPC/x86), .gz</para></listitem>
+          <listitem><para>Sources: Platform-independent, Source .zip</para></listitem>
+        </itemizedlist>
+      </para></listitem>
+      
+      <listitem><para>Keep this page open with the "Email Release Notice" section ready to go, but don't send the email until you've finished the other steps.</para></listitem>
+      
+      <listitem><para>Post a news item announcing the new release (follow the "News" link).  This can contain the same text as the Release Notes, but should <emphasis>not</emphasis> contain manual line breaks.  Again, you may want to look at some older announcements to help maintain a consistent style.</para></listitem>
+      
+      <listitem><para>If necessary, upload the javadoc zip file to CSNet.</para></listitem>
+      
+      <listitem><para>Log in to the javaplt account on CSNet: <literal>ssh javaplt@plt06.cs.rice.edu</literal>.</para></listitem>
+      
+      <listitem><para>Change to the javadoc directory (<filename>/home/javaplt/public_html/drjava/javadoc</filename>).  For backup, temporarily move the old javadocs somewhere (<filename>drjava-old</filename> works).  Now copy the new javadoc zip to this directory, <command>unzip</command> it, move/rename the unzipped <filename>javadoc</filename> directory (<literal>mv drjava-<replaceable>version-tag</replaceable>/javadoc drjava</literal>), and clean up all the remaining junk (an empty unzipped directory, the zip file, and the old javadocs).</para></listitem>
+      
+      <listitem><para>In the top-level DrJava site directory (<filename>/home/javaplt/public_html/drjava</filename>), update <filename>LATEST_VERSION.TXT</filename> (or whichever of the <filename>*VERSION.TXT</filename> files is applicable).  In order to avoid inserting extraneous line breaks in the file, use the <command>echo</command>: <literal>echo -n <replaceable>version-tag</replaceable> &gt; LATEST_VERSION.TXT</literal>.  It is important <emphasis>not</emphasis> to manually edit these files, as doing so will probably insert newlines, which will break the links on the Web site.</para></listitem>
+      
+      <listitem><para>If releasing a beta, changing from a beta to a stable, or otherwise changing which releases should be publicly displayed, edit the <filename>main.shtml</filename> and <filename>download.shtml</filename> files to hide or show the appropriate sections.  <literal>include</literal> statements can be hidden by simply changing the space character immediately preceding "<literal>include</literal>" to a hash (<literal>#</literal>) character, and vice versa.</para></listitem>
+      
+      <listitem><para>Run the <command>drjava-update-news</command> script, which updates the copy of news items on the DrJava Web site.</para></listitem>
+      
+      <listitem><para>Make sure everything on the updated Web site looks good: <ulink url="http://www.cs.rice.edu/~javaplt/drjava">http://www.cs.rice.edu/~javaplt/drjava</ulink>.  Verify that the linked-to files are the correct versions, and that they can be successfully downloaded and run.</para></listitem>
+      
+      <listitem><para>Copy the <literal>javaplt</literal> version of the site to <ulink url="http://drjava.org">http://drjava.org</ulink> using the script <command>drjava-cs-to-sf</command> (do <emphasis>not</emphasis> type this command backwards, or you'll end up copying from the main site instead of to it, overwriting your changes!).</para></listitem>
+      
+      <listitem><para>Finally, announce the changes.  Submit the "Email Release Notice" option from the SourceForge File Release page.  Send a brief announcement to <literal>drjava-hackers@lists.sf.net</literal>, <literal>javaplt@rice.edu</literal>, <literal>drjava@rice.edu</literal>, and, for beta and stable releases, <literal>drjava-users@lists.sf.net</literal>.  While we're not consistent about it, it may also be useful to update catalog sites like <ulink url="http://freshmeat.net/projects/drjava/">FreshMeat.net</ulink>.</para></listitem>
+      
+      </orderedlist>
+    </para>
+    
+  </section>
+  
   
   <!-- Clipped from the previous docs:
   
   <para>It is important to update the DrJava website after all changes to the documentation.  This involves copying the HTML files for the user, quickstart, and developer documentation (and the PDF file for the user documentation) to <filename>drjava.sf.net:/home/groups/d/dr/drjava/htdocs/</filename>.  The HTML files should go in the <filename>userdocs/</filename>, <filename>quickstartdocs</filename>, and <filename>devdocs/</filename> directories, respectively, while the PDF should be saved as <filename>drjava-userdoc.pdf</filename> directly in <filename>htdocs/</filename>.</para>
   -->
+  
+  
 </chapter>

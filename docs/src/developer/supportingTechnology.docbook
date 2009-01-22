@@ -26,8 +26,9 @@
     </itemizedlist>
   </para>
 
+
   <section id="java">
-    <title>Java Language & APIs</title>
+    <title>Java Language &amp; APIs</title>
     <para>The Java language and APIs are documented by Sun at <ulink url="http://java.sun.com">http://java.sun.com</ulink>.  The language actually exists in different "editions": Standard Edition (SE), Enterprise Edition (EE), and a collection of Micro Editions (ME).  The Standard Edition is DrJava's target platform.  See the <link linkend="installJDK">JDK section of Getting Started</link> for instruction on installing Java.</para>
     <para>The language itself is documented by the Java Language Specification, available at <ulink url="http://java.sun.com/docs/books/jls/index.html">http://java.sun.com/docs/books/jls</ulink>.  This is a good authoritative reference on the language, and any good Java developer should be familiar with it.</para>
     <section>
@@ -40,6 +41,17 @@
       <para>Directories of <literal>class</literal> files may be packaged and compressed into a single <literal>jar</literal> file for simplified distribution.  These are essentially just <literal>zip</literal> archives of <literal>class</literal> file collections.  In addition, a default <literal>main</literal> class can be specified for a <literal>jar</literal> file.  Since all necessary classes for running DrJava are bundled into a single <literal>jar</literal> file, this allows the application to be run with a simplified command syntax: 
         <informalexample><para><literal>java -jar drjava.jar</literal></para></informalexample>
       </para>
+      <para>Some other important options:
+        <itemizedlist>
+          <listitem><para>Assertions (Java <literal>assert</literal> statements) in the code will be ignored when running unless they are explicitly turned on, using the <literal>-ea</literal> option.  The Ant script's <literal>run</literal> and <literal>test</literal> targets do this automatically.</para></listitem>
+        
+          <listitem><para>Java properties can be defined using <literal>-D<replaceable>key</replaceable>=<replaceable>value</replaceable></literal> options.  (These are accessible within the program using <literal>System.getProperty("<replaceable>key</replaceable>")</literal>.)</para></listitem>
+        
+          <listitem><para>The JVM's heap size is fixed, and the default size is sometimes too small; to explicitly choose the maximum amount of memory the program can use, include the <literal>-Xmx<replaceable>megabytes</replaceable>M</literal> option.</para></listitem>
+        
+        </itemizedlist>
+      </para>
+      
     </section>
     <section>
       <title>Standard Java APIs</title>
@@ -48,7 +60,7 @@
         <variablelist>
           <varlistentry>
             <term><literal>java.lang</literal></term>
-            <listitem><para>The <literal>Object</literal> class, wrapper classes, strings, threads, and interface with the system are all defined here.</para></listitem>
+            <listitem><para>The <literal>Object</literal> class, wrapper classes, strings, <literal>Iterable</literal> (the fundamental list interface), threads, and interface with the system are all defined here.</para></listitem>
           </varlistentry>
 
           <varlistentry>
@@ -65,14 +77,21 @@
             <term><literal>javax.swing</literal></term>
             <listitem><para>The DrJava GUI is implemented using <firstterm>Swing</firstterm>, the standard Java GUI framework.  (Note that many Swing classes and concepts depend on the <literal>java.awt</literal> package.)</para></listitem>
           </varlistentry>
+
+          <varlistentry id="rmi">
+            <term><literal>java.rmi</literal></term>
+            <listitem><para>Remote Method Invocation (RMI) provides a simple method-invocation model for inter-process communication.  DrJava uses RMI to run the Interactions Pane interpreter in a separate process.  Specific <ulink url="http://java.sun.com/javase/technologies/core/basic/rmi/index.jsp">RMI documentation</ulink> is available.  <firstterm>Remote interfaces</firstterm> are interfaces that directly extend <literal>java.rmi.Remote</literal> and whose methods are declared to throw a <literal>RemoteException</literal>.  Instances of these classes can be <firstterm>exported</firstterm>, which creates a server based on the object.  Other processes can then create proxy objects implementing the remote interface type (the proxy's methods forward their calls to the server via TCP/IP networking; arguments and return values are serialized).  In order for the client processes to locate the server, RMI applications typically register their exported objects with an RMI registry hosted at a well-known port; however, in DrJava (and many other applications) this is not necessary, and the server's information can simply be passed to the client process on startup.</para></listitem>
+          </varlistentry>
         </variablelist>
       </para>
 
       <para>The <ulink url="http://java.sun.com/docs/books/tutorial/">Java Tutorial</ulink> provides a collection of small tutorials covering different parts of the APIs.</para>
 
-      <para>Development in DrJava is limited in some ways by a desire for backwards compatibility.  While the program is developed using Java 5, it is still released for platforms that only support Java 1.4.  Thus, most classes and methods that were introduced with the Java 5 APIs cannot currently be used in DrJava.  (Such classes and methods should be designated with a "since 1.5" tag in the API documentation.)  For details, see the discussion on <link linkend="retroweaver">Retroweaver</link>, a tool that enables this backwards compatibility.</para>
+      <para>While new useful classes are included in each major release (such as version 6) of the Java platform, only those classes that will be available on all DrJava users' machines should be used in development.  Thus, currently, only APIs available in Java 5 or previously should be used.  (Newer classes and methods should be designated with a "since <replaceable>version</replaceable>" tag in the API documentation.)</para>
+
     </section>
   </section>
+
 
   <section id="javac">
     <title><command>javac</command></title>
@@ -85,12 +104,13 @@
         <listitem><para>The <firstterm>boot class path</firstterm> is the location of the standard Java APIs.  It is conceptually prepended to the standard class path whenever a search for a class occurs.  By default, this is the location of the APIs used to run the compiler; it is only necessary to manipulate this setting if compilation should occur against a different or customized version of the APIs.</para></listitem>
         <listitem><para>The <firstterm>class path</firstterm> points to additional libraries and classes used for compilation.  For example, if JUnit tests are to be compiled, the <filename>junit.jar</filename> file should be on the class path.  If iterative updates are to be made to the sources (as is usually the case), the location of the compiled classes should be part of the class path as well.</para></listitem>
         <listitem><para>The <firstterm>source path</firstterm> is the location of source files that, while not explicitly required to be compiled, can be automatically compiled if the classes they define are needed.  This allows, for example, the compilation of a single source file to silently trigger the compilation of many others.  Since such on-demand processing changes the compiler's internal symbol tables on-the-fly, however, it's generally not a good idea to take advantage of this feature &mdash; changing the order in which sources are passed to the compiler can change the meaning of the program!  A better alternative is to simply list <emphasis>all</emphasis> sources that need to be compiled explicitly (Ant and DrJava do this easily and automatically), and set the source path to an empty string.</para></listitem>
-        <listitem><para>The <firstterm>compiler JVM boot class path</firstterm> is the location of the Java APIs used to <emphasis>run</emphasis> the compiler.  Since <command>javac</command> is <emphasis>implemented</emphasis> in Java, it runs in a JVM, and that JVM needs access to the standard APIs.  It's important to note that there need not be any relationship between this value and tha compilation boot class path.  The <command>javac</command> command should automatically set up this parameter correctly.</para></listitem>
+        <listitem><para>The <firstterm>compiler JVM boot class path</firstterm> is the location of the Java APIs used to <emphasis>run</emphasis> the compiler.  Since <command>javac</command> is <emphasis>implemented</emphasis> in Java, it runs in a JVM, and that JVM needs access to the standard APIs.  It's important to note that there need not be any relationship between this value and the compilation boot class path.  The <command>javac</command> command should automatically set up this parameter correctly.</para></listitem>
         <listitem><para>Similarly, the <firstterm>compiler JVM class path</firstterm> is the location of additional libraries and classes used to <emphasis>run</emphasis> the compiler.  Typically, the classes implementing the compiler are found in a <filename>tools.jar</filename> file, and that jar file will need to be on the compiler JVM class path.  Again, there need not be any relationship between this value and the compilation class path.  And the <command>javac</command> command will automatically set this correctly.</para></listitem>
       </itemizedlist></para>
     </section>
       
   </section>
+  
   
   <section id="javadoc">
     <title><command>javadoc</command></title>
@@ -98,17 +118,13 @@
     <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
   </section>
   
-  <section id="rmi">
-    <title>RMI</title>
-    <para>[TODO]</para>
-    <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
-  </section>
   
   <section id="jpda">
     <title>JPDA</title>
     <para>[TODO]</para>
     <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
   </section>
+  
   
   <section id="subversion">
     <title>Subversion</title>
@@ -120,200 +136,291 @@
 -->
   </section>
   
+  
   <section id="ant">
     <title>Ant</title>
-    <para>[TODO]</para>
-    <!-- We can point to the <link linkend="installAnt">Ant installation instructions</link> for installation details -->
+    <para>Apache Ant (<ulink url="http://ant.apache.org/">http://ant.apache.org/</ulink>) is used for scripting DrJava builds.  See the <link linkend="installAnt">Ant section of Getting Started</link> for installation instructions and the <link linkend="basicTutorial">Getting Started tutorial</link> for an introduction.  The <ulink url="http://ant.apache.org/manual/index.html">Ant Manual</ulink> is a great source of documentation.</para>
+    <para>Ant scripts used to build DrJava subtrees are all based on a template located at <filename>trunk/misc/build-template.xml</filename>.  This allows multiple scripts to share a common interface and parameters without resorting to complex redirection between multiple scripts.  Globally-useful changes to any script should be merged back into the template and them propagated to each script (diff tools like OS X's FileMerge are ideal for this task).  The goal of the build process's design is to allow a user to download and build a DrJava subtree with minimal setup or fuss.  As a result, many build tools are bundled with the tree (in <filename>lib/buildlib</filename>) and assumptions about the environment used to run Ant (such as the Java version, class path, or available memory) are minimized.</para>
+    <para>To provide some extended features in Ant, a few libraries are included in <filename>lib/buildlib</filename>: <filename>ant-contrib.jar</filename> is an independent project providing feature additions like a for loop and simple math operations; <filename>cenquatasks.jar</filename> provides an <literal>extendclasspath</literal> command that allows JUnit to be run from Ant without any user setup (there may be a better workaround in recent versions of Ant . . .); and <filename>plt-ant.jar</filename> provides our own Ant extensions, compiled from <filename>trunk/misc/plt-ant</filename>.</para>
   </section>
+  
   
   <section id="junit">
     <title>JUnit</title>
-    <para>[TODO]</para>
-    <!-- We can point to the <link linkend="installJUnit">JUnit installation instructions</link> for installation details -->
+    <para>JUnit is a small library supporting defining and running unit tests in Java, available at <ulink url="http://junit.org/">http://junit.org/</ulink>.  A <firstterm>test runner</firstterm> is responsible for identifying, loading, and running tests (usually defined as classes conforming to a certain informal interface).  JUnit has two important distinct versions: JUnit 3, the traditional library with classes packaged in <literal>junit.framework</literal>, etc.; and JUnit 4, a redesign that takes advantage of Java 5 language features, packaged in <literal>org.junit</literal>.  Tests defined using JUnit 3 can be recognized by JUnit 4 test runners, and tests defined with JUnit 4 can be slightly extended to be recognized by JUnit 3 test runners.</para>
+    <para>Each DrJava subtree uses <filename>lib/buildlib/junit.jar</filename> to compile and run unit tests.  These tests are written using the JUnit 3 framework; after compilation, they are moved into <filename>classes/test</filename> to distinguish them from the main body of code (in <filename>classes/base</filename>).  The DrJava application also <emphasis>bundles</emphasis> JUnit as a library (located at <filename>lib/junit.jar</filename>).  This allows DrJava to define its own test runner (currently a JUnit 3 test runner), and also lets DrJava users write and compile JUnit tests without needing a separate copy of <filename>junit.jar</filename>.</para>
   </section>
+  
+  
+  <section id="jlbench">
+    <title>JLBench</title>
+    <para>JLBench is a tool developed at Rice by Dan Smith to simplify testing of DynamicJava's faithfulness to the Java standard, published as a separate SourceForge project (<ulink url="https://sourceforge.net/projects/jlbench/">https://sourceforge.net/projects/jlbench/</ulink>).  <filename>.jlbench</filename> files are collections of small annotated Java programs and supporting declarations; running a benchmark file verifies that the language behavior (static failure, runtime failure, or success) is consistent with the declared expectation for each program.  Benchmarks for standard language behavior are included in (and can be contributed to) <filename>jlbench.jar</filename>; project-specific tests that exercise DynamicJava-specific features are stored with DynamicJava.</para>
+  </section>
+  
   
   <section id="SourceForge">
     <title>SourceForge</title>
     <para>[TODO]</para>
   </section>
   
-  <section id="clover">
-    <title>Clover</title>
-    <para>[TODO]</para>
-  </section>
-  
-  <section id="retroweaver">
-    <title>Retroweaver</title>
-    <para>[TODO]</para>
-  </section>
   
   <section id="docbook">
     <title>DocBook</title>
-    <para>[TODO]</para>
-    <!-- Clipped from the previous docs:
-    Beware that some versions of these tools may not work with our build script or may generate HTML files without an <filename>index.html</filename> file.  (If this is the case, as it is currently on the greenland server, you'll probably want to copy <filename>book1.html</filename> to <filename>index.html</filename>.  Don't just rename it, because other files will link to the old one.)
-    -->
+    <para>DocBook is a XML-based standard for describing structured documents.  The DrJava documentation (this document, as well as user help) is developed using DocBook.  The standard reference describing DocBook tags is <ulink url="http://www.docbook.org/tdg/en/html/docbook.html">DocBook: The Definitive Guide</ulink>.  A second book, <ulink url="http://www.sagehill.net/book-description.html">DocBook XSL: The Complete Guide</ulink>, is a good additional reference, especially for its coverage of XML-processing tools.</para>
+    <para>DocBook documents can be styled as a variety of different formats, including HTML and PDF.  This translation leverages generic XML-processing tools, where the meaning of DocBook constructs are defined in separate XSL style sheets.  The DocBook style sheets are available from the <ulink url="http://docbook.sourceforge.net/">DocBook SourceForge project</ulink>, and must be installed in order to generate DrJava's documentation.  In addition, the current process relies on <command>xsltproc</command>, an XML translator.  (There are a few alternative tools available for Java, but all seem to currently struggle with the DocBook style sheets: Xalan, Saxon, and the standard Java APIs.  These are invoked from Ant via the core <literal>xslt</literal> task.)
+      <note>
+        <title>Rice Java PLT</title>
+        <para>On the Rice Computer Science department network, <literal>DOCBOOK_XSL_HOME</literal> should point to <filename>/usr/share/sgml/docbook/xsl-stylesheets-1.69.1-5.1</filename>; <command>xsltproc</command> is installed in <filename>/usr/bin</filename>.</para>
+      </note>
+    </para>
+    <para>Note that there are two similar formats for DocBook documents: XML and SGML.  In the past, DrJava used commands <command>docbook2html</command> and <command>docbook2pdf</command>, which processed SGML files.  These and other SGML-based tools seem to have been abandoned by the DocBook community, in favor of generic XML-processing tools.</para>
   </section>
+  
   
   <section id="javacc">
     <title>JavaCC</title>
-    <para>[TODO]</para>
+    <para>JavaCC (<ulink url="https://javacc.dev.java.net/">https://javacc.dev.java.net/</ulink>) is a Java-based top-down parser generator.  It takes a <filename>.jj</filename> file as input and produces a collection of Java sources.  DrJava uses it to produce Java parsers in both DynamicJava and Language Levels.</para>
+    <para>Newer versions of JavaCC added support for generics and cleaned up a lot of generated code that was producing compiler warnings.  Thus, version 4.1 or later is preferred for development in DrJava.</para>
   </section>
   
-  <section id="bcel">
-    <title>BCEL</title>
+  
+  <section id="astgen">
+    <title>ASTGen</title>
+    <para>ASTGen (<ulink url="http://sourceforge.net/projects/astgen">http://sourceforge.net/projects/astgen</ulink>) is a SourceForge project developed by the JavaPLT team at Rice to simplify the definition of large composite type hierarchies and accompanying visitors.  A standalone preprocessor generates Java sources from the contents of a <filename>.ast</filename> file.  The <ulink url="http://sourceforge.net/docman/display_doc.php?docid=60546&amp;group_id=51829">documentation on SourceForge</ulink> provides a good overview.</para>
+    <para>While there are no official releases or version numbers, the tool had a major upgrade with many new features in 2007.  Its use in DrJava (by DynamicJava and Language Levels) is still based on the earlier instance, and it will take some effort (but probably not much) to update to the latest version.  In the meantime, some redundant casts generated by the earlier version produce warnings under <literal>javac</literal> 6.</para>
+  </section>
+  
+  
+  <section id="asm">
+    <title>ASM</title>
+    <para>ObjectWeb's ASM (<ulink url="http://asm.objectweb.org/">http://asm.objectweb.org/</ulink>) is a bytecode manipulation library.  The key interfaces are a set of visitors (such as <literal>org.objectweb.asm.ClassVisitor</literal>) whose methods are invoked in a sequence representing a single pass over a class or method definition.</para>
+    <para>DrJava uses ASM to extract information from class files.  This is especially important for Language Levels, which, as a compiler, must create symbol tables based on class file data (DynamicJava, on the other hand, creates symbol tables via reflection).  DynamicJava also uses ASM to generate classes on-the-fly when users interpret class declarations.</para>
+    <para><link linkend="bcel">BCEL</link> is an alternative to ASM, and was used by DrJava previously.  ASM was preferred because it is under active development (providing a number of Java 5-specific features), has a much smaller disk footprint, and is more efficient.</para>
+  </section>
+  
+  
+  <section id="jgoodies">
+    <title>JGoodies</title>
     <para>[TODO]</para>
   </section>
- 
-  <section id="yourKit">
-    <title>YourKit Java Profiler</title>
-    <subtitle>(compiled by Mathias Ricken, mgricken at rice dot edu)</subtitle>
-    <para>The  <ulink url="http://www.yourkit.com/download/">YourKit Java Profiler</ulink> is a powerful profiler
-	for Java programs that has been lincensed to the DrJava open source project free of charge. It may only be
-	used for developing and improving DrJava and individual licenses for each individual developer are
-	required; they also need to be renewed from time to time. All of this has been generally unproblematic by
-	emailing <ulink url="mailto://sales@yourkit.com">sales@yourkit.com</ulink>. Please do not jeopardize our
-	very good relationshit with YourKit by using it in ways not approved.</para>
-    <para>
-       <orderedList>
-          <listitem>
-            <formalpara>
-              <title><literal>Getting YourKit</literal></title>
-              <para>You can download YourKit from the URL above, but have also installed YourKit into
-		the javaplt account on CSnet. Here are instructions if you want to use it. Please note that this
-		is for the Linux environment on CSnet. For Windows and MacOS, or away from CSnet, these steps
-		don't apply.</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-              <title><literal>Location of YourKit on CSnet</literal></title>
-              <para>YourKit is located in the directory <literal>/home/javaplt/packages/yjp-6.0.11</literal> .   You
-		should add the <literal>bin</literal> path to your <literal>PATH</literal> environment
-		variable. Make the following directory accessible from everywhere:
-		<literal>/home/javaplt/packages/yjp-6.0.11/bin</literal>    .
-              	That gives you access to the two most important scripts, <literal>yjp.sh</literal> and
-		<literal>yjpjava</literal>   .</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-	      <title><literal>Adding the Library</literal></title>
-              <para>Before you can use Yourkit, you have to set the following environment variable:   
-              <literal>setenv LD_LIBRARY_PATH /home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>       .
-	      If you already have an <literal>LD_LIBRARY_PATH</literal>    variable, then you
-		should extend it by adding a colon and the path:   
-	      <literal>setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>           .</para>
-            </formalpara>
-	  </listitem>
-	  <listitem>
-            <formalpara>
-              <title><literal>Starting YourKit</literal</title>
-              <para>To start YourKit, run the following script from the command line:     
-                         <literal>yjp.sh &              </literal>.            
-              The & at the end will make YourKit run in the background, i.e. you can
-                still use the same command line window you've been using.
-              The first time you start YourKit, it should ask you for your license
-		information. If you are a member of the core DrJava development team, you
-		should have by now received your personalized license key.</para>
-            </formalpara>
-          </listitem>
-	  <listitem>
-            <formalpara>
-              <title><literal>Starting the Application to Profile</literal></title>
-              <para>You need to pass a special command line argument to your java
-		executable when you're running a program that you want to profile:          
-	      <literal>-agentlib:yjpagent</literal>              .
-              To make that easier to remember, I have written a script that passes
-		that arguments, and all the argument passed to the script, to java.
-		It's located in the same directory as Yourkit:                
-	      <literal>/home/javaplt/packages/yjp-6.0.11/bin/yjpjava             </literal>          .
-              If you added YourKit to your path in step 2, it should be directly
-		accessible.
-	      If you want to use it to run a program that you would normally start
-		with:             
-	      <literal>java MyClass                  </literal>            .
-	      now just use:                   
-	      <literal>yjpjava MyClass                </literal>           .
-	      Here is a more complicated example to start DrJava. Instead of
-		writing              
-	      <literal>java -cp drjava-15.jar edu.rice.cs.drjava.DrJava                 </literal>           .
-	      now write the following, which avoids the restart, which
-	      may cause trouble:            
-	      <literal>yjpjava -cp drjava-15.jar edu.rice.cs.drjava.DrJavaRoot             </literal>   .
-	      For this to work, you have to make sure that you have the <literal>tools.jar</literal>
-	      file on your Java <literal>CLASSPATH</literal> environment variable.
-	      Regardless, the application you just started should launch now.</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-              <title><literal>Starting to Profile</literal></title>
-              <para>When you actually want to record usage times and counts, press the
-		"Start CPU Profiling" button. That will open another pane. There are
-		two selections, "Sampling" and "Tracing", and as far as I know,
-		"Sampling" records times only and doesn't give you invocation counts
-		and call stacks, but is faster. "Tracing" is a lot slower but gives
-		you more information.</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-              <title><literal>Viewing Data</literal></title>
-              <para>When you want to view the data, i.e. when you're done performing
-		the action you want to profile, press the "Capture Snapshot" button.
-		That will bring up a dialog that tells you the file name as which the
-		snapshot has been saved, and it asks you whether you want to open the
-		snapshot. You probably want to press "Open" if you want to look at the
-		data right now.</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-              <title><literal>Taking a Snapshot Stops Profiling</literal></title>
-              <para>Note that taking a snapshot stops profiling, so if you want to
-		continue to profile, you need to press the "Start CPU Profiling"
-		button again.</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-              <title><literal>Sorting Methods</literal></title>
-              <para>On the page that displays CPU snapshot informations, there are lots
-		of ways to gather information. I haven't explored everything. I found
-		selecting "Method List" on the left the most useful. That will give
-		you a lsit of all methods that were called, and you can sort by name,
-		time, own time, and invocation count (if you used tracing). Time
-		includes time spent in calls to other methods, i.e. the time from
-		method entry to method exit. Own time is only the time spent in the
-		actual method, i.e. the time from method entry to method exit
-		EXCLUDING the time spent in other methods that were called.</para>
-            </formalpara>
-          </listitem>
-          <listitem>
-            <formalpara>
-              <title><literal>Finding the Hotspot</literal></title>
-              <para>Usually I found a very sharp break between the times, i.e. going from
-		40 seconds in some methods (that were probably in a call chain) to 5
-		seconds. My intuition tells me that the last method to have a lot of
-		time spent is one of the "hot spots". You should also look at the
-		invocation count: The program may spend a lot of time in a method, but
-		if it's called very often, that may not mean very much.</para>
-            </formalpara>
-          </listitem>
-       </orderedList>
-    </para>
-  </section>  
 
-  <section id="otherTools">
-    <title>Other Useful Development Tools</title>
-    <para>[TODO]</para>
+
+  <section id="launch4j">
+    <title>Launch4J</title>
+    <para>Launch4J is an open-source tool for distributing Java applications as Windows <filename>.exe</filename> programs.  It is used to create a <filename>drjava.exe</filename> file when new releases of the application are published.  Because it is implemented using platform-specific libraries, developers wishing to create releases must install it separately and set it up for the Ant script by defining the <literal>LAUNCH4J_HOME</literal> environment variable.
+      <note>
+        <title>Rice Java PLT</title>
+        <para>On the Rice Computer Science department network, <literal>LAUNCH4J_HOME</literal> should point to <filename>/home/javaplt/packages/launch4j</filename>.</para>
+      </note>
+    </para>
+  </section>
+
+
+  <section id="analysisTools">
+    <title>Code Analysis Tools</title>
+    <para>The following third-party analysis tools are not part of the normal development cycle, but are useful in helping to identify bugs and weaknesses in the source code.</para>
+ 
+    <section id="clover">
+      <title>Clover</title>
+      <para>Clover is a proprietary test coverage tool.  After setting the environment variable <literal>CLOVER_JAR</literal> to point to your installation, you can use <literal>ant clover</literal> to generate a report.
+        <note>
+          <title>Rice Java PLT</title>
+          <para>On the Rice Computer Science department network, <literal>CLOVER_JAR</literal> should point to <filename>/home/javaplt/packages/clover-ant-1.3.14/lib/clover.jar</filename>.</para>
+        </note>
+      </para>
+    </section>
+    
+    <section id="yourKit">
+      <title>YourKit Java Profiler</title>
+      <para>The <ulink url="http://www.yourkit.com/download/">YourKit Java Profiler</ulink> is a powerful proprietary profiler
+    for Java programs that has been lincensed to the DrJava open source project free of charge. It may only be
+    used for developing and improving DrJava and individual licenses for each individual developer are
+    required; they also need to be renewed from time to time. All of this has been generally unproblematic by
+    emailing <ulink url="mailto://sales@yourkit.com">sales@yourkit.com</ulink>. Please do not jeopardize our
+    very good relationshit with YourKit by using it in ways not approved.</para>
+      <para>
+         <orderedlist>
+            <listitem>
+              <formalpara>
+                <title><literal>Getting YourKit</literal></title>
+                <para>You can download YourKit from the URL above, but have also installed YourKit into
+      the javaplt account on CSnet. Here are instructions if you want to use it. Please note that this
+      is for the Linux environment on CSnet. For Windows and MacOS, or away from CSnet, these steps
+      don't apply.</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+                <title><literal>Location of YourKit on CSnet</literal></title>
+                <para>YourKit is located in the directory <literal>/home/javaplt/packages/yjp-6.0.11</literal> .   You
+      should add the <literal>bin</literal> path to your <literal>PATH</literal> environment
+      variable. Make the following directory accessible from everywhere:
+      <literal>/home/javaplt/packages/yjp-6.0.11/bin</literal>    .
+                  That gives you access to the two most important scripts, <literal>yjp.sh</literal> and
+      <literal>yjpjava</literal>   .</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+          <title><literal>Adding the Library</literal></title>
+                <para>Before you can use Yourkit, you have to set the following environment variable:   
+                <literal>setenv LD_LIBRARY_PATH /home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>       .
+          If you already have an <literal>LD_LIBRARY_PATH</literal>    variable, then you
+      should extend it by adding a colon and the path:   
+          <literal>setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>           .</para>
+              </formalpara>
+      </listitem>
+      <listitem>
+              <formalpara>
+                <title><literal>Starting YourKit</literal></title>
+                <para>To start YourKit, run the following script from the command line:     
+                           <literal>yjp.sh &amp;              </literal>.            
+                The <literal>&amp;</literal> at the end will make YourKit run in the background, i.e. you can
+                  still use the same command line window you've been using.
+                The first time you start YourKit, it should ask you for your license
+      information. If you are a member of the core DrJava development team, you
+      should have by now received your personalized license key.</para>
+              </formalpara>
+            </listitem>
+      <listitem>
+              <formalpara>
+                <title><literal>Starting the Application to Profile</literal></title>
+                <para>You need to pass a special command line argument to your java
+      executable when you're running a program that you want to profile:          
+          <literal>-agentlib:yjpagent</literal>              .
+                To make that easier to remember, I have written a script that passes
+      that arguments, and all the argument passed to the script, to java.
+      It's located in the same directory as Yourkit:                
+          <literal>/home/javaplt/packages/yjp-6.0.11/bin/yjpjava             </literal>          .
+                If you added YourKit to your path in step 2, it should be directly
+      accessible.
+          If you want to use it to run a program that you would normally start
+      with:             
+          <literal>java MyClass                  </literal>            .
+          now just use:                   
+          <literal>yjpjava MyClass                </literal>           .
+          Here is a more complicated example to start DrJava. Instead of
+      writing              
+          <literal>java -cp drjava-15.jar edu.rice.cs.drjava.DrJava                 </literal>           .
+          now write the following, which avoids the restart, which
+          may cause trouble:            
+          <literal>yjpjava -cp drjava-15.jar edu.rice.cs.drjava.DrJavaRoot             </literal>   .
+          For this to work, you have to make sure that you have the <literal>tools.jar</literal>
+          file on your Java <literal>CLASSPATH</literal> environment variable.
+          Regardless, the application you just started should launch now.</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+                <title><literal>Starting to Profile</literal></title>
+                <para>When you actually want to record usage times and counts, press the
+      "Start CPU Profiling" button. That will open another pane. There are
+      two selections, "Sampling" and "Tracing", and as far as I know,
+      "Sampling" records times only and doesn't give you invocation counts
+      and call stacks, but is faster. "Tracing" is a lot slower but gives
+      you more information.</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+                <title><literal>Viewing Data</literal></title>
+                <para>When you want to view the data, i.e. when you're done performing
+      the action you want to profile, press the "Capture Snapshot" button.
+      That will bring up a dialog that tells you the file name as which the
+      snapshot has been saved, and it asks you whether you want to open the
+      snapshot. You probably want to press "Open" if you want to look at the
+      data right now.</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+                <title><literal>Taking a Snapshot Stops Profiling</literal></title>
+                <para>Note that taking a snapshot stops profiling, so if you want to
+      continue to profile, you need to press the "Start CPU Profiling"
+      button again.</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+                <title><literal>Sorting Methods</literal></title>
+                <para>On the page that displays CPU snapshot informations, there are lots
+      of ways to gather information. I haven't explored everything. I found
+      selecting "Method List" on the left the most useful. That will give
+      you a lsit of all methods that were called, and you can sort by name,
+      time, own time, and invocation count (if you used tracing). Time
+      includes time spent in calls to other methods, i.e. the time from
+      method entry to method exit. Own time is only the time spent in the
+      actual method, i.e. the time from method entry to method exit
+      EXCLUDING the time spent in other methods that were called.</para>
+              </formalpara>
+            </listitem>
+            <listitem>
+              <formalpara>
+                <title><literal>Finding the Hotspot</literal></title>
+                <para>Usually I found a very sharp break between the times, i.e. going from
+      40 seconds in some methods (that were probably in a call chain) to 5
+      seconds. My intuition tells me that the last method to have a lot of
+      time spent is one of the "hot spots". You should also look at the
+      invocation count: The program may spend a lot of time in a method, but
+      if it's called very often, that may not mean very much.</para>
+              </formalpara>
+            </listitem>
+         </orderedlist>
+      </para>
+    </section>  
     
     <section id="findbugs">
       <title>FindBugs</title>
-      <para>[TODO]</para>
+      <para>FindBugs is an open-source static analysis tool that tries to identify Java bugs.  After setting the environment variable <literal>FINDBUGS_HOME</literal> to point to your installation, you can use <literal>ant findbugs</literal> to generate a summary of possible bugs.
+        <note>
+          <title>Rice Java PLT</title>
+          <para>On the Rice Computer Science department network, <literal>FINDBUGS_HOME</literal> should point to <filename>/home/javaplt/packages/findbugs</filename>.</para>
+        </note>
+      </para>
+      <para>If necessary, the <literal>findbugs-excludes</literal> property in the Ant script can be edited to filter out unwanted warnings.</para>
     </section>
   
+  </section>
+
+
+  <section id="legacyTechnology">
+    <title>Legacy Technology</title>
+    <para>These are tools and libraries that were used by DrJava in the past, but that are no longer needed.  If you need to build DrJava from past sources, this information may be useful.</para>
+    
+    <section id="jsr14">
+      <title>GJ and JSR-14</title>
+      <para>The DrJava source code used generic classes long before these features were part of standard Java.  Generic Java (GJ) was an independently-developed compiler supporting generic extensions to the Java language; when these features were officially proposed for Java itself, the GJ compiler was adopted and evolved via various releases of the JSR-14 prototype compiler.  Until the official Java 5 release, these compilers were used to build DrJava, and were also supported by the application itself (setting them up required pointing to the appropriate <filename>tools.jar</filename> and related standard library binaries in DrJava's preferences).</para>
+    </section>
+    
+    <section id="rmic">
+      <title><command>rmic</command></title>
+      <para>Older versions of <link linkend="rmi">RMI</link> (Java 1.4 and previous) required RMI <firstterm>stub classes</firstterm> that forward method invocations to the remote process to be manually generated at compile time with <command>rmic</command>, the "RMI compiler."  This was invoked from the Ant script, often from an <literal>rmi-compile</literal> target.  This is no longer necessary: stub classes are generated on-the-fly at runtime.</para>
+    </section>
+    
+    <section id="retroweaver">
+      <title>Retroweaver</title>
+      <para>Retroweaver is a SourceForge project (at <ulink url="http://retroweaver.sourceforge.net/">http://retroweaver.sourceforge.net/</ulink>) that allows Java classes to be converted to a form that is compatible with earlier Java versions.  This made it possible to develop in Java 5 while deploying an application that would run on Java 1.4 JREs.  Since certain language features rely on libraries only available in Java 5 JREs (such as <literal>Iterable</literal> or <literal>Integer.valueOf()</literal>), Retroweaver includes a set of runtime libraries that extend the legacy APIs with Retroweaver's version of the new classes and methods; the compile-time tool replaces all references to new classes or methods (such as <literal>java.lang.Iterable</literal>) with its substitute versions (such as <literal>net.sourceforge.retroweaver.runtime.java.lang.Iterable</literal>).  Since this process can change the type signature of converted methods, it's important that the conversion happen to all classes and libraries simultaneously, as a final step before bundling an application (otherwise, for example, Java 5 classes will fail to compile against Retroweaver-processed libraries).</para>
+      <para>Later versions of Retroweaver provide extensive support for nonessential libraries; some of this support relies on a third-party <filename>backport-util-concurrent.jar</filename> library.</para>
+      <para>The Retroweaver tool was invoked via a <literal>compile-14</literal> Ant target, which produced the directories <filename>classes/base-14</filename>, <filename>classes/test-14</filename>, and <filename>classes/lib-14</filename>, mirroring the similar class directories without the <literal>-14</literal> extension.  Libraries (like <filename>dynamicjava.jar</filename>) were built in two versions: the standard Java 5 classes and a Retroweaver-processed <literal>-14</literal> version; the latter was mainly produced in order to verify when the library was built that it could be successfully processed.</para>
+    </section>
+    
+    <section id="bcel">
+      <title>BCEL</title>
+      <para>BCEL is the Byte Code Engineering Library, available at <ulink url="http://jakarta.apache.org/bcel/">http://jakarta.apache.org/bcel/</ulink>.  It was used by DrJava (including DynamicJava and Language Levels) to access and generate class files.  We later migrated to ASM, which accomplishes many of the same things, but has a lighter-weight one-pass model and uses significantly less disk space.  For a time, the BCEL sources were included in the Language Levels source tree, which allowed source-path-based compilation to skip over any unnecessary BCEL classes, thus reducing the disk footprint.</para>
+    </section>
+    
+    <section id="winlaf">
+      <title>WinLAF</title>
+      <para>WinLAF is a small library providing tweaks to the Swing look-and-feel under Windows.  DrJava included it for some time (although it may not have always been set up properly . . .).  Its use was superceded by JGoodies.</para>
+    </section>
+ 
+  </section>
+  
+ 
+  <section id="otherTools">
+    <title>Other Useful Development Tools</title>
+    <para>This section has notes on any other development tools you may find useful.</para>
+    
     <section id="x11">
       <title>X11</title>
       <para>[TODO]</para>
@@ -332,5 +439,5 @@
     
   </section>
   
-</chapter>
 
+</chapter>

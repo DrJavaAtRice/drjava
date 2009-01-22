@@ -1,4 +1,6 @@
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 
 <!--
   User Documentation for DrJava
@@ -7,7 +9,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2005-8-03</date>
+    <date>2008-7-17</date>
     <title>DrJava User Documentation</title>
   </bookinfo>
   <toc></toc>
@@ -24,7 +26,7 @@
   </chapter>
 
 
-  <!-- ---- Chapter: Getting Started ---- -->
+  <!-- **** Chapter: Getting Started **** -->
   <chapter id="gettingstarted">
     <title>Getting Started</title>
     <para>This chapter describes the basics for how to start using DrJava, including where to get the program and how to run it.</para>
@@ -85,7 +87,7 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 </para>
 
-<itemizedlist mark=opencircle>
+<itemizedlist mark="opencircle">
 <listitem>
 <para>
     Redistributions of source code must retain the above copyright
@@ -687,18 +689,18 @@ learning tool.</para>
 
      <mediaobject>
        <imageobject>
-       <imagedata fileref="LanguageLevelFeatures.jpg" format="jpg" scale=50 scalefit="1">
+       <imagedata fileref="LanguageLevelFeatures.jpg" format="JPG" width="80%" />
        </imageobject>
      </mediaobject>
 
 	<para>And here is a summary of the code augmentation performed at each level.</para>
 	<mediaobject>
 	  <imageobject>
-	  <imagedata fileref="LanguageLevelAugmentation.jpg" format="jpg" scale=50 scalefit="1">
+	  <imagedata fileref="LanguageLevelAugmentation.jpg" format="JPG" width="80%" />
 	  </imageobject>
 	</mediaobject>
 
-     <para>Read on for a more detailed explaination of each level.</para>
+   <para>Read on for a more detailed explaination of each level.</para>
 </section>
 
     <section id="elementaryLL">
@@ -731,7 +733,7 @@ learning tool.</para>
           </section>
           </chapter>                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                    
-  <!-- ---- Chapter: Debugger ---- -->
+  <!-- **** Chapter: Debugger **** -->
   <chapter id="debug">
     <title>Debugger</title>
     <para>DrJava provides advanced tools for debugging your programs in the Interactions Pane.  You can set breakpoints in source files in the Definitions Pane, call methods that stop at the breakpoints in the Interactions Pane, and then interact with programs while they are suspended at breakpoints.  Once a breakpoint is reached, users can interact with any variables, fields, or methods that are in scope in the suspended method.  Users can also resume the method call, or step through it a line at a time.  Finally, the values of local variables and fields can be watched in a table as the method call progresses.</para>
@@ -1008,7 +1010,7 @@ public class Student {
 
 
 
-  <!-- ---- Appendix: Configuring DrJava ---- -->
+  <!-- **** Appendix: Configuring DrJava **** -->
   <appendix id="configuration">
     <title>Configuring DrJava</title>
     <para>DrJava has many configurable options which can be set using the Preferences command in the Edit menu, allowing the user to change both DrJava's appearance and behavior.  Changes made to the configurable options are saved in a <filename>.drjava</filename> file in the user's home directory.  The Preferences window is the preferred method for setting these options, although more experienced users may also edit the configuration file itself.</para>
@@ -1770,7 +1772,7 @@ public class Student {
     
   </appendix>
 
-  <!-- ---- Appendix: Setting up DrJava ---- -->
+  <!-- **** Appendix: Setting up DrJava **** -->
   <appendix id="platform-setup">
     <title>Setting up DrJava on your Platform</title>
     <para>DrJava can be set up to handle files similarly to other applications on your platform.  For example, Windows <!--and Mac OS X--> allows you to associate types of files with particular applications.  <!-- In addition, some platforms even allow you to drop files onto an application's icon to open them.--></para>
@@ -1860,7 +1862,7 @@ public class Student {
   </appendix>
 
 
-  <!-- ---- Appendix: DrJava Errors ---- -->
+  <!-- **** Appendix: DrJava Errors **** -->
   <appendix id="drjava-errors">
     <title>DrJava Errors</title>
     <para>Even though we try hard, it is an unfortunate reality that DrJava contains errors. This appendix describes how DrJava will most likely react in case of an error, and how you can help improve DrJava if you encounter an error.</para>
@@ -1897,7 +1899,7 @@ public class Student {
 
   </appendix>
 
-  <!-- ---- Appendix: Indenting Files from the Command Line ---- -->
+  <!-- **** Appendix: Indenting Files from the Command Line **** -->
   <appendix id="indent-files">
     <title>Indenting Files from the Command Line</title>
     <para>DrJava has a very useful indenting algorithm, but indenting several large files can be a time consuming process.  Because of this, DrJava provides a command line interface to its indenter that can be run on a series of files.</para>

@@ -10,6 +10,7 @@
   <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
   <property environment="env" />
+  <property name="docbook-xsl-home" value="${env.DOCBOOK_XSL_HOME}" />
   
   <!-- By default, clean can fail -->
   <property name="clean-can-fail" value="yes" />
@@ -35,8 +36,9 @@
     <echo message="" />
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
-    <echo message="PATH: 'svn' needs to refer to the Subversion client executable;" />
-    <echo message="      'docbook2html' and 'docbook2pdf' should also be available." />
+    <echo message="DOCBOOK_XSL_HOME: Location of the DocBook XSL style sheets" />
+    <echo message="PATH: 'xsltproc' must be available; 'svn' needs to refer to the" />
+    <echo message="      Subversion client executable" />
     <echo message="" />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
     <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
@@ -80,59 +82,110 @@
  
   <target name="doc-html" description="Generate all html documentation">
     <echo message="Creating html documentation" />
-    <antcall target="run-docbook2html">
+    <antcall target="generate-html">
       <param name="docbook-dir" value="user" />
-      <param name="docbook-srcfile" value="userdoc.docbook" />
+      <param name="docbook-srcfile" value="userdoc" />
     </antcall>
-    <antcall target="run-docbook2html">
+    <antcall target="generate-html">
       <param name="docbook-dir" value="quickstart" />
-      <param name="docbook-srcfile" value="quickstart.docbook" />
+      <param name="docbook-srcfile" value="quickstart" />
     </antcall>
-    <antcall target="run-docbook2html">
+    <antcall target="generate-html">
       <param name="docbook-dir" value="developer" />
-      <param name="docbook-srcfile" value="devdoc.docbook" />
+      <param name="docbook-srcfile" value="devdoc" />
     </antcall>
     <antcall target="copy-resources" />
   </target>
   
   <target name="doc-pdf" description="Generate all pdf documentation">
     <echo message="Creating pdf documentation" />
-    <antcall target="run-docbook2pdf" inheritall="false">
+    <antcall target="generate-pdf">
       <param name="docbook-dir" value="user" />
-      <param name="docbook-srcfile" value="userdoc.docbook" />
+      <param name="docbook-srcfile" value="userdoc" />
     </antcall>
-    <antcall target="run-docbook2pdf" inheritall="false">
+    <antcall target="generate-pdf">
       <param name="docbook-dir" value="quickstart" />
-      <param name="docbook-srcfile" value="quickstart.docbook" />
+      <param name="docbook-srcfile" value="quickstart" />
     </antcall>
-    <antcall target="run-docbook2pdf" inheritall="false">
+    <antcall target="generate-pdf">
       <param name="docbook-dir" value="developer" />
-      <param name="docbook-srcfile" value="devdoc.docbook" />
+      <param name="docbook-srcfile" value="devdoc" />
     </antcall>
   </target>
   
-  <target name="run-docbook2html" depends="assert-docbook2html-present">
-    <mkdir dir="docs/${docbook-dir}" />
-    <apply executable="docbook2html" failonerror="yes" type="file">
-      <arg value="-o" />
-      <arg value="docs/${docbook-dir}" />
-      <arg value="-V" />
-      <arg value="%use-id-as-filename%" />
-      <fileset dir="src/${docbook-dir}">
-        <include name="${docbook-srcfile}" />
-      </fileset>
-    </apply>
+  <target name="doc-user" description="Generate user documentation (html and pdf)">
+    <echo message="Creating user documentation" />
+    <antcall target="generate-html">
+      <param name="docbook-dir" value="user" />
+      <param name="docbook-srcfile" value="userdoc" />
+    </antcall>
+    <antcall target="generate-pdf">
+      <param name="docbook-dir" value="user" />
+      <param name="docbook-srcfile" value="userdoc" />
+    </antcall>
+    <antcall target="copy-resources" />
   </target>
   
-  <target name="run-docbook2pdf" depends="assert-docbook2pdf-present">
+  <target name="doc-quickstart" description="Generate quickstart documentation (html and pdf)">
+    <echo message="Creating user documentation" />
+    <antcall target="generate-html">
+      <param name="docbook-dir" value="quickstart" />
+      <param name="docbook-srcfile" value="quickstart" />
+    </antcall>
+    <antcall target="generate-pdf">
+      <param name="docbook-dir" value="quickstart" />
+      <param name="docbook-srcfile" value="quickstart" />
+    </antcall>
+    <antcall target="copy-resources" />
+  </target>
+  
+  <target name="doc-developer" description="Generate developer documentation (html and pdf)">
+    <echo message="Creating user documentation" />
+    <antcall target="generate-html">
+      <param name="docbook-dir" value="developer" />
+      <param name="docbook-srcfile" value="devdoc" />
+    </antcall>
+    <antcall target="generate-pdf">
+      <param name="docbook-dir" value="developer" />
+      <param name="docbook-srcfile" value="devdoc" />
+    </antcall>
+    <antcall target="copy-resources" />
+  </target>
+  
+  <target name="generate-html" depends="assert-docbook-xsl-exists">
     <mkdir dir="docs/${docbook-dir}" />
-    <apply executable="docbook2pdf" failonerror="yes" type="file">
+    <exec executable="xsltproc" failonerror="yes">
       <arg value="-o" />
-      <arg value="docs" />
-      <fileset dir="src/${docbook-dir}">
-        <include name="${docbook-srcfile}" />
-      </fileset>
-    </apply>
+      <arg value="docs/${docbook-dir}/" />
+      <arg file="${docbook-xsl-home}/html/chunk.xsl" />
+      <arg file="src/${docbook-dir}/${docbook-srcfile}.docbook" />
+    </exec>
+    
+    <!-- This should work and be platform-independent, but I can't get it to generate good output:
+         the built-in Java API version fails; xalan works but the index.html page is blank (no TOC)
+    <xslt style="${docbook-xsl-home}/html/chunk.xsl"
+          destdir="docs/${docbook-dir}" basedir="src/${docbook-dir}" includes="${docbook-srcfile}" />
+    -->
+  </target>
+  
+  <target name="generate-pdf" depends="assert-docbook-xsl-exists">
+    <taskdef name="fop" classname="org.apache.fop.tools.anttasks.Fop">
+      <classpath>
+        <fileset dir="lib/buildlib">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>    
+    </taskdef>
+    <mkdir dir="fo" />
+    <mkdir dir="docs" />
+    <exec executable="xsltproc" failonerror="yes">
+      <arg value="-o" />
+      <arg value="fo/${docbook-srcfile}.fo" />
+      <arg file="${docbook-xsl-home}/fo/docbook.xsl" />
+      <arg file="src/${docbook-dir}/${docbook-srcfile}.docbook" />
+    </exec>
+    <fop fofile="fo/${docbook-srcfile}.fo" outfile="docs/${docbook-srcfile}.pdf"
+         basedir="src/${docbook-dir}" />
   </target>
   
   <target name="copy-resources">
@@ -145,8 +198,8 @@
         <include name="**/*.jpg" />
         <include name="**/*.jpeg" />
         <include name="**/*.properties" />
+        <include name="**/*.html" />
         <!-- Additional resource files should be listed here -->
-	<include name="**/allclasses*" />
       </fileset>
     </copy>
   </target>
@@ -162,6 +215,8 @@
 
   <target name="clean-intermediate" unless="skip-clean">
     <echo message="Deleting all intermediate build products" />
+    
+    <delete dir="fo" failonerror="${clean-can-fail}" />
     
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
@@ -340,14 +395,9 @@
        Property-resolution Targets 
        *************************** -->
   
-  <target name="assert-docbook2html-present">
-    <available file="docbook2html" property="docbook2html-present" filepath="${env.PATH}" />
-    <fail message="The specified target requires docbook2html to be present on the path" unless="docbook2html-present" />
-  </target>
-      
-  <target name="assert-docbook2pdf-present">
-    <available file="docbook2pdf" property="docbook2pdf-present" filepath="${env.PATH}" />
-    <fail message="The specified target requires docbook2pdf to be present on the path" unless="docbook2pdf-present" />
+  <target name="assert-docbook-xsl-exists">
+    <available property="docbook-xsl-exists" file="${docbook-xsl-home}/html/chunk.xsl" />
+    <fail message="${docbook-xsl-home}/html/chunk.xsl does not exist" unless="docbook-xsl-exists" />
   </target>
   
   <target name="assert-jar-exists">

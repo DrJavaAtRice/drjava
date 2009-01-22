@@ -1,4 +1,6 @@
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
   <!ENTITY introduction SYSTEM "introduction.docbook">
   <!ENTITY gettingStarted SYSTEM "gettingStarted.docbook">
   <!ENTITY supportingTechnology SYSTEM "supportingTechnology.docbook">
@@ -19,7 +21,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2006-1-11</date>
+    <date>2009-1-19</date>
     <title>DrJava Developer Documentation</title>
   </bookinfo>
   <toc></toc>
