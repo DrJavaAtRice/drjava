@@ -38,6 +38,7 @@ import java.io.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Map;
 import java.util.List;
@@ -797,6 +798,25 @@ public final class ConcurrentUtil {
       for (String prefix : prefixes) {
         if (entry.getKey() instanceof String && ((String) entry.getKey()).startsWith(prefix)) {
           result.put(entry.getKey(), entry.getValue());
+          break;
+        }
+      }
+    }
+    return result;
+  }
+  
+  /**
+   * Get a subset of the system properties for names that match at least one of the given prefixes.
+   * Returns a String map; in the unusual case that a value is not a String, it is converted 
+   * via {@code toString()}.
+   * @throws SecurityException  As in {@link System#getProperties}.
+   */
+  public static Map<String, String> copyPropertiesAsMap(String... prefixes) {
+    Map<String, String> result = new HashMap<String, String>();
+    for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
+      for (String prefix : prefixes) {
+        if (entry.getKey() instanceof String && ((String) entry.getKey()).startsWith(prefix)) {
+          result.put((String) entry.getKey(), entry.getValue().toString());
           break;
         }
       }
