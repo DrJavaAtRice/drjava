@@ -811,7 +811,7 @@ public final class ConcurrentUtil {
    * via {@code toString()}.
    * @throws SecurityException  As in {@link System#getProperties}.
    */
-  public static Map<String, String> copyPropertiesAsMap(String... prefixes) {
+  public static Map<String, String> getPropertiesAsMap(String... prefixes) {
     Map<String, String> result = new HashMap<String, String>();
     for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
       for (String prefix : prefixes) {
