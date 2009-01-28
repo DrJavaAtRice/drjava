@@ -181,7 +181,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           return;
         }
         StringBuilder sb = new StringBuilder();
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           File f = new File(StringOps.unescapeFileName(fs));
           sb.append(File.pathSeparator);
           sb.append((f.exists() && f.isDirectory())?"true":"false");
@@ -217,7 +217,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           return;
         }
         StringBuilder sb = new StringBuilder();
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File f = new File(fs);
           sb.append(File.pathSeparator);
@@ -253,7 +253,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           return;
         }
         StringBuilder sb = new StringBuilder();
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File f = new File(fs);
           sb.append(File.pathSeparator);
@@ -290,7 +290,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           return;
         }
         StringBuilder sb = new StringBuilder();
-        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(edu.rice.cs.plt.text.TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File f = new File(fs);
           String p = StringOps.escapeFileName(f.getParent());
@@ -335,7 +335,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           return;
         }
         StringBuilder sb = new StringBuilder();
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File f = new File(fs);
           sb.append(File.pathSeparator);
@@ -380,7 +380,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           return;
         }
         StringBuilder sb = new StringBuilder();
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File f = new File(fs);
           try {
@@ -442,7 +442,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           _value = "(file.mkdir Error: file missing...)";
           return;
         }
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File n = new File(fs);
           if (!n.mkdir()) {
@@ -481,7 +481,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         }
         s = StringOps.unescapeFileName(s);
         boolean res = false;
-        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator))) {
+        for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
           File f = new File(fs);
           if (rec) {
@@ -649,39 +649,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.put("else", "");
       }
     });
-    
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("not",
-                                                                 "If the value is true, returns false; if the "+
-                                                                 "value is false, returns true.\n"+
-                                                                 "Required attribute:\n"+
-                                                                 "\tvalue=\"<string evaluating to true of false>\"") {
-      public void update(PropertyMaps pm) {
-        if (_attributes.get("value")==null) {
-          _value = "(not Error...)";
-          return;
-        }
-        if (_attributes.get("value").toLowerCase().equals("true")) {
-          _value = "false";
-        }
-        else if (_attributes.get("value").toLowerCase().equals("false")) {
-          _value = "true";
-        }
-        else {
-          _value = "(not Error...)";
-          return;
-        }
-      }
-      public String getCurrent(PropertyMaps pm) {
-        invalidate();
-        return super.getCurrent(pm);
-      }
-      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-      public void resetAttributes() {
-        _attributes.clear();
-        _attributes.put("value", null);
-      }
-    });
-    
+
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Double,Double,Boolean>("gt",
                                                                 "If the op1 is greater than op2, returns true,"+
@@ -849,12 +817,10 @@ public class DrJavaPropertySetup implements OptionConstants {
                                         <String,Double>("strlen",
                                                         "Returns the length of the operand in characters.\n"+
                                                         "Required attributes:\n"+
-                                                        "\tlist=\"<string>\"",
+                                                        "\top=\"<string>\"",
                                                         new Lambda<String,Double>() {
       public Double value(String s) { return ((double)s.length()); }
     },
-                                                        "list",
-                                                        null,
                                                         UnaryOpProperty.PARSE_STRING,
                                                         UnaryOpProperty.FORMAT_DOUBLE));
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
@@ -868,7 +834,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                new Lambda2<String,String,Double>() {
       public Double value(String s, String sep) {
         if (s.length()==0) return 0.0;
-        return ((double)s.split(TextUtil.regexEscape(sep)).length);
+        return ((double)s.split(TextUtil.regexEscape(sep),-1).length);
       }
     },
                                                                "list",
@@ -896,7 +862,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         int i = index.intValue();
         int c = count.intValue();
         StringBuilder sb = new StringBuilder();
-        String[] els = s.split(TextUtil.regexEscape(sep));
+        String[] els = s.split(TextUtil.regexEscape(sep),-1);
         for(int j=0; j<c; ++j) {
           if (i+j>=els.length) { break; }
           sb.append(sep);
@@ -935,7 +901,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       public String value(String s, String oldSep, String newSep) {
         if (s.length()==0) return "";
         StringBuilder sb = new StringBuilder();
-        for(String el: s.split(TextUtil.regexEscape(oldSep))) {
+        for(String el: s.split(TextUtil.regexEscape(oldSep),-1)) {
           sb.append(newSep);
           sb.append(el);
         }
@@ -1237,7 +1203,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         pm.addVariable(var,"");
         String val;
         try {
-          String[] els = list.split(TextUtil.regexEscape(sep));
+          String[] els = list.split(TextUtil.regexEscape(sep),-1);
           int start = 0;
           while(start<els.length) {
             sbVar.setLength(0);
@@ -1305,7 +1271,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                       "\trel=\"<dir to which the files are relative>\"\n"+
                                                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                                                       "\tdquote=\"<true to enclose file in double quotes>\""));
-    String[] cps = System.getProperty("java.class.path").split(TextUtil.regexEscape(File.pathSeparator));
+    String[] cps = System.getProperty("java.class.path").split(TextUtil.regexEscape(File.pathSeparator),-1);
     File found = null;
     for(String cp: cps) {
       try {

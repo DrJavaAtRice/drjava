@@ -202,7 +202,7 @@ public class PropertyMaps implements Cloneable {
     clone._props.clear();
     for(String category: _props.keySet()) {
       for (String key: _props.get(category).keySet()) {
-        clone.setProperty(key, getProperty(key));
+        clone.setProperty(category, getProperty(key));
       }
     }
     clone._variables.clear();
