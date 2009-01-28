@@ -62,24 +62,49 @@ public class CompletionMonitor implements Condition {
   public void reset() { _signal = false; }
   
   /** Sets the state to signaled and alerts all blocked threads */
-  synchronized public void signal() {
+  public synchronized void signal() {
     boolean changed = !_signal;
     _signal = true;
     if (changed) { this.notifyAll(); }
   }
   
   /** Ensures that the monitor has been signaled before continuing.  Blocks if necessary. */
-  synchronized public void ensureSignaled() throws InterruptedException {
+  public synchronized void ensureSignaled() throws InterruptedException {
     while (!_signal) { this.wait(); }
   }
   
   /**
-   * Ensures that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait is interrupted,
-   * returns {@code false}.
+   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
+   * is interrupted, returns {@code false}.
    */
   public boolean attemptEnsureSignaled() {
     try { ensureSignaled(); return true; }
-    catch (InterruptedException e) { return false; }
+    catch (InterruptedException e) { return _signal; }
+  }
+  
+  /**
+   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
+   * is interrupted or the timeout is reached, returns {@code false}.
+   * @param timeout  Maximum wait time, in milliseconds.  Must be positive or zero (where zero signals, as in
+   *                 {@link Object#wait(long)}, that no timeout should be used).
+   */
+  public synchronized boolean attemptEnsureSignaled(long timeout) {
+    if (timeout == 0) { return attemptEnsureSignaled(); }
+    else if (_signal) { return true; }
+    else {
+      // must record expected wake-up time to account for spurious wake-ups
+      long timeoutTime = System.currentTimeMillis() + timeout;
+      try {
+        do {
+          this.wait(timeout);
+          long currentTime = System.currentTimeMillis();
+          if (currentTime >= timeoutTime) { return _signal; } // timeout has been reached
+          else { timeout = timeoutTime - currentTime; }
+        } while (!_signal);
+        return true;
+      }
+      catch (InterruptedException e) { return _signal; } // _signal may have become true at the same time
+    }
   }
   
 }
