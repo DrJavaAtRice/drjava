@@ -561,7 +561,7 @@ public abstract class StringOps {
       ++i;
       d /= 1024;
     }
-    if (i >= sizes.length) { i = sizes.length - 1; }
+    if (i >= sizes.length) { i = sizes.length - 1; d *= 1024; /* undo last division by 1024 */ }
     StringBuilder sb = new StringBuilder();
     long whole = (long)d;
     if (whole == d) {
@@ -585,6 +585,7 @@ public abstract class StringOps {
       sb.append(sizes[i]);
       sb.append('s');
     }
+    System.out.println("l="+l+" -> "+sb.toString());
     return sb.toString();
   }
   

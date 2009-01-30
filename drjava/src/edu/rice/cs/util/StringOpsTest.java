@@ -49,9 +49,62 @@ public class StringOpsTest extends DrJavaTestCase {
   /** Test the replace() method of StringOps class. */
   public void testReplace() {
     String test = "aabbccdd";
-    assertEquals("testReplace:", "aab12cdd", StringOps.replace(test, "bc", "12"));
+    assertEquals("testReplace:", "aab12cdd", StringOps.replace(test, "bc","12"));
     test = "cabcabc";
     assertEquals("testReplace:", "cabc", StringOps.replace(test, "cabc", "c"));
+  }
+  
+  public void testEncodeHTML() {
+    assertEquals("", StringOps.encodeHTML(""));
+    assertEquals("abc", StringOps.encodeHTML("abc"));
+    assertEquals("&amp;", StringOps.encodeHTML("&"));
+    assertEquals("&lt;", StringOps.encodeHTML("<"));
+    assertEquals("&gt;", StringOps.encodeHTML(">"));
+    assertEquals("<br>", StringOps.encodeHTML(System.getProperty("line.separator")));
+    assertEquals("<br>", StringOps.encodeHTML("\n"));
+    assertEquals("&amp;&lt;&gt;<br><br>", StringOps.encodeHTML("&<>" + System.getProperty("line.separator") + "\n"));
+    assertEquals("&amp;&amp;", StringOps.encodeHTML("&&"));
+    assertEquals("&lt;&lt;", StringOps.encodeHTML("<<"));
+    assertEquals("&gt;&gt;", StringOps.encodeHTML(">>"));
+    assertEquals("<br><br>", StringOps.encodeHTML(System.getProperty("line.separator") + System.getProperty("line.separator")));
+    assertEquals("<br><br>", StringOps.encodeHTML("\n\n"));
+  }
+  
+  public void testCompress() {
+    assertEquals("", StringOps.compress(""));
+    assertEquals("abc", StringOps.compress("abc"));
+    assertEquals(" ", StringOps.compress(" "));
+    assertEquals(" ", StringOps.compress("  "));
+    assertEquals(" ", StringOps.compress(" \n\t\n"));
+    assertEquals("\n", StringOps.compress("\n"));
+    assertEquals("\t", StringOps.compress("\t"));
+    assertEquals("\n", StringOps.compress("\n\t\t"));
+    assertEquals("\t", StringOps.compress("\t\n\n"));
+    
+    assertEquals(" abc", StringOps.compress("  abc"));
+    assertEquals(" abc", StringOps.compress(" \n\t\nabc"));
+    assertEquals("\nabc", StringOps.compress("\nabc"));
+    assertEquals("\tabc", StringOps.compress("\tabc"));
+    assertEquals("\nabc", StringOps.compress("\n\t\tabc"));
+    assertEquals("\tabc", StringOps.compress("\t\n\nabc"));
+    
+    assertEquals(" abc ", StringOps.compress("  abc   "));
+    assertEquals(" abc ", StringOps.compress(" \n\t\nabc   "));
+    assertEquals("\nabc\t", StringOps.compress("\nabc\t\n"));
+    assertEquals("\tabc\n", StringOps.compress("\tabc\n\t"));
+    assertEquals("\nabc\n", StringOps.compress("\n\t\tabc\n\t "));
+    assertEquals("\tabc ", StringOps.compress("\t\n\nabc \t\n"));
+  }
+  
+  public void testFlatten() {
+    assertEquals("", StringOps.flatten(""));
+    assertEquals("abc", StringOps.flatten("abc"));
+    assertEquals(""+StringOps.SEPARATOR, StringOps.flatten("\n"));
+    assertEquals(""+StringOps.SEPARATOR+StringOps.SEPARATOR+StringOps.SEPARATOR, StringOps.flatten("\n\n\n"));
+    assertEquals("abc"+StringOps.SEPARATOR+"def"+StringOps.SEPARATOR+"ghi"+StringOps.SEPARATOR, StringOps.flatten("abc\ndef\nghi\n"));
+    assertEquals("abc"+StringOps.SEPARATOR+StringOps.SEPARATOR+
+                 "def"+StringOps.SEPARATOR+StringOps.SEPARATOR+
+                 "ghi"+StringOps.SEPARATOR+StringOps.SEPARATOR, StringOps.flatten("abc\n\ndef\n\nghi\n\n"));
   }
   
   /** Test the getOffsetAndLength() method of StringOps class. */
@@ -419,6 +472,8 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("1.1MB", "1.10 megabytes", StringOps.memSizeToString((long)(1024*1024*1.1)));
     assertEquals("1GB", "1 gigabyte", StringOps.memSizeToString((1024*1024*1024)));
     assertEquals("1.25GB", "1.25 gigabytes", StringOps.memSizeToString((long)(1024*1024*1024*1.25)));
+    assertEquals("1TB", "1024 gigabytes", StringOps.memSizeToString((long)(1024)*1024*1024*1024));
+    assertEquals("1024TB", "1048576 gigabytes", StringOps.memSizeToString((long)(1024)*1024*1024*1024*1024));
   }
   
   public void testCommandLineToLists() {
