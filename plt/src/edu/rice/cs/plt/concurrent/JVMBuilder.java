@@ -167,6 +167,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return new JVMBuilder(_javaCommand, IterUtil.snapshot(jvmArgs), _classPath, _dir, _properties, _environment, true);
   }
   
+  /** Due to overloading rules, this cannot be invoked via varargs with 0 arguments (the getter matches instead). */
   public JVMBuilder jvmArguments(String... jvmArgs) {
     return new JVMBuilder(_javaCommand, IterUtil.make(jvmArgs), _classPath, _dir, _properties, _environment, true);
   }
@@ -180,6 +181,12 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   
   public JVMBuilder classPath(String classPath) {
     return new JVMBuilder(_javaCommand, _jvmArgs, attemptAbsoluteFiles(IOUtil.parsePath(classPath)), _dir,
+                          _properties, _environment, true);
+  }
+  
+  /** Due to overloading rules, this cannot be invoked via varargs with 0 arguments (the getter matches instead). */
+  public JVMBuilder classPath(File... classPath) {
+    return new JVMBuilder(_javaCommand, _jvmArgs, attemptAbsoluteFiles(IterUtil.asIterable(classPath)), _dir,
                           _properties, _environment, true);
   }
   
