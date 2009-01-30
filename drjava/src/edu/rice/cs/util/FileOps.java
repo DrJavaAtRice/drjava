@@ -56,7 +56,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
   */
 public abstract class FileOps {
   
-  private static Log _log = new Log("FileOpsTest.txt", false);
+  private static Log _log = new Log("FileOpsTest.txt", true);
   
   /** A singleton null file class. There is a separate NullFile class in this package. TODO: merge these two classes.  
     * This class is used for all NullFile.ONLY references while the other is used for distinct untitled documents.
@@ -64,7 +64,7 @@ public abstract class FileOps {
     */
   static public class NullFile extends File {
     
-    public static NullFile ONLY = new NullFile();
+    public static final NullFile ONLY = new NullFile();
     
     private NullFile() { super(""); }
     public boolean canRead() { return false; }
@@ -380,38 +380,42 @@ public abstract class FileOps {
   /** Reads the entire contents of a file and return them as canonicalized Swing Document text. All newLine sequences,
     * including "\n", "\r", and "\r\n" are converted to "\n". */
   public static String readFileAsSwingText(final File file) throws IOException {
-    FileReader reader = new FileReader(file);
-    final StringBuilder buf = new StringBuilder();
-    
-    char pred = (char) 0; // initialize as null character
-    while (reader.ready()) {
-      char c = (char) reader.read();
+    FileReader reader = null;
+    try {
+      reader = new FileReader(file);
+      final StringBuilder buf = new StringBuilder();
       
-      if (c == '\n' && pred == '\r') { } // do nothing ignoring second character of "\r\n";
-      else if (c == '\r') buf.append('\n');
-      else buf.append(c);
-      
-      pred = c;
+      char pred = (char) 0; // initialize as null character
+      while (reader.ready()) {
+        char c = (char) reader.read();
+        
+        if (c == '\n' && pred == '\r') { } // do nothing ignoring second character of "\r\n";
+        else if (c == '\r') buf.append('\n');
+        else buf.append(c);
+        
+        pred = c;
+      }
+      return buf.toString();
     }
-    
-    reader.close();
-    return buf.toString();
+    finally { if (reader!=null) reader.close(); }
   }
   
   /** Reads the entire contents of a file and return them as a String.
     * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#toString(File)} instead, which provides the same functionality.
     */
   @Deprecated public static String readFileAsString(final File file) throws IOException {
-    FileReader reader = new FileReader(file);
-    final StringBuilder buf = new StringBuilder();
-    
-    while (reader.ready()) {
-      char c = (char) reader.read();
-      buf.append(c);
+    FileReader reader = null;
+    try {
+      reader = new FileReader(file);
+      final StringBuilder buf = new StringBuilder();
+      
+      while (reader.ready()) {
+        char c = (char) reader.read();
+        buf.append(c);
+      }
+      return buf.toString();
     }
-    
-    reader.close();
-    return buf.toString();
+    finally { if (reader!=null) reader.close(); }
   }
   
   /** Copies the text of one file into another.
@@ -457,9 +461,12 @@ public abstract class FileOps {
     * @deprecated  Use the equivalent {@link edu.rice.cs.plt.io.IOUtil#writeStringToFile(File, String, boolean)} instead
     */
   @Deprecated public static void writeStringToFile(File file, String text, boolean append) throws IOException {
-    FileWriter writer = new FileWriter(file, append);
-    writer.write(text);
-    writer.close();
+    FileWriter writer = null;
+    try {
+      writer = new FileWriter(file, append);
+      writer.write(text);
+    }
+    finally { if (writer!=null) writer.close(); }
   }
   
   /** Writes text to the given file returning true if it succeeded and false if not.  This is a simple wrapper for

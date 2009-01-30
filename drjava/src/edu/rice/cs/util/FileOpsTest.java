@@ -292,12 +292,13 @@ public class FileOpsTest extends DrJavaTestCase {
   
   public void testSplitFile() {
     String[] parts = new String[]{"","home","username","dir"};
-    String path1 = "";
+    StringBuilder path1 = new StringBuilder();
     for (String s : parts) {
-      path1 += s + File.separator;
+      path1.append(s);
+      path1.append(File.separator);
     }
     
-    File f = new File(path1);
+    File f = new File(path1.toString());
     String[] res = FileOps.splitFile(f);
     
     assertTrue( "Inconsitent results. Expected " +
@@ -341,7 +342,7 @@ public class FileOpsTest extends DrJavaTestCase {
     File dir = new File(args[0]);
     if (! dir.exists()) System.exit(2);
     FileOps.deleteDirectoryOnExit(dir);
-    
+
     // OK, exit cleanly
     System.exit(0);
   }

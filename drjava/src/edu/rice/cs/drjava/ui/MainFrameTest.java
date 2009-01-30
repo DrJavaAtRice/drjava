@@ -110,6 +110,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //        catch(Exception e) { throw new UnexpectedException(e); }
 //      }
 //    });
+    super.tearDown();
   }
   
   JButton _but;

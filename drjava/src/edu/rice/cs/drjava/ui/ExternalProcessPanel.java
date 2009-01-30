@@ -92,7 +92,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     _sb.append(pc.cmdline());
     _sb.append('\n');
     _header = _sb.toString();
-    _textArea.setText(_header);
+    _textArea.setText(_header); // _textArea is non-null because makeLeftPanel() gets called in super constructor
     initThread(pc);
     _textArea.addMouseListener(new MouseListener() {
       public void mouseClicked(MouseEvent e) {

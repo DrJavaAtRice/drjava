@@ -184,7 +184,7 @@ public class PropertyMaps implements Cloneable {
     if (varStack.empty()) {
       // no shadowed variables
       // remove the stack from the hash map of variables
-      _variables.remove(varStack);
+      _variables.remove(name);
       // remove the property
       removeProperty(p);
     }

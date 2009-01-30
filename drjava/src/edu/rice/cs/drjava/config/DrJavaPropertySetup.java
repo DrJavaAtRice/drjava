@@ -48,6 +48,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.text.TextUtil;
 
 import java.io.*;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1103,15 +1104,13 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
       public String toString() { return "--uninitialized--"; }
       public void setAttributes(HashMap<String,String> attrs, Lambda<String,String> replaceLambda) {
-        String val;
-        for(String key: attrs.keySet()) {
-          val = attrs.get(key);
-          if (key.equals("cmd")) {
+        for(Map.Entry<String,String> e: attrs.entrySet()) {
+          if (e.getKey().equals("cmd")) {
             // do not evaluate the cmd attribute yet
-            setAttribute(key, val);
+            setAttribute(e.getKey(), e.getValue());
           }
           else {
-            setAttribute(key, replaceLambda.value(val));
+            setAttribute(e.getKey(), replaceLambda.value(e.getValue()));
           }
         }
       }
@@ -1244,15 +1243,13 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
       public String toString() { return "--uninitialized--"; }
       public void setAttributes(HashMap<String,String> attrs, Lambda<String,String> replaceLambda) {
-        String value;
-        for(String key: attrs.keySet()) {
-          value = attrs.get(key);
-          if (key.equals("cmd")) {
+        for(Map.Entry<String,String> e: attrs.entrySet()) {
+          if (e.getKey().equals("cmd")) {
             // do not evaluate the cmd attribute yet
-            setAttribute(key, value);
+            setAttribute(e.getKey(), e.getValue());
           }
           else {
-            setAttribute(key, replaceLambda.value(value));
+            setAttribute(e.getKey(), replaceLambda.value(e.getValue()));
           }
         }
       }

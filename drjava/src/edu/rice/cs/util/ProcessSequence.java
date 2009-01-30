@@ -333,7 +333,7 @@ public class ProcessSequence extends Process {
   }
 
   /** Thread group for all threads that deal with this process sequence. */
-  protected class ProcessSequenceThreadGroup extends ThreadGroup {
+  protected static class ProcessSequenceThreadGroup extends ThreadGroup {
     private PrintWriter _debugOut;
     public ProcessSequenceThreadGroup(ProcessSequence seq) {
       super("Process Sequence Thread Group");

@@ -229,7 +229,12 @@ public class ProjectProfile implements ProjectFileIR {
   
   /** Write project file in XML format. */
   public void write() throws IOException {
-    write(new FileOutputStream(_projectFile));
+    FileOutputStream fos = null;
+    try {
+      fos = new FileOutputStream(_projectFile);
+      write(fos);
+    }
+    finally { if (fos!=null) fos.close(); }
   }
   
   public void write(OutputStream os) throws IOException {    
@@ -407,7 +412,12 @@ public class ProjectProfile implements ProjectFileIR {
   
   /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void writeOld() throws IOException {
-    writeOld(new FileWriter(_projectFile));
+    FileWriter fw = null;
+    try {
+      fw = new FileWriter(_projectFile);
+      writeOld(fw);
+    }
+    finally { if (fw!=null) fw.close(); }
   }
   
   public String toString() {

@@ -72,6 +72,9 @@ public class MovingDocumentRegion extends DocumentRegion {
   public MovingDocumentRegion(final OpenDefinitionsDocument doc, int start, int end, int lineStart, int lineEnd) {
 
     super(doc, start, end);
+
+    assert doc != null;
+    
     try {
       _startPos = doc.createPosition(start);
       _endPos = doc.createPosition(end);
@@ -80,7 +83,6 @@ public class MovingDocumentRegion extends DocumentRegion {
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
     
-    assert doc != null;
     _stringSuspension = new Thunk<String>() {
       public String value() {
         try {

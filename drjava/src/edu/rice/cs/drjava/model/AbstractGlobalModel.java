@@ -3227,14 +3227,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
       doc.clearBrowserRegions();
       
+      FileReader reader = null;
       try {
         //this line precedes .remove() so that an invalid file is not cleared before this fact is discovered.
         File file = doc.getFile();
-        FileReader reader = new FileReader(file);
+        reader = new FileReader(file);
         doc.clear();
         
         _editorKit.read(reader, doc, 0);
-        reader.close(); // win32 needs readers closed explicitly!
         
         resetModification();
         doc.checkIfClassFileInSync();
@@ -3242,6 +3242,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _notifier.fileReverted(doc);
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
+      finally { if (reader!=null) reader.close(); /* win32 needs readers closed explicitly! */ }
     }
     
     /** Asks the listeners if the GlobalModel can abandon the current document.  Fires the canAbandonFile(File)

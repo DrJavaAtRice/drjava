@@ -205,11 +205,19 @@ public class XMLConfig {
    */
   public void save(File f) {
     if (isDelegated()) { _parent.save(f); return; }
+    FileOutputStream fos = null;
     try {
-      save(new FileOutputStream(f));
+      fos = new FileOutputStream(f);
+      save(fos);
     }
     catch(FileNotFoundException e) {
       throw new XMLConfigException("Error in save", e);
+    }
+    finally {
+      try {
+        if (fos!=null) fos.close();
+      }
+      catch(IOException ioe) { /* ignore exception when closing */ }
     }
   }
   

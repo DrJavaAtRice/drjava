@@ -51,10 +51,7 @@ import java.util.Map;
  */
 
 public class GeneralProcessCreator extends ProcessCreator {
-  protected String _cmdline = null;
   protected List<List<List<String>>> _seqs;
-  protected String _workdir;
-  protected Map<String,String> _env;
     
   /** Constructor for a process creator with the given command line and the work directory.
     * @param cmdline command line
@@ -79,9 +76,6 @@ public class GeneralProcessCreator extends ProcessCreator {
     _props = pm;
   }
   
-  /** Cached copy of the reconstructed command line. */
-  protected String _cachedCmdLine = null;
-
   /** Reconstructs the command line for a simple process. */
   protected static String getProcessCmdLine(List<String> cmds) {
     StringBuilder sb = new StringBuilder();

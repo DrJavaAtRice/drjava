@@ -57,7 +57,7 @@ public class LogTest extends MultiThreadedTestCase {
   // Relying on default constructor
   
   /** A thread class that adds a log message after sleeping a given number of milliseconds */
-  private class LogTestThread extends Thread {
+  private static class LogTestThread extends Thread {
     
     Log _log;
     int _millis;

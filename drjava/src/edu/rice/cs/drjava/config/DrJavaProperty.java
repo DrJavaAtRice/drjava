@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 import java.util.Set;
+import java.util.Map;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -126,10 +127,8 @@ public abstract class DrJavaProperty implements Cloneable {
     * @throws IllegalArgumentException if an attribute with a specified key does not already exist in table
     */
   public void setAttributes(HashMap<String,String> attrs, Lambda<String,String> replaceLambda) {
-    String value;
-    for(String key: attrs.keySet()) {
-      value = attrs.get(key);
-      setAttribute(key, replaceLambda.value(value));
+    for(Map.Entry<String,String> e: attrs.entrySet()) {
+      setAttribute(e.getKey(), replaceLambda.value(e.getValue()));
     }
   }
   

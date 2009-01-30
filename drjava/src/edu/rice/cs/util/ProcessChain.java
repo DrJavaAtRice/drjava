@@ -355,7 +355,7 @@ public class ProcessChain extends Process {
   }
   
   /** Thread group for all threads that deal with this process sequence. */
-  protected class ProcessChainThreadGroup extends ThreadGroup {
+  protected static class ProcessChainThreadGroup extends ThreadGroup {
     private ProcessChain _chain;
     private PrintWriter _debugOut;
     public ProcessChainThreadGroup(ProcessChain chain) {

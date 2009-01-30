@@ -1177,9 +1177,9 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertFalse("Document should no longer be modified after redo.", _doc.isModifiedSinceSave());
   }
   
-  protected final String NEWLINE = "\n"; // Was StringOps.EOL;but swing usees '\n' for newLine
+  protected static final String NEWLINE = "\n"; // Was StringOps.EOL;but swing usees '\n' for newLine
   
-  protected final String NESTED_CLASSES_TEXT =
+  protected static final String NESTED_CLASSES_TEXT =
     "/*bof*/package Temp;" + NEWLINE +
     "" + NEWLINE +
     "public class Test {" + NEWLINE +

@@ -45,7 +45,7 @@ import edu.rice.cs.util.text.EditDocumentException;
 public final class InteractionsDocumentTest extends DrJavaTestCase {
   protected InteractionsDocument _doc;
   
-  final String TEST_BANNER = "This is a test banner";
+  static final String TEST_BANNER = "This is a test banner";
   
   /** Initialize fields for each test. */
   protected void setUp() throws Exception {

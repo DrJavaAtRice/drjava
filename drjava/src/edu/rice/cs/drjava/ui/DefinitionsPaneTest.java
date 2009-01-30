@@ -837,7 +837,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _log.log("testMatchBraceTest completed");
   }
 
-  class KeyTestListener implements KeyListener {
+  static class KeyTestListener implements KeyListener {
     
     public void keyPressed(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keypress " + e); }
     public void keyReleased(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keyrelease " + e); }
@@ -845,7 +845,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     public boolean done() { return true; }
   }
   
-  class DocChangeListener extends DummyGlobalModelListener {
+  static class DocChangeListener extends DummyGlobalModelListener {
     private Object lock = new Object();
     private boolean docChanged = false;
     private int closedCt = 0;

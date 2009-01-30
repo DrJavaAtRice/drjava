@@ -453,7 +453,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPortSet = true;
   }
     
-  private final int DELAY_INTERVAL = 10;
+  private static final int DELAY_INTERVAL = 10;
   private volatile int delayCount = DELAY_INTERVAL;
   
   /** Called when the repl prints to System.out.  Includes a delay to prevent flooding the interactions document.  This
