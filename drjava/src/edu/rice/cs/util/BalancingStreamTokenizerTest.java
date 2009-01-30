@@ -216,6 +216,105 @@ public class BalancingStreamTokenizerTest extends TestCase {
     assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
   }
   
+  public void testThreeQuoteSetup() throws IOException {
+    BalancingStreamTokenizer tok = make("abc\"def ghi 'abc'\"123\n456'abc `def` \"xxx '111' yyy\"'789");
+    tok.defaultThreeQuoteSetup();
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("\"def ghi 'abc'\"", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("456", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("'abc `def` \"xxx '111' yyy\"'", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+  
+  public void testTwoQuoteCurlySetup() throws IOException {
+    BalancingStreamTokenizer tok = make("abc\"def {ghi} 'abc'\"123\n456'abc def \"xxx '111' yyy\"'789");
+    tok.defaultTwoQuoteCurlySetup();
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("\"def {ghi} 'abc'\"", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("456", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("'abc def \"xxx '111' yyy\"'", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+  
+  public void testThreeQuoteCurlySetup() throws IOException {
+    BalancingStreamTokenizer tok = make("abc\"def {ghi} 'abc'\"123\n456'abc `def` \"xxx '111' yyy\"'789");
+    tok.defaultThreeQuoteCurlySetup();
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("\"def {ghi} 'abc'\"", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("456", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("'abc `def` \"xxx '111' yyy\"'", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+  
   public void testDollarQuoted() throws IOException {
     BalancingStreamTokenizer tok = make("abc ${def ghi} 123\n456 `abc def` 789");
     tok.defaultThreeQuoteDollarCurlySetup();
@@ -247,6 +346,21 @@ public class BalancingStreamTokenizerTest extends TestCase {
     // System.err.println(s);
     assertEquals(null, s);
     assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+  
+  public void testWordRange() throws IOException {
+    BalancingStreamTokenizer tok = make("Hello World");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.whitespaceRange(0,255);
+    tok.wordRange(97,122);
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("ello", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("orld", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
   }
   
   public void testDollarNestedQuoted() throws IOException {
@@ -361,6 +475,115 @@ public class BalancingStreamTokenizerTest extends TestCase {
     s = tok.getNextToken();
     // System.err.println(s);
     assertEquals(" 789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+  
+  /* Tests for making a keyword */
+  public void testAddKeywordWhitespace(){
+    BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
+    tok.defaultWhitespaceSetup();
+    try{
+      tok.addKeyword("   key");
+    } catch (Exception e)
+    {
+      return;
+    }
+    fail("Expected Exception");
+  }
+  
+  public void testAddKeywordQuotes(){
+    BalancingStreamTokenizer tok = make("abc def\\ ghi `key 123\n456");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    try{
+      tok.addKeyword("`");
+    } catch (Exception e)
+    {
+      return;
+    }
+    fail("Expected Exception");
+  }
+  
+  /* testing whitespace function */
+  public void testWhitespaceFunction() throws IOException {
+    BalancingStreamTokenizer tok = make("Hello@World");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.whitespace(64);
+    String s = tok.getNextToken();
+    assertEquals("Hello",s);
+    s = tok.getNextToken();
+    assertEquals("World",s);
+  }
+  
+  /* testing wordChars function */
+  public void testWordCharsFunction() throws IOException {
+    BalancingStreamTokenizer tok = make("Hel lo\tWor ld");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.wordChars(32);
+    String s = tok.getNextToken();
+    assertEquals("Hel lo",s);
+    s = tok.getNextToken();
+    assertEquals("Wor ld",s);
+  }
+  
+  /* Testing adding new quotes */
+  public void testAddQuotesWhitespace(){
+    BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    try{
+      tok.addQuotes(" ","#");
+    } catch (Exception e)
+    {
+      return;
+    }
+    fail("Expected Exception");
+  }
+  
+  public void testAddQuotesRepeat(){
+    BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    try{
+      tok.addQuotes("#","'");
+    } catch (Exception e)
+    {
+      return;
+    }
+    fail("Expected Exception");
+  }
+  
+  public void testAddNewQuotes() throws IOException{
+    BalancingStreamTokenizer tok = make("abc ${def ghi 'abc#} 123\n456 ${abc def \"xxx '111# yyy\"} 789");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    try{
+      tok.addQuotes("'","#");
+    } catch (Exception e) {}
+    
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${def ghi 'abc#}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("456", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${abc def \"xxx '111# yyy\"}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("789", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
     s = tok.getNextToken();
     // System.err.println(s);
