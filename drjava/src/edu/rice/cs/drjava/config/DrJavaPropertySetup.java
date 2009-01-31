@@ -929,8 +929,8 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                       "Replaces each occurrence in a string."+
                                                                       "Required attributes:\n"+
                                                                       "\ttext=\"<text in which to replace>\"\n"+
-                                                                      "\told=\"<old separator>\"\n"+
-                                                                      "\tnew=\"<new separator>\"",
+                                                                      "\told=\"<old string>\"\n"+
+                                                                      "\tnew=\"<new string>\"",
                                                                       new Lambda3<String,String,String,String>() {
       public String value(String s, String oldStr, String newStr) {
         if (s.length()==0) return "";
