@@ -585,7 +585,6 @@ public abstract class StringOps {
       sb.append(sizes[i]);
       sb.append('s');
     }
-    System.out.println("l="+l+" -> "+sb.toString());
     return sb.toString();
   }
   

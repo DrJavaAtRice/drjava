@@ -56,7 +56,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
   */
 public abstract class FileOps {
   
-  private static Log _log = new Log("FileOpsTest.txt", true);
+  private static Log _log = new Log("FileOpsTest.txt", false);
   
   /** A singleton null file class. There is a separate NullFile class in this package. TODO: merge these two classes.  
     * This class is used for all NullFile.ONLY references while the other is used for distinct untitled documents.
