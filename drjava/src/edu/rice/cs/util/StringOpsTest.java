@@ -54,6 +54,73 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("testReplace:", "cabc", StringOps.replace(test, "cabc", "c"));
   }
   
+  public void testEscapeUnEscapeFileName() {
+    assertEquals("", StringOps.escapeFileName(""));
+    assertEquals("abc123", StringOps.escapeFileName("abc123"));
+    assertEquals("abc123", StringOps.unescapeFileName("abc123"));
+    
+    assertEquals("\u001b\u001b", StringOps.escapeFileName("\u001b"));
+    assertEquals("\u001b", StringOps.unescapeFileName("\u001b\u001b"));
+    
+    assertEquals("\u001b ", StringOps.escapeFileName(" "));
+    assertEquals(" ", StringOps.unescapeFileName("\u001b "));
+    
+    assertEquals("\u001b" + String.valueOf(java.io.File.pathSeparatorChar), StringOps.escapeFileName(String.valueOf(java.io.File.pathSeparatorChar)));
+    assertEquals(String.valueOf(java.io.File.pathSeparatorChar), StringOps.unescapeFileName("\u001b" + String.valueOf(java.io.File.pathSeparatorChar)));
+    
+    assertEquals("\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR), StringOps.escapeFileName(String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR)));
+    assertEquals(String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR), StringOps.unescapeFileName("\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR)));
+    
+    assertEquals("\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR), StringOps.escapeFileName(String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR)));
+    assertEquals(String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR), StringOps.unescapeFileName("\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR)));
+    
+    assertEquals("\u001b:", StringOps.escapeFileName(":"));
+    assertEquals(":", StringOps.unescapeFileName("\u001b:"));
+    
+    assertEquals("\u001b\u001b\u001b\u001b", StringOps.escapeFileName("\u001b\u001b"));
+    assertEquals("\u001b\u001b", StringOps.unescapeFileName("\u001b\u001b\u001b\u001b"));
+    
+    assertEquals("\u001b \u001b ", StringOps.escapeFileName("  "));
+    assertEquals("  ", StringOps.unescapeFileName("\u001b \u001b "));
+    
+    assertEquals("\u001b" + String.valueOf(java.io.File.pathSeparatorChar) + "\u001b" + String.valueOf(java.io.File.pathSeparatorChar), StringOps.escapeFileName(String.valueOf(java.io.File.pathSeparatorChar) + String.valueOf(java.io.File.pathSeparatorChar)));
+    assertEquals(String.valueOf(java.io.File.pathSeparatorChar) + String.valueOf(java.io.File.pathSeparatorChar), StringOps.unescapeFileName("\u001b" + String.valueOf(java.io.File.pathSeparatorChar) + "\u001b" + String.valueOf(java.io.File.pathSeparatorChar)));
+    
+    assertEquals("\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR), StringOps.escapeFileName(String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR)));
+    assertEquals(String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR), StringOps.unescapeFileName("\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR)));
+                 
+    assertEquals("\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + "\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR), StringOps.escapeFileName(String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR)));
+    assertEquals(String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR), StringOps.unescapeFileName("\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + "\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR)));
+    
+    assertEquals("\u001b:\u001b:", StringOps.escapeFileName("::"));
+    assertEquals("::", StringOps.unescapeFileName("\u001b:\u001b:"));
+    
+    assertEquals("abc\u001b\u001b123", StringOps.escapeFileName("abc\u001b123"));
+    assertEquals("abc\u001b123", StringOps.unescapeFileName("abc\u001b\u001b123"));
+    
+    
+    assertEquals("abc\u001b 123", StringOps.escapeFileName("abc 123"));
+    assertEquals("abc 123", StringOps.unescapeFileName("abc\u001b 123"));
+    
+    assertEquals("abc\u001b" + String.valueOf(java.io.File.pathSeparatorChar) + "123", StringOps.escapeFileName("abc" + String.valueOf(java.io.File.pathSeparatorChar) + "123"));
+    assertEquals("abc" + String.valueOf(java.io.File.pathSeparatorChar) + "123", StringOps.unescapeFileName("abc\u001b" + String.valueOf(java.io.File.pathSeparatorChar) + "123"));
+    
+    assertEquals("abc\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "123", StringOps.escapeFileName("abc" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "123"));
+    assertEquals("abc" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "123", StringOps.unescapeFileName("abc\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "123"));
+    
+    assertEquals("abc\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + "123", StringOps.escapeFileName("abc" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + "123"));
+    assertEquals("abc" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + "123", StringOps.unescapeFileName("abc\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR) + "123"));
+    
+    assertEquals("abc\u001b:123", StringOps.escapeFileName("abc:123"));
+    assertEquals("abc:123", StringOps.unescapeFileName("abc\u001b:123"));
+    
+    assertEquals("\u001b\u001bb", StringOps.escapeFileName("\u001bb"));
+    assertEquals("\u001bb", StringOps.unescapeFileName("\u001b\u001bb"));
+    
+    assertEquals("abc123\u001b \u001b\u001b\u001b:\u001b" + String.valueOf(java.io.File.pathSeparatorChar) + "\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR), StringOps.escapeFileName("abc123 \u001b:" + String.valueOf(java.io.File.pathSeparatorChar) + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR)));
+    assertEquals("abc123 \u001b:" + String.valueOf(java.io.File.pathSeparatorChar) + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR), StringOps.unescapeFileName("abc123\u001b \u001b\u001b\u001b:\u001b" + String.valueOf(java.io.File.pathSeparatorChar) + "\u001b" + String.valueOf(ProcessChain.PROCESS_SEPARATOR_CHAR) + "\u001b" + String.valueOf(ProcessChain.PIPE_SEPARATOR_CHAR)));
+  }
+  
   public void testEncodeHTML() {
     assertEquals("", StringOps.encodeHTML(""));
     assertEquals("abc", StringOps.encodeHTML("abc"));
