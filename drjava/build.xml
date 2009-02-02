@@ -20,6 +20,7 @@
   <property name="test-repeat" value="1" />
   <property name="test-timeout" value="1440" />
   <property name="test-formatter" value="oneline" />
+  <property name="findbugs-formatter" value="html" />
   <property name="test-halt" value="false" />
   <property name="force-server" value="no" />
   <property name="findbugs-timeout" value="30" />
@@ -125,6 +126,8 @@
     <echo message="                the build (default: yes)" />
     <echo message="findbugs-timeout: A time limit (in minutes) for running findbugs " />
     <echo message="                  (default: 30)" />
+    <echo message="findbugs-formatter: Generate XML ('xml') or HTML ('html') output?" />
+    <echo message="                  (default: 'xml')" />
     <echo message="debug: Type of the debug log when running or testing: one of 'stdout'," />
     <echo message="       'stderr', 'file', 'assert', 'popup', 'tree', or 'void'" />
     <echo message="       (equivalent to setting the property 'plt.debug.log'; default: " />
@@ -613,8 +616,8 @@
               value="&lt;Match&gt;&lt;Bug code='${findbugs-excludes}'/&gt;&lt;/Match&gt;" />
     <echo file="findbugs-excludes.xml"
           message="&lt;FindBugsFilter&gt;${findbugs-excludes-match}&lt;/FindBugsFilter&gt;" />
-    <findbugs home="${findbugs-home}" output="html" jvmargs="-Xmx512M" failOnError="true"
-              outputFile="docs/findbugs.html" timeout="${findbugs-timeout-ms}"
+    <findbugs home="${findbugs-home}" output="${findbugs-formatter}" jvmargs="-Xmx512M" failOnError="true"
+              outputFile="docs/findbugs.${findbugs-formatter}" timeout="${findbugs-timeout-ms}"
               excludeFilter="findbugs-excludes.xml">
       <sourcepath path="src" />
       <class location="classes/base" />
