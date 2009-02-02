@@ -38,10 +38,13 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.util.*;
+
 import java.util.*;
-import java.io.File;
+import java.io.*;
 
 /**
  * Tests for the variables and language constructs that can be used in external processes.
@@ -49,6 +52,7 @@ import java.io.File;
  */
 public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   public final String PS = File.pathSeparator; // path separator
+  public static final java.util.Random _r = new java.util.Random();
   public void setUp() throws Exception {
     super.setUp();
     DrJavaPropertySetup.setup();
@@ -87,7 +91,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // sub
     p = pm.getProperty("Misc","sub");
     assertTrue(p.getCurrent(pm).startsWith("(sub Error"));
-    p.setAttribute("op1","1");
+    p.setAttribute("op1","1"); 
     assertTrue(p.getCurrent(pm).startsWith("(sub Error"));
     p.resetAttributes();
     p.setAttribute("op2","2");
@@ -427,6 +431,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("old",".*"); // regular expressions are not enabled; they are escaped
     assertEquals("111123222",p.getCurrent(pm));
   }
+  
   public void testList() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
     DrJavaProperty p;
@@ -689,5 +694,220 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals(PS+PS+"abc"+PS+"def"+PS+PS,p.getCurrent(pm));
     p.setAttribute("list","  abc  def  ");
     assertEquals(PS+PS+"abc"+PS+PS+"def"+PS+PS,p.getCurrent(pm));
+  }
+  
+  public void testFakeConfigProperties() throws CloneNotSupportedException {
+    PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+    DrJavaProperty p;
+    
+    // config.master.jvm.args.combined
+    p = pm.getProperty("Config","config.master.jvm.args.combined");
+    String oldXMX = DrJava.getConfig().getSetting(OptionConstants.MASTER_JVM_XMX);
+    String oldArgs = DrJava.getConfig().getSetting(OptionConstants.MASTER_JVM_ARGS);
+    try {
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"");
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,"");
+      assertEquals("", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"default");
+      assertEquals("", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"512");
+      assertEquals("-Xmx512M", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"1024");
+      assertEquals("-Xmx1024M", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,"-server");
+      assertEquals("-Xmx1024M -server", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"");
+      assertEquals("-server", p.getCurrent(pm));
+    }
+    finally {
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,oldXMX);
+      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,oldArgs);
+    }
+    
+    // config.slave.jvm.args.combined
+    p = pm.getProperty("Config","config.slave.jvm.args.combined");
+    oldXMX = DrJava.getConfig().getSetting(OptionConstants.SLAVE_JVM_XMX);
+    oldArgs = DrJava.getConfig().getSetting(OptionConstants.SLAVE_JVM_ARGS);
+    try {
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"");
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,"");
+      assertEquals("", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"default");
+      assertEquals("", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"512");
+      assertEquals("-Xmx512M", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"1024");
+      assertEquals("-Xmx1024M", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,"-server");
+      assertEquals("-Xmx1024M -server", p.getCurrent(pm));
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"");
+      assertEquals("-server", p.getCurrent(pm));
+    }
+    finally {
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,oldXMX);
+      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,oldArgs);
+    }
+  }
+  
+  public void testFile() throws CloneNotSupportedException, IOException {
+    PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+    DrJavaProperty p;
+    
+    // tmpfile
+    p = pm.getProperty("Misc","tmpfile");
+    String s = StringOps.unescapeFileName(p.getCurrent(pm));
+    assertTrue(s.startsWith(System.getProperty("java.io.tmpdir")+File.separator+"DrJava-Execute-"));
+    String s2 = StringOps.unescapeFileName(p.getCurrent(pm));
+    assertTrue(s2.startsWith(System.getProperty("java.io.tmpdir")+File.separator+"DrJava-Execute-"));
+    assertFalse(s.equals(s2));
+    p.setAttribute("name","foo");
+    s = StringOps.unescapeFileName(p.getCurrent(pm));
+    assertEquals(System.getProperty("java.io.tmpdir")+File.separator+"foo", s);
+    
+    File dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
+    s = StringOps.unescapeFileName(p.getCurrent(pm));
+    assertEquals(dir.getAbsolutePath()+File.separator+"foo", s);
+    
+    p.resetAttributes();
+    p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
+    s = StringOps.unescapeFileName(p.getCurrent(pm));
+    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator+"DrJava-Execute-"));
+    
+    final String TEST_STRING = "This is a test file from DrJavaPropertySetupTest.";
+    p.setAttribute("content",TEST_STRING);
+    s = StringOps.unescapeFileName(p.getCurrent(pm));
+    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator+"DrJava-Execute-"));
+    String text = edu.rice.cs.plt.io.IOUtil.toString(new File(s));
+    assertEquals(TEST_STRING, text);
+    
+    // file.find
+    
+    // file.isdir
+    p = pm.getProperty("File","file.isdir");    
+    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
+    assertEquals("true", p.getCurrent(pm));
+
+    File fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest.txt", TEST_STRING);
+    p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
+    assertEquals("false", p.getCurrent(pm));
+    
+    File notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp");
+    p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
+    assertEquals("false", p.getCurrent(pm));
+
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
+                          StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
+                          StringOps.escapeFileName(notFound.getAbsolutePath()));
+    assertEquals("true"+File.pathSeparator+"false"+File.pathSeparator+"false", p.getCurrent(pm));
+    
+    // file.isfile
+    p = pm.getProperty("File","file.isfile");    
+    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
+    assertEquals("false", p.getCurrent(pm));
+
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest.txt", TEST_STRING);
+    p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
+    assertEquals("true", p.getCurrent(pm));
+    
+    notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp");
+    p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
+    assertEquals("false", p.getCurrent(pm));
+
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
+                          StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
+                          StringOps.escapeFileName(notFound.getAbsolutePath()));
+    assertEquals("false"+File.pathSeparator+"true"+File.pathSeparator+"false", p.getCurrent(pm));
+    
+    // file.isfile
+    p = pm.getProperty("File","file.exists");    
+    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
+    assertEquals("true", p.getCurrent(pm));
+
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest.txt", TEST_STRING);
+    p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
+    assertEquals("true", p.getCurrent(pm));
+    
+    notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp");
+    p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
+    assertEquals("false", p.getCurrent(pm));
+
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
+                          StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
+                          StringOps.escapeFileName(notFound.getAbsolutePath()));
+    assertEquals("true"+File.pathSeparator+"true"+File.pathSeparator+"false", p.getCurrent(pm));
+    
+    // file.parent
+    p = pm.getProperty("File","file.parent");
+    
+    // file.abs
+    p = pm.getProperty("File","file.abs");
+    
+    // file.rel
+    p = pm.getProperty("File","file.rel");
+    
+    // file.mkdir
+    p = pm.getProperty("File","file.mkdir");
+    
+    // file.rm
+    p = pm.getProperty("File","file.rm");
+    
+    // file.mv
+    p = pm.getProperty("File","file.mv");
+  }
+  
+  public void testMisc() throws CloneNotSupportedException {
+    PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+    DrJavaProperty p;
+
+    // drjava.current.time.millis
+    p = pm.getProperty("DrJava","drjava.current.time.millis");
+    
+    // ignore
+    p = pm.getProperty("Misc","ignore");
+    
+    // process.separator
+    p = pm.getProperty("Config","process.separator");
+    
+    // enclosing.djapp.file
+    p = pm.getProperty("Misc","enclosing.djapp.file");
+    
+    // drjava.file
+    // during testing, this is the classes/base directory
+    p = pm.getProperty("Misc","drjava.file");
+    
+    // echo
+    p = pm.getProperty("Misc","echo");
+  }
+  
+  public void testControlFlow() throws CloneNotSupportedException {
+    PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+    DrJavaProperty p;
+
+    // if
+    p = pm.getProperty("Misc","if");
+    
+    // for
+    p = pm.getProperty("Misc","for");
+    
+    // var
+    p = pm.getProperty("Misc","var");
+    
+    // var.set
+    p = pm.getProperty("Misc","var.set");
+  }
+  
+  public void testXML() throws CloneNotSupportedException {
+    PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+    DrJavaProperty p;
+
+    // xml.in
+    p = pm.getProperty("Misc","xml.in");
+    
+    // xml.out.action
+    p = pm.getProperty("Misc","xml.out.action");
   }
 }

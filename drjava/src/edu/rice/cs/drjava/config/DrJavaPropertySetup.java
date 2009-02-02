@@ -63,17 +63,22 @@ public class DrJavaPropertySetup implements OptionConstants {
     final String DEF_DIR = "${drjava.working.dir}";
     
     // fake "Config" properties
-    PropertyMaps.TEMPLATE.setProperty("Config", new DrJavaProperty("config.master.jvm.args.combined",
-                                                                   "This property contains all the JVM arguments passed "+
-                                                                   "to DrJava's master JVM, i.e. the JVM the user is editing "+
-                                                                   "programs in. The arguments from the \"JVM Args for "+
-                                                                   "Main JVM\" and the special -X arguments from \"Maximum "+
-                                                                   "Heap Size for Main JVM\" are combined.") {
+    PropertyMaps.TEMPLATE.setProperty("Config", new EagerProperty("config.master.jvm.args.combined",
+                                                                  "This property contains all the JVM arguments passed "+
+                                                                  "to DrJava's master JVM, i.e. the JVM the user is editing "+
+                                                                  "programs in. The arguments from the \"JVM Args for "+
+                                                                  "Main JVM\" and the special -X arguments from \"Maximum "+
+                                                                  "Heap Size for Main JVM\" are combined.") {
       public void update(PropertyMaps pm) {
-        StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(MASTER_JVM_XMX));
-        if (sb.length()>0) { sb.append(" "); }
+        StringBuilder sb = new StringBuilder();
+        if (!DrJava.getConfig().getSetting(MASTER_JVM_XMX).equals("default") &&
+            !DrJava.getConfig().getSetting(MASTER_JVM_XMX).equals("")) {
+          sb.append("-Xmx");
+          sb.append(DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+          sb.append("M ");
+        }
         sb.append(DrJava.getConfig().getSetting(MASTER_JVM_ARGS));
-        _value = "-Xmx"+sb.toString().trim();
+        _value = sb.toString().trim();
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public void resetAttributes() {
@@ -82,17 +87,22 @@ public class DrJavaPropertySetup implements OptionConstants {
     }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.args"))
       .listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.xmx"));
     
-    PropertyMaps.TEMPLATE.setProperty("Config", new DrJavaProperty("config.slave.jvm.args.combined",
-                                                                   "This property contains all the JVM arguments passed "+
-                                                                   "to DrJava's master JVM, i.e. the JVM the user is editing "+
-                                                                   "programs in. The arguments from the \"JVM Args for "+
-                                                                   "Slave JVM\" and the special -X arguments from \"Maximum "+
-                                                                   "Heap Size for Main JVM\" are combined.") {
+    PropertyMaps.TEMPLATE.setProperty("Config", new EagerProperty("config.slave.jvm.args.combined",
+                                                                  "This property contains all the JVM arguments passed "+
+                                                                  "to DrJava's master JVM, i.e. the JVM the user is editing "+
+                                                                  "programs in. The arguments from the \"JVM Args for "+
+                                                                  "Slave JVM\" and the special -X arguments from \"Maximum "+
+                                                                  "Heap Size for Main JVM\" are combined.") {
       public void update(PropertyMaps pm) {
-        StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-        if (sb.length()>0) { sb.append(" "); }
+        StringBuilder sb = new StringBuilder();
+        if (!DrJava.getConfig().getSetting(SLAVE_JVM_XMX).equals("default") &&
+            !DrJava.getConfig().getSetting(SLAVE_JVM_XMX).equals("")) {
+          sb.append("-Xmx");
+          sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+          sb.append("M ");
+        }
         sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
-        _value = "-Xmx"+sb.toString().trim();
+        _value = sb.toString().trim();
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public void resetAttributes() {
