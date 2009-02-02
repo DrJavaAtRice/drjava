@@ -1020,4 +1020,40 @@ public class XMLConfigTest extends TestCase {
     Assert.assertTrue("Do Not Want to get default value", b);
   }
   
+  /**
+   * Test getNodePath(Node n)
+   */
+  public void testGetNodePath() throws Exception{
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"true\"/>\n"
+                                       +" <thread value=\"false\" />\n"
+                                       +" <node value=\"on\" /> \n"
+                                       +" <dot value=\"off\" /> \n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>")); 
+    
+    Assert.assertEquals("Null does not return empty string", "", xc.getNodePath(null));
+    
+    Node concutest = xc.getNodes("concutest").get(0);
+    
+    Node name = concutest.getFirstChild();
+    
+    while(!name.getNodeName().equals("name"))
+      name = name.getNextSibling();
+    
+    Assert.assertEquals("Path to name is not concutest/name", "concutest/name", xc.getNodePath(name));
+  }
+  
+  /**
+   * Test that construction of XMLConfigException's will succeed
+   * Kind of pointless really.
+   */
+  public void testXMLConfigException() throws Exception{
+    XMLConfig.XMLConfigException e1 = new XMLConfig.XMLConfigException();
+    XMLConfig.XMLConfigException e2 = new XMLConfig.XMLConfigException("dummy message", null);
+    XMLConfig.XMLConfigException e3 = new XMLConfig.XMLConfigException((Throwable)null);
+  }
+  
 }

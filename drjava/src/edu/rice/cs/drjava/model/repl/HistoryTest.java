@@ -294,4 +294,63 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     Utilities.clearEventQueue();
     assertEquals("Did not reset cursor correctly.", entry1, _history.getCurrent());
   }
+  
+  public void testSanityCheckConstructor(){
+   
+    History his =  new History(-1);
+    his.add("Test String");
+    assertEquals("History size is not 0", 0, his.size());
+    
+  }
+  
+  public void testOptionListenerToString(){
+   
+    History his = new History(10);
+    String toS = his.historyOptionListener.toString();
+    assertTrue("Did not return correct string representation",toS.startsWith("HISTORY_MAX_SIZE OptionListener #"));
+    
+  }
+  
+  public void testRemoveLast(){
+   
+    History his = new History(5);
+    
+    assertEquals("Didn't return null for an empty history",null, his.removeLast());
+    
+    his.add("test string 1");
+    his.add("test string 2");
+    his.add("test string 3");
+    his.add("test string 4");
+    his.add("test string 5");
+    
+    assertEquals("Did not return expected last value","test string 5",his.removeLast());
+    
+    his.moveEnd();
+    
+    assertEquals("Did not return expected last value","test string 4",his.removeLast());
+    
+    assertEquals("Did not return expected last value","test string 2",his.lastEntry());
+    
+  }
+  
+  public void testMoveMethods(){
+    
+    History his = new History(0);
+    
+    try{
+      his.movePrevious("3");
+      fail("Should not have moved previous, empty history");
+    }
+    catch(ArrayIndexOutOfBoundsException e){
+      
+    }
+    
+    try{ 
+      his.moveNext("3");
+      fail("Should not have moved next, empty history");
+    }
+    catch(ArrayIndexOutOfBoundsException e){
+      
+    }
+  }
 }
