@@ -49,7 +49,7 @@ import java.util.*;
  */
 public class XMLConfigTest extends TestCase {
   /** Newline string.
-   */
+    */
   public static final String NL = System.getProperty("line.separator");
   public void testNodes() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
@@ -437,34 +437,34 @@ public class XMLConfigTest extends TestCase {
   }
   
   // ----- Delegation Tests -----
-    public void testNodesDelegate() throws Exception {
+  public void testNodesDelegate() throws Exception {
     XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+                                                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                          + "  <bar>abc</bar>\n"
+                                                          + "  <fum fee=\"xyz\">def</fum>\n"
+                                                          + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     assertEquals("abc", xc.get("bar"));
     assertEquals("def", xc.get("fum"));
   }
   public void testAttrsDelegate() throws Exception {
     XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+                                                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                          + "  <bar>abc</bar>\n"
+                                                          + "  <fum fee=\"xyz\">def</fum>\n"
+                                                          + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     assertEquals("foo.a", xc.get(".a"));
     assertEquals("xyz", xc.get("fum.fee"));
   }
   public void testExceptionsDelegate() throws Exception {
     XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+                                                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                          + "  <bar>abc</bar>\n"
+                                                          + "  <fum fee=\"xyz\">def</fum>\n"
+                                                          + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));    
-
+    
     try {
       xc.get("");
       fail("Should throw 'no node' exception");
@@ -496,12 +496,12 @@ public class XMLConfigTest extends TestCase {
   }
   public void testSaveDelegate() throws Exception {
     XMLConfig xcParent = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
-                                                    + "  <bar>abc</bar>\n"
-                                                    + "  <fum fee=\"xyz\">def</fum>\n"
-                                                    + "</foo>"));
+                                                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                          + "  <bar>abc</bar>\n"
+                                                          + "  <fum fee=\"xyz\">def</fum>\n"
+                                                          + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
-
+    
     assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL +
                              "<foo a=\"foo.a\">"+NL +
                              "  <bar>abc</bar>"+NL +
@@ -512,7 +512,7 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xcParent = new XMLConfig();
     xcParent.set("foo/bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
-
+    
     assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
                              "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
@@ -527,7 +527,7 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xcParent = new XMLConfig();
     xcParent.set("foo/bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
-
+    
     assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+
                              "  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("bar"));
@@ -548,7 +548,7 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xcParent = new XMLConfig();
     xcParent.set("foo.bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));    
-
+    
     assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL),
                  xc.toString());
     assertEquals("abc", xc.get(".bar"));
@@ -563,7 +563,7 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xcParent = new XMLConfig();
     xcParent.set("foo.bar", "abc");
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
-
+    
     assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL),
                  xc.toString());
     assertEquals("abc", xc.get(".bar"));
@@ -684,7 +684,7 @@ public class XMLConfigTest extends TestCase {
                                        + "  <fum fee=\"xyz\">def</fum>\n"
                                        + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
-
+    
     List<String> r = xc.getMultiple("bar.fuz");
     assertEquals(2, r.size());
     assertEquals("aaa", r.get(0));
@@ -830,4 +830,194 @@ public class XMLConfigTest extends TestCase {
       }
     }
   }
+  
+  public void testGet() throws Exception {
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +"  <threadcheck:def>\n"
+                                       +"    <invariant>\n"
+                                       +"      <name type=\"only\" value=\"childclass1\"/>\n"
+                                       +"    </invariant>\n"
+                                       +"    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"  </threadcheck:def>\n"
+                                       +"  <threadcheck:def>\n"
+                                       +"    <invariant>\n"
+                                       +"      <name type=\"only\" value=\"childclass-method1\"/>\n"
+                                       +"    </invariant>\n"
+                                       +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
+                                       +"    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
+                                       +"  </threadcheck:def>\n"
+                                       +"</concutest>"));    
+    
+    subTestGet("arbitraryPath", xc);
+    subTestGet("path1/path2", xc);
+    subTestGet("path1.prop1", xc);
+    subTestGet("path1/path2.prop2", xc);
+  }
+  
+  /**
+   * Expectes "concutest" to be the root node of passed XMLConfig.
+   */
+  private void subTestGet(String pathToTest, XMLConfig xc) throws Exception{
+    String ret = xc.get(pathToTest, xc.getNodes("concutest").get(0), "arbitraryDefaultValue");
+    
+    Assert.assertEquals("Default value not returned", "arbitraryDefaultValue", ret);
+    
+    xc.set("concutest/"+pathToTest, "actualValue");
+    
+    ret = xc.get("arbitraryPath", xc.getNodes("concutest").get(0), "arbitraryDefaultValue");
+    
+    Assert.assertEquals("Set value not returned", "actualValue", ret);
+  }
+  
+  
+  
+
+  public void testGetInt() throws Exception {
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"5\"/>\n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>"));    
+    
+    //Test for getInt(String path)
+    int n = xc.getInt("concutest/name.value");
+    Assert.assertEquals("Found expected value", 5, n);
+    try{
+      xc.getInt("concutest/class.name");
+      Assert.fail("Should have thrown exception");
+    }
+    catch(IllegalArgumentException e){}
+    
+    try{
+      xc.getInt("doesNotExitPath/subPath");
+      Assert.fail("Should have thrown exception");
+    }catch(XMLConfig.XMLConfigException e){}
+    
+    //Test for getInt(String path, Node root)
+    n = xc.getInt("name.value", xc.getNodes("concutest").get(0));
+    Assert.assertEquals("Found expected value", 5, n);
+    try{
+      xc.getInt("class.name", xc.getNodes("concutest").get(0));
+      Assert.fail("Should have thrown exception");
+    }
+    catch(IllegalArgumentException e){}
+    
+    try{
+      xc.getInt("doesNotExitPath/subPath", xc.getNodes("concutest").get(0));
+      Assert.fail("Should have thrown exception");
+    }catch(XMLConfig.XMLConfigException e){}
+    
+    //Test for getInt(String path, int default)
+    n = xc.getInt("concutest/name.value", 10);
+    Assert.assertEquals("Found expected value", 5, n);
+    n = xc.getInt("doesNotExitPath/subPath", 10);
+    Assert.assertEquals("Found expected value", 10, n);
+    
+    //Test for getInt(String path, Node root, int defaultValue)
+    n = xc.getInt("name.value", xc.getNodes("concutest").get(0), 10);
+    Assert.assertEquals("Found expected value", 5, n);
+    n = xc.getInt("doesNotExitPath/subPath", xc.getNodes("concutest").get(0), 10);
+    Assert.assertEquals("Found expected value", 10, n);
+  }
+  
+  public void testGetMultipleExcludesComments() throws Exception{
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" Some text to actually fetch.\n"
+                                       +" <!-- A comment to ignore -->\n"
+                                       +"</concutest>"));
+    
+    List<String> ret = xc.getMultiple("concutest");
+    
+    Assert.assertEquals("Only fetched one item", 1, ret.size());
+    Assert.assertEquals("Fetched correct text item", " Some text to actually fetch.\n".trim(), ret.get(0).trim());
+  }
+  
+  /**
+   * Tests for exceptions thrown when getNodes() is passed malformed paths
+   */
+  public void testGetNodesExceptions() throws Exception{
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"true\"/>\n"
+                                       +" <thread value=\"false\" />\n"
+                                       +" <node value=\"on\" /> \n"
+                                       +" <dot value=\"off\" /> \n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>"));
+    
+    try{
+      xc.getNodes("somePath.attr.subAttr");
+      Assert.fail("Shouldn't be able to refer to sub attributes");
+    }catch(XMLConfig.XMLConfigException e){
+      //Needs to be kept in sync with exception message on ~496:XMLConfig
+      Assert.assertEquals("Didn't get expected exception message",
+                          "An attribute cannot have subparts (foo.bar.fum and foo.bar/fum not allowed)",
+                          e.getMessage());
+    }
+    
+    try{
+      xc.getNodes("somePath.attr/subAttr");
+      Assert.fail("Shouldn't be able to refer to a path relative to an attribute");
+    }catch(XMLConfig.XMLConfigException e){
+      //Needs to be kept in sync with exception message on ~496:XMLConfig
+      Assert.assertEquals("Didn't get expected exception message",
+                          "An attribute cannot have subparts (foo.bar.fum and foo.bar/fum not allowed)",
+                          e.getMessage());
+    }
+    
+  }
+  
+  public void testGetBool() throws Exception {
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"true\"/>\n"
+                                       +" <thread value=\"false\" />\n"
+                                       +" <node value=\"on\" /> \n"
+                                       +" <dot value=\"off\" /> \n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>")); 
+    Boolean b = xc.getBool("concutest/name.value") && !xc.getBool("concutest/thread.value") && xc.getBool("concutest/node.value") && !xc.getBool("concutest/dot.value");
+    Assert.assertTrue("Should be true",b);
+    
+    try{
+      xc.getBool("concutest/class.name");
+      Assert.fail("Should have thrown exception");
+    }
+    catch(IllegalArgumentException e){}
+    
+    
+    //Test for getBool(String path, Node root)
+    Node root = xc.getNodes("concutest").get(0);
+    b = xc.getBool("name.value",root) && !xc.getBool("thread.value", root) && xc.getBool("node.value", root) && !xc.getBool("dot.value", root);
+    Assert.assertTrue("Should be true",b);
+    
+    try{
+      xc.getBool("class.name", root);
+      Assert.fail("Should have thrown exception");
+    }
+    catch(IllegalArgumentException e){}
+    
+    //getBool(String path, boolean defaultVal)
+    b = xc.getBool("concutest/name.name",true);
+    Assert.assertTrue("Want to get default value", b);
+    
+    b = xc.getBool("concutest/name.value",false);
+    Assert.assertTrue("Do Not Want to get default value", b);
+    
+    //getBool(String path, Node root, boolean defaultVal)
+    
+    b = xc.getBool("name.name", root, true);
+    Assert.assertTrue("Want to get default value", b);
+    
+    b = xc.getBool("name.value", root, false);
+    Assert.assertTrue("Do Not Want to get default value", b);
+  }
+  
 }

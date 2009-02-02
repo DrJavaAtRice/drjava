@@ -493,6 +493,13 @@ public class XMLConfig {
       path = path + "/";
     }
     int slashPos = path.indexOf('/');
+    
+    if(dotPos != -1 && path.indexOf('.', dotPos+1) != -1)
+      throw new XMLConfigException("An attribute cannot have subparts (foo.bar.fum and foo.bar/fum not allowed)");
+    
+    if(dotPos != -1 && path.indexOf('/', dotPos+1) != -1)
+      throw new XMLConfigException("An attribute cannot have subparts (foo.bar.fum and foo.bar/fum not allowed)");
+    
     if (((slashPos > -1) || (dotPos > -1)) && !dotRead || initialDot)  {
       String nodeName;
       if ((slashPos > -1) && ((dotPos == -1) || (slashPos < dotPos))) {
