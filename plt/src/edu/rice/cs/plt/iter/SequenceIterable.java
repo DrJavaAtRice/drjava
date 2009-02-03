@@ -80,7 +80,7 @@ public class SequenceIterable<T> implements SizedIterable<T>, Serializable {
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (!getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       SequenceIterable<?> cast = (SequenceIterable<?>) o;
       return _initial.equals(cast._initial) && _successor.equals(cast._successor);

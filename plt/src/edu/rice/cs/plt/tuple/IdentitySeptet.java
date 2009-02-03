@@ -50,7 +50,7 @@ public class IdentitySeptet<T1, T2, T3, T4, T5, T6, T7> extends Septet<T1, T2, T
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (! getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Septet<?, ?, ?, ?, ?, ?, ?> cast = (Septet<?, ?, ?, ?, ?, ?, ?>) o;
       return 

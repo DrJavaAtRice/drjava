@@ -68,7 +68,7 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (! getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Wrapper<?> cast = (Wrapper<?>) o;
       return _value == null ? cast._value == null : _value.equals(cast._value);

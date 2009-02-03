@@ -248,7 +248,7 @@ public final class DebugUtil {
           else { result = new SystemErrLogSink(arg); }
         }
         else if (name.equals("file")) {
-          if (arg.equals("")) { arg = defaultName.toLowerCase().replace(' ', '-') + ".txt"; }
+          if (arg.equals("")) { arg = defaultName.toLowerCase().replace(' ', '-') + "-log.txt"; }
           String workingDir = System.getProperty("plt.log.working.dir");
           if (workingDir == null) { result = new FileLogSink(arg); }
           else { result = new FileLogSink(new File(workingDir, arg)); }

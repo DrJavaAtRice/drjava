@@ -51,7 +51,7 @@ public class IdentityWrapper<T> extends Wrapper<T> {
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (! getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Wrapper<?> cast = (Wrapper<?>) o;
       return _value == cast._value;

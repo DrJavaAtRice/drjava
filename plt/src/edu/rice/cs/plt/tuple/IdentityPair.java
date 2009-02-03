@@ -53,7 +53,7 @@ public class IdentityPair<T1, T2> extends Pair<T1, T2> {
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (! getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Pair<?, ?> cast = (Pair<?, ?>) o;
       return 

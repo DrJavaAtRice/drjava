@@ -74,7 +74,7 @@ public class Sextet<T1, T2, T3, T4, T5, T6> extends Tuple {
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (! getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Sextet<?, ?, ?, ?, ?, ?> cast = (Sextet<?, ?, ?, ?, ?, ?>) o;
       return 

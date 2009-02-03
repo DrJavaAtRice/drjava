@@ -68,7 +68,7 @@ public class Pair<T1, T2> extends Tuple {
    */
   public boolean equals(Object o) {
     if (this == o) { return true; }
-    else if (! getClass().equals(o.getClass())) { return false; }
+    else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Pair<?, ?> cast = (Pair<?, ?>) o;
       return 

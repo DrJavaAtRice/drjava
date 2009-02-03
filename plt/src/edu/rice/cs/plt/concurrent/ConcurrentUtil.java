@@ -219,7 +219,7 @@ public final class ConcurrentUtil {
           }
           controller.done(result, exception);
         }
-        catch (InterruptedException e) { /* Task has been cancelled.*/ controller.aborting(); }
+        catch (InterruptedException e) { /* Task has been canceled.*/ controller.aborting(); }
       }
     };
     Thread t = new Thread(runner, "ConcurrentUtil task");
@@ -232,8 +232,8 @@ public final class ConcurrentUtil {
   // Designed to be thread-safe when accessed *only* by the task thread and a single controlling thread.
   private static class IncrementalThreadController<I, R> extends IncrementalTaskController<I, R> {
     private Thread _t; // only accessed by controlling thread
-    private CompletionMonitor _continueMonitor; // only changed when cancelling
-    // only changed when cancelling; accesses should lock (to prevent modifying the list after it's returned)
+    private CompletionMonitor _continueMonitor; // only changed when canceling
+    // only changed when canceling; accesses should lock (to prevent modifying the list after it's returned)
     private Box<List<I>> _intermediateResults;
     private volatile R _result;
     private volatile Throwable _exception;
@@ -502,7 +502,18 @@ public final class ConcurrentUtil {
       if (_exception == null) {
         // The process has started; in the event of any exception, we must destroy the process
         try {
-          ObjectInputStream objIn = new ObjectInputStream(_process.value().getInputStream());
+          InputStream in = _process.value().getInputStream();
+          // skip prefix
+          int matching = 0;
+          while (matching < TaskProcess.PREFIX.length) {
+            int read = in.read();
+            if (read == -1) { throw new EOFException("Data prefix not found"); }
+            else if ((byte) read == TaskProcess.PREFIX[matching]) { matching++; } // cast handles negative byte values
+            else if ((byte) read == TaskProcess.PREFIX[0]) { matching = 1; } // cast handles negative byte values
+            else { matching = 0; }
+          }
+          // prefix has been matched
+          ObjectInputStream objIn = new ObjectInputStream(in);
           try {
             @SuppressWarnings("unchecked") R serializedResult = (R) objIn.readObject();
             result = serializedResult;
@@ -517,10 +528,8 @@ public final class ConcurrentUtil {
           _process.value().destroy();
         }
         catch (EOFException e) {
-          if (processIsTerminated(_process.value())) {
-            _exception = new IOException("Unable to run process; class path may need to be adjusted");
-          }
-          else { _exception = e; _process.value().destroy(); }
+          _exception = new IOException("Unable to run process; class path may need to be adjusted");
+          _process.value().destroy();
         }
         catch (IOException e) { _exception = e; _process.value().destroy(); }
         catch (RuntimeException e) { _process.value().destroy(); throw e; }
@@ -538,14 +547,24 @@ public final class ConcurrentUtil {
 
   
   private static class TaskProcess {
+    /**
+     * A byte sequence marking the beginning of the return data.  Allows java commands to output
+     * text before {@code main()} is invoked without corrupting the data stream.  (This occurs, for example,
+     * with flag "-Xrunjdwp".)  In order to avoid false positives, this prefix uses non-printing ASCII values.
+     * To simplify the matching algorithm, each digit is guaranteed to be unique -- if a particular byte
+     * fails to match, the DFA can only jump to either the initial state or the state after a single match. 
+     */
+    public static final byte[] PREFIX = { 0x00, 0x03, 0x7f, -0x80 };
+    
     public static void main(String... args) {
+      OutputStream out = System.out;
+      IOUtil.replaceSystemOut(VoidOutputStream.INSTANCE);
       try {
-        ObjectOutputStream objOut = new ObjectOutputStream(System.out);
+        out.write(PREFIX);
+        ObjectOutputStream objOut = new ObjectOutputStream(out);
         try {
           Object result = null;
           Exception exception = null;
-          
-          IOUtil.replaceSystemOut(VoidOutputStream.INSTANCE);
           try {
             ObjectInputStream objIn = new ObjectInputStream(System.in);
             try {
@@ -556,14 +575,14 @@ public final class ConcurrentUtil {
             finally { objIn.close(); }
           }
           catch (Exception e) { exception = e; } // problem with objIn
-          finally { IOUtil.revertSystemOut(); }
           
           objOut.writeObject(result);
           objOut.writeObject(exception);
         }
         finally { objOut.close(); }
       }
-      catch (IOException e) { error.log("Can't create or write to ObjectOutputStream", e); }
+      catch (IOException e) { error.log("Error writing to System.out", e); }
+      finally { IOUtil.revertSystemOut(); }
     }
   }
   

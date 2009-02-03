@@ -53,6 +53,7 @@ import edu.rice.cs.plt.text.TextUtil;
 import static edu.rice.cs.plt.io.IOUtil.attemptAbsoluteFiles;
 import static edu.rice.cs.plt.iter.IterUtil.snapshot;
 import static edu.rice.cs.plt.collect.CollectUtil.snapshot;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
  * Creates Java subprocesses via an interface similar to that of {@link ProcessBuilder}.  Each JVMBuilder
@@ -78,7 +79,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   private static final String DEFAULT_JAVA_COMMAND = findJavaCommand(System.getProperty("java.home", ""));
   private static final SizedIterable<String> DEFAULT_JVM_ARGS = IterUtil.empty();
   private static final SizedIterable<File> DEFAULT_CLASS_PATH = attemptAbsoluteFiles(ReflectUtil.SYSTEM_CLASS_PATH);
-  private static final File DEFAULT_DIR = new File(System.getProperty("user.dir", ""));
+  private static final File DEFAULT_DIR = IOUtil.WORKING_DIRECTORY;
   private static final Properties DEFAULT_PROPERTIES = new Properties();
   private static final Map<String, String> DEFAULT_ENVIRONMENT = null;
   
@@ -284,6 +285,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
       env = IterUtil.toArray(envL, String.class);
     }
     
+    debug.logValues("Starting JVM", new String[]{"command", "env", "dir"}, command, env, _dir);
     return Runtime.getRuntime().exec(command, env, _dir);
   }
   

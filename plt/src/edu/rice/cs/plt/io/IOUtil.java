@@ -65,6 +65,12 @@ public final class IOUtil {
   /** Prevents instance creation */
   private IOUtil() {}
   
+  /**
+   * The current working directory, used as the base for relative paths.  Based on System property {@code user.dir},
+   * if defined, converted to an absolute path.
+   */
+  public static final File WORKING_DIRECTORY = IOUtil.attemptAbsoluteFile(new File(System.getProperty("user.dir", "")));
+  
   /** A factory for Files based on a String filename. */
   public static final Lambda<String, File> FILE_FACTORY = new FileFactory();
   
