@@ -38,9 +38,8 @@ package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.Log;
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 
 import java.rmi.RemoteException;
 
@@ -49,13 +48,11 @@ import java.rmi.RemoteException;
   */
 public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   
-  private static Log _log = new Log("MasterSlave.txt", false);
+  volatile TestMasterJVM _testMaster;
   
-  volatile TestMasterJVM _testMaster = _newTestMasterJVM(); // JUnit ensures separate copy for each test
-  
-  private TestMasterJVM _newTestMasterJVM()  { 
-    try { return new TestMasterJVM(); }
-    catch(RemoteException e) { throw new UnexpectedException(e); }
+  public void setUp() throws Exception {
+    super.setUp();
+    _testMaster = new TestMasterJVM();
   }
   
   public void tearDown() throws Exception {
@@ -68,24 +65,23 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     // too many! we run multiple times to prove that the master
     // can invoke multiple slaves (only one active at a time though)
     for (int i = 0; i < 2; i++) _testMaster.runTestSequence();
-    _log.log("testItAll completed");
   }
   
   public void testImmediateQuit() throws Exception {
     for (int i = 0; i < 5; i++)  _testMaster.runImmediateQuitTest();
-    _log.log("testImmediateQuit completed");
   }
   
   
-  private class TestMasterJVM extends AbstractMasterJVM implements TestMasterRemote {
+  private static class TestMasterJVM extends AbstractMasterJVM implements TestMasterRemote {
+    
+    private static final int WAIT_TIMEOUT = 10000; 
     
     /** Field and lock used to signal slave quit events. */
-    private volatile boolean _justQuit;                     // true after slave quits
-    private final Object _quitLock = new Object();
+    private final CompletionMonitor _justQuit = new CompletionMonitor(); 
     
     /** Field and lock used to signal slave connected events. */
-    private volatile boolean _connected;                    // true when slave is connected
-    private final Object _connectedLock = new Object();
+    private volatile TestSlaveRemote _slave;                    // non-null when slave is connected
+    private final Object _slaveLock = new Object();
     
     /** Field and lock used to signal letter change events. */
     private volatile char _letter;
@@ -93,73 +89,47 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     
     private volatile String _currentTest = "";
     
-    public TestMasterJVM() throws RemoteException { super(CounterSlave.class.getName()); }
+    public TestMasterJVM() { super(CounterSlave.class.getName()); }
     
     /** In util-20020414-0647, if quitSlave were called between the time the slave was invoked and the time it 
       * registered, an IllegalStateException was thrown. The correct behavior, which we test for here, is for the
       * slave to quit as soon as it is started up.
       */
     public void runImmediateQuitTest() throws Exception {
-      
-//      Utilities.show("ImmediateQuitTest started");
-      
       _currentTest = "runImmediateQuitTest";
-      _justQuit = false; 
-      _connected = false;
+      _justQuit.reset(); 
+      _slave = null;
       _letter = 'a';  // this needs to be reset because the slave is going to check it!
       
-      invokeSlave(new String[0], FileOps.NULL_FILE);
+      new Thread() {
+        public void run() { invokeSlave(JVMBuilder.DEFAULT); }
+      }.start();
       
-//      Utilities.show("slave invoked");
-      
-      // Immediately call quit, which should not throw an exception. It should return without waiting.
+      // Immediately call quit, which should not throw an exception.
       quitSlave();
-      
-//      Utilities.show("slave quit");     
-      
-      // now we just wait for the quit to process
-      synchronized(_quitLock) { while (! _justQuit) _quitLock.wait(); }
-      
+      assertTrue(_justQuit.attemptEnsureSignaled(WAIT_TIMEOUT));
       _currentTest = "";  // If we get here, it worked as expected.
-      
-      
-//      Utilities.show("ImmediateQuitTest finished");
-      _log.log("Ran immediateQuitTest");
-      
       // (All of the post-quit invariants are checked in handleSlaveQuit.
     }
     
     public void runTestSequence() throws Exception {
-      
       _currentTest = "runTestSequence";
-      _justQuit = false;
-      _connected = false;
+      _justQuit.reset();
+      _slave = null;
       _letter = 'a';
       
-      invokeSlave(new String[0], FileOps.NULL_FILE);           
-      
-      synchronized(_connectedLock) { while (! _connected) _connectedLock.wait();  }
-      
-      ((TestSlaveRemote)getSlave()).startLetterTest();
-      
-      _log.log("letter test started");
-      
+      invokeSlave(JVMBuilder.DEFAULT);           
+      _slave.startLetterTest();
       // now, wait until five getletter calls passed; after fifth call letter is 'f' due to the ++
       synchronized(_letterLock) { while (_letter != 'f') { _letterLock.wait(); } }
-      
-      _log.log("letter test finished");
-      
       for (int i = 0; i < 7; i++) {
-        int value = ((TestSlaveRemote) getSlave()).getNumber();
+        int value = _slave.getNumber();
         assertEquals("value returned by slave", i, value);
       }
       
-      _log.log("number test finished");
-      
       quitSlave();
-      synchronized(_quitLock) { while (! _justQuit) _quitLock.wait(); } // for quit to finish
+      assertTrue(_justQuit.attemptEnsureSignaled(WAIT_TIMEOUT));
       _currentTest = "";
-      _log.log("Ran runTestSequence");
     }
     
     public char getLetter() {
@@ -171,40 +141,27 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
       }
     }
     
-    protected void handleSlaveConnected() {
-      TestSlaveRemote slave = (TestSlaveRemote) getSlave();
-      assertTrue("slave is set", slave != null);
-      assertTrue("startUp not in progress", ! isStartupInProgress());
+    @Override protected void handleSlaveConnected(SlaveRemote slave) {
       // getLetter should have never been called.
       assertEquals("letter value", 'a', _letter);
-      synchronized(_connectedLock) { 
-        _connected = true;
-        _connectedLock.notify(); 
+      synchronized(_slaveLock) {
+        _slave = (TestSlaveRemote) slave;
+        _slaveLock.notify();
       }
-      _log.log("_handleSlaveConnected() finished");
     }
     
-    protected void handleSlaveQuit(int status) {
+    @Override protected void handleSlaveQuit(int status) {
       assertEquals("slave result code", 0, status);
       if (_currentTest.equals("runTestSequence")) {
         // 5 letter calls must have occurred, so 'f' should be next
         assertEquals("last letter returned", 'f', _letter);
       }
-      assertTrue("slave is not set", getSlave() == null);
-      assertTrue("startUp not in progress", ! isStartupInProgress());
-      
       // alert test method that quit occurred.
-      synchronized(_quitLock) {
-        _justQuit = true;
-        _quitLock.notify();
-      }
+      _justQuit.signal();
     }
     
-    /** Called if the slave JVM dies before it is able to register.
-      * @param cause The Throwable which caused the slave to die.
-      */
-    public void errorStartingSlave(Throwable cause) throws RemoteException {
-      fail("There was an error starting the slave JVM: " + cause);
+    @Override protected void handleSlaveWontStart(Exception e) {
+      fail("There was an error starting the slave JVM: " + e);
     }
   }
   
@@ -219,23 +176,18 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     */
   public static class CounterSlave extends AbstractSlaveJVM implements TestSlaveRemote {
     
-    public static final CounterSlave ONLY = newCounterSlave();
+    public static final CounterSlave ONLY = new CounterSlave();
     
     private volatile int _counter = 0;
     private volatile TestMasterRemote _master = null;
     
-    private CounterSlave() throws RemoteException { }
-    
-    private static CounterSlave newCounterSlave() {
-      try { return new CounterSlave(); }
-      catch(RemoteException e) { throw new UnexpectedException(e); }
-    }
+    private CounterSlave() { }
     
     public synchronized int getNumber() { return _counter++; }
     
     protected void handleStart(MasterRemote m) { _master = (TestMasterRemote) m; }
     
-    public void startLetterTest() throws RemoteException {
+    public void startLetterTest() {
       // Run this part of the test in a new thread, so this call will immediately return
       Thread thread = new Thread() {
         public void run() {
@@ -245,15 +197,12 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
               if (c != got) System.exit(2);
             }
             
-            // OK, now wait up till 15 seconds for master jvm to call
+            // OK, now wait up until 15 seconds for master jvm to quit the slave
             Thread.sleep(15000);
             System.exit(4);
           }
           catch (InterruptedException e) { System.exit(5); }
-          catch (RemoteException re) {
-            javax.swing.JOptionPane.showMessageDialog(null, re.toString());
-            System.exit(3);
-          }
+          catch (RemoteException re) { System.exit(3); }
           catch (ClassCastException cce) { System.exit(1); }
         }
       };
@@ -266,7 +215,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     public void startLetterTest() throws RemoteException;
   }
   
-  public interface TestMasterRemote/*<SlaveType extends SlaveRemote>*/ extends MasterRemote/*<SlaveType>*/ {
+  public interface TestMasterRemote extends MasterRemote {
     public char getLetter() throws RemoteException;
   }
 }

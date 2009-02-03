@@ -594,8 +594,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInterpreterResetFailed(Throwable t) { }
     public void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
+    protected void _interpreterWontStart(Exception e) { }
     protected void _notifyInteractionIncomplete() { }
-    protected void _notifySlaveJVMUsed() { }
     public ConsoleDocument getConsoleDocument() { return null; }
   }
   
@@ -666,9 +666,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInterpreterResetFailed(Throwable t) { }
     public void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
+    protected void _interpreterWontStart(Exception e) { }
     protected void _notifyInteractionIncomplete() { _notifyInteractionEnded(); }
     protected void _notifyInterpreterChanged(boolean inProgress) { }
-    protected void _notifySlaveJVMUsed() { }
     
     public void dispose() throws RemoteException { _jvm.dispose(); }
     

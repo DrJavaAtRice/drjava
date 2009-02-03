@@ -121,12 +121,13 @@ public interface InteractionsModelCallback {
     */
   public void interpreterResetFailed(Throwable th);
   
+  /** Called when the slave JVM fails to startup */
+  public void interpreterWontStart(Exception e);
+
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
   
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd);
   
-  /** Called when the slave JVM is used */
-  public void slaveJVMUsed();
 }

@@ -36,25 +36,13 @@
 
 package edu.rice.cs.util.newjvm;
 
-import edu.rice.cs.util.Log;
-
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /** The remote interface for a master JVM.
   * @version $Id$
   */
-// The type parameter specifies the remote interface for the slave JVM.
-// (Generics removed because they confused rmic!)
-public interface MasterRemote/*<SlaveType extends SlaveRemote>*/ extends Remote {
-  
-  /** Registers a slave JVM.  This method is called by the slave JVM after a connection is made. */
-  public void registerSlave(SlaveRemote slave) throws RemoteException;
-  
+public interface MasterRemote extends Remote {
   /** No-op to prove that the master is still alive. */
   public void checkStillAlive() throws RemoteException;
-  
-  /** Called if the slave JVM dies before it is able to register.
-    * @param cause The Throwable which caused the slave to die.
-    */
-  public void errorStartingSlave(Throwable cause) throws RemoteException;
 }

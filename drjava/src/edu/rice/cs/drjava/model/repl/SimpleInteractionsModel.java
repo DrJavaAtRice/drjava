@@ -42,11 +42,11 @@ import java.io.PrintWriter;
 
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.drjava.model.AbstractGlobalModel;
-import edu.rice.cs.drjava.model.GlobalModel;
 
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.text.TextUtil;
 
@@ -76,7 +76,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, new File(System.getProperty("user.dir")), 1000, AbstractGlobalModel.WRITE_DELAY);
-    _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
+    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
@@ -162,10 +162,14 @@ public class SimpleInteractionsModel extends InteractionsModel {
     _document.insertBeforeLastPrompt("Reset Failed!" + StringOps.NEWLINE, InteractionsDocument.ERROR_STYLE);
   }
   
+  protected void _interpreterWontStart(Exception e) {
+    _document.insertBeforeLastPrompt("JVM failed to start." + StringOps.NEWLINE, InteractionsDocument.ERROR_STYLE);
+  }
+  
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) {
     interpreterResetting();
-    _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
+    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     interpreterReady(wd);
   }
@@ -209,9 +213,6 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInteractionIncomplete() {
     // Oh well.  Nothing to do.
   }
-  
-  /** Notifies listeners that the slave JVM has been used. */
-  protected void _notifySlaveJVMUsed() { /* do nothing; no slave JVM */ }
   
   /** Returns null because console tab document is not supported in this model */
   public ConsoleDocument getConsoleDocument() { return null; }

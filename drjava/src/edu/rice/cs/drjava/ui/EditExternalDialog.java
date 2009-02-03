@@ -333,7 +333,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     // this waiting cannot happen in the event thread, as that would block the other dialog
     new Thread(new Runnable() {
       public void run() {
-        _editExternalDialogMonitor.attemptEnsureSignalled();
+        _editExternalDialogMonitor.attemptEnsureSignaled();
         // dialog has finished, figure out the results in the event thread
         EventQueue.invokeLater(new Runnable() {
           public void run() {

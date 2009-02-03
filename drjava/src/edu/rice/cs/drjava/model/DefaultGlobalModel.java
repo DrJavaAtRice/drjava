@@ -39,11 +39,7 @@ package edu.rice.cs.drjava.model;
 
 import java.awt.EventQueue;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.*;
-
-import java.rmi.RemoteException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -52,9 +48,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.config.OptionListener;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
@@ -84,6 +77,7 @@ import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
@@ -144,8 +138,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void interpreterChanged(boolean inProgress) { }
     
     public void interactionIncomplete() { }
-    
-    public void slaveJVMUsed() { }
   };
   
   private CompilerListener _clearInteractionsListener = new DummyCompilerListener() {
@@ -202,12 +194,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (_javadocModel == null) { _javadocModel = new NoJavadocAvailable(this); }
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
-    try { _jvm = new MainJVM(workDir); }
-    catch(java.rmi.server.ExportException e) {
-      if (e.getMessage().equals("Listen failed on port: 0")) throw new RuntimeException(e);
-      else throw new UnexpectedException(e);
-    }
-    catch(RemoteException e) { throw new UnexpectedException(e); }
+    _jvm = new MainJVM(workDir);
 //    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this, compilers);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
@@ -217,32 +204,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _interactionsModel.addListener(_interactionsListener);
     _jvm.setInteractionsModel(_interactionsModel);
     _jvm.setJUnitModel(_junitModel);
-    
-    StringBuilder sb = new StringBuilder();
-    if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
-        (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) {
-      sb.append("-Xmx");
-      sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-      sb.append("M ");
-    }
-    sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
-    _jvm.setOptionArgs(sb.toString());
-    
-    OptionListener<String> updateListener = new OptionListener<String>() {
-      public void optionChanged(OptionEvent<String> oe) {
-        StringBuilder sb = new StringBuilder();
-        if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
-            (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
-          sb.append("-Xmx");
-          sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-          sb.append("M ");
-        }
-        sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
-        _jvm.setOptionArgs(sb.toString());
-      }
-    };
-    DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, updateListener); 
-    DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, updateListener); 
     
     _setupDebugger();
     
@@ -257,9 +218,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //      This is obnoxiously order-dependent, but it works for now.
     _compilerModel.addListener(_clearInteractionsListener);
     
-    // Note: starting the JVM in another thread does not appear to improve performance
-//    AbstractMasterJVM._log.log("Starting the interpreter in " + this);
-    _jvm.startInterpreterJVM();
+    new Thread("Start interpreter JVM") {
+      public void run() { _jvm.startInterpreterJVM(); }
+    }.start();
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
@@ -334,18 +295,16 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
-    // Kill the interpreter
-    _jvm.killInterpreter(null);
-    // Commented out because it invokes UnicastRemoteObject.unexport
-//    try { _jvm.dispose(); }
-//    catch(RemoteException e) { /* ignore */ }
+    // dispose() was previously commented out, with a note simply saying it called UnicastRemoteObject.unexport().
+    // If there's some problem with unexport(), this call can be replaced with killInterpreterJVM(null).
+    _jvm.dispose();
     _notifier.removeAllListeners();  // removes the global model listeners!
   }
   
   /** Disposes of external resources. Kills the slave JVM. */
   public void disposeExternalResources() {
     // Kill the interpreter
-    _jvm.killInterpreter(null);
+    _jvm.killInterpreterJVM(null);
   }
   
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
@@ -433,11 +392,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
   }
   
-  /** Blocks until the interpreter has registered. */
-  public void waitForInterpreter() { _jvm.ensureInterpreterConnected(); }
-  
-  /** Returns the current classpath in use by the Interpreter JVM. */
-  public Iterable<File> getInteractionsClassPath() { return _jvm.getClassPath(); }
+  /** Returns the current class path in use by the Interpreter JVM. */
+  public Iterable<File> getInteractionsClassPath() {
+    return _jvm.getClassPath().unwrap(IterUtil.<File>empty());
+  }
   
   /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
     * in tests!  This method is not supported by AbstractGlobalModel.
@@ -632,7 +590,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
   /** Get the class path to be used in all class-related operations.
-    * TODO: Insure that this is used wherever appropriate.
+    * TODO: Ensure that this is used wherever appropriate.
     */
   public Iterable<File> getClassPath() {
     Iterable<File> result = IterUtil.empty();
@@ -664,7 +622,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
      * internal classes) are also included.  But we're probably stuck doing something like this if we
      * want to continue bundling JUnit with DrJava.
      */
-    result = IterUtil.compose(result, RUNTIME_CLASS_PATH);
+    result = IterUtil.compose(result, ReflectUtil.SYSTEM_CLASS_PATH);
     
     return result;
   }

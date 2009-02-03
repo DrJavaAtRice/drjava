@@ -243,7 +243,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     // spin this off in a separate thread so the event thread is free
     new Thread(new Runnable() {
       public void run() {
-        while(!_abortMonitor.attemptEnsureSignalled()) { } // wait for the abortActionPerformed() call to finish
+        _abortMonitor.attemptEnsureSignaled(); // wait for the abortActionPerformed() call to finish
         _abortMonitor.reset();
         _sb = new StringBuilder("Command line: ");
         _sb.append(_pc.cmdline());

@@ -119,6 +119,7 @@ import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -2230,11 +2231,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
   }
   
-  /** throw new UnsupportedOperationException */
-  public void waitForInterpreter() {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
-  }
-  
   /** throws new UnsupportedOperationException */
   public Iterable<File> getInteractionsClassPath() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
@@ -3184,7 +3180,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
 //      _log.log(this + " not found on path of source roots");
       // Class not on source root set, check system classpath
-      classFile = findFileInPaths(fileName, RUNTIME_CLASS_PATH);
+      classFile = findFileInPaths(fileName, ReflectUtil.SYSTEM_CLASS_PATH);
       
       if (classFile != FileOps.NULL_FILE) return classFile;
       

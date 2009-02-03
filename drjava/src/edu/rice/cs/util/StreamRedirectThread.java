@@ -203,7 +203,7 @@ public class StreamRedirectThread extends Thread {
       }
       if (keepRunning) {
         // wait for a new input stream
-        while(!cm.attemptEnsureSignalled());
+        while(!cm.attemptEnsureSignaled());
         cm.reset();
       }
     } while(keepRunning && !close);

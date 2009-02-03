@@ -38,13 +38,12 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.util.*;
 
-import java.util.*;
 import java.io.*;
+
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
  * Tests for the variables and language constructs that can be used in external processes.

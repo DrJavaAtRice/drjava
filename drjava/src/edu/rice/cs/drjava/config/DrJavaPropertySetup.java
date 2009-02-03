@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
@@ -131,8 +132,6 @@ public class DrJavaPropertySetup implements OptionConstants {
           }
           
           File f = new File(dir, name);
-          try { f = f.getCanonicalFile(); }
-          catch(IOException ioe) { }
           f.deleteOnExit();
           _value = StringOps.escapeFileName(f.toString());
         }
@@ -1322,7 +1321,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                });
     PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("java.file", new Thunk<File>() {
       public File value() {
-        return new File(edu.rice.cs.util.newjvm.ExecJVM.getExecutable()); 
+        return new File(JVMBuilder.DEFAULT.javaCommand()); 
       }
     }, 
                                                                "Returns the Java interpreter executable file.\n"+

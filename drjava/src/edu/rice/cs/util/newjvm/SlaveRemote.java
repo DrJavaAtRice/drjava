@@ -37,21 +37,21 @@
 
 package edu.rice.cs.util.newjvm;
 
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
-/** The remote interface for a slave JVM. All instances must also provide a no-arg constructor, which is reflectively 
-  * invoked in {@link SlaveJVMRunner}.
-  * @version $Id$
-  */
+/**
+ * The remote interface for a slave JVM.
+ * @version $Id$
+ */
 public interface SlaveRemote extends Remote {
+  /**
+   * This method is called when the slave JVM is initialized.
+   * @param master  The remote link to the master JVM. Note that the implementation of the slave class will have to 
+   *                downcast this reference to the correct master remote interface.
+   */
+  public void start(MasterRemote master) throws RemoteException;
+
   /** Quits the slave JVM. */
   public void quit() throws RemoteException;
-  
-  /** This method is called when the slave JVM is initialized.
-    * @param master The remote link to the master JVM. Note that the implementation of the slave class will have to 
-    * downcast this reference to the correct master remote interface. Also note that because of the GJ erasure 
-    * semantics, this can't have the type it, which is MasterRemote<YourSlaveInterface>.  Luckily it doesn't matter 
-    * much here to use the erased type.
-    */
-  public void start(MasterRemote master) throws RemoteException;
 }

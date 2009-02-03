@@ -587,12 +587,6 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  public void slaveJVMUsed() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.slaveJVMUsed(); } }
-    finally { _lock.endRead(); }
-  }
-  
   /** Notifies the view that the current file path contains a #. */
   public void filePathContainsPound() {
     _lock.startRead();

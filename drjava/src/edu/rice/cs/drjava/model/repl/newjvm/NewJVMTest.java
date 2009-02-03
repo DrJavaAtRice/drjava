@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
@@ -46,6 +48,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import java.io.File;
 import java.rmi.RemoteException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -58,21 +61,13 @@ public final class NewJVMTest extends DrJavaTestCase {
   
   private static volatile TestJVMExtension _jvm;
   
-  /* Lock used to prevent interpreter transactions from interfering with one another. */
-  private final static Object _testLock = new Object();
-  
   public NewJVMTest(String name) { super(name); }
-
-  protected void setUp() throws Exception {
-    super.setUp();
-    _jvm.resetFlags();
-  }
 
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
       protected void setUp() throws Exception { _jvm = new TestJVMExtension(); }
-      protected void tearDown() throws Exception { _jvm.killInterpreter(null); }
+      protected void tearDown() throws Exception { _jvm.killInterpreterJVM(null); }
     };
 
     return setup;
@@ -83,19 +78,20 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
     _log.log("NewJVMTest.testPrintln executing");
     
+    _jvm.resetFlags();
     _jvm.interpret("System.err.print(\"err\");");
-    assertEquals("system err buffer", "err", _jvm.errBuf);
-    //assertEquals("void return flag", true, _jvm.voidReturnFlag);
-    _jvm.resetFlags();
+    assertEquals("system err buffer", "err", _jvm.errBuf());
+    assertEquals("void return flag", true, _jvm.voidReturnFlag());
 
+    _jvm.resetFlags();
     _jvm.interpret("System.err.print(\"err2\");");
-    assertEquals("system err buffer", "err2", _jvm.errBuf);
-    //assertEquals("void return flag", true, _jvm.voidReturnFlag);
-    _jvm.resetFlags();
+    assertEquals("system err buffer", "err2", _jvm.errBuf());
+    assertEquals("void return flag", true, _jvm.voidReturnFlag());
 
+    _jvm.resetFlags();
     _jvm.interpret("System.out.print(\"out\");");
-    assertEquals("system out buffer", "out", _jvm.outBuf);
-    //assertEquals("void return flag", true, _jvm.voidReturnFlag);
+    assertEquals("system out buffer", "out", _jvm.outBuf());
+    assertEquals("void return flag", true, _jvm.voidReturnFlag());
     
     debug.logEnd();
   }
@@ -104,8 +100,9 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
    _log.log("NewJVMTest.testReturnConstant executing");
 
+   _jvm.resetFlags();
    _jvm.interpret("5");
-   assertEquals("result", "5", _jvm.returnBuf);
+   assertEquals("result", "5", _jvm.returnBuf());
 
    debug.logEnd();
   }
@@ -115,18 +112,17 @@ public final class NewJVMTest extends DrJavaTestCase {
     _log.log("NewJVMTest.testWorksAfterRestartConstant executing");
 
     // Check that a constant is returned
+    _jvm.resetFlags();
     _jvm.interpret("5");
-    assertEquals("result", "5", _jvm.returnBuf);
+    assertEquals("result", "5", _jvm.returnBuf());
     
     // Now restart interpreter
-    synchronized(_testLock) {
-      _jvm.killInterpreter(FileOps.NULL_FILE);  // "" is not null: start back up
-      _testLock.wait();
-    }
+    _jvm.killInterpreterJVM(FileOps.NULL_FILE);  // "" is not null: start back up
 
     // Now evaluate another constant
+    _jvm.resetFlags();
     _jvm.interpret("4");
-    assertEquals("result", "4", _jvm.returnBuf);
+    assertEquals("result", "4", _jvm.returnBuf());
     
     debug.logEnd();
   }
@@ -136,10 +132,9 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
     _log.log("NewJVMTest.testThrowRuntimeException executing");
     
+    _jvm.resetFlags();
     _jvm.interpret("throw new RuntimeException();");
-    assertTrue("exception message", _jvm.exceptionMsgBuf.startsWith("java.lang.RuntimeException"));
-    // TODO: eliminate the unnecessary stack trace from the error message (replacing with an
-    // accurate stack trace from the interpreted language's point of view)
+    assertTrue("exception message", _jvm.exceptionMsgBuf().startsWith("java.lang.RuntimeException"));
 
     debug.logEnd();
   }
@@ -148,10 +143,11 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
     _log.log("NewJVMTest.testToStringThrowsRuntimeException executing");
     
+    _jvm.resetFlags();
     _jvm.interpret("class A { public String toString() { throw new RuntimeException(); } };" +
                    "new A()");
     assertTrue("exception should have been thrown by toString",
-               _jvm.exceptionMsgBuf != null);
+               _jvm.exceptionMsgBuf() != null);
     
     debug.logEnd();
   }
@@ -181,21 +177,24 @@ public final class NewJVMTest extends DrJavaTestCase {
     _jvm.addInterpreter("monkey");
 
     // x should be defined in active interpreter
+    _jvm.resetFlags();
     _jvm.interpret("x");
-    assertEquals("result", "6", _jvm.returnBuf);
+    assertEquals("result", "6", _jvm.returnBuf());
 
     // switch interpreter
     _jvm.setActiveInterpreter("monkey");
+    _jvm.resetFlags();
     _jvm.interpret("x");
-    assertNotNull("exception was thrown", _jvm.exceptionMsgBuf);
+    assertNotNull("exception was thrown", _jvm.exceptionMsgBuf());
 
     // define x to 3 and switch back
     _jvm.interpret("int x = 3;");
     _jvm.setToDefaultInterpreter();
 
     // x should have its old value
+    _jvm.resetFlags();
     _jvm.interpret("x");
-    assertEquals("result", "6", _jvm.returnBuf);
+    assertEquals("result", "6", _jvm.returnBuf());
 
     // test syntax error handling
     //  (temporarily disabled until bug 750605 fixed)
@@ -207,47 +206,74 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   private static class TestJVMExtension extends MainJVM {
-    public volatile String outBuf;
-    public volatile String errBuf;
-    public volatile String returnBuf;
-    public volatile String exceptionMsgBuf;
-    public volatile boolean voidReturnFlag;
+    private static final int WAIT_TIMEOUT = 10000; // time to wait for an interaction to complete
+    
+    private final CompletionMonitor _done;
+    private volatile String _outBuf;
+    private volatile String _errBuf;
+    private volatile String _returnBuf;
+    private volatile String _exceptionMsgBuf;
+    private volatile boolean _voidReturnFlag;
 
     private volatile InterpretResult.Visitor<Void> _testHandler;
 
     public TestJVMExtension() throws RemoteException {
-      super(null);
+      super(IOUtil.WORKING_DIRECTORY);
+      _done = new CompletionMonitor();
       _testHandler = new TestResultHandler();
       startInterpreterJVM();
-      ensureInterpreterConnected();
+      resetFlags();
     }
 
-    protected InterpretResult.Visitor<Void> getResultHandler() {
+    @Override protected InterpretResult.Visitor<Void> resultHandler() {
       return _testHandler;
     }
 
     public void resetFlags() {
-      outBuf = null;
-      errBuf = null;
-      returnBuf = null;
-      exceptionMsgBuf = null;
-      voidReturnFlag = false;
+      _done.reset();
+      _outBuf = "";
+      _errBuf = "";
+      _returnBuf = null;
+      _exceptionMsgBuf = null;
+      _voidReturnFlag = false;
+    }
+    
+    public String outBuf() {
+      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _outBuf;
     }
 
-    protected void handleSlaveQuit(int status) {
-      synchronized(_testLock) {
-        _testLock.notify();
-        super.handleSlaveQuit(status);
+    public String errBuf() {
+      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _errBuf;
+    }
+
+    public String returnBuf() {
+      try {
+      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _returnBuf;
       }
+      finally { debug.logValue("_returnBuf", _returnBuf); }
     }
 
-    public void systemErrPrint(String s) throws RemoteException { errBuf = s; }
-    public void systemOutPrint(String s) throws RemoteException { outBuf = s; }
+    public String exceptionMsgBuf() {
+      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _exceptionMsgBuf;
+    }
+
+    public boolean voidReturnFlag() {
+      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _voidReturnFlag;
+    }
+
+    public void systemErrPrint(String s) { _errBuf += s; }
+    public void systemOutPrint(String s) { _outBuf += s; }
 
     private class TestResultHandler implements InterpretResult.Visitor<Void> {
       public Void forNoValue() {
         debug.log();
-        voidReturnFlag = true;
+        _voidReturnFlag = true;
+        _done.signal();
         _log.log("NewJVMTest: void returned by interpretResult callback");
         return null;
       }
@@ -259,12 +285,15 @@ public final class NewJVMTest extends DrJavaTestCase {
       
       private void handleValueResult(String s) {
         debug.log();
-        returnBuf = s;
-        _log.log("NewJVMTest: " + returnBuf + " returned by interpretResult callback");
+        _returnBuf = s;
+        _done.signal();
+        _log.log("NewJVMTest: " + _returnBuf + " returned by interpretResult callback");
       }
       
       public Void forException(String msg) {
-        exceptionMsgBuf = msg;
+        debug.log();
+        _exceptionMsgBuf = msg;
+        _done.signal();
         return null;
       }
       

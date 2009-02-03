@@ -324,7 +324,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     }.start();
     
     // Wait for console input to begin
-    completionMonitor.attemptEnsureSignalled();
+    completionMonitor.attemptEnsureSignaled();
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 

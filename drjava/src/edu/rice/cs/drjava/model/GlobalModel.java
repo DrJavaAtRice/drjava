@@ -78,9 +78,6 @@ import edu.rice.cs.util.text.ConsoleDocument;
   */
 public interface GlobalModel extends ILoadDocuments {
   
-  public static final Iterable<File> RUNTIME_CLASS_PATH =
-    IOUtil.attemptAbsoluteFiles(IOUtil.parsePath(System.getProperty("java.class.path", "")));
-  
   //-------------------------- Listener Management --------------------------//
   
   /** Add a listener to this global model.
@@ -309,9 +306,6 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** Clears and resets the interactions pane in the specified working directory. */
   public void resetInteractions(File wd, boolean forceReset);
-  
-  /** Blocks until the interpreter has registered. */
-  public void waitForInterpreter();
   
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction();

@@ -577,12 +577,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
   
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
-  public void replThrewException(String message) {
+  public void replThrewException(final String message) {
     if (message.endsWith("<EOF>\"")) {
       interactionContinues();
     }
     else {
-      _document.appendExceptionResult(message, InteractionsDocument.ERROR_STYLE);
+      Utilities.invokeLater(new Runnable() {
+        public void run() { _document.appendExceptionResult(message, InteractionsDocument.ERROR_STYLE); }
+      });
       _secondToLastError = _lastError;
       _lastError = message;
       _interactionIsOver();
@@ -637,8 +639,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting() {
     if (! _waitingForFirstInterpreter) {
-      _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
-      _document.setInProgress(true);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
+          _document.setInProgress(true);
+        }
+      });
       
       // Change to a new debug port to avoid conflicts
       try { _createNewDebugPort(); }
@@ -662,6 +668,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInterpreterResetFailed(t);
   }
   
+  public void interpreterWontStart(Exception e) {
+    _interpreterWontStart(e);
+    _document.setInProgress(true); // prevent editing -- is there a better way to do this?
+  }
+  
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
     * @param t The Throwable thrown by System.exit
     */
@@ -671,6 +682,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param t Throwable explaining why the reset failed.
     */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);
+  
+  /** Action to perform when the interpreter won't start. */
+  protected abstract void _interpreterWontStart(Exception e);
   
   public String getBanner() { return _banner; }
   
@@ -733,12 +747,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
   public abstract void _notifyInterpreterReady(File wd);
-  
-  /** Called when the slave JVM has been used for interpretation or unit testing. */ 
-  public void slaveJVMUsed() { _notifySlaveJVMUsed(); }
-  
-  /** Notifies listeners that the slave JVM has been used. (Subclasses must maintain listeners.) */
-  protected abstract void _notifySlaveJVMUsed();
   
   /** Assumes a trimmed String. Returns a string of the main call that the interpretor can use. */
   protected static String _testClassCall(String s) {

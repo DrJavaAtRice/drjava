@@ -92,13 +92,6 @@ public class Utilities {
                                                        false).show(); } } );
   }
   
-  /** Show a modal debug message box containing a backtrace for the Throwable t.
-    * @param t the Throwable to be back traced.
-    */
-  public static void showTrace(final Throwable t) { 
-    Utilities.invokeAndWait(new Runnable() { public void run() { new DrJavaErrorHandler().handle(t); } } );
-  } 
-  
   /** Shows a modal debug message box with an OK button when not in TEST_MODE.
     * @param msg string to display
     */

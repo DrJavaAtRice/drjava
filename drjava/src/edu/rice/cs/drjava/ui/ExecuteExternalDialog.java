@@ -990,7 +990,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // this waiting cannot happen in the event thread, as that would block the other dialog
     new Thread(new Runnable() {
       public void run() {
-        _insertVarDialogMonitor.attemptEnsureSignalled();
+        _insertVarDialogMonitor.attemptEnsureSignaled();
         // dialog has finished, figure out the results in the event thread
         EventQueue.invokeLater(new Runnable() {
           public void run() {

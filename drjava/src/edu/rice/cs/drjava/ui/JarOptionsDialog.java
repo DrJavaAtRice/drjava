@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.plt.concurrent.ConcurrentUtil;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.UnexpectedException;
@@ -49,7 +51,6 @@ import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.StreamRedirectThread;
 
 import javax.swing.*;
@@ -665,30 +666,14 @@ public class JarOptionsDialog extends SwingFrame {
               SwingWorker jarRunner = new SwingWorker() {
                 public Object construct() {
                   try {
-                    Process jarFileProcess = ExecJVM.runJVM(_mainClassField.getText(), // mainClass
-                                                            new String[] {}, // classParams,
-                                                            new String[] { _jarFileSelector.getFileFromField().getAbsolutePath() }, // classPath,
-                                                            new String[] {}, // jvmParams,
-                                                            _jarFileSelector.getFileFromField().getParentFile());
-                    
-                    StreamRedirectThread errThread = new StreamRedirectThread("error reader", jarFileProcess.getErrorStream(), System.err);
-                    StreamRedirectThread outThread = new StreamRedirectThread("output reader", jarFileProcess.getInputStream(), System.out);
-                    errThread.start();
-                    outThread.start();
-                    boolean notDead = true;
-                    while(notDead) {
-                      try {
-                        errThread.join();
-                        outThread.join();
-                        notDead = false;
-                      }
-                      catch (InterruptedException exc) {
-                        // ignore, we don't interrupt
-                      }
-                    }
-                    jarFileProcess.waitFor();
+                    File cp = _jarFileSelector.getFileFromField();
+                    File wd = cp.getParentFile();
+                    Process p = JVMBuilder.DEFAULT.classPath(cp).directory(wd).start(_mainClassField.getText());
+                    ConcurrentUtil.copyProcessErr(p, System.err);
+                    ConcurrentUtil.copyProcessOut(p, System.out);
+                    p.waitFor();
                     JOptionPane.showMessageDialog(JarOptionsDialog.this,"Execution of jar file terminated (exit value = "+
-                                                  jarFileProcess.exitValue()+")", "Execution terminated.",
+                                                  p.exitValue()+")", "Execution terminated.",
                                                   JOptionPane.INFORMATION_MESSAGE);
                   }
                   catch(Exception e) {

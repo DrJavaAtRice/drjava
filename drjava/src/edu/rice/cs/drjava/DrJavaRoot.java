@@ -64,6 +64,7 @@ import com.jgoodies.looks.plastic.PlasticLookAndFeel;
 import com.jgoodies.looks.plastic.PlasticTheme;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
+import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
@@ -159,36 +160,18 @@ public class DrJavaRoot {
       // occurred; otherwise, the list of compilers in the UI will be wrong.
       
 //      Utilities.showDebug("Creating MainFrame");
-      
-      try { _mainFrame = new MainFrame(); }
-      catch(RuntimeException e) {
-        Throwable c = e.getCause();
-        if ((c instanceof java.rmi.server.ExportException) && (c.getMessage().equals("Listen failed on port: 0"))) {
-          JOptionPane.showMessageDialog(null,
-                                        "DrJava could not communicate with its Interactions Pane.\n"+
-                                        "This can happen if a firewall does not allow DrJava to access\n"+
-                                        "the network. If you have a firewall, please make sure that\n"+
-                                        "DrJava has network access.\n"+
-                                        "DrJava does not access the internet or other computers, except\n"+
-                                        "for \"Open Java API Javadoc\", but it needs network access to\n"+
-                                        "communicate with the Interactions Pane.",
-                                        "Network Access Failed",
-                                        JOptionPane.ERROR_MESSAGE);
-          System.exit(1);
-        }
-        else throw e;
-      }    
+      _mainFrame = new MainFrame();
 //      Utilities.showDebug("MainFrame created");
       
       // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
       DrJavaErrorWindow.setFrame(_mainFrame);
-      System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.DrJavaErrorHandler");
+      Thread.setDefaultUncaughtExceptionHandler(DrJavaErrorHandler.INSTANCE);
       
       // false means "do not jump to the line number that may be specified, just open the file"
       _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, false);
       
       /* We use EventQueue.invokeLater rather than Utilities.invokeLater to ensure all files have been loaded and
-       * added to the fileview before the MainFrame is set visible.  When this was not done, we occasionally encountered
+       * added to the file view before the MainFrame is set visible.  When this was not done, we occasionally encountered
        * a NullPointerException on start up when specifying a file (ex: java -jar drjava.jar somefile.java)
        */
       EventQueue.invokeLater(new Runnable(){ 
@@ -215,11 +198,12 @@ public class DrJavaRoot {
       if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
     }
     catch(Throwable t) {
+      error.log(t);
       // Show any errors to the real System.err and in an DrJavaErrorHandler
       _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(_consoleErr);
       System.out.println("error thrown");
-      new DrJavaErrorHandler().handle(t);
+      DrJavaErrorHandler.record(t);
     }
   }
   
@@ -241,7 +225,8 @@ public class DrJavaRoot {
   }
   
   private static void _openCommandLineFiles(final MainFrame mf, String[] filesToOpen, int len, boolean jump) {
-    assert EventQueue.isDispatchThread();
+    // Assertion commented out because it doesn't hold at startup.  See DrJava bug 2321815.
+    /* assert EventQueue.isDispatchThread(); */
 //    Utilities.showDebug("Files to open: " + Arrays.toString(filesToOpen));
     anyLineNumbersSpecified = false;
     for (int i = 0; i < len; i++) {

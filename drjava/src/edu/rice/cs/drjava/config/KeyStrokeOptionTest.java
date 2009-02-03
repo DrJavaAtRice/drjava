@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 
 import javax.swing.*;
 import java.awt.event.InputEvent;
@@ -55,8 +54,8 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
   public KeyStrokeOptionTest(String name) { super(name); }
   
   public void testGetName() {
-    KeyStrokeOption io1 = new KeyStrokeOption("indent_size",null);
-    KeyStrokeOption io2 = new KeyStrokeOption("max_files",null);
+    KeyStrokeOption io1 = new KeyStrokeOption("indent_size", null);
+    KeyStrokeOption io2 = new KeyStrokeOption("max_files", null);
     
     assertEquals("indent_size", io1.getName());
     assertEquals("max_files",   io2.getName());
@@ -114,10 +113,7 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
     * to effectively set it back, feel free to remove this hack!)
     */
   public void testLocaleSpecificFormat() throws IOException, InterruptedException {
-    String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
-    String[] args = new String[0];
-    
-    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOps.NULL_FILE);
+    Process process = JVMBuilder.DEFAULT.start(KeyStrokeOptionTest.class.getName()); 
     int status = process.waitFor();
     assertEquals("Local specific keystroke test failed!", 0, status);
   }

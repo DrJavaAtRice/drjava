@@ -300,10 +300,6 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
   }
   
-  public void waitForInterpreter() {
-    throw new UnsupportedOperationException("Tried to call waitForInterpreter on a Dummy");
-  }
-  
   public void interpretCurrentInteraction() {
     throw new UnsupportedOperationException("Tried to call interpretCurrentInteraction on a Dummy");
   }

@@ -79,7 +79,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -96,8 +95,6 @@ public class InteractionsController extends AbstractConsoleController {
   
   /* InteractionsDocument _adapter is inherited from AbstractConsoleController. */
   /* InteractionsPane _pane is inherited from AbstractConsoleController. */
-  
-  private static final Log _log = new Log("ConsoleController.txt", false);
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
@@ -207,7 +204,7 @@ public class InteractionsController extends AbstractConsoleController {
       fireConsoleInputStarted();
       
       // Wait for the inputCompletionCommand to be invoked
-      completionMonitor.attemptEnsureSignalled();
+      completionMonitor.attemptEnsureSignaled();
       
       fireConsoleInputCompleted(_text);
       
@@ -232,7 +229,6 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterExited(int status) { }
     public void interpreterChanged(boolean inProgress) { }
     public void interactionIncomplete() { }
-    public void slaveJVMUsed() { }
   };
   
   /** Glue together the given model and a new view.

@@ -409,7 +409,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
 //    System.err.println("Source root is: " + root);
 //    System.err.println("Package name is: " + doc.getPackageName());
-    assertEquals("source root", new File("").getCanonicalFile(), root);
+    assertEquals("source root", IOUtil.WORKING_DIRECTORY.getCanonicalFile(), root);
     
     // Close this doc to clean up after ourselves for the next check.
     _mf.getModel().closeFile(doc);

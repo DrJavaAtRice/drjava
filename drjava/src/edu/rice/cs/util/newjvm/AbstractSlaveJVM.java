@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.newjvm;
 
-import edu.rice.cs.util.Log;
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 
 import java.rmi.*;
 
@@ -51,120 +50,68 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public abstract class AbstractSlaveJVM implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 1;
   
-  protected static final Log _log  = new Log("MasterSlave.txt", false);
-  
-//  /** remote reference to the Master JVM; after initialization it is immutable until quit is executed. */
-//  public volatile MasterRemote _master;
-  
   /** Name of the thread to quit the slave. */
-  protected volatile String _quitSlaveThreadName = "Quit SlaveJVM Thread";
-  
+  private final String _quitSlaveThreadName;
   /** Name of the thread to periodically poll the master. */
-  protected volatile String _pollMasterThreadName = "Poll MasterJVM Thread";
+  private final String _pollMasterThreadName;
+  private boolean _started;
   
-  private volatile Thread _checkMaster = null;
+  public AbstractSlaveJVM() {
+    this("Quit SlaveJVM Thread", "Poll MasterJVM Thread");
+  }
   
-  private final Object _slaveJVMLock = new Object();
-  
-  private volatile boolean _slaveExited = false;
-  
-  public AbstractSlaveJVM() throws RemoteException { }
-  
-  private void shutdown() {
-//    try { 
-//      boolean exported = UnicastRemoteObject.unexportObject(this, true); 
-//      if (! exported) _log.log("ERROR: " + this + " was not unexported before shutdown");
-//    }
-//    catch(NoSuchObjectException e) { throw new UnexpectedException(e); }  // should never happen
-    _log.log(AbstractSlaveJVM.this + ".shutdown() calling System.exit(0)");
-    System.exit(0);
+  public AbstractSlaveJVM(String quitSlaveThreadName, String pollMasterThreadName) {
+    _quitSlaveThreadName = quitSlaveThreadName;
+    _pollMasterThreadName = pollMasterThreadName;
+    _started = false;
   }
   
   /** Quits the slave JVM, calling {@link #beforeQuit} before it does. */
   public final synchronized void quit() {
-//    _log.log(this + ".quit() called");
-//    _master = null;
-    
     beforeQuit();
-    
-    _slaveExited = false;
-//    Utilities.showDebug("quit() called");
-    
     // put exit into another thread to allow this RMI call to return normally.
-    Thread t = new Thread(_quitSlaveThreadName) {
+    new Thread(_quitSlaveThreadName) {
       public void run() {
-        try {
-          // wait for parent RMI calling thread to exit 
-          synchronized(_slaveJVMLock) { 
-            while (! _slaveExited) {
-//              _log.log("Waiting for " + AbstractSlaveJVM.this + ".quit() to exit");
-              _slaveJVMLock.wait(); 
-            }
-          }
-          shutdown();
+        // ensure (as best we can) that the quit() RMI call has returned cleanly
+        synchronized (AbstractSlaveJVM.this) {
+          try { System.exit(0); }
+          catch (RuntimeException e) { error.log("Can't invoke System.exit", e); }
         }
-        catch(Throwable t) { 
-          _log.log(this + ".quit() failed!");
-          quitFailed(t); 
+      }
+    }.start();
+  }
+  
+  /** Initializes the Slave JVM including starting background thread to periodically poll the master JVM and 
+    * automatically quit if it's dead.  Synchronized to prevent other method invocations from proceeding before
+    * startup is complete.
+    */
+  public final synchronized void start(final MasterRemote master) throws RemoteException {
+    if (_started) { throw new IllegalArgumentException("start() has already been invoked"); }
+    master.checkStillAlive(); // verify that two-way communication works; may throw RemoteException
+
+    Thread checkMaster = new Thread(_pollMasterThreadName) {
+      public void run() {
+        while (true) {
+          ConcurrentUtil.sleep(CHECK_MAIN_VM_ALIVE_SECONDS*1000);
+          try { master.checkStillAlive(); }
+          catch (RemoteException e) {
+            // TODO: This should always be an exceptional situation, but for now
+            // many tests abandon the slave without quitting cleanly.
+            // error.log("Master is no longer available", e);
+            quit();
+          }
         }
       }
     };
-    
-    t.start();
-//    _log.log(this + ".quit() RMI call exited");
-    synchronized(_slaveJVMLock) { 
-      _slaveExited = true; 
-      _slaveJVMLock.notify();  // There does not appear to be any constraint forcing this thread to exit before shutdown
-    }
+    checkMaster.setDaemon(true);
+    checkMaster.start();
+    handleStart(master);
   }
   
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
   protected void beforeQuit() { }
   
-  /** This method is called if the interpreterJVM cannot be exited (likely because of a unexpected security manager.) */
-  protected void quitFailed(Throwable th) { }
-  
-  /** Initializes the Slave JVM including starting background thread to periodically poll the master JVM and 
-    * automatically quit if it's dead.  Unsynchronized because 
-    * (i)   this method can only be called once (without throwing an error) and _master is immutable once assigned here
-    *       until quit() 
-    * (ii)  this method does not depend on any mutable state in this (which constrains {@link #handleStart}); and
-    * (iii) this method (and perhaps {@link #handleStart}) perform remote calls on master.
-    * This method delegates starting actions other than polling master to {@link #handleStart}.
-    */
-  public final void start(final MasterRemote master) throws RemoteException {
-    
-    if (_checkMaster != null) throw new UnexpectedException(this + ".start(...) called a second time");
-    
-    _checkMaster = new Thread(_pollMasterThreadName) {
-      public void run() { // Note: this method is NOT synchronized; it runs in a different thread.
-        while (true) {
-          try { Thread.sleep(CHECK_MAIN_VM_ALIVE_SECONDS*1000); }
-          catch (InterruptedException ie) { }
-//          _log.log(this + " polling " + master + " to confirm Master JVM is still alive");
-          try { master.checkStillAlive(); }
-          catch (RemoteException re) {
-            // TODO: This should always be an exceptional situation, but for now
-            // many tests abandon the slave without quitting cleanly.
-            // error.log(re);
-            quit(); // Master JVM service is defunct. Quit! */
-          }
-        }
-      }
-    };
-    
-    
-    
-    _checkMaster.setDaemon(true);
-    _checkMaster.start();
-    _log.log(_checkMaster + " created and STARTed by " + this);
-    
-    handleStart(master);  // master is passed as parameter because in some refactorings, _master is eliminated
-    
-  }
-  
   /** Called when the slave JVM has started running.  Subclasses must implement this method. */
   protected abstract void handleStart(MasterRemote master);
   
-//  public void finalize() { _log.log(this + " has been FINALIZED"); }
 }

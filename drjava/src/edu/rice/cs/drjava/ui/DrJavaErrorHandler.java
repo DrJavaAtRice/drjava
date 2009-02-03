@@ -47,20 +47,27 @@ import edu.rice.cs.drjava.config.OptionConstants;
 //import edu.rice.cs.plt.swing.SwingUtil;
 import edu.rice.cs.util.Log;
 
-/** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
+/** The handle() method in this class is called every time an uncaught exception propagates to an AWT action.
  *  The static log() method can be used to put log entries into the error log but continue execution.
  *  This does not automatically update the "DrJava Errors" window when new errors occur. In the case of errors,
  *  we want to minimize the effects on the GUI. If we want to see an updated dialog, we can click on the
  *  "DrJava Errors" button again.
  *  @version $Id$
  */
-public class DrJavaErrorHandler {
+public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
+  
+  public static final DrJavaErrorHandler INSTANCE = new DrJavaErrorHandler();
+  
+  private DrJavaErrorHandler() {}
+  
+  /** Handles an uncaught exception. This gets called automatically by AWT. */
+  public void uncaughtException(Thread t, Throwable thrown) {
+    record(thrown);
+  }
+  
   /** the list of errors */
   private static ArrayList<Throwable> _errors = new ArrayList<Throwable>();
   
-  /** Log to file. */
-  public static final Log LOG = new Log("error_handler.txt", false);
-
   /** the button to show */
   private static JButton _errorsButton;
   
@@ -86,12 +93,6 @@ public class DrJavaErrorHandler {
   /** Clears the list of errors. */
   public static void clearErrors() { _errors.clear(); }
 
-  /** Handles an uncaught exception. This gets called automatically by AWT. */
-  public void handle(Throwable thrown) {
-    System.out.println("Unhandled exception: " + thrown);
-    record(thrown);
-  }
-  
   /** Record the throwable in the errors list. */
   public static void record(final Throwable thrown) {
     Utilities.invokeLater(new Runnable() {

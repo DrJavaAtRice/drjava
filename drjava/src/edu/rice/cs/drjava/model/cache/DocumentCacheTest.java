@@ -94,9 +94,6 @@ public class DocumentCacheTest extends DrJavaTestCase {
   protected void createModel() {
     //_model = new DefaultGlobalModel(_originalModel);
     _model = new TestGlobalModel();
-    
-    // Wait until it has connected
-    _model.waitForInterpreter();
   }
   
   /** Create a new temporary file in _tempDir. */

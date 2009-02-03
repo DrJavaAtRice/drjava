@@ -122,7 +122,20 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
         _model.systemErrPrint(StringOps.getStackTrace(t));  // redundantly moves code to event thread
       }
     });
-   
+  }   
+  
+  protected void _interpreterWontStart(final Exception e) {
+    Utilities.invokeLater(new Runnable() { 
+      public void run() {
+        _document.insertBeforeLastPrompt("JVM failed to start.  Make sure a firewall is not blocking " +
+                                         StringOps.NEWLINE +
+                                         "inter-process communication.  See the console tab for details." +
+                                         StringOps.NEWLINE,
+                                         InteractionsDocument.ERROR_STYLE);
+         // Print the exception to the console
+        _model.systemErrPrint(StringOps.getStackTrace(e));  // redundantly moves code to event thread
+      }
+    });
   }
   
   /** Called when the Java interpreter is ready to use.  This method body adds actions that involve the global model. 
@@ -167,11 +180,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
   
-  /** In the event thread, notifies listeners that slave JVM has been used. */
-  protected void _notifySlaveJVMUsed(final File wd) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.slaveJVMUsed(); } });
-  }
-  
   /** In the event thread, notifies listeners that the interpreter has exited unexpectedly.
     * @param status Status code of the dead process
     */
@@ -189,11 +197,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** In the event thread, notifies the view that the current interaction is incomplete. */
   protected void _notifyInteractionIncomplete() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });
-  }
-  
-  /** In the event thread, notifies listeners that the slave JVM has been used. */
-  protected void _notifySlaveJVMUsed() {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.slaveJVMUsed(); } });
   }
   
   public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }

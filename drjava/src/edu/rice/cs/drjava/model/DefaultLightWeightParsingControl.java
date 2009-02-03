@@ -84,7 +84,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
   private ThreadGroup _updaterThreadGroup = new ThreadGroup("Light-weight parsing updater thread group") {
     public void uncaughtException(Thread t, Throwable e) {
       _log.log("Uncaught exception in updater; disabled for rest of session", e);
-      new DrJavaErrorHandler().handle(e);
+      DrJavaErrorHandler.record(e);
     }
   };
   

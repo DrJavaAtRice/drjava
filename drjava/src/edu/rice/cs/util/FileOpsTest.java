@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.FileOps;
 
 /** Test cases for {@link FileOps}.
@@ -276,10 +276,7 @@ public class FileOpsTest extends DrJavaTestCase {
     assertTrue("file2 exists", file2.exists());
     edu.rice.cs.plt.io.IOUtil.deleteOnExitRecursively(tempDir);
       
-    String className = "edu.rice.cs.util.FileOpsTest";
-    String[] args = new String[] {dir1.getAbsolutePath() };  // args = {<Fully qualified name of dir1>}
-    
-    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOps.NULL_FILE);
+    Process process = JVMBuilder.DEFAULT.start(FileOpsTest.class.getName(), dir1.getAbsolutePath()); 
     int status = process.waitFor();
     assertEquals("Delete on exit test exited with an error!", 0, status);
     

@@ -143,7 +143,7 @@ public class JDKToolsLibrary {
     JavadocModel javadoc = new NoJavadocAvailable(model);
     try {
       Class.forName("com.sun.tools.javadoc.Main");
-      javadoc = new DefaultJavadocModel(model, null, GlobalModel.RUNTIME_CLASS_PATH);
+      javadoc = new DefaultJavadocModel(model, null, ReflectUtil.SYSTEM_CLASS_PATH);
     }
     catch (ClassNotFoundException e) { /* can't load */ }
     catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }

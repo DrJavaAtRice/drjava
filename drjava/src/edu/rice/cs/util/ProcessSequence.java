@@ -341,7 +341,7 @@ public class ProcessSequence extends Process {
     }
     public void uncaughtException(Thread t, Throwable e) {
       if ((e instanceof StreamRedirectException) &&
-          (e.getCause() instanceof java.io.IOException)) {
+          (e.getCause() instanceof IOException)) {
         _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
                           e.toString()+"\n\n");
       }

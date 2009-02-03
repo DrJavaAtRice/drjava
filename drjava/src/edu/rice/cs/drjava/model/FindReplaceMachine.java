@@ -183,7 +183,8 @@ public class FindReplaceMachine {
     */
   public boolean onMatch() {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    // Bug: this invariant doesn't hold.  See DrJava bug #2321815
+/* assert Utilities.TEST_MODE || EventQueue.isDispatchThread(); */
     
     String findWord = _findWord;
     int wordLen, off;

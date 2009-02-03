@@ -4000,7 +4000,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Sets up the ctrl-tab listener. */
   private void setUpKeys() { setFocusTraversalKeysEnabled(false); }
   
-  /** Relying on inherited dispose() method. */
+  /** Clean up model and Swing resources. */
+  public void dispose() {
+    _model.dispose();
+    super.dispose();
+  }
   
   /** @return The model providing the logic for this view. */
   public SingleDisplayModel getModel() { return _model; }
@@ -8818,8 +8822,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
        * "Interactions Reset Bug". */
       _interactionsController.interruptConsoleInput();
     }
-    
-    public void slaveJVMUsed() { /* _resetInteractionsAction.setEnabled(true);  */ }
     
     public void consoleReset() { }
     

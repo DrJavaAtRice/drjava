@@ -47,13 +47,15 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.SplashScreen;
+import edu.rice.cs.plt.concurrent.DelayedInterrupter;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.newjvm.ExecJVM;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -166,87 +168,63 @@ public class DrJava {
       // This helps for example when the main JVM heap size is too large, and
       // the JVM cannot be created.
       int failCount = 0;
-      while(failCount<2) {
+      while(failCount < 2) {
         // Restart if there are custom JVM args
+        String masterMemory = getConfig().getSetting(MASTER_JVM_XMX).trim();
         boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
-          || ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))) &&
-              (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))));
+          || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory));
         
-        LinkedList<String> classArgsList = new LinkedList<String>();
-        classArgsList.addAll(_filesToOpen);
+        LinkedList<String> classArgs = new LinkedList<String>();
+        classArgs.addAll(_filesToOpen);
         
         // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
-        if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
+        if (_showDebugConsole) { classArgs.addFirst("-debugConsole"); }
         
         if (! _propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
           // Placed in reversed order to get "-config filename"
-          classArgsList.addFirst(_propertiesFile.getAbsolutePath());
-          classArgsList.addFirst("-config");
+          classArgs.addFirst(_propertiesFile.getAbsolutePath());
+          classArgs.addFirst("-config");
         }
         
-        String[] classArgs = classArgsList.toArray(new String[0]);
-        
         if (restart) {
-          String classPath = System.getProperty("java.class.path");
           
           // Run a new copy of DrJava and exit
           try {
-//          Utilities.showDebug("Starting DrJavaRoot with classArgs = " + Arrays.toString(classArgs) + "; classPath = " + classPath + 
-//                             "; jvmArgs = " + _jvmArgs + "; workDir = " + workDir);
-            Process p = ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, _jvmArgs.toArray(new String[0]), null);
-            final Thread mainThread = Thread.currentThread();
-            // this thread waits some time for something to go wrong in the spawned JVM (p)
-            // then it interrupts the main thread, which is waiting for the JVM to end
-            Thread sleepThread = new Thread(new Runnable() {
-              public void run() {
-                try {
-                  Thread.sleep(WAIT_BEFORE_DECLARING_SUCCESS); // wait 5 seconds for something to go wrong.
-                  mainThread.interrupt();
-                }
-                catch(InterruptedException e) { /* just check if something has gone wrong now, even if it's not 5 seconds later */ }
-              }
-            });
-            sleepThread.setDaemon(true);
-            sleepThread.start(); // this will wait 5 seconds and then interrupt the main thread waiting for the other JVM to quit
-            // let the main threat wait for the JVM to end
+            boolean failed = false;
+            Process p = JVMBuilder.DEFAULT.jvmArguments(_jvmArgs).start(DrJavaRoot.class.getName(), classArgs);
+            DelayedInterrupter timeout = new DelayedInterrupter(WAIT_BEFORE_DECLARING_SUCCESS);
             try {
-              p.waitFor();
-              sleepThread.interrupt();
+              int exitValue = p.waitFor();
+              timeout.abort();
+              failed = (exitValue != 0);
             }
-            catch(InterruptedException e) { /* we got interrupted by the sleepThread */ }
-            try {
-              // check how the JVM ended
-              if (p.exitValue()!=0) {
-                // ended in failure
-                if (failCount>0) {
-                  // 2nd time that spawning has failed, give up
-                  JOptionPane.showMessageDialog(null,
-                                                "DrJava was unable to start, and resetting your configuration\n"+
-                                                "did not help. Please file a support request at\n"+
-                                                "https://sourceforge.net/projects/drjava/",
-                                                "Could Not Start DrJava",
-                                                JOptionPane.ERROR_MESSAGE);
-                  System.exit(0);
-                }
-                else {
-                  // 1st time that spawning has failred, offer to reset configuration
-                  int result = JOptionPane.showConfirmDialog(null,
-                                                             "DrJava was unable to start. Your configuration file (.drjava)\n"+
-                                                             "might be corrupt. Do you want to reset your configuration?",
-                                                             "Could Not Start DrJava",
-                                                             JOptionPane.YES_NO_OPTION);
-                  if (result != JOptionPane.YES_OPTION) { System.exit(0); }
-                  // reset configuration, save, and reload it
-                  getConfig().resetToDefaults();
-                  getConfig().saveConfiguration();
-                  if (!handleCommandLineArgs(args)) { System.exit(0); }
-                  ++failCount;
-                  continue;
-                }
+            catch(InterruptedException e) { /* timeout was reached */ }
+            if (failed) {
+              if (failCount > 0) {
+                // 2nd time that spawning has failed, give up
+                JOptionPane.showMessageDialog(null,
+                                              "DrJava was unable to start, and resetting your configuration\n"+
+                                              "did not help. Please file a support request at\n"+
+                                              "https://sourceforge.net/projects/drjava/",
+                                              "Could Not Start DrJava",
+                                              JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
               }
-            }
-            catch(IllegalThreadStateException e) {
-              // the other JVM hasn't finished yet, assume it's running well
+              else {
+                // 1st time that spawning has failed, offer to reset configuration
+                int result = JOptionPane.showConfirmDialog(null,
+                                                           "DrJava was unable to start. Your configuration file (.drjava)\n"+
+                                                           "might be corrupt. Do you want to reset your configuration?",
+                                                           "Could Not Start DrJava",
+                                                           JOptionPane.YES_NO_OPTION);
+                if (result != JOptionPane.YES_OPTION) { System.exit(0); }
+                // reset configuration, save, and reload it
+                getConfig().resetToDefaults();
+                getConfig().saveConfiguration();
+                if (!handleCommandLineArgs(args)) { System.exit(0); }
+                ++failCount;
+                continue;
+              }
             }
           }
           catch (IOException ioe) {
@@ -263,7 +241,7 @@ public class DrJava {
         
         else {
           // No restart -- just invoke DrJavaRoot.main.
-          DrJavaRoot.main(classArgs);
+          DrJavaRoot.main(classArgs.toArray(new String[0]));
         }
         break;
       }
@@ -272,7 +250,7 @@ public class DrJava {
       // Show any errors to the System.err and in an DrJavaErrorHandler
       System.out.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(System.err);System.out.println("error thrown");
-      new DrJavaErrorHandler().handle(t);
+      DrJavaErrorHandler.record(t);
     }
   }
   

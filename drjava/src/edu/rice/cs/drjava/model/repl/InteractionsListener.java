@@ -80,6 +80,4 @@ public interface InteractionsListener {
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();
   
-  /** Called when the slave JVM is used by the interpreter or unit testing. */
-  public void slaveJVMUsed();
 }

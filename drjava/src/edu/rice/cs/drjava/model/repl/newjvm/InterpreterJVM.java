@@ -46,7 +46,6 @@ import java.rmi.*;
 //  (This class runs in a different JVM, and will not share the config object)
 
 
-import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
@@ -54,11 +53,11 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.text.TextUtil;
-import edu.rice.cs.plt.io.IOUtil;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
@@ -86,13 +85,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   
   /** Singleton instance of this class. */
-  public static final InterpreterJVM ONLY;
-  static {
-    try { ONLY = new InterpreterJVM(); }
-    catch (RemoteException e) { throw new UnexpectedException(e); }
-  }
-  
-  private static final Log _log = new Log("MasterSlave.txt", false);
+  public static final InterpreterJVM ONLY = new InterpreterJVM();
   
   // As RMI can lead to parallel threads, all fields must be thread-safe.  Collections are wrapped
   // in synchronized versions.
@@ -113,22 +106,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
   
-  /** Whether to display an error message if a reset fails. */
-  private volatile boolean _messageOnResetFailure;
-  
   /** Private constructor; use the singleton ONLY instance. */
-  private InterpreterJVM() throws RemoteException {
-    super(); // may throw RemoteException
+  private InterpreterJVM() {
+    super("Reset Interactions Thread", "Poll DrJava Thread");
     
-    // Inherited fields:
-    _quitSlaveThreadName = "Reset Interactions Thread";
-    _pollMasterThreadName = "Poll DrJava Thread";
-    
-    Iterable<File> runtimeCP = IOUtil.parsePath(System.getProperty("java.class.path", ""));
-    _classPathManager = new ClassPathManager(runtimeCP);
+    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreterLoader = _classPathManager.makeClassLoader(null);
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
-    _messageOnResetFailure = true;
     
     _interpreterOptions = Options.DEFAULT;
     _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
@@ -138,11 +122,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
   
-  /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM).  Contract from 
-    * superclass mandates that this code does not synchronized on this across a remote call.  This method has 
-    * no synchronization because it can only be called once (part of the superclass contract) and _mainJVM 
-    * is only assigned (once!) here.
-    */
+  /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). */
   protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
@@ -152,8 +132,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       protected String _getInput() {
         try { return _mainJVM.getConsoleInput(); }
         catch(RemoteException re) {
-          _log.log("System.in: " + re.toString());
-          throw new IllegalStateException("Main JVM can't be reached for input.\n" + re);
+          error.log(re);
+          throw new UnexpectedException("Main JVM can't be reached for input.\n" + re);
         }
       }
     });
@@ -163,9 +143,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       public void print(String s) {
         try { _mainJVM.systemOutPrint(s); }
         catch (RemoteException re) {
-          // nothing to do
           error.log(re);
-          _log.log("System.out: " + re.toString());
+          throw new UnexpectedException("Main JVM can't be reached for output.\n" + re);
         }
       }
     }));
@@ -175,9 +154,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       public void print(String s) {
         try { _mainJVM.systemErrPrint(s); }
         catch (RemoteException re) {
-          // nothing to do
           error.log(re);
-          _log.log("System.err: " + re.toString());
+          throw new UnexpectedException("Main JVM can't be reached for output.\n" + re);
         }
       }
     }));
@@ -194,23 +172,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     //_dialog("interpreter JVM started");
   }
-  
-  /** @param show Whether to show a message if a reset operation fails. */
-  public void setShowMessageOnResetFailure(boolean show) { _messageOnResetFailure = show; }
-  
-  /** This method is called if the interpreterJVM cannot be exited (likely because of a modified security manager. */
-  protected void quitFailed(Throwable th) {
-    if (_messageOnResetFailure) {
-      String msg = "The interactions pane could not be reset:\n" + th;
-      javax.swing.JOptionPane.showMessageDialog(null, msg);
-    }
-    
-    try { _mainJVM.quitFailed(th); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("quitFailed: " + re.toString());
-    }
-  }  
   
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
     * the interpretResult method.
@@ -395,23 +356,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Sets the current interpreter to be the one specified by the given name
     * @param name the unique name of the interpreter to set active
-    * @return Whether the new interpreter is currently in progress with an interaction
+    * @return Status flags: whether the current interpreter changed, and whether it is busy
     */
-  public synchronized boolean setActiveInterpreter(String name) {
+  public synchronized Pair<Boolean, Boolean> setActiveInterpreter(String name) {
     Interpreter i = _interpreters.get(name);
     if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
+    boolean changed = (i != _activeInterpreter.second());
     _activeInterpreter = Pair.make(name, i);
-    return _busyInterpreters.contains(i);
+    return Pair.make(changed, _busyInterpreters.contains(i));
   }
   
   /** Sets the default interpreter to be active.
-    * @return Whether the new interpreter is currently in progress with an interaction
+    * @return Status flags: whether the current interpreter changed, and whether it is busy
     */
-  public synchronized boolean setToDefaultInterpreter() {
+  public synchronized Pair<Boolean, Boolean> setToDefaultInterpreter() {
+    boolean changed = (_defaultInterpreter != _activeInterpreter.second());
     _activeInterpreter = Pair.make("", _defaultInterpreter);
-    return _busyInterpreters.contains(_defaultInterpreter);
+    return Pair.make(changed, _busyInterpreters.contains(_defaultInterpreter));
   }
-  
   
   /** Sets the interpreter to allow access to private members. */
   public synchronized void setPrivateAccessible(boolean allow) {
@@ -441,10 +403,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void nonTestCase(boolean isTestAll) {
     try { _mainJVM.nonTestCase(isTestAll); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("nonTestCase: " + re.toString());
-    }
+    catch (RemoteException re) { error.log(re); }
   }
   
   /** Notifies the main JVM that JUnitTestManager has encountered an illegal class file.  Unsynchronized because it 
@@ -453,10 +412,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void classFileError(ClassFileError e) {
     try { _mainJVM.classFileError(e); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("classFileError: " + re.toString());
-    }
+    catch (RemoteException re) { error.log(re); }
   }
   
   /** Notifies that a suite of tests has started running.  Unsynchronized because it contains a remote call and does
@@ -465,10 +421,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void testSuiteStarted(int numTests) {
     try { _mainJVM.testSuiteStarted(numTests); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("testSuiteStarted: " + re.toString());
-    }
+    catch (RemoteException re) { error.log(re); }
   }
   
   /** Notifies that a particular test has started.  Unsynchronized because it contains a remote call and does not
@@ -477,10 +430,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void testStarted(String testName) {
     try { _mainJVM.testStarted(testName); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("testStarted" + re.toString());
-    }
+    catch (RemoteException re) { error.log(re); }
   }
   
   /** Notifies that a particular test has ended.  Unsynchronized because it contains a remote call.
@@ -490,10 +440,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {
     try { _mainJVM.testEnded(testName, wasSuccessful, causedError); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("testEnded: " + re.toString());
-    }
+    catch (RemoteException re) { error.log(re); }
   }
   
   /** Notifies that a full suite of tests has finished running.  Unsynchronized because it contains a remote call
@@ -502,10 +449,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void testSuiteEnded(JUnitError[] errors) {
     try { _mainJVM.testSuiteEnded(errors); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("testSuiteFinished: " + re.toString());
-    }
+    catch (RemoteException re) { error.log(re); }
   }
   
   /** Called when the JUnitTestManager wants to open a file that is not currently open.  Unsynchronized because it 
@@ -515,21 +459,17 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public File getFileForClassName(String className) {
     try { return _mainJVM.getFileForClassName(className); }
-    catch (RemoteException re) {
-      // nothing to do
-      _log.log("getFileForClassName: " + re.toString());
-      return null;
-    }
+    catch (RemoteException re) { error.log(re); return null; }
   }
   
   public void junitJVMReady() { }
   
-  // --------- Classpath methods ----------
+  // --------- Class path methods ----------
   public void addExtraClassPath(File f) { _classPathManager.addExtraCP(f); }
   public void addProjectClassPath(File f) { _classPathManager.addProjectCP(f); }
   public void addBuildDirectoryClassPath(File f) { _classPathManager.addBuildDirectoryCP(f); }
   public void addProjectFilesClassPath(File f) { _classPathManager.addProjectFilesCP(f); }
   public void addExternalFilesClassPath(File f) { _classPathManager.addExternalFilesCP(f); }
-  public List<File> getClassPath() { return CollectUtil.makeList(_classPathManager.getClassPath()); }
+  public Iterable<File> getClassPath() { return _classPathManager.getClassPath(); }
   
 }

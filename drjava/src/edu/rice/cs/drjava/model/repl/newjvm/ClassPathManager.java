@@ -55,11 +55,11 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
   // to others (via getters or in the class loader), a snapshot is used.
   
-  private final LinkedList<File> _projectCP;       /* The custom project classpath. */
+  private final LinkedList<File> _projectCP;       /* The custom project class path. */
   private final LinkedList<File> _buildCP;         /* The build directory. */
   private final LinkedList<File> _projectFilesCP;  /* The open project files. */
   private final LinkedList<File> _externalFilesCP; /* The open external files. */
-  private final LinkedList<File> _extraCP;         /* The extra preferences classpath. */
+  private final LinkedList<File> _extraCP;         /* The extra preferences class path. */
   // these can be accessed concurrently:
   
   private final Iterable<File> _fullPath;

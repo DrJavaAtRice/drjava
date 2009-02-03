@@ -60,6 +60,7 @@ import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.SimpleBox;
 import edu.rice.cs.util.FileOps;
@@ -439,11 +440,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    Utilities.show("Preparing to synchronize");
     synchronized(_compilerModel.getCompilerLock()) {
       /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-      List<String> tests;
-//      Utilities.show("Finding test classes");
-      try { tests = _jvm.findTestClasses(classNames, files); }
-      catch(IOException e) { throw new UnexpectedException(e); }
-      
+      List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
       if (tests == null || tests.isEmpty()) {
         nonTestCase(allTests);
         return;
@@ -570,8 +567,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   public File getFileForClassName(String className) { return _model.getSourceFile(className + ".java"); }
   
-  /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
-  public Iterable<File> getClassPath() {  return _jvm.getClassPath(); }
+  /** Returns the current classpath in use by the JUnit JVM. */
+  public Iterable<File> getClassPath() {  return _jvm.getClassPath().unwrap(IterUtil.<File>empty()); }
   
   /** Called when the JVM used for unit tests has registered.  Does not necessarily run in even thread. */
   public void junitJVMReady() {

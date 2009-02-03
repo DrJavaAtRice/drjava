@@ -103,8 +103,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void tearDown() throws Exception {
 //    Utilities.invokeLater(new Runnable() {
 //      public void run() {
-        _frame.dispose();             // disposes GUI elements of _frame
-        _frame.getModel().dispose();  // explicitly kills the slave JVM
+        _frame.dispose();
         _frame = null;
         /* try { */ MainFrameTest.super.tearDown(); /* } */
 //        catch(Exception e) { throw new UnexpectedException(e); }

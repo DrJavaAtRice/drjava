@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DummyOpenDefDoc;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.util.FileOps;
 
 import java.io.File;
@@ -69,7 +70,7 @@ public class JavadocModelTest extends DrJavaTestCase {
       }
     };
     // TODO: define so that tools.jar doesn't need to be on the class path
-    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, GlobalModel.RUNTIME_CLASS_PATH);
+    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, ReflectUtil.SYSTEM_CLASS_PATH);
     final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException { return file; }
@@ -89,7 +90,7 @@ public class JavadocModelTest extends DrJavaTestCase {
         return true;  // pretend doc is unsaved
       }
     };
-    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, GlobalModel.RUNTIME_CLASS_PATH);
+    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, ReflectUtil.SYSTEM_CLASS_PATH);
     final File file = new File(System.getProperty("user.dir"));
 
     // Make sure it doesn't return a file until it's saved.

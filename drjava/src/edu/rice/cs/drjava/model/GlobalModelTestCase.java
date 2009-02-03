@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
@@ -60,6 +61,8 @@ import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.regex.*;
 import java.util.List;
+
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Base class for tests over the {@link GlobalModel}.
  *
@@ -101,6 +104,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  </OL>
    */
   public void setUp() throws Exception {
+    debug.logStart();
     _log.log("Setting up " + this);
     super.setUp();  // declared to throw Exception
     _model = new TestGlobalModel();
@@ -114,12 +118,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _tempDir = /* IOUtil.createAndMarkTempDirectory */ FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/);
 //    System.err.println("Temp Directory is " + _tempDir.getAbsolutePath());
     
-    // Wait until model has connected to slave JVM
-    _log.log("Ensuring that interpreter is connected in " + this);
-    _model._jvm.ensureInterpreterConnected();
-    _log.log("Ensured that intepreter is connected in " + this);
     _model.setResetAfterCompile(false);
     _log.log("Completed (GlobalModelTestCase) set up of " + this);
+    debug.logEnd();
     
 //    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
 //    super.setUp();
@@ -127,6 +128,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
+    debug.logStart();
     _log.log("Tearing down " + this);
 //    System.err.println("Tearing down " + this);
     _model.dispose();
@@ -139,6 +141,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     super.tearDown();
     _log.log("Completed tear down of " + this);
+    debug.logEnd();
 //    System.err.println("Completed tear down of " + this);
   }
 
@@ -338,8 +341,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     // Execute the interaction
     Utilities.invokeLater(new Runnable() { public void run() { _model.interpretCurrentInteraction(); } });
     
-    try { listener.waitInteractionDone(); }
-    catch (InterruptedException ie) { throw new UnexpectedException(ie); }
+    listener.waitInteractionDone();
 
     Utilities.clearEventQueue();
     _model.removeListener(listener);
@@ -857,7 +859,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interpreterExited(" + status + ") fired unexpectedly");
     }
     public void interpreterResetFailed(Throwable t) { listenerFail("interpreterResetFailed fired unexpectedly"); }
-    public void slaveJVMUsed() { /* not directly tested; ignore it */ }
     public void consoleReset() { listenerFail("consoleReset fired unexpectedly"); }
     public void saveUntitled() { listenerFail("saveUntitled fired unexpectedly"); }
     
@@ -900,15 +901,16 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   public static class InteractionListener extends TestListener {
-    private volatile boolean _interactionDone = false;       // records when the interaction is done
-    private final Object _interactionLock = new Object();    // lock for _interactionDone
-    
-    private volatile boolean _resetDone = false;             // records when the interaction is done
-    private final Object _resetLock = new Object();          // lock for _interactionDone
+    private static final int WAIT_TIMEOUT = 20000; // time to wait for _interactionDone or _resetDone 
+    private CompletionMonitor _interactionDone;
+    private CompletionMonitor _resetDone;
     
     private volatile int _lastExitStatus = -1;
     
-    /** Relying on the default constructor. */
+    public InteractionListener() {
+      _interactionDone = new CompletionMonitor();
+      _resetDone = new CompletionMonitor();
+    }
     
     public synchronized void interactionStarted() { interactionStartCount++; }
     
@@ -916,10 +918,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //        assertInteractionStartCount(1);
       
       synchronized(this) { interactionEndCount++; }
-      synchronized(_interactionLock) { 
-        _interactionDone = true;
-        _interactionLock.notify(); 
-      }
+      _interactionDone.signal();
     }
     
     public void interpreterExited(int status) {
@@ -930,10 +929,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         interpreterExitedCount++;
         _lastExitStatus = status;
       }
-      synchronized(_interactionLock) { 
-        _interactionDone = true;
-        _interactionLock.notify(); 
-      }
+      _interactionDone.signal();
     }
     
     public void interpreterResetting() {
@@ -945,14 +941,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void interpreterReady(File wd) {
 //        Utilities.showDebug("GlobalModelOtherTest: interpreterReady");
       synchronized(this) { interpreterReadyCount++; }
-      synchronized(_resetLock) {
-//          assertInteractionStartCount(1);
-//          assertInterpreterExitedCount(1);
-//          assertInterpreterResettingCount(1);
-//          Utilities.showDebug("GlobalModelOtherTest: notifying resetDone");
-        _resetDone = true;
-        _resetLock.notifyAll();
-      }
+      _resetDone.signal();
     }
     
     public void consoleReset() {
@@ -966,18 +955,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void resetConsoleResetCount() { consoleResetCount = 0; }
     
     public void logInteractionStart() {
-      _interactionDone = false;
-      _resetDone = false;
+      _interactionDone.reset();
+      _resetDone.reset();
     }
     
-    public void waitInteractionDone() throws InterruptedException {
-      synchronized(_interactionLock) { while (! _interactionDone) _interactionLock.wait(); }
+    public void waitInteractionDone() {
+      assertTrue("Interaction did not complete before timeout",
+                 _interactionDone.attemptEnsureSignaled(WAIT_TIMEOUT));
     }
     
     public void waitResetDone() throws InterruptedException {
-      synchronized(_resetLock) { 
-        while (! _resetDone)  _resetLock.wait(); 
-      }
+      assertTrue("Reset did not complete before timeout",
+                 _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT));
     }
     
     public int getLastExitStatus() { return _lastExitStatus; }
