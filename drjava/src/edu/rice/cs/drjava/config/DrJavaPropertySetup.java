@@ -335,19 +335,20 @@ public class DrJavaPropertySetup implements OptionConstants {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("base");
         if (s==null) {
-          _value = "(file.rel Error: base missing...)";
+          _value = "(file.abs Error: base missing...)";
           return;
         }
         s = StringOps.unescapeFileName(s);
+        File base = new File(s);
         s = _attributes.get("file");
         if (s==null) {
-          _value = "(file.rel Error: file missing...)";
+          _value = "(file.abs Error: file missing...)";
           return;
         }
         StringBuilder sb = new StringBuilder();
         for(String fs: s.split(TextUtil.regexEscape(File.pathSeparator),-1)) {
           fs = StringOps.unescapeFileName(fs);
-          File f = new File(fs);
+          File f = new File(base,fs);
           sb.append(File.pathSeparator);
           sb.append(StringOps.escapeFileName(f.getAbsolutePath()));
         }
