@@ -1174,5 +1174,70 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals(expected, actual);
     assertEquals("${xxx}xyz", StringOps.replaceVariables("$${xxx}xyz",props,PropertyMaps.GET_LAZY));
   }
-  
+
+  public void testReplaceVariables4() {
+    PropertyMaps props = new PropertyMaps();
+    props.setProperty("1", new ConstantProperty("var", "foo", "") {
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("attr", null);
+      }
+      public String getCurrent(PropertyMaps pm) {
+        if (_attributes.get("attr")==null) fail("Attribute attr for property var should be set.");
+        return super.getCurrent(pm);
+      }
+    });
+    props.setProperty("1", new ConstantProperty("xxx", "bar", "") {
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("attr1", null);
+        _attributes.put("attr2", null);
+      }
+      public String getCurrent(PropertyMaps pm) {
+        if (_attributes.get("attr1")==null) fail("Attribute attr1 for property xxx should be set.");
+        if (_attributes.get("attr2")==null) fail("Attribute attr2 for property xxx should be set.");
+        return super.getCurrent(pm);
+      }
+    });
+    
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var;attr=\"xxx\"}xyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx;attr1=\"xxx\";attr2=\"yyy\"}xyz",props,PropertyMaps.GET_LAZY));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx;attr1=\"abc${var;attr=\"xxx\"}xyz\";attr2=\"yyy\"}xyz",props,PropertyMaps.GET_LAZY));
+    try {
+      assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx;attr2=\"yyy\"}xyz",props,PropertyMaps.GET_LAZY));
+      fail("Forgot to set attr1, should fail.");
+    }
+    catch(junit.framework.AssertionFailedError afe) { /* ignore, this is expected */ }
+    try {
+      StringOps.replaceVariables("abc${xxx;attr1=\"abc${var}xyz\";attr2=\"yyy\"}xyz",props,PropertyMaps.GET_LAZY);
+      fail("Forgot to set attr1, should fail.");
+    }
+    catch(junit.framework.AssertionFailedError afe) { /* ignore, this is expected */ }
+    
+    assertEquals("${notfound}", StringOps.replaceVariables("${notfound}",props,PropertyMaps.GET_LAZY));
+
+    props.setProperty("1", new ConstantProperty("var", "foo", ""));
+    props.setProperty("1", new ConstantProperty("xxx", "bar", ""));
+    assertTrue(StringOps.replaceVariables("abc${xxx;;}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;=}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;\"\"}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+// TODO: should a semicolon at the end be disallowed?
+//    assertTrue(StringOps.replaceVariables("abc${xxx;}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr\"\"}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr${}}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr;}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr foo}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=${}}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=;}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=abc}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr==}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\";}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\"\"abc\"}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\"${}}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\"=}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+    assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\"foo}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
+  }
 }
