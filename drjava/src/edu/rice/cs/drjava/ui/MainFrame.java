@@ -9062,13 +9062,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       catch (FileMovedException fme) { fname = fme.getFile().getName(); } // File was deleted, but use same name anyway
       
-      String text = fname + " has changed on disk. Would you like to reload it?\n" + 
-        "This will discard any changes you have made.";
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, fname + " Modified on Disk", 
-                                             JOptionPane.YES_NO_OPTION);
+      String text = fname + " has changed on disk.\n" + 
+        "Would you like to reload it and discard any changes you have made?";
+      String[] options = { "Reload from disk", "Keep my changes" };
+      int rc = JOptionPane.showOptionDialog(MainFrame.this, text, fname + " Modified on Disk", 
+                                            JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                                            null, options, options[0]);
       switch (rc) {
-        case JOptionPane.YES_OPTION:    return true;
-        case JOptionPane.NO_OPTION:     return false;
+        case 0:                         return true;
+        case 1:                         return false;
         case JOptionPane.CLOSED_OPTION:
         case JOptionPane.CANCEL_OPTION: return false;
         default:                        throw new RuntimeException("Invalid rc: " + rc);
