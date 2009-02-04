@@ -867,7 +867,7 @@ public class XMLConfigTest extends TestCase {
     ret = xc.get(pathToTest, "arbitraryDefaultValue");
     
     Assert.assertEquals("Default value not returned", "arbitraryDefaultValue", ret);
-
+    
     xc.set("concutest/"+pathToTest, "actualValue");
     
     ret = xc.get("arbitraryPath", xc.getNodes("concutest").get(0), "arbitraryDefaultValue");
@@ -877,7 +877,7 @@ public class XMLConfigTest extends TestCase {
   
   
   
-
+  
   public void testGetInt() throws Exception {
     XMLConfig xc = 
       new XMLConfig(new StringReader(
@@ -1101,4 +1101,64 @@ public class XMLConfigTest extends TestCase {
     saveTo.delete();
   }
   
+  /**
+   * Tests is XMLConfig constructor rejects null as parameters
+   */
+  public void testNullParamsinConstructor() throws Exception{
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"true\"/>\n"
+                                       +" <thread value=\"false\" />\n"
+                                       +" <node value=\"on\" /> \n"
+                                       +" <dot value=\"off\" /> \n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>")); 
+    
+    Node nd = xc.getNodes("concutest").get(0);
+    
+    try{
+      XMLConfig xc2 = new XMLConfig(null, nd);
+      Assert.fail("Should not have been able to make new XMLConfig with null parent");
+    }
+    catch(XMLConfig.XMLConfigException e){}
+    
+    try{
+      XMLConfig xc2 = new XMLConfig(xc, null);
+      Assert.fail("Should not have been able to make ne XMLConfig with null node");
+    }
+    catch(XMLConfig.XMLConfigException e){}
+  }
+  
+  
+  /**
+   * Tests XMLConfig(String filename)
+   */
+  public void testConstructorWithFileName() throws Exception{
+    
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"true\"/>\n"
+                                       +" <thread value=\"false\" />\n"
+                                       +" <node value=\"on\" /> \n"
+                                       +" <dot value=\"off\" /> \n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>")); 
+    
+    File saveTo = File.createTempFile("drjava_test", "xml");
+    xc.save(saveTo);
+    
+    try{
+      XMLConfig xc2 = new XMLConfig("badfileName");
+    }
+    catch(XMLConfig.XMLConfigException e){}
+    
+    XMLConfig xc2 = new XMLConfig(saveTo.getAbsolutePath());
+    
+    //just makeing sure it worked right
+    Boolean b = xc.getBool("concutest/name.name",true);
+    Assert.assertTrue("Want to get default value", b);
+    
+  }
 }
