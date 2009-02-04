@@ -79,7 +79,9 @@ public final class IterUtil {
     else if (iter instanceof Collection<?>) { return ((Collection<?>) iter).size(); }
     else {
       int result = 0;
-      for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == Integer.MAX_VALUE) break; }
+      // javac 1.5.0_16 chrashes with this annotation
+      //for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == Integer.MAX_VALUE) break; }
+      for (Object o : iter) { result++; if (result == Integer.MAX_VALUE) break; }
       return result;
     }
   }
@@ -98,7 +100,9 @@ public final class IterUtil {
     }
     else {
       int result = 0;
-      for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == bound) break; }
+      // javac 1.5.0_16 chrashes with this annotation
+      //for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == bound) break; }
+      for (Object o : iter) { result++; if (result == bound) break; }
       return result;
     }
   }
