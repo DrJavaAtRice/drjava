@@ -149,6 +149,36 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     assertTrue(!lparen.isMatch(dummy));
     assertTrue(!dummy.isMatch(lparen));
   }
+  
+  public void testSetTypeFalse() {
+    try{
+     lparen.setType("a");
+     fail("Expected BraceException");
+    }catch(BraceException b){};
+  }
+  
+  public void testIsSlashStar(){
+    assertEquals(false, lparen.isSlash());
+    Brace slash = Brace.MakeBrace("/",FREE);
+    assertEquals(true, slash.isSlash());
+    assertEquals(false, lparen.isStar());
+    Brace star = Brace.MakeBrace("*",FREE);
+    assertEquals(true, star.isStar());
+  }
+  
+  public void testGrowFail() {
+    try{
+     lparen.grow(5);
+     fail("Expected BraceException");
+    }catch(BraceException b){};
+  }
+  
+  public void testShrinkFail() {
+    try{
+     lparen.shrink(5);
+     fail("Expected BraceException");
+    }catch(BraceException b){};
+  }
 }
 
 

@@ -55,6 +55,20 @@ public class BalancingStreamTokenizerTest extends TestCase {
     return new BalancingStreamTokenizer(new StringReader(s),c);
   }
   
+  public void testCopyConstructor() throws IOException{
+    BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
+    tok.defaultWhitespaceSetup();
+    String s1 = tok.getNextToken();
+    assertEquals("abc", s1);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    
+    BalancingStreamTokenizer copyTok = make("abc def\\ ghi 123\n456");
+    copyTok.setState(new BalancingStreamTokenizer.State(tok.getState()));
+    String s2 = copyTok.getNextToken();
+    assertEquals("abc", s2);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, copyTok.token());    
+  }
+  
   public void testSimple() throws IOException {
     BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
     tok.defaultWhitespaceSetup();
@@ -361,6 +375,129 @@ public class BalancingStreamTokenizerTest extends TestCase {
     // System.err.println(s);
     assertEquals("orld", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testWordRangeKeywordsQuotes() throws IOException {
+    BalancingStreamTokenizer tok = make("Hello World");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.whitespaceRange(0,96);
+    tok.addKeyword("hello");
+    tok.addKeyword("world");
+    tok.addQuotes("a:",":a");
+    tok.wordRange(97,122);
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("ello", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("orld", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testWhitespaceKeywordsQuotes() throws IOException {
+    BalancingStreamTokenizer tok = make("Hello World");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.wordRange(0,96);
+    tok.addKeyword("hello");
+    tok.addKeyword("world");
+    tok.addQuotes("a:",":a");
+    tok.whitespaceRange(97,122);
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("H", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(" W", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testWordCharKeyword() throws IOException{
+    BalancingStreamTokenizer tok = make("Hello World anthem banana");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.addKeyword("apple");
+    tok.addKeyword("alabama");
+    tok.addKeyword("anthem");
+    tok.addKeyword("banana");
+    tok.addQuotes("a:",":a");
+    tok.addQuotes("b:",":b");
+    tok.wordChars(97);
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("Hello", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("World", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("anthem", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+     s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("banana", s);
+    assertEquals(BalancingStreamTokenizer.Token.KEYWORD, tok.token());
+  }
+  
+  public void testWhitespaceKeyword() throws IOException{
+    BalancingStreamTokenizer tok = make("abc apple");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.addKeyword("apple");
+    tok.addKeyword("alabama");
+    tok.addKeyword("anthem");
+    tok.addKeyword("banana");
+    tok.addQuotes("a:",":a");
+    tok.addQuotes("a","-a");
+    tok.addQuotes("b:",":b");
+    tok.whitespace(97);
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("bc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("pple", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testFindMatchKeywords() throws IOException{
+    BalancingStreamTokenizer tok = make("abc");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.addKeyword("apple");
+    tok.addKeyword("alabama");
+    tok.addKeyword("anthem");
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testEscapeWhitespaceRange() throws IOException{
+    BalancingStreamTokenizer tok = make("aBc",'a');
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.whitespaceRange(97,122);
+    String s = tok.getNextToken();
+    assertEquals("aB", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testEscapeWhitespace() throws IOException{
+    BalancingStreamTokenizer tok = make("aBc",'a');
+    tok.defaultThreeQuoteDollarCurlySetup();
+    tok.whitespace(97);
+    String s = tok.getNextToken();
+    assertEquals("aBc", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+  }
+  
+  public void testNonMatchingQuotes() throws IOException{
+    BalancingStreamTokenizer tok = make("'abc}");
+    tok.defaultThreeQuoteDollarCurlySetup();
+    String s = tok.getNextToken();
+    assertEquals("'abc}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
   }
   
   public void testDollarNestedQuoted() throws IOException {
