@@ -864,6 +864,10 @@ public class XMLConfigTest extends TestCase {
     
     Assert.assertEquals("Default value not returned", "arbitraryDefaultValue", ret);
     
+    ret = xc.get(pathToTest, "arbitraryDefaultValue");
+    
+    Assert.assertEquals("Default value not returned", "arbitraryDefaultValue", ret);
+
     xc.set("concutest/"+pathToTest, "actualValue");
     
     ret = xc.get("arbitraryPath", xc.getNodes("concutest").get(0), "arbitraryDefaultValue");
@@ -1054,6 +1058,47 @@ public class XMLConfigTest extends TestCase {
     XMLConfig.XMLConfigException e1 = new XMLConfig.XMLConfigException();
     XMLConfig.XMLConfigException e2 = new XMLConfig.XMLConfigException("dummy message", null);
     XMLConfig.XMLConfigException e3 = new XMLConfig.XMLConfigException((Throwable)null);
+  }
+  
+  /**
+   * Test save(File f)
+   */
+  public void testSaveAndLoadConstructors() throws Exception{
+    XMLConfig xc = 
+      new XMLConfig(new StringReader(
+                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       +" <name type=\"only\" value=\"true\"/>\n"
+                                       +" <thread value=\"false\" />\n"
+                                       +" <node value=\"on\" /> \n"
+                                       +" <dot value=\"off\" /> \n"
+                                       +" <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       +"</concutest>")); 
+    
+    try{
+      char c = File.separatorChar;
+      xc.save(new File("."+c+"does"+c+"not"+c+"exist"+c+"file.xml"));
+      Assert.fail("Should not have succeeded in saving to non-existant path");
+    }catch(XMLConfig.XMLConfigException e){}
+    
+    File saveTo = File.createTempFile("drjava_test", "xml");
+    xc.save(saveTo);
+    xc.save(saveTo.getAbsolutePath());
+    
+    XMLConfig xcCopy = new XMLConfig(saveTo.getAbsolutePath());
+    
+    try{
+      char c = File.separatorChar;
+      XMLConfig failCopy = new XMLConfig("."+c+"does"+c+"not"+c+"exist"+c+"file.xml");
+      Assert.fail("Should not succeed in load from non-existant file");
+    }catch(XMLConfig.XMLConfigException e){}
+    
+    try{
+      char c = File.separatorChar;
+      XMLConfig failCopy = new XMLConfig(new File("."+c+"does"+c+"not"+c+"exist"+c+"file.xml"));
+      Assert.fail("Should not succeed in load from non-existant file");
+    }catch(XMLConfig.XMLConfigException e){}
+    
+    saveTo.delete();
   }
   
 }
