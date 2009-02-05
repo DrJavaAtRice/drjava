@@ -341,7 +341,7 @@
           <listitem><para>You'll need to invoke the <literal>generate-source</literal> Ant target before you attempt to compile in the IDE (that is, unless the files have already been generated).  Otherwise, some sources will be missing and the compilation will fail.  Some IDEs may also have trouble with these files occasionally disappearing and reappearing, so you might want to ensure that the sources are in a consistent state before opening or closing the IDE application.</para></listitem>
           
         </itemizedlist>
-      </para>
+      If you're using Eclipse, see the <link linkend="eclipse">Eclipse section</link> for instructions on setting up a project.</para>
       
       <para>To get oriented and understand the program design, you may want to browse the <link linkend="systemArchitecture">System Architecture</link> notes, along with the javadocs from the latest release (available at <ulink url="http://drjava.org">drjava.org</ulink>).  You can also generate your own up-to-date copy of the javadocs by invoking the Ant <literal>javadoc</literal> target.  Before you make significant changes to the code, you should familiarize yourself with the <link linkend="bestPractices">Development Best Practices</link> section of this document.</para>
       

@@ -433,8 +433,43 @@
 
     <section id="eclipse">
       <title>Eclipse</title>
-      <para>[TODO]</para>
-      <!-- This can contain tips on how to use some of Eclipse's features - how to use it as the IDE, taking advantage of its extensive compiler warnings, etc. -->
+      <section id="eclipseProject">
+        <title>Setting Up an Eclipse Project</title>
+        <para>There are various ways to set up Eclipse to build and modify the DrJava source trees.  In the following approach, checkouts and commits are performed from the command line, as usual.  An Eclipse project is created within the Eclipse workspace for each source tree, and the sources are referenced via an external link.  Class files produced by the Eclipse compiler are stored within the Eclipse workspace, rather than in the Ant-managed <filename>classes</filename> directory.
+          <orderedlist>
+            <listitem><para>Check out the appropriate sources from Subversion.</para></listitem>
+            <listitem><para>In Eclipse, open the "New Java Project" wizard.</para></listitem>
+            <listitem><para>Give the project a name; make sure the "Create new project in workspace" option is selected; also select "Use project folder as root for sources and class files"; hit "Next".</para></listitem>
+            <listitem><para>Set up the source build path: first choose "Remove project 'ProjectName' from build path" (or click the corresponding toolbar button), since you won't be storing any sources within Eclipse's workspace file tree; second, click "Link additional source" and find the downloaded sources (for example, <filename>drjava/src</filename>).</para></listitem>
+            <listitem><para>Add links to needed libraries.  Go to the "Libraries" tab on the "Java Settings" wizard page.  Set the "JRE System Library" entry to "JVM 1.5" by selecting it and clicking "edit" (Java 1.5 may be the OS default and be chosen automatically, but it's better to set it explicitly, so that the JRE used doesn't change with the OS default).  Then use "Add External JARs" to link to all the jar files in the downloaded <filename>lib</filename> directory (for example, <filename>drjava/lib/plt.jar</filename>).  Also add <filename>lib/buildlib/junit.jar</filename>, if necessary.</para></listitem>
+            <listitem><para>Click "Finish" to create the project.</para></listitem>
+            <listitem><para>If the Ant build script for this project has a "generate-source" target (most do), you'll want to have Eclipse perform this operation (somewhat) automatically.
+              <orderedlist>
+                <listitem><para>Right-click on your newly-created project, select "Properties", and go to the "Builders" section.</para></listitem>
+                <listitem><para>Click "New" to add an "Ant builder".  Give the Builder a descriptive name ("ant generate-source", for example).</para></listitem>
+                <listitem><para>On the "Main" tab, set the the "Buildfile" location to <literal>${workspace_loc:/<replaceable>project-name</replaceable>/src}/../build.xml</literal>.  Click "Apply".</para></listitem>
+                <listitem><para>On the "Refresh" tab, select "Refresh resources upon completion".  "The entire workspace" should be fine for this, but if you'd like to improve performance, you can be more specific about which directories will be changed when running this ant target.  Click "Apply".</para></listitem>
+                <listitem><para>On the "Targets" tab, choose "Set Targets" next to "After a 'Clean'".  Select the "clean" and "generate-source" targets (in that order).  Click "OK", then "Apply".</para></listitem>
+                <listitem><para>Finish the Builder creation by choosing "OK".</para></listitem>
+                <listitem><para>If you haven't already done so in Eclipse, set up any necessary properties for the Ant script.  Normally, certain environment variables must be set in order for the build scripts to function properly (for example, <literal>ant generate-source</literal> may depend on the <literal>JAVACC_HOME</literal> environment variable).  You can run <literal>ant help</literal> to see a list of possible dependencies.  In Eclipse, Ant is run (by default, for efficiency) from within the Eclipse JVM, and so it can't let you customize the process's environment.  <emphasis>If</emphasis> that environment is missing certain variables (you can find out by trial-and-error), you can set a corresponding Java property.  Go to the general Eclipse preferences, choose the Ant Runtime preference page, go to the "Properties" tab, and add needed properties to the list.  The property name should correspond to the environment variable name, transformed to lower case (for example, <literal>JAVACC_HOME</literal> becomes to <literal>javacc-home</literal>).  The property value should be the same as the setting from the command line.</para></listitem>
+              </orderedlist>
+            Now, whenever the generated sources are missing or out-of-sync, you can run "Clean" in the project menu to automatically trigger this Ant execution.  You should test it now to make sure it works correctly.</para></listitem>
+            <listitem><para>If you like you can add other Ant targets (like <literal>ant test</literal>) to the project via the External Tools button on the toolbar.  Select "External Tool Configurations" from the button's drop-down menu to set up an Ant command.  The settings will be similar to those used above.</para></listitem>
+          </orderedlist>
+        The project should now compile without error.  If errors occur, there may be something wrong with your settings.</para>
+      </section>
+      
+      <section>
+        <title>Eclipse Compiler Settings</title>
+        <para>To get useful compiler diagnostics in Eclipse, it's best to match the compiler configuration settings closely with those used by the standard DrJava build process.  These settings are managed globally in the "Java, Compiler" section of Eclipse preferences, or on a per-project basis under "Java Compiler" in the project properties.  Some recommendations:
+          <itemizedlist>
+            <listitem><para>"Compiler compliance level" should be set to "1.5".</para></listitem>
+            <listitem><para>Most of the default settings for errors and warnings are good, but you'll probably want to ignore "Serializable class without serialVersionUID".  Although it is the default, you should make sure none of the warnings in the "Generic types" section are ignored.</para></listitem>
+            <listitem><para>On the "Errors/Warnings" page, "Enable '@SuppressWarnings' annotations" should definitely be selected.</para></listitem>
+            <listitem><para>Javadoc comments should be processed; it's helpful to set "Malformed Javadoc comments" to trigger a warning (by default, these are ignored); and the associated "Only consider members as visible as" option should include all items, including private declarations.</para></listitem>
+          </itemizedlist>
+        Where discrepencies occur in the errors or warnings reported by Eclipse and <command>javac</command> (via <literal>ant compile</literal>), try to accomodate both compilers and eliminate as many warnings as possible.  For example, discrepancies in the generic typing implementation occasionally require explicit type arguments or casting for one compiler but not the other.  Eclipse's <literal>@SuppressWarnings("unused")</literal> annotation is useful when an unused variable, etc., is intentionally declared.  Feel free to clean up unused import statements (the exception is logging imports, which are nice to keep around even when they're not referenced for the moment).</para>
+      </section>
     </section>
     
   </section>
