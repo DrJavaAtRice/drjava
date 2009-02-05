@@ -1240,4 +1240,9 @@ public class StringOpsTest extends DrJavaTestCase {
     assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\"=}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
     assertTrue(StringOps.replaceVariables("abc${xxx;attr=\"abc\"foo}xyz",props,PropertyMaps.GET_LAZY).contains("<-- Error: "));
   }
+  
+  public void testIsMemberClass() {
+    assertFalse("StringOpsTest is not a member class", StringOps.isMemberClass(StringOpsTest.class));
+    assertTrue("XMLConfig.XMLConfigException is a member class", StringOps.isMemberClass(XMLConfig.XMLConfigException.class));
+  }
 }
