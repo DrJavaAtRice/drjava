@@ -8948,7 +8948,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JOptionPane.showMessageDialog(MainFrame.this, message,
                                     "Test Only Executes JUnit test cases",
                                     JOptionPane.ERROR_MESSAGE);
-      DrJavaErrorHandler.record(new UnexpectedException("NonTestCase should not be called!"));
       // clean up as in JUnitEnded 
       try {
         showTab(_junitErrorPanel, true);

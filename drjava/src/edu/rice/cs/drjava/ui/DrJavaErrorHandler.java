@@ -97,33 +97,41 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   public static void record(final Throwable thrown) {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        if (thrown instanceof OutOfMemoryError) {
-          // if this is an OutOfMemoryError inside DrJava, try to suggest to increase Main JVM's max heap
-          Runtime.getRuntime().gc();
-          JFrame f = DrJavaErrorWindow.getFrame();
-          if (f instanceof MainFrame) {
-            MainFrame mf = (MainFrame)f;
-            mf.askToIncreaseMasterMaxHeap();
+        try { // put the entire handler in a try-block so we don't have an exception in here call the exception handler again (infinite loop)
+          if (thrown instanceof OutOfMemoryError) {
+            // if this is an OutOfMemoryError inside DrJava, try to suggest to increase Main JVM's max heap
+            Runtime.getRuntime().gc();
+            JFrame f = DrJavaErrorWindow.getFrame();
+            if (f instanceof MainFrame) {
+              MainFrame mf = (MainFrame)f;
+              mf.askToIncreaseMasterMaxHeap();
+            }
+          }
+          else {
+            try {
+              if (thrown instanceof com.sun.jdi.VMOutOfMemoryException) {
+                // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
+                JFrame f = DrJavaErrorWindow.getFrame();
+                if (f instanceof MainFrame) {
+                  MainFrame mf = (MainFrame)f;
+                  mf.askToIncreaseSlaveMaxHeap();
+                }
+              }
+            }
+            catch(NoClassDefFoundError ncdfe) { /* ignore the case when VMOutOfMemoryException is not found because tools.jar is not on the classpath */ }
+          }
+          _errors.add(thrown);
+          if (_errorsButton != null) {
+            _errorsButton.setVisible(true);
+          }
+          if (_errors.size() == 1 && ! Utilities.TEST_MODE &&
+              DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
+            DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
+            MainFrame.setPopupLoc(popup, popup.getOwner());
+            popup.setVisible(true);
           }
         }
-        else if (thrown instanceof com.sun.jdi.VMOutOfMemoryException) {
-          // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
-          JFrame f = DrJavaErrorWindow.getFrame();
-          if (f instanceof MainFrame) {
-            MainFrame mf = (MainFrame)f;
-            mf.askToIncreaseSlaveMaxHeap();
-          }
-        }
-        _errors.add(thrown);
-        if (_errorsButton != null) {
-          _errorsButton.setVisible(true);
-        }
-        if (_errors.size() == 1 && ! Utilities.TEST_MODE &&
-            DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
-          DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
-          MainFrame.setPopupLoc(popup, popup.getOwner());
-          popup.setVisible(true);
-        }
+        catch(Throwable t) { /* we're in a bad situation here; an exception in the exception handler cannot be dealt with, so ignore it */ }
       }
     });
   }
