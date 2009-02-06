@@ -228,7 +228,7 @@ public class DefaultJavadocModel implements JavadocModel {
     if (docFiles.size() == 0) return;
     
     // Run the actual Javadoc process
-    _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), false);
+    _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
   }
   
   
@@ -260,7 +260,7 @@ public class DefaultJavadocModel implements JavadocModel {
     new Thread("DrJava Javadoc Thread") {
       public void run() {
         Iterable<String> extraArgs = IterUtil.make("-noindex", "-notree", "-nohelp", "-nonavbar");
-        _runJavadoc(IterUtil.make(file.getPath()), destDir, extraArgs, true);
+        _runJavadoc(IterUtil.make(file.getPath()), destDir, extraArgs, false);
       }
     }.start();
   }
@@ -299,7 +299,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param files  List of files to generate
    * @param destDir  Directory where the results are being saved
    * @param extraArgs  List of additional arguments to use with javadoc (besides those gathered from config settings)
-   * @param allDocs  Whether this is running on all documents
+   * @param allDocs  Whether this is running on all documents. If Javadoc is not run on all documents, the target directory will be deleted when DrJava exits
    */
   private void _runJavadoc(Iterable<String> files, File destDir, Iterable<String> extraArgs, boolean allDocs) {
     Iterable<String> args = IterUtil.empty();
@@ -332,7 +332,7 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // waitFor() exit value is 1 for both errors and warnings, so it's no use
     boolean success = _javadocErrorModel.hasOnlyWarnings();
-    if (success && !allDocs) { IOUtil.deleteOnExitRecursively(destDir); }
+    if (!allDocs) { IOUtil.deleteOnExitRecursively(destDir); }
     _notifier.javadocEnded(success, destDir, allDocs);
   }
   
