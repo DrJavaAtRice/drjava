@@ -243,7 +243,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
     debug.log("Entered DISPOSED state");
     try { UnicastRemoteObject.unexportObject(this, true); }
-    catch (NoSuchObjectException e) { error.log(e); }
+    catch (NoSuchObjectException e) { /* ignore for now: error.log(e); */ }
   }
   
   protected boolean isDisposed() { return _monitor.value().equals(State.DISPOSED); }
