@@ -5687,10 +5687,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void _showDebugError(DebugException de) {
     _showError(de, "Debug Error", "A Debugger error occurred in the last operation.\n\n");
   }
-  
+
   void _showJUnitInterrupted(UnexpectedException e) {
     _showWarning(e.getCause(), "JUnit Testing Interrupted", 
                  "The slave JVM has thrown a RemoteException probably indicating that it has been reset.\n\n");
+  }
+  
+  void _showJUnitInterrupted(String message) {
+    JOptionPane.showMessageDialog(this, message, "JUnit Testing Interrupted", JOptionPane.WARNING_MESSAGE);
   }
   
   private void _showError(Throwable e, String title, String message) {
@@ -8847,8 +8851,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       else { // pop up a window to ask if all open files should be compiled before testing
         String title = "Must Compile All Source Files to Run Unit Tests";
-        String msg = "To unit test all documents, you must first compile all out of sync source files.\n" + 
-          "Would you like to compile all files and run the specified test?";
+        String msg = "Before you can run unit tests, you must first compile all out of sync source files.\n" + 
+          "Would you like to compile all files and run the specified test(s)?";
         int rc = JOptionPane.showConfirmDialog(MainFrame.this, msg, title, JOptionPane.YES_NO_OPTION); 
         
         switch (rc) {
@@ -8859,7 +8863,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           case JOptionPane.CLOSED_OPTION:
           case JOptionPane.NO_OPTION:  // abort unit testing
 //            _model.getJUnitModel().nonTestCase(true);  // cleans up
-            _junitInterrupted(new UnexpectedException("Unit testing cancelled by user"));
+            _junitInterrupted("Unit testing cancelled by user.");
             break;
           default:
             throw new UnexpectedException("Invalid returnCode from showConfirmDialog: " + rc);
@@ -9267,7 +9271,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     try {
       _showJUnitInterrupted(e);
       removeTab(_junitErrorPanel);
-      _resetJUnit();
+      _resetJUnit(); 
+      _restoreJUnitActionsEnabled();
+      _model.refreshActiveDocument();
+    }
+    finally { hourglassOff(); }
+  }
+
+  /* Pops up a message and cleans up after unit testing has been interrupted. */
+  private void _junitInterrupted(String message) {
+    try {
+      _showJUnitInterrupted(message);
+      removeTab(_junitErrorPanel);
+      _resetJUnit(); 
+      _restoreJUnitActionsEnabled();
       _model.refreshActiveDocument();
     }
     finally { hourglassOff(); }
