@@ -459,28 +459,33 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       
       _runMain = new DummyInteractionsListener() {
         public void interpreterReady(File wd) {
-          _interactionsModel.removeListener(_runMain);  // listener cannot run
-          // prevent listener from running twice
-          // Restart debugger if it was previously enabled and is now off
-          if (wasDebuggerEnabled && (! getDebugger().isReady())) {
-//            System.err.println("Trying to start debugger");
-            try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
-          }
-          // Load the proper text into the interactions document
-          iDoc.clearCurrentInput();
-          iDoc.append("java " + className, null);
-          
-          // Finally, execute the new interaction and record that event
-          new Thread("Running main method") {
-            public void run() { _interactionsModel.interpretCurrentInteraction(); }
-          }.start();
-          
+          // prevent listener from running twice          
           // This used to be called using invokeLater, so that the listener would be removed
           // after the read lock of the notifier had been released, but that was not always
           // safe; the removal could still happen before the read lock was released
           // Now removeListener has been rewritten and can be called even when the lock is
           // held. In that case, the removal will be done as soon as possible.
-
+          _interactionsModel.removeListener(_runMain);  // listener cannot run
+          
+          // Run debugger restart in an invokeLater so that the InteractionsModel EventNotifier
+          // reader-writer lock isn't held anymore.
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {   
+            public void run() {
+              // Restart debugger if it was previously enabled and is now off
+              if (wasDebuggerEnabled && (! getDebugger().isReady())) {
+//            System.err.println("Trying to start debugger");
+                try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
+              }
+              // Load the proper text into the interactions document
+              iDoc.clearCurrentInput();
+              iDoc.append("java " + className, null);
+              
+              // Finally, execute the new interaction and record that event
+              new Thread("Running main method") {
+                public void run() { _interactionsModel.interpretCurrentInteraction(); }
+              }.start();
+            }
+          });
         }
       };
       
