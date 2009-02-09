@@ -8942,7 +8942,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       final String message = isTestAll ?
         "There are no compiled JUnit TestCases available for execution.\n" +
-        "Perhaps you have not yet compiled your test files."
+        "Perhaps you have not yet saved and compiled your test files."
         :
         "The current document is not a valid JUnit test case.\n" +
         "Please make sure that:\n" +

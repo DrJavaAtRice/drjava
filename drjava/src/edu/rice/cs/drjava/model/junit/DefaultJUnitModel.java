@@ -245,15 +245,24 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
 //      Utilities.show("Out of sync documents exist");
-      
       CompilerListener testAfterCompile = new DummyCompilerListener() {
+        @Override public void compileAborted(Exception e) {
+          // gets called if there are modified files and the user chooses NOT to save the files
+          // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
+          final CompilerListener listenerThis = this;
+          try {
+            nonTestCase(allTests);
+          }
+          finally {  // always remove this listener after its first execution
+            EventQueue.invokeLater(new Runnable() { 
+              public void run() { _compilerModel.removeListener(listenerThis); }
+            });
+          }
+        }
         @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
           final CompilerListener listenerThis = this;
           try {
             if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompErrors() > 0) {
-              if (! Utilities.TEST_MODE) 
-                JOptionPane.showMessageDialog(null, "All open files must be compiled before running a unit test", 
-                                              "Must Compile All Before Testing", JOptionPane.ERROR_MESSAGE); 
               nonTestCase(allTests);
               return;
             }
