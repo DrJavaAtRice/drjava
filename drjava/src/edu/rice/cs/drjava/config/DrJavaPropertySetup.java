@@ -414,6 +414,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                 }
               }
             }
+            if (s.length()==0) { s = "."; }
             sb.append(File.pathSeparator);
             sb.append(StringOps.escapeFileName(s));
           }

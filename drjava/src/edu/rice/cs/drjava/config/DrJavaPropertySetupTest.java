@@ -51,6 +51,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   public final String PS = File.pathSeparator; // path separator
+  public final String FS = File.separator; // path separator
+  public final String TMPDIR = System.getProperty("java.io.tmpdir")+
+      ((System.getProperty("java.io.tmpdir").endsWith(File.separator))?"":File.separator);
   public static final java.util.Random _r = new java.util.Random();
   public void setUp() throws Exception {
     super.setUp();
@@ -755,13 +758,13 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // tmpfile
     p = pm.getProperty("Misc","tmpfile");
     String s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(System.getProperty("java.io.tmpdir")+File.separator+"DrJava-Execute-"));
+    assertTrue(s.startsWith(TMPDIR+"DrJava-Execute-"));
     String s2 = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s2.startsWith(System.getProperty("java.io.tmpdir")+File.separator+"DrJava-Execute-"));
+    assertTrue(s2.startsWith(TMPDIR+"DrJava-Execute-"));
     assertFalse(s.equals(s2));
     p.setAttribute("name","foo");
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertEquals(System.getProperty("java.io.tmpdir")+File.separator+"foo", s);
+    assertEquals(TMPDIR+"foo", s);
     
     File dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
     p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
@@ -846,23 +849,25 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p = pm.getProperty("File","file.parent");
     assertTrue(p.getCurrent(pm).startsWith("(file.parent Error"));    
     dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
-    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
-    assertEquals(dir.getParentFile().getAbsolutePath(), p.getCurrent(pm));
+    p.setAttribute("file",StringOps.escapeFileName(dir .getAbsolutePath()));
+    assertEquals(dir.getParentFile().getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
 
     fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
-    assertEquals(fil.getParentFile().getAbsolutePath(), p.getCurrent(pm));
+    assertEquals(fil.getParentFile().getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
     
     notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
-    assertEquals(new File(System.getProperty("java.io.tmpdir")).getAbsolutePath(), p.getCurrent(pm));
+    assertEquals(new File(System.getProperty("java.io.tmpdir")).getAbsolutePath(),
+                 StringOps.unescapeFileName(p.getCurrent(pm)));
 
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(notFound.getAbsolutePath()));
     assertEquals(dir.getParentFile().getAbsolutePath()+File.pathSeparator+
                  fil.getParentFile().getAbsolutePath()+File.pathSeparator+
-                 new File(System.getProperty("java.io.tmpdir")).getAbsolutePath(), p.getCurrent(pm));
+                 new File(System.getProperty("java.io.tmpdir")).getAbsolutePath(),
+                 StringOps.unescapeFileName(p.getCurrent(pm)));
     
     // file.abs
     p = pm.getProperty("File","file.abs");
@@ -874,29 +879,48 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("base",StringOps.escapeFileName(dir.getParentFile().getAbsolutePath()));
     assertTrue(p.getCurrent(pm).startsWith("(file.abs Error"));
     p.setAttribute("file",StringOps.escapeFileName(dir.getName()));
-    assertEquals(dir.getAbsolutePath(), p.getCurrent(pm));
+    assertEquals(dir.getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
 
     fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getName()));
     p.setAttribute("base",StringOps.escapeFileName(fil.getParentFile().getAbsolutePath()));
-    assertEquals(fil.getAbsolutePath(), p.getCurrent(pm));
+    assertEquals(fil.getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
     
     notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getName()));
     p.setAttribute("base",StringOps.escapeFileName(notFound.getParentFile().getAbsolutePath()));
-    assertEquals(notFound.getAbsolutePath(), p.getCurrent(pm));
+    assertEquals(notFound.getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
 
     p.setAttribute("file",StringOps.escapeFileName(dir.getName())+File.pathSeparator+
                           StringOps.escapeFileName(fil.getName())+File.pathSeparator+
                           StringOps.escapeFileName(notFound.getName()));
     assertEquals(dir.getAbsolutePath()+File.pathSeparator+
                  fil.getAbsolutePath()+File.pathSeparator+
-                 notFound.getAbsolutePath(), p.getCurrent(pm));
+                 notFound.getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
     
     // file.rel
     p = pm.getProperty("File","file.rel");
     assertTrue(p.getCurrent(pm).startsWith("(file.rel Error"));
-    
+    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
+    assertTrue(p.getCurrent(pm).startsWith("(file.rel Error"));
+    p.resetAttributes();
+    p.setAttribute("base",StringOps.escapeFileName(dir.getAbsolutePath()));
+    assertTrue(p.getCurrent(pm).startsWith("(file.rel Error"));
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
+    p.setAttribute("base",StringOps.escapeFileName(dir.getAbsolutePath()));
+    assertEquals(".", StringOps.unescapeFileName(p.getCurrent(pm)));
+    p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
+    p.setAttribute("base",StringOps.escapeFileName(dir.getParentFile().getAbsolutePath()));
+    assertEquals(dir.getName(), StringOps.unescapeFileName(p.getCurrent(pm)));
+    dir = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrJavaPropertySetupTest","");
+    File dir1 = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrJavaPropertySetupTest","",dir);
+    File dir2 = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrJavaPropertySetupTest","",dir);
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest",".txt",dir1);
+    p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
+    p.setAttribute("base",StringOps.escapeFileName(dir2.getAbsolutePath()));
+    assertEquals(".."+FS+dir1.getName()+FS+fil.getName(), StringOps.unescapeFileName(p.getCurrent(pm)));    
+        
     // file.mkdir
     p = pm.getProperty("File","file.mkdir");
     assertTrue(p.getCurrent(pm).startsWith("(file.mkdir Error"));    
