@@ -113,8 +113,7 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** DrJava's main window. */
-public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
-  
+public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {  
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
@@ -1093,7 +1092,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
       _findReplace.findNext();
-      _currentDefPane.requestFocusInWindow();  
+//      _currentDefPane.requestFocusInWindow();  
       // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
     }
   };
@@ -2959,18 +2958,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     /* Set up tabbed pane and navigation pane. */
     _tabbedPane = new JTabbedPane();
-    _tabbedPane.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) {
-        Component c = _tabbedPane.getSelectedComponent();
-//         System.err.println("focus gained in tabbed pane with tab " + c + " with paramString " + e.paramString());
-        if (c == _interactionsContainer) {
-          _interactionsPane.requestFocusInWindow();
-//           System.err.println("Selected tab was interactions container");
-        }
-        else if (c == _findReplace) _findReplace.getFindField().requestFocusInWindow();
-      }
-      public void focusLost(FocusEvent e) { }
-    });
+    _tabbedPane.setFocusable(false);
     
     _tabbedPane.addFocusListener(_focusListenerForRecentDocs);
     _tabbedPane.addKeyListener(_historyListener);    // TODO: can this code be moved to the MainFrame keymap?
@@ -6883,9 +6871,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           // Use EventQueue because this action must execute AFTER all pending events in the event queue
 //        System.err.println("Interactions Container Selected");
           _interactionsContainer.setVisible(true);  // kluge to overcome subtle focus bug
-          EventQueue.invokeLater(new Runnable() { 
-            public void run() { _interactionsContainer.requestFocusInWindow(); } 
-          });
+          EventQueue.invokeLater(new Runnable() {  public void run() { _interactionsContainer.requestFocusInWindow(); }  });
         }
         else if (_tabbedPane.getSelectedIndex() == CONSOLE_TAB) {
           // Use EventQueue because this action must execute AFTER all pending events in the event queue
@@ -8553,7 +8539,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     /** Moves focus in MainFrame to the definitions pane. */
-    public void focusOnDefinitionsPane() { _currentDefPane.requestFocusInWindow(); }
+    public void focusOnDefinitionsPane() {
+      _currentDefPane.requestFocusInWindow();
+    }
     
     public void interactionStarted() {
       _disableInteractionsPane();

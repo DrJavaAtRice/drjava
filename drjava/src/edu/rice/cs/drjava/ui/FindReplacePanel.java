@@ -706,7 +706,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setSearchBackwards(false);
     _findLabelBot.setText("Next");
     _doFind();  // updates position stored in machine before starting
-    _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
+    if (DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+      _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
+    }
   }
   
   /** Called when user the activates "find previous" command.  Package visibility to accommodate calls from MainFrame. */
@@ -715,7 +717,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setSearchBackwards(true);
     _findLabelBot.setText("Prev");
     _doFind();
-    _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
+    if (DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+      _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
+    }
   }
   
   private void _replace() {
@@ -838,6 +842,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
               _replaceFindPreviousAction.setEnabled(true);
               _machine.setLastFindWord();
               _model.addToBrowserHistory();
+              if (DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+                // moves focus to DefinitionsPane
+                _frame.toFront();
+                EventQueue.invokeLater(new Runnable() { public void run() { 
+                  if (_defPane!=null) {
+                    _defPane.requestFocusInWindow();
+                  }
+                } });
+              }
             } };
           
           if (docChanged)
@@ -858,7 +871,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       }
       finally { _frame.hourglassOff(); }
     }
-      
     
     if (! DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
       _findField.requestFocusInWindow();

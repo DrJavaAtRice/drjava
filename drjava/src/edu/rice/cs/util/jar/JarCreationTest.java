@@ -174,9 +174,8 @@ public class JarCreationTest extends DrJavaTestCase {
 
   /** Test the manual creation of jar files
    */
-  public void testCreateJar() {
-    File f = new File("test.jar");
-    f.deleteOnExit();
+  public void testCreateJar() throws IOException {
+    File f = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("test", ".jar");
     File add = null;
     try {
       String fileContents = "public class JarTest {" +
