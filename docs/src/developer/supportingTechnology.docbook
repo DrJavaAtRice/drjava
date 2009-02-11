@@ -170,7 +170,7 @@
     <para>DocBook documents can be styled as a variety of different formats, including HTML and PDF.  This translation leverages generic XML-processing tools, where the meaning of DocBook constructs are defined in separate XSL style sheets.  The DocBook style sheets are available from the <ulink url="http://docbook.sourceforge.net/">DocBook SourceForge project</ulink>, and must be installed in order to generate DrJava's documentation.  In addition, the current process relies on <command>xsltproc</command>, an XML translator.  (There are a few alternative tools available for Java, but all seem to currently struggle with the DocBook style sheets: Xalan, Saxon, and the standard Java APIs.  These are invoked from Ant via the core <literal>xslt</literal> task.)
       <note>
         <title>Rice Java PLT</title>
-        <para>On the Rice Computer Science department network, <literal>DOCBOOK_XSL_HOME</literal> should point to <filename>/usr/share/sgml/docbook/xsl-stylesheets-1.69.1-5.1</filename>; <command>xsltproc</command> is installed in <filename>/usr/bin</filename>.</para>
+        <para>On the Rice Computer Science department network, <literal>DOCBOOK_XSL_HOME</literal> should point to <filename>/usr/share/sgml/docbook/xsl-stylesheets-1.65.1-2</filename>; <command>xsltproc</command> is installed in <filename>/usr/bin</filename>.</para>
       </note>
     </para>
     <para>Note that there are two similar formats for DocBook documents: XML and SGML.  In the past, DrJava used commands <command>docbook2html</command> and <command>docbook2pdf</command>, which processed SGML files.  These and other SGML-based tools seem to have been abandoned by the DocBook community, in favor of generic XML-processing tools.</para>
@@ -264,10 +264,10 @@
               <formalpara>
           <title><literal>Adding the Library</literal></title>
                 <para>Before you can use Yourkit, you have to set the following environment variable:   
-                <literal>setenv LD_LIBRARY_PATH /home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>       .
+                <literal>export LD_LIBRARY_PATH="/home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32"</literal>       .
           If you already have an <literal>LD_LIBRARY_PATH</literal>    variable, then you
       should extend it by adding a colon and the path:   
-          <literal>setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>           .</para>
+          <literal>export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32"</literal>           .</para>
               </formalpara>
       </listitem>
       <listitem>
