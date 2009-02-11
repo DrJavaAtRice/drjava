@@ -191,9 +191,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         
         String text = _document.getCurrentInteraction();
         String toEval = text.trim();
+        _prepareToInterpret(toEval);  // Writes a newLine!
         if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
 //          System.err.println("Preparing to interpret '" + toEval +"'");
-        _prepareToInterpret(toEval);  // Writes a newLine!
         final String evalText = toEval;
 
         new Thread(new Runnable() { 
