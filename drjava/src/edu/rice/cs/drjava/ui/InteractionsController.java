@@ -140,8 +140,8 @@ public class InteractionsController extends AbstractConsoleController {
   
   /** A temporary variable used to hold a box allocated inside getConsoleInput below. */
   private volatile InputBox _box;
-  /** A temporary variable used to hold the text fetched from _box in getConsoleInput below. */
-  private volatile String _text;
+  /** A temporary variable used to hold the result fetched from _box in getConsoleInput below. */
+  private volatile String _result;
   /** A variable indicating whether the input stream has been closed. */
   private volatile boolean _endOfStream = false;
   
@@ -166,7 +166,7 @@ public class InteractionsController extends AbstractConsoleController {
               _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
               
               _box.disableInputs();
-              _text = _box.getText();
+              _result = _box.getResult();
               _endOfStream = _box.isEndOfStream();
               
               /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
@@ -211,9 +211,9 @@ public class InteractionsController extends AbstractConsoleController {
       // Wait for the inputCompletionCommand to be invoked
       completionMonitor.attemptEnsureSignaled();
       
-      fireConsoleInputCompleted(_text);
+      fireConsoleInputCompleted(_result);
       
-      return _text;
+      return _result;
     }
   };
   
@@ -634,6 +634,7 @@ public class InteractionsController extends AbstractConsoleController {
     private volatile Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
     private volatile boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
     private volatile boolean _endOfStream = false;
+    private volatile String _result = "";
     
     public InputBox(boolean endOfStream) {
       _endOfStream = endOfStream;
@@ -687,7 +688,13 @@ public class InteractionsController extends AbstractConsoleController {
       am.put(INSERT_NEWLINE_NAME, newLineAction);
     }
     
+    /** Returns true if this stream has been closed. */
     public boolean isEndOfStream() { return _endOfStream; }
+    
+    /** Return the result of asking the user for input. This is similar to getText(),
+      * but getResult() includes a newline at the end if the user finished the input
+      * by pressing Enter. */
+    public String getResult() { return _result; }
     
     private Border _createBorder() {
       Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
@@ -714,7 +721,7 @@ public class InteractionsController extends AbstractConsoleController {
       final ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
-          append("\n"); // append newline at the end
+          _result = getText() + "\n"; // append newline at the end
           command.run();
         }
       });
@@ -722,8 +729,8 @@ public class InteractionsController extends AbstractConsoleController {
       // Add the input listener for <Ctrl+D>
       am.put(INSERT_END_OF_STREAM, new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
-          if (getText().length()==0) { _endOfStream = true; }
-          // do not append newline at the end
+          _result = getText(); // do not append newline at the end
+          if (_result.length()==0) { _endOfStream = true; }
           command.run();
         }
       });
@@ -736,6 +743,7 @@ public class InteractionsController extends AbstractConsoleController {
       return new Lambda<String, String>() {
         public String value(String input) {
           insert(input, getCaretPosition());
+          _result = getText();
           return input;
         }
       };
