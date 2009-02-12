@@ -82,21 +82,14 @@ import java.io.InputStreamReader;
  * Test suite over InputStreamRedirector.
  */
 public class StreamRedirectorTest extends DrJavaTestCase {
-  /** Tests that an InputStreamRedirector correctly rejects empty input.
-   */
+  /** Tests that an InputStreamRedirector correctly interprets empty input as end of stream. */
   public void testEmptyInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
       protected String _getInput() {
         return "";
       }
     };
-    try {
-      isr.read();
-      fail("Should have thrown IOException on empty input!");
-    }
-    catch (IOException ioe) {
-      // correct behavior
-    }
+    assertEquals("Should return -1 to indicate end of stream", -1, isr.read());
   }
 
   /** Tests that an InputStreamRedirector correctly redirects input that is static.

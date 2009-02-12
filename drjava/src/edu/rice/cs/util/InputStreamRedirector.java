@@ -56,17 +56,15 @@ public abstract class InputStreamRedirector extends InputStream {
     * nothing is currently available.  Subclasses should return the appropriate
     * input to feed to the input stream.  When using a readLine() method, be sure
     * to append a newline to the end of the input.
-    * @return the input to the stream, not the empty string
+    * @return the input to the stream, empty string to indicate end of stream
     */
   protected abstract String _getInput() throws IOException;
 
   /** Reads a single "line" of input into the buffer, i.e. makes a single call
     * to _getInput() and puts the result into the buffer.
-    * @throws IOException if _getInput() returns the empty string
     */
   private void _readInputIntoBuffer() throws IOException {
     String input = _getInput();
-    if (input.equals("")) throw new IOException("_getInput() must return non-empty input!");
 
     for(int i = 0; i < input.length(); i++) {
       _buffer.add(new Character(input.charAt(i)));
@@ -87,7 +85,10 @@ public abstract class InputStreamRedirector extends InputStream {
     */
   public synchronized int read(byte[] b, int off, int len) throws IOException {
     int numRead = 0;
-    if (available() == 0) _readInputIntoBuffer();
+    if (available() == 0) {
+      _readInputIntoBuffer();
+      if (available() == 0) return -1;
+    }
 
     for(int i = off; i < off + len; i++) {
       if (available() == 0) break;
@@ -104,7 +105,10 @@ public abstract class InputStreamRedirector extends InputStream {
     * @throws IOException if an I/O exception
     */
   public synchronized int read() throws IOException {
-    if (available() == 0) _readInputIntoBuffer();
+    if (available() == 0) {
+      _readInputIntoBuffer();
+      if (available() == 0) return -1;
+    }
     return _buffer.remove(0).charValue();
   }
 

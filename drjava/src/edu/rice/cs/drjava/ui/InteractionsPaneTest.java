@@ -335,7 +335,8 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     // Make sure the buffer 'buf' is updated
     synchronized(bufLock) {
-      assertEquals("Should have returned the correct text.", "test-text\n", buf.toString());
+      // we don't expect the newline anymore, this is now added by the input box
+      assertEquals("Should have returned the correct text.", "test-text", buf.toString());
     }
   }
   

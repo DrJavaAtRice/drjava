@@ -98,6 +98,7 @@ public class InteractionsController extends AbstractConsoleController {
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
+  private static final String INSERT_END_OF_STREAM = "Insert End of Stream";
   
   /** Style for System.in box */
   public static final String INPUT_BOX_STYLE = "input.box.style";
@@ -141,12 +142,15 @@ public class InteractionsController extends AbstractConsoleController {
   private volatile InputBox _box;
   /** A temporary variable used to hold the text fetched from _box in getConsoleInput below. */
   private volatile String _text;
+  /** A variable indicating whether the input stream has been closed. */
+  private volatile boolean _endOfStream = false;
   
   /** Listens for input requests from System.in, displaying an input box as needed. */
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
+      if (_endOfStream) return ""; // input stream has been closed, don't ask for more input
       final CompletionMonitor completionMonitor = new CompletionMonitor();
-      _box = new InputBox();  // FIX: move _box inside run as final local variable
+      _box = new InputBox(_endOfStream);  // FIX: move _box inside run as final local variable
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
       EventQueue.invokeLater(new Runnable() {  // why EventQueue.invokeLater?
@@ -162,7 +166,8 @@ public class InteractionsController extends AbstractConsoleController {
               _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
               
               _box.disableInputs();
-              _text = _box.getText() + "\n";
+              _text = _box.getText();
+              _endOfStream = _box.isEndOfStream();
               
               /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
                * interim. */
@@ -222,6 +227,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterResetting() {
       assert EventQueue.isDispatchThread(); 
       _interactionsDJDocument.clearColoring();
+      _endOfStream = false;
     }
     
     public void interpreterReady(File wd) { }
@@ -627,8 +633,10 @@ public class InteractionsController extends AbstractConsoleController {
     private volatile Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     private volatile Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
     private volatile boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
+    private volatile boolean _endOfStream = false;
     
-    public InputBox() {
+    public InputBox(boolean endOfStream) {
+      _endOfStream = endOfStream;
       setForeground(_sysInColor);
       setBackground(_bgColor);
       setCaretColor(_fgColor);
@@ -679,6 +687,8 @@ public class InteractionsController extends AbstractConsoleController {
       am.put(INSERT_NEWLINE_NAME, newLineAction);
     }
     
+    public boolean isEndOfStream() { return _endOfStream; }
+    
     private Border _createBorder() {
       Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
       Border outer = BorderFactory.createLineBorder(_fgColor, BORDER_WIDTH);
@@ -695,14 +705,27 @@ public class InteractionsController extends AbstractConsoleController {
       super.paintComponent(g);
     }
     
-    /** Specifies what to do when the <Enter> key is hit. */
+    /** Specifies what to do when the <Enter> or <Ctrl+D> keys are hit. */
     void setInputCompletionCommand(final Runnable command) {
       final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_D,java.awt.Event.CTRL_MASK), INSERT_END_OF_STREAM);
       
       final ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, new AbstractAction() {
-        public void actionPerformed(ActionEvent e) { command.run(); }
+        public void actionPerformed(ActionEvent e) {
+          append("\n"); // append newline at the end
+          command.run();
+        }
+      });
+
+      // Add the input listener for <Ctrl+D>
+      am.put(INSERT_END_OF_STREAM, new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+          if (getText().length()==0) { _endOfStream = true; }
+          // do not append newline at the end
+          command.run();
+        }
       });
     }
     
