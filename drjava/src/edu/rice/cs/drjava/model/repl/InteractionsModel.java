@@ -40,6 +40,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.swing.text.BadLocationException;
 
@@ -125,6 +126,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected volatile String _lastError = null;
   protected volatile String _secondToLastError = null;
   
+  /** Set of classes or packages to import again when a breakpoint is hit. */
+  protected final HashSet<String> _autoImportSet = new HashSet<String>();
+  
   /** Constructs an InteractionsModel.  The InteractionsPane is created later by the InteractionsController.
     * As a result, the posting of a banner at the top of InteractionsDocument must be deferred
     * until after the InteracationsPane has been set up.
@@ -193,6 +197,27 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         String toEval = text.trim();
         _prepareToInterpret(toEval);  // Writes a newLine!
         if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
+        if (edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
+            toEval.startsWith("import ")) {
+          // add the class or package after the import to the set of auto-imports
+          String line = toEval;
+          do {
+            line = line.substring("import ".length());
+            String substr = line;
+            int endPos = 0;
+            while((endPos<substr.length()) &&
+                  ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
+                   (substr.charAt(endPos)=='.') ||
+                   (substr.charAt(endPos)=='*'))) ++endPos;
+            substr = substr.substring(0,endPos);
+            _autoImportSet.add(substr);
+            
+            // remove substr from line
+            line = line.substring(substr.length()).trim();
+            if (!line.startsWith(";")) break;
+            line = line.substring(1).trim();
+          } while(line.startsWith("import "));
+        }
 //          System.err.println("Preparing to interpret '" + toEval +"'");
         final String evalText = toEval;
 
@@ -204,6 +229,25 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         }).start(); 
       }
     });
+  }
+  
+  public void autoImport() {
+    if (!edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) return;
+    if (_autoImportSet.size()==0) return;
+
+    final StringBuilder sb = new StringBuilder();
+    for(String s: _autoImportSet) {
+      sb.append("import ");
+      sb.append(s);
+      sb.append("; ");
+    }
+    _document.insertBeforeLastPrompt("Auto-import: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+    new Thread(new Runnable() { 
+      public void run() { 
+        try { interpret(sb.toString()); } 
+        catch(Throwable t) { DrJavaErrorHandler.record(t); }
+      } 
+    }).start(); 
   }
   
   /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
@@ -248,6 +292,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Resets the Java interpreter with working directry wd. */
   public final void resetInterpreter(File wd) {
     _workingDirectory = wd;
+    _autoImportSet.clear(); // clear list when interpreter is reset
     _resetInterpreter(wd);
   }
   

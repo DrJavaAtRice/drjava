@@ -8120,6 +8120,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
       _setThreadDependentDebugMenuItems(true);
+      _model.getInteractionsModel().autoImport();
     }
     
     /* Must be executed in the event thread. */
@@ -8163,7 +8164,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void currThreadSet(DebugThreadData dtd) { }
     public void regionAdded(final Breakpoint bp) { }
-    public void breakpointReached(Breakpoint bp) { showTab(_interactionsContainer, true); }
+    public void breakpointReached(Breakpoint bp) {
+      _model.getInteractionsModel().autoImport();
+      showTab(_interactionsContainer, true);
+    }
     public void regionChanged(Breakpoint bp) {  }
     public void regionRemoved(final Breakpoint bp) { }    
     public void watchSet(final DebugWatchData w) { }

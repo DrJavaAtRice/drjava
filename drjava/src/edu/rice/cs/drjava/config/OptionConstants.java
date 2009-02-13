@@ -862,6 +862,9 @@ public interface OptionConstants {
   public static final StringOption DEBUG_STEP_EXCLUDE =
     new StringOption("debug.step.exclude", "");
   
+  /** Whether we want to automatically import packages after breakpoints or steps. */
+  public static final BooleanOption DEBUG_AUTO_IMPORT =
+    new BooleanOption("debug.auto.import", Boolean.TRUE);
   
   
   /* ---------- Javadoc Options ---------- */

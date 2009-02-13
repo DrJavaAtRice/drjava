@@ -813,6 +813,10 @@ public class ConfigFrame extends SwingFrame {
                                                  "<html>Any classes that the debuggger should not step into.<br>" +
                                                  "Should be a COMMA-separated list of fully-qualified class names.<br>" +
                                                  "To exclude a package, add <code>packagename.*</code> to the list.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_AUTO_IMPORT,
+                                                  "Auto-Import after Breakpoint/Step", this,
+                                                  "<html>Whether the Debugger should automatically import packages<br>"+
+                                                  "and classes again after a breakpoint or step.</html>"));
 
     panel.displayComponents();
   }
