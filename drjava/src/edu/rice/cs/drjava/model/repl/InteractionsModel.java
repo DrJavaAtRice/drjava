@@ -200,6 +200,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         if (edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
             toEval.startsWith("import ")) {
           // add the class or package after the import to the set of auto-imports
+          // NOTE: this only processes import statements until the first non-import statement or comment is reached
+          // Example: import java.io.File; import java.io.IOException // imports both File and IOException
+          // Example: import java.io.File; /* comment */ import java.io.IOException // imports only File
+          // Example: import java.io.File; File f; import java.io.IOException // imports only File
           String line = toEval;
           do {
             line = line.substring("import ".length());
@@ -231,6 +235,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     });
   }
   
+  /** Executes import statements for the classes and packages in the auto-import set. */
   public void autoImport() {
     if (!edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) return;
     if (_autoImportSet.size()==0) return;
