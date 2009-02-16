@@ -821,10 +821,13 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DETACH_DEBUGGER = 
     new KeyStrokeOption("key.detach.debugger", KeyStrokeOption.NULL_KEYSTROKE);
   
-  /** The key binging to close stream input in the ineractions panel. */
+  /** The key binging to close stream input in the ineractions panel.
+    * Ctrl-Z on Windows, Ctrl-D on other systems. */
   public static final KeyStrokeOption KEY_CLOSE_SYSTEM_IN = 
     new KeyStrokeOption("key.close.system.in", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));
+                        (PlatformFactory.ONLY.isWindowsPlatform())
+                          ?KeyStroke.getKeyStroke(KeyEvent.VK_Z, CTRL_MASK)
+                          :KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));
 
   
   /* ---------- Find Replace Options ---------- */
