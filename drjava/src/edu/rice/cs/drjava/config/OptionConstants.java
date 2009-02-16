@@ -821,6 +821,12 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DETACH_DEBUGGER = 
     new KeyStrokeOption("key.detach.debugger", KeyStrokeOption.NULL_KEYSTROKE);
   
+  /** The key binging to close stream input in the ineractions panel. */
+  public static final KeyStrokeOption KEY_CLOSE_SYSTEM_IN = 
+    new KeyStrokeOption("key.close.system.in", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK));
+
+  
   /* ---------- Find Replace Options ---------- */
   
   public static final BooleanOption FIND_MATCH_CASE = 

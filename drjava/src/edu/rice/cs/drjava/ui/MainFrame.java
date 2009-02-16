@@ -1734,7 +1734,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Open Javadoc page specified by the word the cursor is on. */
   final Action _openJavadocUnderCursorAction = new AbstractAction("Open Java API Javadoc for Word Under Cursor...") {
     public void actionPerformed(ActionEvent ae) {
-      _openJavadocUnderCursor();
+      ;
+    }
+  };
+  
+  /** Close input stream in the interactions pane. */
+  final Action _closeSystemInAction = new AbstractAction("Close System.in") {
+    public void actionPerformed(ActionEvent ae){
+      _interactionsController.setEndOfStreamInBox(true);
+      _interactionsController.interruptConsoleInput();
     }
   };
   
@@ -5948,6 +5956,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API " +
                  "Javadoc Web page for the word under the cursor");
     
+    
+    /** MOVE TO BETTER LOCATION */
+    _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane");
+    
+     
+    
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
                  "Load a history from a file as a series of interactions");
@@ -6216,6 +6230,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     interMenu.addSeparator();
     _addMenuItem(interMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
     _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE);
+    _addMenuItem(interMenu, _closeSystemInAction, KEY_CLOSE_SYSTEM_IN);
     if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
