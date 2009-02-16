@@ -128,6 +128,9 @@ public class InteractionsController extends AbstractConsoleController {
     */
   private volatile Runnable _inputCompletionCommand;
   
+  /** Runnable command that disables the "Close System.in" menu command. */
+  private final Runnable _disableCloseSystemInMenuItemCommand;
+  
   /** Default implementation of the insert text in input command */
   private static final Lambda<String, String> _defaultInsertTextCommand = 
     new Lambda<String,String>() {
@@ -172,7 +175,7 @@ public class InteractionsController extends AbstractConsoleController {
               if (_box.wasClosedWithEnter()) {
                 _result += "\n";
               }
-              _endOfStream = _box.isEndOfStream();
+              setEndOfStream(_box.isEndOfStream());
               
               /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
                * interim. */
@@ -246,10 +249,12 @@ public class InteractionsController extends AbstractConsoleController {
     * @param model An InteractionsModel
     * @param adapter InteractionsDJDocument being used by the model's doc
     */
-  public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
+  public InteractionsController(final InteractionsModel model,
+                                InteractionsDJDocument adapter,
+                                Runnable disableCloseSystemInMenuItemCommand) {
     this(model, adapter, new InteractionsPane(adapter) {  // creates InteractionsPane
       public int getPromptPos() { return model.getDocument().getPromptPos(); }
-    });
+    }, disableCloseSystemInMenuItemCommand);
   }
   
   /** Glue together the given model and view.
@@ -257,8 +262,12 @@ public class InteractionsController extends AbstractConsoleController {
     * @param adapter InteractionsDJDocument being used by the model's doc
     * @param pane An InteractionsPane
     */
-  public InteractionsController(InteractionsModel model, InteractionsDJDocument adapter, InteractionsPane pane) {
+  public InteractionsController(InteractionsModel model,
+                                InteractionsDJDocument adapter,
+                                InteractionsPane pane,
+                                Runnable disableCloseSystemInMenuItemCommand) {
     super(adapter, pane);
+    _disableCloseSystemInMenuItemCommand = disableCloseSystemInMenuItemCommand;
     DefaultEditorKit d = InteractionsPane.EDITOR_KIT;
     
     for (Action a : d.getActions()) {
@@ -306,8 +315,12 @@ public class InteractionsController extends AbstractConsoleController {
     for(ConsoleStateListener listener : _consoleStateListeners) { listener.consoleInputCompleted(text, this); }
   }
   
-  
-  public void setEndOfStreamInBox(boolean tf) {_box.setEndOfStream(tf); }
+  /** Sets the end of stream flag. */
+  public void setEndOfStream(boolean tf) {
+    _endOfStream = tf;
+    if (_box!=null) { _box.setEndOfStream(tf); }
+    if (tf) { _disableCloseSystemInMenuItemCommand.run(); }
+  }
   
   
   /** Gets the input listener for console input requests.  ONLY used in unit tests.
@@ -697,13 +710,12 @@ public class InteractionsController extends AbstractConsoleController {
       am.put(INSERT_NEWLINE_NAME, newLineAction);
     }
     
-    /**TODO: add setter method for _endofstream */
-    
-    public void setEndOfStream(boolean tf) { _endOfStream = tf; }
-    
     /** Returns true if this stream has been closed. */
     public boolean isEndOfStream() { return _endOfStream; }
 
+    /** Setter for end of stream flag. */
+    public void setEndOfStream(boolean tf) { _endOfStream = tf; }
+    
     /** Was Enter pressed? */
     public boolean wasClosedWithEnter() { return _closedWithEnter; }
     
@@ -714,6 +726,7 @@ public class InteractionsController extends AbstractConsoleController {
       Border temp = BorderFactory.createCompoundBorder(outer, inner);
       return BorderFactory.createCompoundBorder(outerouter, temp);
     }
+    
     /** Enable anti-aliased text by overriding paintComponent. */
     protected void paintComponent(Graphics g) {
       if (_antiAliasText && g instanceof Graphics2D) {

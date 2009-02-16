@@ -69,7 +69,7 @@ public class SimpleInteractionsWindow extends SwingFrame {
     _pane = new InteractionsPane(_adapter) {
       public int getPromptPos() { return _model.getDocument().getPromptPos(); }
     };
-    _controller = new InteractionsController(_model, _adapter, _pane);
+    _controller = new InteractionsController(_model, _adapter, _pane, new Runnable() { public void run() { } });
     
     _pane.setFont(Font.decode("monospaced"));
     

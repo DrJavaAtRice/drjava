@@ -824,7 +824,7 @@ public interface OptionConstants {
   /** The key binging to close stream input in the ineractions panel. */
   public static final KeyStrokeOption KEY_CLOSE_SYSTEM_IN = 
     new KeyStrokeOption("key.close.system.in", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));
 
   
   /* ---------- Find Replace Options ---------- */

@@ -110,7 +110,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model = new TestGlobalModel();
     // create an interactions pane which is essential to the function of the interactions model; 
     _interactionsController =  // InteractionsController constructor creates an interactions pane
-      new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
+      new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument(),
+                                 new Runnable() { public void run() { } });
     _log.log("Global model created for " + this);
     DrJava.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");

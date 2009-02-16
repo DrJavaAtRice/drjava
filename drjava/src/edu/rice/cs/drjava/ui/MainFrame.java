@@ -1741,7 +1741,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Close input stream in the interactions pane. */
   final Action _closeSystemInAction = new AbstractAction("Close System.in") {
     public void actionPerformed(ActionEvent ae){
-      _interactionsController.setEndOfStreamInBox(true);
+      _interactionsController.setEndOfStream(true);
       _interactionsController.interruptConsoleInput();
     }
   };
@@ -2122,7 +2122,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _model.getInteractionsModel().enableRestart();
     // Lots of work, so use another thread
     new Thread(new Runnable() { 
-      public void run() {_model.resetInteractions(_model.getWorkingDirectory(), true);
+      public void run() {
+        _model.resetInteractions(_model.getWorkingDirectory(), true);
+        _closeSystemInAction.setEnabled(true);
       }
     }).start();
   }
@@ -2938,7 +2940,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     };
     
     _interactionsController =
-      new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
+      new InteractionsController(_model.getInteractionsModel(),
+                                 _model.getSwingInteractionsDocument(),
+                                 new Runnable() {
+      public void run() {
+        _closeSystemInAction.setEnabled(false);
+      }
+    });
     
     _interactionsPane = _interactionsController.getPane();
     
@@ -5956,12 +5964,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API " +
                  "Javadoc Web page for the word under the cursor");
     
-    
-    /** MOVE TO BETTER LOCATION */
-    _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane");
-    
-     
-    
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
                  "Load a history from a file as a series of interactions");
@@ -5971,7 +5973,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
     _resetInteractionsAction.setEnabled(true);
-    
+    _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane"); 
+
     _setUpAction(_viewInteractionsClassPathAction, "View Interactions Classpath", 
                  "Display the classpath in use by the Interactions Pane");
     _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", 

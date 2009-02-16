@@ -81,7 +81,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     };
     // Make tests silent
     _pane.setBeep(new TestBeep());
-    _controller = new InteractionsController(_model, _adapter, _pane);
+    _controller = new InteractionsController(_model, _adapter, _pane, new Runnable() { public void run() { } });
 //    _controller.setCachedCaretPos(_pane.getCaretPosition());
 //    _controller.setCachedPromptPos(_doc.getPromptPos());
 //    System.err.println("_controller = " + _controller);
