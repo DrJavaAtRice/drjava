@@ -821,8 +821,9 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DETACH_DEBUGGER = 
     new KeyStrokeOption("key.detach.debugger", KeyStrokeOption.NULL_KEYSTROKE);
   
-  /** The key binging to close stream input in the ineractions panel.
-    * Ctrl-Z on Windows, Ctrl-D on other systems. */
+  /** The key binging to close stream input in the ineractions panel. Ctrl-D on all systems.
+    * In the console on DOS/Windows, this was typically Ctrl-Z, but Ctrl-Z is now the
+    * default for Undo, even on Windows. */
   public static final KeyStrokeOption KEY_CLOSE_SYSTEM_IN = 
     new KeyStrokeOption("key.close.system.in", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));

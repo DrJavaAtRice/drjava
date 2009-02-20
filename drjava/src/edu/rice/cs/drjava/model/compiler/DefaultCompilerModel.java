@@ -240,10 +240,9 @@ public class DefaultCompilerModel implements CompilerModel {
           _compileFiles(filesToCompile, buildDir);
         }
         catch (Throwable t) {
-//          t.printStackTrace();
-//          throw new UnexpectedException(t);
           DJError err = new DJError(t.toString(), false);
           _distributeErrors(Arrays.asList(err));
+          throw new UnexpectedException(t);
         }
       }
     }
