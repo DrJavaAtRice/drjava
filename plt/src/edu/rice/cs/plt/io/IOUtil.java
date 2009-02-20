@@ -1198,10 +1198,7 @@ public final class IOUtil {
       // On the first request, register a shutdown hook to clean up the list
       Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
-          for (Closeable c : TO_CLOSE.value()) {
-            try { c.close(); }
-            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
-          }
+          for (Closeable c : TO_CLOSE.value()) { attemptClose(c); }
         }
       });
       return new LinkedList<Closeable>();
@@ -1216,6 +1213,11 @@ public final class IOUtil {
     TO_CLOSE.value().add(c);
   }
   
+  /** Attempt to close the given resource, failing silently if an exception occurs. */
+  public static void attemptClose(Closeable c) {
+    try { c.close(); }
+    catch (IOException e) { /* intentionally ignore */ }
+  }
   
   /** Define a {@code FileFilter} in terms of a {@code Predicate}. */
   public static FilePredicate asFilePredicate(Predicate<? super File> p) {
@@ -1504,6 +1506,14 @@ public final class IOUtil {
   }
   
   /**
+   * Ignore subsequent writes to {@code System.out} until {@link #revertSystemOut} is called.
+   * A matching revert call should be made.
+   */
+  public static void ignoreSystemOut() {
+    replaceSystemOut(VoidOutputStream.INSTANCE);
+  }
+  
+  /**
    * Set {@code System.out} to its value before the last call to {@link #replaceSystemOut}.  This call
    * should always follow a call to {@code replaceSystemOut()}.  Assuming all calls are properly
    * paired, and that multiple threads do not concurrently invoke these methods, the stream after this
@@ -1524,6 +1534,14 @@ public final class IOUtil {
     else { System.setErr(new PrintStream(substitute)); }
   }
     
+  /**
+   * Ignore subsequent writes to {@code System.err} until {@link #revertSystemErr} is called.  A
+   * matching revert call should be made.
+   */
+  public static void ignoreSystemErr() {
+    replaceSystemErr(VoidOutputStream.INSTANCE);
+  }
+  
   /**
    * Set {@code System.err} to its value before the last call to {@link #replaceSystemErr}.  This call
    * should always follow a call to {@code replaceSystemErr()}.  Assuming all calls are properly

@@ -64,42 +64,42 @@ public class ImmutableRelation<T1, T2> extends DelegatingRelation<T1, T2> {
   public void clear() { throw new UnsupportedOperationException(); }
   
   public boolean contains(T1 first, T2 second) {
-    return ((Relation<T1, T2>) _delegate).contains(first, second);
+    return _delegate.contains(first, second);
   }
   public boolean add(T1 first, T2 second) { throw new UnsupportedOperationException(); }
   public boolean remove(T1 first, T2 second) { throw new UnsupportedOperationException(); }
   
   public Relation<T2, T1> inverse() {
     if (_inverse == null) {
-      _inverse = new ImmutableRelation<T2, T1>(((Relation<T1, T2>) _delegate).inverse(), this);
+      _inverse = new ImmutableRelation<T2, T1>(_delegate.inverse(), this);
     }
     return _inverse;
   }
   
   public PredicateSet<T1> firstSet() {
-    return new ImmutableSet<T1>(((Relation<T1, T2>) _delegate).firstSet());
+    return new ImmutableSet<T1>(_delegate.firstSet());
   }
   public boolean containsFirst(T1 first) {
-    return ((Relation<T1, T2>) _delegate).containsFirst(first);
+    return _delegate.containsFirst(first);
   }
   public PredicateSet<T2> matchFirst(T1 first) {
-    return new ImmutableSet<T2>(((Relation<T1, T2>) _delegate).matchFirst(first));
+    return new ImmutableSet<T2>(_delegate.matchFirst(first));
   }
   public PredicateSet<T2> excludeFirsts() {
-    return new ImmutableSet<T2>(((Relation<T1, T2>) _delegate).excludeFirsts());
+    return new ImmutableSet<T2>(_delegate.excludeFirsts());
   }
 
   public PredicateSet<T2> secondSet() {
-    return new ImmutableSet<T2>(((Relation<T1, T2>) _delegate).secondSet());
+    return new ImmutableSet<T2>(_delegate.secondSet());
   }
   public boolean containsSecond(T2 second) {
-    return ((Relation<T1, T2>) _delegate).containsSecond(second);
+    return _delegate.containsSecond(second);
   }
   public PredicateSet<T1> matchSecond(T2 second) {
-    return new ImmutableSet<T1>(((Relation<T1, T2>) _delegate).matchSecond(second));
+    return new ImmutableSet<T1>(_delegate.matchSecond(second));
   }
   public PredicateSet<T1> excludeSeconds() {
-    return new ImmutableSet<T1>(((Relation<T1, T2>) _delegate).excludeSeconds());
+    return new ImmutableSet<T1>(_delegate.excludeSeconds());
   }
   
   /** Call the constructor (allows {@code T1} and {@code T2} to be inferred). */

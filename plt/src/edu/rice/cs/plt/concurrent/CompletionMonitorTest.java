@@ -52,7 +52,7 @@ public class CompletionMonitorTest extends TestCase {
   public void testRealSignal() throws InterruptedException {
     final CompletionMonitor as = new CompletionMonitor(false);
     
-    DelayedInterrupter interrupter1 = new DelayedInterrupter(300);
+    DelayedInterrupter interrupter1 = new DelayedInterrupter(500); // got a failure when this was 300
     _flag = false;
     assertFalse(as.isSignaled());
     new Thread() { public void run() { ConcurrentUtil.sleep(100); _flag = true; as.signal(); } }.start();

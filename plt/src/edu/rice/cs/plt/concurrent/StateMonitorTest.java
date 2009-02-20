@@ -48,7 +48,7 @@ public class StateMonitorTest extends TestCase {
     m.ensureState(0);
     interrupter1.abort();
     
-    DelayedInterrupter interrupter2 = new DelayedInterrupter(300);
+    DelayedInterrupter interrupter2 = new DelayedInterrupter(500); // got a failure when this was 300
     _flag = false;
     new Thread() { public void run() { ConcurrentUtil.sleep(100); _flag = true; m.set(1); } }.start();
     m.ensureState(1);

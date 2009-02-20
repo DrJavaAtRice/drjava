@@ -44,60 +44,25 @@ import edu.rice.cs.plt.tuple.Pair;
  * (see {@link java.util.AbstractCollection} for details on the default implementations).
  */
 public class DelegatingRelation<T1, T2> extends DelegatingSet<Pair<T1, T2>> implements Relation<T1, T2> {
+  protected final Relation<T1, T2> _delegate; // field is redundant, but prevents a lot of useless casts 
+  public DelegatingRelation(Relation<T1, T2> delegate) { super(delegate); _delegate = delegate; }
   
-  public DelegatingRelation(Relation<T1, T2> delegate) { super(delegate); }
-  
-  public int size(int bound) { return ((Relation<T1, T2>) _delegate).size(bound); }
-  public boolean isInfinite() { return ((Relation<T1, T2>) _delegate).isInfinite(); }
-  public boolean hasFixedSize() { return ((Relation<T1, T2>) _delegate).hasFixedSize(); }
-  public boolean isStatic() { return ((Relation<T1, T2>) _delegate).isStatic(); }
+  public int size(int bound) { return _delegate.size(bound); }
+  public boolean isInfinite() { return _delegate.isInfinite(); }
+  public boolean hasFixedSize() { return _delegate.hasFixedSize(); }
+  public boolean isStatic() { return _delegate.isStatic(); }
 
-  public boolean contains(T1 first, T2 second) {
-    return ((Relation<T1, T2>) _delegate).contains(first, second);
-  }
-  
-  public boolean add(T1 first, T2 second) {
-    return ((Relation<T1, T2>) _delegate).add(first, second);
-  }
-  
-  public boolean remove(T1 first, T2 second) {
-    return ((Relation<T1, T2>) _delegate).remove(first, second);
-  }
-  
-  public Relation<T2, T1> inverse() {
-    return ((Relation<T1, T2>) _delegate).inverse();
-  }
-  
-  public PredicateSet<T1> firstSet() {
-    return ((Relation<T1, T2>) _delegate).firstSet();
-  }
-  
-  public boolean containsFirst(T1 first) {
-    return ((Relation<T1, T2>) _delegate).containsFirst(first);
-  }
-  
-  public PredicateSet<T2> matchFirst(T1 first) {
-    return ((Relation<T1, T2>) _delegate).matchFirst(first);
-  }
-  
-  public PredicateSet<T2> excludeFirsts() {
-    return ((Relation<T1, T2>) _delegate).excludeFirsts();
-  }
-
-  public PredicateSet<T2> secondSet() {
-    return ((Relation<T1, T2>) _delegate).secondSet();
-  }
-  
-  public boolean containsSecond(T2 second) {
-    return ((Relation<T1, T2>) _delegate).containsSecond(second);
-  }
-  
-  public PredicateSet<T1> matchSecond(T2 second) {
-    return ((Relation<T1, T2>) _delegate).matchSecond(second);
-  }
-  
-  public PredicateSet<T1> excludeSeconds() {
-    return ((Relation<T1, T2>) _delegate).excludeSeconds();
-  }
+  public boolean contains(T1 first, T2 second) { return _delegate.contains(first, second); }
+  public boolean add(T1 first, T2 second) { return _delegate.add(first, second); }
+  public boolean remove(T1 first, T2 second) { return _delegate.remove(first, second); }
+  public Relation<T2, T1> inverse() { return _delegate.inverse(); }
+  public PredicateSet<T1> firstSet() { return _delegate.firstSet(); }
+  public boolean containsFirst(T1 first) { return _delegate.containsFirst(first); }
+  public PredicateSet<T2> matchFirst(T1 first) { return _delegate.matchFirst(first); }
+  public PredicateSet<T2> excludeFirsts() { return _delegate.excludeFirsts(); }
+  public PredicateSet<T2> secondSet() { return _delegate.secondSet(); }
+  public boolean containsSecond(T2 second) { return _delegate.containsSecond(second); }
+  public PredicateSet<T1> matchSecond(T2 second) { return _delegate.matchSecond(second); }
+  public PredicateSet<T1> excludeSeconds() { return _delegate.excludeSeconds(); }
   
 }

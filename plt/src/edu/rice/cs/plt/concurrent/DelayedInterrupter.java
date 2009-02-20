@@ -34,6 +34,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
+import edu.rice.cs.plt.lambda.LazyThunk;
+import edu.rice.cs.plt.lambda.Thunk;
+
 /**
  * <p>Sets a "time bomb" on a specific thread: if the {@link #abort} method is not invoked within a specified
  * amount of time (in milliseconds), the thread will be interrupted.  In contrast to {@link Object#wait(long)},
@@ -42,45 +48,47 @@ package edu.rice.cs.plt.concurrent;
  * timeout performs multiple blocking operations, invokes blocking APIs that don't support timeouts
  * (like {@link java.io.InputStream#read}), or polls for an interrupted state.</p>
  * 
- * <p>The timeout is implemented with a separate daemon thread: an outstanding DelayedInterrupter will not
- * prevent the program from terminating.</p>
+ * <p>The timeout is implemented with a single {@link Timer} for all DelayedInterrupter instances.  This
+ * timer is a daemon: an outstanding DelayedInterrupter will not prevent the program from terminating.</p>
  */
 public class DelayedInterrupter {
   
+  /**
+   * Delays instantiation of the timer thread until it's actually needed. (Code may reference this
+   * class, for example, but never actually create a DelayedInterrupter object.)
+   */
+  private static final LazyThunk<Timer> TIMER = new LazyThunk<Timer>(new Thunk<Timer>() {
+    public Timer value() { return new Timer("DelayedInterrupter Timer", true); }
+  });
+
   private final Thread _worker;
-  private final Thread _interrupter;
+  private final TimerTask _task;
   
   /**
    * Create an interrupter for the current thread.
    * @param timeToInterrupt  Number of milliseconds to allow an abort before the thread will be interrupted.
    */
-  public DelayedInterrupter(int timeToInterrupt) { this(Thread.currentThread(), timeToInterrupt); }
+  public DelayedInterrupter(long timeToInterrupt) { this(Thread.currentThread(), timeToInterrupt); }
   
   /**
    * Create an interrupter for the specified thread.
    * @param timeToInterrupt  Number of milliseconds to allow an abort before the thread will be interrupted.
    */
-  public DelayedInterrupter(Thread worker, final int timeToInterrupt) {
+  public DelayedInterrupter(Thread worker, final long timeToInterrupt) {
     _worker = worker;
-    _interrupter = new Thread("DelayedInterrupter") {
-      public void run() {
-        try {
-          sleep(timeToInterrupt);
-          _worker.interrupt();
-        }
-        catch (InterruptedException e) { /* abort has occurred */ }
-      }
+    _task = new TimerTask() {
+      public void run() { _worker.interrupt(); }
     };
-    _interrupter.setDaemon(true);
-    _interrupter.start();
+    TIMER.value().schedule(_task, timeToInterrupt);
   }
-  
+    
   /**
    * Abort the request to interrupt the thread.  When called from the worker thread (this is the intended usage),
    * clears the interrupted status, in case the interrupt occurred but was not detected.
    */
   public void abort() {
-    _interrupter.interrupt();
+    _task.cancel();
+    TIMER.value().purge();
     if (Thread.currentThread() == _worker) {
       Thread.interrupted(); // clear the interrupted status, in case it occurred but wasn't detected
     }

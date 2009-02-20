@@ -34,7 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.recur;
 
-import edu.rice.cs.plt.lambda.Thunk;
+import edu.rice.cs.plt.lambda.ResolvingThunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /**
@@ -128,7 +128,7 @@ import edu.rice.cs.plt.lambda.Lambda;
  * There are 6 steps: three to expand the recursion to the base case, and three to perform the
  * necessary computation after a recursive result has been determined.</p>
  */
-public interface Continuation<T> extends Thunk<T> {
+public interface Continuation<T> extends ResolvingThunk<T> {
   
   /** Iteratively resolve the continuation to a value. */
   public T value();
@@ -137,7 +137,7 @@ public interface Continuation<T> extends Thunk<T> {
   public boolean isResolved();
   
   /**
-   * Produce a continuation representing the next step of compuation.
+   * Produce a continuation representing the next step of computation.
    * @throws IllegalStateException  If {@code isResolved()} is {@code true}
    */
   public Continuation<? extends T> step();

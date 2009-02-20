@@ -34,58 +34,190 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import edu.rice.cs.plt.collect.ListenerSet;
 import edu.rice.cs.plt.lambda.WrappedException;
 
 /**
- * Provides access to a concurrent task that produces incremental results. In addition to adding
- * a {@link #pause} method and an {@link #intermediateValues} method to {@code TaskController}, 
- * implementations should support cancellation of a running task.
+ * <p>Provides access to a concurrent task that produces incremental results. Adds
+ * a {@link #pause} method, more responsive cancellation, and access to intermediate computation
+ * results via {@link #steps} and {@link #intermediateQueue}.</p>
+ * 
+ * <p>To implement a concrete instance, a subclass must provide {@link #doStart}, {@link #doPause},
+ * {@link #doStop}, and, optionally, {@link #discard}.</p>
  */
 public abstract class IncrementalTaskController<I, R> extends TaskController<R> {
+  
+  private final boolean _ignoreIntermediate;
+  private final AtomicInteger _steps;
+  private final BlockingQueue<I> _intermediateQueue;
+  private final ListenerSet<I> _intermediateListeners;
+  
+  /** Sets {@code ignoreIntermediate} to {@code false}. */
+  protected IncrementalTaskController() { this(false); }
+
+  /**
+   * If {@code ignoreIntermediate}, intermediate results will not be enqueued.  (They will,
+   * however, be passed to any listeners and counted by {@link #steps}.)
+   */
+  protected IncrementalTaskController(boolean ignoreIntermediate) {
+    _ignoreIntermediate = ignoreIntermediate;
+    _steps = new AtomicInteger(0);
+    _intermediateQueue = _ignoreIntermediate ? null : new LinkedBlockingQueue<I>();
+    _intermediateListeners = new ListenerSet<I>();
+  }
+  
+  /**
+   * Get the number of intermediate steps the task has taken.  If {@code storeIntermediate}, at
+   * least this many values have been added to the {@code intermediateQueue}.  
+   */
+  public int steps() { return _steps.get(); }
+  
+  /**
+   * <p>Get the queue for storing intermediate results.  Throws an exception if {@code storeIntermediate}
+   * is {@code false}; otherwise each intermediate result is added to this queue.  Clients can check
+   * the controller's status to determine if no additional results will be enqueued.  However, there
+   * is no guarantee (in general) that a running task will produce an intermediate result before completing.
+   * (The task being run may follow some convention for indicating termination via the queue.)  While the
+   * result is intended to be used only for read operations, given the lack of a nice interface for
+   * separating queue reads from queue writes, the result allows write access to the queue as well.</p>
+   * 
+   * <p>IncrementalTaskController implementations should invoke {@link #stepped} to add items to
+   * the queue, rather than doing so directly.</p>
+   * @throws IllegalStateException  If {@code storeIntermediate} is {@code false}.
+   */
+  public BlockingQueue<I> intermediateQueue() {
+    if (_ignoreIntermediate) { throw new IllegalStateException("No queue is maintained"); }
+    else { return _intermediateQueue; }
+  }
+  
+  /**
+   * Access the ListenerSet responding to the availability of intermediate results.  Registered listeners
+   * will be run for each intermediate result that becomes available.
+   */
+  public ListenerSet<I>.Sink intermediateListeners() {
+    return _intermediateListeners.sink();
+  }
   
   /**
    * Request that the task be paused.  After pausing, the task will not continue executing unless 
    * {@link #start} is invoked.  If the the task is {@code PAUSED} or {@code FINISHED}, has no effect.
-   * @throws IllegalStateException  If the task is {@code CANCELLED}.
+   * @throws CancellationException  If the task is {@code CANCELED}.
    */
   public void pause() {
-    switch (_status) {
-      case RUNNING: doPause(); break;
-      case CANCELED: throw new IllegalStateException("Task is cancelled");
-    }
+    // ideally, this would be implemented as part of the state, but we can't do that without
+    // redefining the entire hierarchy of state classes
+    boolean success = false;
+    do {
+      State s = state.get();
+      if (s instanceof TaskController.RunningState) {
+        success = state.compareAndSet(s, new FreshPausingState());
+        if (success) { doPause(); }
+      }
+      else if (s instanceof TaskController.FreshStartingState) {
+        success = state.compareAndSet(s, new PausedStartingState());
+      }
+      else if (s instanceof IncrementalTaskController.StartedPausingState) {
+        success = state.compareAndSet(s, new FreshPausingState());
+      }
+      else if (s instanceof TaskController.CanceledState) {
+        throw new CancellationException("Task is canceled");
+      }
+      else { // ignore other fresh, finished, pausing, or canceling states
+        success = true;
+      }
+    } while (!success);
   }
   
   /**
-   * Get a list of intermediate results.  Every intermediate result will be available via this method exactly 
-   * once.  If no results are currently available (and the task is not finished), run the
-   * task and block until an intermediate or final result is available.
-   * @throws IllegalStateException  If the task has been {@code CANCELLED}.
-   * @throws WrappedException  Wraps an {@link InterruptedException} if the current thread is interrupted
-   *                           while waiting for a result.  (Other errors that occur during execution will
-   *                           instead be thrown by {@link #value}.)
+   * Begin <em>or resume</em> computation and call {@link #started}.  If starting does not occur immediately
+   * (for example, blocking occurs first), the {@code started()} call may occur in a different thread.
    */
-  public List<I> intermediateValues() {
-    if (_status != Status.CANCELED) {
-      try { return getIntermediateValues(); }
-      catch (InterruptedException e) { throw new WrappedException(e); }
-    }
-    else { throw new IllegalStateException("Task is cancelled"); }
-  }
-  
-  /** Check whether the task has an intermediate value available to return. */
-  public abstract boolean hasIntermediateValue();
+  protected abstract void doStart();
   
   /**
-   * Implementation for pausing the task.  Should cause the status to be updated to {@code PAUSED}
-   * (but need not do so directly).  May assume the current status is {@code RUNNING}.
+   * Pause computation and call {@link #paused}.  If pausing does not occur immediately, the {@code paused()}
+   * call may occur in a different thread.  Will only be called after {@code started()} has been invoked.
+   * When execution should resume again, {@code doStart()} will be invoked (but only after {@code paused()}
+   * has been called). In order to support responsive canceling, a call to {@code doStop()} may occur
+   * concurrently, or before {@code paused()} is called.
    */
   protected abstract void doPause();
   
-  /**
-   * Implementation for accessing intermediate results.  Should block until the task is finished or at least
-   * 1 result is available.  May assume the current status is not {@code CANCELLED}.
-   */
-  protected abstract List<I> getIntermediateValues() throws InterruptedException;
+  protected void paused() {
+    boolean kept = false;
+    State current = state.get();
+    State next = new FreshState();
+    while (current instanceof IncrementalTaskController.PausingState && !kept) {
+      // must loop because a transition between PausingStates could occur concurrently
+      // can use weakCompareAndSet since we're already in a while loop
+      kept = state.weakCompareAndSet(current, next);
+      if (kept) { ((PausingState) current).paused(); }
+      else { current = state.get(); }
+    }
+  }
+  
+  /** Record an intermediate result.  Should only be called while the controller is in a running state. */
+  protected void stepped(I intermediateResult) {
+    if (!_ignoreIntermediate) {
+      try { _intermediateQueue.put(intermediateResult); }
+      // shouldn't block in the current implementation, but if that changes, we should throw the
+      // InterruptedException -- it may have been caused by a doCancel() implementation.
+      catch (InterruptedException e) { throw new WrappedException(e); }
+    }
+    _steps.incrementAndGet();
+    _intermediateListeners.run(intermediateResult);
+  }
+  
+  protected abstract class PausingState extends WaitingState {
+    public Status status() { return Status.RUNNING; }
+    public boolean cancel(boolean stopRunning) {
+      if (stopRunning) {
+        if (state.compareAndSet(this, new CanceledPausingState())) { doStop(); return true; }
+        else { return state.get().cancel(stopRunning); }
+      }
+      else { return false; }
+    }
+    /** Operation to perform when pausing is complete */
+    public abstract void paused();
+  }
+  
+  protected class FreshPausingState extends PausingState {
+    public void start() {
+      if (!state.compareAndSet(this, new StartedPausingState())) { state.get().start(); }
+    }
+    public R get() throws InterruptedException, ExecutionException {
+      start(); return state.get().get();
+    }
+    public R get(long timeout, TimeUnit u) throws InterruptedException, ExecutionException, TimeoutException {
+      start(); return state.get().get(timeout, u);
+    }
+    public void paused() {}
+  }
+  
+  protected class CanceledPausingState extends PausingState {
+    public void start() {} // we're already committed to canceling
+    public boolean cancel(boolean stopRunning) { return stopRunning; }
+    public void paused() { state.get().cancel(true); }
+  }
+  
+  protected class StartedPausingState extends PausingState {
+    public void start() {}
+    public void paused() { state.get().start(); }
+  }
+  
+  protected class PausedStartingState extends StartingState {
+    public void start() {
+      if (!state.compareAndSet(this, new FreshStartingState())) { state.get().start(); }
+    }
+    public void started() { IncrementalTaskController.this.pause(); }
+  }
   
 }

@@ -44,6 +44,8 @@ package edu.rice.cs.plt.tuple;
  */
 public abstract class Option<T> extends Tuple {
   
+  protected Option() {}
+  
   /** Calls the appropriate case in the visitor. */
   public abstract <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor);
   

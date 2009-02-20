@@ -34,89 +34,137 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.swing;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+
 import javax.swing.SwingUtilities;
-import java.lang.reflect.InvocationTargetException;
+
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.WrappedException;
-import edu.rice.cs.plt.concurrent.ConcurrentUtil;
-import edu.rice.cs.plt.concurrent.TaskController;
-import edu.rice.cs.plt.concurrent.TaskController.Status;
-import edu.rice.cs.plt.lambda.Thunk;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
+import edu.rice.cs.plt.concurrent.IncrementalTaskController;
 
 /**
- * A utility class providing some of the functionality of {@code javax.swing.SwingWorker}
- * (first available in Java 6).  Allows a task to be separated into two parts:
- * a working portion that calculates a value in the background, and a GUI portion
- * that executes in the Swing event thread when the working portion is complete.
+ * <p>A utility class providing the core functionality of {@code javax.swing.SwingWorker} (first available
+ * in Java 6), in addition to supporting the IncrementalTaskController interface.  Allows a task to be
+ * separated into two parts: a working portion that calculates a value (or sequence of intermediate values)
+ * in the background, and a GUI portion that executes in the Swing event thread when the working portion is
+ * complete.  Implementations should define {@link #doInBackground} and, optionally, {@link #process}
+ * and {@link #done}.  The {@code doInBackground()} implementation may call {@link #publish}
+ * and {@link #authorizeContinue}; other protected methods should generally be ignored as implementation
+ * details.</p>
+ * 
+ * <p>Implementations should be able to migrate seamlessly to the Java 6 API version by simply changing
+ * the parent class, as long as they stick to methods that are defined in both classes.  This version doesn't
+ * support PropertyChangeListeners, a progress property, the Runnable interface, a {@code getState()} method
+ * (although {@code status()} provides similar information), or an {@code isCancelled()} method that can be 
+ * polled by {@code doInBackground()} ({@code isCancelled()} is defined, but its result is never 
+ * {@code true} before {@code doInBackground()} returns; implementations should instead handle cancellation
+ * by checking for an interrupt).  There is also (currently) no thread pooling &mdash;
+ * each worker runs in a new thread.  This version <em>adds</em> the methods provided by
+ * IncrementalTaskController, as well as {@link #authorizeContinue}, which supports the implementation
+ * of {@link #pause}.</p>
  */
-public abstract class SwingWorker<T> {
+public abstract class SwingWorker<R, I> extends IncrementalTaskController<I, R> {
   
-  private final TaskController<T> _controller;
-  private volatile boolean _cancelled;
+  private CompletionMonitor _continueMonitor;
+  private Thread _workerThread;
   
   public SwingWorker() {
-    Thunk<T> task = new Thunk<T>() {
-      public T value() {
-        try { return doInBackground(); }
-        catch (Throwable t) { throw new WrappedException(t); }
-        finally {
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() { done(); }
-          });
-        }
+    super();
+    _continueMonitor = new CompletionMonitor(false);
+    _workerThread = new Thread("SwingWorker") {
+      public void run() {
+        started();
+        try { finishedCleanly(doInBackground()); }
+        catch (InterruptedException e) { stopped(); }
+        catch (Exception e) { finishedWithTaskException(e); }
+        catch (Throwable t) { finishedWithImplementationException(new WrappedException(t)); }
       }
     };
-    _controller = ConcurrentUtil.computeInProcess(task, false);
-    _cancelled = false;
+    finishListeners().add(new Runnable() {
+      public void run() {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() { done(); }
+        });
+      }
+    });
+    // Defined as a stand-alone class in order to simplify self-references.
+    class IntermediateListener implements Runnable1<I> {
+      public void run(I val) {
+        intermediateListeners().remove(this); // don't respond again until the Swing task runs
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            List<I> vals = new LinkedList<I>();
+            // add listener before drain to ensure a concurrent write isn't missed
+            intermediateListeners().add(IntermediateListener.this);
+            intermediateQueue().drainTo(vals);
+            process(vals);
+          }
+        });
+      }
+    }
+    intermediateListeners().add(new IntermediateListener());
   }
   
+  
+  /*=== Public SwingWorker interface. ===*/
+  
+  public final void execute() { start(); }
+  
+  
+  /*=== Methods to be overridden by the subclass. ===*/ 
+    
   /** Work to be performed in a worker thread. */
-  protected abstract T doInBackground() throws Exception;
+  protected abstract R doInBackground() throws Exception;
+  
+  /** Action to be performed in the event thread when intermediate results are available. */
+  protected void process(List<I> chunks) {}
   
   /** Action to be performed in the event thread when work has completed. */
   protected void done() {}
   
-  /** Begin computation in the worker thread. */
-  public final void execute() {  _controller.start(); }
-
-  /**
-   * Requests that the computation be cancelled.  If the worker thread is blocked,
-   * it will be interrupted.  Workers that wish to support cancellation and that
-   * do not periodically block should instead poll {@link #isCancelled()}.
-   */
-  public final void cancel() { _cancelled = true; _controller.cancel(); }
   
-  /** Returns {@code true} iff {@link #cancel()} has been invoked. */
-  public final boolean isCancelled() { return _cancelled; }
+  /*=== Methods that the subclass may call in doInBackground(). ===*/
   
-  /**
-   * Returns {@code true} if worker thread has completed.  Note that there
-   * may be a delay between when {@code isCancelled()} is {@code true} and
-   * when {@code isDone()} is {@code true}.
-   */
-  public final boolean isDone() {
-    Status status = _controller.status();
-    return status.equals(Status.CANCELED) || status.equals(Status.FINISHED);
+  /** Called by {@link #doInBackground} when intermediate results are available. */
+  protected final void publish(I... chunks) {
+    BlockingQueue<I> queue = intermediateQueue();
+    try {
+      for (I val : chunks) { queue.put(val); }
+    }
+    catch (InterruptedException e) { throw new WrappedException(e); }
   }
   
   /**
-   * Get the value of the computation.  Unless {@code isDone()} is {@code true},
-   * blocks until the worker task completes.
-   * @throws IllegalStateException  If the task was cancelled.
-   * @throws InterruptedException  If this thread is interrupted while waiting for a result.
-   * @throws InvocationTargetException  Wraps any exceptions thrown by {@link #doInBackground()}.
+   * <p>Called by {@link #doInBackground} to ensure that the task has not been paused or canceled.
+   * If paused, this method blocks until the task is restarted.  If canceled, throws an
+   * InterruptedException.</p>
+   * 
+   * <p>Tasks that wish to maintain migration compatibility with {@code javax.swing.SwingWorker} cannot
+   * call this method or support pausing.  Instead, they should simply respond to an interrupt when canceled
+   * (checking, for example, via {@link Thread#interrupted}).</p> 
    */
-  public final T get() throws InterruptedException, InvocationTargetException {
-    if (_cancelled) { throw new IllegalStateException("Task was cancelled"); }
-    try { return _controller.value(); }
-    catch (WrappedException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof InterruptedException) {throw (InterruptedException) cause; }
-      else if (cause instanceof InvocationTargetException && cause.getCause() != null) {
-        // The task wrapped the exception, so we must unwrap it
-        throw new InvocationTargetException(cause.getCause());
-      }
-      else { throw e; }
+  protected void authorizeContinue() throws InterruptedException {
+    if (Thread.interrupted()) { throw new InterruptedException(); }
+    if (!_continueMonitor.isSignaled()) {
+      paused();
+      _continueMonitor.ensureSignaled();
+      started();
     }
   }
+  
+  
+  /*=== Implementation of IncrementalTaskController. ===*/
+  
+  
+  protected final void doStart() {
+    _continueMonitor.signal();
+    if (_workerThread.getState() == Thread.State.NEW) { _workerThread.start(); }
+  }
+  protected final void doPause() { _continueMonitor.reset(); }
+  protected final void doStop() { _workerThread.interrupt(); }
+  
   
 }

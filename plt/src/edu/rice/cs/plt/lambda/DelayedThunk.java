@@ -43,7 +43,7 @@ import java.io.Serializable;
  * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
  * only if the wrapped object is serializable.</p>
  */
-public class DelayedThunk<R> implements Box<R>, Serializable {
+public class DelayedThunk<R> implements Box<R>, ResolvingThunk<R>, Serializable {
   
   private R _val;
   private boolean _initialized;
@@ -72,7 +72,9 @@ public class DelayedThunk<R> implements Box<R>, Serializable {
     _initialized = true;
   }
   
-  /** Call the constructor (allows {@code T} to be inferred) */
+  public boolean isResolved() { return _initialized; }
+  
+  /** Call the constructor (allows {@code R} to be inferred) */
   public static <R> DelayedThunk<R> make() { return new DelayedThunk<R>(); }
   
 }

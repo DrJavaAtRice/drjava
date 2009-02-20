@@ -35,6 +35,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.collect;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.Option;
@@ -141,6 +143,20 @@ public final class CollectUtil {
     private final Comparator<? super T> _comp;
     public CustomTreeSetFactory(Comparator<? super T> comp) { _comp = comp; }
     public Set<T> value() { return new TreeSet<T>(_comp); }
+  }
+  
+  /**
+   * Get a factory that produces CopyOnWriteArraySets by invoking the empty CopyOnWriteArraySet constructor.
+   * @see CopyOnWriteArraySet#CopyOnWriteArraySet()
+   */
+  @SuppressWarnings("unchecked") public static <T> Thunk<Set<T>> copyOnWriteArraySetFactory() {
+    return (Thunk<Set<T>>) (Thunk<?>) CopyOnWriteArraySetFactory.INSTANCE;
+  }
+  
+  private static final class CopyOnWriteArraySetFactory<T> implements Thunk<Set<T>>, Serializable {
+    public static final CopyOnWriteArraySetFactory<Object> INSTANCE = new CopyOnWriteArraySetFactory<Object>();
+    private CopyOnWriteArraySetFactory() {}
+    public Set<T> value() { return new CopyOnWriteArraySet<T>(); }
   }
   
   /**
@@ -276,6 +292,20 @@ public final class CollectUtil {
   }
   
   /**
+   * Get a factory that produces CopyOnWriteArraySets by invoking the empty CopyOnWriteArraySet constructor.
+   * @see CopyOnWriteArraySet#CopyOnWriteArraySet()
+   */
+  @SuppressWarnings("unchecked") public static <T> Thunk<List<T>> copyOnWriteArrayListFactory() {
+    return (Thunk<List<T>>) (Thunk<?>) CopyOnWriteArrayListFactory.INSTANCE;
+  }
+  
+  private static final class CopyOnWriteArrayListFactory<T> implements Thunk<List<T>>, Serializable {
+    public static final CopyOnWriteArrayListFactory<Object> INSTANCE = new CopyOnWriteArrayListFactory<Object>();
+    private CopyOnWriteArrayListFactory() {}
+    public List<T> value() { return new CopyOnWriteArrayList<T>(); }
+  }
+  
+  /**
    * Create an immutable {@code PredicateSet} based on the given elements.  May depend on a valid
    * {@code hashCode()} implementation.
    */
@@ -303,7 +333,7 @@ public final class CollectUtil {
     }
   }
   
-  /** Prodce an empty or singleton set based on the given Option. */
+  /** Produce an empty or singleton set based on the given Option. */
   public static <T> PredicateSet<T> makeSet(Option<? extends T> opt) {
     if (opt.isSome()) { return new SingletonSet<T>(opt.unwrap()); }
     else { return EmptySet.make(); }
@@ -539,6 +569,22 @@ public final class CollectUtil {
     return makeArrayList(list);
   }
 
+  /**
+   * Wrap {@code s} as a thread-safe set that produces snapshots to support concurrent iteration.
+   * @see SnapshotSynchronizedSet
+   */
+  public static <T> SnapshotSynchronizedSet<T> snapshotSynchronized(Set<T> s) {
+    return new SnapshotSynchronizedSet<T>(s);
+  }
+  
+  /**
+   * Wrap {@code l} as a thread-safe list that produces snapshots to support concurrent iteration.
+   * @see SnapshotSynchronizedList
+   */
+  public static <T> SnapshotSynchronizedList<T> snapshotSynchronized(List<T> l) {
+    return new SnapshotSynchronizedList<T>(l);
+  }
+  
   /** Produce a lazy union of two sets.  Size-related operations have poor performance. */
   public static <T> PredicateSet<T> union(Set<? extends T> s1, Set<? extends T> s2) {
     return new UnionSet<T>(s1, s2);
@@ -712,6 +758,18 @@ public final class CollectUtil {
       for (Object elt : elts) { result |= c.remove(elt); }
       return result;
     }
+  }
+
+  /**
+   * Remove all but the given elements from a collection.  Unlike {@link Collection#retainAll}, defined for
+   * arbitrary {@code Iterable}s.  When possible, delegates to {@code c.retainAll()}.
+   * @return  {@code true} if {@code c} changed as a result of the call
+   */
+  public static boolean retainAll(Collection<?> c, Iterable<?> elts) {
+    if (elts instanceof Collection<?>) {
+      return c.retainAll((Collection<?>) elts);
+    }
+    else { return c.retainAll(makeSet(elts)); }
   }
 
   /**

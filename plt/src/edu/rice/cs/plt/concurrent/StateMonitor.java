@@ -35,6 +35,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.concurrent;
 
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.Predicate;
@@ -102,6 +104,32 @@ public class StateMonitor<T> implements Box<T>, Serializable {
   }
   
   /**
+   * Ensures that the state equals {@code expected} before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in milliseconds.
+   * @return  The state at the time this method returns (always equal to {@code expected}).
+   */
+  public T ensureState(T expected, long timeout) throws InterruptedException, TimeoutException {
+    return ensureState(expected, timeout, TimeUnit.MILLISECONDS);
+  }
+  
+  /**
+   * Ensures that the state equals {@code expected} before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   * @return  The state at the time this method returns (always equal to {@code expected}).
+   */
+  public synchronized T ensureState(T expected, long timeout, TimeUnit unit)
+      throws InterruptedException, TimeoutException {
+    if (!inState(expected)) {
+      long timeoutTime = ConcurrentUtil.futureTimeNanos(timeout, unit);
+      do { ConcurrentUtil.waitUntilNanos(this, timeoutTime); } while (!inState(expected));
+    }
+    return _state;
+  }
+  
+  /**
    * Tries to ensure that the state equals {@code expected} before continuing.  Blocks if necessary.  Stops waiting
    * if interrupted.
    * @return  The state at the time this method returns (if not interrupted, this is equal to {@code expected}).
@@ -114,36 +142,62 @@ public class StateMonitor<T> implements Box<T>, Serializable {
   /**
    * Tries to ensure that the state equals {@code expected} before continuing.  Blocks if necessary.  If interrupted
    * or if the timeout is reached, stops waiting.
-   * @param timeout  Maximum wait time, in milliseconds.  Must be positive or zero (where zero signals, as in
-   *                 {@link Object#wait(long)}, that no timeout should be used).
-   * @return  The state at the time this method returns (barring an interrupt or timeout, this is equal to
-   *          {@code expected}).
+   * @param timeout  Maximum wait time, in milliseconds.
+   * @return  The state at the time this method returns (barring an interrupt or timeout, this is equal
+   *          to {@code expected}).
    */
-  public synchronized T attemptEnsureState(T expected, long timeout) {
-    if (timeout == 0) { return attemptEnsureState(expected); }
-    else if (inState(expected)) { return _state; }
-    else {
-      // must record expected wake-up time to account for spurious wake-ups
-      long timeoutTime = System.currentTimeMillis() + timeout;
-      try {
-        do {
-          this.wait(timeout);
-          long currentTime = System.currentTimeMillis();
-          if (currentTime >= timeoutTime) { break; } // timeout has been reached
-          else { timeout = timeoutTime - currentTime; }
-        } while (!inState(expected));
-        return _state;
-      }
-      catch (InterruptedException e) { return _state; }
-    }
+  public T attemptEnsureState(T expected, long timeout) {
+    try { ensureState(expected, timeout, TimeUnit.MILLISECONDS); return _state; }
+    catch (InterruptedException e) { return _state; }
+    catch (TimeoutException e) { return _state; }
   }
   
+  /**
+   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If interrupted
+   * or if the timeout is reached, stops waiting.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   * @return  The state at the time this method returns (barring an interrupt or timeout, this is equal
+   *          to {@code expected}).
+   */
+  public T attemptEnsureState(T expected, long timeout, TimeUnit unit) {
+    try { ensureState(expected, timeout, unit); return _state; }
+    catch (InterruptedException e) { return _state; }
+    catch (TimeoutException e) { return _state; }
+  }
+
   /**
    * Ensures that the state does not equal {@code wrong} before continuing.  Blocks if necessary.
    * @return  The state at the time this method returns (never equal to {@code wrong}).
    */
   public synchronized T ensureNotState(T wrong) throws InterruptedException {
     while (inState(wrong)) { this.wait(); }
+    return _state;
+  }
+  
+  /**
+   * Ensures that the state does not equal {@code wrong} before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in milliseconds.
+   * @return  The state at the time this method returns (always equal to {@code expected}).
+   */
+  public T ensureNotState(T wrong, long timeout) throws InterruptedException, TimeoutException {
+    return ensureNotState(wrong, timeout, TimeUnit.MILLISECONDS);
+  }
+  
+  /**
+   * Ensures that the state does not equal {@code wrong} before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   * @return  The state at the time this method returns (always equal to {@code expected}).
+   */
+  public synchronized T ensureNotState(T wrong, long timeout, TimeUnit unit)
+      throws InterruptedException, TimeoutException {
+    if (inState(wrong)) {
+      long timeoutTime = ConcurrentUtil.futureTimeNanos(timeout, unit);
+      do { ConcurrentUtil.waitUntilNanos(this, timeoutTime); } while (inState(wrong));
+    }
     return _state;
   }
   
@@ -159,31 +213,32 @@ public class StateMonitor<T> implements Box<T>, Serializable {
   
   /**
    * Tries to ensure that the state does not equal {@code wrong} before continuing.  Blocks if necessary.
-   * If interrupted or if the timeout is reached, stops waiting.
-   * @param timeout  Maximum wait time, in milliseconds.  Must be positive or zero (where zero signals, as in
-   *                 {@link Object#wait(long)}, that no timeout should be used).
-   * @return  The state at the time this method returns (barring an interrupt or timeout, this is not equal to
-   *          {@code wrong}).
+   * If the wait is interrupted or the timeout is reached, stops waiting.
+   * @param timeout  Maximum wait time, in milliseconds.
+   * @return  The state at the time this method returns (barring an interrupt or timeout, this is not equal
+   *          to {@code wrong}).
    */
-  public synchronized T attemptEnsureNotState(T wrong, long timeout) {
-    if (timeout == 0) { return attemptEnsureNotState(wrong); }
-    else if (!inState(wrong)) { return _state; }
-    else {
-      // must record expected wake-up time to account for spurious wake-ups
-      long timeoutTime = System.currentTimeMillis() + timeout;
-      try {
-        do {
-          this.wait(timeout);
-          long currentTime = System.currentTimeMillis();
-          if (currentTime >= timeoutTime) { break; } // timeout has been reached
-          else { timeout = timeoutTime - currentTime; }
-        } while (inState(wrong));
-        return _state;
-      }
-      catch (InterruptedException e) { return _state; }
-    }
+  public T attemptEnsureNotState(T expected, long timeout) {
+    try { ensureNotState(expected, timeout, TimeUnit.MILLISECONDS); return _state; }
+    catch (InterruptedException e) { return _state; }
+    catch (TimeoutException e) { return _state; }
   }
   
+  /**
+   * Tries to ensure that the state does not equal {@code wrong} before continuing.  Blocks if necessary.
+   * If the wait is interrupted or the timeout is reached, stops waiting.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   * @return  The state at the time this method returns (barring an interrupt or timeout, this is not equal
+   *          to {@code wrong}).
+   */
+  public T attemptEnsureNotState(T expected, long timeout, TimeUnit unit) {
+    try { ensureNotState(expected, timeout, unit); return _state; }
+    catch (InterruptedException e) { return _state; }
+    catch (TimeoutException e) { return _state; }
+  }
+
+
   /**
    * Ensures that {@code predicate} accepts the current state before continuing.  Blocks if necessary.
    * @return  The state at the time this method returns (always a state accepted by {@code predicate}).
@@ -193,6 +248,33 @@ public class StateMonitor<T> implements Box<T>, Serializable {
     return _state;
   }
   
+  /**
+   * Ensures that {@code predicate} accepts the current state before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in milliseconds.
+   * @return  The state at the time this method returns (always a state accepted by {@code predicate}).
+   */
+  public T ensurePredicate(Predicate<? super T> predicate, long timeout)
+      throws InterruptedException, TimeoutException {
+    return ensurePredicate(predicate, timeout, TimeUnit.MILLISECONDS);
+  }
+  
+  /**
+   * Ensures that {@code predicate} accepts the current state before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   * @return  The state at the time this method returns (always a state accepted by {@code predicate}).
+   */
+  public synchronized T ensurePredicate(Predicate<? super T> predicate, long timeout, TimeUnit unit)
+      throws InterruptedException, TimeoutException {
+    if (!predicate.contains(_state)) {
+      long timeoutTime = ConcurrentUtil.futureTimeNanos(timeout, unit);
+      do { ConcurrentUtil.waitUntilNanos(this, timeoutTime); } while (!predicate.contains(_state));
+    }
+    return _state;
+  }
+
   /**
    * Tries to ensure that {@code predicate} accepts the current state before continuing.  Blocks if necessary.
    * Stops waiting if interrupted.
@@ -205,35 +287,34 @@ public class StateMonitor<T> implements Box<T>, Serializable {
   
   /**
    * Tries to ensure that {@code predicate} accepts the current state before continuing.  Blocks if necessary.
-   * If interrupted or if the timeout is reached, stops waiting.
-   * @param timeout  Maximum wait time, in milliseconds.  Must be positive or zero (where zero signals, as in
-   *                 {@link Object#wait(long)}, that no timeout should be used).
-   * @return  The state at the time this method returns (barring an interrupt or timeout, this was accepted by
-   *          {@code predicate}).
+   * If the wait is interrupted or the timeout is reached, stops waiting.
+   * @param timeout  Maximum wait time, in milliseconds.
+   * @return  The state at the time this method returns (barring an interrupt or timeout, this was accepted
+   *          by {@code predicate}).
    */
-  public synchronized T attemptEnsurePredicate(Predicate<? super T> predicate, long timeout) {
-    if (timeout == 0) { return attemptEnsurePredicate(predicate); }
-    else if (predicate.contains(_state)) { return _state; }
-    else {
-      // must record expected wake-up time to account for spurious wake-ups
-      long timeoutTime = System.currentTimeMillis() + timeout;
-      try {
-        do {
-          this.wait(timeout);
-          long currentTime = System.currentTimeMillis();
-          if (currentTime >= timeoutTime) { break; } // timeout has been reached
-          else { timeout = timeoutTime - currentTime; }
-        } while (!predicate.contains(_state));
-        return _state;
-      }
-      catch (InterruptedException e) { return _state; }
-    }
+  public T attemptEnsurePredicate(Predicate<? super T> predicate, long timeout) {
+    try { ensurePredicate(predicate, timeout, TimeUnit.MILLISECONDS); return _state; }
+    catch (InterruptedException e) { return _state; }
+    catch (TimeoutException e) { return _state; }
   }
   
+  /**
+   * Tries to ensure that {@code predicate} accepts the current state before continuing.  Blocks if necessary.
+   * If the wait is interrupted or the timeout is reached, stops waiting.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   * @return  The state at the time this method returns (barring an interrupt or timeout, this was accepted
+   *          by {@code predicate}).
+   */
+  public T attemptEnsurePredicate(Predicate<? super T> predicate, long timeout, TimeUnit unit) {
+    try { ensurePredicate(predicate, timeout, unit); return _state; }
+    catch (InterruptedException e) { return _state; }
+    catch (TimeoutException e) { return _state; }
+  }
+
   /** Test whether the current state matches {@code expected}.  Helper method for performing null-aware comparison. */
   private boolean inState(T expected) {
-    T current = _state; // only read once, to allow for concurrent changes
-    return (current == null) ? (expected == null) : current.equals(expected);
+    return (expected == null) ? (_state == null) : expected.equals(_state);
   }
   
 }

@@ -41,11 +41,14 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Map;
-import java.util.List;
-import java.util.LinkedList;
-import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import edu.rice.cs.plt.lambda.*;
-import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.io.VoidOutputStream;
 
@@ -83,249 +86,285 @@ public final class ConcurrentUtil {
     }
   }
   
-  /** Perform useless computation for the given amount of time (millisconds), or until an interrupt occurs. */
+  /** Perform useless computation for the given amount of time (milliseconds), or until an interrupt occurs. */
   public static void work(long delay) { WORKING_RUNNABLE.run(delay); }
   
   /**
+   * Get the expected value of {@link System#nanoTime} after the given period has passed.  Negative values
+   * for {@code time} return a time from the past.  Note that, since an overflow wrap-around may occur
+   * at any time in the system's nanosecond clock, comparisons between the current time and this method's
+   * result are non-trivial.  For example, to test whether the result time {@code future} has passed:
+   * {@code System.nanoTime() - future > 0}.  (This checks that the current time is within a Long.MAX_VALUE range
+   * <em>after</em> {@code future}, regardless of the absolute numeric values.  We can infer that (most likely)
+   * {@code future} is less than 292 years in the past, or (unlikely) future is more than 292 years in the future.)
+   */
+  public static long futureTimeNanos(long time, TimeUnit unit) {
+    return System.nanoTime() + unit.toNanos(time);
+  }
+  
+  /**
+   * Get the expected value of {@link System#currentTimeMillis} after the given period of time has passed.
+   * Negative values for {@code time} return a time from the past.  While the notes about overflow in
+   * {@link #futureTimeNanos} apply in principal here, an overflow of the 64-bit millisecond clock happens
+   * once every 600 million years, with the year 1970 at 0.  So it's safe to use simple operators to make
+   * comparisons between the current time and this method's result.
+   */
+  public static long futureTimeMillis(long time, TimeUnit unit) {
+    return System.currentTimeMillis() + unit.toMillis(time);
+  }
+  
+  /**
+   * If the given time (based on {@link System#currentTimeMillis}) has passed, throw a TimeoutException.
+   * Otherwise, invoke {@link Object#wait(long)} on the given object, which may return due to
+   * a {@code notify()} call, the timeout being reached, or a spurious wake-up.  To distinguish between
+   * these possibilities, clients should wrap this call in a while loop:
+   * {@code long t = futureTimeMillis(...); while (!condition) waitUntilMillis(lock, t);}
+   * This loop either completes if the condition is satisfied or throws an appropriate exception
+   * due to an interrupt or timeout.
+   * @param obj  Object whose {@code wait()} method will be invoked.  Must be locked by the current thread.
+   * @param futureTime  A millisecond time value based on {@code System.currentTimeMillis()} after which
+   *                    this method should no longer invoke {@code obj.wait()}.
+   * @throws InterruptedException  If the wait is interrupted.
+   * @throws TimeoutException  If, at invocation time, {@code futureTime} is in the past.
+   * @see #futureTimeMillis
+   */
+  public static void waitUntilMillis(Object obj, long futureTime) throws InterruptedException, TimeoutException {
+    long delta = futureTime - System.currentTimeMillis();
+    if (delta > 0) { obj.wait(delta); }
+    else { throw new TimeoutException(); }
+  }
+  
+  /**
+   * If the given time (based on {@link System#nanoTime}) has passed, throw a TimeoutException.
+   * Otherwise, invoke {@link Object#wait(long, int)} on the given object, which may return due to
+   * a {@code notify()} call, the timeout being reached, or a spurious wake-up.  To distinguish between
+   * these possibilities, clients should wrap this call in a while loop:
+   * {@code long t = futureTimeNanos(...); while (!condition) waitUntilNanos(lock, t);}
+   * This loop either completes if the condition is satisfied or throws an appropriate exception
+   * due to an interrupt or timeout.
+   * @param obj  Object whose {@code wait()} method will be invoked.  Must be locked by the current thread.
+   * @param futureTime  A nanosecond time value based on {@code System.nanoTime()} after which
+   *                    this method should no longer invoke {@code obj.wait()}.
+   * @throws InterruptedException  If the wait is interrupted.
+   * @throws TimeoutException  If, at invocation time, {@code futureTime} is in the past.
+   * @see #futureTimeNanos
+   */
+  public static void waitUntilNanos(Object obj, long futureTime) throws InterruptedException, TimeoutException {
+    long delta = futureTime - System.nanoTime();
+    if (delta > 0) { TimeUnit.NANOSECONDS.timedWait(obj, delta); }
+    else { throw new TimeoutException(); }
+  }
+  
+  /** Wrap a thunk in a Callable interface.  The {@code call()} method will not throw checked exceptions. */
+  public static <T> Callable<T> asCallable(Thunk<? extends T> thunk) {
+    return new ThunkCallable<T>(thunk);
+  }
+  
+  private static final class ThunkCallable<T> implements Callable<T>, Serializable {
+    private final Thunk<? extends T> _thunk;
+    public ThunkCallable(Thunk<? extends T> thunk) { _thunk = thunk; }
+    public T call() { return _thunk.value(); }
+  }
+  
+  /**
+   * Wrap a Future in a TaskController interface (which is also a Thunk).  The state of the controller
+   * corresponds to the state of the Future; since Futures have no notion of "starting," the result is
+   * automatically "running" &mdash; it is never in a "paused" state.
+   */
+  public static <T> TaskController<T> asTaskController(Future<? extends T> future) {
+    TaskController<T> result = new FutureTaskController<T>(LambdaUtil.valueLambda(future));
+    result.start();
+    return result;
+  }
+  
+  /**
+   * Wrap a Future produced by a Thunk in a TaskController interface (which is also a Thunk).  "Starting"
+   * the resulting controller corresponds to invoking {@code futureThunk}; subsequently, the state of
+   * the controller corresponds to the state of the Future.
+   */
+  public static <T> TaskController<T> asTaskController(Thunk<? extends Future<? extends T>> futureThunk) {
+    return new FutureTaskController<T>(futureThunk);
+  }
+  
+  /**
+   * A simple Executor that creates a new thread for each task; threads are identified by the name
+   * {@code THREAD_EXECUTOR-n} for some n.
+   */
+  public static final Executor THREAD_EXECUTOR = new Executor() {
+    private int count = 0;
+    public void execute(Runnable r) {
+      new Thread(r, "THREAD_EXECUTOR-" + (++count)).start();
+    }
+  };
+  
+  /** A trivial Executor that simply runs each task directly.  {@code execute()} blocks until the task completes. */
+  public static final Executor DIRECT_EXECUTOR = new Executor() {
+    public void execute(Runnable r) { r.run(); }
+  };
+  
+  /**
    * Execute the given task in a separate thread, and provide access to its result.  This is a
    * convenience method that sets {@code start} to {@code true}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @see ExecutorTaskController
    */
   public static TaskController<Void> runInThread(Runnable task) {
-    return computeInThread(LambdaUtil.asThunk(task), true);
+    return computeWithExecutor(LambdaUtil.asThunk(task), THREAD_EXECUTOR, true);
   }
   
   /**
    * Execute the given task in a separate thread, and provide access to its result.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
+   * @see ExecutorTaskController
    */
   public static TaskController<Void> runInThread(Runnable task, boolean start) {
-    return computeInThread(LambdaUtil.asThunk(task), start);
+    return computeWithExecutor(LambdaUtil.asThunk(task), THREAD_EXECUTOR, start);
   }
   
   /**
    * Execute the given task in a separate thread, and provide access to its result.  This is a
    * convenience method that sets {@code start} to {@code true}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @see ExecutorTaskController
    */
   public static <R> TaskController<R> computeInThread(Thunk<? extends R> task) {
-    return computeInThread(task, true);
+    return computeWithExecutor(task, THREAD_EXECUTOR, true);
   }
   
   /**
    * Execute the given task in a separate thread, and provide access to its result.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
+   * @see ExecutorTaskController
    */
-  public static <R> TaskController<R> computeInThread(final Thunk<? extends R> task, boolean start) {
-    final ThreadController<R> controller = new ThreadController<R>();
-    Runnable runner = new Runnable() {
-      public void run() {
-        R result = null;
-        Throwable exception = null; // *Only* exceptions thrown by the task
-        try { result = task.value(); }
-        catch (Throwable e) { exception = e; }
-        controller.done(result, exception);
-      }
-    };
-    controller.setThread(new Thread(runner, "ConcurrentUtil task"));
-    if (start) { controller.start(); }
-    return controller;
-  }
-  
-  // Declared statically to allow cancel to discard the parameters.
-  // Designed to be thread-safe when accessed *only* by the task thread and a single controlling thread.
-  private static class ThreadController<R> extends TaskController<R> {
-    private Thread _t;
-    private volatile R _result; // set in the task thread
-    private volatile Throwable _exception; // set in the task thread
-    
-    public ThreadController() {}
-    
-    // allows for circular dependency between thread and controller
-    protected void setThread(Thread t) { _t = t; }
-    
-    // invoked by the task thread
-    protected void done(R result, Throwable exception) {
-      // may occur after a cancel()
-      if (_status != Status.CANCELED) {
-        _result = result;
-        _exception = exception;
-        _status = Status.FINISHED;
-      }
-    }
-    
-    protected void doStart() { _t.start(); _status = Status.RUNNING; }
-    
-    protected void doCancel() {
-      _status = Status.CANCELED;
-      _t.interrupt();
-      _t = null;
-      _result = null;
-      _exception = null;
-    }
-    
-    protected R getValue() throws InterruptedException, InvocationTargetException {
-      start(); // make sure the thread is running
-      _t.join(); // guarantees that the result and exception are set
-      if (_exception != null) { throw new InvocationTargetException(_exception); }
-      else { return _result; }
-    }
-    
+  public static <R> TaskController<R> computeInThread(Thunk<? extends R> task, boolean start) {
+    return computeWithExecutor(task, THREAD_EXECUTOR, start);
   }
   
   /**
-   * Execute the given task in a separate thread, and provide access to its result.  This is a convenience method
-   * that sets {@code start} to {@code true} and {@code ignoreIntermediateResults} to {@code false}.
+   * Execute the given task in a separate thread, and provide access to its results.  This is a convenience method
+   * that sets {@code start} to {@code true} and {@code ignoreIntermediate} to {@code false}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @see ExecutorIncrementalTaskController
    */
   public static <I, R> IncrementalTaskController<I, R> computeInThread(IncrementalTask<? extends I, ? extends R> task) {
-    return computeInThread(task, true, false);
+    return computeWithExecutor(task, THREAD_EXECUTOR, true, false);
   }
   
   /**
-   * Execute the given task in a separate thread, and provide access to its result.  This is a convenience method
-   * that sets {@code ignoreIntermediateResults} to {@code false}.
-   */
-  public static <I, R>
-    IncrementalTaskController<I, R> computeInThread(IncrementalTask<? extends I, ? extends R> task, boolean start) {
-    return computeInThread(task, start, false);
-  }
-  
-  /**
-   * Execute the given task in a separate thread, and provide access to its result.
+   * Execute the given task in a separate thread, and provide access to its results.  This is a convenience method
+   * that sets {@code ignoreIntermediate} to {@code false}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
-   * @param ignoreIntermediateResults  If {@code true}, all intermediate results will be immediately discarded.
+   * @see ExecutorIncrementalTaskController
    */
   public static <I, R>
-    IncrementalTaskController<I, R> computeInThread(final IncrementalTask<? extends I, ? extends R> task, 
-                                                    boolean start, final boolean ignoreIntermediateResults) {
-    final IncrementalThreadController<I, R> controller = new IncrementalThreadController<I, R>(start);
-    Runnable runner = new Runnable() {
-      public void run() {
-        R result = null;
-        I intermediate = null;
-        Throwable exception = null; // *Only* exceptions thrown by the task
-        try {
-          while (exception == null && !task.isFinished()) {
-            controller.authorizeContinue();
-            try { intermediate = task.step(); }
-            catch (Throwable e) { exception = e; }
-            if (exception == null && !ignoreIntermediateResults) { controller.addResult(intermediate); }
-          }
-          if (exception == null) {
-            controller.authorizeContinue();
-            try { result = task.value(); }
-            catch (Throwable e) { exception = e; }
-          }
-          controller.done(result, exception);
-        }
-        catch (InterruptedException e) { /* Task has been canceled.*/ controller.aborting(); }
-      }
-    };
-    Thread t = new Thread(runner, "ConcurrentUtil task");
-    controller.setThread(t);
-    t.start();
-    return controller;
+      IncrementalTaskController<I, R> computeInThread(IncrementalTask<? extends I, ? extends R> task, boolean start) {
+    return computeWithExecutor(task, THREAD_EXECUTOR, start, false);
   }
   
-  // Declared statically to allow cancel to discard the parameters.
-  // Designed to be thread-safe when accessed *only* by the task thread and a single controlling thread.
-  private static class IncrementalThreadController<I, R> extends IncrementalTaskController<I, R> {
-    private Thread _t; // only accessed by controlling thread
-    private CompletionMonitor _continueMonitor; // only changed when canceling
-    // only changed when canceling; accesses should lock (to prevent modifying the list after it's returned)
-    private Box<List<I>> _intermediateResults;
-    private volatile R _result;
-    private volatile Throwable _exception;
-    
-    public IncrementalThreadController(boolean start) {
-      _continueMonitor = new CompletionMonitor(start);
-      _intermediateResults = new ConcurrentBox<List<I>>(new LinkedList<I>());
-      if (start) { _status = Status.RUNNING; }
-    }
-    
-    // allows for circular dependency between thread and controller
-    protected void setThread(Thread t) { _t = t; }
-    
-    protected void authorizeContinue() throws InterruptedException {
-      if (!_continueMonitor.isSignaled()) {
-        _status = Status.PAUSED;
-        debug.log("Waiting for signal to continue");
-        _continueMonitor.ensureSignaled();
-        debug.log("Received signal to continue");
-        _status = Status.RUNNING;
-      }
-    }
-    
-    protected void addResult(I result) {
-      synchronized (_intermediateResults) {
-        _intermediateResults.value().add(result);
-        _intermediateResults.notifyAll();
-      }
-    }
-    
-    // invoked by the task thread
-    protected void done(R result, Throwable exception) {
-      _result = result;
-      _exception = exception;
-      _status = Status.FINISHED;
-      synchronized (_intermediateResults) {
-        _intermediateResults.notifyAll(); // in case we're blocking for an intermediate result
-      }
-    }
-    
-    // Assumes that the task thread will no longer access the controller
-    protected void aborting() {
-      _status = Status.CANCELED;
-      _t = null;
-      _continueMonitor = null;
-      _intermediateResults = null;
-      _result = null;
-      _exception = null;
-    }
-    
-    protected void doStart() { _continueMonitor.signal(); }
-    protected void doPause() { _continueMonitor.reset(); }
-    
-    protected void doCancel() {
-      if (_status == Status.FINISHED) {
-        // thread is finished and won't call aborting()
-        aborting();
-      }
-      else {
-        _continueMonitor.reset();
-        _t.interrupt();
-      }
-    }
-    
-    protected List<I> getIntermediateValues() throws InterruptedException {
-      synchronized (_intermediateResults) {
-        while (_intermediateResults.value().isEmpty() && _status != Status.FINISHED) {
-          _continueMonitor.signal(); // make sure we're not permanently paused
-          debug.log("Waiting for intermediate results");
-          _intermediateResults.wait();
-          debug.log("Done waiting for intermediate results");
-        }
-        List<I> result = _intermediateResults.value();
-        _intermediateResults.set(new LinkedList<I>());
-        return result;
-      }
-    }
-    
-    public boolean hasIntermediateValue() {
-      synchronized (_intermediateResults) { return ! _intermediateResults.value().isEmpty(); }
-    }
-    
-    protected R getValue() throws InterruptedException, InvocationTargetException {
-      _continueMonitor.signal(); // make sure we're not permanently paused
-      _t.join(); // guarantees that the result and exception are set; assumes no concurrent cancel
-      if (_exception != null) { throw new InvocationTargetException(_exception); }
-      else { return _result; }
-    }
-    
+  /**
+   * Execute the given task in a separate thread, and provide access to its results.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   * @param ignoreIntermediate  If {@code true}, all intermediate results will be immediately discarded.
+   * @see ExecutorIncrementalTaskController
+   */
+  public static <I, R>
+    IncrementalTaskController<I, R> computeInThread(IncrementalTask<? extends I, ? extends R> task, 
+                                                    boolean start, boolean ignoreIntermediate) {
+    return computeWithExecutor(task, THREAD_EXECUTOR, start, ignoreIntermediate);
   }
-
-
+  
+  /**
+   * Execute the given task with {@code exec} and provide access to its result.  This is a convenience
+   * method that sets {@code start} to {@code true}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param exec  An executor which is given the task to run when the controller is started.
+   * @see ExecutorTaskController
+   */
+  public static <R> TaskController<R> computeWithExecutor(Thunk<? extends R> task, Executor exec) {
+    return computeWithExecutor(task, exec, true);
+  }
+    
+  /**
+   * Execute the given task with {@code exec} and provide access to its result.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param exec  An executor which is given the task to run when the controller is started.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   * @see ExecutorTaskController
+   */
+  public static <R> TaskController<R> computeWithExecutor(Thunk<? extends R> task, Executor exec, boolean start) {
+    ExecutorTaskController<R> result = new ExecutorTaskController<R>(exec, task);
+    if (start) { result.start(); }
+    return result;
+  }
+  
+  /**
+   * Execute the given task with {@code exec} and provide access to its result.  This is a convenience method
+   * that sets {@code start} to {@code true} and {@code ignoreIntermediate} to {@code false}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param exec  An executor which is given the task to run when the controller is started.
+   * @see ExecutorIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeWithExecutor(IncrementalTask<? extends I, ? extends R> task,
+                                                          Executor exec) {
+    return computeWithExecutor(task, exec, true, false);
+  }
+  
+  /**
+   * Execute the given task with {@code exec} and provide access to its result.  This is a convenience method
+   * that sets {@code ignoreIntermediate} to {@code false}.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param exec  An executor which is given the task to run when the controller is started.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   * @see ExecutorIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeWithExecutor(IncrementalTask<? extends I, ? extends R> task, 
+                                                          Executor exec, boolean start) {
+    return computeWithExecutor(task, exec, start, false);
+  }
+  
+  /**
+   * Execute the given task with {@code exec} and provide access to its result.
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param exec  An executor which is given the task to run when the controller is started.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   * @param ignoreIntermediate  If {@code true}, all intermediate results will be immediately discarded.
+   * @see ExecutorIncrementalTaskController
+   */
+  public static <I, R>
+    IncrementalTaskController<I, R> computeWithExecutor(IncrementalTask<? extends I, ? extends R> task, 
+                                                        Executor exec, boolean start, boolean ignoreIntermediate) {
+    IncrementalTaskController<I, R> result =
+      new ExecutorIncrementalTaskController<I, R>(exec, task, ignoreIntermediate);
+    if (start) { result.start(); }
+    return result;
+  }
+  
+  
   /**
    * <p>Execute the given task in a separate process and provide access to its result.  The task and the
    * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
@@ -333,11 +372,12 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT}, sets {@code start} to {@code true},
-   * and provides no {@code onExit} listener.</p>
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and sets {@code start} to {@code true}.</p>
+   * @param task  A task to perform.  Will be abruptly terminated with the process if canceled while running.
+   * @see ProcessTaskController
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task) {
-    return computeInProcess(task, JVMBuilder.DEFAULT, true, null);
+    return computeInProcess(task, JVMBuilder.DEFAULT, true);
   }
 
   /**
@@ -347,13 +387,15 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and provides no {@code onExit} listener.</p>
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT}.</p>
    * 
+   * @param task  A task to perform.  Will be abruptly terminated with the process if canceled while running.
    * @param start If {@code true}, the task will be started before returning; otherwise, the client should
    *              invoke {@link TaskController#start} on the returned controller.
+   * @see ProcessTaskController
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, boolean start) {
-    return computeInProcess(task, JVMBuilder.DEFAULT, start, null);
+    return computeInProcess(task, JVMBuilder.DEFAULT, start);
   }
   
   /**
@@ -363,14 +405,13 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that sets {@code start} to {@code true} and provides no {@code onExit}
-   * listener.</p>
-   * 
+   * @param task  A task to perform.  Will be abruptly terminated with the process if canceled while running.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
    *                    the task's class, ConcurrentUtil, and their dependencies.
+   * @see ProcessTaskController
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder) {
-    return computeInProcess(task, jvmBuilder, true, null);
+    return computeInProcess(task, jvmBuilder, true);
   }
   
   /**
@@ -380,213 +421,131 @@ public final class ConcurrentUtil {
    * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
    * are responsible for process termination.</p>
    * 
-   * <p>This is a convenience method that provides no {@code onExit} listener.</p>
-   * 
+   * @param task  A task to perform.  Will be abruptly terminated with the process if canceled while running.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
    *                    the task's class, ConcurrentUtil, and their dependencies.
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
+   * @see ProcessTaskController
    */
   public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, final JVMBuilder jvmBuilder,
                                                        boolean start) {
-    return computeInProcess(task, jvmBuilder, start, null);
-  }
-
-  /**
-   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
-   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
-   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
-   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
-   * are responsible for process termination.</p>
-   * 
-   * <p>This is a convenience method that sets {@code start} to {@code true}.
-   * 
-   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
-   * @param onExit  Code to execute when the process exits after the task's successful completion.  May be null,
-   *                indicating that no action should occur.  If non-null, the TaskController's {@code value()} method
-   *                will create a listener thread (via {@link #onProcessExit}) immediately before returning
-   *                a successful result.  (In the event of an exception, the process is destroyed and {@code onExit}
-   *                is not invoked.)  Note that thread scheduling may cause {@code onExit} to be called just
-   *                <em>before</em> the controller returns a result.
-   */
-  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder,
-                                                       Runnable1<? super Process> onExit) {
-    return computeInProcess(task, jvmBuilder, true, onExit);
-  }
-  
-  /**
-   * Execute the given task in a separate process and provide access to its result.  The task and the
-   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
-   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
-   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
-   * are responsible for process termination.
-   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
-   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
-   *               {@link TaskController#start} on the returned controller.
-   * @param onExit  Code to execute when the process exits after the task's successful completion.  May be null,
-   *                indicating that no action should occur.  If non-null, the TaskController's {@code value()} method
-   *                will create a listener thread (via {@link #onProcessExit}) immediately before returning
-   *                a successful result.  (In the event of an exception, the process is destroyed and {@code onExit}
-   *                is not invoked.)  Note that thread scheduling may cause {@code onExit} to be called just
-   *                <em>before</em> the controller returns a result.
-   */
-  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder,
-                                                       boolean start, Runnable1<? super Process> onExit) {
-    String mainName = TaskProcess.class.getName();
-    Iterable<String> mainArgs = IterUtil.empty();
-    Thunk<Process> factory = LambdaUtil.bindFirst(LambdaUtil.bindFirst(jvmBuilder, mainName), mainArgs);
-    ProcessController<R> controller = new ProcessController<R>(task, new LazyThunk<Process>(factory), onExit);
+    ProcessTaskController<R> controller = new ProcessTaskController<R>(jvmBuilder, THREAD_EXECUTOR, task);
     if (start) { controller.start(); }
     return controller;
   }
    
-  // Declared statically to allow cancel to discard the parameters.
-  private static class ProcessController<R> extends TaskController<R> {
-    private Thunk<? extends R> _task;
-    private LazyThunk<Process> _process;
-    private Runnable1<? super Process> _onExit; 
-    private Exception _exception; // allows an exception in doStart() to be stored
-    
-    public ProcessController(Thunk<? extends R> task, LazyThunk<Process> process, Runnable1<? super Process> onExit) {
-      _task = task;
-      _process = process;
-      _onExit = onExit;
-      _exception = null;
-    }
-    
-    protected void doStart() {
-      _status = Status.RUNNING;
-      try {
-        _process.value(); /* initialize the process */
-        discardProcessErr(_process.value()); /* prevent the err buffer from filling up */
-      }
-      catch (WrappedException e) {
-        if (e.getCause() instanceof IOException) {
-          _exception = (IOException) e.getCause();
-          _status = Status.FINISHED;
-        }
-        else { throw e; }
-      }
-      
-      if (_exception == null) {
-        // The process has started; in the event of any exception, we must destroy the process
-        try {
-          ObjectOutputStream objOut = new ObjectOutputStream(_process.value().getOutputStream());
-          try { objOut.writeObject(_task); }
-          finally { objOut.close(); }
-        }
-        catch (IOException e) {
-          _exception = e;
-          _process.value().destroy();
-          _status = Status.FINISHED;
-        }
-        catch (RuntimeException e) { _process.value().destroy(); throw e; }
-        catch (Error e) { _process.value().destroy(); throw e; }
-      }
-    }
-    
-    protected void doCancel() {
-      if (_status == Status.RUNNING) { _process.value().destroy(); }
-      _task = null;
-      _process = null;
-      _exception = null;
-      _onExit = null;
-      _status = Status.CANCELED;
-    }
-    
-    protected R getValue() throws Exception {
-      start(); // make sure the process is running
-      R result = null;
-      if (_exception == null) {
-        // The process has started; in the event of any exception, we must destroy the process
-        try {
-          InputStream in = _process.value().getInputStream();
-          // skip prefix
-          int matching = 0;
-          while (matching < TaskProcess.PREFIX.length) {
-            int read = in.read();
-            if (read == -1) { throw new EOFException("Data prefix not found"); }
-            else if ((byte) read == TaskProcess.PREFIX[matching]) { matching++; } // cast handles negative byte values
-            else if ((byte) read == TaskProcess.PREFIX[0]) { matching = 1; } // cast handles negative byte values
-            else { matching = 0; }
-          }
-          // prefix has been matched
-          ObjectInputStream objIn = new ObjectInputStream(in);
-          try {
-            @SuppressWarnings("unchecked") R serializedResult = (R) objIn.readObject();
-            result = serializedResult;
-            _exception = (Exception) objIn.readObject();
-            if (_exception != null) { _process.value().destroy(); }
-          }
-          finally { objIn.close(); }
-        }
-        catch (InterruptedIOException e) {
-          _exception = new InterruptedException(e.getMessage());
-          _exception.setStackTrace(e.getStackTrace());
-          _process.value().destroy();
-        }
-        catch (EOFException e) {
-          _exception = new IOException("Unable to run process; class path may need to be adjusted");
-          _process.value().destroy();
-        }
-        catch (IOException e) { _exception = e; _process.value().destroy(); }
-        catch (RuntimeException e) { _process.value().destroy(); throw e; }
-        catch (Error e) { _process.value().destroy(); throw e; }
-      }
-      _status = Status.FINISHED;
-      if (_exception != null) { throw _exception; }
-      else {
-        if (_onExit != null) { onProcessExit(_process.value(), _onExit); }
-        return result;
-      }
-    }
-    
+  
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and sets {@code start} to {@code true}
+   * and {@code ignoreIntermediate} to {@code false}.</p>
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @see ProcessIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeInProcess(IncrementalTask<? extends I, ? extends R> task) {
+    return computeInProcess(task, JVMBuilder.DEFAULT, true, false);
   }
 
-  
-  private static class TaskProcess {
-    /**
-     * A byte sequence marking the beginning of the return data.  Allows java commands to output
-     * text before {@code main()} is invoked without corrupting the data stream.  (This occurs, for example,
-     * with flag "-Xrunjdwp".)  In order to avoid false positives, this prefix uses non-printing ASCII values.
-     * To simplify the matching algorithm, each digit is guaranteed to be unique -- if a particular byte
-     * fails to match, the DFA can only jump to either the initial state or the state after a single match. 
-     */
-    public static final byte[] PREFIX = { 0x00, 0x03, 0x7f, -0x80 };
-    
-    public static void main(String... args) {
-      OutputStream out = System.out;
-      IOUtil.replaceSystemOut(VoidOutputStream.INSTANCE);
-      try {
-        out.write(PREFIX);
-        ObjectOutputStream objOut = new ObjectOutputStream(out);
-        try {
-          Object result = null;
-          Exception exception = null;
-          try {
-            ObjectInputStream objIn = new ObjectInputStream(System.in);
-            try {
-              Thunk<?> task = (Thunk<?>) objIn.readObject();
-              try { result = task.value(); }
-              catch (Throwable e) { exception = new InvocationTargetException(e); }
-            }
-            finally { objIn.close(); }
-          }
-          catch (Exception e) { exception = e; } // problem with objIn
-          
-          objOut.writeObject(result);
-          objOut.writeObject(exception);
-        }
-        finally { objOut.close(); }
-      }
-      catch (IOException e) { error.log("Error writing to System.out", e); }
-      finally { IOUtil.revertSystemOut(); }
-    }
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the return
+   * value must be serializable. Typically, the subprocess terminates when the TaskController enters a
+   * finished state. However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that uses {@link JVMBuilder#DEFAULT} and sets {@code ignoreIntermediate}
+   * to {@code false}.</p>
+   * 
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param start If {@code true}, the task will be started before returning; otherwise, the client should
+   *              invoke {@link TaskController#start} on the returned controller.
+   * @see ProcessIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeInProcess(IncrementalTask<? extends I, ? extends R> task, boolean start) {
+    return computeInProcess(task, JVMBuilder.DEFAULT, start, false);
   }
   
-  // TODO: Incremental tasks in a separate process
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the return
+   * value must be serializable. Typically, the subprocess terminates when the TaskController enters a
+   * finished state. However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that sets {@code start} to {@code true} and {@code ignoreIntermediate}
+   * to {@code false}.</p>
+   * 
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
+   * @see ProcessIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeInProcess(IncrementalTask<? extends I, ? extends R> task,
+                                                       JVMBuilder jvmBuilder) {
+    return computeInProcess(task, jvmBuilder, true, false);
+  }
+  
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * <p>This is a convenience method that sets {@code ignoreIntermediate} to {@code false}.</p>
+   * 
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   * @see ProcessIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeInProcess(IncrementalTask<? extends I, ? extends R> task,
+                                                       JVMBuilder jvmBuilder, boolean start) {
+    return computeInProcess(task, jvmBuilder, start, false);
+  }
+   
+  /**
+   * <p>Execute the given task in a separate process and provide access to its result.  The task and the
+   * return value must be serializable.  Typically, the subprocess terminates when the TaskController enters a
+   * finished state.  However, if {@code task} spawns additional threads and no exceptions are thrown by the
+   * controller's {@code value()} method, the subprocess may remain alive indefinitely; the remaining threads
+   * are responsible for process termination.</p>
+   * 
+   * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
+   *              wrapped in a {@link WrappedException}.
+   * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
+   *                    the task's class, ConcurrentUtil, and their dependencies.
+   * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
+   *               {@link TaskController#start} on the returned controller.
+   * @param ignoreIntermediate  If {@code true}, all intermediate results will be immediately discarded.
+   * @see ProcessIncrementalTaskController
+   */
+  public static <I, R>
+      IncrementalTaskController<I, R> computeInProcess(IncrementalTask<? extends I, ? extends R> task,
+                                                       JVMBuilder jvmBuilder, boolean start,
+                                                       boolean ignoreIntermediate) {
+    ProcessIncrementalTaskController<I, R> controller =
+      new ProcessIncrementalTaskController<I, R>(jvmBuilder, THREAD_EXECUTOR, task, ignoreIntermediate);
+    if (start) { controller.start(); }
+    return controller;
+  }
+   
   
   
   /**
@@ -597,11 +556,11 @@ public final class ConcurrentUtil {
    * @return  An RMI proxy that can be cast to the remote interface type of the object returned by
    *          {@code factory}.  (See {@link Remote} for the definition of "remote interface.")
    * @throws IOException  If a problem occurs in starting the new process or serializing {@code factory}.
-   * @throws InvocationTargetException  If an exception occurs in {@code factory} or while exporting the result.
+   * @throws ExecutionException  If an exception occurs in {@code factory} or while exporting the result.
    * @throws InterruptedException  If this thread is interrupted while waiting for the result to be produced.
    */
   public static Remote exportInProcess(Thunk<? extends Remote> factory)
-      throws InterruptedException, InvocationTargetException, IOException {
+      throws InterruptedException, ExecutionException, IOException {
     return exportInProcess(factory, JVMBuilder.DEFAULT, null);
   }
   
@@ -615,11 +574,11 @@ public final class ConcurrentUtil {
    * @return  An RMI proxy that can be cast to the remote interface type of the object returned by
    *          {@code factory}.  (See {@link Remote} for the definition of "remote interface.")
    * @throws IOException  If a problem occurs in starting the new process or serializing {@code factory}.
-   * @throws InvocationTargetException  If an exception occurs in {@code factory} or while exporting the result.
+   * @throws ExecutionException  If an exception occurs in {@code factory} or while exporting the result.
    * @throws InterruptedException  If this thread is interrupted while waiting for the result to be produced.
    */
   public static Remote exportInProcess(Thunk<? extends Remote> factory, JVMBuilder jvmBuilder)
-      throws InterruptedException, InvocationTargetException, IOException {
+      throws InterruptedException, ExecutionException, IOException {
     return exportInProcess(factory, jvmBuilder, null);
   }
   
@@ -632,22 +591,22 @@ public final class ConcurrentUtil {
    *                    the factory's class, ConcurrentUtil, and their dependencies.
    * @param onExit  Code to execute when the process exits, assuming a result is successfully returned.  May be
    *                {@code null}, indicating that nothing should be run.  If an exception occurs here, the process is
-   *                destroyed immediately and this listener will not be invoked.  Handled via {@link #onProcessExit}.
+   *                destroyed immediately and this listener will not be invoked.
    * @return  An RMI proxy that can be cast to the remote interface type of the object returned by
    *          {@code factory}.  (See {@link Remote} for the definition of "remote interface.")
    * @throws IOException  If a problem occurs in starting the new process or serializing {@code factory}.
-   * @throws InvocationTargetException  If an exception occurs in {@code factory} or while exporting the result.
+   * @throws ExecutionException  If an exception occurs in {@code factory} or while exporting the result.
    * @throws InterruptedException  If this thread is interrupted while waiting for the result to be produced.
    */
   public static Remote exportInProcess(Thunk<? extends Remote> factory, JVMBuilder jvmBuilder,
                                        Runnable1<? super Process> onExit)
-      throws InterruptedException, InvocationTargetException, IOException {
-    try { return computeInProcess(new ExportRemoteTask(factory), jvmBuilder, onExit).value(); }
+      throws InterruptedException, ExecutionException, IOException {
+    Thunk<Remote> task = new ExportRemoteTask(factory);
+    try { return new ProcessTaskController<Remote>(jvmBuilder, DIRECT_EXECUTOR, task, onExit).get(); }
+    // an interrupt on this thread translates into a "cancel" because DIRECT_EXECUTOR runs the task on this thread
+    catch (CancellationException e) { throw new InterruptedException(); }
     catch (WrappedException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof InterruptedException) { throw (InterruptedException) cause; }
-      else if (cause instanceof InvocationTargetException) { throw (InvocationTargetException) cause; }
-      else if (cause instanceof IOException) { throw (IOException) cause; }
+      if (e.getCause() instanceof IOException) { throw (IOException) e.getCause(); }
       else { throw e; }
     }
   }
@@ -710,8 +669,9 @@ public final class ConcurrentUtil {
    * If, instead, the stream is simply ignored, the system buffer may fill up, causing the process to block (see 
    * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
    * approximately 4 KB).
+   * @return  The thread performing the discard operation, already started.
    */
-  public static void discardProcessOut(Process p) { copyProcessOut(p, VoidOutputStream.INSTANCE); }
+  public static Thread discardProcessOut(Process p) { return copyProcessOut(p, VoidOutputStream.INSTANCE); }
   
   /**
    * Create a thread that will continually copy the contents of the given process's standard output to another
@@ -729,17 +689,26 @@ public final class ConcurrentUtil {
   public static Thread copyProcessOut(Process p, OutputStream out, boolean close) {
     Thread result = new Thread(new CopyStream(p.getInputStream(), out, close), "ConcurrentUtil.copyProcessOut");
     result.setDaemon(true); // this thread should not keep the JVM from exiting
-    // TODO: If the parent process quits, can the child get stuck when its buffer fills?
     result.start();
     return result;
   }
 
   /**
    * Create a task providing access to the given process's standard output as a string.  The result is not 
-   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.
+   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.  A separate
+   * non-daemon thread performs this buffering.
    */
   public static TaskController<String> processOutAsString(Process p) {
     return computeInThread(new StreamToString(p.getInputStream()));
+  }
+  
+  /**
+   * Create a task providing access to the given process's standard output as a string.  The result is not 
+   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.  A task
+   * passed to {@code exec} performs this buffering.
+   */
+  public static TaskController<String> processOutAsString(Process p, Executor exec) {
+    return computeWithExecutor(new StreamToString(p.getInputStream()), exec);
   }
   
   /**
@@ -747,8 +716,9 @@ public final class ConcurrentUtil {
    * If, instead, the stream is simply ignored, the system buffer may fill up, causing the process to block (see 
    * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
    * approximately 4 KB).
+   * @return  The thread performing the discard operation, already started.
    */
-  public static void discardProcessErr(Process p) { copyProcessErr(p, VoidOutputStream.INSTANCE); }
+  public static Thread discardProcessErr(Process p) { return copyProcessErr(p, VoidOutputStream.INSTANCE); }
   
   /**
    * Create a thread that will continually copy the contents of the given process's error output to another
@@ -766,17 +736,26 @@ public final class ConcurrentUtil {
   public static Thread copyProcessErr(Process p, OutputStream err, boolean close) {
     Thread result = new Thread(new CopyStream(p.getErrorStream(), err, close), "ConcurrentUtil.copyProcessErr");
     result.setDaemon(true); // this thread should not keep the JVM from exiting
-    // TODO: If the parent process quits, can the child get stuck when its buffer fills?
     result.start();
     return result;
   }
   
   /**
    * Create a task providing access to the given process's error output as a string.  The result is not 
-   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.
+   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.  A separate
+   * non-daemon thread performs this buffering.
    */
   public static TaskController<String> processErrAsString(Process p) {
     return computeInThread(new StreamToString(p.getErrorStream()));
+  }
+  
+  /**
+   * Create a task providing access to the given process's error output as a string.  The result is not 
+   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.  A task
+   * passed to {@code exec} performs this buffering.
+   */
+  public static TaskController<String> processErrAsString(Process p, Executor exec) {
+    return computeWithExecutor(new StreamToString(p.getErrorStream()), exec);
   }
   
   /** Shared code for copying and closing a stream. */

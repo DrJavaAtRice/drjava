@@ -32,28 +32,34 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.concurrent;
+package edu.rice.cs.plt.collect;
 
-import edu.rice.cs.plt.lambda.ResolvingThunk;
+import java.util.Collection;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
- * A thunk that performs incremental computation.  Clients will repeatedly invoke {@link #step}
- * until {@link #isResolved} is {@code true}, signifying that the result has been computed.
- * {@link #value} need only be supported <em>after</em> the task has completed.
- * @param <I>  The type of the incremental result (may be {@link Void} if there is no useful
- *             intermediate result)
- * @param <R>  The type of the final result (may be {@link Void} if the task has no useful final result)
+ * An implementation of {@link List} that delegates all operations to a wrapped
+ * list.  Subclasses can be defined that override a few of the methods, while maintaining
+ * the default delegation behavior in most cases.  Subclasses can also invoke the overridden
+ * methods in {@link java.util.AbstractCollection} to use the default implementations there by 
+ * invoking, for example, {@link #abstractCollectionAddAll} (see 
+ * {@link java.util.AbstractCollection} for details on the default implementations).
  */
-public interface IncrementalTask<I, R> extends ResolvingThunk<R> {
-  /**
-   * Whether the final result is ready. As long as this returns {@code false}, {@link #step} will
-   * be invoked; after returning {@code true}, only {@link #value} will be invoked.
-   */
-  public boolean isResolved();
+public class DelegatingList<E> extends DelegatingCollection<E> implements List<E> {
+  protected final List<E> _delegate; // field is redundant, but prevents a lot of useless casts 
+  public DelegatingList(List<E> delegate) { super(delegate); _delegate = delegate; }
   
-  /** Perform a step in the computation.  Undefined when {@link #isResolved} is {@code true}. */
-  public I step();
-  
-  /** Produce the final result of the task.  Undefined when {@link #isResolved} is {@code false}. */
-  public R value();
+  public boolean equals(Object o) { return _delegate.equals(o); }
+  public int hashCode() { return _delegate.hashCode(); }
+  public E get(int index) { return _delegate.get(index); }
+  public E set(int index, E element) { return _delegate.set(index, element); }
+  public void add(int index, E element) { _delegate.add(index, element); }
+  public E remove(int index) { return _delegate.remove(index); }
+  public boolean addAll(int index, Collection<? extends E> c) { return _delegate.addAll(index, c); }
+  public int indexOf(Object o) { return _delegate.indexOf(o); }
+  public int lastIndexOf(Object o) { return _delegate.lastIndexOf(o); }
+  public ListIterator<E> listIterator() { return _delegate.listIterator(); }
+  public ListIterator<E> listIterator(int index) { return _delegate.listIterator(index); }
+  public List<E> subList(int fromIndex, int toIndex) { return _delegate.subList(fromIndex, toIndex); }
 }

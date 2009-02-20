@@ -35,43 +35,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.lambda;
 
 /**
- * <p>A thunk providing call-by-need evaluation of the nested thunk, {@code value}. The first invocation of
- * {@link #value()} evaluates and discards the thunk; subsequent invocations return the same value as returned
- * previously.  (If an exception occurs during evaluation, no result is cached and the nested thunk will be
- * evaluated again on a subsequent invocation.)</p>
- * 
- * <p>Evaluation is thread-safe: locking guarantees that the nested thunk will never be evaluated (and
- * terminate normally) twice. Thus, if two threads invoke {@code value()} simultaneously (and a result has not
- * yet been cached), one will block until the other resolves the nested thunk.</p>
- * 
- * @see CachedThunk
- * @see DelayedThunk
- * @see LazyRunnable
+ * A thunk that may be in a "resolved" or "unresolved" state.  In a resolved state, invocations of
+ * {@code value()} will return promptly and without exception.
  */
-public class LazyThunk<R> implements ResolvingThunk<R> {
-
-  private volatile R _val;
-  private volatile Thunk<? extends R> _thunk;
-  
-  public LazyThunk(Thunk<? extends R> value) {
-    _thunk = value;
-    // the value of _val doesn't matter
-  }
-  
-  public R value() {
-    if (_thunk != null) { resolve(); }
-    return _val;
-  }
-  
-  public boolean isResolved() { return _thunk == null; }
-  
-  private synchronized void resolve() {
-    if (_thunk != null) { // verify that the result is still unresolved now that we have a lock
-      _val = _thunk.value();
-      _thunk = null;
-    }
-  }
-  
-  public static <R> LazyThunk<R> make(Thunk<? extends R> value) { return new LazyThunk<R>(value); }
+public interface ResolvingThunk<R> extends Thunk<R> {
+  /**
+   * Test whether the thunk is in a "resolved" state.  If {@code true}, an invocation of {@code value}
+   * will return promptly and without exception.
+   */
+  public boolean isResolved();
   
 }

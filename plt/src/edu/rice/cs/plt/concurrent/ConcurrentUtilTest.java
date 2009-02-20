@@ -37,6 +37,7 @@ package edu.rice.cs.plt.concurrent;
 import java.io.Serializable;
 import java.io.NotSerializableException;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 import java.lang.reflect.InvocationTargetException;
 import junit.framework.TestCase;
 import edu.rice.cs.plt.debug.Stopwatch;
@@ -57,6 +58,8 @@ public class ConcurrentUtilTest extends TestCase {
   }
   
   public void testSleep() {
+    debug.logStart();
+
     Stopwatch w = new Stopwatch(true);
     sleep(500); // has to be long enough to minimize variation
     long time = w.stop();
@@ -67,9 +70,13 @@ public class ConcurrentUtilTest extends TestCase {
     sleep(1000);
     time = w.stop();
     assertInRange(300, 700, time);
+
+    debug.logEnd();
   }
 
   public void testWork() {
+    debug.logStart();
+    
     Stopwatch w = new Stopwatch(true);
     work(500);
     long time = w.stop();
@@ -80,10 +87,14 @@ public class ConcurrentUtilTest extends TestCase {
     work(1000);
     time = w.stop();
     assertInRange(300, 700, time);
+    
+    debug.logEnd();
   }
   
   
   public void testRunInThread() {
+    debug.logStart();
+    
     _obj = null;
     TaskController<Void> c = runInThread(new Runnable() {
       // sleep is to allow c.value() to (hopefully) be called before this completes
@@ -92,15 +103,21 @@ public class ConcurrentUtilTest extends TestCase {
     c.value();
     assertNotNull(_obj);
     assertNotSame(Thread.currentThread(), _obj);
+    
+    debug.logEnd();
   }
 
   
   public void testComputeInThread() {
+    debug.logStart();
+    
     _obj = null;
-    final CompletionMonitor monitor = new CompletionMonitor();
+    final CompletionMonitor started = new CompletionMonitor();
+    final CompletionMonitor finish = new CompletionMonitor();
     Thunk<Thread> task = new Thunk<Thread>() {
       public Thread value() {
-        monitor.attemptEnsureSignaled();
+        started.signal();
+        finish.attemptEnsureSignaled();
         _obj = Thread.currentThread();
         return Thread.currentThread();
       }
@@ -108,47 +125,58 @@ public class ConcurrentUtilTest extends TestCase {
     TaskController<Thread> c = computeInThread(task, false);
     assertSame(TaskController.Status.PAUSED, c.status());
     c.start();
+    started.attemptEnsureSignaled();
     assertSame(TaskController.Status.RUNNING, c.status());
-    monitor.signal();
+    finish.signal();
     Thread t = c.value();
+    assertSame(TaskController.Status.FINISHED, c.status());
     assertNotNull(_obj);
     assertNotSame(Thread.currentThread(), _obj);
     assertSame(t, _obj);
+    
+    debug.logEnd();
   }
   
   public void testComputeInThreadWithException() {
+    debug.logStart();
+    
     TaskController<String> c = computeInThread(new Thunk<String>() {
       public String value() { throw new RuntimeException("exception in task"); }
     });
     try { c.value(); fail("expected exception"); }
     catch (WrappedException e) {
-      assertTrue(e.getCause() instanceof InvocationTargetException);
+      assertTrue(e.getCause() instanceof ExecutionException);
       assertTrue(e.getCause().getCause() instanceof RuntimeException);
       assertEquals("exception in task", e.getCause().getCause().getMessage());
     }
+    
+    debug.logEnd();
   }
   
   public void testComputeIncrementalInThread() {
-    CompletionMonitor monitor = new CompletionMonitor();
+    debug.logStart();
+    
     TrivialIncrementalTask<Integer, String> task =
-      new TrivialIncrementalTask<Integer, String>(IterUtil.make(1, 2, 3, 4, 5), "done", monitor);
+      new TrivialIncrementalTask<Integer, String>(IterUtil.make(1, 2, 3, 4, 5), "done");
     IncrementalTaskController<Integer, String> c = computeInThread(task);
     
-    monitor.signal();
-    assertTrue(IterUtil.isEqual(IterUtil.make(1), c.intermediateValues()));
+    task.signal();
+    assertTrue(IterUtil.isEqual(IterUtil.make(1), c.intermediateQueue()));
     assertSame(TaskController.Status.RUNNING, c.status());
-    monitor.signal();
-    assertTrue(IterUtil.isEqual(IterUtil.make(2), c.intermediateValues()));
+    task.signal();
+    assertTrue(IterUtil.isEqual(IterUtil.make(1, 2), c.intermediateQueue()));
     assertSame(TaskController.Status.RUNNING, c.status());
     c.pause();
+    sleep(50); // can't *guarantee* that the status will update, but we expect it to be reasonably responsive
     task.ignoreMonitor();
-    sleep(100); // can't *guarantee* that the status will update, but we expect it to be reasonably responsive
     assertSame(TaskController.Status.PAUSED, c.status());
+    assertTrue(IterUtil.isEqual(IterUtil.make(1, 2, 3), c.intermediateQueue()));
     c.start();
     assertEquals("done", c.value());
     assertSame(TaskController.Status.FINISHED, c.status());
-    assertTrue(IterUtil.isEqual(IterUtil.make(3, 4, 5), c.intermediateValues()));
-    assertTrue(c.intermediateValues().isEmpty());
+    assertTrue(IterUtil.isEqual(IterUtil.make(1, 2, 3, 4, 5), c.intermediateQueue()));
+    
+    debug.logEnd();
   }
   
   private static class TrivialIncrementalTask<I, R> implements IncrementalTask<I, R> {
@@ -156,16 +184,19 @@ public class ConcurrentUtilTest extends TestCase {
     private final R _finalResult;
     private final CompletionMonitor _monitor;
     private volatile boolean _useMonitor;
-    public TrivialIncrementalTask(Iterable<? extends I> intermediates, R finalResult,
-                                  CompletionMonitor monitor) {
+    public TrivialIncrementalTask(Iterable<? extends I> intermediates, R finalResult) {
       _intermediates = intermediates.iterator();
       _finalResult = finalResult;
-      _monitor = monitor;
+      _monitor = new CompletionMonitor();
       _useMonitor = true;
     }
-    public void ignoreMonitor() { _useMonitor = false; _monitor.signal(); }
-    public void useMonitor() { _monitor.reset(); _useMonitor = true; }
-    public boolean isFinished() { return !_intermediates.hasNext(); }
+    
+    // since we can't wait for state changes, we expect reasonable behavior within a short sleeping delay
+    public void ignoreMonitor() { _useMonitor = false; _monitor.signal(); sleep(50); }
+    public void useMonitor() { _monitor.reset(); _useMonitor = true; sleep(50); }
+    public void signal() { _monitor.signal(); sleep(50); }
+    
+    public boolean isResolved() { return !_intermediates.hasNext(); }
     public I step() {
       if (_useMonitor) { _monitor.attemptEnsureSignaled(); _monitor.reset(); }
       return _intermediates.next();
@@ -178,6 +209,8 @@ public class ConcurrentUtilTest extends TestCase {
   
   
   public void testComputeInProcess() {
+    debug.logStart();
+    
     _obj = null;
     TaskController<String> c1 = computeInProcess(new ProcessTask1());
     assertEquals("done", c1.value());
@@ -187,8 +220,8 @@ public class ConcurrentUtilTest extends TestCase {
     TaskController<String> c2 = computeInProcess(new ProcessTask2());
     try { c2.value(); fail("expected exception"); }
     catch (WrappedException e) {
-      if (e.getCause() instanceof NotSerializableException) { /* expected */ }
-      else { throw e; }
+      assertTrue(e.getCause() instanceof WrappedException); // wrapped once by the task implementation, once by value()
+      assertTrue(e.getCause().getCause() instanceof NotSerializableException);
     }
     assertNull(_obj);
     
@@ -196,12 +229,13 @@ public class ConcurrentUtilTest extends TestCase {
     TaskController<String> c3 = computeInProcess(new ProcessTask3());
     try { c3.value(); fail("expected exception"); }
     catch (WrappedException e) {
-      if (e.getCause() instanceof InvocationTargetException && e.getCause().getCause() instanceof RuntimeException) {
-        assertEquals("done", e.getCause().getCause().getMessage());
-      }
-      else { throw e; }
+      assertTrue(e.getCause() instanceof ExecutionException);
+      assertTrue(e.getCause().getCause() instanceof RuntimeException);
+      assertEquals("done", e.getCause().getCause().getMessage());
     }
     assertNull(_obj);
+    
+    debug.logEnd();
   }
   
   private static final class ProcessTask1 implements Thunk<String>, Serializable {
@@ -222,6 +256,30 @@ public class ConcurrentUtilTest extends TestCase {
     public String value() {
       _obj = "should not be visible in parent process";
       throw new RuntimeException("done");
+    }
+  }
+  
+  public void testComputeIncrementalInProcess() {
+    debug.logStart();
+    
+    _obj = null;
+    IncrementalTaskController<Integer, String> c = computeInProcess(new IncrementalProcessTask1());
+    assertEquals("done", c.value());
+    assertTrue(IterUtil.isEqual(IterUtil.make(1, 2, 3, 4, 5), c.intermediateQueue()));
+    assertEquals(5, c.steps());
+    assertNull(_obj);
+    
+    debug.logEnd();
+  }
+    
+    
+  private static final class IncrementalProcessTask1 implements IncrementalTask<Integer, String>, Serializable {
+    private int _steps = 0;
+    public boolean isResolved() { return _steps >= 5; }
+    public Integer step() { return ++_steps; }
+    public String value() {
+      _obj = "should not be visible in parent process";
+      return "done";
     }
   }
   

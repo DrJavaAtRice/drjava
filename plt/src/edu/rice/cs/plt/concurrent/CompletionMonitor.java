@@ -34,6 +34,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import edu.rice.cs.plt.lambda.Condition;
 
 /**
@@ -62,15 +65,48 @@ public class CompletionMonitor implements Condition {
   public void reset() { _signal = false; }
   
   /** Sets the state to signaled and alerts all blocked threads */
-  public synchronized void signal() {
-    boolean changed = !_signal;
-    _signal = true;
-    if (changed) { this.notifyAll(); }
+  public void signal() {
+    if (!_signal) {
+      synchronized (this) {
+        if (!_signal) {
+          _signal = true;
+          this.notifyAll();
+        }
+      }
+    }
   }
   
   /** Ensures that the monitor has been signaled before continuing.  Blocks if necessary. */
-  public synchronized void ensureSignaled() throws InterruptedException {
-    while (!_signal) { this.wait(); }
+  public void ensureSignaled() throws InterruptedException {
+    if (!_signal) {
+      synchronized (this) {
+        while (!_signal) { this.wait(); }
+      }
+    }
+  }
+  
+  /**
+   * Ensures that the monitor has been signaled before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in milliseconds.
+   */
+  public void ensureSignaled(long timeout) throws InterruptedException, TimeoutException {
+    ensureSignaled(timeout, TimeUnit.MILLISECONDS);
+  }
+  
+  /**
+   * Ensures that the monitor has been signaled before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   */
+  public void ensureSignaled(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+    if (!_signal) {
+      long timeoutTime = ConcurrentUtil.futureTimeNanos(timeout, unit);
+      synchronized (this) {
+        while (!_signal) { ConcurrentUtil.waitUntilNanos(this, timeoutTime); }
+      }
+    }
   }
   
   /**
@@ -85,26 +121,24 @@ public class CompletionMonitor implements Condition {
   /**
    * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
    * is interrupted or the timeout is reached, returns {@code false}.
-   * @param timeout  Maximum wait time, in milliseconds.  Must be positive or zero (where zero signals, as in
-   *                 {@link Object#wait(long)}, that no timeout should be used).
+   * @param timeout  Maximum wait time, in milliseconds.
    */
-  public synchronized boolean attemptEnsureSignaled(long timeout) {
-    if (timeout == 0) { return attemptEnsureSignaled(); }
-    else if (_signal) { return true; }
-    else {
-      // must record expected wake-up time to account for spurious wake-ups
-      long timeoutTime = System.currentTimeMillis() + timeout;
-      try {
-        do {
-          this.wait(timeout);
-          long currentTime = System.currentTimeMillis();
-          if (currentTime >= timeoutTime) { return _signal; } // timeout has been reached
-          else { timeout = timeoutTime - currentTime; }
-        } while (!_signal);
-        return true;
-      }
-      catch (InterruptedException e) { return _signal; } // _signal may have become true at the same time
-    }
+  public boolean attemptEnsureSignaled(long timeout) {
+    try { ensureSignaled(timeout, TimeUnit.MILLISECONDS); return true; }
+    catch (InterruptedException e) { return _signal; }
+    catch (TimeoutException e) { return _signal; }
+  }
+  
+  /**
+   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
+   * is interrupted or the timeout is reached, returns {@code false}.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   */
+  public boolean attemptEnsureSignaled(long timeout, TimeUnit unit) {
+    try { ensureSignaled(timeout, unit); return true; }
+    catch (InterruptedException e) { return _signal; }
+    catch (TimeoutException e) { return _signal; }
   }
   
 }

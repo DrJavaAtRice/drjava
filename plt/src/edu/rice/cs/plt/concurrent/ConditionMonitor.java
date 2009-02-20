@@ -34,6 +34,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import edu.rice.cs.plt.lambda.Condition;
 
 /**
@@ -64,6 +67,28 @@ public class ConditionMonitor implements Condition {
   }
   
   /**
+   * Ensures that the condition is true before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in milliseconds.
+   */
+  public void ensureTrue(long timeout) throws InterruptedException, TimeoutException {
+    ensureTrue(timeout, TimeUnit.MILLISECONDS);
+  }
+  
+  /**
+   * Ensures that the condition is true before continuing.  Blocks if necessary; fails if the
+   * the timeout is reached.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   */
+  public synchronized void ensureTrue(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+    if (!_condition.isTrue()) {
+      long timeoutTime = ConcurrentUtil.futureTimeNanos(timeout, unit);
+      do { ConcurrentUtil.waitUntilNanos(this, timeoutTime); } while (!_condition.isTrue());
+    }
+  }
+  
+  /**
    * Tries to ensure that the condition is true before continuing.  Blocks if necessary.  If the wait is
    * interrupted, returns {@code false}.
    */
@@ -75,26 +100,24 @@ public class ConditionMonitor implements Condition {
   /**
    * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
    * is interrupted or the timeout is reached, returns {@code false}.
-   * @param timeout  Maximum wait time, in milliseconds.  Must be positive or zero (where zero signals, as in
-   *                 {@link Object#wait(long)}, that no timeout should be used).
+   * @param timeout  Maximum wait time, in milliseconds.
    */
-  public synchronized boolean attemptEnsureTrue(long timeout) {
-    if (timeout == 0) { return attemptEnsureTrue(); }
-    else if (_condition.isTrue()) { return true; }
-    else {
-      // must record expected wake-up time to account for spurious wake-ups
-      long timeoutTime = System.currentTimeMillis() + timeout;
-      try {
-        do {
-          this.wait(timeout);
-          long currentTime = System.currentTimeMillis();
-          if (currentTime >= timeoutTime) { return _condition.isTrue(); } // timeout has been reached
-          else { timeout = timeoutTime - currentTime; }
-        } while (!_condition.isTrue());
-        return true; // no need to invoke condition again -- it was true at least once
-      }
-      catch (InterruptedException e) { return _condition.isTrue(); } // check, just in case it became true
-    }
+  public boolean attemptEnsureTrue(long timeout) {
+    try { ensureTrue(timeout, TimeUnit.MILLISECONDS); return true; }
+    catch (InterruptedException e) { return _condition.isTrue(); }
+    catch (TimeoutException e) { return _condition.isTrue(); }
+  }
+  
+  /**
+   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
+   * is interrupted or the timeout is reached, returns {@code false}.
+   * @param timeout  Maximum wait time, in {@code unit} units.
+   * @param unit  Units for {@code timeout}.
+   */
+  public boolean attemptEnsureTrue(long timeout, TimeUnit unit) {
+    try { ensureTrue(timeout, unit); return true; }
+    catch (InterruptedException e) { return _condition.isTrue(); }
+    catch (TimeoutException e) { return _condition.isTrue(); }
   }
   
 }
