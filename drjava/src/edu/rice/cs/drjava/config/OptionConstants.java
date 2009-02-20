@@ -825,9 +825,7 @@ public interface OptionConstants {
     * Ctrl-Z on Windows, Ctrl-D on other systems. */
   public static final KeyStrokeOption KEY_CLOSE_SYSTEM_IN = 
     new KeyStrokeOption("key.close.system.in", 
-                        (PlatformFactory.ONLY.isWindowsPlatform())
-                          ?KeyStroke.getKeyStroke(KeyEvent.VK_Z, CTRL_MASK)
-                          :KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));
 
   
   /* ---------- Find Replace Options ---------- */
