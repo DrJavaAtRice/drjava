@@ -1734,7 +1734,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Open Javadoc page specified by the word the cursor is on. */
   final Action _openJavadocUnderCursorAction = new AbstractAction("Open Java API Javadoc for Word Under Cursor...") {
     public void actionPerformed(ActionEvent ae) {
-      ;
+      _openJavadocUnderCursor();
     }
   };
   
