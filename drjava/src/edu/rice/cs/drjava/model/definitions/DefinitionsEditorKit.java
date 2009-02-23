@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.model.definitions;
 
 
 import javax.swing.text.*;
+import javax.swing.Action;
+import java.awt.event.ActionEvent;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /** The editor kit class for editing Java source files. It functions as the controller in an MVC hierarchy.  It also
@@ -47,11 +49,47 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 public class DefinitionsEditorKit extends StyledEditorKit {
   
   private GlobalEventNotifier _notifier;
+  private Action[] _actions;
+  
+  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("actions.txt",true);
   
   /** Creates a new editor kit with the given listeners.
     * @param notifier Keeps track of the listeners to the model
     */
-  public DefinitionsEditorKit(GlobalEventNotifier notifier) { _notifier = notifier; }
+  public DefinitionsEditorKit(GlobalEventNotifier notifier) {
+    _notifier = notifier;
+    Action[] supActions = super.getActions();
+    _actions = new Action[supActions.length];
+    LOG.log("DefinitionsEditorKit ctor");
+    for(int i=0; i<_actions.length; ++i) {
+      Action a = supActions[i];
+      Object name = a.getValue("Name");
+      LOG.log(name.toString());
+      if (name.equals(beginWordAction)) {
+        _actions[i] = new BeginWordAction(beginWordAction, false);
+        LOG.log("\treplacing");
+      }
+      else if (name.equals(endWordAction)) {
+        _actions[i] = new EndWordAction(endWordAction, false);
+        LOG.log("\treplacing");
+      }
+      else if (name.equals(nextWordAction)){
+        _actions[i] = new NextWordAction(nextWordAction, false);
+        LOG.log("\treplacing");
+      }
+      else if (name.equals(previousWordAction)) {
+        _actions[i] = new PreviousWordAction(previousWordAction, false);
+        LOG.log("\treplacing");
+      }
+      else if (name.equals(selectWordAction)) {
+        _actions[i] = new SelectWordAction();
+        LOG.log("\treplacing");
+      }
+      else _actions[i] = a;
+    }
+  }
+  
+  public Action[] getActions() { return _actions; }
   
   private static ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
@@ -90,6 +128,144 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     * a factory that creates ColoringViews.
     */
   public final ViewFactory getViewFactory() { return _factory; }
+  
+  static class BeginWordAction extends TextAction {
+    BeginWordAction(String nm, boolean select) {
+      super(nm);
+      this.select = select;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      LOG.log("BeginWordAction.actionPerformed");
+      JTextComponent target = getTextComponent(e);
+      if (target != null) {
+        final String text = target.getText();
+        int offs = target.getCaretPosition();
+        while(offs>0) {
+          char chPrev = text.charAt(offs - 1);
+          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || (Character.isWhitespace(chPrev))) {
+            break;
+          }
+          --offs;
+          char ch = text.charAt(offs);
+          chPrev = text.charAt(offs - 1);
+          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
+            break;
+          }
+        }
+        if (select) {
+          target.moveCaretPosition(offs);
+        } else {
+          target.setCaretPosition(offs);
+        }
+      }
+    }
+    private boolean select;
+  }
+  
+  static class EndWordAction extends TextAction {
+    EndWordAction(String nm, boolean select) {
+      super(nm);
+      this.select = select;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      LOG.log("EndWordAction.actionPerformed");
+      JTextComponent target = getTextComponent(e);
+      if (target != null) {
+        final String text = target.getText();
+        int offs = target.getCaretPosition();
+        while(offs<text.length()-1) {
+          ++offs;
+          char ch = text.charAt(offs);
+          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || Character.isWhitespace(ch)) {
+            break;
+          }
+        }
+        if (select) {
+          target.moveCaretPosition(offs);
+        } else {
+          target.setCaretPosition(offs);
+        }
+      }
+    }
+    private boolean select;
+  }
+  
+  static class PreviousWordAction extends TextAction {
+    PreviousWordAction(String nm, boolean select) {
+      super(nm);
+      this.select = select;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      LOG.log("PreviousWordAction.actionPerformed");
+      JTextComponent target = getTextComponent(e);
+      if (target != null) {
+        final String text = target.getText();
+        int offs = target.getCaretPosition();
+        while(offs>=0) {
+          --offs;
+          char ch = text.charAt(offs);
+          char chPrev = text.charAt(offs - 1);
+          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(chPrev)) {
+            break;
+          }
+        }
+        if (select) {
+          target.moveCaretPosition(offs);
+        } else {
+          target.setCaretPosition(offs);
+        }
+      }
+    }
+    private boolean select;
+  }
+  
+  static class NextWordAction extends TextAction {
+    NextWordAction(String nm, boolean select) {
+      super(nm);
+      this.select = select;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      LOG.log("NextWordAction.actionPerformed");
+      JTextComponent target = getTextComponent(e);
+      if (target != null) {
+        final String text = target.getText();
+        int offs = target.getCaretPosition();
+        while(offs>=0) {
+          ++offs;
+          char ch = text.charAt(offs);
+          char chPrev = text.charAt(offs - 1);
+          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(chPrev)) {
+            break;
+          }
+        }
+        if (select) {
+          target.moveCaretPosition(offs);
+        } else {
+          target.setCaretPosition(offs);
+        }
+      }
+    }
+    private boolean select;
+  }
+  
+  static class SelectWordAction extends TextAction {
+    public SelectWordAction() {
+      super(selectWordAction);
+      start = new BeginWordAction("pigdog", false);
+      end = new EndWordAction("pigdog", true);
+    }
+    public void actionPerformed(ActionEvent e) {
+      LOG.log("SelectWordAction.actionPerformed");
+      start.actionPerformed(e);
+      end.actionPerformed(e);
+    }
+    private Action start;
+    private Action end;    
+  }
 }
 
 

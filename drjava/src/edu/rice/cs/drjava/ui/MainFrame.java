@@ -9327,8 +9327,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    kbm.addShiftAction(KEY_BEGIN_LINE, DefaultEditorKit.selectionBeginLineAction);
     kbm.addShiftAction(KEY_BEGIN_LINE, _selectionBeginLineAction);
     
-    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
-    kbm.addShiftAction(KEY_PREVIOUS_WORD, DefaultEditorKit.selectionPreviousWordAction);
+    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(_currentDefDoc.getEditor().previousWordAction), null, "Previous Word");
+    kbm.addShiftAction(KEY_PREVIOUS_WORD, _currentDefDoc.getEditor().selectionPreviousWordAction);
     
     kbm.put(KEY_DOWN, actionMap.get(DefaultEditorKit.downAction), null, "Down");
     kbm.addShiftAction(KEY_DOWN, DefaultEditorKit.selectionDownAction);
@@ -9339,8 +9339,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     kbm.put(KEY_END_LINE, actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
     kbm.addShiftAction(KEY_END_LINE, DefaultEditorKit.selectionEndLineAction);
     
-    kbm.put(KEY_NEXT_WORD, actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
-    kbm.addShiftAction(KEY_NEXT_WORD, DefaultEditorKit.selectionNextWordAction);
+    kbm.put(KEY_NEXT_WORD, actionMap.get(_currentDefDoc.getEditor().nextWordAction), null, "Next Word");
+    kbm.addShiftAction(KEY_NEXT_WORD, _currentDefDoc.getEditor().selectionNextWordAction);
     
     kbm.put(KEY_FORWARD, actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
     kbm.addShiftAction(KEY_FORWARD, DefaultEditorKit.selectionForwardAction);

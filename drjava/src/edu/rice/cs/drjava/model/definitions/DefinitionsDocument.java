@@ -118,6 +118,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Keeps track of the listeners to this model. */
   private final GlobalEventNotifier _notifier;
   
+  /** Uses an updated version of the DefaultEditorKit */
+  private final DefinitionsEditorKit _editor;
+  
   /* Relying on the following definition in AbstractDJDocument.  It must be placed there to be initialized before use!
    protected static final Object _wrappedPosListLock = new Object();
    */
@@ -132,6 +135,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
     super(indenter);
     _notifier = notifier;
+    _editor = new DefinitionsEditorKit(notifier);
     resetUndoManager();
   }
   
@@ -142,6 +146,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
     _notifier = notifier;
+    _editor = new DefinitionsEditorKit(notifier);
     resetUndoManager();
   }
   
@@ -152,7 +157,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super();
     _notifier = notifier;
+    _editor = new DefinitionsEditorKit(notifier);
     _undoManager = undoManager;
+  }
+  
+  /** Returns the document's editor */
+  public DefinitionsEditorKit getEditor(){
+    return _editor;
   }
   
   /** Returns a new indenter. */
