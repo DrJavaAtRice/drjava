@@ -602,7 +602,9 @@ public final class ConcurrentUtil {
                                        Runnable1<? super Process> onExit)
       throws InterruptedException, ExecutionException, IOException {
     Thunk<Remote> task = new ExportRemoteTask(factory);
-    try { return new ProcessTaskController<Remote>(jvmBuilder, DIRECT_EXECUTOR, task, onExit).get(); }
+    // no need to spawn a thread if we don't need to wait for the process to quit
+    Executor exec = (onExit == null) ? DIRECT_EXECUTOR : THREAD_EXECUTOR;
+    try { return new ProcessTaskController<Remote>(jvmBuilder, exec, task, onExit).get(); }
     // an interrupt on this thread translates into a "cancel" because DIRECT_EXECUTOR runs the task on this thread
     catch (CancellationException e) { throw new InterruptedException(); }
     catch (WrappedException e) {
