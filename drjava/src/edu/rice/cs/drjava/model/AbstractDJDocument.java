@@ -370,22 +370,37 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Checks to see if the current string is a number
     * @return true if x is a parseable number, i.e. either parsable as a double or as a long after chopping off a possible trailing 'L' or 'l'
     */
-  private boolean _isNum(String x) {
+  static boolean _isNum(String x) {
     try {
       Double.parseDouble(x);
       return true;
     } 
     catch (NumberFormatException e) {
-      if (x.endsWith("l")||x.endsWith("L")) {
-          try {
-              Long.parseLong(x.substring(0,x.length()-1));
-              return true;
-          } 
-          catch (NumberFormatException e2) {
-              return false;
+      int begin = 0;
+      int end = x.length();
+      if (end-begin>1) {
+          // string is not empty
+          char ch = x.charAt(end-1);
+          if ((ch=='l')||(ch=='L')) --end; // skip trailing 'l' or 'L'
+          if (end-begin>1) {
+              // string is not empty
+              if (x.charAt(0)=='0') { // skip leading '0' of octal or hexadecimal literal
+                  ++begin;
+                  if (end-begin>1) {
+                      // string is not empty
+                      ch = x.charAt(1);
+                      if ((ch=='x')||(ch=='X')) ++begin; // skip 'x' or 'X' from hexadecimal literal
+                  }
+              }
           }
       }
-      return false;
+      try {
+          Long.parseLong(x.substring(begin,end));
+          return true;
+      }
+      catch (NumberFormatException e2) {
+          return false;
+      }
     }
   }
   
