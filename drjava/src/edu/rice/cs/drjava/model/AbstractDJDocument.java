@@ -376,30 +376,40 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       return true;
     } 
     catch (NumberFormatException e) {
+      int radix = 10;
       int begin = 0;
       int end = x.length();
+      int bits = 32;
       if (end-begin>1) {
+        // string is not empty
+        char ch = x.charAt(end-1);
+        if ((ch=='l')||(ch=='L')) { // skip trailing 'l' or 'L'
+          --end;
+          bits = 64;  
+        }
+        if (end-begin>1) {
           // string is not empty
-          char ch = x.charAt(end-1);
-          if ((ch=='l')||(ch=='L')) --end; // skip trailing 'l' or 'L'
-          if (end-begin>1) {
+          if (x.charAt(0)=='0') { // skip leading '0' of octal or hexadecimal literal
+            ++begin;
+            radix = 8;
+            if (end-begin>1) {
               // string is not empty
-              if (x.charAt(0)=='0') { // skip leading '0' of octal or hexadecimal literal
-                  ++begin;
-                  if (end-begin>1) {
-                      // string is not empty
-                      ch = x.charAt(1);
-                      if ((ch=='x')||(ch=='X')) ++begin; // skip 'x' or 'X' from hexadecimal literal
-                  }
+              ch = x.charAt(1);
+              if ((ch=='x')||(ch=='X')) { // skip 'x' or 'X' from hexadecimal literal
+                ++begin;
+                radix = 16;
               }
+            }
           }
+        }
       }
       try {
-          Long.parseLong(x.substring(begin,end));
-          return true;
+        // BigInteger can parse hex numbers representing negative longs; Long can't
+        java.math.BigInteger val = new java.math.BigInteger(x.substring(begin, end), radix);
+        return (val.bitLength() <= bits);
       }
       catch (NumberFormatException e2) {
-          return false;
+        return false;
       }
     }
   }
