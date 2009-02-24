@@ -368,14 +368,25 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Checks to see if the current string is a number
-    * @return true if x is a parseable number
+    * @return true if x is a parseable number, i.e. either parsable as a double or as a long after chopping off a possible trailing 'L' or 'l'
     */
   private boolean _isNum(String x) {
     try {
       Double.parseDouble(x);
       return true;
     } 
-    catch (NumberFormatException e) {  return false; }
+    catch (NumberFormatException e) {
+      if (x.endsWith("l")||x.endsWith("L")) {
+          try {
+              Long.parseLong(x.substring(0,x.length()-1));
+              return true;
+          } 
+          catch (NumberFormatException e2) {
+              return false;
+          }
+      }
+      return false;
+    }
   }
   
   /** Checks to see if the current string is a type. A type is assumed to be a primitive type OR
