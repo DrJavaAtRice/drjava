@@ -9919,6 +9919,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         };
         public void toFront(WindowEvent we) {
           Window opposite = we.getOppositeWindow();
+          if (opposite==null) { return; /* probably a native application window, not DrJava */ }
           if (opposite instanceof Dialog) {
             Dialog d = (Dialog)opposite;
             if (d.isModal()) {
