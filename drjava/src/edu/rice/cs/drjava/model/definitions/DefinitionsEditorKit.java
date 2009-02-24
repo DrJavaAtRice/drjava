@@ -51,8 +51,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
   private GlobalEventNotifier _notifier;
   private Action[] _actions;
   
-  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("actions.txt",true);
-  
   /** Creates a new editor kit with the given listeners.
     * @param notifier Keeps track of the listeners to the model
     */
@@ -60,30 +58,23 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     _notifier = notifier;
     Action[] supActions = super.getActions();
     _actions = new Action[supActions.length];
-    LOG.log("DefinitionsEditorKit ctor");
     for(int i=0; i<_actions.length; ++i) {
       Action a = supActions[i];
       Object name = a.getValue("Name");
-      LOG.log(name.toString());
       if (name.equals(beginWordAction)) {
         _actions[i] = new BeginWordAction(beginWordAction, false);
-        LOG.log("\treplacing");
       }
       else if (name.equals(endWordAction)) {
         _actions[i] = new EndWordAction(endWordAction, false);
-        LOG.log("\treplacing");
       }
       else if (name.equals(nextWordAction)){
         _actions[i] = new NextWordAction(nextWordAction, false);
-        LOG.log("\treplacing");
       }
       else if (name.equals(previousWordAction)) {
         _actions[i] = new PreviousWordAction(previousWordAction, false);
-        LOG.log("\treplacing");
       }
       else if (name.equals(selectWordAction)) {
         _actions[i] = new SelectWordAction();
-        LOG.log("\treplacing");
       }
       else _actions[i] = a;
     }
@@ -136,7 +127,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
 
     public void actionPerformed(ActionEvent e) {
-      LOG.log("BeginWordAction.actionPerformed");
       JTextComponent target = getTextComponent(e);
       if (target != null) {
         final String text = target.getText();
@@ -170,7 +160,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
 
     public void actionPerformed(ActionEvent e) {
-      LOG.log("EndWordAction.actionPerformed");
       JTextComponent target = getTextComponent(e);
       if (target != null) {
         final String text = target.getText();
@@ -199,7 +188,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
 
     public void actionPerformed(ActionEvent e) {
-      LOG.log("PreviousWordAction.actionPerformed");
       JTextComponent target = getTextComponent(e);
       if (target != null) {
         final String text = target.getText();
@@ -229,7 +217,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
 
     public void actionPerformed(ActionEvent e) {
-      LOG.log("NextWordAction.actionPerformed");
       JTextComponent target = getTextComponent(e);
       if (target != null) {
         final String text = target.getText();
@@ -259,7 +246,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       end = new EndWordAction("pigdog", true);
     }
     public void actionPerformed(ActionEvent e) {
-      LOG.log("SelectWordAction.actionPerformed");
       start.actionPerformed(e);
       end.actionPerformed(e);
     }
