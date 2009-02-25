@@ -72,6 +72,9 @@ public interface OptionConstants {
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
+  /** A String used as an example to import java classes. */
+  public static final StringOption INTERACTIONS_AUTO_IMPORT_CLASS_STRING = new StringOption("interactions.auto.import.class.string", "");
+  
   /** The extension for an old DrJava project file */
   public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
 

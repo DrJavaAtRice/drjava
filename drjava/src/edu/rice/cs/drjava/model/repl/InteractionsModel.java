@@ -56,6 +56,8 @@ import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -197,7 +199,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         String toEval = text.trim();
         _prepareToInterpret(toEval);  // Writes a newLine!
         if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
-        if (edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
+        if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
             toEval.startsWith("import ")) {
           // add the class or package after the import to the set of auto-imports
           // NOTE: this only processes import statements until the first non-import statement or comment is reached
@@ -237,22 +239,30 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Executes import statements for the classes and packages in the auto-import set. */
   public void autoImport() {
-    if (!edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) return;
-    if (_autoImportSet.size()==0) return;
-
+    String classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING);
+    String []import_classes = classes.split(",");
     final StringBuilder sb = new StringBuilder();
-    for(String s: _autoImportSet) {
-      sb.append("import ");
-      sb.append(s);
-      sb.append("; ");
+    
+    for(String s: import_classes) {
+      String name = s.trim();
+      if (s.length()>0) {
+        sb.append("import ");
+        sb.append(s.trim());
+        sb.append("; ");
+      }
+    }    
+    if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
+      for(String s: _autoImportSet) {
+        sb.append("import ");
+        sb.append(s);
+        sb.append("; ");
+      }
     }
-    _document.insertBeforeLastPrompt("Auto-import: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
-    new Thread(new Runnable() { 
-      public void run() { 
-        try { interpret(sb.toString()); } 
-        catch(Throwable t) { DrJavaErrorHandler.record(t); }
-      } 
-    }).start(); 
+
+    if (sb.length()>0) {
+      interpret(sb.toString());
+      _document.insertBeforeLastPrompt("Auto-import after debug: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+    }
   }
   
   /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
@@ -787,12 +797,42 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           _document.reset(generateBanner(wd));
           _document.setInProgress(false);
           if (_pane != null) _pane.setCaretPosition(_document.getLength());
+          
+          autoImportOnReset();
+          
           _notifyInterpreterReady(wd);
+        }
+      });
+    }
+    else {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          autoImportOnReset();
         }
       });
     }
     _waitingForFirstInterpreter = false;
     debug.logEnd();
+  }
+
+  /** Auto-import the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASS_STRING. */
+  public void autoImportOnReset() {
+    String classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING);
+    String []import_classes = classes.split(",");
+    final StringBuilder sb = new StringBuilder();
+    
+    for(String s: import_classes) {
+      String name = s.trim();
+      if (s.length()>0) {
+        sb.append("import ");
+        sb.append(s.trim());
+        sb.append("; ");
+      }
+    }
+    if (sb.length()>0) {
+      interpret(sb.toString());
+      _document.insertBeforeLastPrompt("Auto-import after reset: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+    }
   }
   
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */

@@ -447,8 +447,9 @@ public class ConfigFrame extends SwingFrame {
                                                   "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>" +
                                                   "or to always use the value of the \"user.home\" Java property<br>"+
                                                   "(currently "+System.getProperty("user.home")+")."));
-
+    
     panel.displayComponents();
+    
   }
 
   /** Add all of the components for the Display Options panel of the preferences window. */
@@ -1130,6 +1131,12 @@ public class ConfigFrame extends SwingFrame {
                                                          "Maximum Lines in \"Follow File\" Window", this,
                                                          "<html>The maximum number of lines to keep in a \"Follow File\"<br>"+
                                                          "or \"External Process\" pane. Enter 0 for unlimited.</html>"));
+    
+    StringOptionComponent autoImportClasses = 
+      new StringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING, "Classes to Auto-Import", this, 
+                                "<html>List of classes to auto-import every time the Interaction Pane" +
+                                "is reset or started. Classes must be separated by commas.");
+    addOptionComponent(panel, autoImportClasses);
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
