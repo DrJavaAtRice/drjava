@@ -118,7 +118,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
   
   /** Resets the Java interpreter. */
-  protected void _resetInterpreter(File wd) { _jvm.killInterpreterJVM(wd); }
+  protected void _resetInterpreter(File wd, boolean force) {
+    _jvm.setWorkingDirectory(wd);
+    _jvm.restartInterpreterJVM(force);
+  }
   
   /** Adds a named interpreter to the list.
     * @param name the unique name for the interpreter
@@ -187,8 +190,5 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     Option<Iterable<File>> result = _jvm.getClassPath();
     return result.unwrap(IterUtil.<File>empty());
   }
-  
-  /** Enables restarting of slave JVM (after it has been disabled). */
-  public void enableRestart() { _jvm.enableRestart(); }
   
 }

@@ -54,8 +54,6 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
 
   // _log is inherited from GlobalModelTestCase
   
-  private Object _readyLock = new Object(); // lock used for wait/notify on interpreterReady event
-  
   /** Get the instance of the SingleDisplayModel.*/
   private DefaultGlobalModel getSDModel() { return  _model; }
 
@@ -234,12 +232,6 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
       public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
       public synchronized void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
-      public synchronized void interpreterReady(File wd) {  // closing all files calls resetInteractions
-//        Utilities.show("interpreterReady(" + wd + ") called");
-//        Utilities.show("Traceback is:\n" + StringOps.getStackTrace());
-        interpreterReadyCount++;
-        synchronized(_readyLock) { _readyLock.notify(); }
-      }
     };
     
     _model.addListener(listener);
@@ -290,14 +282,6 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     assertNumOpenDocs(1);
     assertLength(0, _model.getActiveDocument()); 
     
-    // wait for interpreter to be ready
-    try {
-      synchronized(_readyLock) {
-        if (listener.getInterpreterReadyCount() == 0) _readyLock.wait(10000);  // intentionally not a while 
-      }
-    }
-    catch(InterruptedException e) { fail("Wait for interpreterReady event was interrupted by " + e); }
-    listener.assertInterpreterReadyCount(1);  
     listener.assertNewCount(4);
     listener.assertCloseCount(4);
     listener.assertAbandonCount(4);

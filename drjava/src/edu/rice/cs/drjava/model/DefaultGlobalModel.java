@@ -110,6 +110,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** RMI interface to the Interactions JVM. */
   final MainJVM _jvm; 
   
+  private final Thread _jvmStarter; // thread that invokes _jvm.startInterpreterJVM()
+  
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected final DefaultInteractionsModel _interactionsModel;
   
@@ -218,9 +220,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //      This is obnoxiously order-dependent, but it works for now.
     _compilerModel.addListener(_clearInteractionsListener);
     
-    new Thread("Start interpreter JVM") {
+    _jvmStarter = new Thread("Start interpreter JVM") {
       public void run() { _jvm.startInterpreterJVM(); }
-    }.start();
+    };
+    _jvmStarter.start();
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
@@ -295,17 +298,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
-    // dispose() was previously commented out, with a note simply saying it called UnicastRemoteObject.unexport().
-    // If there's some problem with unexport(), this call can be replaced with killInterpreterJVM(null).
+    try { _jvmStarter.join(); } // some tests were reach this point before _jvmStarter has completed
+    catch (InterruptedException e) { throw new UnexpectedException(e); }
     _jvm.dispose();
     _notifier.removeAllListeners();  // removes the global model listeners!
   }
   
   /** Disposes of external resources. Kills the slave JVM. */
-  public void disposeExternalResources() {
-    // Kill the interpreter
-    _jvm.killInterpreterJVM(null);
-  }
+  public void disposeExternalResources() { _jvm.stopInterpreterJVM(); }
   
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
   
@@ -321,18 +321,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
-    
-    if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && wd.equals(workDir)) {
-      debug.log();
-      // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
-      _interactionsModel._notifyInterpreterReady(wd);
-      debug.logEnd();
-      return; 
-    }
+    forceReset |= isClassPathChanged();
+    forceReset |= !wd.equals(workDir);
     // update the setting
-    debug.log();
     DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
-    _interactionsModel.resetInterpreter(wd);
+    _interactionsModel.resetInterpreter(wd, forceReset);
     debug.logEnd();
   }
   

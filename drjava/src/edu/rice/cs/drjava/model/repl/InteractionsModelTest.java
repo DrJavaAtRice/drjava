@@ -585,7 +585,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     public void addProjectFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
     public void addExternalFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
     public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
-    protected void _resetInterpreter(File wd) { fail("cannot reset interpreter in a test"); }
+    protected void _resetInterpreter(File wd, boolean force) { fail("cannot reset interpreter in a test"); }
     
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }

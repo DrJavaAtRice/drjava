@@ -167,7 +167,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
   
   /** Resets the Java interpreter. */
-  protected void _resetInterpreter(File wd) {
+  protected void _resetInterpreter(File wd, boolean force) {
     interpreterResetting();
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));

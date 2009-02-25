@@ -304,15 +304,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public abstract String getVariableType(String var);
   
-  /** Resets the Java interpreter with working directry wd. */
-  public final void resetInterpreter(File wd) {
+  /** Resets the Java interpreter with working directory wd. */
+  public final void resetInterpreter(File wd, boolean force) {
     _workingDirectory = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
-    _resetInterpreter(wd);
+    _resetInterpreter(wd, force);
   }
   
   /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. */
-  protected abstract void _resetInterpreter(File wd);
+  protected abstract void _resetInterpreter(File wd, boolean force);
   
   /** Returns the working directory for the current interpreter. */
   public File getWorkingDirectory() { return _workingDirectory; }

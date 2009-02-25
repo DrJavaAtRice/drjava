@@ -54,7 +54,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.IDocumentNavigator;

@@ -2119,7 +2119,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _doResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
-    _model.getInteractionsModel().enableRestart();
     // Lots of work, so use another thread
     new Thread(new Runnable() { 
       public void run() {

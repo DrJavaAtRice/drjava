@@ -140,7 +140,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
       
     // Reset the interactions pane, restarting the interpreter
     File f = _model.getWorkingDirectory();
-    _model.resetInterpreter(f);
+    _model.resetInterpreter(f, true);
     
 //    System.err.println("Interpreter reset");
 

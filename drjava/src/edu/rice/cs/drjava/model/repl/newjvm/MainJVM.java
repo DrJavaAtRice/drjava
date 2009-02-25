@@ -41,6 +41,7 @@ import java.io.*;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -59,7 +60,6 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.concurrent.StateMonitor;
 
@@ -70,7 +70,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
  * <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
- * provides callbacks allowing the remote JVM to access the model; and a variety of delegating
+ * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
  * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
  * In the case of errors, these interpreter-delegating methods communicate the failure via the
  * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
@@ -94,10 +94,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private static final int STARTUP_TIMEOUT = 10000;  
   
   /** Contains the current InterpreterJVM stub, or {@code null} if it is not running. */
-  private final StateMonitor<InterpreterJVMRemoteI> _interpreterJVM;
-  
-  /** Records state of slaveJVM (interpreterJVM); used to suppress restartInteractions on a fresh JVM */
-  private volatile boolean _slaveJVMUsed = false;
+  private final StateMonitor<State> _state;
   
   /** Instance of inner class to handle interpret result. */
   private final ResultHandler _handler = new ResultHandler();
@@ -111,27 +108,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Listens to debug-related events */
   private volatile DebugModelCallback _debugModel;
   
-  /**
-   * Controls access to all startup-related options and state, for code that writes to these fields or that reads
-   * multiple fields (and requires them to be consistent).
-   */
-  private final Object _startupLock = new Object();
-  
-  /* startup state */
-  
-  /** This flag is set to false to inhibit the automatic restart of the JVM. */
-  private volatile boolean _restart = true;
-  
-  /** This flag is set to remember that the JVM is cleanly restarting, so that the replCalledSystemExit method
-    * does not need to be called.
-    */
-  private volatile boolean _cleanlyRestarting = false;
-  
-  /** Number of startup attempts that have been initiated but not completed.  0 means not starting up. */
-  private volatile int _startupAttempts = 0;
-  
-  /** Signaled whenever no startup is in progress. */
-  private final CompletionMonitor _startupComplete = new CompletionMonitor(true);
   
   /* JVM execution options */
   
@@ -154,7 +130,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
     _debugModel = new DummyDebugModel();
-    _interpreterJVM = new StateMonitor<InterpreterJVMRemoteI>(null);
+    _state = new StateMonitor<State>(new FreshState());
     _startupClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
   }
   
@@ -164,56 +140,26 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   
   /** Starts the interpreter if it's not running already. */
-  public void startInterpreterJVM() {
-    debug.logStart();
-
-    boolean alreadyStarted;
-    synchronized (_startupLock) {
-      alreadyStarted = (_interpreterJVM.value() != null || !_startupComplete.isSignaled());
-      if (!alreadyStarted) {
-        _startupComplete.reset();
-        _startupAttempts = 1;
-      }
-    }
-    if (alreadyStarted) { debug.log("Already started"); }
-    else { _doStartup(); }
-    debug.logEnd();
-  }
-    
-  /**
-   * Kills the running interpreter JVM, and restarts with working directory {@code wd} if {@code wd != null}.
-   * If {@code wd == null}, the interpreter is not restarted.  (Note that killing without restarting will
-   * cause all methods that delegate to the interpreter JVM to fail, returning "false" or "none".)
-   */
-  public void killInterpreterJVM(File wd) {
-    debug.logStart();
-    _startupComplete.attemptEnsureSignaled();
-    boolean restart = (wd != null);
-    InterpreterJVMRemoteI current;
-    synchronized (_startupLock) {
-      _workingDir = wd;
-      _restart = restart;
-      _cleanlyRestarting = true;
-      current = _interpreterJVM.getAndSet(null);
-    }
-    if (current != null) {
-      if (restart) _interactionsModel.interpreterResetting();
-      quitSlave();
-      // new slave JVM is started by in handleSlaveQuit()
-    }
-    debug.logEnd();
-  }
+  public void startInterpreterJVM() { _state.value().start(); }
   
   /**
-   * Kill the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
+   * Stop the interpreter if it's current running.  (Note that, until {@link #startInterpreterJVM} is called
+   * again, all methods that delegate to the interpreter JVM will fail, returning "false" or "none".)
+   */
+  public void stopInterpreterJVM() { _state.value().stop(); }
+  
+  /**
+   * Get a "fresh" interpreter JVM.  Has the same effect as {@link #startInterpreterJVM} if no interpreter
+   * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
+   * {@code force} is true.
+   */
+  public void restartInterpreterJVM(boolean force) { _state.value().restart(force); }
+    
+  /**
+   * Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
    * May be useful when a number of different MainJVM objects are created (such as when running tests).
    */
-  public void dispose() {
-    debug.logStart();
-    killInterpreterJVM(null);
-    if (!isDisposed()) { super.dispose(); }
-    debug.logEnd();
-  }
+  public void dispose() { _state.value().dispose(); }
   
   
   /*
@@ -226,71 +172,27 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   protected void handleSlaveConnected(SlaveRemote newSlave) {
     InterpreterJVMRemoteI slaveCast = (InterpreterJVMRemoteI) newSlave;
-    Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
-    try { slaveCast.setPrivateAccessible(allowAccess); }
-    catch (RemoteException re) { _handleRemoteException(re); }
-
-    synchronized (_startupLock) {
-      _restart = true;
-      _cleanlyRestarting = false;
-      _startupAttempts = 0;
-      _slaveJVMUsed = false;
-      _interpreterJVM.set(slaveCast); // initialized after all other state is set
-      _startupComplete.signal();
-    }
-    _interactionsModel.interpreterReady(_workingDir);
-    _junitModel.junitJVMReady();
+    _state.value().started(slaveCast);
   }
-  
+
   /**
    * Callback for when the slave JVM has quit.
    * @param status The exit code returned by the slave JVM.
    */
   protected void handleSlaveQuit(int status) {
     debug.logValue("Slave quit", "status", status);
-    boolean wasRestarting;
-    boolean doRestart;
-    synchronized (_startupLock) {
-      wasRestarting = _cleanlyRestarting;
-      _cleanlyRestarting = false;
-      doRestart = _restart;
-      _interpreterJVM.set(null);
-    }
-    if (!wasRestarting) { _interactionsModel.replCalledSystemExit(status); }
-    if (doRestart) {
-      // We have already fired this event if we are cleanly restarting
-      if (!wasRestarting) { _interactionsModel.interpreterResetting(); }
-      startInterpreterJVM();
-    }
+    _state.value().stopped(status);
   }
-  
-  
+    
   /**
    * Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
    * @param e  Exception that occurred during startup.
    */
   protected void handleSlaveWontStart(Exception e) {
-    boolean giveUp;
-    synchronized (_startupLock) {
-      _startupAttempts++;
-      debug.logValue("startupFailures", _startupAttempts);
-      giveUp = _startupAttempts > MAX_STARTUP_FAILURES;
-      if (giveUp) {
-        _restart = false;
-        _startupAttempts = 0;
-        _startupComplete.signal();
-      }
-    }
-    if (giveUp) {
-      debug.log("Giving up on restart");
-      _interactionsModel.interpreterWontStart(e);
-    }
-    else {
-      debug.logStart("trying to start interpreter again");
-      _doStartup();
-      debug.logEnd("trying to start interpreter again");
-    }
+    debug.log("Slave won't start", e);
+    _state.value().startFailed(e);
   }
+    
   
 
   /*
@@ -328,14 +230,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     return s; 
   }
  
-  /** This method is called by the interpreter JVM if it cannot be exited.
-   * @param th The Throwable thrown by System.exit
-   */
-  public void quitFailed(Throwable th) {
-    _interactionsModel.interpreterResetFailed(th);
-    _cleanlyRestarting = false;
-  }
- 
   /** Called if JUnit is invoked on a non TestCase class.  Forwards from the other JVM to the local JUnit model.
    * @param isTestAll whether or not it was a use of the test all button
    */
@@ -356,7 +250,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(int numTests) {
-    _slaveJVMUsed = true;
     _junitModel.testSuiteStarted(numTests);
   }
 
@@ -364,7 +257,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param testName The name of the test being started.
    */
   public void testStarted(String testName) {
-    _slaveJVMUsed = true;
     _junitModel.testStarted(testName);
   }
  
@@ -408,8 +300,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * === Local getters and setters ===
    */
   
-  public boolean slaveJVMUsed() { return _slaveJVMUsed; }
-  
   /** Provides an object to listen to interactions-related events. */
   public void setInteractionsModel(InteractionsModelCallback model) { _interactionsModel = model; }
   
@@ -432,9 +322,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _startupClassPath = IOUtil.parsePath(classPath);
   }
   
-  /** Re-enables restarting the slave if it has been turned off by repeated startup failures. */
-  public void enableRestart() {
-    synchronized (_startupLock) { _restart = true; }
+  /** Sets the working directory for the interpreter (takes effect on next startup). */
+  public void setWorkingDirectory(File dir) {
+    _workingDir = dir;
   }
   
   /** Declared as a getter in order to allow subclasses to override the standard behavior. */
@@ -448,11 +338,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     *          during the call, or an unexpected exception occurs.
     */
   public boolean interpret(final String s) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(true);
     if (remote == null) { return false; }
     try {
       debug.logStart("Interpreting " + s);
-      _slaveJVMUsed = true;
       InterpretResult result = remote.interpret(s);
       result.apply(resultHandler());
       debug.logEnd("result", result);
@@ -467,7 +356,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param var the name of the variable
    */
   public Option<String> getVariableToString(String var) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
     try { return Option.some(remote.getVariableToString(var)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
@@ -479,7 +368,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param var the name of the variable
    */
   public Option<String> getVariableType(String var) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
     try { return Option.some(remote.getVariableType(var)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
@@ -490,7 +379,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the remote JVM.
    */
   public boolean addProjectClassPath(File f) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addProjectClassPath(f); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -501,7 +390,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the remote JVM.
    */
   public boolean addBuildDirectoryClassPath(File f) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addBuildDirectoryClassPath(f); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -512,7 +401,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the remote JVM.
    */
   public boolean addProjectFilesClassPath(File f) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addProjectFilesClassPath(f); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -523,7 +412,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the remote JVM.
    */
   public boolean addExternalFilesClassPath(File f) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addExternalFilesClassPath(f); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -534,7 +423,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the remote JVM.
    */
   public boolean addExtraClassPath(File f) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addExtraClassPath(f); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -544,7 +433,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * if the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
     */
   public Option<Iterable<File>> getClassPath() {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
     try { return Option.some(remote.getClassPath()); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
@@ -554,7 +443,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @param packageName Name of the package to enter.
     */
   public boolean setPackageScope(String packageName) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.interpret("package " + packageName + ";"); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -567,7 +456,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @return the class names that are actually test cases
     */
   public Option<List<String>> findTestClasses(List<String> classNames, List<File> files) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
     try { return Option.some(remote.findTestClasses(classNames, files)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
@@ -578,7 +467,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Returns {@code false} if no test suite is cached, the remote JVM is unavailable, or an error occurs.
    */
   public boolean runTestSuite() { 
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(true);
     if (remote == null) { return false; }
     try { return remote.runTestSuite(); }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -602,7 +491,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @throws IllegalArgumentException if the name is not unique
    */
   public boolean addInterpreter(String name) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addInterpreter(name); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -613,7 +502,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @param name Name of the interpreter to remove
     */
   public boolean removeInterpreter(String name) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.removeInterpreter(name); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -625,7 +514,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @return Status flags: whether the current interpreter changed, and whether it is busy; or "none" on an error
     */
   public Option<Pair<Boolean, Boolean>> setActiveInterpreter(String name) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
     try { return Option.some(remote.setActiveInterpreter(name)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
@@ -636,7 +525,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @return Status flags: whether the current interpreter changed, and whether it is busy; or "none" on an error
     */
   public Option<Pair<Boolean, Boolean>> setToDefaultInterpreter() {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
     try { return Option.some(remote.setToDefaultInterpreter()); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
@@ -646,7 +535,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
    */
   public boolean setPrivateAccessible(boolean allow) {
-    InterpreterJVMRemoteI remote = _accessInterpreterJVM();
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.setPrivateAccessible(allow); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
@@ -657,19 +546,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * === Helper methods ===
    */
   
-  /** Call invokeSlave with the appropriate JVMBuilder.  Defined here to allow for multiple attempts. */
+  /** Call invokeSlave with the appropriate JVMBuilder. */
   private void _doStartup() {
-    Iterable<File> classPath;
-    List<String> jvmArgs = new ArrayList<String>();
-    File dir;
-    synchronized (_startupLock) {
-      if (_allowAssertions) { jvmArgs.add("-ea"); }
-      classPath = _startupClassPath;
-      dir = _workingDir;
-    }
+    File dir = _workingDir;
     // TODO: Eliminate NULL_FILE.  It is a bad idea!  The correct behavior when it is used always depends on
     // context, so it can never be treated transparently.  In this case, the process won't start.
     if (dir == FileOps.NULL_FILE) { dir = IOUtil.WORKING_DIRECTORY; }
+
+    List<String> jvmArgs = new ArrayList<String>();
+    if (_allowAssertions) { jvmArgs.add("-ea"); }
     int debugPort = _getDebugPort();
     if (debugPort > -1) {
       jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort);
@@ -687,7 +572,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     jvmArgs.addAll(ArgumentTokenizer.tokenize(slaveArgs));
     
-    invokeSlave(new JVMBuilder(classPath).directory(dir).jvmArguments(jvmArgs));
+    invokeSlave(new JVMBuilder(_startupClassPath).directory(dir).jvmArguments(jvmArgs));
   }
   
   /** Returns the debug port to use, as specified by the model. Returns -1 if no usable port could be found. */
@@ -700,12 +585,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     return port;
   }
   
-  /** If an interpreter has not registered itself, this method will block until one does.*/
-  private InterpreterJVMRemoteI _accessInterpreterJVM() {
-    if (!_restart) { return _interpreterJVM.value(); }
-    else { return _interpreterJVM.attemptEnsureNotState(null, STARTUP_TIMEOUT); }
-  }
-
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
   private void _handleRemoteException(RemoteException e) {
     if (e instanceof UnmarshalException && e.getCause() instanceof EOFException) {
@@ -719,6 +598,208 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Helper classes
    */
 
+  /** State-based implementation of the starting/stopping functionality. */
+  private abstract class State {
+    /**
+     * Get the current interpreter -- null if unavailable.  Block if necessary.
+     * @param used  Whether this access will lead to a used JVM -- one that should be reset even when not forced 
+     */
+    public abstract InterpreterJVMRemoteI interpreter(boolean used); 
+    /** Ensure that the interpreter is starting or running.  Block if necessary. */
+    public abstract void start();
+    /** Ensure that the interpreter is stopping or not running. Block if necessary. */
+    public abstract void stop();
+    /**
+     * Ensure that the interpreter is stopping or not running, to be started again.  Block if necessary.
+     * @param force  Whether an unused, running JVM should be restarted
+     */
+    public abstract void restart(boolean force);
+    public abstract void dispose();
+    /** React to a completed startup. */
+    public void started(InterpreterJVMRemoteI i) { throw new IllegalStateException("Unexpected started() call"); }
+    /** React to a failed startup. */
+    public void startFailed(Exception e) { throw new IllegalStateException("Unexpected startFailed() call"); }
+    /** React to a completed shutdown (requested or spontaneous). */
+    public void stopped(int status) { throw new IllegalStateException("Unexpected stopped() call"); }
+  }
+  
+  /** Fresh, hasn't yet been started. */
+  private class FreshState extends State {
+    public InterpreterJVMRemoteI interpreter(boolean used) { return null; } 
+    public void start() {
+      if (_state.compareAndSet(this, new StartingState())) { _doStartup(); }
+      else { _state.value().start(); }
+    }
+    public void stop() {}
+    public void restart(boolean force) { start(); }
+    public void dispose() {
+      if (_state.compareAndSet(this, new DisposedState())) { MainJVM.super.dispose(); }
+      else { _state.value().dispose(); }
+    }
+  }
+  
+  /** Has been started, waiting for startup to complete. */
+  private class StartingState extends State {
+    private final int _failures;
+    public StartingState() { _failures = 0; }
+    private StartingState(int failures) { _failures = failures; }
+    
+    public InterpreterJVMRemoteI interpreter(boolean used) {
+      try { return _state.ensureNotState(this, STARTUP_TIMEOUT).interpreter(used); }
+      catch (TimeoutException e) { return null; }
+      catch (InterruptedException e) { throw new UnexpectedException(e); }
+    }
+    
+    public void start() {}
+    
+    public void restart(boolean force) {
+      try { _state.ensureNotState(this, STARTUP_TIMEOUT).restart(force); }
+      catch (Exception e) { throw new UnexpectedException(e); }
+    }
+    
+    public void stop() {
+      try { _state.ensureNotState(this, STARTUP_TIMEOUT).stop(); }
+      catch (Exception e) { throw new UnexpectedException(e); }
+    }
+    
+    public void dispose() { stop(); _state.value().dispose(); }
+
+    @Override public void started(InterpreterJVMRemoteI i) {
+      if (_state.compareAndSet(this, new FreshRunningState(i))) {
+        Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
+        try { i.setPrivateAccessible(allowAccess); }
+        catch (RemoteException re) { _handleRemoteException(re); }
+        // Note that _workingDir isn't guaranteed to be the dir at the time startup began.  Is that a problem?
+        // (Is the user ever going to see a working dir message that doesn't match the actual setting?)
+        _interactionsModel.interpreterReady(_workingDir);
+        _junitModel.junitJVMReady();        
+      }
+      else { _state.value().started(i); }
+    }
+    
+    @Override public void startFailed(Exception e) {
+      int count = _failures + 1;
+      if (count < MAX_STARTUP_FAILURES) {
+        if (_state.compareAndSet(this, new StartingState(count))) { _doStartup(); }
+        else { _state.value().startFailed(e); }
+      }
+      else {
+        if (_state.compareAndSet(this, new FreshState())) { _interactionsModel.interpreterWontStart(e); }
+        else { _state.value().startFailed(e); }
+      }
+    }
+  }
+  
+  /** Has an active interpreter available. */
+  private class RunningState extends State {
+    protected final InterpreterJVMRemoteI _interpreter;
+    public RunningState(InterpreterJVMRemoteI interpreter) { _interpreter = interpreter; }
+    public InterpreterJVMRemoteI interpreter(boolean used) { return _interpreter; }
+    public void start() {}
+    
+    public void stop() {
+      if (_state.compareAndSet(this, new StoppingState())) { quitSlave(); }
+      else { _state.value().stop(); }
+    }
+    
+    public void restart(boolean force) {
+      if (_state.compareAndSet(this, new RestartingState())) {
+        _interactionsModel.interpreterResetting();
+        quitSlave();
+      }
+      else { _state.value().restart(force); }
+    }
+    
+    public void dispose() { stop(); _state.value().dispose(); }
+
+    @Override public void stopped(int status) {
+      if (_state.compareAndSet(this, new RestartingState())) {
+        _interactionsModel.replCalledSystemExit(status);
+        _interactionsModel.interpreterResetting();
+      }
+      _state.value().stopped(status); // delegate whether state changed here or in another thread
+    }
+  }
+  
+  /** Variant of RunningState where the interpreter JVM has not yet been used. */
+  private class FreshRunningState extends RunningState {
+    public FreshRunningState(InterpreterJVMRemoteI interpreter) { super(interpreter); }
+    @Override public InterpreterJVMRemoteI interpreter(boolean used) {
+      if (used) {
+        _state.compareAndSet(this, new RunningState(_interpreter));
+        return _state.value().interpreter(used); // delegate whether state changed here or in another thread
+      }
+      else { return super.interpreter(used); }
+    }
+    @Override public void restart(boolean force) {
+      if (force) { super.restart(force); }
+      // otherwise, ignore
+    }
+  }
+  
+  /** Waiting for stop, should automatically start when that happens. */
+  private class RestartingState extends State {
+
+    public InterpreterJVMRemoteI interpreter(boolean used) {
+      try { return _state.ensureNotState(this, STARTUP_TIMEOUT).interpreter(used); }
+      catch (TimeoutException e) { return null; }
+      catch (InterruptedException e) { throw new UnexpectedException(e); }
+    }
+
+    public void start() {}
+
+    public void stop() {
+      if (!_state.compareAndSet(this, new StoppingState())) { _state.value().stop(); }
+    }
+
+    public void restart(boolean force) {}
+
+    public void dispose() {
+      if (_state.compareAndSet(this, new DisposedState())) { MainJVM.super.dispose(); }
+      else { _state.value().dispose(); }
+    }
+    
+    @Override public void stopped(int status) {
+      if (_state.compareAndSet(this, new FreshState())) { _state.value().start(); }
+      else { _state.value().stopped(status); }
+    }
+  }
+  
+  /** Waiting for stop, no restart. */
+  private class StoppingState extends State {
+    public InterpreterJVMRemoteI interpreter(boolean used) { return null; }
+
+    public void start() {
+      try { _state.ensureNotState(this, STARTUP_TIMEOUT).start(); }
+      catch (Exception e) { throw new UnexpectedException(e); }
+    }
+
+    public void stop() {}
+
+    public void restart(boolean force) {
+      if (!_state.compareAndSet(this, new RestartingState())) { _state.value().restart(force); }
+    }
+
+    public void dispose() {
+      if (_state.compareAndSet(this, new DisposedState())) { MainJVM.super.dispose(); }
+      else { _state.value().dispose(); }
+    }
+    
+    @Override public void stopped(int status) {
+      if (!_state.compareAndSet(this, new FreshState())) { _state.value().stopped(status); } 
+    }
+  }
+  
+  private class DisposedState extends State {
+    public InterpreterJVMRemoteI interpreter(boolean used) { throw new IllegalStateException("MainJVM is disposed"); }
+    public void start() { throw new IllegalStateException("MainJVM is disposed"); }
+    public void stop() { throw new IllegalStateException("MainJVM is disposed"); }
+    public void restart(boolean force) { throw new IllegalStateException("MainJVM is disposed"); }
+    public void dispose() {}
+    public void stopped() { /* may occur if transitioned here from Restarting or Stopping */ }
+  }
+
+  
   /** Performs the appropriate action to return any type of result from a call to interpret back to the GlobalModel. */
   private class ResultHandler implements InterpretResult.Visitor<Void> {
     /** Lets the model know that void was returned. */

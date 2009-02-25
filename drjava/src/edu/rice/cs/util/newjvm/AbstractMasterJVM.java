@@ -72,9 +72,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 public abstract class AbstractMasterJVM implements MasterRemote {
   
   /**
-   * Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING or
-   * QUITTING state.  After that, the only state transitions out of STARTING/QUITTING occur in the
-   * same thread (or a single designated worker thread); all other threads must wait until the
+   * Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING, or
+   * QUITTING, or DISPOSED state.  After that, the only state transitions out of STARTING/QUITTING occur 
+   * in the same thread (or a single designated worker thread); all other threads must wait until the
    * transition to FRESH or RUNNING.
    */
   private enum State { FRESH, STARTING, RUNNING, QUITTING, DISPOSED };
@@ -146,16 +146,8 @@ public abstract class AbstractMasterJVM implements MasterRemote {
    * @throws IllegalStateException  If this object has been disposed.
    */
   protected final void invokeSlave(JVMBuilder jvmBuilder) {
-    if (isDisposed()) { throw new IllegalStateException(); }
-    
-    // verify that we're in the right state, and that only one thread will start at a time
-    while (!_monitor.compareAndSet(State.FRESH, State.STARTING)) {
-      debug.logValue("Waiting for FRESH state", "current state", _monitor.value());
-      try { _monitor.ensureState(State.FRESH); }
-      catch (InterruptedException e) { throw new UnexpectedException(e); }
-    }
-    debug.log("Entered STARTING state");
-    
+    transition(State.FRESH, State.STARTING);
+
     // update jvmBuilder with any special properties
     Map<String, String> props = ConcurrentUtil.getPropertiesAsMap("plt.", "drjava.", "edu.rice.cs.");
     props.put("java.rmi.server.hostname", "127.0.0.1"); // Make sure RMI doesn't use an IP address that might change
@@ -210,15 +202,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
    * @throws IllegalStateException  If this object has been disposed.
    */
   protected final void quitSlave() {
-    if (isDisposed()) { throw new IllegalStateException(); }
-
-    // verify that we're in the right state, and that only one thread will quit at a time
-    while (!_monitor.compareAndSet(State.RUNNING, State.QUITTING)) {
-      debug.logValue("Waiting for RUNNING state", "current state", _monitor.value());
-      try { _monitor.ensureState(State.RUNNING); }
-      catch (InterruptedException e) { throw new UnexpectedException(e); }
-    }
-    debug.log("Entered QUITTING state");
+    transition(State.RUNNING, State.QUITTING);
     attemptQuit(_slave);
     _slave = null;
     _monitor.set(State.FRESH);
@@ -236,14 +220,29 @@ public abstract class AbstractMasterJVM implements MasterRemote {
    * quit; blocks until that occurs.  After an object has been disposed, it is no longer useful.
    */
   protected void dispose() {
-    while (!_monitor.compareAndSet(State.FRESH, State.DISPOSED)) {
-      debug.logValue("Waiting for FRESH state", "current state", _monitor.value());
-      try { _monitor.ensureState(State.FRESH); }
+    transition(State.FRESH, State.DISPOSED);
+    if (_masterStub.isResolved()) { 
+      try { UnicastRemoteObject.unexportObject(this, true); }
+      catch (NoSuchObjectException e) { error.log(e); }
+    }
+  }
+  
+  /**
+   * Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
+   * thread is successful in performing the transition (only one thread can do so at a time).  Throws
+   * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
+   * out of the disposed state (the alternative is to block permanently). 
+   */
+  private void transition(State from, State to) {
+    State s = _monitor.value();
+    // watch all state transitions until from->to is successful or the DISPOSED state is reached
+    while (!(s.equals(from) && _monitor.compareAndSet(from, to))) {
+      if (s.equals(State.DISPOSED)) { throw new IllegalStateException("In disposed state"); }
+      debug.log("Waiting for transition from " + s + " to " + from);
+      try { s = _monitor.ensureNotState(s); }
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
-    debug.log("Entered DISPOSED state");
-    try { UnicastRemoteObject.unexportObject(this, true); }
-    catch (NoSuchObjectException e) { /* ignore for now: error.log(e); */ }
+    debug.log("Entered state " + to);
   }
   
   protected boolean isDisposed() { return _monitor.value().equals(State.DISPOSED); }

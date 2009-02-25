@@ -67,7 +67,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
       protected void setUp() throws Exception { _jvm = new TestJVMExtension(); }
-      protected void tearDown() throws Exception { _jvm.killInterpreterJVM(null); }
+      protected void tearDown() throws Exception { _jvm.dispose(); }
     };
 
     return setup;
@@ -117,7 +117,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     assertEquals("result", "5", _jvm.returnBuf());
     
     // Now restart interpreter
-    _jvm.killInterpreterJVM(FileOps.NULL_FILE);  // "" is not null: start back up
+    _jvm.restartInterpreterJVM(true);
 
     // Now evaluate another constant
     _jvm.resetFlags();
