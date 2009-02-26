@@ -206,7 +206,7 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   private static class TestJVMExtension extends MainJVM {
-    private static final int WAIT_TIMEOUT = 10000; // time to wait for an interaction to complete
+    private static final int WAIT_TIMEOUT = 30000; // time to wait for an interaction to complete
     
     private final CompletionMonitor _done;
     private volatile String _outBuf;
