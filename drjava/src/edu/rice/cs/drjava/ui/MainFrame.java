@@ -3490,16 +3490,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         _tabbedPanesFrame.setDisplayInFrame(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+	// TODO: find the correct place for this; right now, it can throw
+	// a NullPointerException; the import is performed, but the info
+	// message isn't printed to the Interactions Pane correctly
         EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    // Perform the default imports for the interactions pane
-                    _model.getInteractionsModel().performDefaultImports();
-                }
-                catch(Throwable t) {
-                    DrJavaErrorHandler.record(t);
-                }
-            }
+          public void run() {
+	    // Perform the default imports for the interactions pane
+            _model.getInteractionsModel().performDefaultImports();
+          }
         });
       }
     });
