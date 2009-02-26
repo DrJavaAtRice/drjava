@@ -119,6 +119,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd, boolean force) {
+    setToDefaultInterpreter();
     _jvm.setWorkingDirectory(wd);
     _jvm.restartInterpreterJVM(force);
   }

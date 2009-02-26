@@ -3490,6 +3490,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         _tabbedPanesFrame.setDisplayInFrame(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    // Perform the default imports for the interactions pane
+                    _model.getInteractionsModel().performDefaultImports();
+                }
+                catch(Throwable t) {
+                    DrJavaErrorHandler.record(t);
+                }
+            }
+        });
       }
     });
   }   // End of MainFrame constructor

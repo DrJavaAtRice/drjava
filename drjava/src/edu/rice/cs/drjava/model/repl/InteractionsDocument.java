@@ -122,9 +122,7 @@ public class InteractionsDocument extends ConsoleDocument {
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
-  
-  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("interactions.log",true);
-  
+    
   /** Resets the document to a clean state.  Does not reset the history. */
   public void reset(String banner) {
     try {
@@ -132,18 +130,10 @@ public class InteractionsDocument extends ConsoleDocument {
       // Clear interactions document
       setHasPrompt(false);
       setPromptPos(0);
-      LOG.log("Document before: "+getText());
-      LOG.log("Document length before: "+getLength());
       removeText(0, _document.getLength());
-      LOG.log("Document after remove: "+getText());
-      LOG.log("Document length after remove: "+getLength());
       insertText(0, banner, OBJECT_RETURN_STYLE);
-      LOG.log("Document after banner: "+getText());
-      LOG.log("Document length after banner: "+getLength());
 //      System.err.println("Inserting prompt in cleared interactions pane");
       insertPrompt();
-      LOG.log("Document after prompt: "+getText());
-      LOG.log("Document length after prompt: "+getLength());
       _history.moveEnd();
       setInProgress(false);  // redundant? also done in InteractionsDocument.interpreterReady(...)
     }

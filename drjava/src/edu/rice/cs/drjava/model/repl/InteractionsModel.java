@@ -261,7 +261,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
     if (sb.length()>0) {
       interpret(sb.toString());
-      _document.insertBeforeLastPrompt("Auto-import after debug: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+      _document.insertBeforeLastPrompt("Auto-import: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
   }
   
@@ -798,16 +798,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           _document.setInProgress(false);
           if (_pane != null) _pane.setCaretPosition(_document.getLength());
           
-          autoImportOnReset();
+          performDefaultImports();
           
           _notifyInterpreterReady(wd);
-        }
-      });
-    }
-    else {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          autoImportOnReset();
         }
       });
     }
@@ -815,8 +808,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     debug.logEnd();
   }
 
-  /** Auto-import the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASS_STRING. */
-  public void autoImportOnReset() {
+  /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASS_STRING. */
+  public void performDefaultImports() {
     String classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING);
     String []import_classes = classes.split(",");
     final StringBuilder sb = new StringBuilder();
@@ -831,7 +824,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     if (sb.length()>0) {
       interpret(sb.toString());
-      _document.insertBeforeLastPrompt("Auto-import after reset: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+      _document.insertBeforeLastPrompt("Default imports: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
   }
   
