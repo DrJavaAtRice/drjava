@@ -99,7 +99,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     * EditorKit before the JEditorPane constructor asks for the Document.
     *
     * As an easier alternative, we just let the DefaultEditorKit return a PlainDocument (much lighter weight),
-    * which is thrown away when the true DefinitionsDocument is assigned.
+    * which is thrown away when the true DefinitionsDocument is assigned
     *
     * Improvements to this approach are welcome...  :)
     */
@@ -110,7 +110,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     */
   private DefinitionsDocument _createDefaultTypedDocument() { return new DefinitionsDocument(_notifier); }
   
-  /** Get the MIME content type of the document.
+  /** Get the MIME content type of the document
     * @return "text/java"
     */
   public String getContentType() { return "text/java"; }
@@ -120,6 +120,10 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     */
   public final ViewFactory getViewFactory() { return _factory; }
   
+  /**
+   * Brings the cursor to the beginning of the current word
+   * separated by whitespace or a delimiting character
+   */
   static class BeginWordAction extends TextAction {
     BeginWordAction(String nm, boolean select) {
       super(nm);
@@ -153,6 +157,10 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     private boolean select;
   }
   
+  /**
+   * Sets the cursor at the end of the current word
+   * separated by whitespace or a delimiting character
+   */
   static class EndWordAction extends TextAction {
     EndWordAction(String nm, boolean select) {
       super(nm);
@@ -180,7 +188,13 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
     private boolean select;
   }
-  
+ 
+  /**
+   * Moves the cursor to the previous word beginning
+   * If the cursor is currently inside of a word, moves it to the beginning of that word
+   * Otherwise, moves the cursor to the beginning of the previous word
+   * Also stops at delimiting characters and at the end of a line
+   */
   static class PreviousWordAction extends TextAction {
     PreviousWordAction(String nm, boolean select) {
       super(nm);
@@ -192,11 +206,23 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       if (target != null) {
         final String text = target.getText();
         int offs = target.getCaretPosition();
-        while(offs>=0) {
+        while(offs>0) {
           --offs;
+          if (offs == 0)
+            break;
           char ch = text.charAt(offs);
           char chPrev = text.charAt(offs - 1);
-          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(chPrev)) {
+          if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev)){
+            continue;
+          }
+          else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || 
+              (Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)))) {
+            break;
+          }
+          else if (Character.isWhitespace(chPrev) && !Character.isWhitespace(ch)){
+            break;
+          }
+          else if (!Character.isWhitespace(chPrev) && ch == '\n'){
             break;
           }
         }
@@ -209,7 +235,11 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
     private boolean select;
   }
-  
+
+  /**
+   * Moves the cursor from the current word to the beginning of the next word
+   * Also stops at delimiting characters and at the end of a line
+   */ 
   static class NextWordAction extends TextAction {
     NextWordAction(String nm, boolean select) {
       super(nm);
@@ -221,12 +251,23 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       if (target != null) {
         final String text = target.getText();
         int offs = target.getCaretPosition();
-        while(offs>=0) {
+        while(offs < text.length() - 1) {
           ++offs;
+          if (offs == text.length())
+            break;
           char ch = text.charAt(offs);
           char chPrev = text.charAt(offs - 1);
-          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(chPrev)) {
-            break;
+          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(chPrev) || ch == '\n') {
+            while(Character.isWhitespace(ch) && ch != '\n'){
+              if ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0)
+                break;
+              ++offs;
+              ch = text.charAt(offs);
+            }
+            if (ch == '\n' && Character.isWhitespace(text.charAt(offs - 1)))
+              continue;
+            else
+              break;
           }
         }
         if (select) {
@@ -239,6 +280,10 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     private boolean select;
   }
   
+  /**
+   * Defines the action for word selection as in when
+   * double-clicking a word
+   */
   static class SelectWordAction extends TextAction {
     public SelectWordAction() {
       super(selectWordAction);
@@ -250,10 +295,6 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       end.actionPerformed(e);
     }
     private Action start;
-    private Action end;    
+    private Action end;
   }
 }
-
-
-
-
