@@ -49,7 +49,7 @@ import javax.swing.text.BadLocationException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
@@ -567,7 +567,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   private volatile int _finalPaneCt;
   private volatile int _finalDocCt;
   
-  public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException {
+  public void testDocumentPaneMemoryLeak()  throws InterruptedException, IOException {
     
     DocChangeListener listener = new DocChangeListener();
     
@@ -638,6 +638,25 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     p6.addFinalizationListener(fl);
 //    System.err.println("Listener attached to DefintionsPane@" + p6.hashCode()); 
     assertEquals("Doc6 setup correctly", d6, p6.getOpenDefDocument()); 
+
+    // print identity hash codes into a StringBuilder in case we need them later;
+    // this does not create any references
+    StringBuilder sbIdHashCodes = new StringBuilder();
+    sbIdHashCodes.append("_frame = "+_frame.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
+    sbIdHashCodes.append("_model = "+_model.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
+    sbIdHashCodes.append("p1     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p1))+"\n");
+    sbIdHashCodes.append("p2     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p2))+"\n");
+    sbIdHashCodes.append("p3     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p3))+"\n");
+    sbIdHashCodes.append("p4     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p4))+"\n");
+    sbIdHashCodes.append("p5     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p5))+"\n");
+    sbIdHashCodes.append("p6     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p6))+"\n");
+    sbIdHashCodes.append("d1     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d1))+"\n");
+    sbIdHashCodes.append("d2     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d2))+"\n");
+    sbIdHashCodes.append("d3     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d3))+"\n");
+    sbIdHashCodes.append("d4     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d4))+"\n");
+    sbIdHashCodes.append("d5     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d5))+"\n");
+    sbIdHashCodes.append("d6     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d6)));
+
     
     // all the panes have a listener, so lets close all files
 //    Utilities.show("Waiting to start");
@@ -662,10 +681,21 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       ct++; 
     }
     while (ct < 10 && (_finalDocCt != 6 && _finalPaneCt != 6));
-    
-    if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
-                       (6 - _finalDocCt));
-    
+
+    if (ct == 10) {
+      // if we fail with a garbage collection problem, dump heap
+      LOG.setEnabled(true);
+      LOG.log(sbIdHashCodes.toString());
+      try { LOG.log("heap dump in "+dumpHeap()); }
+      catch(Exception e) {
+        System.err.println("Could not dump heap.");
+        e.printStackTrace(System.err);
+      }
+      
+      fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
+           (6 - _finalDocCt));
+    }
+
     if (ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
 
     assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCt);
@@ -867,6 +897,67 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       closedCt = 0;
     }
     public int getClosedCt() { return closedCt; }
+  }
+  
+  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("heap.log",false);
+  
+  /** Dumps the current heap to a file. */
+  public static File dumpHeap() throws IOException, InterruptedException {
+    String javaHome = System.getenv("JAVA_HOME");
+    char SEP = File.separatorChar;
+    
+    // try jps first
+    File jps = new File(javaHome+SEP+"bin"+SEP+"jps");
+    // if that doesn't work, try jps.exe
+    if (!jps.exists()) jps = new File(javaHome+SEP+"bin"+SEP+"jps.exe");
+    
+    // execute jps
+    ProcessBuilder pb = new ProcessBuilder(jps.getAbsolutePath());
+    LOG.log(java.util.Arrays.toString(pb.command().toArray()));
+    Process jpsProc = pb.start();
+    jpsProc.waitFor();
+    LOG.log("jps returned "+jpsProc.exitValue());
+    
+    // read the output of jps
+    BufferedReader br = new BufferedReader(new InputStreamReader(jpsProc.getInputStream()));
+    Integer pid = null;
+    String line = null;
+    while((pid==null) && (line=br.readLine())!=null) {
+      LOG.log(line);
+      // find the PID of JUnitTestRunner, i.e. the PID of the current process
+      if (line.indexOf("JUnitTestRunner")>=0) {
+        pid = new Integer(line.substring(0,line.indexOf(' ')));
+      }
+    }
+    if (pid==null) throw new FileNotFoundException("Could not detect PID");
+    LOG.log("PID is "+pid);
+    
+    // try jmap first
+    File jmap = new File(javaHome+SEP+"bin"+SEP+"jmap");
+    // if that doesn't work, try jmap.exe
+    if (!jmap.exists()) jmap = new File(javaHome+SEP+"bin"+SEP+"jmap.exe");
+    
+    // execute jmap -heap:format=b PID
+    pb = new ProcessBuilder(jmap.getAbsolutePath(),
+                            "-heap:format=b",
+                            pid.toString());
+    LOG.log(java.util.Arrays.toString(pb.command().toArray()));
+    Process jmapProc = pb.start();
+    jmapProc.waitFor();
+    LOG.log("jmap returned "+jmapProc.exitValue());
+    
+    // read the output of jmap
+    br = new BufferedReader(new InputStreamReader(jmapProc.getInputStream()));
+    while((line=br.readLine())!=null) {
+      LOG.log(line);
+    }
+    
+    // rename the file 
+    File dump = new File("heap.bin");
+    if (!dump.exists()) { throw new FileNotFoundException("heap.bin not found"); }
+    File newDump = new File("heap-DefinitionsPaneTest-"+pid+"-"+System.currentTimeMillis()+".bin");
+    dump.renameTo(newDump);
+    return newDump;
   }
 }
 
