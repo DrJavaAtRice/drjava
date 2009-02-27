@@ -108,7 +108,7 @@ public class ProjectTest extends DrJavaTestCase {
       "(classpaths\n" +
       "   (file (name "+ convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
-      "   (file (name \"src/sexp/SEList.java\")))";
+      "   some.package.ClassName)";
     
     File f = new File(parent, "test1.pjt");
 
@@ -138,8 +138,8 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(base, "src/sexp/SEList.java").getCanonicalPath(), 
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.package.ClassName", 
+                 pfir.getMainClass());
   }
 
    /** Test to make sure all elements of the project are read correctly into the IR */
@@ -169,7 +169,7 @@ public class ProjectTest extends DrJavaTestCase {
       "(classpaths\n" +
       "   (file (name "+ convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
-      "   (file (name \"src/sexp/SEList.java\")))";
+      "   some.ClassName)";
     
     File f = new File(parent, "test2.pjt");
 
@@ -201,8 +201,8 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(root, "sexp/SEList.java").getCanonicalPath(), 
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.ClassName", 
+                 pfir.getMainClass());
   }
   
   public void testParseFile() throws SExpParseException {
@@ -230,7 +230,7 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addClassPathFile(new File(parent, "lib"));
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
-    fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
+    fb.setMainClass("some.main.ClassName");
     fb.write();
 
     StringBuilder received = new StringBuilder();
@@ -267,8 +267,8 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("work-dir name", srcDir.getCanonicalPath(), pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(parent,"lib").getCanonicalPath(),
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(parent,"dir1/testfile1.java").getCanonicalPath(),
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.main.ClassName",
+                 pfir.getMainClass());
     pf.delete();
   }
   
@@ -303,7 +303,7 @@ public class ProjectTest extends DrJavaTestCase {
       "(classpaths\n" +
       "   (file (name "+ convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
-      "   (file (name \"src/sexp/SEList.java\")))";
+      "   some.thing.ClassName)";
     
     File f = new File(parent, "test1.pjt");
 
@@ -333,8 +333,8 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(base, "src/sexp/SEList.java").getCanonicalPath(), 
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.thing.ClassName", 
+                 pfir.getMainClass());
   }
 
    /** Test to make sure all elements of the project are read correctly into the IR */
@@ -364,7 +364,7 @@ public class ProjectTest extends DrJavaTestCase {
       "(classpaths\n" +
       "   (file (name "+ convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
-      "   (file (name \"src/sexp/SEList.java\")))";
+      "   some.thing.Name)";
     
     File f = new File(parent, "test2.pjt");
 
@@ -396,8 +396,8 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(root, "sexp/SEList.java").getCanonicalPath(), 
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.thing.Name", 
+                 pfir.getMainClass());
   }
 
   public void testWriteFilePJT() throws IOException, MalformedProjectFileException {
@@ -416,7 +416,7 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addClassPathFile(new File(parent, "lib"));
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
-    fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
+    fb.setMainClass("some.main.ClassName");
     fb.writeOld();
 
     StringBuilder received = new StringBuilder();
@@ -452,7 +452,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
     assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
     assertEquals("classpath name", new File(parent,"lib"), IterUtil.first(pfir.getClassPaths()));
-    assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
+    assertEquals("main-class name", "some.main.ClassName", pfir.getMainClass());
     pf.delete();
   }
 
@@ -474,7 +474,7 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addClassPathFile(new File(parent, "lib"));
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
-    fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
+    fb.setMainClass("some.main.ClassName");
     fb.write();
 
     StringBuilder received = new StringBuilder();
@@ -511,8 +511,8 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("work-dir name", srcDir.getCanonicalPath(), pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(parent,"lib").getCanonicalPath(),
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(parent,"dir1/testfile1.java").getCanonicalPath(),
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.main.ClassName",
+                 pfir.getMainClass());
     pf.delete();
   }
   

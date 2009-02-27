@@ -432,16 +432,26 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * up to date.  Fires an event to signal when execution is about to begin.
       * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
       * event thread execution!
+      * 
+      * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
+      * 
       * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
       * @exception IOException propagated from GlobalModel.compileAll()
       */
-    public void runMain() throws ClassNameNotFoundException, IOException {
+    public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
       assert EventQueue.isDispatchThread();
 
       _notifier.prepareForRun(ConcreteOpenDefDoc.this);
       
+      String tempClassName = null;
+      
+      if(qualifiedClassName == null)
+        tempClassName = getDocument().getQualifiedClassName();
+      else
+        tempClassName = qualifiedClassName;
+      
       // Get the class name for this document, the first top level class in the document.
-      final String className = getDocument().getQualifiedClassName();
+      final String className = tempClassName;
       final InteractionsDocument iDoc = _interactionsModel.getDocument();
       if (! checkIfClassFileInSync()) {
         iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);

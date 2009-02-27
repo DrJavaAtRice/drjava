@@ -146,8 +146,9 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       try {
         s = _xc.get(".main");
         LOG.log("main = '"+s+"'");
-        File mainClass = new File(_parent, s);
-        pfir.setMainClass(mainClass);
+        /*File mainClass = new File(_parent, s);
+        pfir.setMainClass(mainClass);*/
+        pfir.setMainClass(s);
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
       

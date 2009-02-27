@@ -209,10 +209,12 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** Runs the main method in this document in the interactions pane. Demands that the definitions be saved 
    *  and compiled before proceeding. Fires an event to signal when execution is about to begin.
+   * 
+   *  @param qualifiedClassName - the fully qualified name of the class contained in this document to run the main(String[]) method of
    *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
    *  @exception IOException propagated from GlobalModel.compileAll()
    */
-  public void runMain() throws ClassNameNotFoundException, IOException;
+  public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
 
   /** Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
    *  with testing.  Fires the appropriate events as the testing proceeds and finishes.

@@ -82,7 +82,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private DirectorySelectorComponent _projRootSelector;
   private DirectorySelectorComponent _buildDirSelector;
   private DirectorySelectorComponent _workDirSelector;
-  private FileSelectorComponent _mainDocumentSelector;
+  private JTextField                 _mainDocumentSelector;
   
   private JCheckBox _autoRefreshComponent;
 
@@ -202,10 +202,10 @@ public class ProjectPropertiesFrame extends SwingFrame {
     if (wd == FileOps.NULL_FILE) wdTextField.setText("");
     else _workDirSelector.setFileField(wd);
 
-    final File mc = _model.getMainClass();
-    final JTextField mcTextField = _mainDocumentSelector.getFileField();
-    if (mc == FileOps.NULL_FILE) mcTextField.setText("");
-    else _mainDocumentSelector.setFileField(mc);
+    final String mc = _model.getMainClass();
+    final JTextField mcTextField = _mainDocumentSelector;
+    if (mc == null) mcTextField.setText("");
+    else mcTextField.setText(mc);
     
     _autoRefreshComponent.setSelected(_getAutoRefreshStatus());
 
@@ -218,6 +218,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _applyButton.setEnabled(false);
   }
 
+  static edu.rice.cs.util.Log Log = new edu.rice.cs.util.Log("saveSettings.txt", true);
+  
   /** Caches the settings in the global model */
   public boolean saveSettings() {//throws IOException {
     boolean projRootChanged = false;
@@ -238,9 +240,12 @@ public class ProjectPropertiesFrame extends SwingFrame {
     if (_workDirSelector.getFileField().getText().equals("")) wd = FileOps.NULL_FILE;
     _model.setWorkingDirectory(wd);
 
-    File mc = _mainDocumentSelector.getFileFromField();
-    if (_mainDocumentSelector.getFileField().getText().equals("")) mc = FileOps.NULL_FILE;
+    String mc = _mainDocumentSelector.getText();
+    Log.log("set: "+mc+"\n");
+    if(mc == null) mc = "";
     _model.setMainClass(mc);
+    Log.log("get: "+_model.getMainClass());
+    Log.log("file: "+_model.getMainClassContainingFile());
 
     Vector<File> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
     _model.setExtraClassPath(IterUtil.snapshot(extras));
@@ -255,6 +260,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
         _model.reloadProject(_mainFrame.getCurrentProject(), _mainFrame.gatherProjectDocInfo());
       } catch(IOException e) { throw new edu.rice.cs.util.UnexpectedException(e, "I/O error while reloading project"); }
     }
+    
+    Log.log("post: "+_mainDocumentSelector.getText());
+    
     return true;
   }
 
@@ -279,11 +287,19 @@ public class ProjectPropertiesFrame extends SwingFrame {
     return FileOps.NULL_FILE;
   }
 
-  /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
+  /** Returns the file contianing the main class in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getMainFile() {
-    File mainFile = _model.getMainClass();
+    File mainFile = _model.getMainClassContainingFile();
     if (mainFile != null) return mainFile;
     return FileOps.NULL_FILE;
+  }
+  
+  /** Returns the fully-qualified name of the main class in the project profile ("" if none is set) */
+  private String _getMainClass(){
+    String mainClass = _model.getMainClass();
+    if(mainClass == null) return "";
+    
+    return mainClass;
   }
   
   /** Returns whether the project is set to automatically open new source files */
@@ -559,29 +575,71 @@ public class ProjectPropertiesFrame extends SwingFrame {
   public JPanel _mainDocumentSelector() {
     final File projRoot = _getProjRoot();
 
-    FileChooser chooser = new FileChooser(projRoot);
+    final FileChooser chooser = new FileChooser(projRoot);
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     chooser.setDialogType(JFileChooser.CUSTOM_DIALOG);
 
     chooser.setDialogTitle("Select Main Document");
 //  Utilities.show("Main Document Root is: " + root);
     chooser.setCurrentDirectory(projRoot);
-    File mainFile = _getMainFile();
-    if (mainFile != FileOps.NULL_FILE) chooser.setSelectedFile(mainFile);
+    //String mainClass = _getMainClass();
+    File   mainFile  = _getMainFile();
+    if (mainFile != FileOps.NULL_FILE){
+      chooser.setSelectedFile(mainFile);
+    }
 
     chooser.setApproveButtonText("Select");
 
     chooser.addChoosableFileFilter(new JavaSourceFilter());
-    _mainDocumentSelector = new FileSelectorComponent(this, chooser, 20, 12f) {
-      protected void _chooseFile() {
-        _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
-        super._chooseFile();
-        _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
+    _mainDocumentSelector = new JTextField(20){
+      public Dimension getMaximumSize() {
+        return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height);
       }
     };
 
-    _mainDocumentSelector.getFileField().getDocument().addDocumentListener(_applyListener);
-    return _mainDocumentSelector;
+    _mainDocumentSelector.setFont(_mainDocumentSelector.getFont().deriveFont(12f));
+    _mainDocumentSelector.setPreferredSize(new Dimension(22, 22));
+    
+    _mainDocumentSelector.getDocument().addDocumentListener(_applyListener);
+    
+    JButton selectFile = new JButton("...");
+    selectFile.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+        int ret = chooser.showOpenDialog(ProjectPropertiesFrame.this);
+        
+        if(ret != JFileChooser.APPROVE_OPTION)
+          return;
+        
+        File mainClass = chooser.getSelectedFile();
+        
+        File sourceRoot = _model.getProjectRoot();
+        
+        if(sourceRoot == null || mainClass == null)
+          return;
+        
+        String qualifiedName = mainClass.getAbsolutePath().substring(sourceRoot.getAbsolutePath().length());
+        
+        if(qualifiedName.startsWith(""+File.separatorChar))
+          qualifiedName = qualifiedName.substring(1);
+        
+        if(qualifiedName.toLowerCase().endsWith(".java"))
+          qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
+          
+        _mainDocumentSelector.setText(qualifiedName.replace(File.separatorChar, '.'));
+      }
+    });
+    
+    
+    selectFile.setMaximumSize(new Dimension(22, 22));
+    selectFile.setMargin(new Insets(0, 5 ,0, 5));
+    
+    JPanel toRet = new JPanel();
+    javax.swing.BoxLayout layout = new javax.swing.BoxLayout(toRet, javax.swing.BoxLayout.X_AXIS);
+    toRet.setLayout(layout);
+    toRet.add(_mainDocumentSelector);
+    toRet.add(selectFile);
+    
+    return toRet;
   }
 
   public JPanel _manifestFileSelector() {

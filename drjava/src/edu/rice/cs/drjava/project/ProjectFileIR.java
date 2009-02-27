@@ -72,8 +72,11 @@ public interface ProjectFileIR {
   /** @return an array full of all the classpath path elements in the classpath for this project file */
   public Iterable<File> getClassPaths();
   
-  /** @return the name of the file that holds the Jar main class associated with this project */
-  public File getMainClass();
+  /** @return the fully qualified name of the class that holds the Jar main class associated with this project */
+  public String getMainClass();
+  
+  /** @return the File that contains the class specified by getMainClass() */
+  public File getMainClassContainingFile();
   
   /** @return the project file for this project. */
   public File getProjectFile();
@@ -105,7 +108,7 @@ public interface ProjectFileIR {
   public void setClassPaths(Iterable<? extends File> cp);
   public void setBuildDirectory(File dir);
   public void setWorkingDirectory(File dir);
-  public void setMainClass(File main);
+  public void setMainClass(String main);
   public void setProjectRoot(File root);
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);

@@ -49,7 +49,7 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
     String xml = 
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"+
       "<drjava version=\""+edu.rice.cs.drjava.Version.getVersionString()+"\">\n"+
-      "  <project root=\"src\" build=\"classes\" work=\"\" main=\"src/edu/rice/cs/drjava/DrJava.java\">\n"+
+      "  <project root=\"src\" build=\"classes\" work=\"\" main=\"some.main.ClassName\">\n"+
       "    <createjar file=\"drjava-15.jar\" flags=\"3\"/>\n"+
       "    <source>\n"+
       
@@ -164,7 +164,7 @@ public class XMLProjectFileParserTest extends DrJavaTestCase {
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(System.getProperty("user.dir"),"lib").getCanonicalPath(), 
                  IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", new File(base, "src/edu/rice/cs/drjava/DrJava.java").getCanonicalPath(), 
-                 pfir.getMainClass().getCanonicalPath());
+    assertEquals("main-class name", "some.main.ClassName", 
+                 pfir.getMainClass());
   }
 }

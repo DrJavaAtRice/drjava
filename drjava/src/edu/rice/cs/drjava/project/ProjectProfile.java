@@ -79,7 +79,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private List<File> _classPathFiles = new ArrayList<File>();
   
-  private File _mainClass = null;
+  private String _mainClass = null;
   
   /** root of project source tree.  Invariant: _projectRoot.exists() */
   private File _projectRoot; /* Invariant after init: _projectRoot.exists() implying _projectRoot != null. */
@@ -140,7 +140,40 @@ public class ProjectProfile implements ProjectFileIR {
   public Iterable<File> getClassPaths() { return _classPathFiles; }
   
   /** @return the name of the file that holds the Jar main class associated with this project */
-  public File getMainClass() { return _mainClass; }
+  public String getMainClass() { return _mainClass; }
+  
+  private static edu.rice.cs.util.Log _LOG = new edu.rice.cs.util.Log("getMainClassContainingFile.txt", true);
+  
+  /** @return the file containing the project's main class. */
+  public File getMainClassContainingFile(){
+    DocFile[] possibleContainers = getSourceFiles();
+    
+    String main = getMainClass();
+    if(main.toLowerCase().endsWith(".java")){
+      main = main.substring(0, main.length()-5);
+      main = main.replace(File.separatorChar,'.');
+    }
+    
+    _LOG.log("matching against: "+getMainClass());
+    
+    for(int i = 0; i < possibleContainers.length; i++){
+      String toMatch = possibleContainers[i].getAbsolutePath();
+      toMatch = toMatch.substring(0, toMatch.lastIndexOf(".java"));
+      toMatch = toMatch.replace(File.separatorChar,'.');
+      
+      _LOG.log("\t"+toMatch);
+      
+      if(toMatch.endsWith(main))
+        return possibleContainers[i];
+    }
+    
+    //Return a guess at the main class if its not in a source file
+    File toRet = new File(main.replace('.',File.separatorChar)+".java");
+    
+    _LOG.log("\t"+toRet.getAbsolutePath());
+    
+    return toRet;
+  }
   
   /** @return the project root directory which must exist. */
   public File getProjectRoot() { return _projectRoot; }
@@ -202,7 +235,7 @@ public class ProjectProfile implements ProjectFileIR {
 //    System.err.println("Vaidated form is: " + _buildDir);
   }
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
-  public void setMainClass(File main) { _mainClass = main;  }
+  public void setMainClass(String main) { _mainClass = main;  }
   public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new LinkedList<DocFile>(sf); }
   public void setClassPaths(Iterable<? extends File> cpf) {
     _classPathFiles = new ArrayList<File>();
@@ -251,10 +284,10 @@ public class ProjectProfile implements ProjectFileIR {
       path = replace(path, File.separator, "/");
       xc.set("drjava/project.build", path);
     }
-    if (_mainClass != null && _mainClass.getPath() != "") {
-      path = FileOps.stringMakeRelativeTo(_mainClass, _projectFile);
-      path = replace(path, File.separator, "/");
-      xc.set("drjava/project.main", path);      
+    if (_mainClass != null && _mainClass != "") {
+      /*path = FileOps.stringMakeRelativeTo(_mainClass, _projectFile);
+      path = replace(path, File.separator, "/");*/
+      xc.set("drjava/project.main", _mainClass);      
     }
     xc.set("drjava/project.autorefresh", String.valueOf(_autoRefreshStatus));
     
@@ -515,7 +548,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (_mainClass != null) {
       fw.write("\n;; rooted at the (parent of the) project file");
       fw.write("\n(main-class");
-      fw.write("\n" + encodeFileRelative(_mainClass, "  ", _projectFile));
+      fw.write("\n" + " "+ getMainClass() );
       fw.write(")");
     }
     else fw.write("\n;; no main class");

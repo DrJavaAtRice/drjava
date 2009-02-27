@@ -536,7 +536,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     final OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        try { doc.runMain(); }
+        try { doc.runMain(null); }
         catch(Exception e) { throw new UnexpectedException(e); }
       }
     });
@@ -547,7 +547,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        try { doc.runMain(); }
+        try { doc.runMain(null); }
         catch(Exception e) { throw new UnexpectedException(e); }
       }
     });

@@ -100,15 +100,15 @@ public interface FileGroupingState {
   /** Sets the current working directory for the interactions pane. */
   public void setWorkingDirectory(File f);
   
-  /** Returns the source file that has the main method of the project
+  /** Returns the name of the class that has the main method of the project
     * @return null if no build directory is specified
     */
-  public File getMainClass();
+  public String getMainClass();
   
-  /** Sets the file that has the main method of the project
+  /** Sets the name of the class that has the main method of the project
     * (Note: should point to the sourcefile of the document, not the class file)
     */
-  public void setMainClass(File f);
+  public void setMainClass(String f);
   
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f);

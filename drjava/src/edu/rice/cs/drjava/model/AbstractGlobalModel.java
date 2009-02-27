@@ -410,8 +410,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   protected FileGroupingState
-    makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
+    makeProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                                  File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refresh) {
+    
     return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags,
                                         refresh);
   }
@@ -455,14 +456,52 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean inProjectPath(OpenDefinitionsDocument doc) { return _state.inProjectPath(doc); }
   
   /** Sets the class with the project's main method. */
-  public void setMainClass(File f) {
+  public void setMainClass(String f) {
     _state.setMainClass(f);
     _notifier.projectRunnableChanged();
     setProjectChanged(true);
   }
   
   /** @return the class with the project's main method. */
-  public File getMainClass() { return _state.getMainClass(); }
+  public String getMainClass() { return _state.getMainClass(); }
+  
+  private static edu.rice.cs.util.Log Log = new edu.rice.cs.util.Log("mainClassFile.txt", true);
+  
+  /** @return the file containing the project's main class. */
+  public File getMainClassContainingFile(){
+    String path = getMainClass();
+    
+    Log.log("For path: "+path+"\n");
+    
+    if(path == null){
+      Log.log("\tnull\n");
+      return null;
+    }
+    
+    if(path.toLowerCase().endsWith(".java")){
+      Log.log("\t"+(new File(getProjectFile().getParent(), path)).getAbsolutePath()+"\n");
+      return new File(getProjectFile().getParent(), path);
+    }//if
+    
+    path = path.replace('.', File.separatorChar);
+    File tempFile = new File(getProjectFile().getParent(), path+".java");
+    
+    while(path.length() > 0){
+      if(tempFile.exists()){
+        Log.log("\t"+tempFile.getAbsolutePath()+"\n");
+        return tempFile;
+      }//if
+      
+      if(path.indexOf(File.separatorChar) == -1)
+        break;
+      
+      path = path.substring(0, path.lastIndexOf(File.separatorChar));
+      tempFile = new File(getProjectFile().getParent(), path+".java");
+    }
+    
+    Log.log("\tnull\n");
+    return null;
+  }
   
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f) {
@@ -554,7 +593,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   class ProjectFileGroupingState implements FileGroupingState {
     
     volatile File _projRoot;
-    volatile File _mainFile;
+    volatile String _mainClass;
     volatile File _buildDir;
     volatile File _workDir;
     volatile File _projectFile;
@@ -575,10 +614,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
            IterUtil.<File>empty(), null, 0, false);
     }
     
-    ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
+    ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                              File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refreshStatus) {
       _projRoot = pr;
-      _mainFile = main;
+      _mainClass = main;
       _buildDir = bd;
       _workDir = wd;
       _projectFile = project;
@@ -721,9 +760,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void setWorkingDirectory(File f) { _workDir = f; }
     
-    public File getMainClass() { return _mainFile; }
+    public String getMainClass() { return _mainClass; }
     
-    public void setMainClass(File f) { _mainFile = f; }
+    public void setMainClass(String f) { _mainClass = f; }
     
     public void setCreateJarFile(File f) { _createJarFile = f; }
     
@@ -911,8 +950,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setWorkingDirectory(File f) { }
     public File[] getProjectFiles() { return new File[0]; }
     public boolean inProject(File f) { return false; }
-    public File getMainClass() { return null; }
-    public void setMainClass(File f) { }
+    public String getMainClass() { return null; }
+    public void setMainClass(String f) { }
     public void setCreateJarFile(File f) { }
     public File getCreateJarFile() { return FileOps.NULL_FILE; }
     public void setCreateJarFlags(int f) { }
@@ -1515,7 +1554,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (wd != FileOps.NULL_FILE) builder.setWorkingDirectory(wd);
     
     // add jar main class
-    File mainClass = getMainClass();
+    String mainClass = getMainClass();
     if (mainClass != null) builder.setMainClass(mainClass);
     
     // add create jar file
@@ -1567,7 +1606,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
 //    }
     
-    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass (), 
+    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass(), 
                                                       builder.getBuildDirectory(), builder.getWorkingDirectory(), file,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(), 
                                                       builder.getExcludedFiles(),
@@ -1633,7 +1672,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File projectRoot = pr;
     final File buildDir = ir.getBuildDirectory ();
     final File workDir = ir.getWorkingDirectory();
-    final File mainClass = ir.getMainClass();
+    final String mainClass = ir.getMainClass();
     final Iterable<File> projectClassPaths = ir.getClassPaths();
     final File createJarFile  = ir.getCreateJarFile ();
     int createJarFlags = ir.getCreateJarFlags();
@@ -3016,7 +3055,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** throws UnsupportedOperationException */
-    public void runMain() throws IOException, ClassNameNotFoundException {
+    public void runMain(String className) throws IOException, ClassNameNotFoundException {
       throw new UnsupportedOperationException("AbstractGlobalModel does not support running");
     }
     

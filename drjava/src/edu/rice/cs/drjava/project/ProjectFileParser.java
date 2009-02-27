@@ -157,10 +157,20 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       pfir.setClassPaths(fList);
     }
     else if (name.compareToIgnoreCase("main-class") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
-      if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple main classes");
-      else if (fList.size() == 0) pfir.setMainClass(null);
-      else pfir.setMainClass(fList.get(0));
+      try{
+        List<DocFile> fList = exp.getRest().accept(flv);
+        if(fList.size() == 1){
+          String main = fList.get(0).getPath().replace(File.separatorChar,'.');
+          main = main.substring(0, main.length() - 5);
+          
+          pfir.setMainClass(main);
+          
+          return;
+        }
+      }catch(Exception exc){}
+      
+      String mainClass = exp.getRest().accept(NameVisitor.ONLY);
+      pfir.setMainClass(mainClass);
     }
     else if (name.compareToIgnoreCase("create-jar-file") == 0) {
       List<DocFile> fList = exp.getRest().accept(flv);

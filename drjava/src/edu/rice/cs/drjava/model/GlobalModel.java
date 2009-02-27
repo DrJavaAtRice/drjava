@@ -444,10 +444,13 @@ public interface GlobalModel extends ILoadDocuments {
   public void setWorkingDirectory(File f);
   
   /** Sets the main file of the project. */
-  public void setMainClass(File f);
+  public void setMainClass(String f);
   
   /** Return the main file for the project If not in project mode, returns null. */
-  public File getMainClass();
+  public String getMainClass();
+  
+  /** Return the File that contains the Main-Class. */
+  public File getMainClassContainingFile();
   
   /** Returns only the project's extra classpaths.
     * @return The classpath entries loaded along with the project

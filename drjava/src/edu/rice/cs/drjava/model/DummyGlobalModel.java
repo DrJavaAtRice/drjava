@@ -437,11 +437,15 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call setWorkingDirectory on a Dummy");
   }
   
-  public void setMainClass(File f) {
+  public void setMainClass(String f) {
     throw new UnsupportedOperationException("Tried to call setMainClass on a Dummy");
   }
   
-  public File getMainClass() {
+  public String getMainClass() {
+    throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
+  }
+  
+  public File getMainClassContainingFile(){
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   

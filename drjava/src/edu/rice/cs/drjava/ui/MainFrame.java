@@ -3735,7 +3735,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       setProperty("Project", 
                   new FileProperty("project.main.class", 
                                    new Thunk<File>() {
-      public File value() { return _model.getMainClass(); }
+      public File value() { return new File(_model.getMainClass()); }
     },
                                    "Returns the current project file in DrJava.\n"+
                                    "Optional attributes:\n"+
@@ -5324,11 +5324,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _runProject() {
     if (_model.isProjectActive()) {
       try {
-        final File f = _model.getMainClass();
+        final File f = _model.getMainClassContainingFile();
         if (f != null) {
           updateStatusField("Running Open Project");
           OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
-          doc.runMain();
+          doc.runMain(_model.getMainClass());
         }
       }
       catch (ClassNameNotFoundException e) {
@@ -5350,7 +5350,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _runMain() {
     updateStatusField("Running main Method of Current Document");
     
-    try { _model.getActiveDocument().runMain(); }
+    try { _model.getActiveDocument().runMain(null); }
     
     catch (ClassNameNotFoundException e) {
       // Display a warning message if a class name can't be found.
@@ -9135,7 +9135,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void projectRunnableChanged() {
-      if (_model.getMainClass() != null && _model.getMainClass().exists()) {
+      if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && _model.getMainClassContainingFile().exists()) {
         _runProjectAction.setEnabled(_model.isProjectActive());
         _runButton = _updateToolbarButton(_runButton, _runProjectAction);
       }

@@ -229,7 +229,7 @@ public class JarOptionsDialog extends SwingFrame {
         _rootFile = _rootFile.getCanonicalFile();
       } catch(IOException e) { }
       
-      final File mc = _model.getMainClass();
+      final File mc = _model.getMainClassContainingFile();
       if (mc == null)  _mainClassField.setText("");
       else {
         try {
