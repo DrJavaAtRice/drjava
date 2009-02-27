@@ -465,21 +465,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the class with the project's main method. */
   public String getMainClass() { return _state.getMainClass(); }
   
-  private static edu.rice.cs.util.Log Log = new edu.rice.cs.util.Log("mainClassFile.txt", true);
-  
   /** @return the file containing the project's main class. */
   public File getMainClassContainingFile(){
     String path = getMainClass();
     
-    Log.log("For path: "+path+"\n");
-    
     if(path == null){
-      Log.log("\tnull\n");
       return null;
     }
     
     if(path.toLowerCase().endsWith(".java")){
-      Log.log("\t"+(new File(getProjectFile().getParent(), path)).getAbsolutePath()+"\n");
       return new File(getProjectFile().getParent(), path);
     }//if
     
@@ -488,7 +482,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     while(path.length() > 0){
       if(tempFile.exists()){
-        Log.log("\t"+tempFile.getAbsolutePath()+"\n");
         return tempFile;
       }//if
       
@@ -499,7 +492,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       tempFile = new File(getProjectFile().getParent(), path+".java");
     }
     
-    Log.log("\tnull\n");
     return null;
   }
   
