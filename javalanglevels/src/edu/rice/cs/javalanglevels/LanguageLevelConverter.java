@@ -78,6 +78,15 @@ public class LanguageLevelConverter {
   /**Parse, Visit, Type Check, and Convert any language level files in the array of files*/
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
   convert(File[] files, Options options) {
+    Map<File,List<String>> sourceToTopLevelClassMap = new HashMap<File,List<String>>();
+    return convert(files, options, sourceToTopLevelClassMap);
+  }
+  
+  /**Parse, Visit, Type Check, and Convert any language level files in the array of files
+    * @param sourceToTopLevelClassMap a map from source file to names of top-level classes created from that source file;
+    *        an empty map should be passed in; it will be filled out by this method */
+  public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
+  convert(File[] files, Options options, Map<File,List<String>> sourceToTopLevelClassMap) {
     OPT = options;
     LanguageLevelVisitor._newSDs=new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
@@ -146,6 +155,15 @@ public class LanguageLevelConverter {
           JExprParser jep = new JExprParser(f);
           try { 
             sf = jep.SourceFile();
+            final List<String> topLevelClasses = new ArrayList<String>();
+            for (TypeDefBase t: sf.getTypes()) {
+              t.visit(new JExpressionIFAbstractVisitor_void() {
+                public void forClassDef(ClassDef that) {
+                  topLevelClasses.add(that.getName().getText());
+                }
+              });
+            }
+            sourceToTopLevelClassMap.put(f,topLevelClasses);
           }
           catch (ParseException pe) {
             // If there is a ParseException, go to next file.
