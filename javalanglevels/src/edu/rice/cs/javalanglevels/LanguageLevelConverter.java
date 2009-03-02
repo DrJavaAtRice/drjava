@@ -78,7 +78,7 @@ public class LanguageLevelConverter {
   /**Parse, Visit, Type Check, and Convert any language level files in the array of files*/
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
   convert(File[] files, Options options) {
-    Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
+    Map<File,Set<String>> sourceToTopLevelClassMap = new Hashtable<File,Set<String>>();
     return convert(files, options, sourceToTopLevelClassMap);
   }
   
@@ -88,7 +88,7 @@ public class LanguageLevelConverter {
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
   convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
     OPT = options;
-    LanguageLevelVisitor._newSDs=new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
+    LanguageLevelVisitor._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
     LinkedList<Pair<String, JExpressionIF>> languageLevelVisitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
     
@@ -223,15 +223,15 @@ public class LanguageLevelConverter {
       }
     }
     
-    //now create any constructors.
-    while (!LanguageLevelVisitor._newSDs.isEmpty()) {
-        Enumeration<SymbolData> en = LanguageLevelVisitor._newSDs.keys();
-      while (en.hasMoreElements()) {
-        SymbolData first = en.nextElement();
-        LanguageLevelVisitor sdlv = LanguageLevelVisitor._newSDs.remove(first);
-        sdlv.createConstructor(first);
-      }
+    // Create any constructors.
+    Hashtable<SymbolData, LanguageLevelVisitor> newSDs = LanguageLevelVisitor._newSDs;
+    Enumeration<SymbolData> keys = newSDs.keys();
+    while (keys.hasMoreElements()) {
+      SymbolData key = keys.nextElement();
+      LanguageLevelVisitor sdlv = newSDs.get(key);    // Can return null because of silly side effects!
+      if (sdlv != null) sdlv.createConstructor(key);  // Bug fix is a kludge! Deletes (key,sdlv) from _newSDs!
     }
+    assert LanguageLevelVisitor._newSDs.isEmpty();
     
     languageLevelVisitorErrors.addAll(LanguageLevelVisitor.errors); //add any errors that accumulated during the continuation resolving/constructor generation
     

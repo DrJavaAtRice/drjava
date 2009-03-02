@@ -402,9 +402,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   
   
   
-   /**
-    * Test the methods declared in the above class.
-    */
+   /** Test the methods declared in the above class. */
   public static class IntermediateVisitorTest extends TestCase {
     
     private IntermediateVisitor _iv;
