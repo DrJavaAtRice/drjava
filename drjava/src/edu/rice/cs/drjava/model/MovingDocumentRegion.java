@@ -102,15 +102,22 @@ public class MovingDocumentRegion extends DocumentRegion {
           String text = doc.getText(excerptStart, excerptLength);
           
           // Construct the matching string and compressed selection prefix and suffix strings within text
-          String prefix = StringOps.compress(text.substring(0, startRed));
-          String match, suffix;
-          if (excerptLength < startRed + selLength) { // selection extends beyond excerpt
-            match = text.substring(startRed) + " ...";
+          String prefix, match, suffix;
+          if (excerptLength < startRed) { // selection not included in excerpt
+            prefix = StringOps.compress(text.substring(0, excerptLength));
+            match = " ...";
             suffix = "";
           }
           else {
-            match = text.substring(startRed, endRed);
-            suffix = StringOps.compress(text.substring(endRed, excerptLength));
+            prefix = StringOps.compress(text.substring(0, startRed));
+            if (excerptLength < startRed + selLength) { // selection extends beyond excerpt
+              match = text.substring(startRed) + " ...";
+              suffix = "";
+            }
+            else {
+              match = text.substring(startRed, endRed);
+              suffix = StringOps.compress(text.substring(endRed, excerptLength));
+            }
           }
           
           // COMMENT: We need a global invariant concerning non-displayable characters.  
