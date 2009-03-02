@@ -39,13 +39,7 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Iterator;
+import java.util.*;
 
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -331,20 +325,12 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  
   /** Compiles the language levels files in the list.  Adds any errors to the given error list.
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
   private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<DJError> errors,
                                                            Iterable<File> classPath, Iterable<File> bootClassPath) {
-    LanguageLevelConverter llc = new LanguageLevelConverter();
-    Options llOpts;
-    if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
-    else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
-    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
-      llc.convert(files.toArray(new File[0]), llOpts);
-    
     /* Rename any .dj0 files in files to be .java files, so the correct thing is compiled.  The hashset is used to 
      * make sure we never send in duplicate files. This can happen if the java file was sent in along with the 
      * corresponding .dj* file. The dj* file is renamed to a .java file and thus we have two of the same file in 
@@ -358,10 +344,82 @@ public class DefaultCompilerModel implements CompilerModel {
       int lastIndex = fileName.lastIndexOf(".dj");
       if (lastIndex != -1) {
         containsLanguageLevels = true;
-        javaFileSet.add(new File(fileName.substring(0, lastIndex) + ".java"));
+        File javaFile = new File( fileName.substring(0, lastIndex) + ".java");
+        javaFileSet.add(javaFile);
+
+        // Delete the .java file, it will be regenerated later
+        javaFile.delete();
       }
       else { javaFileSet.add(canonicalFile); }
     }
+    
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Options llOpts;
+    if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
+    else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
+    Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
+      llc.convert(files.toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
+    
+    if (containsLanguageLevels) {
+      final File buildDir = _model.getBuildDirectory();
+      final File sourceDir = _model.getProjectRoot();
+//      System.out.println("Build dir  : "+buildDir);
+//      System.out.println("Source root: "+sourceDir);
+      // Delete the .class files that match the following pattern:
+      // XXX.dj? --> XXX.class
+      //             XXX$*.class
+      // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
+      // We create a map from parent directory to class names in that directory.
+      // Then we scan the files in each directory and delete files that match the class names listed for it.
+      // dirToClassNameMap: key=parent directory, value=set of classes in this directory
+      Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
+      for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
+        try {
+          File dir = e.getKey().getParentFile();
+          if ((buildDir!=null)&&(buildDir!=FileOps.NULL_FILE)&&
+              (sourceDir!=null)&&(sourceDir!=FileOps.NULL_FILE)) {
+            // build directory set
+            String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
+            dir = new File(buildDir,rel);
+          }
+          Set<String> classNames = dirToClassNameMap.get(dir);
+          if (classNames==null) classNames = new HashSet<String>();
+          classNames.addAll(e.getValue());
+          dirToClassNameMap.put(dir,classNames);
+//          System.out.println(e.getKey()+" --> "+dir);
+//          for(String name: e.getValue()) {
+//            System.out.println("\t"+name);
+//          }
+        }
+        catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
+      }
+      // Now that we have a map from parent directories to the class names that should be deleted
+      // in them, we scan the files in each directory, then check if the names match the class names.      
+      for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
+//        System.out.println("Processing dir: "+e.getKey());
+//        System.out.println("\t"+java.util.Arrays.toString(e.getValue().toArray(new String[0])));
+        e.getKey().listFiles(new java.io.FilenameFilter() {
+          public boolean accept(File dir, String name) {
+//            System.out.println("\t"+name);
+            int endPos = name.lastIndexOf(".class");
+            if (endPos<0) return false; // can't be a class file
+            int dollarPos = name.indexOf('$');
+            if ((dollarPos>=0) && (dollarPos<endPos)) endPos = dollarPos;
+            // class name goes to the .class or the first $, whichever comes first
+            Set<String> classNames = e.getValue();
+            if (classNames.contains(name.substring(0,endPos))) { 
+              // this is a class file that is generated from a .dj? file
+              new File(dir,name).delete();
+              // don't need to return true, we're deleting the file here already
+//              System.out.println("\t\tDeleted");
+            }
+            return false;
+          }
+        });
+      }
+    }
+
     files = new LinkedList<File>(javaFileSet);
     
     errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));

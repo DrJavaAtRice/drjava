@@ -218,8 +218,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _applyButton.setEnabled(false);
   }
 
-  static edu.rice.cs.util.Log Log = new edu.rice.cs.util.Log("saveSettings.txt", true);
-  
   /** Caches the settings in the global model */
   public boolean saveSettings() {//throws IOException {
     boolean projRootChanged = false;
@@ -241,11 +239,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _model.setWorkingDirectory(wd);
 
     String mc = _mainDocumentSelector.getText();
-    Log.log("set: "+mc+"\n");
     if(mc == null) mc = "";
     _model.setMainClass(mc);
-    Log.log("get: "+_model.getMainClass());
-    Log.log("file: "+_model.getMainClassContainingFile());
 
     Vector<File> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
     _model.setExtraClassPath(IterUtil.snapshot(extras));
@@ -260,8 +255,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
         _model.reloadProject(_mainFrame.getCurrentProject(), _mainFrame.gatherProjectDocInfo());
       } catch(IOException e) { throw new edu.rice.cs.util.UnexpectedException(e, "I/O error while reloading project"); }
     }
-    
-    Log.log("post: "+_mainDocumentSelector.getText());
     
     return true;
   }

@@ -142,8 +142,6 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return the name of the file that holds the Jar main class associated with this project */
   public String getMainClass() { return _mainClass; }
   
-  private static edu.rice.cs.util.Log _LOG = new edu.rice.cs.util.Log("getMainClassContainingFile.txt", true);
-  
   /** @return the file containing the project's main class. */
   public File getMainClassContainingFile(){
     DocFile[] possibleContainers = getSourceFiles();
@@ -154,14 +152,10 @@ public class ProjectProfile implements ProjectFileIR {
       main = main.replace(File.separatorChar,'.');
     }
     
-    _LOG.log("matching against: "+getMainClass());
-    
     for(int i = 0; i < possibleContainers.length; i++){
       String toMatch = possibleContainers[i].getAbsolutePath();
       toMatch = toMatch.substring(0, toMatch.lastIndexOf(".java"));
       toMatch = toMatch.replace(File.separatorChar,'.');
-      
-      _LOG.log("\t"+toMatch);
       
       if(toMatch.endsWith(main))
         return possibleContainers[i];
@@ -169,8 +163,6 @@ public class ProjectProfile implements ProjectFileIR {
     
     //Return a guess at the main class if its not in a source file
     File toRet = new File(main.replace('.',File.separatorChar)+".java");
-    
-    _LOG.log("\t"+toRet.getAbsolutePath());
     
     return toRet;
   }
