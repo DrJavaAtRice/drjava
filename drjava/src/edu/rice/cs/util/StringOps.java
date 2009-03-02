@@ -985,4 +985,42 @@ public abstract class StringOps {
 //    System.out.println("Final entire buffer: "+sb.toString());
     return sb.toString();
   }
+  
+  /** Return a string containing a hexdump of the input string. The string will be formatted in the canonical hexdump format:
+    * xx xx xx xx xx xx xx xx    xx xx xx xx xx xx xx xx | aaaaaaaaaaaaaaaa
+    * @param s string to dump
+    * @return hexdump string */
+  public static String toStringHexDump(String s) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<s.length(); ++i) {
+      char ch = s.charAt(i);
+      pw.printf("%02x ",(int)ch);
+      if (ch<32) ch = ' ';
+      sb.append(ch);
+      if (i%16==7) {
+        pw.printf("   ");
+      }
+      else if (i%16==15) {
+        pw.printf("| %s\n", sb.toString());
+        sb.setLength(0);
+      }
+    }
+    if (s.length()%16>0) {
+      for(int i=0;i<16-(s.length()%16);++i) {
+        pw.printf("   ");
+        sb.append(' ');
+        if ((s.length()+i)%16==7) {
+          pw.printf("   ");
+          sb.append(' ');
+        }
+        else if ((s.length()+i)%16==15) {
+          pw.printf("| %s", sb.toString());
+          sb.setLength(0);
+        }
+      }
+    }
+    return sw.toString();
+  }
 }

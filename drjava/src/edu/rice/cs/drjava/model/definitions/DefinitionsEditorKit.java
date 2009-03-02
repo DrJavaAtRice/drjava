@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.*;
 import javax.swing.Action;
@@ -129,29 +130,33 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       super(nm);
       this.select = select;
     }
-
+    
     public void actionPerformed(ActionEvent e) {
       JTextComponent target = getTextComponent(e);
       if (target != null) {
-        final String text = target.getText();
-        int offs = target.getCaretPosition();
-        while(offs>0) {
-          char chPrev = text.charAt(offs - 1);
-          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || (Character.isWhitespace(chPrev))) {
-            break;
+        try {
+          int offs = target.getCaretPosition();
+          final String text = target.getDocument().getText(0,offs);
+          while(offs>0) {
+            char chPrev = text.charAt(offs - 1);
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || (Character.isWhitespace(chPrev))) {
+              break;
+            }
+            --offs;
+            if (offs==0) break; // otherwise offs-1 below generates an index out of bounds
+            char ch = text.charAt(offs);
+            chPrev = text.charAt(offs - 1);
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
+              break;
+            }
           }
-          --offs;
-          char ch = text.charAt(offs);
-          chPrev = text.charAt(offs - 1);
-          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
-            break;
+          if (select) {
+            target.moveCaretPosition(offs);
+          } else {
+            target.setCaretPosition(offs);
           }
         }
-        if (select) {
-          target.moveCaretPosition(offs);
-        } else {
-          target.setCaretPosition(offs);
-        }
+        catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
     private boolean select;
@@ -166,29 +171,33 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       super(nm);
       this.select = select;
     }
-
+    
     public void actionPerformed(ActionEvent e) {
       JTextComponent target = getTextComponent(e);
       if (target != null) {
-        final String text = target.getText();
-        int offs = target.getCaretPosition();
-        while(offs<text.length()-1) {
-          ++offs;
-          char ch = text.charAt(offs);
-          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || Character.isWhitespace(ch)) {
-            break;
+        try {
+          int offs = target.getCaretPosition();
+          final int iOffs = offs;
+          final String text = target.getDocument().getText(iOffs,target.getDocument().getLength()-iOffs);
+          while((offs-iOffs)<text.length()-1) {
+            ++offs;
+            char ch = text.charAt(offs-iOffs);
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || Character.isWhitespace(ch)) {
+              break;
+            }
+          }
+          if (select) {
+            target.moveCaretPosition(offs);
+          } else {
+            target.setCaretPosition(offs);
           }
         }
-        if (select) {
-          target.moveCaretPosition(offs);
-        } else {
-          target.setCaretPosition(offs);
-        }
+        catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
     private boolean select;
   }
- 
+  
   /**
    * Moves the cursor to the previous word beginning
    * If the cursor is currently inside of a word, moves it to the beginning of that word
@@ -200,42 +209,45 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       super(nm);
       this.select = select;
     }
-
+    
     public void actionPerformed(ActionEvent e) {
       JTextComponent target = getTextComponent(e);
       if (target != null) {
-        final String text = target.getText();
-        int offs = target.getCaretPosition();
-        while(offs>0) {
-          --offs;
-          if (offs == 0)
-            break;
-          char ch = text.charAt(offs);
-          char chPrev = text.charAt(offs - 1);
-          if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev)){
-            continue;
+        try {
+          int offs = target.getCaretPosition();
+          final String text = target.getDocument().getText(0,offs);
+          while(offs>0) {
+            --offs;
+            if (offs == 0)
+              break;
+            char ch = text.charAt(offs);
+            char chPrev = text.charAt(offs - 1);
+            if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev)){
+              continue;
+            }
+            else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || 
+                     ((offs>=2) && Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)))) {
+              break;
+            }
+            else if (Character.isWhitespace(chPrev) && !Character.isWhitespace(ch)){
+              break;
+            }
+            else if (!Character.isWhitespace(chPrev) && ch == '\n'){
+              break;
+            }
           }
-          else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || 
-              (Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)))) {
-            break;
-          }
-          else if (Character.isWhitespace(chPrev) && !Character.isWhitespace(ch)){
-            break;
-          }
-          else if (!Character.isWhitespace(chPrev) && ch == '\n'){
-            break;
+          if (select) {
+            target.moveCaretPosition(offs);
+          } else {
+            target.setCaretPosition(offs);
           }
         }
-        if (select) {
-          target.moveCaretPosition(offs);
-        } else {
-          target.setCaretPosition(offs);
-        }
+        catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
     private boolean select;
   }
-
+  
   /**
    * Moves the cursor from the current word to the beginning of the next word
    * Also stops at delimiting characters and at the end of a line
@@ -245,36 +257,44 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       super(nm);
       this.select = select;
     }
-
+    
     public void actionPerformed(ActionEvent e) {
       JTextComponent target = getTextComponent(e);
       if (target != null) {
-        final String text = target.getText();
-        int offs = target.getCaretPosition();
-        while(offs < text.length() - 1) {
-          ++offs;
-          if (offs == text.length())
-            break;
-          char ch = text.charAt(offs);
-          char chPrev = text.charAt(offs - 1);
-          if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(chPrev) || ch == '\n') {
-            while(Character.isWhitespace(ch) && ch != '\n'){
-              if ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0)
-                break;
-              ++offs;
-              ch = text.charAt(offs);
-            }
-            if (ch == '\n' && Character.isWhitespace(text.charAt(offs - 1)))
-              continue;
-            else
+        try {
+          int offs = target.getCaretPosition();
+          final int iOffs = offs;
+          final String text = target.getDocument().getText(iOffs,target.getDocument().getLength()-iOffs);
+          final int len = text.length();
+          while((offs-iOffs) < len) {
+            ++offs;
+            if (offs-iOffs == len)
               break;
+            char ch = text.charAt(offs-iOffs);
+            char chPrev = text.charAt(offs-iOffs - 1);
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) ||
+                ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) ||
+                Character.isWhitespace(chPrev) ||
+                ch == '\n') {
+              while((offs-iOffs<len) && Character.isWhitespace(ch) && ch != '\n'){
+                if ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0)
+                  break;
+                ++offs;
+                ch = text.charAt(offs-iOffs);
+              }
+              if (ch == '\n' && Character.isWhitespace(text.charAt(offs - iOffs - 1)))
+                continue;
+              else
+                break;
+            }
+          }
+          if (select) {
+            target.moveCaretPosition(offs);
+          } else {
+            target.setCaretPosition(offs);
           }
         }
-        if (select) {
-          target.moveCaretPosition(offs);
-        } else {
-          target.setCaretPosition(offs);
-        }
+        catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
     private boolean select;
