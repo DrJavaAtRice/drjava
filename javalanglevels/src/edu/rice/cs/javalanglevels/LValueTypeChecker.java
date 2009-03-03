@@ -165,7 +165,7 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
       if (reference != null) {
         if (lhs instanceof SymbolData) {
           //does this reference a field? if so, it must be static
-          if (!reference.hasModifier("static")) {
+          if (! reference.hasModifier("static")) {
             _addError("Non-static variable " + Data.dollarSignsToDots(reference.getName()) + " cannot be accessed from the static context " + Data.dollarSignsToDots(lhs.getName()) + ".  Perhaps you meant to instantiate an instance of " + Data.dollarSignsToDots(lhs.getName()), that);
             return reference.getType().getInstanceData();
           }

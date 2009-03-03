@@ -801,8 +801,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           Enumeration<SymbolData> keys = newSDs.keys();
           while (keys.hasMoreElements()) {
             SymbolData key = keys.nextElement();
-            LanguageLevelVisitor sdlv = newSDs.get(key);
-            sdlv.createConstructor(key);  // Deletes (key,sdlv) from _newSDs!
+            LanguageLevelVisitor sdlv = newSDs.get(key);    // Can return null because of silly side effects!
+            if (sdlv != null) sdlv.createConstructor(key);  // Null test is a kludge! Deletes (key,sdlv) from _newSDs!
           }
           assert LanguageLevelVisitor._newSDs.isEmpty();
           
@@ -2174,12 +2174,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       return result;
     }
     
-    /**
-     * Try to look up the enclosing of this complex name reference and then try to
-     * match the name on the right within that context to a type.
-     * If it could not be matched, return a package data.
-     * @param that  The thing we're trying to match to a type
-     */
+    /** Try to look up the enclosing of this complex name reference and then try to match the name on the right
+      * within that context to a type.  If it could not be matched, return a package data.
+      * @param that  The thing we're trying to match to a type
+      */
     public TypeData forComplexNameReference(ComplexNameReference that) {
       TypeData lhs = that.getEnclosing().visit(this);
       SymbolData result = getSymbolData(lhs, that.getName().getText(), that.getSourceInfo(), true);

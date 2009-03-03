@@ -938,37 +938,41 @@ public class ExpressionTypeChecker extends Bob {
   }
     
     
-  /**
-   * To resolve this ComplexNameReference, first visit the lhs with an instance
-   * of this visitor in order to get its type.  Then, try to figure out how the name reference
-   * on the right fits with the type on the left.
-   *   1. If the lhs is a package data, then either the rhs is a class reference, or the whole thing is another PackageData
-   *   2. If the rhs is a variable or field visible from the context of the lhs, it must be static if the lhs is a SymbolData, and regardless, it
-   *       must have a value to be referenced here.
-   *   3. If the rhs references an inner class of the lhs, the lhs must be a SymbolData if the rhs is a static inner class, and the rhs must
-   *        be static if the lhs is a SymbolData.
-   *   4.  Otherwise, give an error because we couldn't resolve the symbol.
-   */
+  /** To resolve this ComplexNameReference, first visit the lhs with an instance of this visitor in order to get its
+    * type.  Then, try to figure out how the name reference on the right fits with the type on the left.
+    *   1. If the lhs is a package data, then either the rhs is a class reference, or the whole thing is another 
+    *      PackageData.
+    *   2. If the rhs is a variable or field visible from the context of the lhs, it must be static if the lhs is a 
+    *      SymbolData, and regardless, it must have a value to be referenced here.
+    *   3. If the rhs references an inner class of the lhs, the lhs must be a SymbolData if the rhs is a static inner
+    *      class, and the rhs must be static if the lhs is a SymbolData.
+    *   4. Otherwise, give an error because we couldn't resolve the symbol.
+    */
   public TypeData forComplexNameReference(ComplexNameReference that) {
     TypeData lhs = that.getEnclosing().visit(this);
+    if (lhs == null) return null;   // defensive code based on NullPointerException that MAY be due to lhs == null
+    
     Word myWord = that.getName();
     
     //if lhs is a package data, either we found a class reference or this piece is still part of the package
     if (lhs instanceof PackageData) {
       SymbolData classRef =  findClassReference(lhs, myWord.getText(), that);
-      if (classRef != null) {return classRef;}
+      if (classRef != null) { return classRef; }
       return new PackageData((PackageData) lhs, myWord.getText());
     }
-    
-    checkAccessibility(that, lhs.getSymbolData().getMav(), lhs.getSymbolData().getName(), lhs.getSymbolData(), _data.getSymbolData(), "class or interface", true);
+    if (_data == null) return null;  // intermittent NullPointerException in next line; lhs == null or _data == null
+    checkAccessibility(that, lhs.getSymbolData().getMav(), lhs.getSymbolData().getName(), lhs.getSymbolData(), 
+                       _data.getSymbolData(), "class or interface", true);
      
     //if the word is a variable reference, make sure it can be seen from this context
     VariableData reference = getFieldOrVariable(myWord.getText(), lhs.getSymbolData(), _data.getSymbolData(), that);
     if (reference != null) {
       if (lhs instanceof SymbolData) {
         //does this reference a field? if so, it must be static
-        if (!reference.hasModifier("static")) {
-          _addError("Non-static variable " + reference.getName() + " cannot be accessed from the static context " + Data.dollarSignsToDots(lhs.getName()) + ".  Perhaps you meant to instantiate an instance of " + Data.dollarSignsToDots(lhs.getName()), that);
+        if (! reference.hasModifier("static")) {
+          _addError("Non-static variable " + reference.getName() + " cannot be accessed from the static context " + 
+                    Data.dollarSignsToDots(lhs.getName()) + ".  Perhaps you meant to instantiate an instance of " + 
+                    Data.dollarSignsToDots(lhs.getName()), that);
           return reference.getType().getInstanceData();
         }
       }
