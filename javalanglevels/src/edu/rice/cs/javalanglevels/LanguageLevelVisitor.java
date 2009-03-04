@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.tree.Type; // resove ambiguity
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import edu.rice.cs.javalanglevels.parser.ParseException;
-import edu.rice.cs.javalanglevels.util.Log;
+//import edu.rice.cs.javalanglevels.util.Log;
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.Modifier;
@@ -115,7 +115,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * ClassDefs and LanguageLevelVisitors.
    */
   static Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>> _classesToBeParsed;
-  protected static final Log _log = new Log("/Users/cork/drjava/javalanglevels/LLVisitor.txt", true);
+//  protected static final Log _log = new Log("/Users/cork/drjava/javalanglevels/LLVisitor.txt", true);
   
   /** This constructor is called from the subclasses of LanguageLevelVisitor.
     * @param file  The File corresponding to the source file we are visiting
@@ -969,8 +969,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   protected SymbolData getSymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
                                      boolean addError, boolean checkImportedStuff) {
     
-    _log.log("getSymbolData(" + className + ", " + si + ", " + resolve + ", " + fromClassFile + ", " + addError +
-             ", " + checkImportedStuff);
+    //_log.log("getSymbolData(" + className + ", " + si + ", " + resolve + ", " + fromClassFile + ", " + addError +
+    //         ", " + checkImportedStuff);
     
     int indexOfNextDot = className.indexOf(".");
     /* we don't think this is necessay, but as a safety percausion, check the $ that denotes anonymous inner classes 
@@ -1031,7 +1031,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     if (! fromClassFile && addError) {
-      _log.log("Returning an Invalid class name for " + className);
+      // _log.log("Returning an Invalid class name for " + className);
       String newName = className;
       int lastDollar = newName.lastIndexOf("$");
       newName = newName.substring(lastDollar + 1, newName.length());
