@@ -44,11 +44,10 @@ import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-/**
- * This class represents the mechanism by which we convert a language level file to a .java file of the same name by
- * first visiting the file to error-check it, and then augment the file.  This class is tested at the top level in the AdvancedLevelTest,
- * ElementaryLevelTest, and IntermediateLevelTest.
- */
+/** This class represents the mechanism by which we convert a language level file to a .java file of the same name by
+  * first visiting the file to error-check it, and then augment the file.  This class is tested at the top level in the
+  * AdvancedLevelTest, ElementaryLevelTest, and IntermediateLevelTest.
+  */
 public class LanguageLevelConverter {
 
   public static Options OPT = Options.DEFAULT;
