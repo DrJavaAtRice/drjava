@@ -287,7 +287,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * @param buildDir The output directory for all the .class files; @code{null} means output to the same 
     *                 directory as the source file
     */
-  private void _compileFiles(List<? extends File> files, File buildDir) throws IOException {
+  private void _compileFiles(List<File> files, File buildDir) throws IOException {
     if (! files.isEmpty()) {
       /* Canonicalize buildDir */
       if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
@@ -325,11 +325,24 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
+  /** Reorders files so that all file names containing "Test" are at the end.  */
+  private static List<File> _testFileSort(List<File> files) {
+    LinkedList<File> testFiles = new LinkedList<File>();
+    LinkedList<File> otherFiles = new LinkedList<File>();
+    for (File f: files) {
+      if (f.getName().contains("Test")) testFiles.add(f);
+      else otherFiles.add(f);
+    }
+//    return otherFiles.addAll(testFiles);  // rejected by compiler bug!
+    for (File f: testFiles) otherFiles.add(f);
+    return otherFiles;
+  }
+    
   /** Compiles the language levels files in the list.  Adds any errors to the given error list.
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<DJError> errors,
+  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
                                                            Iterable<File> classPath, Iterable<File> bootClassPath) {
     /* Rename any .dj0 files in files to be .java files, so the correct thing is compiled.  The hashset is used to 
      * make sure we never send in duplicate files. This can happen if the java file was sent in along with the 
@@ -344,7 +357,7 @@ public class DefaultCompilerModel implements CompilerModel {
       int lastIndex = fileName.lastIndexOf(".dj");
       if (lastIndex != -1) {
         containsLanguageLevels = true;
-        File javaFile = new File( fileName.substring(0, lastIndex) + ".java");
+        File javaFile = new File(fileName.substring(0, lastIndex) + ".java");
         javaFileSet.add(javaFile);
 
         // Delete the .java file, it will be regenerated later
@@ -358,8 +371,11 @@ public class DefaultCompilerModel implements CompilerModel {
     if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
     else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
     Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
+    /* LanguageLevels Bug Workaround:  JUnit test files can generate spurious conversion errors.  This
+     * problem can be mitigated by compiling JUnit test files, which contain the substring "Test", last.  
+     */
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
-      llc.convert(files.toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
+      llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
     
     if (containsLanguageLevels) {
       final File buildDir = _model.getBuildDirectory();
@@ -377,8 +393,8 @@ public class DefaultCompilerModel implements CompilerModel {
       for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
         try {
           File dir = e.getKey().getParentFile();
-          if ((buildDir!=null)&&(buildDir!=FileOps.NULL_FILE)&&
-              (sourceDir!=null)&&(sourceDir!=FileOps.NULL_FILE)) {
+          if (buildDir != null && buildDir != FileOps.NULL_FILE &&
+              sourceDir != null && sourceDir != FileOps.NULL_FILE) {
             // build directory set
             String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
             dir = new File(buildDir,rel);
