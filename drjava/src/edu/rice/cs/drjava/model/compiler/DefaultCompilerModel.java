@@ -333,8 +333,7 @@ public class DefaultCompilerModel implements CompilerModel {
       if (f.getName().contains("Test")) testFiles.add(f);
       else otherFiles.add(f);
     }
-//    return otherFiles.addAll(testFiles);  // rejected by compiler bug!
-    for (File f: testFiles) otherFiles.add(f);
+    otherFiles.addAll(testFiles);
     return otherFiles;
   }
     

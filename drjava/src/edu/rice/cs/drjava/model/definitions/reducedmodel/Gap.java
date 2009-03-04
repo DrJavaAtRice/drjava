@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
   * @version $Id$
   */
 class Gap extends ReducedToken {
-  private int _size;
+  private volatile int _size;
   
   /** Creates a new Gap.
     * @param size the size of the gap
