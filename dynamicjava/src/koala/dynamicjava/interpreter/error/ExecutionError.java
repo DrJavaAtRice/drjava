@@ -28,6 +28,7 @@
 
 package koala.dynamicjava.interpreter.error;
 
+import java.io.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.util.*;
@@ -125,15 +126,15 @@ public class ExecutionError extends Error {
    * exception information.
    * @see #printStackTrace(PrintWriter)
    */
-  public void printStackTrace(java.io.PrintStream s) {
-    this.printStackTrace(new java.io.PrintWriter(s, true));
+  public void printStackTrace(PrintStream s) {
+    this.printStackTrace(new PrintWriter(s, true));
   }
   
   /**
    * Handles all calls to printStackTrace(), printing
    * the stack trace of the current exception, and also that of its cause.
    */
-  public void printStackTrace(java.io.PrintWriter w) {
+  public void printStackTrace(PrintWriter w) {
     String trace = System.getProperty(SHOW_TRACE_PROPERTY);
     if (trace != null && !new Boolean(trace).booleanValue()) {
       w.println(this);

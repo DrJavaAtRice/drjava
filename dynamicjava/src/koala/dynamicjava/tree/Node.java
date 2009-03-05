@@ -300,7 +300,7 @@ public abstract class Node {
    * Returns the defined properties for this node.
    * @return a set of string
    */
-  public Set getProperties() {
+  public Set<String> getProperties() {
     return properties.keySet();
   }
   

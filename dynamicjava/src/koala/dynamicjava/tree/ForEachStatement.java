@@ -117,10 +117,6 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
   
   /**
    * Creates a new for statement
-   * @param init  the initialization statements
-   * @param cond  the condition to evaluate at each loop
-   * @param updt  the update statements
-   * @param body  the body
    * @exception IllegalArgumentException if body is null
    */
   public ForEachStatement(FormalParameter para, Expression collection, Node body) {
@@ -129,9 +125,6 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
   
   /**
    * Creates a new for statement
-   * @param init  the initialization statements
-   * @param cond  the condition to evaluate at each loop
-   * @param updt  the update statements
    * @param body  the body
    * @param fn    the filename
    * @param bl    the begin line

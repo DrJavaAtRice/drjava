@@ -95,6 +95,7 @@ import edu.rice.cs.dynamicjava.symbol.type.*;
 import edu.rice.cs.dynamicjava.symbol.TypeSystem.*;
 
 import static koala.dynamicjava.interpreter.NodeProperties.*;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
@@ -135,7 +136,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     return new ExpressionChecker(context, opt).check(exp, expected);
   }
   
-  private Iterable<Type> checkTypes(Iterable<? extends Expression> l) {
+  @SuppressWarnings("unused") private Iterable<Type> checkTypes(Iterable<? extends Expression> l) {
     return new ExpressionChecker(context, opt).checkList(l);
   }
   

@@ -3,7 +3,6 @@ package edu.rice.cs.dynamicjava.interpreter;
 import edu.rice.cs.plt.iter.IterUtil;
 
 import edu.rice.cs.dynamicjava.symbol.*;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 

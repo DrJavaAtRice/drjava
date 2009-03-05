@@ -61,9 +61,7 @@ public class AssertStatement extends Statement {
     
   /**
    * Creates a new assert statement
-   * @param cond  the condition
-   * @param tstmt the statement
-   * @exception IllegalArgumentException if cond is null or tstmt is null
+   * @exception IllegalArgumentException if cond is null or falseString is null
    */
   public AssertStatement(Expression cond, Expression falseString) {
     this(cond, falseString, null, 0, 0, 0, 0);
@@ -71,14 +69,12 @@ public class AssertStatement extends Statement {
   
   /**
    * Creates a new assert statement
-   * @param cond  the condition
-   * @param tstmt the statement
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
    * @param el    the end line
    * @param ec    the end column
-   * @exception IllegalArgumentException if cond is null or tstmt is null
+   * @exception IllegalArgumentException if cond is null or falseString is null
    */
   public AssertStatement(Expression cond, Expression falseString, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);

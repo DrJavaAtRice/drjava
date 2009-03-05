@@ -28,8 +28,6 @@
 
 package koala.dynamicjava.tree;
 
-import koala.dynamicjava.tree.visitor.*;
-
 /**
  * This class represents the assign expression nodes of the syntax tree
  *
@@ -48,7 +46,7 @@ public abstract class AssignExpression extends    BinaryExpression
      * @param bc    the begin column
      * @param el    the end line
      * @param ec    the end column
-     * @exception IllegalArgumentExceptionAddAssignExpression.java if lexp is null or rexp is null
+     * @exception IllegalArgumentException if lexp is null or rexp is null
      */
     protected AssignExpression(Expression lexp, Expression rexp,
        String fn, int bl, int bc, int el, int ec) {

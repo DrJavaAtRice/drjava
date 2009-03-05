@@ -1,7 +1,6 @@
 package edu.rice.cs.dynamicjava.interpreter;
 
 import edu.rice.cs.dynamicjava.symbol.*;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 

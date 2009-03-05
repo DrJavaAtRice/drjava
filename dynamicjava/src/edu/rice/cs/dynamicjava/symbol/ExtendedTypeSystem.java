@@ -236,7 +236,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   /**
    * Determine if {@code subT} is a subtype of {@code superT}.  This is a recursive
-   * (in terms of {@link isEqual}), transitive relation.
+   * (in terms of {@link #isEqual}), transitive relation.
    */
   public boolean isSubtype(Type subT, Type superT) {
     //debug.logStart(new String[]{"subT", "superT"}, subT, superT);
@@ -452,7 +452,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     //} finally { debug.logEnd(); }
   }
   
-  /** Determine if {@link cast()} would succeed given an expression of the given type */
+  /** Determine if {@link #cast} would succeed given an expression of the given type */
   public boolean isCastable(Type target, Type expT) {
     // TODO: Handle unchecked warnings -- perhaps at the call site
     try {
@@ -464,7 +464,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     catch (UnsupportedConversionException e) { return false; }
   }
   
-  /** Determine if {@link assign()} would succeed given a non-constant expression of the given type */
+  /** Determine if {@link #assign} would succeed given a non-constant expression of the given type */
   public boolean isAssignable(Type target, Type expT) {
     // TODO: Handle unchecked warnings -- perhaps at the call site
     try { 
@@ -476,7 +476,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     catch (UnsupportedConversionException e) { return false; }
   }
   
-  /** Determine if {@link assign()} would succeed given a constant expression of the given type and value */
+  /** Determine if {@link #assign} would succeed given a constant expression of the given type and value */
   public boolean isAssignable(Type target, Type expT, Object expValue) {
     // TODO: Handle unchecked warnings -- perhaps at the call site
     try { 
@@ -588,7 +588,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   /**
    * Compute the erased type of {@code t}.  The result is guaranteed to be reifiable (according
-   * to {@link isReifiable}) and a supertype of {@code t}.
+   * to {@link #isReifiable}) and a supertype of {@code t}.
    */
   public Type erase(Type t) { return t.apply(ERASE); }
   
@@ -710,7 +710,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   /**
    * Determine the element type of the given array type.  Assumes {@code t} is an array type (according to 
-   * {@link isArray}).
+   * {@link #isArray}).
    */
   public Type arrayElementType(Type t) {
     return t.apply(ARRAY_ELEMENT_TYPE);
@@ -1166,7 +1166,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   /**
    * Convert the expression to a primitive.  The result is guaranteed to have a primitive type as its
-   * TYPE property (according to {@link isPrimitive}).
+   * TYPE property (according to {@link #isPrimitive}).
    * 
    * @param e  A typed expression
    * @return  A typed expression equivalent to {@code e} that has a primitive type
@@ -1208,7 +1208,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   /**
    * Convert the expression to a reference.  The result is guaranteed to have a reference type as its
-   * TYPE property (according to {@link isReferene}).
+   * TYPE property (according to {@link #isReference}).
    * 
    * @param e  A typed expression
    * @return  A typed expression equivalent to {@code e} that has a reference type
@@ -2431,10 +2431,10 @@ public class ExtendedTypeSystem extends TypeSystem {
     /** Must be invoked first */
     public abstract boolean matches();
     
-    /** Must only be invoked after {@link matches()} */
+    /** Must only be invoked after {@link #matches()} */
     public abstract boolean matchesWithBoxing();
     
-    /** Must only be invoked after {@link matchesWithAutoboxing} */
+    /** Must only be invoked after {@link #matchesWithBoxing} */
     public abstract boolean matchesWithVarargs();
     
     /** Must only be invoked after one of the match() methods returns {@code true} */
@@ -2517,8 +2517,8 @@ public class ExtendedTypeSystem extends TypeSystem {
     }
     
     /** 
-     * Update {@code _args} with the boxed or unboxed versions of the arguments; set {@link _paramForVarargs}
-     * and {@link _argForVarargs} before performing the conversion on the last argument
+     * Update {@code _args} with the boxed or unboxed versions of the arguments; set {@link #_paramForVarargs}
+     * and {@link #_argForVarargs} before performing the conversion on the last argument
      * 
      * @return  {@code true} iff the result of the conversion is different from the original set of arguments
      */
@@ -2818,8 +2818,8 @@ public class ExtendedTypeSystem extends TypeSystem {
    * The sequence of matching first on explicit signatures, then boxing-compatible signatures, and 
    * finally vararg-compatible signatures is handled by this method.
    * 
-   * @param T  The signature type ({@code DJMethod}, for example)
-   * @param R  The result type ({@code MethodInvocation}, for example)
+   * @param <T>  The signature type ({@code DJMethod}, for example)
+   * @param <R>  The result type ({@code MethodInvocation}, for example)
    * @param sigs  A list of signatures
    * @param makeChecker  Factory to create a new SignatureChecker from a signature
    * @param makeResult  Factory to create a result value from a signature and its matching
@@ -2892,7 +2892,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * @param typeArgs  The type arguments for the constructor's type parameters.
    * @param args  A list of typed expressions corresponding to the constructor's parameters.
    * @param expected  The type expected in the invocation's calling context, if any.
-   * @return  A {@link ConstructorInvocation} object representing the matched constructor.
+   * @return  A {@link TypeSystem.ConstructorInvocation} object representing the matched constructor.
    * @throws InvalidTargetException  If the type {@code t} cannot be constructed.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 constructor matches the given arguments and type 
@@ -3039,7 +3039,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * @param typeArgs  The type arguments for the method's type parameters.
    * @param args  A list of typed expressions corresponding to the method's parameters.
    * @param expected  The type expected in the invocation's calling context, if any.
-   * @return  An {@link ObjectMethodInvocation} object representing the matched method.
+   * @return  An {@link TypeSystem.ObjectMethodInvocation} object representing the matched method.
    * @throws InvalidTargetException  If {@code object} cannot be used to invoke a method.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
@@ -3163,7 +3163,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * @param typeArgs  The type arguments for the method's type parameters.
    * @param args  A list of typed expressions corresponding to the method's parameters.
    * @param expected  The type expected in the invocation's calling context, if any.
-   * @return  A {@link StaticMethodInvocation} object representing the matched method.
+   * @return  A {@link TypeSystem.StaticMethodInvocation} object representing the matched method.
    * @throws InvalidTargetException  If method invocation is not legal for the type {@code t}.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
@@ -3329,7 +3329,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * Lookup the field with the given name in the given object.
    * @param object  A typed expression representing the object whose field is to be accessed.
    * @param name  The name of the field.
-   * @return An {@link ObjectFieldReference} object representing the matched field.
+   * @return An {@link TypeSystem.ObjectFieldReference} object representing the matched field.
    * @throws InvalidTargetException  If {@code object} cannot be used to access a field.
    * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
    */
@@ -3403,7 +3403,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * Lookup the static field with the given name.
    * @param t  The type in which to search for a static field.
    * @param name  The name of the field.
-   * @return A {@link StaticFieldReference} object representing the matched field.
+   * @return A {@link TypeSystem.StaticFieldReference} object representing the matched field.
    * @throws InvalidTargetException  If field access is not legal for the type {@code t}.
    * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
    */
@@ -3707,7 +3707,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   
   /**
    * Test whether the given arguments are within the bounds of the corresponding parameters.  Unlike 
-   * {@link checkBounds}, no exception is thrown when a mismatch occurs.  Assumes that {@code params} 
+   * {@link #checkBounds}, no exception is thrown when a mismatch occurs.  Assumes that {@code params} 
    * and {@code args} have matching arity.
    * 
    * @return  {@code true} iff the given arguments are within the bounds of the given parameters

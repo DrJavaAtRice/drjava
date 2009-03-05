@@ -30,8 +30,6 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
-import koala.dynamicjava.tree.visitor.*;
-
 /**
  * This class represents a type declaration
  *

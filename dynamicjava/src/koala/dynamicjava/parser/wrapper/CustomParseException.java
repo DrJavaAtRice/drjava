@@ -65,7 +65,6 @@ public class CustomParseException extends ParseException {
       return getMessage();
     }
     else {
-      String expected = "";
       int maxSize = 0;
       for (int i = 0; i < expectedTokenSequences.length; i++) {
         if (maxSize < expectedTokenSequences[i].length) {

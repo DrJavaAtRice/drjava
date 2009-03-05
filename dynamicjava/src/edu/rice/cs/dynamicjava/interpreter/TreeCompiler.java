@@ -8,10 +8,8 @@ import edu.rice.cs.plt.lambda.Runnable2;
 import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.collect.CollectUtil;
 
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ClassWriter;
 
@@ -159,8 +157,7 @@ public class TreeCompiler {
   }
   
   /** Dump the compiled bytes to a file for use in debugging. */
-
-  private void dumpClassFile() {
+  @SuppressWarnings("unused") private void dumpClassFile() {
     try {
       String name = _treeClass.fullName();
       int dot = name.lastIndexOf('.');
@@ -983,7 +980,7 @@ public class TreeCompiler {
   }
   
   /** Helper method for printing debug messages from generated code. */
-  private void emitDebug(MethodVisitor mv, String message, StackSizeTracker stack) {
+  @SuppressWarnings("unused") private void emitDebug(MethodVisitor mv, String message, StackSizeTracker stack) {
     mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
     mv.visitLdcInsn(message);
     stack.adjust(2);
@@ -992,7 +989,7 @@ public class TreeCompiler {
   }
 
   /** Helper method for printing a toString of the current object.  The object is not consumed. */
-  private void emitPrintToString(MethodVisitor mv, StackSizeTracker stack) {
+  @SuppressWarnings("unused") private void emitPrintToString(MethodVisitor mv, StackSizeTracker stack) {
     mv.visitInsn(DUP);
     mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
     stack.adjust(2);
@@ -1283,7 +1280,7 @@ public class TreeCompiler {
      * {@code bindings}.
      * @return  The value returned by the method body (via a return statement); {@code null}
      *          if the return statement is void, or if no return statement is evaluated.
-     * @throws  Any exceptions (or errors) that occur during evaluation, without any wrapping.
+     * @throws Throwable  Any exceptions (or errors) that occur during evaluation, without any wrapping.
      */
     public Object evaluateMethod(String key, RuntimeBindings bindings, Object[] args) throws Throwable {
       MethodDeclaration decl = _methods.get(key);
@@ -1294,7 +1291,7 @@ public class TreeCompiler {
     /**
      * Evaluate an expression in the given environment.
      * @return  The value of the interpreted expression.
-     * @throws  Any exceptions (or errors) that occur during evaluation, without any wrapping.
+     * @throws Throwable  Any exceptions (or errors) that occur during evaluation, without any wrapping.
      */
     public Object evaluateExpression(String key, RuntimeBindings bindings) throws Throwable {
       Expression exp = _expressions.get(key);
@@ -1306,7 +1303,7 @@ public class TreeCompiler {
      * The given environment is extended with the constructor parameters bound to the given arguments;
      * {@code this} should be defined in {@code bindings}.
      * @param index  0-based index into the call's arguments; -1 for the call's outer (prefix) expression
-     * @throws  Any exceptions (or errors) that occur during evaluation, without any wrapping.
+     * @throws Throwable  Any exceptions (or errors) that occur during evaluation, without any wrapping.
      */
     public Object evaluateConstructorCallArg(String key, int index, RuntimeBindings bindings,
                                              Object[] args) throws Throwable {
@@ -1321,7 +1318,7 @@ public class TreeCompiler {
     /**
      * Evaluate a constructor body in the given environment, extended with the constructor parameters
      * bound to the given arguments.  {@code this} should be defined in {@code bindings}.
-     * @throws  Any exceptions (or errors) that occur during evaluation, without any wrapping.
+     * @throws Throwable  Any exceptions (or errors) that occur during evaluation, without any wrapping.
      */    
     public void evaluateConstructorBody(String key, RuntimeBindings bindings, Object[] args)
       throws Throwable {
@@ -1333,7 +1330,7 @@ public class TreeCompiler {
     /**
      * Evaluate an initializer in the given environment.  If the initializer is non-static,
      * {@code this} should be defined in {@code bindings}.
-     * @throws  Any exceptions (or errors) that occur during evaluation, without any wrapping.
+     * @throws Throwable  Any exceptions (or errors) that occur during evaluation, without any wrapping.
      */
     public void evaluateInitializer(String key, RuntimeBindings bindings) throws Throwable {
       Initializer decl = _initializers.get(key);

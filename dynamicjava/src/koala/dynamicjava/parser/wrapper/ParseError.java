@@ -30,7 +30,6 @@ package koala.dynamicjava.parser.wrapper;
 
 
 import koala.dynamicjava.parser.impl.ParseException;
-import koala.dynamicjava.parser.impl.TokenMgrError;
   
 /**
  * This error is thrown when an unexpected error append while

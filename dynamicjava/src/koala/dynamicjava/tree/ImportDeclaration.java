@@ -31,7 +31,6 @@ package koala.dynamicjava.tree;
 import java.util.*;
 
 import koala.dynamicjava.tree.visitor.*;
-import koala.dynamicjava.util.*;
 
 /**
  * This class represents the import declarations

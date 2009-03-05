@@ -64,10 +64,6 @@
 
 package koala.dynamicjava.tree;
 
-import java.util.*;
-
-import koala.dynamicjava.tree.visitor.*;
-
 /**
  * This class represents the for statement nodes of the syntax tree
  *

@@ -236,8 +236,9 @@ public class Java5Class extends JavaClass {
     }
   };
   
-  private static final Lambda<Class<?>, DJClass> CONVERT_CLASS = new Lambda<Class<?>, DJClass>() {
-    public DJClass value(Class<?> c) { return new Java5Class(c); }
+  @SuppressWarnings("unchecked") // java.lang.Class methods return (raw) type Class[] in Java 5 (fixed in Java 6)
+  private static final Lambda<Class, DJClass> CONVERT_CLASS = new Lambda<Class, DJClass>() {
+    public DJClass value(Class c) { return new Java5Class(c); }
   };
   
   private static final Lambda<Field, DJField> CONVERT_FIELD = new Lambda<Field, DJField>() {
@@ -245,6 +246,7 @@ public class Java5Class extends JavaClass {
   };
   
   /** Non-static because Java5Constructor is non-static. */
+  @SuppressWarnings("unchecked") // java.lang.Class methods return (raw) type Constructor[] in Java 5 (fixed in Java 6)
   private final Lambda<Constructor, DJConstructor> CONVERT_CONSTRUCTOR =
     new Lambda<Constructor, DJConstructor>() {
     public DJConstructor value(Constructor k) { return new Java5Constructor(k); }
@@ -260,7 +262,7 @@ public class Java5Class extends JavaClass {
   }
   
   private class Java5Constructor extends JavaConstructor {
-    public Java5Constructor(Constructor k) { super(k); }
+    public Java5Constructor(Constructor<?> k) { super(k); }
     public Iterable<VariableType> declaredTypeParameters() {
       return IterUtil.mapSnapshot(IterUtil.asIterable(_k.getTypeParameters()), CONVERT_VAR);
     }

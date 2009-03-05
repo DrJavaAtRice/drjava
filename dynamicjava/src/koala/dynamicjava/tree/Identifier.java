@@ -130,7 +130,7 @@ public class Identifier implements IdentifierToken {
    * was found in the source file
    */
   public int endColumn() {
-    return endLine;
+    return endColumn;
   }
    /**
    * Implementation of toString for use in unit testing

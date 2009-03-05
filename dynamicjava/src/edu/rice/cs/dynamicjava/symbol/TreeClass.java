@@ -3,7 +3,6 @@ package edu.rice.cs.dynamicjava.symbol;
 import java.util.List;
 import java.util.LinkedList;
 import java.lang.reflect.Modifier;
-import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Box;

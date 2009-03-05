@@ -36,7 +36,6 @@
 
 package koala.dynamicjava.tree.tiger;
 
-import java.util.*;
 import edu.rice.cs.plt.tuple.Option;
 
 import koala.dynamicjava.tree.*;
@@ -54,7 +53,8 @@ public class HookTypeName extends ReferenceTypeName {
   
   /**
    * Initializes the type
-   * @param type the hooked type
+   * @param up the upper bound
+   * @param low the lower bound
    * @exception IllegalArgumentException if type is null
    */
   public HookTypeName(Option<TypeName> up, Option<TypeName> low) {
@@ -63,7 +63,8 @@ public class HookTypeName extends ReferenceTypeName {
 
   /**
    * Initializes the type
-   * @param type the hooked type
+   * @param up the upper bound
+   * @param low the lower bound
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column

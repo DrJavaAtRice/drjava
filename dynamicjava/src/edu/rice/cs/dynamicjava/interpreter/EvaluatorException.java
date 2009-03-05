@@ -1,10 +1,6 @@
 package edu.rice.cs.dynamicjava.interpreter;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.iter.ReadOnceIterable;
-import edu.rice.cs.plt.lambda.Lambda;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 

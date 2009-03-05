@@ -47,7 +47,6 @@ public class LibraryFinder extends FileFinder {
   
   /**
    * Creates a new library finder
-   * @param suffix the suffix of the source files
    */
   public LibraryFinder() {
     suffixes = new LinkedList<String>();
@@ -67,9 +66,8 @@ public class LibraryFinder extends FileFinder {
    * @exception ClassNotFoundException if the class cannot be loaded
    */
   public File findCompilationUnit(String cname) throws ClassNotFoundException {
-    Iterator it = suffixes.iterator();
-    while (it.hasNext()) {
-      String fname = cname.replace('.', '/') + it.next();
+    for (String s : suffixes) {
+      String fname = cname.replace('.', '/') + s;
       try {
         return findFile(fname);
       } catch (IOException e) {
@@ -93,9 +91,8 @@ public class LibraryFinder extends FileFinder {
    * @return the name of the root class
    */
   public String findCompilationUnitName(String cname) throws ClassNotFoundException {
-    Iterator it = suffixes.iterator();
-    while (it.hasNext()) {
-      String fname = cname.replace('.', '/') + it.next();
+    for (String s : suffixes) {
+      String fname = cname.replace('.', '/') + s;
       try {
         findFile(fname);
         return cname;

@@ -37,10 +37,8 @@
 
 package koala.dynamicjava.tree.tiger;
 
-import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.ReferenceTypeName;
 import koala.dynamicjava.tree.IdentifierToken;
-import koala.dynamicjava.tree.TreeUtilities;
 import koala.dynamicjava.SourceInfo;
 import java.util.List;
 

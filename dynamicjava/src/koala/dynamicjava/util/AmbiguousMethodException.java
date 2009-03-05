@@ -44,7 +44,7 @@ import java.lang.reflect.Method;
  */
 public class AmbiguousMethodException extends RuntimeException {
   
-  private Method[] _methods;
+  @SuppressWarnings("unused") private Method[] _methods;
   
   /**
    * Public constructor - calls the super class constructor

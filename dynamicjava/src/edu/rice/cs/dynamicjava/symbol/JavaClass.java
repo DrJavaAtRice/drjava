@@ -119,14 +119,16 @@ public class JavaClass implements DJClass {
     else { return new SimpleClassType(new JavaClass(c)); }
   }
   
-  private static final Lambda<Class<?>, Type> CLASS_AS_TYPE = new Lambda<Class<?>, Type>() {
-    public Type value(Class<?> c) {
+  @SuppressWarnings("unchecked") // java.lang.Class methods return (raw) type Class[] in Java 5 (fixed in Java 6)
+  private static final Lambda<Class, Type> CLASS_AS_TYPE = new Lambda<Class, Type>() {
+    public Type value(Class c) {
       return classAsType(c);
     }
   };
   
-  private static final Lambda<Class<?>, DJClass> CONVERT_CLASS = new Lambda<Class<?>, DJClass>() {
-    public DJClass value(Class<?> c) { return new JavaClass(c); }
+  @SuppressWarnings("unchecked") // java.lang.Class methods return (raw) type Class[] in Java 5 (fixed in Java 6)
+  private static final Lambda<Class, DJClass> CONVERT_CLASS = new Lambda<Class, DJClass>() {
+    public DJClass value(Class c) { return new JavaClass(c); }
   };
   
   private static final Lambda<Field, DJField> CONVERT_FIELD = new Lambda<Field, DJField>() {
@@ -134,6 +136,7 @@ public class JavaClass implements DJClass {
   };
   
   /** Non-static because the JavaConstructor class is non-static. */
+  @SuppressWarnings("unchecked") // java.lang.Class methods return (raw) type Constructor[] in Java 5 (fixed in Java 6)
   private final Lambda<Constructor, DJConstructor> CONVERT_CONSTRUCTOR =
     new Lambda<Constructor, DJConstructor>() {
     public DJConstructor value(Constructor k) { return new JavaConstructor(k); }
@@ -213,11 +216,11 @@ public class JavaClass implements DJClass {
   
   /** Non-static in order to determine the outer type. */
   protected class JavaConstructor implements DJConstructor {
-    protected final Constructor _k;
+    protected final Constructor<?> _k;
     protected final Type _outerType;
     private final Thunk<Iterable<LocalVariable>> _params;
     
-    public JavaConstructor(Constructor k) {
+    public JavaConstructor(Constructor<?> k) {
       _k = k;
       DJClass outer = SymbolUtil.dynamicOuterClass(JavaClass.this);
       _outerType = (outer == null) ? null : SymbolUtil.thisType(outer);

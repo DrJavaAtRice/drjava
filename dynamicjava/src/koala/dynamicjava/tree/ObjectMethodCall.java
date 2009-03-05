@@ -70,11 +70,6 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
    * @param exp   the expression on which this method call applies
    * @param mn    the field name
    * @param args  the arguments. Can be null.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   public ObjectMethodCall(Expression exp, String mn, List<? extends Expression> args) {

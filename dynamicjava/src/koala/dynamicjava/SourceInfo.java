@@ -111,10 +111,7 @@ package koala.dynamicjava;
 
 import java.io.*;
 
-/**
- * A simple tuple class to represent source location.
- * TODO: Add comments.
- */
+/** A simple tuple class to represent source location. */
 public final class SourceInfo {
   /**
    * The source file

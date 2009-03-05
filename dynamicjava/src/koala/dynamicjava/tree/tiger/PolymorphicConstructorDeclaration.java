@@ -49,15 +49,8 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
   
   private TypeParameter[] _typeParameters;
   /**
-   * Creates a new method declaration
-   * @param flags   the access flags
-   * @param type    the return type of this method
-   * @param name    the name of the method to declare
-   * @param params  the parameters list
-   * @param excepts the exception list
-   * @param body    the body statement
-   * @param typeParams the type parameters
-   * @exception IllegalArgumentException if name is null or type is null or
+   * Creates a new constructor declaration
+   * @exception IllegalArgumentException if name is null or
    *            params is null or excepts is null
    */
   public PolymorphicConstructorDeclaration(int flags, String name,
@@ -67,20 +60,8 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
   }
   
   /**
-   * Creates a new method declaration
-   * @param flags   the access flags
-   * @param type    the return type of this method
-   * @param name    the name of the method to declare
-   * @param params  the parameters list
-   * @param excepts the exception list
-   * @param body    the body statement
-   * @param fn      the filename
-   * @param bl      the begin line
-   * @param bc      the begin column
-   * @param el      the end line
-   * @param ec      the end column
-   * @param typeParams the type parameters
-   * @exception IllegalArgumentException if name is null or type is null or
+   * Creates a new constructor declaration
+   * @exception IllegalArgumentException if name is null or
    *            params is null or excepts is null
    */
   public PolymorphicConstructorDeclaration(int flags, String name,

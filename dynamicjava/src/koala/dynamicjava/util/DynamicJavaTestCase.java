@@ -36,7 +36,6 @@
 
 package koala.dynamicjava.util;
 
-import java.util.*;
 import junit.framework.*;
 
 public abstract class DynamicJavaTestCase extends TestCase {

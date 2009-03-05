@@ -78,7 +78,6 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
    * @param bc    the begin column
    * @param el    the end line
    * @param ec    the end column
-   * @param typeParams the type parameters
    * @exception IllegalArgumentException if ids is null
    */
   public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs, String fn,  int bl, int bc, int el, int ec) {

@@ -44,7 +44,7 @@ import koala.dynamicjava.tree.MethodDeclaration;
  */
 public class AmbiguousFunctionException extends RuntimeException {
   
-  private MethodDeclaration[] _methods;
+  @SuppressWarnings("unused") private MethodDeclaration[] _methods;
   
   /**
    * Public constructor - calls the super class constructor

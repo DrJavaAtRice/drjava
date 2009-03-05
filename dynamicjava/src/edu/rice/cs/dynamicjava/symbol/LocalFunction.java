@@ -1,7 +1,6 @@
 package edu.rice.cs.dynamicjava.symbol;
 
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.lambda.WrappedException;
 
 import edu.rice.cs.dynamicjava.Options;

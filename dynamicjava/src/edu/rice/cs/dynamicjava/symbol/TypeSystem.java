@@ -1,7 +1,6 @@
 package edu.rice.cs.dynamicjava.symbol;
 
 import edu.rice.cs.dynamicjava.symbol.type.*;
-import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.Expression;
 
 import edu.rice.cs.plt.tuple.Pair;
@@ -141,17 +140,17 @@ public abstract class TypeSystem {
   
   /**
    * Determine if {@code subT} is a subtype of {@code superT}.  This is a recursive
-   * (in terms of {@link isEqual}), transitive relation.
+   * (in terms of {@link #isEqual}), transitive relation.
    */
   public abstract boolean isSubtype(Type subT, Type superT);
 
-  /** Determine if {@link cast()} would succeed given an expression of the given type */
+  /** Determine if {@link #cast} would succeed given an expression of the given type */
   public abstract boolean isCastable(Type target, Type expT);
 
-  /** Determine if {@link assign()} would succeed given a non-constant expression of the given type */
+  /** Determine if {@link #assign} would succeed given a non-constant expression of the given type */
   public abstract boolean isAssignable(Type target, Type expT);
 
-  /** Determine if {@link assign()} would succeed given a constant expression of the given type and value */
+  /** Determine if {@link #assign} would succeed given a constant expression of the given type and value */
   public abstract boolean isAssignable(Type target, Type expT, Object expValue);
   
   public abstract boolean isPrimitiveConvertible(Type t);
@@ -172,7 +171,7 @@ public abstract class TypeSystem {
   
   /**
    * Compute the erased type of {@code t}.  The result is guaranteed to be reifiable (according
-   * to {@link isReifiable}) and a supertype of {@code t}.
+   * to {@link #isReifiable}) and a supertype of {@code t}.
    */
   public abstract Type erase(Type t);
   
@@ -193,7 +192,7 @@ public abstract class TypeSystem {
   
   /**
    * Determine the element type of the given array type.  Assumes {@code t} is an array type (according to 
-   * {@link isArray}).
+   * {@link #isArray}).
    */
   public abstract Type arrayElementType(Type t);
 
@@ -224,7 +223,7 @@ public abstract class TypeSystem {
     
   /**
    * Convert the expression to a primitive.  The result is guaranteed to have a primitive type as its
-   * TYPE property (according to {@link isPrimitive}).
+   * TYPE property (according to {@link #isPrimitive}).
    * 
    * @param e  A typed expression
    * @return  A typed expression equivalent to {@code e} that has a primitive type
@@ -234,7 +233,7 @@ public abstract class TypeSystem {
   
   /**
    * Convert the expression to a reference.  The result is guaranteed to have a reference type as its
-   * TYPE property (according to {@link isReferene}).
+   * TYPE property (according to {@link #isReference}).
    * 
    * @param e  A typed expression
    * @return  A typed expression equivalent to {@code e} that has a reference type

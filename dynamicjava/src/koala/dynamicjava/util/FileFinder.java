@@ -68,9 +68,8 @@ public class FileFinder {
    * @throws IOException if no file was found
    */
   public File findFile(String name) throws IOException {
-    Iterator it = paths.iterator();
-    while (it.hasNext()) {
-      File f = new File((String)it.next() + name);
+    for (String s : paths) {
+      File f = new File(s + name);
       if (f.exists()) {
         return f;
       }

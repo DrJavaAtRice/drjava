@@ -10,7 +10,6 @@ import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.tuple.Option;
 
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
 
 import edu.rice.cs.dynamicjava.Options;

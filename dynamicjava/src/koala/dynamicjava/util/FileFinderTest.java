@@ -37,7 +37,6 @@
 package koala.dynamicjava.util;
 
 import java.io.*;
-import java.util.*;
 import junit.framework.TestCase;
 
 /**

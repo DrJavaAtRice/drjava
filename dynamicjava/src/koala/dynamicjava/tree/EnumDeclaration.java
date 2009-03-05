@@ -31,8 +31,6 @@ package koala.dynamicjava.tree;
 import java.util.*;
 import java.lang.reflect.Modifier;
 
-import koala.dynamicjava.tree.visitor.*;
-
 /**
  * This class represents an enum declaration
  *

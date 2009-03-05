@@ -39,7 +39,6 @@ public class StringLiteral extends Literal {
   /**
    * Initializes a literal
    * @param rep the representation of the literal
-   * @param val the value of this string
    */
   public StringLiteral(String rep) {
     this(rep, null, 0, 0, 0, 0);
@@ -48,7 +47,6 @@ public class StringLiteral extends Literal {
   /**
    * Initializes a literal
    * @param rep the representation of the literal
-   * @param val the value of this string
    * @param fn  the filename
    * @param bl  the begin line
    * @param bc  the begin column

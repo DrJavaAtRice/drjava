@@ -75,11 +75,7 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import java.util.*;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.collect.CollectUtil;
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Lambda;
-import edu.rice.cs.plt.lambda.Lambda2;
-import edu.rice.cs.plt.lambda.Thunk;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.*;
@@ -90,9 +86,9 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.interpreter.error.ExecutionError;
-import koala.dynamicjava.interpreter.TypeUtil;
 
 import static koala.dynamicjava.interpreter.NodeProperties.*;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
@@ -105,7 +101,7 @@ public class TypeNameChecker {
   
   private final TypeContext context;
   private final TypeSystem ts;
-  private final Options opt;
+  @SuppressWarnings("unused") private final Options opt;
   private final TypeNameVisitor visitor; // singleton per outer instance
 
   public TypeNameChecker(TypeContext ctx, Options options) {

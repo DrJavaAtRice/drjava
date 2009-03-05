@@ -8,7 +8,6 @@ import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.iter.IterUtil;
 
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
 
 import edu.rice.cs.dynamicjava.Options;
@@ -19,7 +18,7 @@ import static koala.dynamicjava.interpreter.NodeProperties.*;
 /** Evaluates the given expression.  The expression is assumed to have been
   * checked without any errors.  Note that the result of a visitor method is not necessarily
   * the value of the expression -- for example, a primitive casting conversion might be required.
-  * The {@link value} method contains additional checks and conversions, and should be used exclusively
+  * The {@link #value} method contains additional checks and conversions, and should be used exclusively
   * by clients to evaluate an expression.
   */
 public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lambda<Node, Object> {

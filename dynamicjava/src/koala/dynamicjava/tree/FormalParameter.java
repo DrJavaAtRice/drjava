@@ -73,7 +73,6 @@ public class FormalParameter extends Node {
    * @param f     is the parameter final?
    * @param t     the type of the parameter
    * @param n     the name of the parameter
-   * @param va    whether paramater is a varargs
    * @exception IllegalArgumentException if t is null or n is null
    */
   public FormalParameter(boolean f, TypeName t, String n) {

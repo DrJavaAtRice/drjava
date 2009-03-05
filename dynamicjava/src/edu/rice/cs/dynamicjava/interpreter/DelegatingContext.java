@@ -165,7 +165,7 @@ public abstract class DelegatingContext implements TypeContext {
   /**
    * List all local functions that match the given name (empty if there are none).  Overridden for
    * convenience, delegating to a trivial instance of
-   * {@link getLocalFunctions(String, TypeSystem, Iterable)}.
+   * {@link #getLocalFunctions(String, TypeSystem, Iterable)}.
    */
   public Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts) {
     return getLocalFunctions(name, ts, IterUtil.<LocalFunction>empty());

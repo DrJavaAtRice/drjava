@@ -51,11 +51,6 @@ public class ContinueStatement extends Statement {
   /**
    * Creates a new while statement
    * @param label the label
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
   public ContinueStatement(String label) {
     this(label, null, 0, 0, 0, 0);

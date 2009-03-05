@@ -6,7 +6,6 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.WrappedException;
 
 import koala.dynamicjava.tree.Node;
-import koala.dynamicjava.tree.Expression;
 import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;

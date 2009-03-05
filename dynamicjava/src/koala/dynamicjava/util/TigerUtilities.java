@@ -40,19 +40,8 @@ package koala.dynamicjava.util;
 
 
 import java.lang.reflect.*;
-import java.util.*;
-import junit.framework.*;
 
-import koala.dynamicjava.tree.*;
-import koala.dynamicjava.interpreter.*;
-import koala.dynamicjava.SourceInfo;
-import koala.dynamicjava.util.*;
 import koala.dynamicjava.interpreter.error.*;
-
-import java.io.StringReader;
-import java.util.List;
-import koala.dynamicjava.parser.wrapper.ParserFactory;
-import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
 /**
  * Common utilities of DynamicJava for implementing features of 1.5.
@@ -126,7 +115,7 @@ public class TigerUtilities {
   /**
    * @return @{code true} iff c has the vararg modifier set.
    */
-  public static boolean isVarArgs(Constructor c) {
+  public static boolean isVarArgs(Constructor<?> c) {
     return _tigerEnabled && ((c.getModifiers() & VARARGS) != 0);
   }
   

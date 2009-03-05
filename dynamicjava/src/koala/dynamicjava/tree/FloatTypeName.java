@@ -40,11 +40,6 @@ import koala.dynamicjava.tree.visitor.Visitor;
 public class FloatTypeName extends PrimitiveTypeName {
     /**
      * Initializes the type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
      */
     public FloatTypeName() {
  this(null, 0, 0, 0, 0);

@@ -29,7 +29,6 @@
 package koala.dynamicjava.util;
 
 import java.io.*;
-import java.util.*;
 
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -137,9 +136,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("initialization:");
     if (node.getInitialization() != null) {
       indent();
-      Iterator it = node.getInitialization().iterator();
-      while (it.hasNext()) {
-        ((Node)it.next()).acceptVisitor(this);
+      for (Node n : node.getInitialization()) {
+        n.acceptVisitor(this);
       }
       unindent();
     }
@@ -152,9 +150,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("update:");
     if (node.getUpdate() != null) {
       indent();
-      Iterator it = node.getUpdate().iterator();
-      while (it.hasNext()) {
-        ((Node)it.next()).acceptVisitor(this);
+      for (Node n : node.getUpdate()) {
+        n.acceptVisitor(this);
       }
       unindent();
     }
@@ -198,9 +195,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     print("bindings:");
     indent();
-    Iterator it = node.getBindings().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getBindings()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -225,9 +221,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("statements:");
     indent();
     if (node.getStatements() != null) {
-      Iterator it = node.getStatements().iterator();
-      while (it.hasNext()) {
-        ((Node)it.next()).acceptVisitor(this);
+      for (Node n : node.getStatements()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -282,9 +277,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     print("catchStatements:");
     indent();
-    Iterator it = node.getCatchStatements().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getCatchStatements()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("finallyBlock:");
@@ -577,9 +571,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -601,9 +594,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -629,9 +621,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -655,9 +646,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -683,9 +673,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -869,9 +858,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("l."+node.getBeginLine()+" ArrayInitializer {");
     print("cells:");
     indent();
-    Iterator it = node.getCells().iterator();
-    while (it.hasNext()) {
-      ((Expression)it.next()).acceptVisitor(this);
+    for (Node n : node.getCells()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("elementType:");
@@ -899,9 +887,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     print("sizes:");
     indent();
-    Iterator it = node.getSizes().iterator();
-    while (it.hasNext()) {
-      ((Expression)it.next()).acceptVisitor(this);
+    for (Node n : node.getSizes()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("initialization:");
@@ -928,9 +915,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -952,17 +938,15 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
     print("members:");
     indent();
-    Iterator it = node.getMembers().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getMembers()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -987,9 +971,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
@@ -1015,17 +998,15 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("arguments:");
     indent();
     if (node.getArguments() != null) {
-      Iterator it = node.getArguments().iterator();
-      while (it.hasNext()) {
-        ((Expression)it.next()).acceptVisitor(this);
+      for (Node n : node.getArguments()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
     print("members:");
     indent();
-    Iterator it = node.getMembers().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getMembers()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -1417,9 +1398,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("l."+node.getBeginLine()+" BlockStatement {");
     print("statements:");
     indent();
-    Iterator it = node.getStatements().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getStatements()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -1444,17 +1424,15 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("interfaces:");
     indent();
     if (node.getInterfaces() != null) {
-      Iterator it = node.getInterfaces().iterator();
-      while (it.hasNext()) {
-        ((Node)it.next()).acceptVisitor(this);
+      for (Node n : node.getInterfaces()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
     print("members:");
     indent();
-    Iterator it = node.getMembers().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getMembers()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -1475,17 +1453,15 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("interfaces:");
     indent();
     if (node.getInterfaces() != null) {
-      Iterator it = node.getInterfaces().iterator();
-      while (it.hasNext()) {
-        ((Node)it.next()).acceptVisitor(this);
+      for (Node n : node.getInterfaces()) {
+        n.acceptVisitor(this);
       }
     }
     unindent();
     print("members:");
     indent();
-    Iterator it = node.getMembers().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getMembers()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -1509,16 +1485,14 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     print("parameters:");
     indent();
-    Iterator it = node.getParameters().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getParameters()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("exceptions:");
     indent();
-    it = node.getExceptions().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getExceptions()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("constructorInvocation:");
@@ -1529,9 +1503,8 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     print("statements:");
     indent();
-    it = node.getStatements().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getStatements()) {
+      n.acceptVisitor(this);
     }
     unindent();
     displayProperties(node);
@@ -1559,16 +1532,14 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     print("parameters:");
     indent();
-    Iterator it = node.getParameters().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getParameters()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("exceptions:");
     indent();
-    it = node.getExceptions().iterator();
-    while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+    for (Node n : node.getExceptions()) {
+      n.acceptVisitor(this);
     }
     unindent();
     print("body:");
@@ -1726,14 +1697,10 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Displays the properties of a node
    */
   private void displayProperties(Node node) {
-    Iterator it = node.getProperties().iterator();
-    if (it.hasNext()) {
-      print("properties:");
-    }
-    
-    while (it.hasNext()) {
+    boolean first = true;
+    for (String prop : node.getProperties()) {
+      if (first) { print("properties:"); first = false; }
       indent();
-      String prop = (String)it.next();
       print(prop+": "+node.getProperty(prop));
       unindent();
     }

@@ -36,9 +36,7 @@
 
 package koala.dynamicjava.interpreter.error;
 
-import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.util.*;
 
 /**
  * This error is thrown when an NameVisitor encounters AmbiguousName
