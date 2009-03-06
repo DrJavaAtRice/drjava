@@ -45,16 +45,11 @@ public class SimpleMethodCall extends MethodCall {
    * Creates a new node
    * @param mn    the function name
    * @param args  the arguments. Can be null.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   public SimpleMethodCall(String mn, List<Expression> args,
-                      String fn, int bl, int bc, int el, int ec) {
-    super(mn, args, fn, bl, bc, el, ec);
+                      SourceInfo si) {
+    super(mn, args, si);
   }
   
   /**

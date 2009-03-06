@@ -56,35 +56,25 @@ public class PackageDeclaration extends Node {
    *              The list can be null.
    */
   public PackageDeclaration(List<IdentifierToken> ident) {
-    this(ident, null, 0, 0, 0, 0);
+    this(ident, SourceInfo.NONE);
   }
   
   /**
    * Creates a new package declaration node
    * @param ident a list of tokens that represents a package name.
    *              The list can be null.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
-  public PackageDeclaration(List<IdentifierToken> ident, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public PackageDeclaration(List<IdentifierToken> ident, SourceInfo si) {
+    super(si);
     name = TreeUtilities.listToName(ident);
   }
   
   /**
    * Creates a new package declaration node
    * @param nm    a string that represents a package name.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
-  public PackageDeclaration(String nm, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public PackageDeclaration(String nm, SourceInfo si) {
+    super(si);
     name = nm;
   }
   

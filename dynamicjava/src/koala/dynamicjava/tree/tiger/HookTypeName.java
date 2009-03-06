@@ -58,22 +58,17 @@ public class HookTypeName extends ReferenceTypeName {
    * @exception IllegalArgumentException if type is null
    */
   public HookTypeName(Option<TypeName> up, Option<TypeName> low) {
-    this(up, low, null, 0, 0, 0, 0);
+    this(up, low, SourceInfo.NONE);
   }
 
   /**
    * Initializes the type
    * @param up the upper bound
    * @param low the lower bound
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if type is null
    */
   public HookTypeName(Option<TypeName> up, Option<TypeName> low,
-                      String fn, int bl, int bc, int el, int ec) {
+                      SourceInfo si) {
     super("?");
 
     if (up == null) throw new IllegalArgumentException("up == null");

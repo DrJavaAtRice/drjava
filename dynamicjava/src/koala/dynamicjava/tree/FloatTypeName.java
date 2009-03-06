@@ -42,19 +42,14 @@ public class FloatTypeName extends PrimitiveTypeName {
      * Initializes the type
      */
     public FloatTypeName() {
- this(null, 0, 0, 0, 0);
+ this(SourceInfo.NONE);
     }
 
     /**
      * Initializes the type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
      */
-    public FloatTypeName(String fn, int bl, int bc, int el, int ec) {
- super(float.class, fn, bl, bc, el, ec);
+    public FloatTypeName(SourceInfo si) {
+ super(float.class, si);
     }
   
   /**

@@ -55,21 +55,16 @@ public class BlockStatement extends Statement {
    * @param stmts the list of the statements contained in this block
    */
   public BlockStatement(List<Node> stmts) {
-    this(stmts, null, 0, 0, 0, 0);
+    this(stmts, SourceInfo.NONE);
   }
   
   /**
    * Creates a new block statement
    * @param stmts the list of the statements contained in this block
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if stmts is null
    */
-  public BlockStatement(List<Node> stmts, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public BlockStatement(List<Node> stmts, SourceInfo si) {
+    super(si);
     
     if (stmts == null) throw new IllegalArgumentException("stmts == null");
     

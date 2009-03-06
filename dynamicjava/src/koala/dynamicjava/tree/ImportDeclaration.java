@@ -70,7 +70,7 @@ public class ImportDeclaration extends Node {
    * @exception IllegalArgumentException if ident is null
    */
   public ImportDeclaration(List<IdentifierToken> ident, boolean pkg, boolean sttc) {
-    this(ident, pkg, sttc, null, 0, 0, 0, 0);
+    this(ident, pkg, sttc, SourceInfo.NONE);
   }
 
   /**
@@ -78,16 +78,11 @@ public class ImportDeclaration extends Node {
    * @param ident a list of tokens that represents a package or a class name
    * @param pkg   true if this declaration imports a package
    * @param sttc  true if this declaration is a static import
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if ident is null
    */
   public ImportDeclaration(List<IdentifierToken> ident, boolean pkg, boolean sttc,
-                           String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                           SourceInfo si) {
+    super(si);
 
     if (ident == null) throw new IllegalArgumentException("ident == null");
     pckage     = pkg;
@@ -100,16 +95,11 @@ public class ImportDeclaration extends Node {
    * @param nm    a string that represents a package or a class name
    * @param pkg   true if this declaration imports a package
    * @param sttc  true if this declaration is a static import
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if ident is null
    */
   public ImportDeclaration(String nm, boolean pkg, boolean sttc,
-                           String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                           SourceInfo si) {
+    super(si);
 
     if (nm == null) throw new IllegalArgumentException("name == null");
 

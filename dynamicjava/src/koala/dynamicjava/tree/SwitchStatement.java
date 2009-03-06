@@ -64,16 +64,11 @@ public class SwitchStatement extends Statement {
    * Creates a new switch statement
    * @param sel   the selector
    * @param cases the case bindings (SwitchBlocks)
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if sel is null or cases is null
    */
   public SwitchStatement(Expression sel, List<SwitchBlock> cases,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(si);
     
     if (sel == null)   throw new IllegalArgumentException("sel == null");
     if (cases == null) throw new IllegalArgumentException("cases == null");

@@ -107,14 +107,64 @@
 
 
 // Code below imported from the earlier DrJava's Interactions preprocessor
-package koala.dynamicjava;
+package koala.dynamicjava.tree;
 
 import java.io.*;
 
+import edu.rice.cs.plt.object.ObjectUtil;
+
 /** A simple tuple class to represent source location. */
 public final class SourceInfo {
+  
+  public interface Wrapper {
+    SourceInfo getSourceInfo();
+  }
+  
+  public static final SourceInfo NONE = new SourceInfo(null, 0, 0, 0, 0);
+  
+  public static SourceInfo point(File f, int line, int column) {
+    return new SourceInfo(f, line, column, line, column);
+  }
+  
+  public static SourceInfo range(File f, int startLine, int startColumn, int endLine, int endColumn) {
+    return new SourceInfo(f, startLine, startColumn, endLine, endColumn);
+  }
+  
+  public static SourceInfo extend(SourceInfo si, int endLine, int endColumn) {
+    return new SourceInfo(si._file, si._startLine, si._startColumn, endLine, endColumn);
+  }
+  
+  public static SourceInfo extend(Wrapper wrapper, int endLine, int endColumn) {
+    return extend(wrapper.getSourceInfo(), endLine, endColumn);
+  }
+  
+  public static SourceInfo prepend(int startLine, int startColumn, SourceInfo si) {
+    return new SourceInfo(si._file, startLine, startColumn, si._endLine, si._endColumn);
+  }
+  
+  public static SourceInfo prepend(int startLine, int startColumn, Wrapper wrapper) {
+    return prepend(startLine, startColumn, wrapper.getSourceInfo());
+  }
+  
+  public static SourceInfo span(SourceInfo first, SourceInfo second) {
+    assert ObjectUtil.equal(first._file, second._file);
+    return new SourceInfo(first._file, first._startLine, first._startColumn, second._endLine, second._endColumn);
+  }
+  
+  public static SourceInfo span(SourceInfo first, Wrapper second) {
+    return span(first, second.getSourceInfo());
+  }
+  
+  public static SourceInfo span(Wrapper first, SourceInfo second) {
+    return span(first.getSourceInfo(), second);
+  }
+  
+  public static SourceInfo span(Wrapper first, Wrapper second) {
+    return span(first.getSourceInfo(), second.getSourceInfo());
+  }
+  
   /**
-   * The source file
+   * The source file.  May be null.
    */
   private final File _file;
   
@@ -140,17 +190,17 @@ public final class SourceInfo {
 
   /**
    * Constructs a SourceInfo.
-   * @param file The source file
+   * @param file  The source file.  May be null, indicating no source file.
    * @param startLine Starting line
    * @param startColumn Starting column
    * @param endLine Ending line
    * @param endColumn Ending column
    */
-  public SourceInfo(File file,
-                    int startLine,
-                    int startColumn,
-                    int endLine,
-                    int endColumn)
+  private SourceInfo(File file,
+                     int startLine,
+                     int startColumn,
+                     int endLine,
+                     int endColumn)
   {
     _file = file;
     _startLine = startLine;
@@ -158,55 +208,18 @@ public final class SourceInfo {
     _endLine = endLine;
     _endColumn = endColumn;
   }
-
-  /**
-   * Constructs an empty SourceInfo.
-   */
-  public SourceInfo()
-  {
-    _file = new File("");
-    _startLine = -1;
-    _startColumn = -1;
-    _endLine = -1;
-    _endColumn = -1;
-  }
-
-  /**
-   * Getter Method
-   * @return Source file
-   */
-  final public File getFile() { return _file; }
   
-  /**
-   * Getter Method
-   * @return Source filename
-   */
-  final public String getFilename() { return _file.getName(); }
+  /** May be null, if the source file is unknown. */
+  public File getFile() { return _file; }
   
-  /**
-   * Getter Method
-   * @return Starting line
-   */
-  final public int getStartLine() { return _startLine; }
+  /** Get the file's name, or {@code "(no file)"}. */
+  public String getFilename() { return _file == null ? "(no file)" : _file.getPath(); }
   
-  /**
-   * Getter Method
-   * @return Starting column
-   */
-  final public int getStartColumn() { return _startColumn; }
+  public int getStartLine() { return _startLine; }
+  public int getStartColumn() { return _startColumn; }
+  public int getEndLine() { return _endLine; }
+  public int getEndColumn() { return _endColumn; }
   
-  /**
-   * Getter Method
-   * @return Ending line
-   */
-  final public int getEndLine() { return _endLine; }
-  
-  /**
-   * Getter Method
-   * @return Ending column
-   */
-  final public int getEndColumn() { return _endColumn; }
-
   /**
    * Returns a string representation of the source information.  The format is as following:
    * [fileName: (startLine,startColumn)-(endLine,endColumn)]
@@ -214,15 +227,7 @@ public final class SourceInfo {
    * @return The string format of the source info
    */
   public String toString() {
-    String fileName;
-    if (_file == null) {
-      fileName = "(no file)";
-    }
-    else {
-      fileName = _file.getName();
-    }
-
-    return "[" + fileName + ": " +
+    return "[" + getFilename() + ": " +
            "(" + _startLine + "," + _startColumn + ")-" +
            "(" + _endLine + "," + _endColumn + ")]";
   }
@@ -235,50 +240,23 @@ public final class SourceInfo {
    * The integers for the corresponding Start/End Line/Column must be identical
    * @return Whether or not the two SourceInfo objects are equal
    */
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-
-    if (obj.getClass() != this.getClass()) {
+  @Override public boolean equals(Object obj) {
+    if (obj == null || obj.getClass() != this.getClass()) {
       return false;
     }
     else {
       SourceInfo casted = (SourceInfo) obj;
-
-      File tF = getFile();
-      File oF = casted.getFile();
-
-      if ( ((tF == null) && (oF != null)) ||
-           ((tF != null) && ! tF.equals(oF)))
-      {
-        return false;
-      }
-
-      if (! (getStartLine() == casted.getStartLine())) return false;
-      if (! (getStartColumn() == casted.getStartColumn())) return false;
-      if (! (getEndLine() == casted.getEndLine())) return false;
-      if (! (getEndColumn() == casted.getEndColumn())) return false;
-      return true;
+      return
+        ObjectUtil.equal(this._file, casted._file) &&
+        this._startLine == casted._startLine &&
+        this._startColumn == casted._startColumn &&
+        this._endLine == casted._endLine &&
+        this._endColumn == casted._endColumn;
     }
   }
 
-  /**
-   * Implementation of hashCode that is consistent with
-   * equals. The value of the hashCode is formed by
-   * XORing the hashcode of the class object with
-   * the hashcodes of all the fields of the object.
-   * @return A hashcode for a SourceInfo object
-   */
-  public final int hashCode() {
-    int code = getClass().hashCode();
-
-    if (getFile() != null) {
-      code ^= getFile().hashCode();
-    }
-
-    code ^= getStartLine();
-    code ^= getStartColumn();
-    code ^= getEndLine();
-    code ^= getEndColumn();
-    return code;
+  @Override public int hashCode() {
+    return ObjectUtil.hash(getClass(), _file, _startLine, _startColumn, _endLine, _endColumn);
   }
+  
 }

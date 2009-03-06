@@ -50,7 +50,7 @@ public class PolymorphicAnonymousAllocation extends AnonymousAllocation {
    */
   public PolymorphicAnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, 
                                         List<Node> memb, List<TypeName> targs) {
-    this(tp, args, memb, targs, null, 0, 0, 0, 0);
+    this(tp, args, memb, targs, SourceInfo.NONE);
   }
   
   /**
@@ -59,17 +59,12 @@ public class PolymorphicAnonymousAllocation extends AnonymousAllocation {
    * @param args  the arguments of the constructor. null if no arguments.
    * @param memb  the members of the class
    * @param targs the type arguments of the constructor
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if tp is null or memb is null
    */
   public PolymorphicAnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, 
                                         List<Node> memb, List<TypeName> targs,
-                                        String fn, int bl, int bc, int el, int ec) {
-    super(tp, args, memb, fn, bl, bc, el, ec);
+                                        SourceInfo si) {
+    super(tp, args, memb, si);
     
     _typeArguments = targs;
   }

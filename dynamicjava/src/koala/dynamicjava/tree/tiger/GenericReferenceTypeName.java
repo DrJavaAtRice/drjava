@@ -57,7 +57,7 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
    * @exception IllegalArgumentException if ids is null
    */
   public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs) {
-    this(ids, typeArgs, null, 0, 0, 0, 0);
+    this(ids, typeArgs, SourceInfo.NONE);
   }
   
 //  /**
@@ -67,21 +67,17 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
 //   * @exception IllegalArgumentException if rep is null
 //   */
 //  public GenericReferenceTypeName(String rep, List<List<? extends TypeName>> typeArgs) {
-//    this(rep, typeArgs, null, 0, 0, 0, 0);
+//    this(rep, typeArgs, SourceInfo.NONE);
 //  }
   
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs, String fn,  int bl, int bc, int el, int ec) {
-    super(ids, fn, bl, bc, el, ec);
+  public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs,
+                                  SourceInfo si) {
+    super(ids, si);
     if (ids.size() != typeArgs.size()) { throw new IllegalArgumentException("ids.size() != typeArgs.size()"); }
     _typeArguments = typeArgs;
   }

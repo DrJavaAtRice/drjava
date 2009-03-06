@@ -67,7 +67,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @return null
    */
   public Void visit(PackageDeclaration node) {
-    print("l."+node.getBeginLine()+" PackageDeclaration "+node.getName()+" {");
+    print("l."+node.getSourceInfo().getStartLine()+" PackageDeclaration "+node.getName()+" {");
     displayProperties(node);
     print("}");
     return null;
@@ -79,7 +79,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @return null
    */
   public Void visit(ImportDeclaration node) {
-    print("l."+node.getBeginLine()+" ImportDeclaration "+node.getName()
+    print("l."+node.getSourceInfo().getStartLine()+" ImportDeclaration "+node.getName()
             +(node.isPackage() ? ".*" : "")+" {");
     displayProperties(node);
     print("}");
@@ -91,14 +91,14 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(EmptyStatement node) {
-    print("l."+node.getBeginLine()+" EmptyStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" EmptyStatement {");
     displayProperties(node);
     print("}");
     return null;
   }
   
   public Void visit(ExpressionStatement node) {
-    print("l."+node.getBeginLine()+" ExpressionStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" ExpressionStatement {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -113,7 +113,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(WhileStatement node) {
-    print("l."+node.getBeginLine()+" WhileStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" WhileStatement {");
     print("condition:");
     indent();
     node.getCondition().acceptVisitor(this);
@@ -132,7 +132,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ForStatement node) {
-    print("l."+node.getBeginLine()+" ForStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" ForStatement {");
     print("initialization:");
     if (node.getInitialization() != null) {
       indent();
@@ -169,7 +169,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(DoStatement node) {
-    print("l."+node.getBeginLine()+" DoStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" DoStatement {");
     print("condition:");
     indent();
     node.getCondition().acceptVisitor(this);
@@ -188,7 +188,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SwitchStatement node) {
-    print("l."+node.getBeginLine()+" SwitchStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" SwitchStatement {");
     print("selector:");
     indent();
     node.getSelector().acceptVisitor(this);
@@ -209,7 +209,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SwitchBlock node) {
-    print("l."+node.getBeginLine()+" SwitchBlock {");
+    print("l."+node.getSourceInfo().getStartLine()+" SwitchBlock {");
     print("expression:");
     indent();
     if (node.getExpression() != null) {
@@ -236,7 +236,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(LabeledStatement node) {
-    print("l."+node.getBeginLine()+" LabeledStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" LabeledStatement {");
     print("label:");
     indent();
     print(node.getLabel());
@@ -255,7 +255,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(BreakStatement node) {
-    print("l."+node.getBeginLine()+" BreakStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" BreakStatement {");
     print("label:");
     indent();
     print(node.getLabel());
@@ -270,7 +270,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(TryStatement node) {
-    print("l."+node.getBeginLine()+" TryStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" TryStatement {");
     print("tryBlock:");
     indent();
     node.getTryBlock().acceptVisitor(this);
@@ -297,7 +297,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(CatchStatement node) {
-    print("l."+node.getBeginLine()+" CatchStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" CatchStatement {");
     print("exception:");
     indent();
     node.getException().acceptVisitor(this);
@@ -316,7 +316,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ThrowStatement node) {
-    print("l."+node.getBeginLine()+" ThrowStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" ThrowStatement {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -331,7 +331,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ReturnStatement node) {
-    print("l."+node.getBeginLine()+" ReturnStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" ReturnStatement {");
     print("expression:");
     indent();
     //Bug fix to allow for "return;"
@@ -350,7 +350,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SynchronizedStatement node) {
-    print("l."+node.getBeginLine()+" SynchronizedStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" SynchronizedStatement {");
     print("lock:");
     indent();
     node.getLock().acceptVisitor(this);
@@ -369,7 +369,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ContinueStatement node) {
-    print("l."+node.getBeginLine()+" ContinueStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" ContinueStatement {");
     print("label:");
     indent();
     print(node.getLabel());
@@ -384,7 +384,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(IfThenStatement node) {
-    print("l."+node.getBeginLine()+" IfThenStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" IfThenStatement {");
     print("condition:");
     indent();
     node.getCondition().acceptVisitor(this);
@@ -403,7 +403,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(IfThenElseStatement node) {
-    print("l."+node.getBeginLine()+" IfThenElseStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" IfThenElseStatement {");
     print("condition:");
     indent();
     node.getCondition().acceptVisitor(this);
@@ -426,7 +426,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(Literal node) {
-    print("l."+node.getBeginLine()+" Literal ("+
+    print("l."+node.getSourceInfo().getStartLine()+" Literal ("+
           node.getType()+") <"+node.getValue()+"> {");
     displayProperties(node);
     print("}");
@@ -438,7 +438,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ThisExpression node) {
-    print("l."+node.getBeginLine()+" ThisExpression {");
+    print("l."+node.getSourceInfo().getStartLine()+" ThisExpression {");
     print("className:");
     indent();
     print(node.getClassName());
@@ -453,7 +453,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(AmbiguousName node) {
-    print("l."+node.getBeginLine()+" AmbiguousName {");
+    print("l."+node.getSourceInfo().getStartLine()+" AmbiguousName {");
     print("representation:");
     indent();
     print(node.getRepresentation());
@@ -468,7 +468,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ObjectFieldAccess node) {
-    print("l."+node.getBeginLine()+" ObjectFieldAccess {");
+    print("l."+node.getSourceInfo().getStartLine()+" ObjectFieldAccess {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -487,7 +487,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(StaticFieldAccess node) {
-    print("l."+node.getBeginLine()+" StaticFieldAccess {");
+    print("l."+node.getSourceInfo().getStartLine()+" StaticFieldAccess {");
     print("fieldType:");
     indent();
     node.getFieldType().acceptVisitor(this);
@@ -506,7 +506,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ArrayAccess node) {
-    print("l."+node.getBeginLine()+" ArrayAccess {");
+    print("l."+node.getSourceInfo().getStartLine()+" ArrayAccess {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -525,7 +525,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SimpleFieldAccess node) {
-    print(indentation+"l."+node.getBeginLine()+" SimpleFieldAccess {");
+    print(indentation+"l."+node.getSourceInfo().getStartLine()+" SimpleFieldAccess {");
     print("fieldName:");
     indent();
     print(node.getFieldName());
@@ -540,7 +540,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SuperFieldAccess node) {
-    print(indentation+"l."+node.getBeginLine()+" SuperFieldAccess {");
+    print(indentation+"l."+node.getSourceInfo().getStartLine()+" SuperFieldAccess {");
     print("fieldName:");
     indent();
     print(node.getFieldName());
@@ -555,7 +555,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ObjectMethodCall node) {
-    print("l."+node.getBeginLine()+" ObjectMethodCall {");
+    print("l."+node.getSourceInfo().getStartLine()+" ObjectMethodCall {");
     print("expression:");
     indent();
     if (node.getExpression() != null) {
@@ -586,7 +586,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SimpleMethodCall node) {
-    print("l."+node.getBeginLine()+" SimpleMethodCall {");
+    print("l."+node.getSourceInfo().getStartLine()+" SimpleMethodCall {");
     print("methodName:");
     indent();
     print(node.getMethodName());
@@ -609,7 +609,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(StaticMethodCall node) {
-    print("l."+node.getBeginLine()+" StaticMethodCall {");
+    print("l."+node.getSourceInfo().getStartLine()+" StaticMethodCall {");
     print("methodType:");
     indent();
     node.getMethodType().acceptVisitor(this);
@@ -636,7 +636,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ConstructorCall node) {
-    print("l."+node.getBeginLine()+" ConstructorCall {");
+    print("l."+node.getSourceInfo().getStartLine()+" ConstructorCall {");
     print("expression:");
     indent();
     if (node.getExpression() != null) {
@@ -665,7 +665,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SuperMethodCall node) {
-    print("l."+node.getBeginLine()+" SuperMethodCall {");
+    print("l."+node.getSourceInfo().getStartLine()+" SuperMethodCall {");
     print("methodName:");
     indent();
     print(node.getMethodName());
@@ -765,7 +765,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
   }
 
   private void handlePrimitiveTypeName(PrimitiveTypeName node, String name) {
-    print("l."+node.getBeginLine()+" PrimitiveTypeName <"+name+">");
+    print("l."+node.getSourceInfo().getStartLine()+" PrimitiveTypeName <"+name+">");
     displayProperties(node);
   }
   
@@ -774,7 +774,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ReferenceTypeName node) {
-    print("l."+node.getBeginLine()+" ReferenceTypeName {");
+    print("l."+node.getSourceInfo().getStartLine()+" ReferenceTypeName {");
     print("representation:");
     indent();
     print(node.getRepresentation());
@@ -789,7 +789,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ArrayTypeName node) {
-    print("l."+node.getBeginLine()+" ArrayTypeName {");
+    print("l."+node.getSourceInfo().getStartLine()+" ArrayTypeName {");
     if (node.getElementType() != null) {
       print("elementType:");
       node.getElementType().acceptVisitor(this);
@@ -804,7 +804,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(TypeExpression node) {
-    print("l."+node.getBeginLine()+" TypeExpression {");
+    print("l."+node.getSourceInfo().getStartLine()+" TypeExpression {");
     print("type:");
     indent();
     node.getType().acceptVisitor(this);
@@ -855,7 +855,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ArrayInitializer node) {
-    print("l."+node.getBeginLine()+" ArrayInitializer {");
+    print("l."+node.getSourceInfo().getStartLine()+" ArrayInitializer {");
     print("cells:");
     indent();
     for (Node n : node.getCells()) {
@@ -876,7 +876,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ArrayAllocation node) {
-    print("l."+node.getBeginLine()+" ArrayAllocation {");
+    print("l."+node.getSourceInfo().getStartLine()+" ArrayAllocation {");
     print("elementType:");
     indent();
     node.getElementType().acceptVisitor(this);
@@ -907,7 +907,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(SimpleAllocation node) {
-    print("l."+node.getBeginLine()+" SimpleAllocation {");
+    print("l."+node.getSourceInfo().getStartLine()+" SimpleAllocation {");
     print("creationType:");
     indent();
     node.getCreationType().acceptVisitor(this);
@@ -930,7 +930,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(AnonymousAllocation node) {
-    print("l."+node.getBeginLine()+" AnonymousAllocation {");
+    print("l."+node.getSourceInfo().getStartLine()+" AnonymousAllocation {");
     print("creationType:");
     indent();
     node.getCreationType().acceptVisitor(this);
@@ -959,7 +959,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(InnerAllocation node) {
-    print("l."+node.getBeginLine()+" InnerAllocation {");
+    print("l."+node.getSourceInfo().getStartLine()+" InnerAllocation {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -986,7 +986,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(AnonymousInnerAllocation node) {
-    print("l."+node.getBeginLine()+" AnonymousInnerAllocation {");
+    print("l."+node.getSourceInfo().getStartLine()+" AnonymousInnerAllocation {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -1019,7 +1019,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(CastExpression node) {
-    print("l."+node.getBeginLine()+" CastExpression {");
+    print("l."+node.getSourceInfo().getStartLine()+" CastExpression {");
     print("targetType:");
     indent();
     node.getTargetType().acceptVisitor(this);
@@ -1182,7 +1182,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(InstanceOfExpression node) {
-    print("l."+node.getBeginLine()+" InstanceOfExpression {");
+    print("l."+node.getSourceInfo().getStartLine()+" InstanceOfExpression {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
@@ -1264,7 +1264,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ConditionalExpression node) {
-    print("l."+node.getBeginLine()+" ConditionalExpression {");
+    print("l."+node.getSourceInfo().getStartLine()+" ConditionalExpression {");
     print("conditionExpression:");
     indent();
     node.getConditionExpression().acceptVisitor(this);
@@ -1395,7 +1395,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(BlockStatement node) {
-    print("l."+node.getBeginLine()+" BlockStatement {");
+    print("l."+node.getSourceInfo().getStartLine()+" BlockStatement {");
     print("statements:");
     indent();
     for (Node n : node.getStatements()) {
@@ -1412,7 +1412,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ClassDeclaration node) {
-    print("l."+node.getBeginLine()+" ClassDeclaration {");
+    print("l."+node.getSourceInfo().getStartLine()+" ClassDeclaration {");
     print("name:");
     indent();
     print(node.getName());
@@ -1445,7 +1445,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(InterfaceDeclaration node) {
-    print("l."+node.getBeginLine()+" InterfaceDeclaration {");
+    print("l."+node.getSourceInfo().getStartLine()+" InterfaceDeclaration {");
     print("name:");
     indent();
     print(node.getName());
@@ -1474,7 +1474,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ConstructorDeclaration node) {
-    print("l."+node.getBeginLine()+" ConstructorDeclaration {");
+    print("l."+node.getSourceInfo().getStartLine()+" ConstructorDeclaration {");
     print("accessFlags:");
     indent();
     print(""+node.getAccessFlags());
@@ -1517,7 +1517,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(MethodDeclaration node) {
-    print("l."+node.getBeginLine()+" MethodDeclaration {");
+    print("l."+node.getSourceInfo().getStartLine()+" MethodDeclaration {");
     print("accessFlags:");
     indent();
     print(""+node.getAccessFlags());
@@ -1558,7 +1558,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(FormalParameter node) {
-    print("l."+node.getBeginLine()+" FormalParameter {");
+    print("l."+node.getSourceInfo().getStartLine()+" FormalParameter {");
     if (node.isFinal()) {
       print("final");
     }
@@ -1580,7 +1580,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(FieldDeclaration node) {
-    print("l."+node.getBeginLine()+" FieldDeclaration {");
+    print("l."+node.getSourceInfo().getStartLine()+" FieldDeclaration {");
     print("accessFlags:");
     indent();
     print(""+node.getAccessFlags());
@@ -1609,7 +1609,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(VariableDeclaration node) {
-    print("l."+node.getBeginLine()+" VariableDeclaration {");
+    print("l."+node.getSourceInfo().getStartLine()+" VariableDeclaration {");
     print("isFinal:");
     indent();
     print(""+node.isFinal());
@@ -1638,7 +1638,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(ClassInitializer node) {
-    print("l."+node.getBeginLine()+" ClassInitializer {");
+    print("l."+node.getSourceInfo().getStartLine()+" ClassInitializer {");
     print("block:");
     indent();
     node.getBlock().acceptVisitor(this);
@@ -1653,7 +1653,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    */
   public Void visit(InstanceInitializer node) {
-    print("l."+node.getBeginLine()+" InstanceInitializer {");
+    print("l."+node.getSourceInfo().getStartLine()+" InstanceInitializer {");
     print("block:");
     indent();
     node.getBlock().acceptVisitor(this);
@@ -1667,7 +1667,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Displays an unary expression
    */
   private void displayUnary(UnaryExpression ue) {
-    print("l."+ue.getBeginLine()+" "+ue.getClass().getName()+" {");
+    print("l."+ue.getSourceInfo().getStartLine()+" "+ue.getClass().getName()+" {");
     print("expression:");
     indent();
     ue.getExpression().acceptVisitor(this);
@@ -1680,7 +1680,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Displays a binary expression
    */
   private void displayBinary(BinaryExpression be) {
-    print("l."+be.getBeginLine()+" "+be.getClass().getName()+" {");
+    print("l."+be.getSourceInfo().getStartLine()+" "+be.getClass().getName()+" {");
     print("leftExpression:");
     indent();
     be.getLeftExpression().acceptVisitor(this);

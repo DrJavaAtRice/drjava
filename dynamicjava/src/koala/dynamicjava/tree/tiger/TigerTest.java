@@ -493,7 +493,7 @@
 //    testString =
 //      "import static java.lang.Integer.MAX_VALUE;";
 //
-//    ImportDeclaration id = new ImportDeclaration("java.lang.Integer.MAX_VALUE", false, true, null, 0, 0, 0, 0);
+//    ImportDeclaration id = new ImportDeclaration("java.lang.Integer.MAX_VALUE", false, true, SourceInfo.NONE);
 //    assertEquals(id, parse(testString).get(0));
 //
 //  }
@@ -502,13 +502,13 @@
 //    testString =
 //      "import static java.lang.Integer.*;";
 //
-//    ImportDeclaration id = new ImportDeclaration("java.lang.Integer", true, true, null, 0, 0, 0, 0);
+//    ImportDeclaration id = new ImportDeclaration("java.lang.Integer", true, true, SourceInfo.NONE);
 //    assertEquals(id, parse(testString).get(0));
 //  }
 //
 //  public void testNodeEquals(){
-//    ImportDeclaration id1 = new ImportDeclaration("java.lang.Integer.MAX_VALUE", false, true, null, 0, 0, 0, 0);
-//    ImportDeclaration id2 = new ImportDeclaration("java.lang.Integer.MAX_VALUE", false, true, null, 0, 0, 0, 0);
+//    ImportDeclaration id1 = new ImportDeclaration("java.lang.Integer.MAX_VALUE", false, true, SourceInfo.NONE);
+//    ImportDeclaration id2 = new ImportDeclaration("java.lang.Integer.MAX_VALUE", false, true, SourceInfo.NONE);
 //
 //    assertEquals(id1, id2);
 //  }
@@ -526,7 +526,7 @@
 //
 //    MethodDeclaration md = new MethodDeclaration(
 //                                                 java.lang.reflect.Modifier.PUBLIC | 0x00000080, // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
-//                                                 new VoidTypeName(),"someMethod",params,new LinkedList<ReferenceTypeName>(),body,null, 0, 0, 0, 0);
+//                                                 new VoidTypeName(),"someMethod",params,new LinkedList<ReferenceTypeName>(),body,SourceInfo.NONE);
 //    assertEquals(md, parse(testString).get(0));
 //  }
 //

@@ -84,16 +84,11 @@ public abstract class TypeDeclaration extends Node {
    * @param name  the name of the class to declare
    * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
    * @param body  the list of fields declarations
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if name is null or body is null
    */
   protected TypeDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
-                            String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                            SourceInfo si) {
+    super(si);
 
     if (name == null) throw new IllegalArgumentException("name == null");
     if (body == null) throw new IllegalArgumentException("body == null");

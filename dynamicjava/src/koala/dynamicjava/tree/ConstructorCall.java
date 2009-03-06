@@ -72,7 +72,7 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
    * @param sup  whether this invocation is 'super' or 'this'
    */
   public ConstructorCall(Expression exp, List<? extends Expression> args, boolean sup) {
-    this(exp, args, sup, null, 0, 0, 0, 0);
+    this(exp, args, sup, SourceInfo.NONE);
   }
   
   /**
@@ -80,15 +80,10 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
    * @param exp  the prefix expression
    * @param args the arguments. null if there are no argument.
    * @param sup  whether this invocation is 'super' or 'this'
-   * @param fn   the filename
-   * @param bl   the begin line
-   * @param bc   the begin column
-   * @param el   the end line
-   * @param ec   the end column
    */
   public ConstructorCall(Expression exp, List<? extends Expression> args, boolean sup,
-                               String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                               SourceInfo si) {
+    super(si);
     
     expression = exp;
     arguments  = (args == null) ? null : new ArrayList<Expression>(args);

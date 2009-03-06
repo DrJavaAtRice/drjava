@@ -94,7 +94,7 @@ public class ForStatement extends ForSlashEachStatement implements ContinueTarge
    * @exception IllegalArgumentException if body is null
    */
   public ForStatement(List<Node> init, Expression cond, List<Node> updt, Node body) {
-    this(init, cond, updt, body, null, 0, 0, 0, 0);
+    this(init, cond, updt, body, SourceInfo.NONE);
   }
   
   /**
@@ -103,16 +103,11 @@ public class ForStatement extends ForSlashEachStatement implements ContinueTarge
    * @param cond  the condition to evaluate at each loop
    * @param updt  the update statements (either Statements or declarations)
    * @param body  the body
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if body is null
    */
   public ForStatement(List<Node> init, Expression cond, List<Node> updt, Node body,
-                      String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                      SourceInfo si) {
+    super(si);
     
     if (body == null) throw new IllegalArgumentException("body == null");
     

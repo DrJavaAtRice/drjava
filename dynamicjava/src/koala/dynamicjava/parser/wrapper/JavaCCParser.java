@@ -48,42 +48,22 @@ public class JavaCCParser implements SourceCodeParser {
    */
   private Parser parser;
   
-  /**
-   * Creates a new JavaCCParser
-   * @param is    the input stream
-   * @param fname the file name
-   */
-  public JavaCCParser(InputStream is, String fname) {
+  public JavaCCParser(InputStream is, File f) {
     parser = new Parser(is);
-    parser.setFilename(fname);
+    parser.setFile(f);
   }
   
-  /**
-   * Creates a new JavaCCParser
-   * @param r     the reader
-   * @param fname the file name
-   */
-  public JavaCCParser(Reader r, String fname) {
+  public JavaCCParser(InputStream is) {
+    parser = new Parser(is);
+  }
+  
+  public JavaCCParser(Reader r, File f) {
     parser = new Parser(r);
-    parser.setFilename(fname);
+    parser.setFile(f);
   }
   
-  /**
-   * Creates a new parser and returns it
-   * @param is    the input stream
-   * @param fname the file name
-   */
-  public SourceCodeParser createParser(InputStream is, String fname) {
-    return new JavaCCParser(is, fname);
-  }
-  
-  /**
-   * Creates a new parser and returns it
-   * @param r     the reader
-   * @param fname the file name
-   */
-  public SourceCodeParser createParser(Reader r, String fname) {
-    return new JavaCCParser(r, fname);
+  public JavaCCParser(Reader r) {
+    parser = new Parser(r);
   }
   
   /**

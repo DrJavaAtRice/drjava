@@ -2,6 +2,7 @@ package koala.dynamicjava.interpreter;
 
 import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.Expression;
+import koala.dynamicjava.tree.SourceInfo;
 import koala.dynamicjava.tree.TypeName;
 import koala.dynamicjava.tree.visitor.Visitor;
 
@@ -15,7 +16,7 @@ public class TypeUtil {
    *          but it can have properties set and be used to build other {@code Node}s.
    */
   public static Expression makeEmptyExpression() {
-    return new Expression(null, 0, 0, 0, 0) {
+    return new Expression(SourceInfo.NONE) {
       public <T> T acceptVisitor(Visitor<T> v) { 
         throw new IllegalArgumentException("Cannot visit an empty expression");
       }
@@ -29,8 +30,7 @@ public class TypeUtil {
    *          but it can have properties set and be used to build other {@code Node}s.
    */
   public static Expression makeEmptyExpression(Node location) {
-    return new Expression(location.getFilename(), location.getBeginLine(), location.getBeginColumn(),
-                          location.getEndLine(), location.getEndColumn()) {
+    return new Expression(location.getSourceInfo()) {
       public <T> T acceptVisitor(Visitor<T> v) { 
         throw new IllegalArgumentException("Cannot visit an empty expression");
       }
@@ -42,7 +42,7 @@ public class TypeUtil {
    *          but it can have properties set and be used to build other {@code Node}s.
    */
   public static TypeName makeEmptyTypeName() {
-    return new TypeName(null, 0, 0, 0, 0) {
+    return new TypeName(SourceInfo.NONE) {
       public <T> T acceptVisitor(Visitor<T> v) { 
         throw new IllegalArgumentException("Cannot visit an empty type name");
       }
@@ -55,8 +55,7 @@ public class TypeUtil {
    *          but it can have properties set and be used to build other {@code Node}s.
    */
   public static TypeName makeEmptyTypeName(Node location) {
-    return new TypeName(location.getFilename(), location.getBeginLine(), location.getBeginColumn(),
-                        location.getEndLine(), location.getEndColumn()) {
+    return new TypeName(location.getSourceInfo()) {
       public <T> T acceptVisitor(Visitor<T> v) { 
         throw new IllegalArgumentException("Cannot visit an empty type name");
       }

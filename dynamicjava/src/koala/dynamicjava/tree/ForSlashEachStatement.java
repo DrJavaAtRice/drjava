@@ -74,8 +74,8 @@ package koala.dynamicjava.tree;
 public abstract class ForSlashEachStatement extends Statement{
   // represents either a ForStatement or a ForEachStatement
 
-    protected ForSlashEachStatement(String fn, int bl, int bc, int el, int ec) {
-      super(fn, bl, bc, el, ec);
+    protected ForSlashEachStatement(SourceInfo si) {
+      super(si);
     }
 
 }

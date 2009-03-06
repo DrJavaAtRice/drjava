@@ -64,22 +64,17 @@ public class ExpressionStatement extends Statement implements ExpressionContaine
    * @exception IllegalArgumentException if exp is null
    */
   public ExpressionStatement(Expression exp, boolean hasSemi) {
-    this(exp, hasSemi, null, 0, 0, 0, 0);
+    this(exp, hasSemi, SourceInfo.NONE);
   }
   
   /**
    * Creates a new assert statement
    * @param exp     The expression
    * @param hasSemi Whether the expression is followed by a semicolon
-   * @param fn      the filename
-   * @param bl      the begin line
-   * @param bc      the begin column
-   * @param el      the end line
-   * @param ec      the end column
    * @exception IllegalArgumentException if exp is null
    */
-  public ExpressionStatement(Expression exp, boolean hasSemi, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public ExpressionStatement(Expression exp, boolean hasSemi, SourceInfo si) {
+    super(si);
     if (exp == null)  throw new IllegalArgumentException("exp == null");
     expression    = exp;
     hasSemicolon  = hasSemi;

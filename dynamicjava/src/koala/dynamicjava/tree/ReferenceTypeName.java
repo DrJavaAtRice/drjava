@@ -70,7 +70,7 @@ public class ReferenceTypeName extends TypeName {
    * @exception IllegalArgumentException if ids is null or empty
    */
   public ReferenceTypeName(List<? extends IdentifierToken> ids) {
-    this(ids, null, 0, 0, 0, 0);
+    this(ids, SourceInfo.NONE);
   }
   
   public ReferenceTypeName(IdentifierToken... ids) {
@@ -92,15 +92,10 @@ public class ReferenceTypeName extends TypeName {
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if ids is null or empty
    */
-  public ReferenceTypeName(List<? extends IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public ReferenceTypeName(List<? extends IdentifierToken> ids, SourceInfo si) {
+    super(si);
 
     if (ids == null) throw new IllegalArgumentException("ids == null");
     if (ids.size() == 0) throw new IllegalArgumentException("ids.size() == 0");

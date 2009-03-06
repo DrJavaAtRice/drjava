@@ -48,23 +48,18 @@ public class SuperMethodCall extends MethodCall {
    * @exception IllegalArgumentException if mn is null
    */
   public SuperMethodCall(String mn, List<? extends Expression> args) {
-    this(mn, args, null, 0, 0, 0, 0);
+    this(mn, args, SourceInfo.NONE);
   }
   
   /**
    * Creates a new node
    * @param mn    the method name
    * @param args  the arguments. null if no arguments.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   public SuperMethodCall(String mn, List<? extends Expression> args,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(mn, args, fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(mn, args, si);
   }
   
   /**

@@ -66,22 +66,17 @@ public class ArrayInitializer extends Expression {
    * @exception IllegalArgumentException if cells is null
    */
   public ArrayInitializer(List<? extends Expression> cells) {
-    this(cells, null, 0, 0, 0, 0);
+    this(cells, SourceInfo.NONE);
   }
   
   /**
    * Initializes the expression
    * @param cells the list of initialized cells
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if cells is null
    */
   public ArrayInitializer(List<? extends Expression> cells,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                          SourceInfo si) {
+    super(si);
     
     if (cells == null) throw new IllegalArgumentException("cells == null");
     

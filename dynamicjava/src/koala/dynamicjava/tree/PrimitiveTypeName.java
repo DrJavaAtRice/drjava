@@ -49,15 +49,10 @@ public abstract class PrimitiveTypeName extends TypeName {
   /**
    * Initializes the type
    * @param val   the value of this type
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if val is null
    */
-  protected PrimitiveTypeName(Class<?> val, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  protected PrimitiveTypeName(Class<?> val, SourceInfo si) {
+    super(si);
     
     if (val == null) throw new IllegalArgumentException("val == null");
     

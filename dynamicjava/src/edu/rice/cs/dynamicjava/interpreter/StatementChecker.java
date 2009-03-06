@@ -82,7 +82,6 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.lambda.Lambda;
 
-import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -748,10 +747,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         if (ambigName.getIdentifiers().size() == 1) {
           String name = ambigName.getRepresentation();
           if (!context.variableExists(name, opt.typeSystem())) {
-            SourceInfo si = node.getSourceInfo();
-            Node decl = new VariableDeclaration(false, null, name, assign.getRightExpression(),
-                                                si.getFilename(), si.getStartLine(), si.getStartColumn(),
-                                                si.getEndLine(), si.getEndColumn());
+            Node decl = new VariableDeclaration(false, null, name, assign.getRightExpression(), node.getSourceInfo());
             setStatementTranslation(node, decl);
             return decl.acceptVisitor(this);
           }

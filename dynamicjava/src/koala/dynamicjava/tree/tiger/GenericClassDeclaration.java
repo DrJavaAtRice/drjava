@@ -59,8 +59,9 @@ public class GenericClassDeclaration extends ClassDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
-    this(flags, name, ext, impl, body, null, 0, 0, 0, 0, typeParams);
+  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext,
+                                 List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
+    this(flags, name, ext, impl, body, typeParams, SourceInfo.NONE);
   }
   
   /**
@@ -70,17 +71,13 @@ public class GenericClassDeclaration extends ClassDeclaration {
    * @param ext        the tokens that compose the name of the parent class.
    * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
    * @param body       the list of members declarations
-   * @param fn         the filename
-   * @param bl         the begin line
-   * @param bc         the begin column
-   * @param el         the end line
-   * @param ec         the end column
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
-                                 String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, name, ext, impl, body, fn, bl, bc, el, ec);
+  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext,
+                                 List<? extends ReferenceTypeName> impl, List<Node> body,
+                                 TypeParameter[] typeParams, SourceInfo si) {
+    super(flags, name, ext, impl, body, si);
     _typeParameters = typeParams;
   }
   

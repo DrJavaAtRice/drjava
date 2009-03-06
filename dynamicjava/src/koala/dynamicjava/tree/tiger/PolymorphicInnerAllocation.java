@@ -57,7 +57,7 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
    */
   public PolymorphicInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs,
                                     List<? extends Expression> args, List<TypeName> targs) {
-    this(exp, cn, ctargs, args, targs, null, 0, 0, 0, 0);
+    this(exp, cn, ctargs, args, targs, SourceInfo.NONE);
   }
   
   /**
@@ -66,17 +66,12 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
    * @param cn    the inner class name
    * @param args  the arguments of the constructor. null if no arguments.
    * @param targs the type arguments of the constructor
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or tp is null
    */
   public PolymorphicInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs,
                                     List<? extends Expression> args, List<TypeName> targs,
-                                    String fn, int bl, int bc, int el, int ec) {
-    super(exp, cn, ctargs, args, fn, bl, bc, el, ec);
+                                    SourceInfo si) {
+    super(exp, cn, ctargs, args, si);
     _typeArguments = targs;
   }
   

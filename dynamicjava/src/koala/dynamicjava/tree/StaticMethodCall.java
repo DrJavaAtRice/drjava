@@ -61,7 +61,7 @@ public class StaticMethodCall extends MethodCall {
    * @exception IllegalArgumentException if typ is null or mn is null
    */
   public StaticMethodCall(TypeName typ, String mn, List<? extends Expression> args) {
-    this(typ, mn, args, null, 0, 0, 0, 0);
+    this(typ, mn, args, SourceInfo.NONE);
   }
 
   /**
@@ -69,16 +69,11 @@ public class StaticMethodCall extends MethodCall {
    * @param typ   the type on which this method call applies
    * @param mn    the field name
    * @param args  the arguments. Can be null.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if typ is null or mn is null
    */
   public StaticMethodCall(TypeName typ, String mn, List<? extends Expression> args,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(mn, args, fn, bl, bc, el, ec);
+                          SourceInfo si) {
+    super(mn, args, si);
 
     if (typ == null) throw new IllegalArgumentException("typ == null");
 

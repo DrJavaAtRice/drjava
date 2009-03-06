@@ -111,7 +111,7 @@ public class ConstructorDeclaration extends Node {
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorCall eci, List<Node> stmts) {
-    this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0);
+    this(flags, name, params, excepts, eci, stmts, SourceInfo.NONE);
   }
 
   /**
@@ -122,19 +122,14 @@ public class ConstructorDeclaration extends Node {
    * @param excepts the exception list (a list of list of token)
    * @param eci     the explicit constructor invocation
    * @param stmts   the statements
-   * @param fn      the filename
-   * @param bl      the begin line
-   * @param bc      the begin column
-   * @param el      the end line
-   * @param ec      the end column
    * @exception IllegalArgumentException if name is null or params is null or
    *            excepts is null or stmts is null
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorCall eci, List<Node> stmts,
-                                String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                                SourceInfo si) {
+    super(si);
 
     if (name == null)    throw new IllegalArgumentException("name == null");
     if (params == null)  throw new IllegalArgumentException("params == null");

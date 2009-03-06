@@ -51,15 +51,10 @@ public class CatchStatement extends Statement {
    * Creates a new catch statement
    * @param fp   the catched exception
    * @param blk  the block
-   * @param fn     the filename
-   * @param bl     the begin line
-   * @param bc     the begin column
-   * @param el     the end line
-   * @param ec     the end column
    */
   public CatchStatement(FormalParameter fp, Node blk,
-                        String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                        SourceInfo si) {
+    super(si);
     exception = fp;
     block     = blk;
   }

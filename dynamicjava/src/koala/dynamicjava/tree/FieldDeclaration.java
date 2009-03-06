@@ -87,7 +87,7 @@ public class FieldDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or type is null
    */
   public FieldDeclaration(int flags, TypeName type, String name, Expression init) {
-    this(flags, type, name, init, null, 0, 0 ,0 ,0);
+    this(flags, type, name, init, SourceInfo.NONE);
   }
 
   /**
@@ -96,16 +96,11 @@ public class FieldDeclaration extends Node {
    * @param type   the type of this field
    * @param name   the name of this field
    * @param init   the initializer. Can be null
-   * @param fn     the filename
-   * @param bl     the begin line
-   * @param bc     the begin column
-   * @param el     the end line
-   * @param ec     the end column
    * @exception IllegalArgumentException if name is null or type is null
    */
   public FieldDeclaration(int flags, TypeName type, String name, Expression init,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                          SourceInfo si) {
+    super(si);
 
     if (type == null) throw new IllegalArgumentException("type == null");
     if (name == null) throw new IllegalArgumentException("name == null");

@@ -50,23 +50,18 @@ public class ObjectFieldAccess extends FieldAccess implements ExpressionContaine
    * @exception IllegalArgumentException if exp is null or fln is null
    */
   public ObjectFieldAccess(Expression exp, String fln) {
-    this(exp, fln, null, 0, 0, 0, 0);
+    this(exp, fln, SourceInfo.NONE);
   }
   
   /**
    * Creates a new field access node
    * @param exp   the expression on which this field access applies
    * @param fln   the field name
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or fln is null
    */
   public ObjectFieldAccess(Expression exp, String fln, 
-                           String fn, int bl, int bc, int el, int ec) {
-    super(fln, fn, bl, bc, el, ec);
+                           SourceInfo si) {
+    super(fln, si);
     
     if (exp == null) throw new IllegalArgumentException("exp == null");
     

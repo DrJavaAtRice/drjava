@@ -49,15 +49,10 @@ public abstract class FieldAccess extends PrimaryExpression implements LeftHandS
   /**
    * Creates a new field access node
    * @param fln   the field name
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if fln is null
    */
-  protected FieldAccess(String fln, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  protected FieldAccess(String fln, SourceInfo si) {
+    super(si);
     
     if (fln == null) throw new IllegalArgumentException("Null field name in FieldAccess construction");
     

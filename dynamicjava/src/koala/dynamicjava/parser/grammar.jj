@@ -15,7 +15,6 @@ import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.tuple.Option;
 
-import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -29,9 +28,9 @@ import koala.dynamicjava.tree.tiger.*;
 
 public class Parser {
   /**
-   * The name of the file currently interpreted
+   * The name of the file currently interpreted; null by default
    */
-  private String filename;
+  private File file = null;
   
   /**
    * A flag to use in semantic lookaheads.  Declared here as a workaround because 
@@ -67,24 +66,11 @@ public class Parser {
   private LocalizedMessageReader reader =
     new LocalizedMessageReader("koala.dynamicjava.parser.resources.messages");
   
-  /**
-   * Sets the current filename
-   * @param fname the name of the input file
-   */
-  public void setFilename(String fname) {
-    filename = fname;
-  }
+  /** Sets the current file */
+  public void setFile(File f) { file = f; }
   
-  /**
-   * Creates a source location that starts at the given first token
-   * and ends in the last token yet read.
-   */
-  private SourceInfo _loc(Token first) {
-    return new SourceInfo(new File(filename),
-                          first.beginLine,
-                          first.beginColumn,
-                          token.endLine,
-                          token.endColumn);
+  private SourceInfo _range(Token first, Token last) {
+    return SourceInfo.range(file, first.beginLine, first.beginColumn, last.endLine, last.endColumn);
   }
   
   /**
@@ -149,37 +135,29 @@ public class Parser {
                                                   Token          name,
                                                   Expression     exp,
                                                   int            dim) {
-    
-    int bl, bc, el, ec, flags = 0;
+    SourceInfo si;
+    int flags = 0;
     
     // Compute the position of the declaration in the source code
     if (mf != null) {
-      bl    = mf.beginLine;
-      bc    = mf.beginColumn;
+      si = mf.getSourceInfo();
       flags = mf.accessFlags;
     } else {
-      bl = typ.getBeginLine();
-      bc = typ.getBeginColumn();
+      si = typ.getSourceInfo();
     }
     
     if (exp != null) {
-      el = exp.getEndLine();
-      ec = exp.getEndColumn();
+      si = SourceInfo.span(si, exp);
     } else {
-      el = name.endLine;
-      ec = name.endColumn;
+      si = SourceInfo.extend(si, name.endLine, name.endColumn);
     }
     
     // If the field is an array, create an array type node
     if (dim > 0) {
-      typ = new ArrayTypeName(typ, dim, false,
-                              filename,
-                              typ.getBeginLine(), typ.getBeginColumn(),
-                              typ.getEndLine(), typ.getEndColumn());
+      typ = new ArrayTypeName(typ, dim, false, typ.getSourceInfo());
     }
     
-    return new FieldDeclaration(flags, typ, name.image, exp,
-                                filename, bl, bc, el, ec);
+    return new FieldDeclaration(flags, typ, name.image, exp, si);
   }
   
   /**
@@ -190,37 +168,29 @@ public class Parser {
                                                         Token          name,
                                                         Expression     exp,
                                                         int            dim) {
-    int bl, bc, el, ec;
+    SourceInfo si;
     boolean isFinal = false;
     
     // Compute the position of the declaration in the source code
     if (mf != null) {
-      bl      = mf.beginLine;
-      bc      = mf.beginColumn;
+      si = _range(mf, mf);
       isFinal = true;
     } else {
-      bl = typ.getBeginLine();
-      bc = typ.getBeginColumn();
+      si = typ.getSourceInfo();
     }
     
     if (exp != null) {
-      el = exp.getEndLine();
-      ec = exp.getEndColumn();
+      si = SourceInfo.span(si, exp);
     } else {
-      el = name.endLine;
-      ec = name.endColumn;
+      si = SourceInfo.extend(si, name.endLine, name.endColumn);
     }
     
     // If the variable contains an array, create an array type node
     if (dim > 0) {
-      typ = new ArrayTypeName(typ, dim, false,
-                              filename,
-                              typ.getBeginLine(), typ.getBeginColumn(),
-                              typ.getEndLine(), typ.getEndColumn());
+      typ = new ArrayTypeName(typ, dim, false, typ.getSourceInfo());
     }
     
-    return new VariableDeclaration(isFinal, typ, name.image, exp,
-                                   filename, bl, bc, el, ec);
+    return new VariableDeclaration(isFinal, typ, name.image, exp, si);
   }
   
   
@@ -305,26 +275,21 @@ public class Parser {
         PolymorphicAnonymousAllocation cast = (PolymorphicAnonymousAllocation) alloc;
         return new PolymorphicAnonymousInnerAllocation(exp, name, classTargs, args,
                                                        cast.getMembers(), cast.getTypeArguments(),
-                                                       filename, exp.getBeginLine(), exp.getBeginColumn(),
-                                                       alloc.getEndLine(), alloc.getEndColumn());
+                                                       SourceInfo.span(exp, alloc));
       }
       else if (alloc instanceof AnonymousAllocation) {
         return new AnonymousInnerAllocation(exp, name, classTargs, args,
                                             ((AnonymousAllocation) alloc).getMembers(),
-                                            filename, exp.getBeginLine(), exp.getBeginColumn(),
-                                            alloc.getEndLine(), alloc.getEndColumn());
+                                            SourceInfo.span(exp, alloc));
       }
       else if (alloc instanceof PolymorphicSimpleAllocation) {
         return new PolymorphicInnerAllocation(exp, name, classTargs, args,
                                               ((PolymorphicSimpleAllocation) alloc).getTypeArguments(),
-                                              filename, exp.getBeginLine(), exp.getBeginColumn(),
-                                              alloc.getEndLine(), alloc.getEndColumn());
+                                              SourceInfo.span(exp, alloc));
 
       }
       else {
-        return new InnerAllocation(exp, name, classTargs, args,
-                                   filename, exp.getBeginLine(), exp.getBeginColumn(),
-                                   alloc.getEndLine(), alloc.getEndColumn());
+        return new InnerAllocation(exp, name, classTargs, args, SourceInfo.span(exp, alloc));
       }
     }
   }
@@ -357,29 +322,18 @@ public class Parser {
           exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
         }
       }
-      return new ObjectFieldAccess
-        (exp, identifier.image,
-         filename,
-         exp.getBeginLine(), exp.getBeginColumn(),
-         identifier.endLine, identifier.endColumn);
+      return new ObjectFieldAccess(exp, identifier.image,
+                                   SourceInfo.extend(exp, identifier.endLine, identifier.endColumn));
     }
   }
   
-  class ArrayReferenceSuffix extends ExpressionSuffix {
+  class ArrayReferenceSuffix extends ExpressionSuffix implements SourceInfo.Wrapper {
     /**
      * The expression
      */
-    public Expression expression;
+    public final Expression expression;
     
-    /**
-     * The end line
-     */
-    public int endLine;
-    
-    /**
-     * The end column
-     */
-    public int endColumn;
+    public final SourceInfo sourceInfo;
     
     /**
      * Creates a new suffix
@@ -387,11 +341,12 @@ public class Parser {
      * @param el  the end line
      * @param ec  the end column
      */
-    public ArrayReferenceSuffix(Expression exp, int el, int ec) {
+    public ArrayReferenceSuffix(Expression exp, SourceInfo si) {
       expression = exp;
-      endLine    = el;
-      endColumn  = ec;
+      sourceInfo = si;
     }
+    
+    public SourceInfo getSourceInfo() { return sourceInfo; }
     
     /**
      * Creates an expression node
@@ -407,24 +362,12 @@ public class Parser {
           exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
         }
       }
-      return new ArrayAccess
-        (exp, expression,
-         filename,
-         exp.getBeginLine(), exp.getBeginColumn(),
-         endLine, endColumn);
+      return new ArrayAccess(exp, expression, SourceInfo.span(exp, this));
     }
   }
   
-  class DotThisSuffix extends ExpressionSuffix {
-    /**
-     * The end line
-     */
-    public int endLine;
-    
-    /**
-     * The end column
-     */
-    public int endColumn;
+  class DotThisSuffix extends ExpressionSuffix implements SourceInfo.Wrapper {
+    public final SourceInfo sourceInfo;
     
     /**
      * Creates a new suffix
@@ -432,10 +375,9 @@ public class Parser {
      * @param ec  the end column
      * @param fn  the file name
      */
-    public DotThisSuffix(int el, int ec) {
-      endLine    = el;
-      endColumn  = ec;
-    }
+    public DotThisSuffix(SourceInfo si) { sourceInfo = si; }
+    
+    public SourceInfo getSourceInfo() { return sourceInfo; }
     
     /**
      * Creates an expression node
@@ -452,20 +394,14 @@ public class Parser {
         }
       }
       if (exp instanceof AmbiguousName) {
-        return new ThisExpression
-          (((AmbiguousName)exp).getIdentifiers(),
-           filename,
-           exp.getBeginLine(), exp.getBeginColumn(),
-           endLine, endColumn);
+        return new ThisExpression(((AmbiguousName)exp).getIdentifiers(), SourceInfo.span(exp, this));
       } else {
-        throw new ParseError(reader.getMessage("this.prefix", null),
-                             filename,
-                             exp.getBeginLine(), exp.getBeginColumn());
+        throw new ParseError(reader.getMessage("this.prefix", null), exp.getSourceInfo());
       }
     }
   }
   
-  class ArgumentsSuffix extends ExpressionSuffix {
+  class ArgumentsSuffix extends ExpressionSuffix implements SourceInfo.Wrapper {
     /**
      * The arguments
      */
@@ -476,15 +412,7 @@ public class Parser {
      */
     public List<TypeName> typeArgs;
     
-    /**
-     * The end line
-     */
-    public int endLine;
-    
-    /**
-     * The end column
-     */
-    public int endColumn;
+    public final SourceInfo sourceInfo;
     
     /**
      * Creates a new argument suffix
@@ -492,12 +420,13 @@ public class Parser {
      * @param el    the end line
      * @param ec    the end column
      */
-    public ArgumentsSuffix(List<Expression> args, List<TypeName> tArgs, int el, int ec) {
+    public ArgumentsSuffix(List<Expression> args, List<TypeName> tArgs, SourceInfo si) {
       arguments = args;
       typeArgs = tArgs;
-      endLine   = el;
-      endColumn = ec;
+      sourceInfo = si;
     }
+    
+    public SourceInfo getSourceInfo() { return sourceInfo; }
     
     /**
      * Creates an expression node
@@ -516,66 +445,43 @@ public class Parser {
             exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
           }
           if(typeArgs != null && typeArgs.size() > 0)
-            return new PolymorphicObjectMethodCall
-            (exp, dis.identifier.image, arguments, typeArgs,
-             filename,
-             exp.getBeginLine(), exp.getBeginColumn(),
-             endLine, endColumn);
+            return new PolymorphicObjectMethodCall(exp, dis.identifier.image, arguments, typeArgs,
+                                                   SourceInfo.span(exp, this));
           else
-            return new ObjectMethodCall
-            (exp, dis.identifier.image, arguments,
-             filename,
-             exp.getBeginLine(), exp.getBeginColumn(),
-             endLine, endColumn);
+            return new ObjectMethodCall(exp, dis.identifier.image, arguments, SourceInfo.span(exp, this));
         } else {
-          throw new ParseError(reader.getMessage("parameter.list", null),
-                               filename,
-                               endLine, endColumn);
+          throw new ParseError(reader.getMessage("parameter.list", null), sourceInfo);
         }
       } else {
         if (prefix instanceof CompileTimeQualifiedName) {
           // Remove the last identifier from the qualified name
           List<IdentifierToken>  l = ((CompileTimeQualifiedName)prefix).identifiers;
-          Token f = (l.get(0)).getToken();
-          Token t = (l.remove(l.size()-1)).getToken();
+          IdentifierToken f = l.get(0);
+          IdentifierToken t = l.remove(l.size()-1);
           if (l.size() >= 1) {
             Expression exp = ((CompileTimeQualifiedName)prefix).
               createRuntimeExpression();
             if(typeArgs != null && typeArgs.size() > 0)
-              return new PolymorphicObjectMethodCall(exp, t.image, arguments, typeArgs,
-                                                     filename,
-                                                     f.beginLine, f.beginColumn,
-                                                     endLine,   endColumn);
+              return new PolymorphicObjectMethodCall(exp, t.image(), arguments, typeArgs,
+                                                     SourceInfo.span(f, this));
             else
-              return new ObjectMethodCall(exp, t.image, arguments,
-                                          filename,
-                                          f.beginLine, f.beginColumn,
-                                          endLine,   endColumn);
+              return new ObjectMethodCall(exp, t.image(), arguments, SourceInfo.span(f, this));
           }
           else {
             if (typeArgs != null && typeArgs.size() > 0) {
               throw new IllegalArgumentException("Type arguments on simple method not supported");
             }
-            return new SimpleMethodCall(t.image, arguments, filename, f.beginLine, f.beginColumn,
-                                        endLine, endColumn);
+            return new SimpleMethodCall(t.image(), arguments, SourceInfo.span(f, this)); 
           }
         } else if (prefix instanceof CompileTimeSuperExpression) {
           // Transform the super expression into a super method call
           CompileTimeSuperExpression se = (CompileTimeSuperExpression)prefix;
           if(typeArgs != null && typeArgs.size() > 0)
-            return new PolymorphicSuperMethodCall(se.identifier, arguments, typeArgs,
-                                                  filename,
-                                                  se.getBeginLine(), se.getBeginColumn(),
-                                                  endLine,           endColumn);
+            return new PolymorphicSuperMethodCall(se.identifier, arguments, typeArgs, SourceInfo.span(se, this));
           else
-            return new SuperMethodCall(se.identifier, arguments,
-                                       filename,
-                                       se.getBeginLine(), se.getBeginColumn(),
-                                       endLine,           endColumn);
+            return new SuperMethodCall(se.identifier, arguments, SourceInfo.span(se, this));
         } else {
-          throw new ParseError(reader.getMessage("parameter.list", null),
-                               filename,
-                               endLine, endColumn);
+          throw new ParseError(reader.getMessage("parameter.list", null), sourceInfo);
         }
       }
     }
@@ -605,8 +511,8 @@ public class Parser {
      * @param el    the end line
      * @param ec    the end column
      */
-    public CompileTimeSuperExpression(String ident, int bl, int bc, int el, int ec) {
-      super("", bl, bc, el, ec);
+    public CompileTimeSuperExpression(String ident, SourceInfo si) {
+      super(si);
       identifier = ident;
     }
     
@@ -615,10 +521,7 @@ public class Parser {
      * This method must be called when the expression has no suffix
      */
     public Expression createRuntimeExpression() {
-      return new SuperFieldAccess(identifier,
-                                  filename,
-                                  getBeginLine(), getBeginColumn(),
-                                  getEndLine(),   getEndColumn());
+      return new SuperFieldAccess(identifier, getSourceInfo());
     }
     
     /**
@@ -640,7 +543,7 @@ public class Parser {
      * @param ids a list of token
      */
     public CompileTimeQualifiedName(List<IdentifierToken> ids) {
-      super("", 0, 0, 0, 0);
+      super(SourceInfo.NONE);
       identifiers = ids;
     }
     
@@ -649,22 +552,13 @@ public class Parser {
      */
     public Expression createFieldAccess() {
       if (identifiers.size() == 1) {
-        Token t = (identifiers.get(0)).getToken();
-        return new AmbiguousName(identifiers,
-                                 filename,
-                                 t.beginLine, t.beginColumn,
-                                 t.endLine,   t.endColumn);
+        return new AmbiguousName(identifiers, identifiers.get(0).getSourceInfo());
       } else {
-        Token f = (identifiers.get(0)).getToken();
-        Token t = (identifiers.remove(identifiers.size()-1)).getToken();;
-        Token l = (identifiers.get(identifiers.size()-1)).getToken();
-        return new ObjectFieldAccess(new AmbiguousName(identifiers,
-                                                       filename,
-                                                       f.beginLine, f.beginColumn,
-                                                       l.endLine,   l.endColumn),
-                                     t.image, filename,
-                                     f.beginLine, f.beginColumn,
-                                     t.endLine,   t.endColumn);
+        IdentifierToken f = identifiers.get(0);
+        IdentifierToken t = identifiers.remove(identifiers.size()-1);
+        IdentifierToken l = identifiers.get(identifiers.size()-1);
+        return new ObjectFieldAccess(new AmbiguousName(identifiers, SourceInfo.span(f, l)),
+                                     t.image(), SourceInfo.span(f, t));
       }
     }
     
@@ -673,12 +567,8 @@ public class Parser {
      * This method must be called when the expression has no suffix
      */
     public Expression createRuntimeExpression() {
-      Token first = (identifiers.get(0)).getToken();
-      Token last  = (identifiers.get(identifiers.size()-1)).getToken();
       return new AmbiguousName(identifiers,
-                               filename,
-                               first.beginLine, first.beginColumn,
-                               last.endLine,    last.endColumn);
+                               SourceInfo.span(identifiers.get(0), identifiers.get(identifiers.size()-1)));
     }
     
     /**
@@ -692,31 +582,31 @@ public class Parser {
   /**
    * To store modifier flags
    */
-  static class ModifierFlags {
+  class ModifierFlags implements SourceInfo.Wrapper {
     int accessFlags;
-    int beginLine;
-    int beginColumn;
+    SourceInfo sourceInfo;
     
-    ModifierFlags(int flags, int bl, int bc) {
+    ModifierFlags(int flags, SourceInfo si) {
       accessFlags = flags;
-      beginLine   = bl;
-      beginColumn = bc;
+      sourceInfo = si;
     }
+    
+    public SourceInfo getSourceInfo() { return sourceInfo; }
   }
   
   /**
    * To store a class body
    */
-  static class ClassBody {
+  static class ClassBody implements SourceInfo.Wrapper {
     List<Node> list;
-    int  endLine;
-    int  endColumn;
+    SourceInfo sourceInfo;
     
-    ClassBody(List<Node> l, int el, int ec) {
-      list      = l;
-      endLine   = el;
-      endColumn = ec;
+    ClassBody(List<Node> l, SourceInfo si) {
+      list = l;
+      sourceInfo = si;
     }
+    
+    public SourceInfo getSourceInfo() { return sourceInfo; }
   }
 }
 PARSER_END(Parser)
@@ -1173,10 +1063,7 @@ PARSER_END(Parser)
         if(name == null) {
           _throwParseException("Empty Package name");
         }
-        return new PackageDeclaration(name.getRepresentation(),
-                                      filename,
-                                      t1.beginLine, t1.beginColumn,
-                                      t2.endLine,   t2.endColumn);
+        return new PackageDeclaration(name.getRepresentation(), _range(t1, t2));
       }
     }
     catch(ParseException pe) {
@@ -1205,10 +1092,7 @@ PARSER_END(Parser)
         if(name == null) {
           _throwParseException("Missing name - Cannot import");
         }
-        return new ImportDeclaration(name.getRepresentation(), star != null, sttic != null,
-                                     filename,
-                                     t1.beginLine, t1.beginColumn,
-                                     t2.endLine,   t2.endColumn);
+        return new ImportDeclaration(name.getRepresentation(), star != null, sttic != null, _range(t1, t2));
       }
     }
     catch(ParseException pe) {
@@ -1260,12 +1144,12 @@ PARSER_END(Parser)
   {
     id=<IDENTIFIER>
     {
-      list.add(new TreeToken(id));
+      list.add(new TreeToken(id, file));
     }
     ( LOOKAHEAD(2)
        "." id=<IDENTIFIER>
      {
-      list.add(new TreeToken(id));
+      list.add(new TreeToken(id, file));
     }
     )*
     {
@@ -1285,13 +1169,13 @@ PARSER_END(Parser)
     try{
       id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
       {
-        list.add(new TreeToken(id));
+        list.add(new TreeToken(id, file));
         allTypeArgs.add( typeArgs );
         typeArgs = new LinkedList<TypeName>();
       }
       ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER>  [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
          {
-        list.add(new TreeToken(id));
+        list.add(new TreeToken(id, file));
         allTypeArgs.add( typeArgs );
         typeArgs = new LinkedList<TypeName>();
       }
@@ -1314,16 +1198,10 @@ PARSER_END(Parser)
           } else if(GenericTypesEnv.contains(TreeUtilities.listToName(list))){
             return GenericTypesEnv.lookup(TreeUtilities.listToName(list));
           } else {
-            return new ReferenceTypeName(list,
-                                     filename,
-                                     f.beginLine(), f.beginColumn(),
-                                     l.endLine(),   l.endColumn());
+            return new ReferenceTypeName(list, SourceInfo.span(f, l));
           }
         } else {
-          return new GenericReferenceTypeName(list, allTypeArgs,
-                                          filename,
-                                          f.beginLine(), f.beginColumn(),
-                                          l.endLine(), l.endColumn());
+          return new GenericReferenceTypeName(list, allTypeArgs, SourceInfo.span(f, l));
         }
       }
     }
@@ -1384,9 +1262,9 @@ PARSER_END(Parser)
    */
   ModifierFlags modifiers() :
   {
-    Token t;
-    int   flags = 0;
-    Token ft    = null;
+    Token t = null;
+    int flags = 0;
+    Token ft = null;
   }
   {
     ( t="abstract"
@@ -1394,13 +1272,9 @@ PARSER_END(Parser)
       if (ft == null) {
         ft = t;
       } else if ((flags & Modifier.ABSTRACT) != 0) {
-        throw new ParseError(reader.getMessage("abstract.abstract", null),
-                             filename,
-                             t.beginLine, t.beginColumn);
+        throw new ParseError(reader.getMessage("abstract.abstract", null), _range(t, t));
       } else if ((flags & Modifier.FINAL) != 0) {
-        throw new ParseError(reader.getMessage("abstract.final", null),
-                             filename,
-                             t.beginLine, t.beginColumn);
+        throw new ParseError(reader.getMessage("abstract.final", null), _range(t, t));
       }
       flags |= Modifier.ABSTRACT;
     }
@@ -1409,13 +1283,9 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.FINAL) != 0) {
-         throw new ParseError(reader.getMessage("final.final", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("final.final", null), _range(t, t));
        } else if ((flags & Modifier.ABSTRACT) != 0) {
-         throw new ParseError(reader.getMessage("abstract.final", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("abstract.final", null), _range(t, t));
        }
        flags |= Modifier.FINAL;
      }
@@ -1424,17 +1294,11 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.PUBLIC) != 0) {
-         throw new ParseError(reader.getMessage("public.public", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("public.public", null), _range(t, t));
        } else if ((flags & Modifier.PROTECTED) != 0) {
-         throw new ParseError(reader.getMessage("public.protected", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("public.protected", null), _range(t, t));
        } else if ((flags & Modifier.PRIVATE) != 0) {
-         throw new ParseError(reader.getMessage("public.private", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("public.private", null), _range(t, t));
        }
        
        flags |= Modifier.PUBLIC;
@@ -1444,17 +1308,11 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.PROTECTED) != 0) {
-         throw new ParseError(reader.getMessage("protected.protected", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("protected.protected", null), _range(t, t));
        } else if ((flags & Modifier.PUBLIC) != 0) {
-         throw new ParseError(reader.getMessage("public.protected", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("public.protected", null), _range(t, t));
        } else if ((flags & Modifier.PRIVATE) != 0) {
-         throw new ParseError(reader.getMessage("protected.private", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("protected.private", null), _range(t, t));
        }
        flags |= Modifier.PROTECTED;
      }
@@ -1463,17 +1321,11 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        }  else if ((flags & Modifier.PRIVATE) != 0) {
-         throw new ParseError(reader.getMessage("private.private", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("private.private", null), _range(t, t));
        } else if ((flags & Modifier.PUBLIC) != 0) {
-         throw new ParseError(reader.getMessage("public.private", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("public.private", null), _range(t, t));
        } else if ((flags & Modifier.PROTECTED) != 0) {
-         throw new ParseError(reader.getMessage("protected.private", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("protected.private", null), _range(t, t));
        }
        flags |= Modifier.PRIVATE;
      }
@@ -1482,9 +1334,7 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.TRANSIENT) != 0) {
-         throw new ParseError(reader.getMessage("transient.transient", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("transient.transient", null), _range(t, t));
        }
        flags |= Modifier.TRANSIENT;
      }
@@ -1493,9 +1343,7 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.VOLATILE) != 0) {
-         throw new ParseError(reader.getMessage("volatile.volatile", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("volatile.volatile", null), _range(t, t));
        }
        flags |= Modifier.VOLATILE;
      }
@@ -1504,13 +1352,9 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.NATIVE) != 0) {
-         throw new ParseError(reader.getMessage("native.native", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("native.native", null), _range(t, t));
        }  else if ((flags & Modifier.ABSTRACT) != 0) {
-         throw new ParseError(reader.getMessage("abstract.native", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("abstract.native", null), _range(t, t));
        }
        flags |= Modifier.NATIVE;
      }
@@ -1519,9 +1363,7 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.STATIC) != 0) {
-         throw new ParseError(reader.getMessage("static.static", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("static.static", null), _range(t, t));
        }
        flags |= Modifier.STATIC;
      }
@@ -1530,9 +1372,7 @@ PARSER_END(Parser)
        if (ft == null) {
          ft = t;
        } else if ((flags & Modifier.SYNCHRONIZED) != 0) {
-         throw new ParseError(reader.getMessage("synchronized.synchronized", null),
-                              filename,
-                              t.beginLine, t.beginColumn);
+         throw new ParseError(reader.getMessage("synchronized.synchronized", null), _range(t, t));
        }
        flags |= Modifier.SYNCHRONIZED;
      }
@@ -1540,7 +1380,7 @@ PARSER_END(Parser)
      {
        return (ft == null)
          ? null
-         : new ModifierFlags(flags, ft.beginLine, ft.beginColumn);
+         : new ModifierFlags(flags, _range(ft, t));
      }
   }
   
@@ -1563,31 +1403,23 @@ PARSER_END(Parser)
       [ "extends" ext=ReferenceTypeName() ] [ "implements" impl=ReferenceTypeNameList() ]
       body=classBody()
     {
-      if (typeParameters != null){
+      if (typeParameters != null) {
         GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
         if (mf == null) {
-          return new GenericClassDeclaration(0, id.image, ext, impl, body.list,
-                                             filename,
-                                             t.beginLine,  t.beginColumn,
-                                             body.endLine, body.endColumn, typeParameters);
+          return new GenericClassDeclaration(0, id.image, ext, impl, body.list, typeParameters,
+                                             SourceInfo.prepend(t.beginLine, t.beginColumn, body));
         } else {
-          return new GenericClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
-                                             filename,
-                                             mf.beginLine, mf.beginColumn,
-                                             body.endLine, body.endColumn, typeParameters);
+          return new GenericClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list, typeParameters,
+                                             SourceInfo.span(mf, body));
         }
       }
       else {
         if (mf == null) {
           return new ClassDeclaration(0, id.image, ext, impl, body.list,
-                                      filename,
-                                      t.beginLine,  t.beginColumn,
-                                      body.endLine, body.endColumn);
+                                      SourceInfo.prepend(t.beginLine, t.beginColumn, body));
         } else {
           return new ClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
-                                      filename,
-                                      mf.beginLine, mf.beginColumn,
-                                      body.endLine, body.endColumn);
+                                      SourceInfo.span(mf, body));
         }
       }
     }
@@ -1598,22 +1430,22 @@ PARSER_END(Parser)
    */
   ClassBody classBody() :
   {
-    Token t;
+    Token left, right;
     List<Node> list = new LinkedList<Node>();
     List<Node> decl;
   }
   {
     try {
-      "{"
+      left = "{"
         (
          decl=classBodyDeclaration()
            {
         list.addAll(decl);
       }
       )*
-        t="}"
+      right ="}"
       {
-        return new ClassBody(list, t.endLine, t.endColumn);
+        return new ClassBody(list, _range(left, right));
       }
     }
     catch (ParseException pe) {
@@ -1726,8 +1558,7 @@ PARSER_END(Parser)
   {
     MethodDeclaration md;
     ModifierFlags     mf;
-    int               bl;
-    int               bc;
+    SourceInfo        si;
     int               flags = 0;
     TypeParameter[]   typeParameters = null;
     TypeName              typ;
@@ -1750,37 +1581,30 @@ PARSER_END(Parser)
         {
           if (mf != null) {
             checkModifiers(mf.accessFlags, Modifier.TRANSIENT | Modifier.VOLATILE);
-            bl    = mf.beginLine;
-            bc    = mf.beginColumn;
+            si = mf.getSourceInfo();
             flags = mf.accessFlags;
           } else {
-            bl = typ.getBeginLine();
-            bc = typ.getBeginColumn();
+            si = typ.getSourceInfo();
           }
           if (dim > 0) {
-            typ = new ArrayTypeName(typ, dim, false,
-                                    filename,
-                                    typ.getBeginLine(), typ.getBeginColumn(),
-                                    typ.getEndLine(), typ.getEndColumn());
+            typ = new ArrayTypeName(typ, dim, false, typ.getSourceInfo());
           }
-          if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
+          if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // java.lang.reflect.Modifier.VARARGS == 0x00000080
           
           if (typeParameters == null){
             return new MethodDeclaration(flags, typ, id.image, params,
                                          exceptions,
                                          (body instanceof BlockStatement) ?
                                            (BlockStatement)body : null,
-                                         filename,
-                                         bl, bc, body.getEndLine(), body.getEndColumn());
+                                         SourceInfo.span(si, body));
           } else {
             GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
             return new PolymorphicMethodDeclaration(flags, typ, id.image, params,
                                                     exceptions,
                                                     (body instanceof BlockStatement) ?
                                                       (BlockStatement)body : null,
-                                                    filename,
-                                                    bl, bc, body.getEndLine(), body.getEndColumn(),
-                                                    typeParameters);
+                                                    typeParameters,
+                                                    SourceInfo.span(si, body));
           }
         }
     }
@@ -1843,16 +1667,12 @@ PARSER_END(Parser)
       [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
       {
         if (dim > 0) {
-          typ = new ArrayTypeName(typ, dim, false,
-                                  filename,
-                                  typ.getBeginLine(), typ.getBeginColumn(),
-                                  typ.getEndLine(), typ.getEndColumn());
+          typ = new ArrayTypeName(typ, dim, false, typ.getSourceInfo());
         }
-        return new FormalParameter(f != null, typ, id.image,
-                                   filename,
-                                   (f != null) ? f.beginLine   : typ.getBeginLine(),
-                                   (f != null) ? f.beginColumn : typ.getBeginColumn(),
-                                   id.endLine, id.endColumn);
+        SourceInfo si;
+        if (f == null) { si = SourceInfo.extend(typ, id.endLine, id.endColumn); }
+        else { si = _range(f, id); }
+        return new FormalParameter(f != null, typ, id.image, si);
       }
     }
     catch(ParseException pe) {
@@ -1876,15 +1696,11 @@ PARSER_END(Parser)
       [ f="final" ] typ=type() <VAR_ARGS> id=<IDENTIFIER>
       {
         // convert the type of the formal parameter to be an array
-        typ = new ArrayTypeName(typ, 1, true,
-                                filename,
-                                typ.getBeginLine(), typ.getBeginColumn(),
-                                typ.getEndLine(),   typ.getEndColumn());
-        return new FormalParameter(f != null, typ, id.image,
-                                   filename,
-                                   (f != null) ? f.beginLine   : typ.getBeginLine(),
-                                   (f != null) ? f.beginColumn : typ.getBeginColumn(),
-                                   id.endLine, id.endColumn);
+        typ = new ArrayTypeName(typ, 1, true, typ.getSourceInfo());
+        SourceInfo si;
+        if (f == null) { si = SourceInfo.extend(typ, id.endLine, id.endColumn); }
+        else { si = _range(f, id); }
+        return new FormalParameter(f != null, typ, id.image, si);
       }
     }
     catch(ParseException pe) {
@@ -1908,15 +1724,9 @@ PARSER_END(Parser)
     [ t="static" ] node=block()
     {
       if (t == null) {
-        return new InstanceInitializer(node,
-                                       filename,
-                                       node.getBeginLine(), node.getEndColumn(),
-                                       node.getEndLine(), node.getEndColumn());
+        return new InstanceInitializer(node, node.getSourceInfo());
       } else {
-        return new ClassInitializer(node,
-                                    filename,
-                                    t.beginLine, t.beginColumn,
-                                    node.getEndLine(), node.getEndColumn());
+        return new ClassInitializer(node, SourceInfo.prepend(t.beginLine, t.beginColumn, node));
       }
     }
   }
@@ -1938,7 +1748,7 @@ PARSER_END(Parser)
     ConstructorCall ci = null;
     List<Node>            stmt;
     List<Node>            stmts = new LinkedList<Node>();
-    int                   bl, bc;
+    SourceInfo            si;
     Token                 e;
   }
   {
@@ -1964,26 +1774,23 @@ PARSER_END(Parser)
           checkModifiers(mf.accessFlags, Modifier.STATIC | Modifier.FINAL | Modifier.NATIVE | Modifier.ABSTRACT
                            | Modifier.SYNCHRONIZED | Modifier.TRANSIENT | Modifier.VOLATILE);
           flags = mf.accessFlags;
-          bl = mf.beginLine;
-          bc = mf.beginColumn;
+          si = mf.getSourceInfo();
         }
         else if (typeParameters != null && typeParameters.length > 0) {
-          bl = typeParameters[0].getBeginLine();
-          bc = typeParameters[0].getBeginColumn();
+          si = typeParameters[0].getSourceInfo();
         }
         else {
-          bl = id.beginLine;
-          bc = id.beginColumn;
+          si = _range(id, id);
         }
         if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080
         if (typeParameters == null) {
           return new ConstructorDeclaration(flags, id.image, params, exceptions, ci, stmts,
-                                            filename, bl, bc, e.endLine, e.endColumn);
+                                            SourceInfo.extend(si, e.endLine, e.endColumn));
         } else {
           GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
           return new PolymorphicConstructorDeclaration(flags, id.image, params,
-                                                       exceptions, ci, stmts,
-                                                       filename, bl, bc, e.endLine, e.endColumn, typeParameters);
+                                                       exceptions, ci, stmts, typeParameters,
+                                                       SourceInfo.extend(si, e.endLine, e.endColumn));
         }
       }
     }
@@ -2015,10 +1822,7 @@ PARSER_END(Parser)
          b="super" args=arguments(typeArgs) e=";"
          )
       {
-        return new ConstructorCall(exp, args.arguments, b.image.equals("super"),
-                                         filename,
-                                         b.beginLine, b.beginColumn,
-                                         e.endLine,   e.endColumn);
+        return new ConstructorCall(exp, args.arguments, b.image.equals("super"), _range(b, e));
       }
     }
     catch(ParseException pe) {
@@ -2081,17 +1885,10 @@ PARSER_END(Parser)
           m = mf.accessFlags;
         }
         if (typeParameters == null){
-          return new InterfaceDeclaration(m, id.image, impl, list,
-                                          filename,
-                                          t.beginLine, t.beginColumn,
-                                          e.endLine,   e.endColumn);
+          return new InterfaceDeclaration(m, id.image, impl, list, _range(t, e));
         } else {
           GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
-          return new GenericInterfaceDeclaration(m, id.image, impl, list,
-                                                 filename,
-                                                 t.beginLine, t.beginColumn,
-                                                 e.endLine, e.endColumn,
-                                                 typeParameters);
+          return new GenericInterfaceDeclaration(m, id.image, impl, list, typeParameters, _range(t, e));
         }
       }
     }
@@ -2178,10 +1975,7 @@ PARSER_END(Parser)
       e="}"
     {
       if (mf != null) m = mf.accessFlags;
-      return new EnumDeclaration(m, id.image, impl, body,
-                                 filename,
-                                 t.beginLine, t.beginColumn,
-                                 e.endLine,   e.endColumn);
+      return new EnumDeclaration(m, id.image, impl, body, _range(t, e));
     }
   }
   
@@ -2282,10 +2076,7 @@ PARSER_END(Parser)
            )* ]
              [ t="," ] e="}"
            {
-             return new ArrayInitializer(list,
-                                         filename,
-                                         b.beginLine, b.beginColumn,
-                                         e.endLine,   e.endColumn);
+             return new ArrayInitializer(list, _range(b, e));
            }
   }
   
@@ -2328,10 +2119,7 @@ PARSER_END(Parser)
       )*
         p2="}"
       {
-        return new BlockStatement(list,
-                                  filename,
-                                  p1.beginLine, p1.beginColumn,
-                                  p2.endLine,   p2.endColumn);
+        return new BlockStatement(list, _range(p1, p2));
       }
     }
     catch(ParseException pe) {
@@ -2447,10 +2235,7 @@ PARSER_END(Parser)
         ((ContinueTarget)node).addLabel(id.image);
         return (Statement)node;
       } else {
-        return new LabeledStatement(id.image, node,
-                                    filename,
-                                    id.beginLine,      id.beginColumn,
-                                    node.getEndLine(), node.getEndColumn());
+        return new LabeledStatement(id.image, node, SourceInfo.prepend(id.beginLine, id.beginColumn, node));
       }
     }
   }
@@ -2466,7 +2251,7 @@ PARSER_END(Parser)
   {
     t=";"
     {
-      return new EmptyStatement(filename, t.beginLine, t.beginColumn);
+      return new EmptyStatement(_range(t, t));
     }
   }
   
@@ -2490,15 +2275,9 @@ PARSER_END(Parser)
         [ LOOKAHEAD(1) "else" stat2=statement(true) ]
       {
         if (stat2 == null) {
-          return new IfThenStatement(exp, stat1,
-                                     filename,
-                                     t.beginLine,       t.beginColumn,
-                                     stat1.getEndLine(), stat1.getEndColumn());
+          return new IfThenStatement(exp, stat1, SourceInfo.prepend(t.beginLine, t.beginColumn, stat1));
         } else {
-          return new IfThenElseStatement(exp, stat1, stat2,
-                                         filename,
-                                         t.beginLine,       t.beginColumn,
-                                         stat2.getEndLine(), stat2.getEndColumn());
+          return new IfThenElseStatement(exp, stat1, stat2, SourceInfo.prepend(t.beginLine, t.beginColumn, stat2));
         }
       }
     }
@@ -2521,9 +2300,7 @@ PARSER_END(Parser)
     try { 
       t="assert" exp=expression() [":" falseString=expression()] (t2=";" | t2=<EOF>)
       {   
-        return new AssertStatement(exp, falseString, filename,
-                                   t.beginLine,      t.beginColumn,
-                                   t2.endLine, t2.endColumn);
+        return new AssertStatement(exp, falseString, _range(t, t2));
       }
     }
     catch(ParseException pe) {
@@ -2549,10 +2326,7 @@ PARSER_END(Parser)
         exp=expression() ")"
         stat=statement(true)
       {
-        return new WhileStatement(exp, stat,
-                                  filename,
-                                  t.beginLine,       t.beginColumn,
-                                  stat.getEndLine(), stat.getEndColumn());
+        return new WhileStatement(exp, stat, SourceInfo.prepend(t.beginLine, t.beginColumn, stat));
       }
     }
     catch(ParseException pe) {
@@ -2576,10 +2350,7 @@ PARSER_END(Parser)
         ( "(" | _errorChar('('))
         exp=expression() ")" t2=";"
       {
-        return new DoStatement(exp, stat,
-                               filename,
-                               t1.beginLine, t1.beginColumn,
-                               t2.endLine,   t2.endColumn);
+        return new DoStatement(exp, stat, _range(t1, t2));
       }
     }
     catch(ParseException pe) {
@@ -2593,68 +2364,50 @@ PARSER_END(Parser)
    */
   SwitchStatement switchStatement() :
   {
-    Token      b, e;
+    Token b, e;
     Expression sel;
-    Expression val         = null;
-    List<Node>        stat        = null;
-    List<SwitchBlock> cases       = new LinkedList<SwitchBlock>();
-    List<Node>       list        = new LinkedList<Node>();
-    Token      t           = null;
+    SwitchBlock sb;
+    List<SwitchBlock> cases = new LinkedList<SwitchBlock>();
   }
   {
     try {
-      b="switch" ( "(" | _errorChar('('))
-        sel=expression() ")"
+      b="switch"
+        ( "(" | _errorChar('('))
+        sel=expression()
+        ")"
         ( "{" | _errorChar('{'))
-        ( ( "case" val=expression() | t="default" )
-           (":" | _errorChar(':'))
-           ( stat=blockStatement()
-              {
-        list.addAll(stat);
-      }
-      )*
-         {
-        int bl, bc, el, ec;
-        if (t != null) {
-          bl = t.beginLine;
-          bc = t.beginColumn;
-          el = t.endLine;
-          ec = t.endColumn;
-        } else {
-          bl = val.getBeginLine();
-          bc = val.getBeginColumn();
-          el = val.getEndLine();
-          ec = val.getEndColumn();
-        }
-        
-        if (list.size() != 0) {
-          Node n = list.get(list.size() - 1);
-          el = n.getEndLine();
-          ec = n.getEndColumn();
-        }
-        
-        cases.add(new SwitchBlock(val, (list.size() != 0) ? list : null,
-                                  filename,
-                                  bl, bc, el, ec));
-        val = null;
-        t   = null;
-        if (list.size() != 0) {
-          list = new LinkedList<Node>();
-        }
-      }
-      )*
+        ( sb = switchBlock() { cases.add(sb); } )*
         e="}"
-      {
-        return new SwitchStatement(sel, cases,
-                                   filename,
-                                   b.beginLine, b.beginColumn,
-                                   e.endLine,   e.endColumn);
-      }
+        { return new SwitchStatement(sel, cases, _range(b, e)); }
     }
     catch(ParseException pe) {
       _throwParseException(pe,"Invalid switch statement");
     }
   }
+  
+  SwitchBlock switchBlock() :
+  {
+    Token t, t2;
+    Expression val = null;
+    List<Node> stat;
+    List<Node> allStats = new LinkedList<Node>();
+    SourceInfo si;
+  }
+  {
+    ( t="case" val=expression() | t="default" )
+    ( t2 = ":" { si = _range(t, t2); } | _errorChar(':') { si = _range(t, t); } )
+    (
+      stat=blockStatement()
+      {
+        allStats.addAll(stat);
+        if (stat.size() > 0)
+          si = SourceInfo.span(si, stat.get(stat.size()-1));
+      }
+    )*
+    {
+      return new SwitchBlock(val, (allStats.isEmpty()) ? null: allStats, si);
+    }
+  }  
   
   /**
    * Parses a for statement (with standard or foreach syntax)
@@ -2688,15 +2441,9 @@ PARSER_END(Parser)
         ")" stmt=statement(true)
       {
         if(colon != null){
-          return new ForEachStatement(forEachInit, exp, stmt,
-                                      filename,
-                                      t.beginLine, t.beginColumn,
-                                      stmt.getEndLine(), stmt.getEndColumn());
+          return new ForEachStatement(forEachInit, exp, stmt, SourceInfo.prepend(t.beginLine, t.beginColumn, stmt));
         }else{
-          return new ForStatement(init, exp, update, stmt,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  stmt.getEndLine(), stmt.getEndColumn());
+          return new ForStatement(init, exp, update, stmt, SourceInfo.prepend(t.beginLine, t.beginColumn, stmt));
           
         }
       }
@@ -2732,15 +2479,10 @@ PARSER_END(Parser)
   {
     exp=statementExpression()
     {
-      list.add(new ExpressionStatement(exp, true, filename,
-                                       exp.getBeginLine(), exp.getBeginColumn(),
-                                       exp.getEndLine(), exp.getEndColumn()));
+      list.add(new ExpressionStatement(exp, true, exp.getSourceInfo()));
     }
     ( "," exp=statementExpression()
-      {  list.add(new ExpressionStatement(exp, true, filename,
-                                          exp.getBeginLine(), exp.getBeginColumn(),
-                                          exp.getEndLine(), exp.getEndColumn()));
-      }
+      {  list.add(new ExpressionStatement(exp, true, exp.getSourceInfo())); }
     )*
     { return list; }
   }
@@ -2758,10 +2500,7 @@ PARSER_END(Parser)
     try {
       b="break" [ id=<IDENTIFIER> ] e=";"
       {
-        return new BreakStatement((id != null) ? id.image : null,
-                                  filename,
-                                  b.beginLine, b.beginColumn,
-                                  e.endLine,   e.endColumn);
+        return new BreakStatement((id != null) ? id.image : null, _range(b, e));
       }
     }
     catch(ParseException pe) {
@@ -2782,10 +2521,7 @@ PARSER_END(Parser)
     try {
       b="continue" [ id=<IDENTIFIER> ] e=";"
       {
-        return new ContinueStatement((id != null) ? id.image : null,
-                                     filename,
-                                     b.beginLine, b.beginColumn,
-                                     e.endLine,   e.endColumn);
+        return new ContinueStatement((id != null) ? id.image : null, _range(b, e));
       }
     }
     catch(ParseException pe) {
@@ -2806,10 +2542,7 @@ PARSER_END(Parser)
     try {
       b="return" [ exp=expression() ] e=";"
       {
-        return new ReturnStatement(exp,
-                                   filename,
-                                   b.beginLine, b.beginColumn,
-                                   e.endLine,   e.endColumn);
+        return new ReturnStatement(exp, _range(b, e));
       }
     }
     catch(ParseException pe) {
@@ -2830,10 +2563,7 @@ PARSER_END(Parser)
     try {
       b="throw" exp=expression() e=";"
       {
-        return new ThrowStatement(exp,
-                                  filename,
-                                  b.beginLine, b.beginColumn,
-                                  e.endLine,   e.endColumn);
+        return new ThrowStatement(exp, _range(b, e));
       }
     }
     catch(ParseException pe) {
@@ -2856,10 +2586,7 @@ PARSER_END(Parser)
       t="synchronized" ( "(" | _errorChar('('))
         exp=expression() ")" stmt=block()
       {
-        return new SynchronizedStatement(exp, stmt,
-                                         filename,
-                                         t.beginLine, t.beginColumn,
-                                         stmt.getEndLine(), stmt.getEndColumn());
+        return new SynchronizedStatement(exp, stmt, SourceInfo.prepend(t.beginLine, t.beginColumn, stmt));
       }
     }
     catch(ParseException pe) {
@@ -2879,39 +2606,30 @@ PARSER_END(Parser)
     List<CatchStatement>      catches = new LinkedList<CatchStatement>();
     FormalParameter formal;
     Node            finallyBlock = null;
-    int             el = 0, ec = 0;
+    SourceInfo si = null;
   }
   {
     try{
       t="try" tryBlock=block()
-        ( u="catch" ( "(" | _errorChar('('))
-           formal=formalParameter() ")" catchBlock=block()
-           {
-        el = catchBlock.getEndLine();
-        ec = catchBlock.getEndColumn();
-        catches.add(new CatchStatement(formal, catchBlock,
-                                       filename,
-                                       u.beginLine, u.beginColumn,
-                                       el, ec));
-      }
-      )*
-        [ "finally" finallyBlock=block()
-           {
-        el = finallyBlock.getEndLine();
-        ec = finallyBlock.getEndColumn();
-      }
-         ]
-         {
-           if (finallyBlock == null && catches.size() == 0) {
-             throw new ParseError(reader.getMessage("try.without.catch", null),
-                                  filename,
-                                  t.beginLine, t.beginColumn);
-           }
-           return new TryStatement(tryBlock, catches, finallyBlock,
-                                   filename,
-                                   t.beginLine, t.beginColumn,
-                                   el, ec);
-         }
+        (
+          u="catch"
+          ( "(" | _errorChar('('))
+          formal=formalParameter()
+          ")"
+          catchBlock=block()
+          {
+            si = SourceInfo.prepend(u.beginLine, u.beginColumn, catchBlock);
+            catches.add(new CatchStatement(formal, catchBlock, si));
+          }
+        )*
+        [ "finally" finallyBlock=block() { si = finallyBlock.getSourceInfo(); } ]
+        {
+          if (finallyBlock == null && catches.size() == 0) {
+            throw new ParseError(reader.getMessage("try.without.catch", null), _range(t, t));
+          }
+          return new TryStatement(tryBlock, catches, finallyBlock,
+                                  SourceInfo.prepend(t.beginLine, t.beginColumn, si));
+        }
     }
     catch(ParseException pe) {
       _throwParseException(pe,"Invalid try statement");
@@ -2942,14 +2660,10 @@ PARSER_END(Parser)
     )
     {
       if (t == null) {
-        return new ExpressionStatement(exp, false, filename,
-                                       exp.getBeginLine(), exp.getBeginColumn(),
-                                       exp.getEndLine(),  exp.getEndColumn());
+        return new ExpressionStatement(exp, false, exp.getSourceInfo());
       }
       else {
-        return new ExpressionStatement(exp, true, filename,
-                                       exp.getBeginLine(), exp.getBeginColumn(),
-                                       t.endLine,  t.endColumn);
+        return new ExpressionStatement(exp, true, SourceInfo.extend(exp, t.endLine, t.endColumn)); 
       }
     }
   }
@@ -2987,17 +2701,11 @@ PARSER_END(Parser)
        | exp=primaryExpression()
        [ t="++"
           {
-      exp = new PostIncrement(exp,
-                              filename,
-                              exp.getBeginLine(), exp.getBeginColumn(),
-                              t.endLine,          t.endColumn);
+      exp = new PostIncrement(exp, SourceInfo.extend(exp, t.endLine, t.endColumn));
     }
         | t="--"
           {
-          exp = new PostDecrement(exp,
-                                  filename,
-                                  exp.getBeginLine(), exp.getBeginColumn(),
-                                  t.endLine,          t.endColumn);
+          exp = new PostDecrement(exp, SourceInfo.extend(exp, t.endLine, t.endColumn));
         }
         | exp=expressionSuffix(exp)
           ]
@@ -3006,9 +2714,7 @@ PARSER_END(Parser)
           if (exp instanceof StatementExpression) {
             return exp;
           } else {
-            throw new ParseError(reader.getMessage("expression.statement", null),
-                                 filename,
-                                 exp.getBeginLine(), exp.getBeginColumn());
+            throw new ParseError(reader.getMessage("expression.statement", null), exp.getSourceInfo());
           }
         }
   }
@@ -3024,97 +2730,58 @@ PARSER_END(Parser)
   {
     ( "="    exp2=expression()
        {
-      exp = new SimpleAssignExpression(pre, exp2,
-                                       filename,
-                                       pre.getBeginLine(), pre.getBeginColumn(),
-                                       exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new SimpleAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
     }
      | "*="   exp2=expression()
        {
-       exp = new MultiplyAssignExpression(pre, exp2,
-                                          filename,
-                                          pre.getBeginLine(), pre.getBeginColumn(),
-                                          exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new MultiplyAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "/="   exp2=expression()
        {
-       exp = new DivideAssignExpression(pre, exp2,
-                                        filename,
-                                        pre.getBeginLine(), pre.getBeginColumn(),
-                                        exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new DivideAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "%="   exp2=expression()
        {
-       exp = new RemainderAssignExpression(pre, exp2,
-                                           filename,
-                                           pre.getBeginLine(), pre.getBeginColumn(),
-                                           exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new RemainderAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "+="   exp2=expression()
        {
-       exp = new AddAssignExpression(pre, exp2,
-                                     filename,
-                                     pre.getBeginLine(), pre.getBeginColumn(),
-                                     exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new AddAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "-="   exp2=expression()
        {
-       exp = new SubtractAssignExpression(pre, exp2,
-                                          filename,
-                                          pre.getBeginLine(), pre.getBeginColumn(),
-                                          exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new SubtractAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "<<="  exp2=expression()
        {
-       exp = new ShiftLeftAssignExpression(pre, exp2,
-                                           filename,
-                                           pre.getBeginLine(), pre.getBeginColumn(),
-                                           exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new ShiftLeftAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | ">>="  exp2=expression()
        {
-       exp = new ShiftRightAssignExpression
-         (pre, exp2,
-          filename,
-          pre.getBeginLine(), pre.getBeginColumn(),
-          exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new ShiftRightAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | ">>>=" exp2=expression()
        {
-       exp = new UnsignedShiftRightAssignExpression
-         (pre, exp2,
-          filename,
-          pre.getBeginLine(), pre.getBeginColumn(),
-          exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new UnsignedShiftRightAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "&="   exp2=expression()
        {
-       exp = new BitAndAssignExpression(pre, exp2,
-                                        filename,
-                                        pre.getBeginLine(), pre.getBeginColumn(),
-                                        exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new BitAndAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "^="   exp2=expression()
        {
-       exp = new ExclusiveOrAssignExpression(pre, exp2,
-                                             filename,
-                                             pre.getBeginLine(), pre.getBeginColumn(),
-                                             exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new ExclusiveOrAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      | "|="   exp2=expression()
        {
-       exp = new BitOrAssignExpression(pre, exp2,
-                                       filename,
-                                       pre.getBeginLine(), pre.getBeginColumn(),
-                                       exp2.getEndLine(),  exp2.getEndColumn());
+       exp = new BitOrAssignExpression(pre, exp2, SourceInfo.span(pre, exp2));
      }
      )
      {
        if (!(pre instanceof LeftHandSide)) {
          throw new ParseError(reader.getMessage("left.expression.in.assignment",
                                                 null),
-                              filename,
-                              pre.getBeginLine(), pre.getBeginColumn());
+                              pre.getSourceInfo());
        }
        return exp;
      }
@@ -3133,10 +2800,7 @@ PARSER_END(Parser)
     exp=conditionalOrExpression()
       [ "?" exp2=expression() ":" exp3=conditionalExpression()
          {
-      exp = new ConditionalExpression(exp, exp2, exp3,
-                                      filename,
-                                      exp.getBeginLine(), exp.getBeginColumn(),
-                                      exp3.getEndLine(),  exp3.getEndColumn());
+      exp = new ConditionalExpression(exp, exp2, exp3, SourceInfo.span(exp, exp3));
     }
        ]
        {
@@ -3156,10 +2820,7 @@ PARSER_END(Parser)
     exp=conditionalAndExpression()
       ( "||" exp2=conditionalAndExpression()
          {
-      exp = new OrExpression(exp, exp2,
-                             filename,
-                             exp.getBeginLine(), exp.getBeginColumn(),
-                             exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new OrExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
     )*
     {
@@ -3179,10 +2840,7 @@ PARSER_END(Parser)
     exp=inclusiveOrExpression()
       ( "&&" exp2=inclusiveOrExpression()
          {
-      exp = new AndExpression(exp, exp2,
-                              filename,
-                              exp.getBeginLine(), exp.getBeginColumn(),
-                              exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new AndExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
     )*
     {
@@ -3202,10 +2860,7 @@ PARSER_END(Parser)
     exp=exclusiveOrExpression()
       ( "|" exp2=exclusiveOrExpression()
          {
-      exp = new BitOrExpression(exp, exp2,
-                                filename,
-                                exp.getBeginLine(), exp.getBeginColumn(),
-                                exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new BitOrExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
     )*
     {
@@ -3225,10 +2880,7 @@ PARSER_END(Parser)
     exp=andExpression()
       ( "^" exp2=andExpression()
          {
-      exp = new ExclusiveOrExpression(exp, exp2,
-                                      filename,
-                                      exp.getBeginLine(), exp.getBeginColumn(),
-                                      exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new ExclusiveOrExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
     )*
     {
@@ -3248,10 +2900,7 @@ PARSER_END(Parser)
     exp=equalityExpression()
       ( "&" exp2=equalityExpression()
          {
-      exp = new BitAndExpression(exp, exp2,
-                                 filename,
-                                 exp.getBeginLine(), exp.getBeginColumn(),
-                                 exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new BitAndExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
     )*
     {
@@ -3271,17 +2920,11 @@ PARSER_END(Parser)
     exp=instanceOfExpression()
       ( "==" exp2=instanceOfExpression()
          {
-      exp = new EqualExpression(exp, exp2,
-                                filename,
-                                exp.getBeginLine(), exp.getBeginColumn(),
-                                exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new EqualExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
        | "!=" exp2=instanceOfExpression()
          {
-         exp = new NotEqualExpression(exp, exp2,
-                                      filename,
-                                      exp.getBeginLine(), exp.getBeginColumn(),
-                                      exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new NotEqualExpression(exp, exp2, SourceInfo.span(exp, exp2));
        }
        )*
        {
@@ -3301,10 +2944,7 @@ PARSER_END(Parser)
     exp=relationalExpression() [ "instanceof" typ=type() ]
     {
       if (typ != null) {
-        return new InstanceOfExpression(exp, typ,
-                                        filename,
-                                        exp.getBeginLine(), exp.getBeginColumn(),
-                                        typ.getEndLine(),   typ.getEndColumn());
+        return new InstanceOfExpression(exp, typ, SourceInfo.span(exp, typ));
       } else {
         return exp;
       }
@@ -3324,31 +2964,19 @@ PARSER_END(Parser)
       ( LOOKAHEAD(1) ( // consume as large an expression as possible
         "<"  exp2=shiftExpression()
          {
-            exp = new LessExpression(exp, exp2,
-                               filename,
-                               exp.getBeginLine(), exp.getBeginColumn(),
-                               exp2.getEndLine(),  exp2.getEndColumn());
+            exp = new LessExpression(exp, exp2, SourceInfo.span(exp, exp2));
          }
        | ">"  exp2=shiftExpression()
          {
-         exp = new GreaterExpression(exp, exp2,
-                                     filename,
-                                     exp.getBeginLine(), exp.getBeginColumn(),
-                                     exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new GreaterExpression(exp, exp2, SourceInfo.span(exp, exp2));
          }
        | "<=" exp2=shiftExpression()
          {
-         exp = new LessOrEqualExpression(exp, exp2,
-                                         filename,
-                                         exp.getBeginLine(), exp.getBeginColumn(),
-                                         exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new LessOrEqualExpression(exp, exp2, SourceInfo.span(exp, exp2));
          }
        | ">=" exp2=shiftExpression()
          {
-         exp = new GreaterOrEqualExpression(exp, exp2,
-                                            filename,
-                                            exp.getBeginLine(), exp.getBeginColumn(),
-                                            exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new GreaterOrEqualExpression(exp, exp2, SourceInfo.span(exp, exp2));
          }
        ))*
        {
@@ -3368,25 +2996,15 @@ PARSER_END(Parser)
     exp=additiveExpression()
       ( "<<"  exp2=additiveExpression()
          {
-      exp = new ShiftLeftExpression(exp, exp2,
-                                    filename,
-                                    exp.getBeginLine(), exp.getBeginColumn(),
-                                    exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new ShiftLeftExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
        | <RSSHIFT1> <RSSHIFT2>  exp2=additiveExpression()
          {
-         exp = new ShiftRightExpression(exp, exp2,
-                                        filename,
-                                        exp.getBeginLine(), exp.getBeginColumn(),
-                                        exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new ShiftRightExpression(exp, exp2, SourceInfo.span(exp, exp2));
        }
        | <RUSHIFT1> <RUSHIFT2> <RUSHIFT3> exp2=additiveExpression()
          {
-         exp = new UnsignedShiftRightExpression
-           (exp, exp2,
-            filename,
-            exp.getBeginLine(), exp.getBeginColumn(),
-            exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new UnsignedShiftRightExpression(exp, exp2, SourceInfo.span(exp, exp2));
        }
        )*
        {
@@ -3407,17 +3025,11 @@ PARSER_END(Parser)
       ( LOOKAHEAD(1) (// consume as large an expression as possible
         "+" exp2=multiplicativeExpression()
          {
-           exp = new AddExpression(exp, exp2,
-                              filename,
-                              exp.getBeginLine(), exp.getBeginColumn(),
-                              exp2.getEndLine(),  exp2.getEndColumn());
+           exp = new AddExpression(exp, exp2, SourceInfo.span(exp, exp2));
          }
        | "-" exp2=multiplicativeExpression()
          {
-           exp = new SubtractExpression(exp, exp2,
-                                      filename,
-                                      exp.getBeginLine(), exp.getBeginColumn(),
-                                      exp2.getEndLine(),  exp2.getEndColumn());
+           exp = new SubtractExpression(exp, exp2, SourceInfo.span(exp, exp2));
          }
        ))*
        {
@@ -3437,24 +3049,15 @@ PARSER_END(Parser)
     exp=unaryExpression()
       ( "*" exp2=unaryExpression()
          {
-      exp = new MultiplyExpression(exp, exp2,
-                                   filename,
-                                   exp.getBeginLine(), exp.getBeginColumn(),
-                                   exp2.getEndLine(),  exp2.getEndColumn());
+      exp = new MultiplyExpression(exp, exp2, SourceInfo.span(exp, exp2));
     }
        | "/" exp2=unaryExpression()
          {
-         exp = new DivideExpression(exp, exp2,
-                                    filename,
-                                    exp.getBeginLine(), exp.getBeginColumn(),
-                                    exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new DivideExpression(exp, exp2, SourceInfo.span(exp, exp2));
        }
        | "%" exp2=unaryExpression()
          {
-         exp = new RemainderExpression(exp, exp2,
-                                       filename,
-                                       exp.getBeginLine(), exp.getBeginColumn(),
-                                       exp2.getEndLine(),  exp2.getEndColumn());
+         exp = new RemainderExpression(exp, exp2, SourceInfo.span(exp, exp2));
        }
        )*
        {
@@ -3473,26 +3076,16 @@ PARSER_END(Parser)
   {
     ( t="+" exp=unaryExpression()
        {
-      return new PlusExpression(exp,
-                                filename,
-                                t.beginLine,      t.beginColumn,
-                                exp.getEndLine(), exp.getEndColumn());
+      return new PlusExpression(exp, SourceInfo.prepend(t.beginLine, t.beginColumn, exp));
     }
      |
-     t="-" (LOOKAHEAD(1)tk=<INTEGER_LITERAL>{return new IntegerLiteral("-"+tk.image,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                                           tk.endLine,   tk.endColumn);
-                                 }
+     t="-" (LOOKAHEAD(1)tk=<INTEGER_LITERAL>{ return new IntegerLiteral("-"+tk.image, _range(t, tk)); }
             |LOOKAHEAD(1)tk=<LONG_LITERAL>{
               if(tk.image.endsWith("L")) tk.image=tk.image.substring(0,tk.image.length()-1);
-              return new LongLiteral("-"+tk.image, filename, t.beginLine, t.beginColumn,
-                                                   tk.endLine,   tk.endColumn);
+              return new LongLiteral("-"+tk.image, _range(t, tk)); 
              }
            | exp=unaryExpression(){
-               return new MinusExpression(exp, filename,
-                                          t.beginLine,      t.beginColumn,
-                                          exp.getEndLine(), exp.getEndColumn());
+               return new MinusExpression(exp, SourceInfo.prepend(t.beginLine, t.beginColumn, exp));
              }
            )
      |
@@ -3517,18 +3110,12 @@ PARSER_END(Parser)
   {
     ( t="~" exp=unaryExpression()
        {
-      return new ComplementExpression(exp,
-                                      filename,
-                                      t.beginLine,      t.beginColumn,
-                                      exp.getEndLine(), exp.getEndColumn());
+      return new ComplementExpression(exp, SourceInfo.prepend(t.beginLine, t.beginColumn, exp));
     }
      |
      t="!" exp=unaryExpression()
        {
-       return new NotExpression(exp,
-                                filename,
-                                t.beginLine,      t.beginColumn,
-                                exp.getEndLine(), exp.getEndColumn());
+       return new NotExpression(exp, SourceInfo.prepend(t.beginLine, t.beginColumn, exp));
      }
      |
      LOOKAHEAD( castLookahead() )
@@ -3555,10 +3142,7 @@ PARSER_END(Parser)
        |
      t="(" typ=type() ")" exp=unaryExpressionNotPlusMinus() )
     {
-      return new CastExpression(typ, exp,
-                                filename,
-                                t.beginLine, t.beginColumn,
-                                exp.getEndLine(), exp.getEndColumn());
+      return new CastExpression(typ, exp, SourceInfo.prepend(t.beginLine, t.beginColumn, exp));
     }
   }
   
@@ -3573,10 +3157,7 @@ PARSER_END(Parser)
   {
     t="++" pe=primaryExpression()
     {
-      return new PreIncrement(pe,
-                              filename,
-                              pe.getBeginLine(), pe.getBeginColumn(),
-                              t.endLine,         t.endColumn);
+      return new PreIncrement(pe, SourceInfo.prepend(t.beginLine, t.beginColumn, pe));
     }
   }
   
@@ -3591,10 +3172,7 @@ PARSER_END(Parser)
   {
     t="--" pe=primaryExpression()
     {
-      return new PreDecrement(pe,
-                              filename,
-                              pe.getBeginLine(), pe.getBeginColumn(),
-                              t.endLine,         t.endColumn);
+      return new PreDecrement(pe, SourceInfo.prepend(t.beginLine, t.beginColumn, pe));
     }
   }
   
@@ -3611,17 +3189,11 @@ PARSER_END(Parser)
       [ LOOKAHEAD(1) (// consume as large an expression as possible
         t="++"
          {
-           return new PostIncrement(pe,
-                               filename,
-                               pe.getBeginLine(), pe.getBeginColumn(),
-                               t.endLine,         t.endColumn);
+           return new PostIncrement(pe, SourceInfo.extend(pe, t.endLine, t.endColumn));
          }
        | t="--"
          {
-         return new PostDecrement(pe,
-                                  filename,
-                                  pe.getBeginLine(), pe.getBeginColumn(),
-                                  t.endLine,         t.endColumn);
+         return new PostDecrement(pe, SourceInfo.extend(pe, t.endLine, t.endColumn));
        }
        )]
        { return pe; }
@@ -3701,7 +3273,7 @@ PARSER_END(Parser)
   {
     "." t="this"
     {
-      return new DotThisSuffix(t.endLine, t.endColumn);
+      return new DotThisSuffix(_range(t, t));
     }
   }
   
@@ -3740,33 +3312,13 @@ PARSER_END(Parser)
       ]
     {
       if (cb == null) {
-        if(typeArgs.size() > 0)
-          return new PolymorphicSimpleAllocation(rt,
-                                                 as.arguments,
-                                                 typeArgs,
-                                                 filename,
-                                                 t.beginLine, t.beginColumn,
-                                                 as.endLine, as.endColumn);
-        return new SimpleAllocation(rt,
-                                    as.arguments,
-                                    filename,
-                                    t.beginLine, t.beginColumn,
-                                    as.endLine,  as.endColumn);
+        SourceInfo si = SourceInfo.prepend(t.beginLine, t.beginColumn, as);
+        if(typeArgs.size() > 0) return new PolymorphicSimpleAllocation(rt, as.arguments, typeArgs, si);
+        else return new SimpleAllocation(rt, as.arguments, si);
       } else {
-        if(typeArgs.size() > 0)
-          return new PolymorphicAnonymousAllocation(rt,
-                                                    as.arguments,
-                                                    cb.list,
-                                                    typeArgs,
-                                                    filename,
-                                                    t.beginLine, t.beginColumn,
-                                                    as.endLine, as.endColumn);
-        return new AnonymousAllocation(rt,
-                                       as.arguments,
-                                       cb.list,
-                                       filename,
-                                       t.beginLine, t.beginColumn,
-                                       cb.endLine,  cb.endColumn);
+        SourceInfo si = SourceInfo.prepend(t.beginLine, t.beginColumn, cb);
+        if(typeArgs.size() > 0) return new PolymorphicAnonymousAllocation(rt, as.arguments, cb.list, typeArgs, si);
+        else return new AnonymousAllocation(rt, as.arguments, cb.list, si);
       }
     }
   }
@@ -3791,12 +3343,12 @@ PARSER_END(Parser)
   ExpressionSuffix arrayReference() :
   {
     Expression exp;
-    Token      t;
+    Token      left, right;
   }
   {
-    "[" exp=expression() t="]"
+    left="[" exp=expression() right="]"
     {
-      return new ArrayReferenceSuffix(exp, t.endLine, t.endColumn);
+      return new ArrayReferenceSuffix(exp, _range(left, right));
     }
   }
   
@@ -3806,12 +3358,12 @@ PARSER_END(Parser)
   ArgumentsSuffix arguments(List<TypeName> typeArgs) :
   {
     List<Expression> list = null;
-    Token t;
+    Token left, right;
   }
   {
-    "(" [ list=argumentList() ] t=")"
+    left="(" [ list=argumentList() ] right=")"
     {
-      return new ArgumentsSuffix(list, typeArgs, t.endLine, t.endColumn);
+      return new ArgumentsSuffix(list, typeArgs, _range(left, right));
     }
   }
   
@@ -3852,73 +3404,48 @@ PARSER_END(Parser)
         // if(t.image.equals("2147483648")){t.image = "-2147483648";} // Introduced an error with int x = 2147483648
         
         
-        return new IntegerLiteral(t.image,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  t.endLine,   t.endColumn);
+        return new IntegerLiteral(t.image, _range(t, t));
       }
       |
         t=<LONG_LITERAL>
       {
         if(t.image.endsWith("L")) t.image=t.image.substring(0,t.image.length()-1);
-           return new LongLiteral(t.image, filename,
-                                  t.beginLine, t.beginColumn,
-                                  t.endLine,   t.endColumn);
+           return new LongLiteral(t.image, _range(t, t));
       }
       |
         t=<FLOAT_LITERAL>
       {
-        return new FloatLiteral(t.image,
-                                filename,
-                                t.beginLine, t.beginColumn,
-                                t.endLine,   t.endColumn);
+        return new FloatLiteral(t.image, _range(t, t));
       }
       |
         t=<DOUBLE_LITERAL>
       {
-        return new DoubleLiteral(t.image,
-                                 filename,
-                                 t.beginLine, t.beginColumn,
-                                 t.endLine,   t.endColumn);
+        return new DoubleLiteral(t.image, _range(t, t));
       }
       |
         t=<CHARACTER_LITERAL>
       {
-        return new CharacterLiteral(t.image,
-                                    filename,
-                                    t.beginLine, t.beginColumn,
-                                    t.endLine,   t.endColumn);
+        return new CharacterLiteral(t.image, _range(t, t));
       }
       |
         t=<STRING_LITERAL>
       {
-        return new StringLiteral(t.image,
-                                 filename,
-                                 t.beginLine, t.beginColumn,
-                                 t.endLine,   t.endColumn);
+        return new StringLiteral(t.image, _range(t, t));
       }
       |
         t="true"
       {
-        return new BooleanLiteral(true,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  t.endLine,   t.endColumn);
+        return new BooleanLiteral(true, _range(t, t));
       }
       |
         t="false"
       {
-        return new BooleanLiteral(false,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  t.endLine,   t.endColumn);
+        return new BooleanLiteral(false, _range(t, t));
       }
       |
         t="null"
       {
-        return new NullLiteral(filename,
-                               t.beginLine, t.beginColumn,
-                               t.endLine,   t.endColumn);
+        return new NullLiteral(_range(t, t));
       }
     }
     catch (ParseException pe) {
@@ -3935,10 +3462,7 @@ PARSER_END(Parser)
   {
     t="this"
     {
-      return new ThisExpression(new LinkedList<IdentifierToken>(),
-                                filename,
-                                t.beginLine, t.beginColumn,
-                                t.endLine,   t.endColumn);
+      return new ThisExpression(new LinkedList<IdentifierToken>(), _range(t, t));
     }
   }
   
@@ -3953,9 +3477,7 @@ PARSER_END(Parser)
   {
     t="super" "." id=<IDENTIFIER>
     {
-      return new CompileTimeSuperExpression(id.image,
-                                            t.beginLine,  t.beginColumn,
-                                            id.endLine,   id.endColumn);
+      return new CompileTimeSuperExpression(id.image, _range(t, id));
     }
   }
   
@@ -3984,10 +3506,7 @@ PARSER_END(Parser)
   {
     typ=resultType() "." t="class"
     {
-      return new TypeExpression(typ,
-                                filename,
-                                typ.getBeginLine(), typ.getBeginColumn(),
-                                t.endLine,   t.endColumn);
+      return new TypeExpression(typ, SourceInfo.extend(typ, t.endLine, t.endColumn));
     }
   }
   
@@ -4008,10 +3527,7 @@ PARSER_END(Parser)
     ( LOOKAHEAD(2)
        t="new" primT=primitiveType() td=arrayDimsAndInits()
        {
-      return new ArrayAllocation(primT, td,
-                                 filename,
-                                 t.beginLine, t.beginColumn,
-                                 td.endLine,  td.endColumn);
+      return new ArrayAllocation(primT, td, SourceInfo.prepend(t.beginLine, t.beginColumn, td));
     }
      |
      t="new"
@@ -4019,10 +3535,7 @@ PARSER_END(Parser)
        refT = ReferenceTypeName()
        ( td=arrayDimsAndInits()
           {
-       return new ArrayAllocation(refT, td,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  td.endLine, td.endColumn);
+       return new ArrayAllocation(refT, td, SourceInfo.prepend(t.beginLine, t.beginColumn, td));
      }
         | as=arguments(typeArgs)
         [ LOOKAHEAD(1) // consume as large an expression as possible
@@ -4030,15 +3543,10 @@ PARSER_END(Parser)
         ]
           {
           if (cb == null) {
-            return new SimpleAllocation(refT, as.arguments,
-                                        filename,
-                                        t.beginLine, t.beginColumn,
-                                        as.endLine,  as.endColumn);
+            return new SimpleAllocation(refT, as.arguments, SourceInfo.prepend(t.beginLine, t.beginColumn, as));
           } else {
             return new AnonymousAllocation(refT, as.arguments, cb.list,
-                                           filename,
-                                           t.beginLine, t.beginColumn,
-                                           cb.endLine,  cb.endColumn);
+                                           SourceInfo.prepend(t.beginLine, t.beginColumn, cb));
           }
         }
         )
@@ -4052,40 +3560,28 @@ PARSER_END(Parser)
   {
     List<Expression>  dims = new LinkedList<Expression>();
     int   dim  = 0;
-    Token t;
+    Token left, right;
     Expression exp;
     ArrayInitializer ai;
   }
   {
     ( LOOKAHEAD(2)
        ( LOOKAHEAD(2)
-          "[" exp=expression() t="]"
-          {
-      dims.add(exp);
-    }
-    )+
-     ( LOOKAHEAD(2) "[" t="]"
-        {
-      dim++;
-    }
-    )*
-     {
-      return new ArrayAllocation.TypeDescriptor(dims, dim+dims.size(), null,
-                                                t.endLine, t.endColumn);
-    }
-     |
-     ( "[" "]"
-        {
-       dim++;
-     }
-     )+
-     ai=arrayInitializer()
+          left="[" exp=expression() right="]"
+          { dims.add(exp); }
+        )+
+        ( LOOKAHEAD(2) left="[" right="]" { dim++; } )*
        {
-       return new ArrayAllocation.TypeDescriptor
-         (dims, dim, ai,
-          ai.getEndLine(), ai.getEndColumn());
-     }
-     )
+         return new ArrayAllocation.TypeDescriptor(dims, dim+dims.size(), null, _range(left, right));
+       }
+    |
+       ( left = "[" "]" { dim++; } )+
+       ai=arrayInitializer()
+         {
+           return new ArrayAllocation.TypeDescriptor(dims, dim, ai,
+                                                     SourceInfo.prepend(left.beginLine, left.beginColumn, ai));
+         }
+    )
   }
   
   // Productions for Types ///////////////////////////////////////////////////////////
@@ -4116,10 +3612,7 @@ PARSER_END(Parser)
       if (dim == 0) {
         return rt;
       } else {
-        return new ArrayTypeName(rt, dim, false,
-                                 filename,
-                                 rt.getBeginLine(), rt.getBeginColumn(),
-                                 t.endLine, t.endColumn);
+        return new ArrayTypeName(rt, dim, false, SourceInfo.extend(rt, t.endLine, t.endColumn));
       }
     }
   }
@@ -4135,8 +3628,7 @@ PARSER_END(Parser)
   {
     t="void"
     {
-      return new VoidTypeName(filename,
-                          t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new VoidTypeName(_range(t, t));
     }
     |
       typ=type()
@@ -4155,50 +3647,42 @@ PARSER_END(Parser)
   {
     t="boolean"
     {
-      return new BooleanTypeName(filename,
-                             t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new BooleanTypeName(_range(t, t));
     }
     |
       t="char"
     {
-      return new CharTypeName(filename,
-                          t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new CharTypeName(_range(t, t));
     }
     |
       t="byte"
     {
-      return new ByteTypeName(filename,
-                          t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new ByteTypeName(_range(t, t));
     }
     |
       t="short"
     {
-      return new ShortTypeName(filename,
-                           t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new ShortTypeName(_range(t, t));
     }
     |
       t="int"
     {
-      return new IntTypeName(filename,
-                         t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new IntTypeName(_range(t, t));
     }
     |
       t="long"
     {
-      return new LongTypeName(filename,
-                          t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new LongTypeName(_range(t, t));
     }
     |
       t="float"
     {
-      return new FloatTypeName(filename,
-                           t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new FloatTypeName(_range(t, t));
     }
     |
       t="double"
     {
-      return new DoubleTypeName(filename,
-                            t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      return new DoubleTypeName(_range(t, t));
     }
   }
   
@@ -4825,28 +4309,30 @@ PARSER_END(Parser)
   {
     List<IdentifierToken> name;
     TypeName bound = new ReferenceTypeName("Object");
-    Token first = getToken(1);
     List<ReferenceTypeName> interfaceBoundsList = new LinkedList<ReferenceTypeName>();
     ReferenceTypeName interf;
+    SourceInfo.Wrapper last;
   }
   {
-    name = name()
+    name = name() { last = name.get(name.size()-1); }
       [
        "extends"
-         bound = type()
+         bound = type() { last = bound; }
          ("&" interf = ReferenceTypeName()
             {
-      interfaceBoundsList.add(interf);
-    }
-    )*
+              interfaceBoundsList.add(interf);
+              last = interf;
+            }
+         )*
        ]
     {
+      IdentifierToken first = name.get(0);
       if(bound instanceof ReferenceTypeName){
-        return new TypeParameter(_loc(first), name, (ReferenceTypeName)bound, interfaceBoundsList);
+        return new TypeParameter(name, (ReferenceTypeName)bound, interfaceBoundsList, SourceInfo.span(first, last));
       } else {
-        throw new ParseException("Primitives are not allowed as bound"+
-                                 "types, and array types are temporarily disabled due to a "+
-                                 "DynamicJava AST hierarchy bug!");
+        throw new ParseError("Primitives are not allowed as bound"+
+                              "types, and array types are temporarily disabled due to a "+
+                              "DynamicJava AST hierarchy bug!", first.getSourceInfo());
       }
     }
   }
@@ -4869,12 +4355,10 @@ PARSER_END(Parser)
     (
       hook="?" ( "extends" upper = type() )? ( "super" lower = type() )?
       {
-        int endLine = hook.endLine;
-        int endColumn = hook.endColumn;
-        if (upper != null) { endLine = upper.getEndLine(); endColumn = upper.getEndColumn(); }
-        if (lower != null) { endLine = lower.getEndLine(); endColumn = lower.getEndColumn(); }
-        return new HookTypeName(Option.wrap(upper), Option.wrap(lower), filename,
-                                hook.beginLine, hook.beginColumn, endLine, endColumn);
+        SourceInfo si = _range(hook, hook);
+        if (upper != null) { si = SourceInfo.span(si, upper); }
+        if (lower != null) { si = SourceInfo.span(si, lower); }
+        return new HookTypeName(Option.wrap(upper), Option.wrap(lower), si);
       }
     | upper = type() { return upper; }
     )

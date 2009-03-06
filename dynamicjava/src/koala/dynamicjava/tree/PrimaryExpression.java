@@ -38,13 +38,8 @@ package koala.dynamicjava.tree;
 public abstract class PrimaryExpression extends Expression {
     /**
      * Initializes the expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
      */
-    protected PrimaryExpression(String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
+    protected PrimaryExpression(SourceInfo si) {
+	super(si);
     }
 }

@@ -60,23 +60,18 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
    * @exception IllegalArgumentException if exp is null or t is null
    */
   public InstanceOfExpression(Expression exp, TypeName t) {
-    this(exp, t, null, 0, 0, 0, 0);
+    this(exp, t, SourceInfo.NONE);
   }
   
   /**
    * Initializes the expression
    * @param exp   the expression to test
    * @param t     the type to check
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or t is null
    */
   public InstanceOfExpression(Expression exp, TypeName t,
-                              String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                              SourceInfo si) {
+    super(si);
     
     if (exp == null) throw new IllegalArgumentException("exp == null");
     if (t == null)   throw new IllegalArgumentException("t == null");

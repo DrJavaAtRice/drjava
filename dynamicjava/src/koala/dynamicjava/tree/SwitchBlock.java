@@ -59,22 +59,17 @@ public class SwitchBlock  extends Node implements ExpressionContainer {
    * Creates a new binding
    */
   public SwitchBlock(Expression exp, List<Node> stmts) {
-    this(exp, stmts, null, 0, 0, 0, 0);
+    this(exp, stmts, SourceInfo.NONE);
   }
   
   /**
    * Creates a new binding
    * @param exp   the case expression, or {@code null} for a {@code default} block
    * @param stmts the body
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
   public SwitchBlock(Expression exp, List<Node> stmts,
-                     String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                     SourceInfo si) {
+    super(si);
     
     expression = exp;
     statements = stmts;

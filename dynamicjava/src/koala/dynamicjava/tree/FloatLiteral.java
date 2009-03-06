@@ -41,23 +41,18 @@ public class FloatLiteral extends Literal {
      * @param rep the representation of the literal
      */
     public FloatLiteral(String rep) {
- this(rep, null, 0, 0, 0, 0);
+ this(rep, SourceInfo.NONE);
     }
 
     /**
      * Initializes a literal
      * @param rep the representation of the literal
-     * @param fn  the filename
-     * @param bl  the begin line
-     * @param bc  the begin column
-     * @param el  the end line
-     * @param ec  the end column
      */
-    public FloatLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
+    public FloatLiteral(String rep, SourceInfo si) {
  super(rep,
        new Float(rep),
        float.class,
-       fn, bl, bc, el, ec);
+       si);
     }
  
 }

@@ -49,16 +49,11 @@ public abstract class Initializer extends Node {
     /**
      * Creates a new initializer statement
      * @param block the block
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
      * @exception IllegalArgumentException if block is null
      */
     protected Initializer(BlockStatement block,
-			  String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
+			  SourceInfo si) {
+	super(si);
 
 	if (block == null) throw new IllegalArgumentException("block == null");
 

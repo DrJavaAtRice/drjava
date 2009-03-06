@@ -63,7 +63,7 @@ public class AnonymousInnerAllocation extends InnerAllocation {
    */
   public AnonymousInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, 
                                   List<? extends Expression> args, List<Node> memb) {
-    this(exp, cn, ctargs, args, memb, null, 0, 0, 0, 0);
+    this(exp, cn, ctargs, args, memb, SourceInfo.NONE);
   }
   
   /**
@@ -72,18 +72,13 @@ public class AnonymousInnerAllocation extends InnerAllocation {
    * @param cn    the inner class name
    * @param args  the arguments of the constructor. Can be null.
    * @param memb  the members of the class
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or memb is null or
    *            tp is null
    */
   public AnonymousInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, 
                                   List<? extends Expression> args, List<Node> memb,
-                                  String fn, int bl, int bc, int el, int ec) {
-    super(exp, cn, ctargs, args, fn, bl, bc, el, ec);
+                                  SourceInfo si) {
+    super(exp, cn, ctargs, args, si);
     if (memb == null) throw new IllegalArgumentException("memb == null");
     members = memb;
   }

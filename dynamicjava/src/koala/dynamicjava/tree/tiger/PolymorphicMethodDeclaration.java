@@ -61,8 +61,9 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    *            params is null or excepts is null
    */
   public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body, TypeParameter[] typeParams) {
-    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
+                                      BlockStatement body, TypeParameter[] typeParams) {
+    this(flags, type, name, params, excepts, body, typeParams, SourceInfo.NONE);
   }
   
   /**
@@ -73,20 +74,14 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    * @param params  the parameters list
    * @param excepts the exception list
    * @param body    the body statement
-   * @param fn      the filename
-   * @param bl      the begin line
-   * @param bc      the begin column
-   * @param el      the end line
-   * @param ec      the end column
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
   public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
-                                      String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, type, name, params, excepts, body, fn, bl, bc, el, ec);
-    
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
+                                      BlockStatement body, TypeParameter[] typeParams, SourceInfo si) {
+    super(flags, type, name, params, excepts, body, si);
     _typeParameters = typeParams;
   }
   

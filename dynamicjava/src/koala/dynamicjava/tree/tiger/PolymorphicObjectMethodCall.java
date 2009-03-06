@@ -52,16 +52,11 @@ public class PolymorphicObjectMethodCall extends ObjectMethodCall {
    * @param mn    the field name
    * @param args  the arguments. Can be null.
    * @param targs the type arguments
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   public PolymorphicObjectMethodCall(Expression exp, String mn, List<? extends Expression> args, List<TypeName> targs,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(exp, mn, args, fn, bl, bc, el, ec);
+                          SourceInfo si) {
+    super(exp, mn, args, si);
     _typeArgs = targs;
   }
 
@@ -73,7 +68,7 @@ public class PolymorphicObjectMethodCall extends ObjectMethodCall {
    * @exception IllegalArgumentException if mn is null
    */
   public PolymorphicObjectMethodCall(Expression exp, String mn, List<? extends Expression> args, List<TypeName> targs) {
-    this(exp, mn, args, targs, null, 0, 0, 0, 0);
+    this(exp, mn, args, targs, SourceInfo.NONE);
   }
 
   public List<TypeName> getTypeArguments(){ return _typeArgs; }

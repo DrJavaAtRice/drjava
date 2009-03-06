@@ -53,7 +53,7 @@ public class PolymorphicAnonymousInnerAllocation extends AnonymousInnerAllocatio
   public PolymorphicAnonymousInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs,
                                              List<? extends Expression> args, List<Node> memb,
                                              List<TypeName> targs) {
-    this(exp, cn, ctargs, args, memb, targs, null, 0, 0, 0, 0);
+    this(exp, cn, ctargs, args, memb, targs, SourceInfo.NONE);
   }
   
   /**
@@ -63,19 +63,14 @@ public class PolymorphicAnonymousInnerAllocation extends AnonymousInnerAllocatio
    * @param args  the arguments of the constructor. Can be null.
    * @param memb  the members of the class
    * @param targs the type arguments of the class
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or memb is null or
    *            tp is null
    */
   public PolymorphicAnonymousInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs,
                                              List<? extends Expression> args, List<Node> memb, 
                                              List<TypeName> targs,
-                                             String fn, int bl, int bc, int el, int ec) {
-    super(exp, cn, ctargs, args, memb, fn, bl, bc, el, ec);
+                                             SourceInfo si) {
+    super(exp, cn, ctargs, args, memb, si);
     _typeArguments = (targs == null) ? null : new ArrayList<TypeName>(targs);
   }
   

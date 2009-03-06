@@ -58,8 +58,9 @@ public class GenericInterfaceDeclaration extends InterfaceDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
-    this(flags, name, impl, body, null, 0, 0, 0, 0, typeParams);
+  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl,
+                                     List<Node> body, TypeParameter[] typeParams) {
+    this(flags, name, impl, body, typeParams, SourceInfo.NONE);
   }
   
   /**
@@ -68,17 +69,12 @@ public class GenericInterfaceDeclaration extends InterfaceDeclaration {
    * @param name       the name of the class to declare
    * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
    * @param body       the list of members declarations
-   * @param fn         the filename
-   * @param bl         the begin line
-   * @param bc         the begin column
-   * @param el         the end line
-   * @param ec         the end column
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
   public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
-                                     String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, name, impl, body, fn, bl, bc, el, ec);
+                                     TypeParameter[] typeParams, SourceInfo si) {
+    super(flags, name, impl, body, si);
     _typeParameters = typeParams;
   }
   

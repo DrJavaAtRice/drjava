@@ -42,19 +42,14 @@ public class ByteTypeName extends PrimitiveTypeName {
    * Initializes the type
    */
   public ByteTypeName() {
-    this(null, 0, 0, 0, 0);
+    this(SourceInfo.NONE);
   }
   
   /**
    * Initializes the type
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
-  public ByteTypeName(String fn, int bl, int bc, int el, int ec) {
-    super(byte.class, fn, bl, bc, el, ec);
+  public ByteTypeName(SourceInfo si) {
+    super(byte.class, si);
   }
   
   /**

@@ -76,7 +76,7 @@ public class FormalParameter extends Node {
    * @exception IllegalArgumentException if t is null or n is null
    */
   public FormalParameter(boolean f, TypeName t, String n) {
-    this(f, t, n, null, 0, 0, 0, 0);
+    this(f, t, n, SourceInfo.NONE);
   }
   
   /**
@@ -84,16 +84,11 @@ public class FormalParameter extends Node {
    * @param f     is the parameter final?
    * @param t     the type of the parameter
    * @param n     the name of the parameter
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if t is null or n is null
    */
   public FormalParameter(boolean f, TypeName t, String n,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(si);
     
     if (t == null) throw new IllegalArgumentException("t == null");
     if (n == null) throw new IllegalArgumentException("n == null");

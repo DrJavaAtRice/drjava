@@ -39,7 +39,7 @@ package koala.dynamicjava.tree.tiger;
 
 import koala.dynamicjava.tree.ReferenceTypeName;
 import koala.dynamicjava.tree.IdentifierToken;
-import koala.dynamicjava.SourceInfo;
+import koala.dynamicjava.tree.SourceInfo;
 import java.util.List;
 
 /**
@@ -54,9 +54,9 @@ public class TypeParameter extends ReferenceTypeName {
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
-  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
-    super(ids, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
-          in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
+  public TypeParameter(List<IdentifierToken> ids, ReferenceTypeName in_bound,
+                       List<ReferenceTypeName> in_interfaceBounds, SourceInfo in_sourceInfo) {
+    super(ids, in_sourceInfo);
 
     if (in_bound == null) {
       throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null.");

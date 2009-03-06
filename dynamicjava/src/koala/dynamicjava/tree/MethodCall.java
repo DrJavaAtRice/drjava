@@ -65,16 +65,11 @@ public abstract class MethodCall extends PrimaryExpression
    * Creates a new node
    * @param mn    the field name
    * @param args  the arguments. null if no arguments.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   protected MethodCall(String mn, List<? extends Expression> args,
-                       String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                       SourceInfo si) {
+    super(si);
     
 
     if (mn == null) throw new IllegalArgumentException("mn == null");

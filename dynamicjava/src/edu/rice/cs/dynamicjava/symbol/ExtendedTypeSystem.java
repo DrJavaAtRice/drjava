@@ -1191,9 +1191,7 @@ public class ExtendedTypeSystem extends TypeSystem {
   }
   
   private Expression unbox(Expression exp, String methodName) {
-    ObjectMethodCall result = new ObjectMethodCall(exp, methodName, null, 
-                                                   exp.getFilename(), exp.getBeginLine(), exp.getBeginColumn(), 
-                                                   exp.getEndLine(), exp.getEndColumn());
+    ObjectMethodCall result = new ObjectMethodCall(exp, methodName, null, exp.getSourceInfo());
     try {
       ObjectMethodInvocation inv = lookupMethod(exp, methodName, EMPTY_TYPE_ITERABLE, EMPTY_EXPRESSION_ITERABLE,
                                                 NONE_TYPE_OPTION);
@@ -1239,9 +1237,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     NodeProperties.setType(boxedTypeName, boxedType);
     List<Expression> arguments = Collections.singletonList(exp);
     if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
-      StaticMethodCall m = new StaticMethodCall(boxedTypeName, "valueOf", arguments, 
-                                                exp.getFilename(), exp.getBeginLine(), exp.getBeginColumn(), 
-                                                exp.getEndLine(), exp.getEndColumn());
+      StaticMethodCall m = new StaticMethodCall(boxedTypeName, "valueOf", arguments, exp.getSourceInfo());
       try {
         MethodInvocation inv = lookupStaticMethod(boxedType, "valueOf", EMPTY_TYPE_ITERABLE, arguments,
                                                   NONE_TYPE_OPTION);
@@ -1253,8 +1249,7 @@ public class ExtendedTypeSystem extends TypeSystem {
       catch (TypeSystemException e) { throw new RuntimeException("Boxing method inaccessible", e); }
     }
     else {
-      SimpleAllocation k = new SimpleAllocation(boxedTypeName, arguments, exp.getFilename(), exp.getBeginLine(),
-                                                exp.getBeginColumn(), exp.getEndLine(), exp.getEndColumn());
+      SimpleAllocation k = new SimpleAllocation(boxedTypeName, arguments, exp.getSourceInfo());
       try {
         ConstructorInvocation inv = lookupConstructor(boxedType, EMPTY_TYPE_ITERABLE, arguments, NONE_TYPE_OPTION); 
         k.setArguments(CollectUtil.makeList(inv.args()));
@@ -1616,8 +1611,7 @@ public class ExtendedTypeSystem extends TypeSystem {
    * also be set on {@code e}, as necessary.
    */
   private Expression makeCast(Type target, Expression e) {
-    Expression result = new CastExpression(null, e, e.getFilename(), e.getBeginLine(), e.getBeginColumn(),
-                                           e.getEndLine(), e.getEndColumn());
+    Expression result = new CastExpression(null, e, e.getSourceInfo());
     if (isPrimitive(target)) {
       if (!isEqual(target, NodeProperties.getType(e))) {
         NodeProperties.setConvertedType(e, erasedClass(target));
@@ -1642,7 +1636,7 @@ public class ExtendedTypeSystem extends TypeSystem {
     NodeProperties.setType(init, arrayType);
     NodeProperties.setErasedType(init, erasedType);
     Expression result = new ArrayAllocation(tn, new ArrayAllocation.TypeDescriptor(new ArrayList<Expression>(0), 
-                                                                                   1, init, 0, 0));
+                                                                                   1, init, SourceInfo.NONE));
     NodeProperties.setType(result, arrayType);
     NodeProperties.setErasedType(result, erasedType);
     return result;

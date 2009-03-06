@@ -44,21 +44,16 @@ public class SuperFieldAccess extends FieldAccess {
    * @exception IllegalArgumentException if fln is null
    */
   public SuperFieldAccess(String fln) {
-    this(fln, null, 0, 0, 0, 0);
+    this(fln, SourceInfo.NONE);
   }
   
   /**
    * Creates a new field access node
    * @param fln   the field name
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if fln is null
    */
-  public SuperFieldAccess(String fln, String fn, int bl, int bc, int el, int ec) {
-    super(fln, fn, bl, bc, el, ec);
+  public SuperFieldAccess(String fln, SourceInfo si) {
+    super(fln, si);
   }
   
   /**

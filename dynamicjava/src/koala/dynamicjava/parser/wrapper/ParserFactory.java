@@ -39,17 +39,8 @@ import java.io.*;
  */
 
 public interface ParserFactory {
-    /**
-     * Creates a new parser and returns it
-     * @param is    the input stream
-     * @param fname the file name
-     */
-    SourceCodeParser createParser(InputStream is, String fname);
-
-    /**
-     * Creates a new parser and returns it
-     * @param r     the reader
-     * @param fname the file name
-     */
-    SourceCodeParser createParser(Reader r, String fname);
+    SourceCodeParser createParser(InputStream is, File f);
+    SourceCodeParser createParser(InputStream is);
+    SourceCodeParser createParser(Reader r, File f);
+    SourceCodeParser createParser(Reader r);
 }

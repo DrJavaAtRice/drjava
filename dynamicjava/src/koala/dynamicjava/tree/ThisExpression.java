@@ -55,15 +55,10 @@ public class ThisExpression extends PrimaryExpression {
    * Initializes the expression
    * @param ids   the identifiers (tokens) that qualify this 'this'.
    *              Can be null.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if ids is null or body is null
    */
-  public ThisExpression(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public ThisExpression(List<IdentifierToken> ids, SourceInfo si) {
+    super(si);
     
     if (ids == null) throw new IllegalArgumentException("ids == null");
     
@@ -71,7 +66,7 @@ public class ThisExpression extends PrimaryExpression {
   }
   
   public ThisExpression() {
-    this(new LinkedList<IdentifierToken>(), null, 0, 0, 0, 0);
+    this(new LinkedList<IdentifierToken>(), SourceInfo.NONE);
   }
   
   /**

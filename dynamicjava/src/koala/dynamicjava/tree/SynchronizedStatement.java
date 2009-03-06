@@ -62,16 +62,11 @@ public class SynchronizedStatement extends Statement {
    * Creates a new while statement
    * @param lock  the lock object
    * @param body  the body
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if lock is null or body is null
    */
   public SynchronizedStatement(Expression lock, Node body,
-                               String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                               SourceInfo si) {
+    super(si);
     
     if (lock == null) throw new IllegalArgumentException("lock == null");
     if (body == null) throw new IllegalArgumentException("body == null");

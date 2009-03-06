@@ -53,23 +53,18 @@ public class ArrayAllocation extends PrimaryExpression {
     * @param td    the type descriptor
     * @exception IllegalArgumentException if tp is null or td is null
     */
-  public ArrayAllocation(TypeName tp, TypeDescriptor td) { this(tp, td, null, 0, 0, 0, 0); }
+  public ArrayAllocation(TypeName tp, TypeDescriptor td) { this(tp, td, SourceInfo.NONE); }
   
   /**
    * Initializes the expression
    * @param tp    the type prefix
    * @param td    the type descriptor.  The element type of the enclosed initializer will
    *              be automatically and recursively set.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if tp is null or td is null
    */
   public ArrayAllocation(TypeName tp, TypeDescriptor td,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(si);
     
     if (tp == null) throw new IllegalArgumentException("tp == null");
     if (td == null) throw new IllegalArgumentException("td == null");
@@ -157,7 +152,7 @@ public class ArrayAllocation extends PrimaryExpression {
   /**
    * This class contains informations about the array to create
    */
-  public static class TypeDescriptor {
+  public static class TypeDescriptor implements SourceInfo.Wrapper {
     /** The array dimension sizes */
     List<Expression> sizes;
     
@@ -167,27 +162,24 @@ public class ArrayAllocation extends PrimaryExpression {
     /** The initialization expression */
     ArrayInitializer initialization;
     
-    /** The end line */
-    public int endLine;
+    SourceInfo sourceInfo;
     
-    /** The end columnm*/
-    public int endColumn;
-    
-    /**mCreates a new type descriptor */
-    public TypeDescriptor(List<? extends Expression> sizes, int dim, ArrayInitializer init, int el, int ec) {
+    /** Creates a new type descriptor */
+    public TypeDescriptor(List<? extends Expression> sizes, int dim, ArrayInitializer init, SourceInfo si) {
       this.sizes     = (sizes == null) ? null : new ArrayList<Expression>(sizes);
       dimension      = dim;
       initialization = init;
-      endLine        = el;
-      endColumn      = ec;
+      sourceInfo     = si;
     }
+    
+    public SourceInfo getSourceInfo() { return sourceInfo; }
     
     /** Initializes the type descriptor */
     void initialize(TypeName t) {
       if (initialization != null) {
         TypeName et;
         if (dimension > 1)
-          et = new ArrayTypeName(t, dimension-1, false, t.getFilename(), t.getBeginLine(), t.getBeginColumn(), endLine, endColumn);
+          et = new ArrayTypeName(t, dimension-1, false, SourceInfo.span(t, this));
         else
           et = t; 
 

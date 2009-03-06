@@ -47,21 +47,16 @@ public class VariableAccess extends PrimaryExpression implements LeftHandSide {
    * @exception IllegalArgumentException if varName is null
    */
   public VariableAccess(String varName) {
-    this(varName, null, 0, 0, 0, 0);
+    this(varName, SourceInfo.NONE);
   }
   
   /**
    * Creates a new field access node
    * @param varName   the variable name
-   * @param fn        the filename
-   * @param bl        the begin line
-   * @param bc        the begin column
-   * @param el        the end line
-   * @param ec        the end column
    * @exception IllegalArgumentException if varName is null
    */
-  public VariableAccess(String varName, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public VariableAccess(String varName, SourceInfo si) {
+    super(si);
     
     if (varName == null) throw new IllegalArgumentException("Null variable name in VariableAccess construction");
     

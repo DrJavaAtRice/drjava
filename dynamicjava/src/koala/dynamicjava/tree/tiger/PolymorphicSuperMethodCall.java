@@ -48,7 +48,7 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * @exception IllegalArgumentException if mn is null
    */
   public PolymorphicSuperMethodCall(String mn, List<? extends Expression> args, List<TypeName> targs) {
-    this(mn, args, targs, null, 0, 0, 0, 0);
+    this(mn, args, targs, SourceInfo.NONE);
   }
   
   /**
@@ -56,16 +56,11 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * @param mn    the method name
    * @param args  the arguments. null if no arguments.
    * @param targs the type arguments
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   public PolymorphicSuperMethodCall(String mn, List<? extends Expression> args, List<TypeName> targs,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(mn, args, fn, bl, bc, el, ec);
+                                    SourceInfo si) {
+    super(mn, args, si);
     _typeArgs = targs;
   }
   

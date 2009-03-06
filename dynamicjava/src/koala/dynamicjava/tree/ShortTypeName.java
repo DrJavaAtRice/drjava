@@ -42,19 +42,14 @@ public class ShortTypeName extends PrimitiveTypeName {
      * Initializes the type
      */
     public ShortTypeName() {
- this(null, 0, 0, 0, 0);
+ this(SourceInfo.NONE);
     }
 
     /**
      * Initializes the type
-     * @param fn  the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
      */
-    public ShortTypeName(String fn, int bl, int bc, int el, int ec) {
- super(short.class, fn, bl, bc, el, ec);
+    public ShortTypeName(SourceInfo si) {
+ super(short.class, si);
     }
   
   /**

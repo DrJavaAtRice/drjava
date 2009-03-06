@@ -77,7 +77,7 @@ public class ConditionalExpression extends Expression {
    *            fexp is null
    */
   public ConditionalExpression(Expression cexp, Expression texp, Expression fexp) {
-    this(cexp, texp, fexp, null, 0, 0, 0, 0);
+    this(cexp, texp, fexp, SourceInfo.NONE);
   }
   
   /**
@@ -85,17 +85,12 @@ public class ConditionalExpression extends Expression {
    * @param cexp  the condition expression
    * @param texp  the if true expression
    * @param fexp  the if false expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if cexp is null or texp is null or
    *            fexp is null
    */
   public ConditionalExpression(Expression cexp, Expression texp, Expression fexp,
-                               String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                               SourceInfo si) {
+    super(si);
     
     if (cexp == null) throw new IllegalArgumentException("cexp == null");
     if (texp == null) throw new IllegalArgumentException("texp == null");

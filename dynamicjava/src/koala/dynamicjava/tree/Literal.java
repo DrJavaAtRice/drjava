@@ -73,16 +73,10 @@ public abstract class Literal extends PrimaryExpression {
    * @param rep the representation of the literal
    * @param val the value of this literal
    * @param typ the type of this literal
-   * @param fn  the filename
-   * @param bl  the begin line
-   * @param bc  the begin column
-   * @param el  the end line
-   * @param ec  the end column
    * @exception IllegalArgumentException if rep is null
    */
-  protected Literal(String rep, Object val, Class<?> typ,
-                    String fn, int bl, int bc, int el,int ec) {
-    super(fn, bl, bc, el, ec);
+  protected Literal(String rep, Object val, Class<?> typ, SourceInfo si) {
+    super(si);
     
     if (rep == null) throw new IllegalArgumentException("rep == null");
     

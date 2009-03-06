@@ -28,28 +28,29 @@
 
 package koala.dynamicjava.parser.wrapper;
 
+import java.io.File;
+
 import koala.dynamicjava.parser.impl.Token;
 import koala.dynamicjava.tree.IdentifierToken;
+import koala.dynamicjava.tree.SourceInfo;
 
-/**
- * This class represents the token managed by the syntax tree
- *
- * @author  Stephane Hillion
- * @version 1.0 - 1999/06/11
- */
+/** An IdentifierToken wrapping a javacc Token. */
 
 public class TreeToken implements IdentifierToken {
   /**
    * The implementation
    */
-  private Token token;
+  private final Token token;
+  
+  private final SourceInfo sourceInfo;
   
   /**
    * Creates a new tree token
    * @param t the parser token
    */
-  public TreeToken(Token t) {
+  public TreeToken(Token t, File f) {
     token = t;
+    sourceInfo = SourceInfo.range(f, t.beginLine, t.beginColumn, t.endLine, t.endColumn);
   }
   
   /**
@@ -66,36 +67,8 @@ public class TreeToken implements IdentifierToken {
     return token.image;
   }
   
-  /**
-   * Returns the line number where the beginning of the token
-   * was found in the source file
-   */
-  public int beginLine() {
-    return token.beginLine;
-  }
-  
-  /**
-   * Returns the line number where the end of the token
-   * was found in the source file
-   */
-  public int endLine() {
-    return token.endLine;
-  }
-  
-  /**
-   * Returns the column number where the beginning of the token
-   * was found in the source file
-   */
-  public int beginColumn() {
-    return token.beginColumn;
-  }
-  
-  /**
-   * Returns the column number where the end of the token
-   * was found in the source file
-   */
-  public int endColumn() {
-    return token.endLine;
+  public SourceInfo getSourceInfo() {
+    return sourceInfo;
   }
   
   public String toString() {

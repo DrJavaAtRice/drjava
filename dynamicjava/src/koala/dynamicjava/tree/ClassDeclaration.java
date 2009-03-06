@@ -65,7 +65,7 @@ public class ClassDeclaration extends TypeDeclaration {
    * @param body  the list of members declarations
    */
   public ClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body) {
-    this(flags, name, ext, impl, body, null, 0, 0, 0, 0);
+    this(flags, name, ext, impl, body, SourceInfo.NONE);
   }
 
   /**
@@ -78,15 +78,10 @@ public class ClassDeclaration extends TypeDeclaration {
    * @param impl  the list of implemented interfaces (a list of list of
    *              Token). Can be null.
    * @param body  the list of members declarations
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
   public ClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(flags, name, impl, body, fn, bl, bc, el, ec);
+                          SourceInfo si) {
+    super(flags, name, impl, body, si);
     superclass = (ext == null) ? OBJECT : ext;
   }
   

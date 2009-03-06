@@ -60,16 +60,11 @@ public abstract class BinaryExpression extends Expression {
    * Initializes the expression
    * @param lexp  the LHS expression
    * @param rexp  the RHS expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if lexp is null or rexp is null
    */
   protected BinaryExpression(Expression lexp, Expression rexp,
-                             String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                             SourceInfo si) {
+    super(si);
     
     if (lexp == null) throw new IllegalArgumentException("lexp == null");
     if (rexp == null) throw new IllegalArgumentException("rexp == null");

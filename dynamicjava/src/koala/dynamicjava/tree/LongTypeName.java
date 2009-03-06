@@ -42,19 +42,14 @@ public class LongTypeName extends PrimitiveTypeName {
      * Initializes the type
      */
     public LongTypeName() {
- this(null, 0, 0, 0, 0);
+ this(SourceInfo.NONE);
     }
 
     /**
      * Initializes the type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
      */
-    public LongTypeName(String fn, int bl, int bc, int el, int ec) {
- super(long.class, fn, bl, bc, el, ec);
+    public LongTypeName(SourceInfo si) {
+ super(long.class, si);
     }
   
   /**

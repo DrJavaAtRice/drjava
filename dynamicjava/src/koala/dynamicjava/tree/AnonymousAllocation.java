@@ -60,7 +60,7 @@ public class AnonymousAllocation extends SimpleAllocation implements StatementEx
    * @exception IllegalArgumentException if tp is null or memb is null
    */
   public AnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, List<Node> memb) {
-    this(tp, args, memb, null, 0, 0, 0, 0);
+    this(tp, args, memb, SourceInfo.NONE);
   }
   
   /**
@@ -68,16 +68,10 @@ public class AnonymousAllocation extends SimpleAllocation implements StatementEx
    * @param tp    the type prefix
    * @param args  the arguments of the constructor. null if no arguments.
    * @param memb  the members of the class
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if tp is null or memb is null
    */
-  public AnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, List<Node> memb,
-                             String fn, int bl, int bc, int el, int ec) {
-    super(tp, args, fn, bl, bc, el, ec);
+  public AnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, List<Node> memb, SourceInfo si) {
+    super(tp, args, si);
     if (memb == null) throw new IllegalArgumentException("memb == null");
     members = memb;
   }

@@ -85,7 +85,7 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    * @exception IllegalArgumentException if exp is null or tp is null
    */
   public InnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, List<? extends Expression> args) {
-    this(exp, cn, ctargs, args, null, 0, 0, 0, 0);
+    this(exp, cn, ctargs, args, SourceInfo.NONE);
   }
   
   /**
@@ -94,16 +94,11 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    * @param cn    the inner class name
    * @param ctargs the inner class's type arguments
    * @param args  the arguments of the constructor. null if no arguments.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or cn is null
    */
   public InnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, List<? extends Expression> args,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(si);
     
     if (cn == null) throw new IllegalArgumentException("cn == null");
     if (exp == null) throw new IllegalArgumentException("exp == null");

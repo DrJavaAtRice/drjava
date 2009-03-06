@@ -49,7 +49,7 @@ public class EnumDeclaration extends ClassDeclaration {
    * @param body  the list of members declarations
    */
   public EnumDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, EnumBody body) {
-    this(flags, name, impl, body, null, 0, 0, 0, 0);
+    this(flags, name, impl, body, SourceInfo.NONE);
   }
 
 //  /** Flag is set if symbol has a synthetic attribute.
@@ -76,14 +76,9 @@ public class EnumDeclaration extends ClassDeclaration {
    * @param impl  the list of implemented interfaces (a list of list of
    *              Token). Can be null.
    * @param body  the list of members declarations
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
   public EnumDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, EnumBody body,
-                          String fn, int bl, int bc, int el, int ec) {
+                          SourceInfo si) {
     // the first parameter should be (flags | 0x4000), 
     // but this causes problems when trying to create 
     // an instance of it using reflection since you 
@@ -99,7 +94,7 @@ public class EnumDeclaration extends ClassDeclaration {
         HandleConstructors(name,
           makeEnumBodyDeclarationsFromEnumConsts(name, body)),
         body.getConstants()),
-      fn, bl, bc, el, ec);
+      si);
   }
 
   static List<Node> AddValues(String enumTypeName, List<Node> body, List<EnumConstant> consts){
@@ -114,7 +109,8 @@ public class EnumDeclaration extends ClassDeclaration {
     
     Expression alloc = new ArrayAllocation(enumType,
                                            new ArrayAllocation.TypeDescriptor(Collections.<Expression>emptyList(), 1,
-                                                                              new ArrayInitializer(cells), 0, 0));
+                                                                              new ArrayInitializer(cells),
+                                                                              SourceInfo.NONE));
     Statement valuesBody = new ReturnStatement(alloc);
     newbody.add(new MethodDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                                       new ArrayTypeName(enumType, 1, false),

@@ -48,22 +48,17 @@ public class ThrowStatement extends Statement implements ExpressionContainer {
    * @param exp   the expression
    */
   public ThrowStatement(Expression exp) {
-    this(exp, null, 0, 0, 0, 0);
+    this(exp, SourceInfo.NONE);
   }
   
   /**
    * Creates a new while statement
    * @param exp   the expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if exp is null
    */
   public ThrowStatement(Expression exp,
-                        String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                        SourceInfo si) {
+    super(si);
     
     if (exp == null) throw new IllegalArgumentException("exp == null");
     

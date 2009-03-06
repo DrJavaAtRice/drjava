@@ -49,7 +49,7 @@ public class PolymorphicStaticMethodCall extends StaticMethodCall {
    * @exception IllegalArgumentException if mn is null
    */
   public PolymorphicStaticMethodCall(TypeName typ, String mn, List<? extends Expression> args, List<TypeName> targs) {
-    this(typ, mn, args, targs, null, 0, 0, 0, 0);
+    this(typ, mn, args, targs, SourceInfo.NONE);
   }
   
   /**
@@ -57,16 +57,11 @@ public class PolymorphicStaticMethodCall extends StaticMethodCall {
    * @param mn    the method name
    * @param args  the arguments. null if no arguments.
    * @param targs the type arguments
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
   public PolymorphicStaticMethodCall(TypeName typ, String mn, List<? extends Expression> args, List<TypeName> targs,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(typ, mn, args, fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(typ, mn, args, si);
     _typeArgs = targs;
   }
   

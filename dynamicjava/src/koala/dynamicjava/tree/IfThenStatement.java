@@ -65,23 +65,18 @@ public class IfThenStatement extends Statement {
    * @exception IllegalArgumentException if cond is null or tstmt is null
    */
   public IfThenStatement(Expression cond, Node tstmt) {
-    this(cond, tstmt, null, 0, 0, 0, 0);
+    this(cond, tstmt, SourceInfo.NONE);
   }
   
   /**
    * Creates a new while statement
    * @param cond  the condition
    * @param tstmt the statement
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if cond is null or tstmt is null
    */
   public IfThenStatement(Expression cond, Node tstmt,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(si);
     
     if (cond == null)  throw new IllegalArgumentException("cond == null");
     if (tstmt == null) throw new IllegalArgumentException("tstmt == null");

@@ -38,21 +38,16 @@ import java.io.*;
  */
 
 public class JavaCCParserFactory implements ParserFactory {
-  /**
-   * Creates a new parser and returns it
-   * @param is    the input stream
-   * @param fname the file name
-   */
-  public SourceCodeParser createParser(InputStream is, String fname) {
-    return new JavaCCParser(is, fname);
+  public SourceCodeParser createParser(InputStream is, File f) {
+    return new JavaCCParser(is, f);
   }
-  
-  /**
-   * Creates a new parser and returns it
-   * @param r     the reader
-   * @param fname the file name
-   */
-  public SourceCodeParser createParser(Reader r, String fname) {
-    return new JavaCCParser(r, fname);
+  public SourceCodeParser createParser(InputStream is) {
+    return new JavaCCParser(is);
+  }
+  public SourceCodeParser createParser(Reader r, File f) {
+    return new JavaCCParser(r, f);
+  }
+  public SourceCodeParser createParser(Reader r) {
+    return new JavaCCParser(r);
   }
 }

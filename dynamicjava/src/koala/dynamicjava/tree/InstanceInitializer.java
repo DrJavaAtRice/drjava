@@ -44,22 +44,17 @@ public class InstanceInitializer extends Initializer {
    * @exception IllegalArgumentException if block is null
    */
   public InstanceInitializer(BlockStatement block) {
-    this(block, null, 0, 0, 0, 0);
+    this(block, SourceInfo.NONE);
   }
   
   /**
    * Creates a new initializer statement
    * @param block the block
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if block is null
    */
   public InstanceInitializer(BlockStatement block,
-                             String fn, int bl, int bc, int el, int ec) {
-    super(block, fn, bl, bc, el, ec);
+                             SourceInfo si) {
+    super(block, si);
   }
   
   /**

@@ -64,20 +64,15 @@ public class AssertStatement extends Statement {
    * @exception IllegalArgumentException if cond is null or falseString is null
    */
   public AssertStatement(Expression cond, Expression falseString) {
-    this(cond, falseString, null, 0, 0, 0, 0);
+    this(cond, falseString, SourceInfo.NONE);
   }
   
   /**
    * Creates a new assert statement
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if cond is null or falseString is null
    */
-  public AssertStatement(Expression cond, Expression falseString, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public AssertStatement(Expression cond, Expression falseString, SourceInfo si) {
+    super(si);
     
     if (cond == null)  throw new IllegalArgumentException("cond == null");
     

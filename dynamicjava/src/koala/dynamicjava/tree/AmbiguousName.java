@@ -65,15 +65,15 @@ public class AmbiguousName extends PrimaryExpression implements LeftHandSide {
    * @exception IllegalArgumentException if ids is null
    */
   public AmbiguousName(List<IdentifierToken> ids) {
-    this(ids, null, 0, 0, 0, 0);
+    this(ids, SourceInfo.NONE);
   }
   
   public AmbiguousName(IdentifierToken... ids) {
-    this(Arrays.asList(ids), null, 0, 0, 0, 0);
+    this(Arrays.asList(ids), SourceInfo.NONE);
   }
   
   public AmbiguousName(String... ids) {
-    this(makeIdList(ids), null, 0, 0, 0, 0);
+    this(makeIdList(ids), SourceInfo.NONE);
   }
   
   private static List<IdentifierToken> makeIdList(String... ids) {
@@ -85,15 +85,10 @@ public class AmbiguousName extends PrimaryExpression implements LeftHandSide {
   /**
    * Creates a new qualified name
    * @param ids  the identifiers (IdentifierTokens) that compose this name
-   * @param fn   the filename
-   * @param bl   the begin line
-   * @param bc   the begin column
-   * @param el   the end line
-   * @param ec   the end column
    * @exception IllegalArgumentException if ids is null
    */
-  public AmbiguousName(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+  public AmbiguousName(List<IdentifierToken> ids, SourceInfo si) {
+    super(si);
 
     if (ids == null) throw new IllegalArgumentException("ids == null");
     if (ids.size() == 0) throw new IllegalArgumentException("ids.size() == 0");

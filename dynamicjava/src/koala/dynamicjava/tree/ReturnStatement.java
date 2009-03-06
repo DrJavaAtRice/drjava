@@ -49,21 +49,16 @@ public class ReturnStatement extends Statement implements ExpressionContainer {
    * @exception IllegalArgumentException if exp is null
    */
   public ReturnStatement(Expression exp) {
-    this(exp, null, 0, 0, 0, 0);
+    this(exp, SourceInfo.NONE);
   }
   
   /**
    * Creates a new while statement
    * @param exp   the expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    */
   public ReturnStatement(Expression exp,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                         SourceInfo si) {
+    super(si);
     expression = exp;
   }
   

@@ -28,7 +28,6 @@
 
 package koala.dynamicjava.parser.wrapper;
 
-import java.io.*;
 import java.util.*;
 import koala.dynamicjava.tree.Node;
 
@@ -41,19 +40,6 @@ import koala.dynamicjava.tree.Node;
  */
 
 public interface SourceCodeParser {
-    /**
-     * Creates a new parser and returns it
-     * @param is    the input stream
-     * @param fname the file name
-     */
-    SourceCodeParser createParser(InputStream is, String fname);
-
-    /**
-     * Creates a new parser and returns it
-     * @param r     the reader
-     * @param fname the file name
-     */
-    SourceCodeParser createParser(Reader r, String fname);
 
     /**
      * Parses top level statements

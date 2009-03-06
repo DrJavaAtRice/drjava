@@ -56,7 +56,7 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
   public PolymorphicConstructorDeclaration(int flags, String name,
                                       List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, 
                                       ConstructorCall eci, List<Node> stmts, TypeParameter[] typeParams) {
-    this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0, typeParams);
+    this(flags, name, params, excepts, eci, stmts, typeParams, SourceInfo.NONE);
   }
   
   /**
@@ -65,10 +65,10 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
    *            params is null or excepts is null
    */
   public PolymorphicConstructorDeclaration(int flags, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
-                                      ConstructorCall eci, List<Node> stmts,
-                                      String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, name, params, excepts, eci, stmts, fn, bl, bc, el, ec);
+                                           List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
+                                           ConstructorCall eci, List<Node> stmts, TypeParameter[] typeParams,
+                                           SourceInfo si) {
+    super(flags, name, params, excepts, eci, stmts, si);
     
     _typeParameters = typeParams;
   }

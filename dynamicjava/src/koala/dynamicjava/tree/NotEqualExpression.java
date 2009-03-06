@@ -45,23 +45,18 @@ public class NotEqualExpression extends BinaryExpression {
    * @exception IllegalArgumentException if lexp is null or rexp is null
    */
   public NotEqualExpression(Expression lexp, Expression rexp) {
-    this(lexp, rexp, null, 0, 0, 0, 0);
+    this(lexp, rexp, SourceInfo.NONE);
   }
   
   /**
    * Initializes the expression
    * @param lexp  the LHS expression
    * @param rexp  the RHS expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if lexp is null or rexp is null
    */
   public NotEqualExpression(Expression lexp, Expression rexp,
-                            String fn, int bl, int bc, int el, int ec) {
-    super(lexp, rexp, fn, bl, bc, el, ec);
+                            SourceInfo si) {
+    super(lexp, rexp, si);
   }
   
   /**

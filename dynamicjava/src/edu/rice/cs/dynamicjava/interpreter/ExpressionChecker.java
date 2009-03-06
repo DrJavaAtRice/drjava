@@ -214,12 +214,10 @@ public class ExpressionChecker {
       Expression resultExp = null;
       
       if (context.localVariableExists(first.image(), ts)) {
-        resultExp = new VariableAccess(first.image(), node.getFilename(), first.beginLine(),
-                                       first.beginColumn(), first.endLine(), first.endColumn());
+        resultExp = new VariableAccess(first.image(), first.getSourceInfo()); 
       }
       else if (context.fieldExists(first.image(), ts)) {
-        resultExp = new SimpleFieldAccess(first.image(), node.getFilename(), first.beginLine(),
-                                          first.beginColumn(), first.endLine(), first.endColumn());
+        resultExp = new SimpleFieldAccess(first.image(), first.getSourceInfo());
       }
       else {
         // Try to match a class
@@ -263,12 +261,8 @@ public class ExpressionChecker {
         while (ids.hasNext() && resultExp == null) {
           IdentifierToken memberName = ids.next();
           if (ts.containsField(classType, memberName.image())) {
-            ReferenceTypeName rt = new ReferenceTypeName(classIds, node.getFilename(),
-                                                         first.beginLine(), first.beginColumn(),
-                                                         last.endLine(),  last.endColumn());
-            resultExp = new StaticFieldAccess(rt, memberName.image(), rt.getFilename(),
-                                              first.beginLine(), first.beginColumn(),
-                                              memberName.endLine(), memberName.endColumn());
+            ReferenceTypeName rt = new ReferenceTypeName(classIds, SourceInfo.span(first, last)); 
+            resultExp = new StaticFieldAccess(rt, memberName.image(), SourceInfo.span(first, memberName)); 
           }
           else if (ts.containsClass(classType, memberName.image())) {
             last = memberName;
@@ -292,18 +286,14 @@ public class ExpressionChecker {
         }
         
         if (resultExp == null) { // there must be no more tokens; the name is the name of a class
-          return new ReferenceTypeName(classIds, node.getFilename(),
-                                       first.beginLine(), first.beginColumn(),
-                                       last.endLine(),  last.endColumn());
+          return new ReferenceTypeName(classIds, SourceInfo.span(first, last));
         }
       }
       
       // resultExp is now guaranteed to be defined; append any additional identifiers as field accesses
       while (ids.hasNext()) {
         IdentifierToken field = ids.next();
-        resultExp = new ObjectFieldAccess(resultExp, field.image(), node.getFilename(), 
-                                          first.beginLine(), first.beginColumn(),
-                                          field.endLine(), field.endColumn());
+        resultExp = new ObjectFieldAccess(resultExp, field.image(), SourceInfo.span(first, field));
       }
       return resultExp;
     }
@@ -403,9 +393,7 @@ public class ExpressionChecker {
         if (resolved instanceof ReferenceTypeName) {
           // this is actually a StaticFieldAccess
           Expression translation =
-            new StaticFieldAccess((ReferenceTypeName) resolved, node.getFieldName(), node.getFilename(),
-                                  node.getBeginLine(), node.getBeginColumn(), node.getEndLine(),
-                                  node.getEndColumn());
+            new StaticFieldAccess((ReferenceTypeName) resolved, node.getFieldName(), node.getSourceInfo());
           translation.acceptVisitor(this);
           setTranslation(node, translation);
           setVariableType(node, getVariableType(translation));
@@ -552,13 +540,11 @@ public class ExpressionChecker {
             translation =
               new PolymorphicStaticMethodCall((ReferenceTypeName) resolved, node.getMethodName(), node.getArguments(),
                                               ((PolymorphicObjectMethodCall) node).getTypeArguments(),
-                                              node.getFilename(), node.getBeginLine(), node.getBeginColumn(),
-                                              node.getEndLine(), node.getEndColumn());
+                                              node.getSourceInfo());
           }
           else {
             translation = new StaticMethodCall((ReferenceTypeName) resolved, node.getMethodName(),
-                                               node.getArguments(), node.getFilename(), node.getBeginLine(),
-                                               node.getBeginColumn(), node.getEndLine(), node.getEndColumn());
+                                               node.getArguments(), node.getSourceInfo());
           }
           translation.acceptVisitor(this);
           setTranslation(node, translation);

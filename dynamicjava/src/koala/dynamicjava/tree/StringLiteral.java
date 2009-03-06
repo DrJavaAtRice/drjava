@@ -41,24 +41,19 @@ public class StringLiteral extends Literal {
    * @param rep the representation of the literal
    */
   public StringLiteral(String rep) {
-    this(rep, null, 0, 0, 0, 0);
+    this(rep, SourceInfo.NONE);
   }
   
   /**
    * Initializes a literal
    * @param rep the representation of the literal
-   * @param fn  the filename
-   * @param bl  the begin line
-   * @param bc  the begin column
-   * @param el  the end line
-   * @param ec  the end column
    */
   public StringLiteral(String rep, 
-                       String fn, int bl, int bc, int el, int ec) {
+                       SourceInfo si) {
     super(rep,
           decodeString(rep),
           String.class,
-          fn, bl, bc, el, ec);
+          si);
   }
   
   /**

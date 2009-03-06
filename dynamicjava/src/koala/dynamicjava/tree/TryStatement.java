@@ -60,15 +60,10 @@ public class TryStatement extends Statement {
    * @param tryB   the try block
    * @param catchL the catch list
    * @param fin    the finally block
-   * @param fn     the filename
-   * @param bl     the begin line
-   * @param bc     the begin column
-   * @param el     the end line
-   * @param ec     the end column
    */
   public TryStatement(Node tryB, List<CatchStatement> catchL, Node fin,
-                      String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                      SourceInfo si) {
+    super(si);
     tryBlock        = tryB;
     catchStatements = catchL;
     finallyBlock    = fin;

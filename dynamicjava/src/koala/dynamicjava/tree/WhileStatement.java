@@ -72,23 +72,18 @@ public class WhileStatement extends Statement implements ContinueTarget {
    * @exception IllegalArgumentException if cond is null or body is null
    */
   public WhileStatement(Expression cond, Node body) {
-    this(cond, body, null, 0, 0, 0, 0);
+    this(cond, body, SourceInfo.NONE);
   }
   
   /**
    * Creates a new while statement
    * @param cond  the condition to evaluate at each loop
    * @param body  the body
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if cond is null or body is null
    */
   public WhileStatement(Expression cond, Node body,
-                        String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                        SourceInfo si) {
+    super(si);
     
     if (cond == null) throw new IllegalArgumentException("cond == null");
     if (body == null) throw new IllegalArgumentException("body == null");

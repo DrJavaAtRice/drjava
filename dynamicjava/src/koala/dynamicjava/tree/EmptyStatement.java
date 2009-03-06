@@ -42,17 +42,14 @@ public class EmptyStatement extends Statement {
    * Creates a new empty statement
    */
   public EmptyStatement() {
-    this(null, 0, 0);
+    this(SourceInfo.NONE);
   }
   
   /**
    * Creates a new empty statement
-   * @param line  the line in the input where the statement occurs
-   * @param fn    the filename
-   * @param col   the column
    */
-  public EmptyStatement(String fn, int line, int col) {
-    super(fn, line, col, line, col);
+  public EmptyStatement(SourceInfo si) {
+    super(si);
   }
   
   /**

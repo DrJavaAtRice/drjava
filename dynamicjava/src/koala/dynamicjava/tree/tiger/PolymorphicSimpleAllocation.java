@@ -56,24 +56,18 @@ public class PolymorphicSimpleAllocation extends SimpleAllocation {
    */
   public PolymorphicSimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args, 
                                      List<TypeName> targs) {
-    this(tp, args, targs, null, 0, 0, 0, 0);
+    this(tp, args, targs, SourceInfo.NONE);
   }
   
   /**
    * Initializes the expression
    * @param tp    the type prefix
    * @param args  the arguments of the constructor
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if tp is null
    */
   public PolymorphicSimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args, 
-                                     List<TypeName> targs,
-                                     String fn, int bl, int bc, int el, int ec) {
-    super(tp, args, fn, bl, bc, el, ec);
+                                     List<TypeName> targs, SourceInfo si) {
+    super(tp, args, si);
     _typeArguments = targs;
   }
   

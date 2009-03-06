@@ -40,19 +40,14 @@ public class NullLiteral extends Literal {
      * Initializes a literal
      */
     public NullLiteral() {
- this(null, 0, 0, 0, 0);
+ this(SourceInfo.NONE);
     }
 
     /**
      * Initializes a literal
-     * @param fn  the filename
-     * @param bl  the begin line
-     * @param bc  the begin column
-     * @param el  the end line
-     * @param ec  the end column
      */
-    public NullLiteral(String fn, int bl, int bc, int el, int ec) {
- super("null", null, null, fn, bl, bc, el, ec);
+    public NullLiteral(SourceInfo si) {
+ super("null", null, null, si);
     }
  
 }

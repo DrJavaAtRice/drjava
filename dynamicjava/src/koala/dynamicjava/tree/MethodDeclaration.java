@@ -113,7 +113,7 @@ public class MethodDeclaration extends Node {
    */
   public MethodDeclaration(int flags, TypeName type, String name,
                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body) {
-    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0);
+    this(flags, type, name, params, excepts, body, SourceInfo.NONE);
   }
 
   /**
@@ -124,18 +124,13 @@ public class MethodDeclaration extends Node {
    * @param params  the parameters list
    * @param excepts the exception list
    * @param body    the body statement
-   * @param fn      the filename
-   * @param bl      the begin line
-   * @param bc      the begin column
-   * @param el      the end line
-   * @param ec      the end column
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, TypeName type, String name,
                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
-                           String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                           SourceInfo si) {
+    super(si);
 
     if (type == null)    throw new IllegalArgumentException("type == null");
     if (name == null)    throw new IllegalArgumentException("name == null");

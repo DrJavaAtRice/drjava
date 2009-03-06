@@ -30,6 +30,7 @@ package koala.dynamicjava.parser.wrapper;
 
 
 import koala.dynamicjava.parser.impl.ParseException;
+import koala.dynamicjava.tree.SourceInfo;
   
 /**
  * This error is thrown when an unexpected error append while
@@ -109,6 +110,10 @@ public class ParseError extends Error {
         filename = fn;
         line     = l;
         column   = c;
+    }
+    
+    public ParseError(String s, SourceInfo si) {
+      this(s, si.getFilename(), si.getStartLine(), si.getStartColumn());
     }
     
     /**

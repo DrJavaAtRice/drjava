@@ -46,23 +46,17 @@ public class UnsignedShiftRightAssignExpression extends AssignExpression {
    * @exception IllegalArgumentException if lexp is null or rexp is null
    */
   public UnsignedShiftRightAssignExpression(Expression lexp, Expression rexp) {
-    this(lexp, rexp, null, 0, 0, 0, 0);
+    this(lexp, rexp, SourceInfo.NONE);
   }
   
   /**
    * Initializes the expression
    * @param lexp  the LHS expression
    * @param rexp  the RHS expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if lexp is null or rexp is null
    */
-  public UnsignedShiftRightAssignExpression(Expression lexp, Expression rexp,
-                                            String fn,int bl, int bc, int el, int ec) {
-    super(lexp, rexp, fn, bl, bc, el, ec);
+  public UnsignedShiftRightAssignExpression(Expression lexp, Expression rexp, SourceInfo si) {
+    super(lexp, rexp, si);
   }
   
   /**

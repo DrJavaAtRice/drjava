@@ -87,7 +87,7 @@ public class VariableDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or type is null
    */
   public VariableDeclaration(boolean fin, TypeName type, String name, Expression init) {
-    this(fin, type, name, init, null, 0, 0, 0, 0);
+    this(fin, type, name, init, SourceInfo.NONE);
   }
   
   /**
@@ -96,16 +96,11 @@ public class VariableDeclaration extends Node {
    * @param type   the type of this variable
    * @param name   the name of this variable
    * @param init   the initializer
-   * @param fn     the filename
-   * @param bl     the begin line
-   * @param bc     the begin column
-   * @param el     the end line
-   * @param ec     the end column
    * @exception IllegalArgumentException if name is null or type is null
    */
   public VariableDeclaration(boolean fin, TypeName type, String name, Expression init,
-                             String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                             SourceInfo si) {
+    super(si);
     
     // TODO: restore this check? -- we're allowing an inferred type for now
     //if (type == null) throw new IllegalArgumentException("type == null");

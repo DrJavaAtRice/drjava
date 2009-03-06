@@ -65,23 +65,18 @@ public class LabeledStatement extends Statement {
    * @exception IllegalArgumentException if label is null or stat is null
    */
   public LabeledStatement(String label, Node stat) {
-    this(label, stat, null, 0, 0, 0, 0);
+    this(label, stat, SourceInfo.NONE);
   }
   
   /**
    * Creates a new while statement
    * @param label the label
    * @param stat  the statement
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
    * @exception IllegalArgumentException if label is null or stat is null
    */
   public LabeledStatement(String label, Node stat,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
+                          SourceInfo si) {
+    super(si);
     
     if (label == null) throw new IllegalArgumentException("label == null");
     if (stat == null)  throw new IllegalArgumentException("stat == null");
