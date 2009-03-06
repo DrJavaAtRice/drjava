@@ -104,6 +104,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  </OL>
    */
   public void setUp() throws Exception {
+    super.setUp();  // declared to throw Exception
     debug.logStart();
     _log.log("Setting up " + this);
     super.setUp();  // declared to throw Exception

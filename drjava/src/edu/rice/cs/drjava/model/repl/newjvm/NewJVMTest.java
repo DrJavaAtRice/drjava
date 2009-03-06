@@ -66,7 +66,10 @@ public final class NewJVMTest extends DrJavaTestCase {
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
-      protected void setUp() throws Exception { _jvm = new TestJVMExtension(); }
+      protected void setUp() throws Exception { 
+        super.setUp();
+        _jvm = new TestJVMExtension(); 
+      }
       protected void tearDown() throws Exception { _jvm.dispose(); }
     };
 

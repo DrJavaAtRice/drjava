@@ -424,7 +424,7 @@ public class DrJava {
     
     final File propFile = _propertiesFile;    // a static variable shared across configurations in tests
     
-    try { propFile.createNewFile(); }               // be nice and ensure a config file if there isn't one
+    try { propFile.createNewFile(); }         // be nice and ensure a config file if there isn't one
     catch (IOException e) { /* IOException occurred, continue without a real file */ }
     
     config = new FileConfiguration(propFile);

@@ -242,8 +242,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   
   /** Sets up the debugger for each test. */
   public void setUp() throws Exception {
-    _log.log("Setting up (DebugTestCase)" + this);
     super.setUp();
+    _log.log("Setting up (DebugTestCase)" + this);
     _debugger = _model.getDebugger();
     assertNotNull("Debug Manager should not be null", _debugger);
   }

@@ -44,15 +44,13 @@ import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.Log;
 
 /** Test case class for all DrJava test cases. DrJava test cases should extend this class, potentially override setUp()
   * and tearDown(), but make sure to invoke super.setUp() and super.tearDown() appropriately. That ensures that the 
   * system is correctly initialized for every test.
   */
 public class DrJavaTestCase extends TestCase {
-  /** System property with the name of an alternative DrJava configuration file used during testing. */
-  public static final String TEST_DRJAVA_CONFIG_PROPERTY = "drjava.test.config";
-  
   /** Create a new DrJava test case. */
   public DrJavaTestCase() { super(); }
   
@@ -61,14 +59,17 @@ public class DrJavaTestCase extends TestCase {
     */
   public DrJavaTestCase(String name) { super(name); }
   
+  private static Log _log = new Log("DrJavaTestCase.txt", false);
+  
   /** Set up for every test.
     * @throws Exception  This convention is mandated by JUnit.TestCase, the superclass of this class.
     */
   protected void setUp() throws Exception {
     super.setUp();  // declared to throw Exception, forcing throws clause on preceding line
     Utilities.TEST_MODE = true;
-    final String newName = System.getProperty(TEST_DRJAVA_CONFIG_PROPERTY);
+    final String newName = System.getProperty("drjava.test.config");
     assert newName != null;
+//    _log.log("newName = " + newName);
 //    if (newName != null) {
 //      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
     Utilities.invokeAndWait(new Runnable() {

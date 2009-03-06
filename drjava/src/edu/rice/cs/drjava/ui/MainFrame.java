@@ -8713,7 +8713,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").
 //        show();
-      _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError); // this does nothing!
+      _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError);  // What does this do?
       _junitErrorPanel.progressStep(succeeded);
       _model.refreshActiveDocument();
     }
