@@ -378,7 +378,7 @@ public abstract class FileOps {
   }
   
   /** Reads the entire contents of a file and return them as canonicalized Swing Document text. All newLine sequences,
-    * including "\n", "\r", and "\r\n" are converted to "\n". */
+    * including "\n", "\r", and "\r\n" are converted to "\n". Characters below 32, except for newlines, are changed to spaces. */
   public static String readFileAsSwingText(final File file) throws IOException {
     FileReader reader = null;
     try {
@@ -391,6 +391,7 @@ public abstract class FileOps {
         
         if (c == '\n' && pred == '\r') { } // do nothing ignoring second character of "\r\n";
         else if (c == '\r') buf.append('\n');
+        else if ((c < 32) && (c != '\n')) buf.append(' ');
         else buf.append(c);
         
         pred = c;

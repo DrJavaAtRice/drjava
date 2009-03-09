@@ -926,6 +926,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Default paste action.  Returns focus to the correct pane. */
   final Action pasteAction = new DefaultEditorKit.PasteAction() {
     public void actionPerformed(ActionEvent e) {
+      // remove unprintable characters before pasting
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      Transferable contents = clipboard.getContents(null);
+      if ((contents != null) && (contents.isDataFlavorSupported(DataFlavor.stringFlavor))) {
+        try {
+          String result = (String)contents.getTransferData(DataFlavor.stringFlavor);
+          StringBuilder sb = new StringBuilder();
+          for(int i=0; i<result.length(); ++i) {
+            char ch = result.charAt(i);
+            if ((ch<32) && (ch!='\n')) sb.append(' ');
+            else sb.append(ch);
+          }
+          StringSelection stringSelection = new StringSelection(sb.toString());
+          clipboard.setContents(stringSelection, stringSelection);
+        }
+        catch (UnsupportedFlavorException ex) { /* just keep it the same */ }
+        catch (IOException ex) { /* just keep it the same */ }
+      }
+
       Component c = MainFrame.this.getFocusOwner();
       if (_currentDefPane.hasFocus()) {
         _currentDefPane.endCompoundEdit();
