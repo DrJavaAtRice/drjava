@@ -1542,6 +1542,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       generateJavaAPIList();
     }
   }
+
   
   /** Generate Java API class list. */
   public static List<JavaAPIListEntry> _generateJavaAPIList(String base,
@@ -1549,8 +1550,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                             String suffix) {
     // TODO: put this in an AsyncTask
     List<JavaAPIListEntry> l = new ArrayList<JavaAPIListEntry>();
+    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
+    return _generateJavaAPIList(base, stripPrefix, url);
+  }
+  
+  /** Generate Java API class list. */
+  public static List<JavaAPIListEntry> _generateJavaAPIList(String base,
+                                                            String stripPrefix,
+                                                            URL url) {
+    // TODO: put this in an AsyncTask
+    List<JavaAPIListEntry> l = new ArrayList<JavaAPIListEntry>();
     try {
-      URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
       InputStream urls = url.openStream();
       InputStreamReader is = null;
       BufferedReader br = null;
@@ -1633,11 +1643,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         suffix = "/allclasses-1.5.html";
       }
       else if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
-        base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
-        // but we do need to strip the absolute part to get correct fully-qualified class names
-        // and we take the default string here, not what the user entered, because the links in
-        // our allclasses-1.6.html file go to the original Sun website.
-        stripPrefix = JAVADOC_1_6_LINK.getDefaultString() + "/";
+        // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
+        // base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
+        // // but we do need to strip the absolute part to get correct fully-qualified class names
+        // // and we take the default string here, not what the user entered, because the links in
+        // // our allclasses-1.6.html file go to the original Sun website.
+        // stripPrefix = JAVADOC_1_6_LINK.getDefaultString() + "/";
+        base = DrJava.getConfig().getSetting(JAVADOC_1_6_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Javadoc are relative
         suffix = "/allclasses-1.6.html";
       }
       else {
@@ -1645,6 +1658,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return;
       }
       _javaAPIList = _generateJavaAPIList(base, stripPrefix, suffix);
+      
+      // add JUnit 3.8.2
+      List<JavaAPIListEntry> junit382APIList = _generateJavaAPIList(DrJava.getConfig().getSetting(JUNIT_3_8_2_LINK) + "/",
+                                                                    "", // relative links
+                                                                    "/allclasses-junit3.8.2.html");
+      _javaAPIList.addAll(junit382APIList);
+      
+      // add additional Javadoc libraries
+      for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
+        try {
+          List<JavaAPIListEntry> additionalList = _generateJavaAPIList(url + "/",
+                                                                       "", // relative links
+                                                                       new URL(url+"/allclasses-frame.html"));
+          _javaAPIList.addAll(additionalList);
+        }
+        catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+      }
+      
       if (_javaAPIList.size()==0) { _javaAPIList = null; }
     }
   }
@@ -3365,6 +3396,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     };
     DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
+    OptionListener<String> link382OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        _javaAPIList = null;
+      }
+    };
+    DrJava.getConfig().addOptionListener(JUNIT_3_8_2_LINK, link382OptionListener);
+    OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
+      public void optionChanged(OptionEvent<Vector<String>> oce) {
+        _javaAPIList = null;
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
     
     // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
     _documentBreakpointHighlights = new IdentityHashMap<Breakpoint, HighlightManager.HighlightInfo>();

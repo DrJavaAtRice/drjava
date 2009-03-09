@@ -239,11 +239,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Executes import statements for the classes and packages in the auto-import set. */
   public void autoImport() {
-    String classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING);
-    String []import_classes = classes.split(",");
+    java.util.Vector<String> classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
     final StringBuilder sb = new StringBuilder();
     
-    for(String s: import_classes) {
+    for(String s: classes) {
       String name = s.trim();
       if (s.length()>0) {
         sb.append("import ");
@@ -808,13 +807,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     debug.logEnd();
   }
 
-  /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASS_STRING. */
+  /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASSES. */
   public void performDefaultImports() {
-    String classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING);
-    String []import_classes = classes.split(",");
+    java.util.Vector<String> classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
     final StringBuilder sb = new StringBuilder();
     
-    for(String s: import_classes) {
+    for(String s: classes) {
       String name = s.trim();
       if (s.length()>0) {
         sb.append("import ");

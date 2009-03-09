@@ -857,6 +857,47 @@ public class ConfigFrame extends SwingFrame {
                        new StringOptionComponent(OptionConstants.JAVADOC_1_6_LINK,
                                                  "Javadoc 1.6 URL", this,
                                                  "URL for the Java 1.6 API, for generating links to library classes."));
+    addOptionComponent(panel, 
+                       new StringOptionComponent(OptionConstants.JUNIT_3_8_2_LINK,
+                                                 "JUnit 3.8.2 URL", this,
+                                                 "URL for the JUnit 3.8.2 API, for \"Open Java API Javadoc\"."));
+
+    VectorStringOptionComponent additionalJavadoc =
+      new VectorStringOptionComponent(OptionConstants.JAVADOC_ADDITIONAL_LINKS, "Additional Javadoc URLs", this,
+                                      "<html>Additional URLs with Javadoc, for \"Open Java API Javadoc\"<br>" +
+                                      "and auto-completion.</html>") {
+      protected boolean verify(String s) {
+        // verify that the allclasses-frame.html file exists at that URL. do not actually parse it now
+        boolean result = true;
+        try {
+          java.net.URL url = new java.net.URL(s+"/allclasses-frame.html");
+          java.io.InputStream urls = url.openStream();
+          java.io.InputStreamReader is = null;
+          java.io.BufferedReader br = null;
+          try {
+            is = new java.io.InputStreamReader(urls);
+            br = new java.io.BufferedReader(is);
+            String line = br.readLine();
+            if (line == null) { result = false; }
+          }
+          finally {
+            if (br!=null) { br.close(); }
+            if (is!=null) { is.close(); }
+            if (urls!=null) { urls.close(); }
+          }
+        }
+        catch(java.io.IOException ioe) { result = false; }
+        if (!result) {
+          JOptionPane.showMessageDialog(ConfigFrame.this,
+                                        "Could not find the Javadoc at the URL\n"+
+                                        s,
+                                        "Error Adding Javadoc",
+                                        JOptionPane.ERROR_MESSAGE); 
+        }
+        return result;
+      }
+    };
+    addOptionComponent(panel, additionalJavadoc);
     
     addOptionComponent(panel, 
                        new DirectoryOptionComponent(OptionConstants.JAVADOC_DESTINATION,
@@ -1132,10 +1173,32 @@ public class ConfigFrame extends SwingFrame {
                                                          "<html>The maximum number of lines to keep in a \"Follow File\"<br>"+
                                                          "or \"External Process\" pane. Enter 0 for unlimited.</html>"));
     
-    StringOptionComponent autoImportClasses = 
-      new StringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASS_STRING, "Classes to Auto-Import", this, 
-                                "<html>List of classes to auto-import every time the Interaction Pane" +
-                                "is reset or started. Classes must be separated by commas.");
+    VectorStringOptionComponent autoImportClasses =
+      new VectorStringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import", this,
+                                      "<html>List of classes to auto-import every time the<br>"+
+                                      "Interaction Pane is reset or started. Examples:<br><br>"+
+                                      "java.io.File<br>"+
+                                      "java.util.*</html>") {
+      protected boolean verify(String s) {
+        boolean result = true;
+        // verify that the string contains only Java identifier characters, dots and stars
+        for(int i=0; i<s.length(); ++i) {
+          char ch = s.charAt(i);
+          if ((ch!='.') && (ch!='*') && (!Character.isJavaIdentifierPart(ch))) {
+            result = false;
+            break;
+          }
+        }
+        if (!result) {
+          JOptionPane.showMessageDialog(ConfigFrame.this,
+                                        "This is not a valid class name:\n"+
+                                        s,
+                                        "Error Adding Class Name",
+                                        JOptionPane.ERROR_MESSAGE); 
+        }
+        return result;
+      }
+    };
     addOptionComponent(panel, autoImportClasses);
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.

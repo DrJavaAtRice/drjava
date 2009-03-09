@@ -72,8 +72,9 @@ public interface OptionConstants {
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
-  /** A String used as an example to import java classes. */
-  public static final StringOption INTERACTIONS_AUTO_IMPORT_CLASS_STRING = new StringOption("interactions.auto.import.class.string", "");
+  /** A Vector<String> storing the classes to automatically import. */
+  public static final VectorOption<String> INTERACTIONS_AUTO_IMPORT_CLASSES =
+    new VectorOption<String>("interactions.auto.import.classes", new StringOption("",""), new Vector<String>());
   
   /** The extension for an old DrJava project file */
   public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
@@ -939,6 +940,14 @@ public interface OptionConstants {
   /** The version of Java to use for the "Open Java API Javadoc" feature. */
   public static final ForcedChoiceOption JAVADOC_API_REF_VERSION =
     new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT, apiJavadocVersionChoices);
+
+  /** URL for JUnit 3.8.2 javadocs. */
+  public static final StringOption JUNIT_3_8_2_LINK =
+    new StringOption("junit.3.8.2.link", "http://www.cs.rice.edu/~javaplt/javadoc/junit3.8.2");
+
+  /** Additional Javadoc URLs. */
+  public static final VectorOption<String> JAVADOC_ADDITIONAL_LINKS =
+    new VectorOption<String>("javadoc.additional.links", new StringOption("",null), new Vector<String>());
   
   /** Whether to include the entire package heirarchy from the source roots when generating JavaDoc output. */
   public static final BooleanOption JAVADOC_FROM_ROOTS = new BooleanOption("javadoc.from.roots", Boolean.FALSE);
