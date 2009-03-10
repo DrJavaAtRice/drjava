@@ -41,6 +41,10 @@ import koala.dynamicjava.tree.tiger.HookTypeName;
 
 public interface Visitor<T> {
   /**
+   * Visits a CompilationUnit
+   */
+  T visit(CompilationUnit node);
+  /**
    * Visits an PackageDeclaration
    * @param node the node to visit
    */

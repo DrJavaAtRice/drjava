@@ -119,7 +119,11 @@ public class TypeNameChecker {
     return IterUtil.mapSnapshot(l, visitor);
   }
   
-  public void setTypeParameterBounds(TypeParameter[] tparams) {
+  /** Tag the given type parameters with a new VariableType, and set the bounds appropriately. */
+  public void checkTypeParameters(TypeParameter[] tparams) {
+    for (TypeParameter tparam : tparams) {
+      setTypeVariable(tparam, new VariableType(new BoundedSymbol(tparam, tparam.getRepresentation())));
+    }
     TypeNameVisitor v = new TypeNameVisitor();
     for (TypeParameter param : tparams) {
       Type firstBound = param.getBound().acceptVisitor(v);

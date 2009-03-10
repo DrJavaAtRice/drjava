@@ -98,7 +98,6 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
  * This tree visitor checks the typing rules for expressions and determines each expression's type.
- * (Somewhat incongruously, it also processes TypeNames.)
  * The following properties (from {@code NodeProperties}) are set:<ul>
  * <li>TYPE on all {@code Expression}s and on {@code FormalParameter}s</li>
  * <li>CONVERTED_TYPE on any {@code CastExpression} subexpressions that require runtime conversion</li>
@@ -812,7 +811,9 @@ public class ExpressionChecker {
       TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node,
                                   new TreeClassLoader(context.getClassLoader(), opt), opt);
       setDJClass(node, c);
-      new ClassMemberChecker(new ClassContext(context, c), opt).checkClassMembers(node.getMembers());
+      ClassMemberChecker checker = new ClassMemberChecker(new ClassContext(context, c), opt);
+      checker.checkClassSignatures(node.getMembers());
+      checker.checkBodies(node.getMembers());
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
@@ -923,7 +924,9 @@ public class ExpressionChecker {
       TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node,
                                   new TreeClassLoader(context.getClassLoader(), opt), opt);
       setDJClass(node, c);
-      new ClassMemberChecker(new ClassContext(context, c), opt).checkClassMembers(node.getMembers());
+      ClassMemberChecker checker = new ClassMemberChecker(new ClassContext(context, c), opt);
+      checker.checkClassSignatures(node.getMembers());
+      checker.checkBodies(node.getMembers());
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));

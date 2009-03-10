@@ -5,6 +5,8 @@ import java.io.StringWriter;
 
 public abstract class InterpreterException extends Exception {
   
+  public InterpreterException() {}
+  
   public InterpreterException(Throwable cause) {
     super(cause);
   }

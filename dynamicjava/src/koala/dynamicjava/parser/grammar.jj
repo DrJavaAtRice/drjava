@@ -1016,31 +1016,35 @@ PARSER_END(Parser)
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  List<Node> parseCompilationUnit() :
+  CompilationUnit parseCompilationUnit() :
   {
-    List<Node> list = new LinkedList<Node>();
-    Node node;
+    SourceInfo start = null;
+    PackageDeclaration pkg = null;
+    List<ImportDeclaration> imps = new LinkedList<ImportDeclaration>();
+    ImportDeclaration imp;
+    List<Node> decls = new LinkedList<Node>();
+    Node decl;
+    Token t;
   }
   {
-    [ node=packageDeclaration()
+    [ pkg=packageDeclaration() { start = pkg.getSourceInfo(); } ]
+    ( imp=importDeclaration()
+          {
+            imps.add(imp);
+            if (start == null) start = imp.getSourceInfo(); 
+          }
+    )*
+    ( decl=typeDeclaration()
        {
-      list.add(node);
-    }
-     ]
-       ( node=importDeclaration()
+         decls.add(decl);
+         if (start == null) start = decl.getSourceInfo();
+       }
+    |
+       t = ";" { if (start == null) start = _range(t, t); }
+    )*
+        t = <EOF>
           {
-       list.add(node);
-     }
-     )*
-       ( ( node=typeDeclaration()
-            {
-       list.add(node);
-     }
-          | ";" )
-          )*
-            <EOF>
-          {
-            return list;
+            return new CompilationUnit(pkg, imps, decls, SourceInfo.extend(start, t.beginLine, t.beginColumn));
           }
   }
   

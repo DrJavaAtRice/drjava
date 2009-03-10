@@ -95,7 +95,7 @@ public class JavaCCParser implements SourceCodeParser {
    * Parses a library file
    * @see koala.dynamicjava.tree.Node
    */
-  public List<Node> parseCompilationUnit() {
+  public CompilationUnit parseCompilationUnit() {
     try {
       return parser.parseCompilationUnit();
     }

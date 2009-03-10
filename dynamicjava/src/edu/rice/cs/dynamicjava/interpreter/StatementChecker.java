@@ -107,6 +107,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *     {@link MethodDeclaration}s</li>
  * <li>DJClASS on class declarations</li>
  * </ul>
+ * Throws an ExecutionError if an error is found.
  */
 // TODO: Handle non-literal constant expressions
 public class StatementChecker extends AbstractVisitor<TypeContext> implements Lambda<Node, TypeContext> {
@@ -308,6 +309,9 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     DJClass c = new TreeClass(context.makeClassName(node.getName()), null, node, loader, opt);
     setDJClass(node, c);
     
+    TypeContext sigContext = new ClassSignatureContext(context, c, loader);
+    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
+
     final TypeParameter[] tparams;
     if (node instanceof GenericClassDeclaration) {
       tparams = ((GenericClassDeclaration) node).getTypeParameters();
@@ -316,13 +320,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       tparams = ((GenericInterfaceDeclaration) node).getTypeParameters();
     }
     else { tparams = new TypeParameter[0]; }
-    for (TypeParameter param : tparams) {
-      setTypeVariable(param, new VariableType(new BoundedSymbol(param, param.getRepresentation())));
-    }
-    
-    TypeContext sigContext = new ClassSignatureContext(context, c, loader);
-    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
-    sigChecker.setTypeParameterBounds(tparams);
+    sigChecker.checkTypeParameters(tparams);
+
     if (node instanceof ClassDeclaration) {
       sigChecker.check(((ClassDeclaration) node).getSuperclass());
     }
@@ -330,13 +329,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       for (TypeName tn : node.getInterfaces()) { sigChecker.check(tn); }
     }
 
-    TypeContext bodyContext = new ClassContext(sigContext, c);
+    ClassMemberChecker classChecker = new ClassMemberChecker(new ClassContext(sigContext, c), opt); 
     if (node instanceof InterfaceDeclaration) {
-      new ClassMemberChecker(bodyContext, opt).checkInterfaceMembers(node.getMembers());
+      classChecker.checkInterfaceSignatures(node.getMembers());
     }
     else {
-      new ClassMemberChecker(bodyContext, opt).checkClassMembers(node.getMembers());
+      classChecker.checkClassSignatures(node.getMembers());
     }
+    classChecker.checkBodies(node.getMembers());
     
     return new LocalContext(context, loader, c);
   }
@@ -348,18 +348,15 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   @Override public TypeContext visit(MethodDeclaration node) {
     LocalFunction f = new LocalFunction(node);
     
+    TypeContext sigContext = new FunctionSignatureContext(context, f);
+    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
+
     TypeParameter[] tparams;
     if (node instanceof PolymorphicMethodDeclaration) {
       tparams = ((PolymorphicMethodDeclaration) node).getTypeParameters();
     }
     else { tparams = new TypeParameter[0]; }
-    for (TypeParameter param : tparams) {
-      setTypeVariable(param, new VariableType(new BoundedSymbol(param, param.getRepresentation())));
-    }
-    
-    TypeContext sigContext = new FunctionSignatureContext(context, f);
-    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
-    sigChecker.setTypeParameterBounds(tparams);
+    sigChecker.checkTypeParameters(tparams);
 
     Type returnT = sigChecker.check(node.getReturnType());
     setErasedType(node, ts.erasedClass(returnT));

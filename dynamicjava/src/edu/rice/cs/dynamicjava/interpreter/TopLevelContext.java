@@ -10,15 +10,16 @@ import edu.rice.cs.plt.text.TextUtil;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
-import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** The context at the top level.  Manages package and import statements, and
-  * loading external classes.
-  */
-public class TopLevelContext implements TypeContext {
+/**
+ * The context at the top level of a source file or local block.  Manages package and
+ * import statements.
+ */
+public class TopLevelContext extends DelegatingContext {
 
+  private final TypeContext _next; // need to save here for making copies
   private final ClassLoader _loader;
   private final String _currentPackage;
   private final Iterator<Integer> _anonymousCounter;
@@ -41,8 +42,21 @@ public class TopLevelContext implements TypeContext {
   /** Classes containing an individually-imported method */
   private final HashMap<String, DJClass> _importedMethods;
   
-  /** The context is initialized with an on-demand import of "java.lang"  */
+  /**
+   * Make a top-level context that delegates to a LibraryContext based on the given class loader.
+   * The context is initialized with an on-demand import of "java.lang".
+   */
   public TopLevelContext(ClassLoader loader) {
+    this(new LibraryContext(SymbolUtil.classLibrary(loader)), loader);
+  }
+  
+  /**
+   * Make a top-level context that delegates to the given context.
+   * The context is initialized with an on-demand import of "java.lang".
+   */
+  public TopLevelContext(TypeContext next, ClassLoader loader) {
+    super(next);
+    _next = next;
     _loader = loader;
     _currentPackage = "";
     _anonymousCounter = new SequenceIterator<Integer>(1, LambdaUtil.INCREMENT_INT);
@@ -58,11 +72,13 @@ public class TopLevelContext implements TypeContext {
   }
   
   private TopLevelContext(TopLevelContext copy) {
-    this(copy._loader, copy._currentPackage, copy);
+    this(copy._next, copy._loader, copy._currentPackage, copy);
   }
   
   @SuppressWarnings("unchecked")
-  private TopLevelContext(ClassLoader loader, String currentPackage, TopLevelContext bindings) {
+  private TopLevelContext(TypeContext next, ClassLoader loader, String currentPackage, TopLevelContext bindings) {
+    super(next);
+    _next = next;
     _loader = loader;
     _currentPackage = currentPackage;
     _anonymousCounter = bindings._anonymousCounter;
@@ -75,10 +91,15 @@ public class TopLevelContext implements TypeContext {
     _importedMethods = (HashMap<String, DJClass>) bindings._importedMethods.clone();
   }
   
+  protected TypeContext duplicate(TypeContext next) {
+    return new TopLevelContext(next, _loader, _currentPackage, this);
+  }
+
+  
   /* PACKAGE AND IMPORT MANAGEMENT */
   
   /** Set the current package to the given package name */
-  public TypeContext setPackage(String name) { return new TopLevelContext(_loader, name, this); }
+  public TypeContext setPackage(String name) { return new TopLevelContext(_next, _loader, name, this); }
   
   /** Import on demand all top-level classes in the given package */
   public TypeContext importTopLevelClasses(String pkg) {
@@ -141,7 +162,7 @@ public class TopLevelContext implements TypeContext {
   
   /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
   public boolean typeExists(String name, TypeSystem ts) {
-    return topLevelClassExists(name, ts) || memberClassExists(name, ts);
+    return topLevelClassExists(name, ts) || memberClassExists(name, ts) || super.typeVariableExists(name, ts);
   }
   
   /** Test whether {@code name} is an in-scope top-level class */
@@ -157,26 +178,19 @@ public class TopLevelContext implements TypeContext {
    * resulting in a null result here.
    */
   public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
-    if (TextUtil.contains(name, '.')) {
-      try { return SymbolUtil.wrapClass(_loader.loadClass(name)); }
-      catch (ClassNotFoundException e) { return null; }
-      catch (LinkageError e) { return null; }
-    }
+    if (TextUtil.contains(name, '.')) { return super.getTopLevelClass(name, ts); }
     else {
       DJClass result = _importedTopLevelClasses.get(name);
       if (result == null) {
-        try { result = SymbolUtil.wrapClass(_loader.loadClass(makeClassName(name))); }
-        catch (ClassNotFoundException e) { /* ignore -- class is not in the imported/default package */ }
-        catch (LinkageError e) { /* ignore -- class is not in the imported/default package */ }
+        result = super.getTopLevelClass(makeClassName(name), ts);
         if (result == null) {
-          LinkedList<Class<?>> onDemandMatches = new LinkedList<Class<?>>();
+          LinkedList<String> onDemandNames = new LinkedList<String>();
           for (String p : _onDemandPackages) {
-            try { onDemandMatches.add(_loader.loadClass(p + "." + name)); }
-            catch (ClassNotFoundException e2) { /* ignore -- class is not in this package */ }
-            catch (LinkageError e) { /* ignore -- class is not in this package */ }
+            String fullName = p + "." + name;
+            if (super.topLevelClassExists(fullName, ts)) { onDemandNames.add(fullName); }
           }
-          if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
-          else if (onDemandMatches.size() == 1) { result = SymbolUtil.wrapClass(onDemandMatches.getFirst()); }
+          if (onDemandNames.size() > 1) { throw new AmbiguousNameException(); }
+          else if (onDemandNames.size() == 1) { result = super.getTopLevelClass(onDemandNames.get(0), ts); }
         }
       }
       return result;
@@ -208,26 +222,18 @@ public class TopLevelContext implements TypeContext {
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
       else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
+      if (result == null) {
+        result = super.typeContainingMemberClass(name, ts);
+      }
     }
     return result;
   }
   
-  /** Test whether {@code name} is an in-scope type variable. */
-  public boolean typeVariableExists(String name, TypeSystem ts) {
-    return false;
-  }
-  
-  /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public VariableType getTypeVariable(String name, TypeSystem ts) {
-    return null;
-  }
-  
-
   /* VARIABLES: FIELDS AND LOCAL VARIABLES */  
   
   /** Test whether {@code name} is an in-scope field or local variable */
   public boolean variableExists(String name, TypeSystem ts) {
-    return fieldExists(name, ts);
+    return fieldExists(name, ts) || super.localVariableExists(name, ts);
   }
   
   /** Test whether {@code name} is an in-scope field */
@@ -252,18 +258,11 @@ public class TopLevelContext implements TypeContext {
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
       else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
+      if (result == null) {
+        result = super.typeContainingField(name, ts);
+      }
     }
     return result;
-  }
-  
-  /** Test whether {@code name} is an in-scope local variable */
-  public boolean localVariableExists(String name, TypeSystem ts) {
-    return false;
-  }
-  
-  /** Return the variable object for the given name, or {@code null} if it does not exist. */
-  public LocalVariable getLocalVariable(String name, TypeSystem ts) {
-    return null;
   }
   
   
@@ -271,7 +270,7 @@ public class TopLevelContext implements TypeContext {
   
   /** Test whether {@code name} is an in-scope method or local function */
   public boolean functionExists(String name, TypeSystem ts) {
-    return methodExists(name, ts);
+    return methodExists(name, ts) || super.localFunctionExists(name, ts);
   }
   
   /** Test whether {@code name} is an in-scope method */
@@ -295,20 +294,11 @@ public class TopLevelContext implements TypeContext {
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
       else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
+      if (result == null) {
+        result = super.typeContainingMethod(name, ts);
+      }
     }
     return result;
-  }
-  
-  public boolean localFunctionExists(String name, TypeSystem ts) {
-    return false;
-  }
-  
-  public Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts) {
-    return IterUtil.empty();
-  }
-  
-  public Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts, Iterable<LocalFunction> partial) {
-    return partial;
   }
   
   

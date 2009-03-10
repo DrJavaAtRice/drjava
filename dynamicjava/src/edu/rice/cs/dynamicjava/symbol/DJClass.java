@@ -67,20 +67,3 @@ public interface DJClass {
   public int hashCode();
 
 } 
-
-//// Things not dealt with here from ReflectionAdapter:
-//
-//  
-//  /** {@code true} iff {@code t} is an iterable */
-//  public boolean isIterable(Type t);
-//
-//  /** {@code true} iff {@code t} is an enum */
-//  public boolean isEnum(Type t);
-//  
-//  
-//  
-//  /**
-//   * Create a typed expression, wrapping the given expression (assumed to represent a primitive)
-//   * in conversion code that generates its corresponding boxed value.
-//   */
-//  public Expression box(Expression e, ClassType boxedType);

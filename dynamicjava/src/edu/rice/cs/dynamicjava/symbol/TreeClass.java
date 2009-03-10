@@ -25,16 +25,17 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** <p>A DJClass wrapper for a parsed class or interface declaration.</p>
-  * <p>A DJClass object must be available before any types can be created in terms of the class.
-  * Thus all class declarations introduced in some scope must have corresponding DJClasses before 
-  * processing the supertypes and type parameters, etc., of those declarations.  Here we handle
-  * much of this process by recursively creating all members of the given class at the time of
-  * creation, and tagging the declarations with these new objects.  The members of the resulting DJClass 
-  * are immediately available; type-related operations (accessing the type parameters or supertypes, 
-  * for example), on the other hand, must not occur until after the corresponding syntax has been 
-  * tagged with the appropriate types.
-  */
+/** 
+ * <p>A DJClass wrapper for a parsed class or interface declaration.</p>
+ * <p>A DJClass object must be available before any types can be created in terms of the class.
+ * Thus all class declarations introduced in some scope must have corresponding DJClasses before 
+ * processing the supertypes and type parameters, etc., of those declarations.  Here we handle
+ * much of this process by recursively creating all members of the given class at the time of
+ * creation, and tagging the declarations with these new objects.  The members of the resulting DJClass 
+ * are immediately available; type-related operations (accessing the type parameters or supertypes, 
+ * for example), on the other hand, must not occur until after the corresponding syntax has been 
+ * tagged with the appropriate types.
+ */
 public class TreeClass implements DJClass {
   
   private static final Type RUNTIME_BINDINGS_TYPE = 
@@ -52,6 +53,8 @@ public class TreeClass implements DJClass {
   private final Options _opt;
   
   /**
+   * All the class's declared members are indexed, and the FIELD, METHOD, and DJ_CLASS properties are set
+   * (applied recursively). 
    * @param fullName  The fully-qualified name of the class, as in {@link Class#getName}.
    * @param declaring  The declaring class of this class, or null if it appears at a top level or local
    *                   scope.

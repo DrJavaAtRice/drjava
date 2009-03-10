@@ -29,6 +29,8 @@
 package koala.dynamicjava.parser.wrapper;
 
 import java.util.*;
+
+import koala.dynamicjava.tree.CompilationUnit;
 import koala.dynamicjava.tree.Node;
 
 /**
@@ -52,5 +54,5 @@ public interface SourceCodeParser {
      * Parses a library file
      * @see koala.dynamicjava.tree.Node
      */
-    List<Node> parseCompilationUnit();
+    CompilationUnit parseCompilationUnit();
 }

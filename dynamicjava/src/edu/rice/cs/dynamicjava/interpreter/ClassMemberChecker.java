@@ -9,7 +9,6 @@ import koala.dynamicjava.interpreter.error.ExecutionError;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
-import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 import static koala.dynamicjava.interpreter.NodeProperties.*;
 
@@ -31,27 +30,23 @@ public class ClassMemberChecker {
     _opt = opt;
   }
   
-  public void checkClassMembers(Iterable<Node> nodes) {
-    checkClassSignatures(nodes);
-    checkBodies(nodes);
-  }
-  
-  public void checkInterfaceMembers(Iterable<Node> nodes) {
-    checkInterfaceSignatures(nodes);
-    checkBodies(nodes);
-  }
-  
-  private void checkClassSignatures(Iterable<Node> nodes) {
+  /** Validate the type signature of a class declaration: field types, method signatures, nested classes, etc. */
+  public void checkClassSignatures(Iterable<Node> nodes) {
     ClassMemberSignatureVisitor sig = new ClassMemberSignatureVisitor();
     for (Node n : nodes) { n.acceptVisitor(sig); }
   }
   
-  private void checkInterfaceSignatures(Iterable<Node> nodes) {
+  /** Validate the type signature of an interface declaration: field types, method signatures, nested classes, etc. */
+  public void checkInterfaceSignatures(Iterable<Node> nodes) {
     InterfaceMemberSignatureVisitor sig = new InterfaceMemberSignatureVisitor();
     for (Node n : nodes) { n.acceptVisitor(sig); }
   }
   
-  private void checkBodies(Iterable<Node> nodes) {
+  /**
+   * Check the field initializers, method bodies, nested class bodies, etc., of a class or interface declaration.
+   * Should be called <em>after</em> the signatures of all relevant classes and interfaces have been checked.
+   */
+  public void checkBodies(Iterable<Node> nodes) {
     BodyVisitor bod = new BodyVisitor();
     for (Node n : nodes) { n.acceptVisitor(bod); }
   }
@@ -70,18 +65,15 @@ public class ClassMemberChecker {
     @Override public Void visit(MethodDeclaration node) {
       DJMethod m = getMethod(node);
       
+      TypeContext sigContext = new FunctionSignatureContext(_context, m);
+      TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
+
       TypeParameter[] tparams;
       if (node instanceof PolymorphicMethodDeclaration) {
         tparams = ((PolymorphicMethodDeclaration) node).getTypeParameters();
       }
       else { tparams = new TypeParameter[0]; }
-      for (TypeParameter tparam : tparams) {
-        setTypeVariable(tparam, new VariableType(new BoundedSymbol(tparam, tparam.getRepresentation())));
-      }
-      
-      TypeContext sigContext = new FunctionSignatureContext(_context, m);
-      TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
-      sigChecker.setTypeParameterBounds(tparams);
+      sigChecker.checkTypeParameters(tparams);
       
       Type returnT = sigChecker.check(node.getReturnType());
       setErasedType(node, _opt.typeSystem().erasedClass(returnT));
@@ -129,18 +121,15 @@ public class ClassMemberChecker {
         throw new ExecutionError("constructor.name");
       }
       
+      TypeContext sigContext = new FunctionSignatureContext(_context, k);
+      TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
+
       TypeParameter[] tparams;
       if (node instanceof PolymorphicConstructorDeclaration) {
         tparams = ((PolymorphicConstructorDeclaration) node).getTypeParameters();
       }
       else { tparams = new TypeParameter[0]; }
-      for (TypeParameter tparam : tparams) {
-        setTypeVariable(tparam, new VariableType(new BoundedSymbol(tparam, tparam.getRepresentation())));
-      }
-      
-      TypeContext sigContext = new FunctionSignatureContext(_context, k);
-      TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
-      sigChecker.setTypeParameterBounds(tparams);
+      sigChecker.checkTypeParameters(tparams);
       
       for (FormalParameter param : node.getParameters()) {
         Type t = sigChecker.check(param.getType());

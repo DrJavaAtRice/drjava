@@ -145,6 +145,10 @@ public class SymbolUtil {
     else { return new ParameterizedClassType(c, vars); }
   }
   
+  /**
+   * Create an appropriate DJClass for the given Class, based on the available reflection APIs.
+   * If Java 5 is available, returns a {@link Java5Class}.  Otherwise, returns a {@link JavaClass}.
+   */
   public static DJClass wrapClass(Class<?> c) {
     if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
       try {
@@ -154,6 +158,24 @@ public class SymbolUtil {
       catch (ReflectException e) { throw new RuntimeException("Unable to create a Java5Class"); }
     }
     else { return new JavaClass(c); }
+  }
+  
+  /**
+   * Create an appropriate Library for the given ClassLoader, based on the available reflection APIs.
+   * If Java 5 is available, returns a {@link Java5Library}.  Otherwise, returns a {@link JavaLibrary}.
+   */
+  public static Library classLibrary(ClassLoader loader) {
+    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
+      try {
+        return (Library) ReflectUtil.loadObject(Library.class.getClassLoader(), Java5Library.class.getName(),
+                                                new Class<?>[]{ ClassLoader.class }, loader);
+      }
+      catch (ReflectException e) {
+        debug.log(e);
+        throw new RuntimeException("Unable to create a Java5Library");
+      }
+    }
+    else { return new JavaLibrary(loader); }
   }
   
   /**

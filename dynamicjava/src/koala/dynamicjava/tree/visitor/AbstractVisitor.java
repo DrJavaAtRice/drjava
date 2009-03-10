@@ -44,6 +44,14 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
   }
   
   /**
+   * Visits a CompilationUnit
+   * @param node the node to visit
+   */
+  public T visit(CompilationUnit node) {
+    return defaultCase(node);
+  }
+  
+  /**
    * Visits an PackageDeclaration
    * @param node the node to visit
    */
