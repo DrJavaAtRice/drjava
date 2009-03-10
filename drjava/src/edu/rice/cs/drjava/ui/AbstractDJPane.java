@@ -112,8 +112,14 @@ public abstract class AbstractDJPane extends JTextPane
   /** Our current paren/brace/bracket matching highlight. */
   protected volatile HighlightManager.HighlightInfo _matchHighlight = null;
   
-  protected static final SwingDocument NULL_DOCUMENT = new SwingDocument();
-  
+  protected static final SwingDocument NULL_DOCUMENT = new SwingDocument() {
+    public void addDocumentListener(DocumentListener listener) {
+      // do nothing, NULL_DOCUMENT is a dummy
+    }
+    public void addUndoableEditListener(UndoableEditListener listener) {
+      // do nothing, NULL_DOCUMENT is a dummy
+    }
+  };
   
   //--------- CONSTRUCTOR ----------
   

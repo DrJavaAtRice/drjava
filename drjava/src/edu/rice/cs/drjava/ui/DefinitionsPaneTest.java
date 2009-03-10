@@ -587,6 +587,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     listener.reset();
     OpenDefinitionsDocument d1 = _model.newFile();
+//    try {
+//      java.lang.reflect.Field fTimeStamp = d1.getClass().getSuperclass().getDeclaredField("_timestamp");
+//      fTimeStamp.setAccessible(true);
+//      fTimeStamp.setLong(d1,System.identityHashCode(d1));
+//    } catch(Exception e) { throw new RuntimeException(e); }
     d1.addFinalizationListener(fldoc);
     listener.waitDocChanged();
     DefinitionsPane p1 = _frame.getCurrentDefPane();
@@ -596,6 +601,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
     listener.reset();
     OpenDefinitionsDocument d2 = _model.newFile();
+//    try {
+//      java.lang.reflect.Field fTimeStamp = d2.getClass().getSuperclass().getDeclaredField("_timestamp");
+//      fTimeStamp.setAccessible(true);
+//      fTimeStamp.setLong(d2,System.identityHashCode(d1));
+//    } catch(Exception e) { throw new RuntimeException(e); }
     d2.addFinalizationListener(fldoc);
     listener.waitDocChanged();
     DefinitionsPane p2 = _frame.getCurrentDefPane();
@@ -605,6 +615,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     listener.reset();
     OpenDefinitionsDocument d3 = _model.newFile();
+//    try {
+//      java.lang.reflect.Field fTimeStamp = d3.getClass().getSuperclass().getDeclaredField("_timestamp");
+//      fTimeStamp.setAccessible(true);
+//      fTimeStamp.setLong(d3,System.identityHashCode(d1));
+//    } catch(Exception e) { throw new RuntimeException(e); }
     d3.addFinalizationListener(fldoc);
     listener.waitDocChanged();
     DefinitionsPane p3 = _frame.getCurrentDefPane();
@@ -614,6 +629,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
        
     listener.reset();
     OpenDefinitionsDocument d4 = _model.newFile();
+//    try {
+//      java.lang.reflect.Field fTimeStamp = d4.getClass().getSuperclass().getDeclaredField("_timestamp");
+//      fTimeStamp.setAccessible(true);
+//      fTimeStamp.setLong(d4,System.identityHashCode(d1));
+//    } catch(Exception e) { throw new RuntimeException(e); }
     d4.addFinalizationListener(fldoc);
     listener.waitDocChanged();
     DefinitionsPane p4 = _frame.getCurrentDefPane();
@@ -623,6 +643,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
         
     listener.reset();
     OpenDefinitionsDocument d5 = _model.newFile();
+//    try {
+//      java.lang.reflect.Field fTimeStamp = d5.getClass().getSuperclass().getDeclaredField("_timestamp");
+//      fTimeStamp.setAccessible(true);
+//      fTimeStamp.setLong(d5,System.identityHashCode(d1));
+//    } catch(Exception e) { throw new RuntimeException(e); }
     d5.addFinalizationListener(fldoc);
     listener.waitDocChanged();
     DefinitionsPane p5 = _frame.getCurrentDefPane();
@@ -632,6 +657,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     listener.reset();
     OpenDefinitionsDocument d6 = _model.newFile();
+//    try {
+//      java.lang.reflect.Field fTimeStamp = d6.getClass().getSuperclass().getDeclaredField("_timestamp");
+//      fTimeStamp.setAccessible(true);
+//      fTimeStamp.setLong(d6,System.identityHashCode(d1));
+//    } catch(Exception e) { throw new RuntimeException(e); }
     d6.addFinalizationListener(fldoc);
     listener.waitDocChanged();
     DefinitionsPane p6 = _frame.getCurrentDefPane();
@@ -641,22 +671,21 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
     // print identity hash codes into a StringBuilder in case we need them later;
     // this does not create any references
-    StringBuilder sbIdHashCodes = new StringBuilder();
-    sbIdHashCodes.append("_frame = "+_frame.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
-    sbIdHashCodes.append("_model = "+_model.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
-    sbIdHashCodes.append("p1     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p1))+"\n");
-    sbIdHashCodes.append("p2     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p2))+"\n");
-    sbIdHashCodes.append("p3     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p3))+"\n");
-    sbIdHashCodes.append("p4     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p4))+"\n");
-    sbIdHashCodes.append("p5     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p5))+"\n");
-    sbIdHashCodes.append("p6     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p6))+"\n");
-    sbIdHashCodes.append("d1     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d1))+"\n");
-    sbIdHashCodes.append("d2     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d2))+"\n");
-    sbIdHashCodes.append("d3     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d3))+"\n");
-    sbIdHashCodes.append("d4     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d4))+"\n");
-    sbIdHashCodes.append("d5     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d5))+"\n");
-    sbIdHashCodes.append("d6     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d6)));
-
+//    StringBuilder sbIdHashCodes = new StringBuilder();
+//    sbIdHashCodes.append("_frame = "+_frame.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
+//    sbIdHashCodes.append("_model = "+_model.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
+//    sbIdHashCodes.append("p1     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p1))+"\n");
+//    sbIdHashCodes.append("p2     = "+p2.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p2))+"\n");
+//    sbIdHashCodes.append("p3     = "+p3.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p3))+"\n");
+//    sbIdHashCodes.append("p4     = "+p4.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p4))+"\n");
+//    sbIdHashCodes.append("p5     = "+p5.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p5))+"\n");
+//    sbIdHashCodes.append("p6     = "+p6.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p6))+"\n");
+//    sbIdHashCodes.append("d1     = "+d1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d1))+"\n");
+//    sbIdHashCodes.append("d2     = "+d2.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d2))+"\n");
+//    sbIdHashCodes.append("d3     = "+d3.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d3))+"\n");
+//    sbIdHashCodes.append("d4     = "+d4.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d4))+"\n");
+//    sbIdHashCodes.append("d5     = "+d5.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d5))+"\n");
+//    sbIdHashCodes.append("d6     = "+d6.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(d6)));
     
     // all the panes have a listener, so lets close all files
 //    Utilities.show("Waiting to start");
@@ -685,7 +714,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     if (ct == 10) {
       // if we fail with a garbage collection problem, dump heap
       LOG.setEnabled(true);
-      LOG.log(sbIdHashCodes.toString());
+//      LOG.log(sbIdHashCodes.toString());
       try { LOG.log("heap dump in "+dumpHeap()); }
       catch(Exception e) {
         System.err.println("Could not dump heap.");
