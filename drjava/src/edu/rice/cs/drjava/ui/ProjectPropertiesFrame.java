@@ -91,7 +91,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
   private VectorFileOptionComponent _extraClassPathList;
   private VectorFileOptionComponent _excludedFilesList;
-
+  
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
   public ProjectPropertiesFrame(MainFrame mf) {
     super("Project Properties");
@@ -605,7 +605,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
         
         File mainClass = chooser.getSelectedFile();
         
-        File sourceRoot = _model.getProjectRoot();
+        //File sourceRoot = _model.getProjectRoot();
+        File sourceRoot = new File(_projRootSelector.getFileField().getText());
         
         if(sourceRoot == null || mainClass == null)
           return;
