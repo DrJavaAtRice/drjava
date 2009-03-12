@@ -122,13 +122,13 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   public void tearDown() throws Exception {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-          IOUtil.deleteOnExitRecursively(_parent);
-          _auxFile.delete();
-          //FileOps.deleteDirectory(_parent);
-          _frame.dispose();
-          _projFile = FileOps.NULL_FILE;
-          _model = null;
-          _frame = null;
+        IOUtil.deleteOnExitRecursively(_parent);
+        _auxFile.delete();
+        //FileOps.deleteDirectory(_parent);
+        _frame.dispose();
+        _projFile = FileOps.NULL_FILE;
+        _model = null;
+        _frame = null;
       }
     });
     super.tearDown();
