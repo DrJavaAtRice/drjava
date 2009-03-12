@@ -34,45 +34,39 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.javalanglevels;
+package edu.rice.cs.javalanglevels.util;
 
-import edu.rice.cs.javalanglevels.tree.*;
-import edu.rice.cs.javalanglevels.parser.JExprParser;
-import java.util.*;
-
-import junit.framework.TestCase;
-
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
 /**
- * Represents the data for an instantiation of a class.  When you actually create an object of some type,
- * an InstanceData represents what you have created.  Each InstanceData has a pointer to the SymbolData of its
- * class type.
+ * A JScrollPane without a traditional Swing border.  Uses its own
+ * EtchedBorder instead, which improves the appearance of nested panes
+ * on Mac OS X.
+ * @version $Id: BorderlessScrollPane.java 4447 2008-04-18 16:06:34Z rcartwright $
  */
-public class InstanceData extends TypeData {
-  
-  /**The class corresponding to this InstanceData*/
-  private SymbolData _classSymbolData;
-  
-  /*@param classSD  The SymbolData this is an instance of*/
-  public InstanceData(SymbolData classSD) {
-    super(null);
-    _classSymbolData = classSD;
-    _name = classSD.getName();
-  }
-  
-  
-  /**@return  true since this is an InstanceData.*/
-  public boolean isInstanceType() {
-    return true;
-  }
- 
- 
- /**@return  The class SymbolData corresponding to the class of this InstanceData.*/
-  public SymbolData getSymbolData() { 
-    return _classSymbolData;
-  }
+public class BorderlessScrollPane extends JScrollPane {
+  /** The default border for a "borderless" scroll pane.
+   */
+  private static final Border DEFAULT = new EtchedBorder();
 
-  /**@return this InstanceData.*/
-  public InstanceData getInstanceData() { 
-    return this;
+  // note, I can't think of a way to guarantee superclass behavior without
+  // overriding each superclass constructor and then calling setBorder().
+  
+  public BorderlessScrollPane() {
+    super();
+    setBorder(DEFAULT);
+  }
+  public BorderlessScrollPane(Component view) {
+    super(view);
+    setBorder(DEFAULT);
+  }
+  public BorderlessScrollPane(Component view, int vsbPolicy, int hsbPolicy) {
+    super(view,vsbPolicy,hsbPolicy);
+    setBorder(DEFAULT);
+  }
+  public BorderlessScrollPane(int vsbPolicy, int hsbPolicy) {
+    super(vsbPolicy,hsbPolicy);
+    setBorder(DEFAULT);
   }
 }

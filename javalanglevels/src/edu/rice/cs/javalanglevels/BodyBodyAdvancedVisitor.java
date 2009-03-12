@@ -91,7 +91,7 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
    */
   public void forBlock(Block that) {
     forBlockDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     that.getStatements().visit(new BodyBodyAdvancedVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
@@ -104,16 +104,16 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
    */
   public void forCatchBlock(CatchBlock that) {
     forCatchBlockDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     Block b = that.getBlock();
     forBlockDoFirst(b);
-    if (prune(b)) { return; }
+    if (prune(b)) return;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     
     VariableData exceptionVar = formalParameters2VariableData(new FormalParameter[]{ that.getException() }, bd)[0];
-    if (prune(that.getException())) { return; }
+    if (prune(that.getException())) return;
     bd.addVar(exceptionVar);
     
     b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
@@ -156,39 +156,29 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
     //do nothing!  No errors to throw here.
   }
 
-  /*
-   * Make sure that no modifiers appear before the InnerClassDef, and then delegate.
-   */
+  /* Make sure that no modifiers appear before the InnerClassDef, and then delegate. */
   public void forInnerClassDef(InnerClassDef that) {
     if (that.getMav().getModifiers().length > 0) {_addAndIgnoreError("No modifiers may appear before a class declaration here", that.getMav());}
     handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "$" + _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
   }
   
-  /**
-   * Give an error, since InnerInterfaces cannot appear here.
-   */
+  /** Give an error, since InnerInterfaces cannot appear here. */
   public void forInnerInterfaceDef(InnerInterfaceDef that) {
     _addError("Inner interface declarations cannot appear here", that);
   }
   
-  /**
-   * Delegate to method in LLV
-   */
+  /** Delegate to method in LLV. */
   public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _bodyData);
   }
 
-  /**
-   * Delegate to method in LLV
-   */
+  /** Delegate to method in LLV. */
   public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _bodyData);
   }
 
     
-   /**
-    * Test most of the methods declared above right here:
-    */
+  /** Test most of the methods declared above right here. */
   public static class BodyBodyAdvancedVisitorTest extends TestCase {
     
     private BodyBodyAdvancedVisitor _bav;

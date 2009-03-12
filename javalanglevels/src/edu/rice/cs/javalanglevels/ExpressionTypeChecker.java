@@ -51,6 +51,8 @@ import junit.framework.TestCase;
  */
 public class ExpressionTypeChecker extends Bob {
   
+  public final JavaVersion JAVA_VERSION = LanguageLevelConverter.OPT.javaVersion();
+  
   /**
    * Simply pass the necessary information on to superclass constructor.
    * @param data  The data that represents the context.
@@ -61,32 +63,32 @@ public class ExpressionTypeChecker extends Bob {
    * @param vars  The list of fields that have been assigned up to the point where Bob is called.
    * @param thrown  The list of exceptions that the context is declared to throw
    */
-  public ExpressionTypeChecker(Data data, File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  public ExpressionTypeChecker(Data data, File file, String packageName, LinkedList<String> importedFiles, 
+                               LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
+                               LinkedList<Pair<SymbolData, JExpression>> thrown) {
     super(data, file, packageName, importedFiles, importedPackages, vars, thrown);
   }
 
 
-  /**
-   * Visit the lhs of this assignment with the LValueTypeChecker, which does extra checking for the assignment.
-   * Visit the rhs of this assignment with the regular expression type checker, since anything normal expression can appear on the right.
-   * @param that  The SimpleAssignmentExpression to type check
-   * @return  The result of the assignment.
-   */
+  /** Visit the lhs of this assignment with LValueTypeChecker, which does extra checking.  Visit the rhs of this
+    * assignment with the regular expression type checker, since anything normal expression can appear on the right.
+    * @param that  The SimpleAssignmentExpression to type check
+    * @return  The result of the assignment.
+    */
   public TypeData forSimpleAssignmentExpression(SimpleAssignmentExpression that) {
     TypeData value_result = that.getValue().visit(this);
     TypeData name_result = that.getName().visit(new LValueTypeChecker(this));
     return forSimpleAssignmentExpressionOnly(that, name_result, value_result);
   }
   
-  /**
-   * A SimpleAssignmentExpression is okay if both the lhs and the rhs are instances, and the rhs is assignable to the lhs.
-   * Give an error if these constraints are not met.
-   * Return an instance of the lhs or null if the left or right could not be resolved.
-   * @param that  The SimpleAssignmentExpression being typechecked
-   * @param name_result  The TypeData representing the lhs of the assignment
-   * @param value_result  The TypeData representing the rhs of the assignment
-   */
-  public TypeData forSimpleAssignmentExpressionOnly(SimpleAssignmentExpression that, TypeData name_result, TypeData value_result) {
+  /** A SimpleAssignmentExpression is okay if both lhs and rhs are instances, and rhs is assignable to lhs. Give an 
+    * error if these constraints are not met.  Return an instance of the lhs or null if the left or right could not be resolved.
+    * @param that  The SimpleAssignmentExpression being typechecked
+    * @param name_result  The TypeData representing the lhs of the assignment
+    * @param value_result  The TypeData representing the rhs of the assignment
+    */
+  public TypeData forSimpleAssignmentExpressionOnly(SimpleAssignmentExpression that, TypeData name_result, 
+                                                    TypeData value_result) {
     if (name_result == null || value_result == null) {return null;}
   
     //make sure that both lhs and rhs could be resolved (not PackageDatas)
@@ -96,22 +98,23 @@ public class ExpressionTypeChecker extends Bob {
     
     //make sure both are instance datas
     if (assertInstanceType(name_result, "You cannot assign a value to the type " + name_result.getName(), that) &&
-        assertInstanceType(value_result, "You cannot use the type name " + value_result.getName() + " on the right hand side of an assignment", that)) {
+        assertInstanceType(value_result, "You cannot use the type name " + value_result.getName() + 
+                           " on the right hand side of an assignment", that)) {
       
       //make sure the rhs can be assigned to the lhs
-      if (!value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("You cannot assign something of type " + value_result.getName() + " to something of type " + name_result.getName(), that);
+      if (! value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), JAVA_VERSION)) {
+        _addError("You cannot assign something of type " + value_result.getName() + " to something of type " + 
+                  name_result.getName(), that);
       }
     }   
     return name_result.getInstanceData();
   }
 
-  /**
-   * Visit the lhs of this assignment with the LValueWithValueTypeChecker, which does extra checking for the lhs.
-   * Visit the rhs of this assignment with the regular expression type checker, since anything regular expression can appear on the right.
-   * @param that  The PlusAssignmentExpression to type check
-   * @return  The result of the assignment.
-   */
+  /** Visit the lhs of this assignment with LValueWithValueTypeChecker, which does extra checking.  Visit the rhs of
+    * this assignment with regular expression type checker, since anything regular expression can appear on the right.
+    * @param that  The PlusAssignmentExpression to type check
+    * @return  The result of the assignment.
+    */
   public TypeData forPlusAssignmentExpression(PlusAssignmentExpression that) {
     TypeData value_result = that.getValue().visit(this);
     TypeData name_result = that.getName().visit(new LValueWithValueTypeChecker(this));
@@ -119,15 +122,16 @@ public class ExpressionTypeChecker extends Bob {
     return forPlusAssignmentExpressionOnly(that, name_result, value_result);
   }
   
-  /**
-   * A PlusAssignmentExpression is okay if the lhs and rhs are both instances.  If the lhs is a string, the rhs can be anything.  If the rhs is a string,
-   * the lhs had better be a string too.  If neither of them is a string, they should both be numbers, and the rhs should be assignable to the lhs.
-   * @param that  The PlusAssignmentExpression we are typechecking
-   * @param name_result  The TypeData representing the lhs
-   * @param value_result  The TypeData representing the rhs
-   * @return  An instance of the result of the lhs, or null if either the right or the left could not be resolved.
-   */
-  public TypeData forPlusAssignmentExpressionOnly(PlusAssignmentExpression that, TypeData name_result, TypeData value_result) {
+  /** A PlusAssignmentExpression is okay if the lhs and rhs are both instances.  If the lhs is a string, the rhs can
+    * be anything.  If the rhs is a string, the lhs had better be a string too.  If neither of them is a string, they 
+    * should both be numbers, and the rhs should be assignable to the lhs.
+    * @param that  The PlusAssignmentExpression we are typechecking
+    * @param name_result  The TypeData representing the lhs
+    * @param value_result  The TypeData representing the rhs
+    * @return  An instance of the result of the lhs, or null if either the right or the left could not be resolved.
+    */
+  public TypeData forPlusAssignmentExpressionOnly(PlusAssignmentExpression that, TypeData name_result, 
+                                                  TypeData value_result) {
     if (name_result == null || value_result == null) {return null;}
     
     //make sure that both lhs and rhs could be resolved (not PackageDatas)
@@ -138,41 +142,47 @@ public class ExpressionTypeChecker extends Bob {
     //need to see if rhs is a String.
     SymbolData string = getSymbolData("java.lang.String", that, false, false);
 
-    if (name_result.getSymbolData().isAssignableTo(string, LanguageLevelConverter.OPT.javaVersion())) {
+    if (name_result.getSymbolData().isAssignableTo(string, JAVA_VERSION)) {
       //the rhs is a String, so just make sure they are both instance types.
-      assertInstanceType(name_result, "The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified a type name", that);
-      assertInstanceType(value_result, "The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified a type name", that);
+      assertInstanceType(name_result, "The arguments to a Plus Assignment Operator (+=) must both be instances, " + 
+                         "but you have specified a type name", that);
+      assertInstanceType(value_result, "The arguments to a Plus Assignment Operator (+=) must both be instances, " + 
+                         "but you have specified a type name", that);
       return string.getInstanceData();
     }
     
     else { //neither is a string, so they must both be numbers
-      if (!name_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion()) ||
-          !value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("The arguments to the Plus Assignment Operator (+=) must either include an instance of a String or both be numbers.  You have specified arguments of type " + name_result.getName() + " and " + value_result.getName(), that);
+      if (!name_result.getSymbolData().isNumberType(JAVA_VERSION) ||
+          !value_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        _addError("The arguments to the Plus Assignment Operator (+=) must either include an instance of a String " + 
+                  "or both be numbers.  You have specified arguments of type " + name_result.getName() + " and " + 
+                  value_result.getName(), that);
         return string.getInstanceData(); //return String by default
       }
       
-      else if (!value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("You cannot increment something of type " + name_result.getName() + " with something of type " + value_result.getName(), that);
+      else if (! value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), 
+                                                            JAVA_VERSION)) {
+        _addError("You cannot increment something of type " + name_result.getName() + " with something of type " + 
+                  value_result.getName(), that);
       }
       
       else {
-        assertInstanceType(name_result, "The arguments to the Plus Assignment Operator (+=) must both be instances, but you have specified a type name", that);
-        assertInstanceType(value_result, "The arguments to the Plus Assignment Operator (+=) must both be instances, but you have specified a type name", that);
+        assertInstanceType(name_result, "The arguments to the Plus Assignment Operator (+=) must both be instances, " + 
+                           "but you have specified a type name", that);
+        assertInstanceType(value_result, "The arguments to the Plus Assignment Operator (+=) must both be instances, " + 
+                           "but you have specified a type name", that);
       }
     
       return name_result.getInstanceData();
     }
   }
-
   
-  /**
-   * Visit the lhs of this assignment with the LValueWithValueTypeChecker, which does extra checking for the lhs, because it needs to be able
-   * to be assigned to and already have a value.
-   * Visit the rhs of this assignment with the regular expression type checker, since any regular expression can appear on the right.
-   * @param that  The NumericAssignmentExpression to type check
-   * @return  The result of the assignment.
-   */
+  /** Visit the lhs of this assignment with the LValueWithValueTypeChecker, which does extra checking for the lhs, 
+    * because it needs to be able to be assigned to and already have a value.  Visit the rhs of this assignment 
+    * with the regular expression type checker, since any regular expression can appear on the right.
+    * @param that  The NumericAssignmentExpression to type check
+    * @return  The result of the assignment.
+    */
   public TypeData forNumericAssignmentExpression(NumericAssignmentExpression that) {
     TypeData value_result = that.getValue().visit(this);
     TypeData name_result = that.getName().visit(new LValueWithValueTypeChecker(this));
@@ -210,15 +220,15 @@ public class ExpressionTypeChecker extends Bob {
   }
 
     
-  /**
-   * A NumericAssignmentExpression is okay if both the lhs and the rhs are instances, both are numbers, and the rhs is assignable to the lhs.
-   * Return the lhs, or null
-   * @param that  The SimpleAssignmentExpression being typechecked
-   * @param name_result  The TypeData representing the lhs of the assignment
-   * @param value_result  The TypeData representing the rhs of the assignment
-   * @return  An instance of the lhs, or null if the lhs or rhs could not be resolved.
-   */
-  public TypeData forNumericAssignmentExpressionOnly(NumericAssignmentExpression that, TypeData name_result, TypeData value_result) {
+  /** A NumericAssignmentExpression is okay if both the lhs and the rhs are instances, both are numbers, and the rhs
+    * is assignable to the lhs. Return the lhs, or null
+    * @param that  The SimpleAssignmentExpression being typechecked
+    * @param name_result  The TypeData representing the lhs of the assignment
+    * @param value_result  The TypeData representing the rhs of the assignment
+    * @return  An instance of the lhs, or null if the lhs or rhs could not be resolved.
+    */
+  public TypeData forNumericAssignmentExpressionOnly(NumericAssignmentExpression that, TypeData name_result, 
+                                                     TypeData value_result) {
     if (name_result == null || value_result == null) {return null;}
     
     //make sure that both lhs and rhs could be resolved (not PackageDatas)
@@ -227,24 +237,30 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     //make sure both are instance datas
-    if (assertInstanceType(name_result, "You cannot use a numeric assignment (-=, %=, *=, /=) on the type " + name_result.getName(), that) &&
-        assertInstanceType(value_result, "You cannot use the type name " + value_result.getName() + " on the left hand side of a numeric assignment (-=, %=, *=, /=)", that)) {
+    if (assertInstanceType(name_result, "You cannot use a numeric assignment (-=, %=, *=, /=) on the type " + 
+                           name_result.getName(), that) &&
+        assertInstanceType(value_result, "You cannot use the type name " + value_result.getName() + 
+                           " on the left hand side of a numeric assignment (-=, %=, *=, /=)", that)) {
       
       boolean error = false;
       //make sure that both lhs and rhs are number types:
-      if (!name_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("The left side of this expression is not a number.  Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
+      if (!name_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        _addError("The left side of this expression is not a number.  " + 
+                  "Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
         error=true;
       }
-      if (!value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("The right side of this expression is not a number.  Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
+      if (!value_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        _addError("The right side of this expression is not a number.  " + 
+                  "Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
         error = true;
       }
             
-      //make sure the lhs is parent type of rhs  NOTE: technically, this is allowable in full java (try int i = 0; i+= 4.2), but it is inconsistent
-      //with the fact that you cannot say int i = 0; i = i + 4.2;  To avoid student confusion, we will not allow it.
-      if (!error && !value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("You cannot use a numeric assignment (-=, %=, *=, /=) on something of type " + name_result.getName() + " with something of type " + value_result.getName(), that);
+      // Make sure the lhs is parent type of rhs  NOTE: technically this is allowable in full java but inconsistent
+      // with the fact that you cannot say int i = 0; i = i + 4.2;  To avoid student confusion, we will not allow it.
+      if (!error && !value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), 
+                                                                 JAVA_VERSION)) {
+        _addError("You cannot use a numeric assignment (-=, %=, *=, /=) on something of type " + name_result.getName() + 
+                  " with something of type " + value_result.getName(), that);
       }
     }  
     return name_result.getInstanceData();  
@@ -253,43 +269,45 @@ public class ExpressionTypeChecker extends Bob {
   /**
    * Not currently supported.
    */
-  public TypeData forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that, TypeData name_result, TypeData value_result) {
-    throw new RuntimeException ("Internal Program Error: Shift assignment operators are not supported.  This should have been caught before the TypeChecker.  Please report this bug.");
+  public TypeData forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that, TypeData name_result, 
+                                                   TypeData value_result) {
+    throw new RuntimeException ("Internal Program Error: Shift assignment operators are not supported.  " + 
+                                "This should have been caught before the TypeChecker.  Please report this bug.");
   }
 
   /**
    * Not currently supported.
    */
   public TypeData forBitwiseAssignmentExpressionOnly(BitwiseAssignmentExpression that, TypeData name_result, TypeData value_result) {
-    throw new RuntimeException ("Internal Program Error: Bitwise assignment operators are not supported.  This should have been caught before the TypeChecker.  Please report this bug.");
+    throw new RuntimeException ("Internal Program Error: Bitwise assignment operators are not supported.  " + 
+                                "This should have been caught before the TypeChecker.  Please report this bug.");
   }
   
-  /**
-   * Check if this BooleanExpression was okay.  It is not okay if either the left or the right result are not boolean types
-   * or if they are not instance datas.  Throw an appropriate error if any of these is the case.  Always return the boolean instance type.
-   * @param that  The BooleanExpression being checked
-   * @param left_result  The result from visiting the left side of the BooleanExpression
-   * @param right_result  The result from visiting the right side of the BooleanExpression
-   * @return  The boolean instance type
-   */
+  /** Checks if this BooleanExpression is well-formed, i.e., that left and right arguments are well-formed boolean
+    * expressions.  Throws an appropriate error if ill-formed.  Always returns the boolean instance type.
+    * @param that  The BooleanExpression being checked
+    * @param left_result  The result from visiting the left side of the BooleanExpression
+    * @param right_result  The result from visiting the right side of the BooleanExpression
+    * @return  The boolean instance type
+    */
   public TypeData forBooleanExpressionOnly(BooleanExpression that, TypeData left_result, TypeData right_result) {
-   if (left_result == null || right_result == null) {return null;}
+   if (left_result == null || right_result == null)  return null;
     
-   //make sure that both lhs and rhs could be resolved (not PackageDatas)
-    if (!assertFound(left_result, that) || !assertFound(right_result, that)) {
-      return null;
-    }
+   // Make sure that both lhs and rhs could be resolved (not PackageDatas)
+    if (! assertFound(left_result, that) || ! assertFound(right_result, that)) return null;
    
     if (assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that) &&
-        !left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
+        !left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
       
-      _addError("The left side of this expression is not a boolean value.  Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
+      _addError("The left side of this expression is not a boolean value.  " + 
+                "Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
     }
     
     if (assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that) &&
-        !right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
+        !right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
       
-      _addError("The right side of this expression is not a boolean value.  Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
+      _addError("The right side of this expression is not a boolean value.  " + 
+                "Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
     }
 
     
@@ -299,72 +317,75 @@ public class ExpressionTypeChecker extends Bob {
   /**
    * Not currently supported.
    */
-  public TypeData forBitwiseBinaryExpressionOnly(BitwiseBinaryExpression that, TypeData left_result, TypeData right_result) {
-    throw new RuntimeException ("Internal Program Error: Bitwise operators are not supported.  This should have been caught before the TypeChecker.  Please report this bug.");
+  public TypeData forBitwiseBinaryExpressionOnly(BitwiseBinaryExpression that, TypeData left_result, 
+                                                 TypeData right_result) {
+    throw new RuntimeException ("Internal Program Error: Bitwise operators are not supported.  " + 
+                                "This should have been caught before the TypeChecker.  Please report this bug.");
   }
 
-  /**
-   * This EqualityExpression is badly formed if left_result and right_result are not both reference types or not both number types
-   * or not both boolean types.  Also, both the left and the right should be instance datas.  Throw an error if this is not correct.
-   * Return the InstanceData corresponding to boolean, the return type from an equality check.
-   * @param that  The EqualityExpression being checked
-   * @param left_result  The result of visiting the left side of the expression
-   * @param right_result  The result of visiting the right side of the expression
-   * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
-   */
+  /** This EqualityExpression is badly formed if left_result and right_result have incompatible types.  Both left 
+    * and the right should be instance datas.  Throws an error if ill-formed.  Returns the InstanceData corresponding
+    * to boolean, the return type from an equality check.
+    * @param that  The EqualityExpression being checked
+    * @param left_result  The result of visiting the left side of the expression
+    * @param right_result  The result of visiting the right side of the expression
+    * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
+    */
   public TypeData forEqualityExpressionOnly(EqualityExpression that, TypeData left_result, TypeData right_result) {
-    if (left_result == null || right_result == null) {return null;}
+    if (left_result == null || right_result == null) return null;
     
     //make sure that both lhs and rhs could be resolved (not PackageDatas)
-    if (!assertFound(left_result, that) || !assertFound(right_result, that)) {
-      return null;
-    }
-
+    if (!assertFound(left_result, that) || !assertFound(right_result, that)) return null;
     
     //if either left or right are primitive, the must either be both numeric or both boolean
-    if (left_result.getSymbolData().isPrimitiveType() || right_result.getSymbolData().isPrimitiveType()) {
-      if (!((left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion()) &&
-             right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
-            (left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())
-               && right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())))) {
-        _addError("At least one of the arguments to this Equality Operator (==, !=) is primitive.  Therefore, they must either both be number types or both be boolean types.  You have specified expressions with type " + left_result.getName() + " and " + right_result.getName(), that);
+    SymbolData left = left_result.getSymbolData();
+    SymbolData right = right_result.getSymbolData();
+    if (left.isPrimitiveType() || right.isPrimitiveType()) {
+      if (!((left.isNumberType(JAVA_VERSION) &&
+             right.isNumberType(JAVA_VERSION)) ||
+            (left.isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)
+               && right.isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)))) {
+        _addError("At least one of the arguments to this Equality Operator (==, !=) is primitive.  Therefore, they " + 
+                  "must either both be number types or both be boolean types.  You have specified expressions with type " +
+                  left_result.getName() + " and " + right_result.getName(), that);
       }
     }
     
     //otherwise, anything goes...just check for instance types
     
-    assertInstanceType(left_result, "The arguments to this Equality Operator(==, !=) must both be instances.  Instead, you have referenced a type name on the left side", that);
-    assertInstanceType(right_result, "The arguments to this Equality Operator(==, !=) must both be instances.  Instead, you have referenced a type name on the right side", that);
+    assertInstanceType(left_result, "The arguments to this Equality Operator(==, !=) must both be instances.  " +
+                       "Instead, you have referenced a type name on the left side", that);
+    assertInstanceType(right_result, "The arguments to this Equality Operator(==, !=) must both be instances.  " + 
+                       "Instead, you have referenced a type name on the right side", that);
     
     return SymbolData.BOOLEAN_TYPE.getInstanceData();
   }
 
-  /**
-   * Verify that both the left and right of this comparison expression are number types and InstanceDatas.  Give an
-   * error if this is not the case.  Return the InstanceData for boolean, since that is the result of a comparison expression.
-   * @param that  The Comparison expression being type-checked
-   * @param left_result  The result of visiting the left side of the expression
-   * @param right_result  The result of visiting the right side of the expression
-   * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
-   */
+  /** Verify that both the left and right of this comparison expression are number types and InstanceDatas.  Give an
+    * error if this is not the case.  Return the InstanceData for boolean, since that is the result of a comparison 
+    * expression.
+    * @param that  The Comparison expression being type-checked
+    * @param left_result  The result of visiting the left side of the expression
+    * @param right_result  The result of visiting the right side of the expression
+    * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
+    */
   public TypeData forComparisonExpressionOnly(ComparisonExpression that, TypeData left_result, TypeData right_result) {
     if (left_result == null || right_result == null) {return null;}
     
     //make sure that both lhs and rhs could be resolved (not PackageDatas)
-    if (!assertFound(left_result, that) || !assertFound(right_result, that)) {
-      return null;
-    }
-
+    if (!assertFound(left_result, that) || !assertFound(right_result, that)) return null;
     
-    if (!left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-      _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator (<, >; <=, >=) to it", that);
+    if (!left_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+      _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator" +
+                " (<, >; <=, >=) to it", that);
     }
     else {
       assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that);
     }
 
-    if (!right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-      _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator (<, >; <=, >=) to it", that);
+    if (!right_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+      _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator" +
+                " (<, >; <=, >=) to it", that);
     }
     else {
       assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that);
@@ -377,7 +398,8 @@ public class ExpressionTypeChecker extends Bob {
    * Not currently supported
    */
   public TypeData forShiftBinaryExpressionOnly(ShiftBinaryExpression that, TypeData left_result, TypeData right_result) {
-    throw new RuntimeException ("Internal Program Error: BinaryShifts are not supported.  This should have been caught before the TypeChecker.  Please report this bug.");
+    throw new RuntimeException ("Internal Program Error: BinaryShifts are not supported.  " + 
+                                "This should have been caught before the TypeChecker.  Please report this bug.");
   }
 
   
@@ -400,23 +422,29 @@ public class ExpressionTypeChecker extends Bob {
     
     SymbolData string = getSymbolData("java.lang.String", that, false, false);
 
-    if (left_result.getSymbolData().isAssignableTo(string, LanguageLevelConverter.OPT.javaVersion()) ||
-        right_result.getSymbolData().isAssignableTo(string, LanguageLevelConverter.OPT.javaVersion())) {
+    if (left_result.getSymbolData().isAssignableTo(string, JAVA_VERSION) ||
+        right_result.getSymbolData().isAssignableTo(string, JAVA_VERSION)) {
       //one of these is a String, so just make sure they are both instance types.
-      assertInstanceType(left_result, "The arguments to the Plus Operator (+) must both be instances, but you have specified a type name", that);
-      assertInstanceType(right_result, "The arguments to the Plus Operator (+) must both be instances, but you have specified a type name", that);
+      assertInstanceType(left_result, "The arguments to the Plus Operator (+) must both be instances, " + 
+                         "but you have specified a type name", that);
+      assertInstanceType(right_result, "The arguments to the Plus Operator (+) must both be instances, " + 
+                         "but you have specified a type name", that);
       return string.getInstanceData();
     }
     
     else { //neither is a string, so they must both be numbers
-      if (!left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion()) ||
-          !right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("The arguments to the Plus Operator (+) must either include an instance of a String or both be numbers.  You have specified arguments of type " + left_result.getName() + " and " + right_result.getName(), that);
+      if (!left_result.getSymbolData().isNumberType(JAVA_VERSION) ||
+          !right_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        _addError("The arguments to the Plus Operator (+) must either include an instance of a String or both be" + 
+                  " numbers.  You have specified arguments of type " + left_result.getName() + " and " + 
+                  right_result.getName(), that);
         return string.getInstanceData(); //return String by default
       }
       else {
-        assertInstanceType(left_result, "The arguments to the Plus Operator (+) must both be instances, but you have specified a type name", that);
-        assertInstanceType(right_result, "The arguments to the Plus Operator (+) must both be instances, but you have specified a type name", that);
+        assertInstanceType(left_result, "The arguments to the Plus Operator (+) must both be instances, but you have" + 
+                           " specified a type name", that);
+        assertInstanceType(right_result, "The arguments to the Plus Operator (+) must both be instances, but you have" + 
+                           " specified a type name", that);
       }
       
       return _getLeastRestrictiveType(left_result.getSymbolData(), right_result.getSymbolData()).getInstanceData();
@@ -442,16 +470,18 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that) &&
-        !left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
+        !left_result.getSymbolData().isNumberType(JAVA_VERSION)) {
       
-      _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary Operator (*, /, -, %) to it", that);
+      _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary" + 
+                " Operator (*, /, -, %) to it", that);
       return right_result.getInstanceData();
     }
     
     if (assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that) &&
-        !right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
+        !right_result.getSymbolData().isNumberType(JAVA_VERSION)) {
       
-      _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary Operator (*, /, -, %) to it", that);
+      _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary " + 
+                "Operator (*, /, -, %) to it", that);
       return left_result.getInstanceData();
     }
 
@@ -463,7 +493,8 @@ public class ExpressionTypeChecker extends Bob {
    * This should have been caught in the first pass.  Throw a RuntimeException.
    */
   public TypeData forNoOpExpressionOnly(NoOpExpression that, TypeData left_result, TypeData right_result) {
-    throw new RuntimeException("Internal Program Error: The student is missing an operator.  This should have been caught before the TypeChecker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: The student is missing an operator.  " + 
+                               "This should have been caught before the TypeChecker.  Please report this bug.");
   }
 
   
@@ -497,13 +528,12 @@ public class ExpressionTypeChecker extends Bob {
   }
   
   
-  /**
-   * An IncrementExpression is badly formatted if the thing being incremented is a type (value_result is not an InstanceData)
-   * or if the value being incremented cannot be assigned to.  Throw an error in either of these cases.
-   * @param that  The IncrementExpression that is being type checked.
-   * @param value_result  The result of evaluating the argument to the increment expression.
-   * @return  The type of what is being incremented.
-   */
+  /** An IncrementExpression is badly formatted if the thing being incremented is a type (value_result is not an 
+    * InstanceData) or if the value being incremented cannot be assigned to.  Throw an error in either of these cases.
+    * @param that  The IncrementExpression that is being type checked.
+    * @param value_result  The result of evaluating the argument to the increment expression.
+    * @return  The type of what is being incremented.
+    */
   public TypeData forIncrementExpressionOnly(IncrementExpression that, TypeData value_result) {
     if (value_result == null) {return null;}
  
@@ -512,9 +542,11 @@ public class ExpressionTypeChecker extends Bob {
       return null;
     }
     
-    if (assertInstanceType(value_result, "You cannot increment or decrement " + value_result.getName() + ", because it is a class name not an instance", that)) {
-      if (!value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("You cannot increment or decrement something that is not a number type.  You have specified something of type " + value_result.getName(), that);
+    if (assertInstanceType(value_result, "You cannot increment or decrement " + value_result.getName() + 
+                           ", because it is a class name not an instance", that)) {
+      if (!value_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        _addError("You cannot increment or decrement something that is not a number type." + 
+                  "  You have specified something of type " + value_result.getName(), that);
       }
     }
     return value_result.getInstanceData();
@@ -536,10 +568,12 @@ public class ExpressionTypeChecker extends Bob {
       return null;
     }
     
-    if (assertInstanceType(value_result, "You cannot use a numeric unary operator (+, -) with " + value_result.getName() + ", because it is a class name, not an instance", that) &&
-        !value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
+    if (assertInstanceType(value_result, "You cannot use a numeric unary operator (+, -) with " + value_result.getName() + 
+                           ", because it is a class name, not an instance", that) &&
+        !value_result.getSymbolData().isNumberType(JAVA_VERSION)) {
       
-      _addError("You cannot apply this unary operator to something of type " + value_result.getName() + ".  You can only apply it to a numeric type such as double, int, or char", that);
+      _addError("You cannot apply this unary operator to something of type " + value_result.getName() + 
+                ".  You can only apply it to a numeric type such as double, int, or char", that);
       return value_result;
     }
     
@@ -547,21 +581,20 @@ public class ExpressionTypeChecker extends Bob {
     return _getLeastRestrictiveType(value_result.getSymbolData(), SymbolData.INT_TYPE).getInstanceData();
   }
   
-    /**
-     * Not Currently Supported.
-     */
+  /** Not Currently Supported. */
   public TypeData forBitwiseNotExpressionOnly(BitwiseNotExpression that, TypeData value_result) {
-    throw new RuntimeException("Internal Program Error: BitwiseNot is not supported.  It should have been caught before getting to the TypeChecker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: BitwiseNot is not supported.  " + 
+                               "It should have been caught before getting to the TypeChecker.  Please report this bug.");
   }
 
   
-  /**
-   * A NotExpression is illformed if its argument is not an instance type or its argument is not of type boolean.  Give an error if this
-   * is the case.  Always return SymbolData.BOOLEAN_TYPE.getInstanceData() since this is the correct type for this expression.
-   * @param that  The NotExpression being type-checked
-   * @param value_result  The type of the argument to the NotExpression
-   * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
-   */
+  /** A NotExpression is illformed if its argument is not an instance type or its argument is not of type boolean.  Give
+    * an error if this is the case.  Always return SymbolData.BOOLEAN_TYPE.getInstanceData() since this is the correct 
+    * type for this expression.
+    * @param that  The NotExpression being type-checked
+    * @param value_result  The type of the argument to the NotExpression
+    * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
+    */
   public TypeData forNotExpressionOnly(NotExpression that, TypeData value_result) {
     if (value_result == null) {return null;}
     
@@ -570,42 +603,42 @@ public class ExpressionTypeChecker extends Bob {
       return null;
     }
     
-    if (assertInstanceType(value_result, "You cannot use the not (!) operator with " + value_result.getName() + ", because it is a class name, not an instance", that) &&
-        !value_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
+    if (assertInstanceType(value_result, 
+                           "You cannot use the not (!) operator with " + value_result.getName() + 
+                           ", because it is a class name, not an instance", that) &&
+        ! value_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, 
+                                                      JAVA_VERSION)) {
       
-      _addError("You cannot use the not (!) operator with something of type " + value_result.getName() + ". Instead, it should be used with an expression of boolean type", that);
+      _addError("You cannot use the not (!) operator with something of type " + value_result.getName() + 
+                ". Instead, it should be used with an expression of boolean type", that);
     }
     
     return SymbolData.BOOLEAN_TYPE.getInstanceData(); //it should always be a boolean type.
     
   }
 
-  /**
-   * Not currently supported
-   */
-  public TypeData forConditionalExpressionOnly(ConditionalExpression that, TypeData condition_result, TypeData forTrue_result, TypeData forFalse_result) {
-    throw new RuntimeException ("Internal Program Error: Conditional expressions are not supported.  This should have been caught before the TypeChecker.  Please report this bug.");
+  /** Not currently supported */
+  public TypeData forConditionalExpressionOnly(ConditionalExpression that, TypeData condition_result, 
+                                               TypeData forTrue_result, TypeData forFalse_result) {
+    throw new RuntimeException ("Internal Program Error: Conditional expressions are not supported.  " + 
+                                "This should have been caught before the TypeChecker.  Please report this bug.");
   }
   
   
-  /**
-   * Not currently supported
-   */
+  /** Not currently supported */
   public TypeData forInstanceofExpressionOnly(InstanceofExpression that, TypeData value_result, TypeData type_result) {
-    throw new RuntimeException("Internal Program Error: instanceof is not currently supported.  This should have been caught before the Type Checker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: instanceof is not currently supported." + 
+                               "  This should have been caught before the Type Checker.  Please report this bug.");
   }
-  
-  
    
-  /**
-   * Check to see if this CastExpression is okay.  It is not okay if type_result is not a SymbolData,
-   * value_result is not an InstanceData, or if value_result cannot be cast to type_result.  If any of these are the case, give an
-   * appropriate error message.  Return an instance data corresponding to type_result.
-   * @param that  The CastExpression being examined.
-   * @param type_result  The type of the cast expression
-   * @param value_result  The instance type of what is being cast
-   * @return  type_result's instance data.
-   */
+  /** Checks to see if this CastExpression is okay.  It is not okay if type_result is not a SymbolData, value_result is 
+    * not an InstanceData, or if value_result cannot be cast to type_result.  If any of these are the case, give an
+    * appropriate error message.  Return an instance data corresponding to type_result.
+    * @param that  The CastExpression being examined.
+    * @param type_result  The type of the cast expression
+    * @param value_result  The instance type of what is being cast
+    * @return  type_result's instance data.
+    */
   public TypeData forCastExpressionOnly(CastExpression that, TypeData type_result, TypeData value_result) {
     if (type_result == null || value_result == null) {return null;}
     
@@ -615,32 +648,34 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (type_result.isInstanceType()) {
-      _addError("You are trying to cast to an instance of a type, which is not allowed.  Perhaps you meant to cast to the type itself, " + type_result.getName(), that);
+      _addError("You are trying to cast to an instance of a type, which is not allowed.  " + 
+                "Perhaps you meant to cast to the type itself, " + type_result.getName(), that);
     }
     
-    else if (assertInstanceType(value_result, "You are trying to cast " + value_result.getName() + ", which is a class or interface type, not an instance", that) &&
-             !value_result.getSymbolData().isCastableTo(type_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
+    else if (assertInstanceType(value_result, "You are trying to cast " + value_result.getName() + 
+                                ", which is a class or interface type, not an instance", that) &&
+             !value_result.getSymbolData().isCastableTo(type_result.getSymbolData(), 
+                                                        JAVA_VERSION)) {
       
-      _addError("You cannot cast an expression of type " + value_result.getName() + " to type " + type_result.getName() + " because they are not related", that);
+      _addError("You cannot cast an expression of type " + value_result.getName() + " to type " + 
+                type_result.getName() + " because they are not related", that);
     }
     
     return type_result.getInstanceData();
   }
 
 
-  /**
-   * Give a Runtime Exception, because the fact that there is an EmptyExpression here should have been
-   * caught before the TypeChecker pass.
-   */
+  /** Gives a Runtime Exception, because the fact that there is an EmptyExpression here should have been caught before 
+    * the TypeChecker pass.
+    */
   public TypeData forEmptyExpressionOnly(EmptyExpression that) {
-    throw new RuntimeException("Internal Program Error: EmptyExpression encountered.  Student is missing something.  Should have been caught before TypeChecker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: EmptyExpression encountered.  Student is missing something." + 
+                               "  Should have been caught before TypeChecker.  Please report this bug.");
   }
-  
-  
-  /** 
-   * Visit the ClassInstantiation's arguments.  Lookup the required constructor matching the ClassInstantiation's argument types.
-   * Check accessibility of the constructor.  In all cases, returns classToInstantiate.getInstanceData.
-   */
+   
+  /** Visit the ClassInstantiation's arguments.  Lookup the required constructor matching the ClassInstantiation's 
+    * argument types.  Check accessibility of the constructor.  In all cases, returns classToInstantiate.getInstanceData.
+    */
   public InstanceData classInstantiationHelper(ClassInstantiation that, SymbolData classToInstantiate) {
     if (classToInstantiate == null) {return null;}
     Expression[] expr = that.getArguments().getExpressions();
@@ -648,17 +683,18 @@ public class ExpressionTypeChecker extends Bob {
     for (int i = 0; i<expr.length; i++) {
       Expression e = expr[i];
       TypeData type = e.visit(this);
-      if (type == null || !assertFound(type, expr[i]) || ! assertInstanceType(type, "Cannot pass a class or interface name as a constructor argument", e)) {
+      if (type == null || !assertFound(type, expr[i]) || 
+          ! assertInstanceType(type, "Cannot pass a class or interface name as a constructor argument", e)) {
         // by default, return an instance type of context
         return classToInstantiate.getInstanceData();
       }
       args[i] = type.getInstanceData();
     }
 
-    MethodData md = _lookupMethod(LanguageLevelVisitor.getUnqualifiedClassName(that.getType().getName()), classToInstantiate, args, that, 
-                           "No constructor found in class " + Data.dollarSignsToDots(classToInstantiate.getName()) + " with signature: ", 
-                           true, _getData().getSymbolData());
-
+    MethodData md = 
+      _lookupMethod(LanguageLevelVisitor.getUnqualifiedClassName(that.getType().getName()), classToInstantiate, args, 
+                    that, "No constructor found in class " + Data.dollarSignsToDots(classToInstantiate.getName()) + 
+                    " with signature: ", true, _getData().getSymbolData());
 
     if (md == null) {return classToInstantiate.getInstanceData();}
     
@@ -674,26 +710,26 @@ public class ExpressionTypeChecker extends Bob {
   
   
   
-  /**
-   * Handle a simple class instantiation--
-   * Here, if the type of the instantiation cannot be resolved, return null because an error will already been thrown.
-   * Also check to see if the class being instantiated is non-static, is not a top level class, and the name used has a dot in it.
-   * If so, then this is a non-static inner class being referenced like a static inner class, and an error should be thrown.
-   * Once you've checked all of that, just delegate to the class Instantion helper, which will 
-   * resolve the type of the class.
-   * @return  The InstanceData corresponding to the instantiation
-   */
+  /** Handles a simple class instantiation.  If the type of the instantiation is not resolved, returns null because an
+    * error has already been thrown.  Also checks to see if the class being instantiated is non-static, is not a top 
+    * level class, and the name used has a dot in it.  If so, then a non-static inner class is being referenced like 
+    * a static inner class, and an error is thrown. After performing these checks, delegates to the class Instantion 
+    * helper, which will resolve the type of the class.
+    * @return  The InstanceData corresponding to the instantiation
+    */
   public TypeData forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) {
     SymbolData type = getSymbolData(that.getType().getName(), _getData(), that);
     if (type == null) {return null;}
-    //It is an error to instantiate a non-static inner class from a static context (i.e. new A.B() where B is not a static inner class).
-    //Here, we make sure that if B is non-static, it is not an inner class of anything.
+    // Cannot instantiate a non-static inner class from a static context (i.e. new A.B() where B is dynamic).
+    // Here, we make sure that if B is non-static, it is not an inner class of anything.
     String name = that.getType().getName();
     int lastIndexOfDot = name.lastIndexOf(".");
     if (!type.hasModifier("static") && (type.getOuterData() != null) && lastIndexOfDot != -1) {
       String firstPart = name.substring(0, lastIndexOfDot);
       String secondPart = name.substring(lastIndexOfDot + 1, name.length()); //skip the dot itself
-      _addError(Data.dollarSignsToDots(type.getName()) + " is not a static inner class, and thus cannot be instantiated from this context.  Perhaps you meant to use an instantiation of the form new " + firstPart + "().new " + secondPart + "()", that);
+      _addError(Data.dollarSignsToDots(type.getName()) + " is not a static inner class, and thus cannot be " + 
+                "instantiated from this context.  Perhaps you meant to use an instantiation of the form new " + 
+                firstPart + "().new " + secondPart + "()", that);
     }
     InstanceData result = classInstantiationHelper(that, type);
     if (result != null && result.getSymbolData().hasModifier("abstract")) {
@@ -702,21 +738,22 @@ public class ExpressionTypeChecker extends Bob {
     return result;
   }
   
-  /**
-   * Handle this complex named class instantiation.  First, visit the lhs and get the enclosing type.  If the enclosing type is null, or
-   * a PackageData, return null, because an error has already been thrown.  Otherwise, call the classInstantiationHelper to get a new
-   * instance of the rhs, from the context of the lhs.  It is an error if the class being instantiated is non-static, but it is called from
-   * a static context.  It is an error if the class being instantiated is static but it is being called as a.new B();
-   * @param that  The ComplexNamedClassInstantiation being created
-   * @return  An InstanceData corresponding to the instantiation
-   */
+  /** Handles this complex named class instantiation.  First, visit the lhs and get the enclosing type.  If the 
+    * enclosing type is null, or a PackageData, return null, because an error has already been thrown.  Otherwise, 
+    * call the classInstantiationHelper to get a new instance of the rhs, from the context of the lhs.  It is an 
+    * error if the class being instantiated is non-static, but it is called from a static context.  It is an error
+    * if the class being instantiated is static but it is being called as a.new B();
+    * @param that  The ComplexNamedClassInstantiation being created
+    * @return  An InstanceData corresponding to the instantiation
+    */
   public TypeData forComplexNamedClassInstantiation(ComplexNamedClassInstantiation that) {
     TypeData enclosingType = that.getEnclosing().visit(this);
     if ((enclosingType == null) || ! assertFound(enclosingType, that.getEnclosing())) { return null; }
     
     else {
       //make sure we can see enclosingType
-      checkAccessibility(that, enclosingType.getSymbolData().getMav(), enclosingType.getSymbolData().getName(), enclosingType.getSymbolData(), _data.getSymbolData(), "class or interface", true);
+      checkAccessibility(that, enclosingType.getSymbolData().getMav(), enclosingType.getSymbolData().getName(), 
+                         enclosingType.getSymbolData(), _data.getSymbolData(), "class or interface", true);
 
       // TODO: will getSymbolData correctly handle all cases here?
       //TODO: We still do not handle static fields on the lhs correctly.  I think.
@@ -725,14 +762,16 @@ public class ExpressionTypeChecker extends Bob {
       if (innerClass == null) {return null;}
       
       //make sure we can see inner class
-      checkAccessibility(that, innerClass.getMav(), innerClass.getName(), innerClass, _data.getSymbolData(), "class or interface", true);
+      checkAccessibility(that, innerClass.getMav(), innerClass.getName(), innerClass, _data.getSymbolData(), 
+                         "class or interface", true);
       InstanceData result = classInstantiationHelper(that, innerClass);
       if (result == null) {return null;}
       boolean resultIsStatic = result.getSymbolData().hasModifier("static");
     
       if (!enclosingType.isInstanceType() && !resultIsStatic) {
-               _addError ("The constructor of a non-static inner class can only be called on an instance of its containing class (e.g. new " + 
-                   Data.dollarSignsToDots(enclosingType.getName()) + "().new " + that.getType().getName() + "())", that);
+               _addError ("The constructor of a non-static inner class can only be called on an instance of its" + 
+                          " containing class (e.g. new " + Data.dollarSignsToDots(enclosingType.getName()) + "().new " +
+                          that.getType().getName() + "())", that);
       }
       else if (resultIsStatic) {
         _addError("You cannot instantiate a static inner class or interface with this syntax.  Instead, try new " + 
@@ -747,17 +786,17 @@ public class ExpressionTypeChecker extends Bob {
   }
   
   
-  /**
-   * Do the work that is shared between a SimpleAnonymousClassInstantiation and a ComplexAnonymousClassInstantiation.
-   * Basically, update the anonymous inner class corresponding to the enclosing data and the superC with
-   * superC and accessors, if necessary.
-   * @param that  The AnonymousClassInstantiation being processed.
-   * @param superC  The data corresponding to the super class of this instantiation (the type being created)
-   */
+  /** Do the work that is shared between SimpleAnonymousClassInstantiation and ComplexAnonymousClassInstantiation. 
+    * Basically, update the anonymous inner class corresponding to the enclosing data and the superC with superC 
+    * and accessors, if necessary.
+    * @param that  The AnonymousClassInstantiation being processed.
+    * @param superC  The data corresponding to the super class of this instantiation (the type being created)
+    */
   public SymbolData handleAnonymousClassInstantiation(AnonymousClassInstantiation that, SymbolData superC) {
     SymbolData sd = _data.getNextAnonymousInnerClass();
     if (sd == null) {
-      throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.");
+      throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class." + 
+                                 "  Please report this bug.");
     }
     if (sd.getSuperClass() == null) {
       if (superC.isInterface()) {sd.setSuperClass(symbolTable.get("java.lang.Object")); sd.addInterface(superC);}
@@ -778,26 +817,33 @@ public class ExpressionTypeChecker extends Bob {
    * @return  The result of type checking the class instantiation.
    */
   public TypeData forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    final SymbolData superclass_result = getSymbolData(that.getType().getName(), _data, that);//resolve super class
+    final SymbolData superclass_result = getSymbolData(that.getType().getName(), _data, that); // resolve super class
 
     // Get this anonymous inner class's SymbolData, and finish resolving it.
     SymbolData myData = handleAnonymousClassInstantiation(that, superclass_result);
       
-    //It is an error to instantiate a non-static inner class from a static context (i.e. new A.B() where B is not a static inner class).
-    //Here, we make sure that if B is non-static, it is not an inner class of anything.
+    // Cannot instantiate a non-static inner class from a static context (i.e. new A.B() where B is dynamic).
+    // Here, we make sure that if B is non-static, it is not an inner class of anything.
     String name = that.getType().getName();
     int lastIndexOfDot = name.lastIndexOf(".");
-    if (!superclass_result.hasModifier("static") && !superclass_result.isInterface() && (superclass_result.getOuterData() != null) && lastIndexOfDot != -1) {
+    if (!superclass_result.hasModifier("static") && !superclass_result.isInterface() && 
+        (superclass_result.getOuterData() != null) && lastIndexOfDot != -1) {
       String firstPart = name.substring(0, lastIndexOfDot);
       String secondPart = name.substring(lastIndexOfDot + 1, name.length());
-      _addError(Data.dollarSignsToDots(superclass_result.getName()) + " is not a static inner class, and thus cannot be instantiated from this context.  Perhaps you meant to use an instantiation of the form new " + Data.dollarSignsToDots(firstPart) + "().new " + Data.dollarSignsToDots(secondPart) + "()", that);
+      _addError(Data.dollarSignsToDots(superclass_result.getName()) + 
+                " is not a static inner class, and thus cannot be instantiated from this context." + 
+                "  Perhaps you meant to use an instantiation of the form new " + Data.dollarSignsToDots(firstPart) + 
+                "().new " + Data.dollarSignsToDots(secondPart) + "()", that);
     }
     
     
     //if superclass_result is an interface, then the constructor that should be used is Object--i.e. no arguments
     if (superclass_result.isInterface()) {
       Expression[] expr = that.getArguments().getExpressions();
-      if (expr.length > 0) { _addError("You are creating an anonymous inner class that directly implements an interface, thus you should use the Object constructor which takes in no arguments.  However, you have specified " + expr.length + " arguments", that);}
+      if (expr.length > 0) { 
+        _addError("You are creating an anonymous inner class that directly implements an interface, thus you should" + 
+                  " use the Object constructor which takes in no arguments.  However, you have specified " + 
+                  expr.length + " arguments", that);}
     }
     
     else {classInstantiationHelper(that, superclass_result);} //use super class here, since it has constructors in it
@@ -806,30 +852,31 @@ public class ExpressionTypeChecker extends Bob {
     //clone the variables and visit the body.
     LinkedList<VariableData> vars = cloneVariableDataList(_vars);
     vars.addAll(myData.getVars());
-    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(myData, _file, _package, _importedFiles, _importedPackages, vars, _thrown));
+    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(myData, _file, _package, _importedFiles, 
+                                                                               _importedPackages, vars, _thrown));
 
     
     _checkAbstractMethods(myData, that);
     return myData.getInstanceData();  //but actually return an instance of the anonymous inner class
   }
   
-  /**
-   * Resolve the type of this anonymous class.  Look it up in the enclosing data, check that
-   * it is using a valid constructor through the classInstantiationHelper and visit the body.
-   * Make sure that all abstract methods are overwritten.  The enclosing data is found by first resolving the
-   * enclosing data.  Make sure that if this is an inner class it is being called from the appropriate static/non-static context (see
-   * ComplexNamedClassInstantiation for more details)
-   * @param that  The SimpleAnonymousClassInstantiation being type-checked
-   * @return  The result of type checking the class instantiation.
-   */
+  /** Resolve the type of this anonymous class.  Look it up in enclosing data, check that it is using a valid constructor
+    * through the classInstantiationHelper and visit the body. Make sure that all abstract methods are overwritten.  The
+    * enclosing data is found by first resolving the enclosing data.  Make sure that if this is an inner class it is being
+    * called from the appropriate static/non-static context (see ComplexNamedClassInstantiation for more details).
+    * @param that  The SimpleAnonymousClassInstantiation being type-checked
+    * @return  The result of type checking the class instantiation.
+    */
   public TypeData forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     TypeData enclosingType = that.getEnclosing().visit(this);
     if ((enclosingType == null) || !assertFound(enclosingType, that.getEnclosing())) {return null; }
     
     //make sure we can see enclosingType
-    checkAccessibility(that, enclosingType.getSymbolData().getMav(), enclosingType.getSymbolData().getName(), enclosingType.getSymbolData(), _data.getSymbolData(), "class or interface", true);
+    checkAccessibility(that, enclosingType.getSymbolData().getMav(), enclosingType.getSymbolData().getName(), 
+                       enclosingType.getSymbolData(), _data.getSymbolData(), "class or interface", true);
     
-    final SymbolData superclass_result = getSymbolData(that.getType().getName(), enclosingType.getSymbolData(), that.getType());
+    final SymbolData superclass_result = getSymbolData(that.getType().getName(), enclosingType.getSymbolData(), 
+                                                       that.getType());
 
     
     
@@ -844,7 +891,11 @@ public class ExpressionTypeChecker extends Bob {
     
     if (superclass_result.isInterface()) {
       Expression[] expr = that.getArguments().getExpressions();
-      if (expr.length > 0) { _addError("You are creating an anonymous inner class that directly implements an interface, thus you should use the Object constructor which takes in no arguments.  However, you have specified " + expr.length + " arguments", that);}
+      if (expr.length > 0) { 
+        _addError("You are creating an anonymous inner class that directly implements an interface, thus you should" + 
+                  " use the Object constructor which takes in no arguments.  However, you have specified " + 
+                  expr.length + " arguments", that);
+      }
       resultIsStatic = true;
     }
     
@@ -857,8 +908,9 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (!enclosingType.isInstanceType() && !resultIsStatic) {
-      _addError ("The constructor of a non-static inner class can only be called on an instance of its containing class (e.g. new " + 
-                 Data.dollarSignsToDots(enclosingType.getName()) + "().new " + that.getType().getName() + "())", that);
+      _addError ("The constructor of a non-static inner class can only be called on an instance of its containing" + 
+                 " class (e.g. new " + Data.dollarSignsToDots(enclosingType.getName()) + "().new " + 
+                 that.getType().getName() + "())", that);
     }
     
     else if (enclosingType.isInstanceType() && resultIsStatic) {
@@ -870,7 +922,8 @@ public class ExpressionTypeChecker extends Bob {
     LinkedList<VariableData> vars = cloneVariableDataList(_vars);
     vars.addAll(myData.getVars());
     
-    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(myData, _file, _package, _importedFiles, _importedPackages, vars, _thrown));
+    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(myData, _file, _package, _importedFiles, 
+                                                                               _importedPackages, vars, _thrown));
 
     //make sure all abstract super class methods are overwritten
     _checkAbstractMethods(myData, that);
@@ -927,7 +980,8 @@ public class ExpressionTypeChecker extends Bob {
     SymbolData classR = findClassReference(null, myWord.getText(), that);
     if (classR != null && classR != SymbolData.AMBIGUOUS_REFERENCE) {
       //Only return the symbolData if it is accessible--otherwise, return PackageData
-      if (checkAccessibility(that, classR.getMav(), classR.getName(), classR, _data.getSymbolData(), "class or interface", false)) {
+      if (checkAccessibility(that, classR.getMav(), classR.getName(), classR, _data.getSymbolData(), 
+                             "class or interface", false)) {
         return classR;
       }
     }
@@ -979,28 +1033,37 @@ public class ExpressionTypeChecker extends Bob {
         
       //make sure it already had a value
       if (!reference.hasValue()) {
-        _addError("You cannot use " + reference.getName() + " here, because it may not have been given a value", that.getName());
+        _addError("You cannot use " + reference.getName() + " here, because it may not have been given a value", 
+                  that.getName());
       }
         
       return reference.getType().getInstanceData();
     }
       
     //does this reference an inner class? if so, it must be static
-    SymbolData sd = getSymbolData(true, myWord.getText(), lhs.getSymbolData(), that, false); //give error below instead, if it cannot be found
+    SymbolData sd = getSymbolData(true, myWord.getText(), lhs.getSymbolData(), that, false); // may report error below
     if (sd != null && sd != SymbolData.AMBIGUOUS_REFERENCE) {
-      if (!checkAccessibility(that, sd.getMav(), sd.getName(), sd, _data.getSymbolData(), "class or interface")) {return null;}
+      if (!checkAccessibility(that, sd.getMav(), sd.getName(), sd, _data.getSymbolData(), "class or interface")) {
+        return null;
+      }
       if (!sd.hasModifier("static")) {
-        _addError("Non-static inner class " + Data.dollarSignsToDots(sd.getName()) + " cannot be accessed from this context.  Perhaps you meant to instantiate it", that);
+        _addError("Non-static inner class " + Data.dollarSignsToDots(sd.getName()) + 
+                  " cannot be accessed from this context.  Perhaps you meant to instantiate it", that);
       }
       
       //you cannot reference static inner classes from the context of an instantiation of their outer class
       else if (lhs instanceof InstanceData) {
-        _addError("You cannot reference the static inner class " + Data.dollarSignsToDots(sd.getName()) + " from an instance of " + Data.dollarSignsToDots(lhs.getName()) + ".  Perhaps you meant to say " + Data.dollarSignsToDots(sd.getName()), that);
+        _addError("You cannot reference the static inner class " + Data.dollarSignsToDots(sd.getName()) + 
+                  " from an instance of " + Data.dollarSignsToDots(lhs.getName()) + ".  Perhaps you meant to say " 
+                    + Data.dollarSignsToDots(sd.getName()), that);
       }
       return sd;
     }
  
-    if (sd != SymbolData.AMBIGUOUS_REFERENCE) { _addError("Could not resolve " + myWord.getText() + " from the context of " + Data.dollarSignsToDots(lhs.getName()), that);}
+    if (sd != SymbolData.AMBIGUOUS_REFERENCE) { 
+      _addError("Could not resolve " + myWord.getText() + " from the context of " + Data.dollarSignsToDots(lhs.getName()),
+                that);
+    }
     return null;
   }
 
@@ -1040,7 +1103,8 @@ public class ExpressionTypeChecker extends Bob {
     if (!myData.isInnerClassOf(enclosing_result.getSymbolData(), true)) {
       // Test whether myData is an inner class of enclosing_result at all.  Somewhat inefficient, but only happens when errors occur.
       if (myData.isInnerClassOf(enclosing_result.getSymbolData(), false)) {
-        _addError("You cannot reference " + enclosing_result.getName() + ".this from here, because " + myData.getName() + " or one of its enclosing classes " +
+        _addError("You cannot reference " + enclosing_result.getName() + ".this from here, because " + myData.getName() + 
+                  " or one of its enclosing classes " +
                   "is static.  Thus, an enclosing instance of " + enclosing_result.getName() + " does not exist", that);
       }
       else {
@@ -1052,13 +1116,12 @@ public class ExpressionTypeChecker extends Bob {
     return enclosing_result.getInstanceData();
   }
     
-  /**
-   * All classes should have a super class, which is java.lang.Object by default.  Lookup this class's super class.
-   * If it is null, give an error (but keep in mind this should never happen).  Otherwise, return the instance data corresponding to 
-   * the super class.
-   * @param that  The SimpleSuperReference we are resolving.
-   * @return  InstanceData corresponding to the super class
-   */
+  /** All classes should have a super class, which is java.lang.Object by default.  Looks up this class's super class.
+    * If it is null, generates an error (this should never happen).  Otherwise, returns the instance data corresponding
+    * to the super class.
+    * @param that  The SimpleSuperReference we are resolving.
+    * @return  InstanceData corresponding to the super class
+    */
   public TypeData forSimpleSuperReference(SimpleSuperReference that) {
     if (inStaticMethod()) {
       _addError("'super' cannot be referenced from within a static method", that);
@@ -1071,14 +1134,13 @@ public class ExpressionTypeChecker extends Bob {
     return superClass.getInstanceData();
   }
   
-  /**
-   * Make sure that the enclosing result is not null--if it is, return null.  Insure that an 
-   * enclosing instance of that name exists in the current (non-static) context.  Give an error if the enclosing_result
-   * is not an instance type.  Get its super class, and return an instance data corresponding to it.
-   * @param that  The ComplexSuperReference being typechecked
-   * @param enclosing_result  The type of the left hand side of this reference.
-   * @return  An InstanceData corresponding to the super class of enclosing_result.
-   */
+  /** Makes sure that the enclosing result is not null--if it is, return null.  Insure that an 
+    * enclosing instance of that name exists in the current (non-static) context.  Give an error if the enclosing_result
+    * is not an instance type.  Get its super class, and return an instance data corresponding to it.
+    * @param that  The ComplexSuperReference being typechecked
+    * @param enclosing_result  The type of the left hand side of this reference.
+    * @return  An InstanceData corresponding to the super class of enclosing_result.
+    */
   public TypeData forComplexSuperReferenceOnly(ComplexSuperReference that, TypeData enclosing_result) {
     //make sure that enclosing_result is not null and not a PackageData.  If it is, return null
     if ((enclosing_result == null) || ! assertFound(enclosing_result, that.getEnclosing())) { return null; }
@@ -1092,14 +1154,15 @@ public class ExpressionTypeChecker extends Bob {
     
     SymbolData myData = _getData().getSymbolData();
     if (!myData.isInnerClassOf(enclosing_result.getSymbolData(), true)) {
-      // Test whether myData is an inner class of enclosing_result at all.  Somewhat inefficient, but only happens when errors occur.
+      // Test whether myData is an inner class of enclosing_result.  Inefficient, but only happens when errors occur.
       if (myData.isInnerClassOf(enclosing_result.getSymbolData(), false)) {
-        _addError("You cannot reference " + enclosing_result.getName() + ".super from here, because " + myData.getName() + " or one of its enclosing classes " +
+        _addError("You cannot reference " + enclosing_result.getName() + ".super from here, because " + myData.getName() + 
+                  " or one of its enclosing classes " +
                   "is static.  Thus, an enclosing instance of " + enclosing_result.getName() + " does not exist", that);
       }
       else {
-        _addError("You cannot reference " + enclosing_result.getName() + ".super from here, because " + enclosing_result.getName() + 
-                  " is not an outer class of " + myData.getName(), that);
+        _addError("You cannot reference " + enclosing_result.getName() + ".super from here, because " + 
+                  enclosing_result.getName() + " is not an outer class of " + myData.getName(), that);
       }
     }
 
@@ -1129,13 +1192,15 @@ public class ExpressionTypeChecker extends Bob {
     
     if (assertInstanceType(lhs, "You cannot access an array element of a type name", that) &&
         ! (lhs.getSymbolData() instanceof ArrayData)) {
-      _addError("The variable referred to by this array access is a " + lhs.getSymbolData().getName() + ", not an array", that);
+      _addError("The variable referred to by this array access is a " + lhs.getSymbolData().getName() + ", not an array",
+                that);
       return lhs.getInstanceData();
     }
     
     if (assertInstanceType(index, "You have used a type name in place of an array index", that) &&
-        !index.getSymbolData().isAssignableTo(SymbolData.INT_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
-      _addError("You cannot reference an array element with an index of type " + index.getSymbolData().getName() + ".  Instead, you must use an int", that);
+        !index.getSymbolData().isAssignableTo(SymbolData.INT_TYPE, JAVA_VERSION)) {
+      _addError("You cannot reference an array element with an index of type " + index.getSymbolData().getName() + 
+                ".  Instead, you must use an int", that);
       
     }
     
@@ -1220,7 +1285,8 @@ public class ExpressionTypeChecker extends Bob {
       
       if (!assertFound(args[i], that)) {return null;}
       if (!args[i].isInstanceType()) {
-        _addError("Cannot pass a class or interface name as an argument to a method.  Perhaps you meant to create an instance or use " + args[i].getName() + ".class", exprs[i]);
+        _addError("Cannot pass a class or interface name as an argument to a method." +
+                  "  Perhaps you meant to create an instance or use " + args[i].getName() + ".class", exprs[i]);
       }
       newArgs[i]=args[i].getInstanceData();
 
@@ -1250,35 +1316,34 @@ public class ExpressionTypeChecker extends Bob {
     return md.getReturnType().getInstanceData();
   }
   
-  /**
-   * Try to match this method invocation to a method in the context.  Here, the context is the 
-   * enclosing data of where this is being invoked.
-   * @param that  ComplexMethodInvocation we are typechecking
-   * @return  The return type of the method, or null if method cannot be seen or found.
-   */
+  /** Tries to match this method invocation to a method in the context.  Here, the context is the enclosing data for
+    * where this is being invoked.
+    * @param that  ComplexMethodInvocation we are typechecking
+    * @return  The return type of the method, or null if method cannot be seen or found.
+    */
   //TODO: We should handle static fields too!
   public TypeData forSimpleMethodInvocation(SimpleMethodInvocation that) {
     TypeData context = _getData().getSymbolData().getInstanceData();
-    if (inStaticMethod()) { context = context.getSymbolData();} //Because it is static, want the SymbolData corresponding to the context, not the instance data.
+    if (inStaticMethod()) context = context.getSymbolData();  // Need SymbolData for context, not instance data.
     return methodInvocationHelper(that, context);
   }
 
-  /**
-   * Try to match this method invocation to a method in the context.  Here, the context is the 
-   * enclosing field of the method invocation.
-   * @param that  ComplexMethodInvocation we are typechecking
-   * @return  The return type of the method, or null if method cannot be seen or found.
-   */
+  /** Tries to match this method invocation to a method in the context.  Here, the context is the enclosing field of
+    * the method invocation.
+    * @param that  ComplexMethodInvocation we are typechecking
+    * @return  The return type of the method, or null if method cannot be seen or found.
+    */
   //TODO: We should handle static fields too!
   public TypeData forComplexMethodInvocation(ComplexMethodInvocation that) {
     TypeData context = that.getEnclosing().visit(this);
     if (!assertFound(context, that.getEnclosing()) || context==null) {return null;}
   
     //make sure we can see enclosingType
-    checkAccessibility(that, context.getSymbolData().getMav(), context.getSymbolData().getName(), context.getSymbolData(), _data.getSymbolData(), "class or interface", true);
+    checkAccessibility(that, context.getSymbolData().getMav(), context.getSymbolData().getName(), context.getSymbolData(),
+                       _data.getSymbolData(), "class or interface", true);
 
     
-    //this next check insures that only static methods can be called from a static context, by forcing the rhs to be a static context.
+    // This check insures that only static methods can be called from static contexts; forces rhs to be a static context.
     if (inStaticMethod()) { context = context.getSymbolData();}
     return methodInvocationHelper(that, context);
   }
@@ -1307,26 +1372,26 @@ public class ExpressionTypeChecker extends Bob {
    * otherwise return INT_TYPE.
    */
   protected SymbolData _getLeastRestrictiveType(SymbolData sd1, SymbolData sd2) {
-    if ((sd1.isDoubleType(LanguageLevelConverter.OPT.javaVersion()) &&
-         sd2.isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
-        (sd2.isDoubleType(LanguageLevelConverter.OPT.javaVersion()) &&
-         sd1.isNumberType(LanguageLevelConverter.OPT.javaVersion()))) {
+    if ((sd1.isDoubleType(JAVA_VERSION) &&
+         sd2.isNumberType(JAVA_VERSION)) ||
+        (sd2.isDoubleType(JAVA_VERSION) &&
+         sd1.isNumberType(JAVA_VERSION))) {
       return SymbolData.DOUBLE_TYPE;
     }
-    else if ((sd1.isFloatType(LanguageLevelConverter.OPT.javaVersion()) &&
-              sd2.isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
-             (sd2.isFloatType(LanguageLevelConverter.OPT.javaVersion()) &&
-              sd1.isNumberType(LanguageLevelConverter.OPT.javaVersion()))) {
+    else if ((sd1.isFloatType(JAVA_VERSION) &&
+              sd2.isNumberType(JAVA_VERSION)) ||
+             (sd2.isFloatType(JAVA_VERSION) &&
+              sd1.isNumberType(JAVA_VERSION))) {
       return SymbolData.FLOAT_TYPE;
     }
-    else if ((sd1.isLongType(LanguageLevelConverter.OPT.javaVersion()) &&
-              sd2.isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
-             (sd2.isLongType(LanguageLevelConverter.OPT.javaVersion()) &&
-              sd1.isNumberType(LanguageLevelConverter.OPT.javaVersion()))) {
+    else if ((sd1.isLongType(JAVA_VERSION) &&
+              sd2.isNumberType(JAVA_VERSION)) ||
+             (sd2.isLongType(JAVA_VERSION) &&
+              sd1.isNumberType(JAVA_VERSION))) {
       return SymbolData.LONG_TYPE;
     }
-    else if (sd1.isBooleanType(LanguageLevelConverter.OPT.javaVersion()) &&
-             sd2.isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
+    else if (sd1.isBooleanType(JAVA_VERSION) &&
+             sd2.isBooleanType(JAVA_VERSION)) {
       return SymbolData.BOOLEAN_TYPE;
     }
     else return SymbolData.INT_TYPE; // NOTE: It seems like any binary operation on number types with only ints, shorts, chars, or bytes will return an int
@@ -1387,16 +1452,20 @@ public class ExpressionTypeChecker extends Bob {
    * @param dimensions_result  The array of the result of type-checking all the dimensions of this array.
    * @return an instance of the array.
    */
-  public TypeData forUninitializedArrayInstantiationOnly(UninitializedArrayInstantiation that, TypeData type_result, TypeData[] dimensions_result) {
+  public TypeData forUninitializedArrayInstantiationOnly(UninitializedArrayInstantiation that, TypeData type_result, 
+                                                         TypeData[] dimensions_result) {
     //make sure all of the dimensions_result dimensions are instance datas
     Expression[] dims = that.getDimensionSizes().getExpressions();
     for (int i = 0; i<dimensions_result.length; i++) {
       if (dimensions_result[i] != null && assertFound(dimensions_result[i], dims[i])) {
-        if (!dimensions_result[i].getSymbolData().isAssignableTo(SymbolData.INT_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
-          _addError("The dimensions of an array instantiation must all be ints.  You have specified something of type " + dimensions_result[i].getName(), dims[i]);
+        if (!dimensions_result[i].getSymbolData().isAssignableTo(SymbolData.INT_TYPE, 
+                                                                 JAVA_VERSION)) {
+          _addError("The dimensions of an array instantiation must all be ints.  You have specified something of type " +
+                    dimensions_result[i].getName(), dims[i]);
         }
         else {
-          assertInstanceType(dimensions_result[i], "All dimensions of an array instantiation must be instances.  You have specified the type " + dimensions_result[i].getName(), dims[i]);
+          assertInstanceType(dimensions_result[i], "All dimensions of an array instantiation must be instances." + 
+                             "  You have specified the type " + dimensions_result[i].getName(), dims[i]);
         }               
       }
     }
@@ -1405,7 +1474,9 @@ public class ExpressionTypeChecker extends Bob {
       int dim = ((ArrayData) type_result).getDimensions();
       if (dimensions_result.length > dim) {
        //uh oh!  Dimensions list is too long!
-        _addError("You are trying to initialize an array of type " + type_result.getName() + " which requires " + dim + " dimensions, but you have specified " + dimensions_result.length + " dimensions--the wrong number", that);
+        _addError("You are trying to initialize an array of type " + type_result.getName() + " which requires " + dim +
+                  " dimensions, but you have specified " + dimensions_result.length + " dimensions--the wrong number", 
+                  that);
       }
     }
 
@@ -1434,7 +1505,8 @@ public class ExpressionTypeChecker extends Bob {
    * This is not legal java--should have been caught before the TypeChecker.  Give a runtime exception
    */
   public TypeData forComplexUninitializedArrayInstantiation(ComplexUninitializedArrayInstantiation that) {
-    throw new RuntimeException("Internal Program Error: Complex Uninitialized Array Instantiations are not legal Java.  This should have been caught before the Type Checker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: Complex Uninitialized Array Instantiations are not legal Java." +
+                               "  This should have been caught before the Type Checker.  Please report this bug.");
   }
   
   
@@ -1443,7 +1515,8 @@ public class ExpressionTypeChecker extends Bob {
    * helper instead of calling this method directly.
    */
   public TypeData forArrayInitializer(ArrayInitializer that) {
-    throw new RuntimeException("Internal Program Error: forArrayInitializer should never be called, but it was.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: forArrayInitializer should never be called, but it was." + 
+                               "  Please report this bug.");
   }
   
   /**
@@ -1463,7 +1536,8 @@ public class ExpressionTypeChecker extends Bob {
    * This is not legal java--should have been caught before the TypeChecker.  Give a runtime exception
    */
   public TypeData forComplexInitializedArrayInstantiation(ComplexInitializedArrayInstantiation that) {
-    throw new RuntimeException("Internal Program Error: Complex Initialized Array Instantiations are not legal Java.  This should have been caught before the Type Checker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: Complex Initialized Array Instantiations are not legal Java." + 
+                               "  This should have been caught before the Type Checker.  Please report this bug.");
   }
   
  
@@ -1486,29 +1560,24 @@ public class ExpressionTypeChecker extends Bob {
     for (int i = 0; i < that.getInterfaces().length; i++) {
       interfaces_result[i] = that.getInterfaces()[i].visit(this);
     }
-    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, _thrown));
-    //return forInnerClassDefOnly(that, mav_result, name_result, typeParameters_result, superclass_result, interfaces_result, body_result);
+    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, 
+                                                                               _importedPackages, _vars, _thrown));
+//    return forInnerClassDefOnly(that, mav_result, name_result, typeParameters_result, superclass_result, 
+//                                interfaces_result, body_result);
     return null;
   }
     
-  
-  /**
-   * Compare the two lists of variable datas, and if a data is in both lists, mark it as
-   * having been assigned.
-   * @param l1  One of the lists of variable datas
-   * @param l2  The other list of variable datas.
-   */
+  /** Compares the two lists of variable datas, and if a data is in both lists, mark it as having been assigned.
+    * @param l1  One of the lists of variable datas
+    * @param l2  The other list of variable datas.
+    */
   void reassignVariableDatas(LinkedList<VariableData> l1, LinkedList<VariableData> l2) {
     for (int i = 0; i<l1.size(); i++) { 
-      if (l2.contains(l1.get(i))) {
-        l1.get(i).gotValue();
-      }
+      if (l2.contains(l1.get(i))) l1.get(i).gotValue();
     }
   }
   
-  /**
-   * Compare a list of variable datas and a list of list of variable datas.
-   * If a variable data is in the list and in each list of the lists of lists, mark it as having been
+  /** Compare a list of variable datas and a list of list of variable datas.  If a variable data is in the list and in each list of the lists of lists, mark it as having been
    * assigned.
    * @param tryBlock  The list of variable datas.
    * @param catchBlocks  The list of list of variable datas.
@@ -2178,10 +2247,12 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForEqualityExpressionOnly() {
-      EqualityExpression ee = new EqualsExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      EqualityExpression ee = new EqualsExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), 
+                                                   new NullLiteral(JExprParser.NO_SOURCE_INFO));
       
       //left and right are both primitive and both boolean type--should work
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forEqualityExpressionOnly(ee, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE.getInstanceData()));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forEqualityExpressionOnly(ee, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
       
       //left and right are both primitive and both int type--should work

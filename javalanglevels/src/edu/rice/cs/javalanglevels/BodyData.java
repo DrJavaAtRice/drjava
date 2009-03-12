@@ -64,16 +64,10 @@ public abstract class BodyData extends Data{
    */
   public abstract MethodData getMethodData();
   
-  /**
-   * True if this is a method data.
-   */
+  /** True if this is a method data. */
   public abstract boolean isMethodData();
   
-  
-  
-   /**
-   * A JUnit test case class for BodyData.  Verifies that methods work as expected.
-   */
+   /** Test class for BodyData.  Verifies that methods work as expected. */
   public static class BodyDataTest extends TestCase {
     
     private BodyData _bd1;

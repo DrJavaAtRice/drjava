@@ -139,7 +139,7 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
    */
   public void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     MethodData md = createMethodData(that, _symbolData);
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -160,7 +160,7 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
    */
   public void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     MethodData md = createMethodData(that, _symbolData);
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -192,7 +192,7 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
    */
   public void forConstructorDef(ConstructorDef that) {
     forConstructorDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     that.getMav().visit(this);
     String name = getUnqualifiedClassName(that.getName().getText());
@@ -204,7 +204,7 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
     String[] throwStrings = referenceType2String(that.getThrows());
     
     SymbolData returnType = _symbolData;
-    MethodData md = new MethodData(name, that.getMav(), new TypeParameter[0], returnType, 
+    MethodData md = MethodData.make(name, that.getMav(), new TypeParameter[0], returnType, 
                                    new VariableData[0], throwStrings, _symbolData, that);
 
     _checkError(); // reset check flag

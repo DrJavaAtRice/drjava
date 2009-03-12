@@ -339,7 +339,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
    */
   public void forClassDef(ClassDef that) {
     forClassDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     boolean isTestCase = false;
     String className = getQualifiedClassName(that.getName().getText());
@@ -354,14 +354,10 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
     }
 
     SymbolData sd = addSymbolData(that, className);
-    if (sd == null) {
-      return;
-    }
+    if (sd == null) return;
     
-    //Test cases are automatically public
-    if (isTestCase) {
-      sd.addModifier("public");
-    }
+    // Test cases are automatically public
+    if (isTestCase) sd.addModifier("public");
 
     that.getMav().visit(this);
     that.getName().visit(this);

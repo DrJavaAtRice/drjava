@@ -147,9 +147,9 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
    */
   public void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     MethodData md = createMethodData(that, _symbolData);
-    md.addPublicMav(); //All methods are automatically public at the Elementary level.
+    md.addPublicMav(); // All methods are automatically public at the Elementary level.
     String className = getUnqualifiedClassName(_symbolData.getName());
     if (className.equals(md.getName())) {
       _addAndIgnoreError("Constructors are they only methods that can have the same name as the class they appear in, and they are not allowed at the Elementary level",
@@ -170,7 +170,7 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
    */
   public void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     MethodData md = createMethodData(that, _symbolData);
     String className = getUnqualifiedClassName(_symbolData.getName());
     if (className.equals(md.getName())) {

@@ -83,7 +83,6 @@ import edu.rice.cs.plt.io.IOUtil;
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
     
-    
     /**Now make sure that the resulting java files are correct.*/
     for(int i = 0; i < testFiles.length; i++) {
       File currFile = testFiles[i];

@@ -245,7 +245,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
                            "You must invoke one of " + superClass.getName() + "'s constructors here.  You can either explicitly invoke one of its exisitng constructors or add a constructor with signature: ", 
                            true, superClass);
 
-    if (cd == null) {return;}
+    if (cd == null) return;
     //if constructor is declared to throw exceptions, add them to thrown list:
     //add BracedBody as the JExpression corresponding to the error
     String[] thrown = cd.getThrown();

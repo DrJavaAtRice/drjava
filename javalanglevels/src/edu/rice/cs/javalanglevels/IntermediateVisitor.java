@@ -55,33 +55,33 @@ import junit.framework.TestCase;
  */
 public class IntermediateVisitor extends LanguageLevelVisitor {
   
-  /**
-   * This constructor is called when creating a new instance of IntermediateVisitor.  The default 
-   * value for className is the empty string.
-   */
+  /** This constructor is called when creating a new instance of IntermediateVisitor.  The default value for className
+    * is the empty string.
+    */
   public IntermediateVisitor(File file, String packageName, LinkedList<String> importedFiles, 
-                         LinkedList<String> importedPackages,LinkedList<String> classNamesInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+                         LinkedList<String> importedPackages,LinkedList<String> classNamesInThisFile, 
+                             Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
     super(file, packageName, importedFiles, importedPackages, classNamesInThisFile, continuations);
   }
   
-  /**
-   * This constructor is called when testing.  It initializes all of the static fields
-   * of LanguageLevelVisitor.
-   */
+  /** This constructor is called when testing.  It initializes all of the static fields of LanguageLevelVisitor. */
   public IntermediateVisitor(File file) {
-    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), 
+         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+         new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), 
+         new Hashtable<SymbolData, LanguageLevelVisitor>());
   }
     
-   /**
-   * This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
-   * IntermediateVisitor to visit a new file with.  Package is set to "" by default.
-   * @param file  The File corresponding to the source file we are visiting
-   * @param errors  The list of errors that have been encountered so far.
-   * @param symbolTable  The table of classes (types) that we have encountered
-   * @param continuations  The table of classes we have encountered but still need to resolve
-   * @param visitedFiles  The list of files we have visited
-   * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after this pass is finished)
-   */
+  /** This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
+    * IntermediateVisitor to visit a new file with.  Package is set to "" by default.
+    * @param file  The File corresponding to the source file we are visiting
+    * @param errors  The list of errors that have been encountered so far.
+    * @param symbolTable  The table of classes (types) that we have encountered
+    * @param continuations  The table of classes we have encountered but still need to resolve
+    * @param visitedFiles  The list of files we have visited
+    * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after 
+    *                this pass is finished)
+    */
   public IntermediateVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable,
                              Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
                              LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles,
@@ -95,7 +95,6 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
   }
   
-  
   /**Only abstract, public, private, protected, and static are allowed at this level.*/
   public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
@@ -104,7 +103,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     int count = 0;    
     for(int i = 0; i < modifiersAndVisibility.length; i++) {
       temp = modifiersAndVisibility[i];
-      if (!(temp.equals("abstract") || temp.equals("public") || temp.equals("private") || temp.equals("protected") || temp.equals("static"))) {
+      if (! (temp.equals("abstract") || temp.equals("public") || temp.equals("private") || temp.equals("protected") || temp.equals("static"))) {
         sb.append(" \"" + temp + "\"");
         count++;
       }
@@ -112,9 +111,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     // check if any illegal keywords were found
     temp = "The keyword";
     if (sb.length() > 0) {
-      if (count > 1) {
-        temp = temp + "s";
-      }
+      if (count > 1)  temp = temp + "s";
       _addAndIgnoreError(temp + sb.toString() + " cannot be used at the Intermediate level", that);
       return;
     }
@@ -251,7 +248,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
    */
   public void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = addSymbolData(that, className);
@@ -281,7 +278,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     */
   public void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     String className = that.getName().getText();
     that.getMav().visit(this);
     that.getName().visit(this);
@@ -305,42 +302,43 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
     VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
     for (int i = 0; i < vds.length; i++) {
-      if ((vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 1) || (!vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 0)) {
+      if ((vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 1) || 
+          (! vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 0)) {
         StringBuffer s = new StringBuffer("the keyword(s) ");
         String[] modifiers = vds[i].getMav().getModifiers();
         for (int j = 0; j<modifiers.length; j++) {
-          if (!modifiers[j].equals("static")) {s.append("\"" + modifiers[j] + "\" ");}
+          if (! modifiers[j].equals("static")) {s.append("\"" + modifiers[j] + "\" ");}
         }
-        _addAndIgnoreError("You cannot use " + s.toString() + "to declare a field at the Intermediate level.  Only the keyword 'static' is allowed", vd);
+        _addAndIgnoreError("You cannot use " + s.toString() + "to declare a field at the Intermediate level.  " + 
+                           "Only the keyword 'static' is allowed", vd);
       }
-      if (vds[i].hasModifier("static")) {vds[i].addModifier("public");}
-      else {vds[i].addModifier("private");}
+      if (vds[i].hasModifier("static")) vds[i].addModifier("public");
+      else vds[i].addModifier("private"); 
       vds[i].setFinal();
     }
     return vds;
   }
-
-  /**
-   * Pass this call directly onto the language level visitor.  This is a hack to 
-   * bypass the privateAndFinal setting when we are dealing with local variables.
-   */
+  
+  /** Pass this call directly onto the language level visitor.  This is a hack to bypass the privateAndFinal setting 
+    * when we are dealing with local variables.
+    */
   protected VariableData[] llVariableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
     return super._variableDeclaration2VariableData(vd, enclosingData);
   }
 
  
-  /**
-   * Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.
-   * Do not generate automatic accessors for the anonymous class--this will be done in type checker pass.
-   * @param that  The AnonymousClassInstantiation being visited
-   * @param enclosing  The enclosing Data
-   * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
-   */
+  /** Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.  Do
+    * not generate automatic accessors for the anonymous class--this will be done in type checker pass.
+    * @param that  The AnonymousClassInstantiation being visited
+    * @param enclosing  The enclosing Data
+    * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
+    */
   public void anonymousClassInstantiationHelper(AnonymousClassInstantiation that, Data enclosing, SymbolData superC) {
     that.getArguments().visit(this); 
     
     //Get the SymbolData that will correspond to this anonymous class
-    SymbolData sd = new SymbolData(getQualifiedClassName(enclosing.getSymbolData().getName()) + "$" + enclosing.getSymbolData().preincrementAnonymousInnerClassNum());
+    SymbolData sd = new SymbolData(getQualifiedClassName(enclosing.getSymbolData().getName()) + "$" + 
+                                   enclosing.getSymbolData().preincrementAnonymousInnerClassNum());
     enclosing.addInnerClass(sd);
     sd.setOuterData(enclosing);
     sd.setSuperClass(superC); //the super class is what was passed in
@@ -351,21 +349,20 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     createEquals(sd);
     //accessors will be filled in in typeChecker pass
     
-    //visit the body to get it all nice and resolved.
-    that.getBody().visit(new ClassBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
-
+    //visit the body to get it all nice and resolved.  NOTE: what about the fact that all of the methods MUST BE PUBLIC
+    that.getBody().visit(new ClassBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages, 
+                                                          _classNamesInThisFile, continuations));
   }
   
-  /**
-   * Look up the super type of this class instantiation and add it to the symbol table.
-   * Visit the body of the class instantiation.  All handling of this as an anonymous inner class (i.e. adding it to
-   * the enclosing SD's list of inner classes, creating a symbol data for the anonyomous inner class, etc) will be handled
-   * in the TypeChecker pass.  This is because no one will depend on that symbolData until we create it.
-   * @param that  The SimpleAnonymousClassInstantiation being processed.
-   */
+  /** Look up the super type of this class instantiation and add it to the symbol table. Visit the body of the class 
+    * instantiation.  All handling of this as an anonymous inner class (i.e. adding it to the enclosing SD's list of 
+    * inner classes, creating a symbol data for the anonyomous inner class, etc) will be handled in the TypeChecker pass.
+    * This is because no one will depend on that symbolData until we create it.
+    * @param that  The SimpleAnonymousClassInstantiation being processed.
+    */
   public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, Data data) {
     forSimpleAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     //resolve the super class and make sure it will be in the SymbolTable.
     SymbolData superC = getSymbolData(that.getType().getName(), that.getSourceInfo());
@@ -375,17 +372,15 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     forSimpleAnonymousClassInstantiationOnly(that);
   }
   
-  /**
-   * Do not resolve the super class type of this instantiation, becuase it will have already been resolved (it
-   * is an inner class of the enclosing of this instantiation.  When the enclosing was resolved, all of its inner classes should have
-   * also been resolved).
-   * Visit the body of the class instantiation.  
-   * @param that  The ComplexAnonymousClassInstantiation being processed.
-   * @param data  The enclosing data where this was sreferenced from.
-   */
+  /** Do not resolve the super class type of this instantiation, because it will have already been resolved (it is an
+    * inner class of the enclosing SD.  When the enclosing SD was resolved, all of its inner classes 
+    * should have also been resolved).  Visit the body of the class instantiation.  
+    * @param that  The ComplexAnonymousClassInstantiation being processed.
+    * @param data  The enclosing data where this was sreferenced from.
+    */
   public void complexAnonymousClassInstantiationHelper(ComplexAnonymousClassInstantiation that, Data data) {
     forComplexAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) {return;}
+    if (prune(that)) return;
     
     //visit the enclosing 
     that.getEnclosing().visit(this);
@@ -395,14 +390,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     //originally, make super class null.  This will be updated in the TypeChecker pass.
     anonymousClassInstantiationHelper(that, data, null);
-
+    
     
     forComplexAnonymousClassInstantiationOnly(that);
   }
   
-  
-  
-   /** Test the methods declared in the above class. */
+
+  /** Test the methods declared in the above class. */
   public static class IntermediateVisitorTest extends TestCase {
     
     private IntermediateVisitor _iv;

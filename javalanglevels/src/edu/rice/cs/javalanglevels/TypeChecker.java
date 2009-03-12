@@ -272,24 +272,25 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   
 
   /**pass a default value*/
-  protected MethodData _lookupMethodHelper(String methodName, SymbolData enclosingSD, InstanceData[] arguments, JExpression jexpr, boolean isConstructor, SymbolData thisSD) {
-    return _lookupMethodHelper(methodName, enclosingSD, arguments, jexpr, isConstructor, thisSD, new LinkedList<MethodData>());
+  protected MethodData _lookupMethodHelper(String methodName, SymbolData enclosingSD, InstanceData[] arguments, 
+                                           JExpression jexpr, boolean isConstructor, SymbolData thisSD) {
+    return _lookupMethodHelper(methodName, enclosingSD, arguments, jexpr, isConstructor, thisSD, 
+                               new LinkedList<MethodData>());
   }
   
-  
-  
-  /**
-   * Finds and returns all matching methods
-   * @param methodName  The name of the method.
-   * @param enclosingSD  The SymbolData we're currently searching for the method.
-   * @param arguments  The types of the arguments to the method.
-   * @param jexpr  The JExpression for the method invocation used in the error message.
-   * @param isConstructor  Tells us if this method is a constructor. If so, we know it must be in the initial SymbolData.
-   *                       We assume that the correct SymbolData was passed in.
-   * @param thisSD  The SymbolData whence the method is invoked.
-   * @return  The SymbolData where we find the method of null if it was not found.  An error is added if it is not found.
-   */  
-  protected Pair<LinkedList<MethodData>, LinkedList<MethodData>> _getMatchingMethods(String methodName, SymbolData enclosingSD, InstanceData[] arguments, JExpression jexpr, boolean isConstructor, SymbolData thisSD) {
+  /** Finds and returns all matching methods
+    * @param methodName  The name of the method.
+    * @param enclosingSD  The SymbolData we're currently searching for the method.
+    * @param arguments  The types of the arguments to the method.
+    * @param jexpr  The JExpression for the method invocation used in the error message.
+    * @param isConstructor  Tells us if this method is a constructor. If so, we know it must be in the initial SymbolData.
+    *                       We assume that the correct SymbolData was passed in.
+    * @param thisSD  The SymbolData whence the method is invoked.
+    * @return  The SymbolData where we find the method of null if it was not found.  An error is added if it is not found.
+    */  
+  protected Pair<LinkedList<MethodData>, LinkedList<MethodData>> 
+    _getMatchingMethods(String methodName, SymbolData enclosingSD, InstanceData[] arguments, JExpression jexpr, 
+                        boolean isConstructor, SymbolData thisSD) {
     LinkedList<MethodData> mds = enclosingSD.getMethods();
     Iterator<MethodData> iter = mds.iterator();
     LinkedList<MethodData> matching = new LinkedList<MethodData>();
@@ -305,7 +306,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         // First check to see if any methods exist that match the invocation without using autoboxing
         for (i = 0; i < vds.length && i < arguments.length; i++) {
           matches = matches && _isAssignableFromWithoutAutoboxing(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
-          if (matches == false) {break;}
+          if (matches == false) break;
         }
         
         // if all arguments checked out, check the access stuff.
@@ -313,19 +314,18 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
           matching.addLast(md);
         }
 
-        if (matches == false) { //it didn't match the method directly, but let's see if we can add it to the list of methods done through autoboxing
+        if (matches == false) { // Didn't match the method directly; try to match it with autoboxing
           matches = true;
-          //Now check to see if any methods exist that match the invocation while using autoboxing.
+          // Now check to see if any methods exist that match the invocation while using autoboxing.
           for (i = 0; i < vds.length && i < arguments.length; i++) {
             matches = matches && _isAssignableFrom(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
-            if (matches == false) {break;}
+            if (matches == false) break;
           }
 
           // if all arguments checked out, check the access stuff.
           if (matches && checkAccessibility(jexpr, md.getMav(), md.getName(), enclosingSD, thisSD, "method")) {
             matchingWithAutoBoxing.addLast(md);
           }
-          
         }
       }
     }
@@ -632,7 +632,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
              * final to be used.
              */
             if (thisSD.isOuterData(vd.getEnclosingData())) {
-              if (!vd.isFinal() && addError) {
+              if (! vd.isFinal() && addError) {
                 _addError("Local variable " + vd.getName() + " is accessed from within an inner class; must be declared final", piece);
               }
             }
@@ -1275,12 +1275,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
     
     
-    public TypeCheckerTest() {
-      this("");
-    }
-    public TypeCheckerTest(String name) {
-      super(name);
-    }
+    public TypeCheckerTest() { this(""); }
+    public TypeCheckerTest(String name) { super(name); }
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
@@ -2024,15 +2020,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       symbolTable.put("superSD", superSD);
       cd7.visit(_btc);
       assertEquals("There should be 8 errors now", 8, errors.size());
-      assertEquals("The error message should be correct", "SuperSD is an interface and thus cannot appear after the keyword 'extends' here.  Perhaps you meant to say 'implements'?", errors.get(7).getFirst());
-      
-      
+      assertEquals("The error message should be correct", 
+                   "SuperSD is an interface and thus cannot appear after the keyword 'extends' here." + 
+                   "  Perhaps you meant to say 'implements'?", errors.get(7).getFirst());
+     
       //Test that if a public class is not in a file of the same name, an error is thrown
       superSD.setInterface(false);
       sd.addModifier("public");
       cd7.visit(_btc);
       assertEquals("There should now be 9 errors", 9, errors.size());
-      assertEquals("The error message should be correct", "Hspia is public thus must be defined in a file with the same name.", errors.get(8).getFirst());
+      assertEquals("The error message should be correct", 
+                   "Hspia is public thus must be defined in a file with the same name.", errors.get(8).getFirst());
       
       //Test that if a public class is in a file of the same name, no error is thrown.
       _btc._file = new File("Hspia.dj1");

@@ -40,6 +40,7 @@ import java.util.*;
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
+import edu.rice.cs.javalanglevels.util.Log;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -49,11 +50,14 @@ import edu.rice.cs.plt.iter.IterUtil;
   * AdvancedLevelTest, ElementaryLevelTest, and IntermediateLevelTest.
   */
 public class LanguageLevelConverter {
+  
+//  public static final Log _log = new Log("LLConverter.txt", true);
 
   public static Options OPT = Options.DEFAULT;
     
   /* For Corky's version: set this to false */
   private static final boolean SAFE_SUPPORT_CODE = false;
+  public static final int INPUT_BUFFER_SIZE = 8192;  // This reportedly is the current default in the JDK.
   
   /**Holds any parse exceptions that are encountered*/
   private LinkedList<JExprParseException> _parseExceptions = new LinkedList<JExprParseException>();
@@ -131,23 +135,20 @@ public class LanguageLevelConverter {
       try {
         BufferedReader tempBr = new BufferedReader(new FileReader(files[ind]));
         String firstLine = tempBr.readLine();
-        if (firstLine == null) {
-          continue;
-        }
+        if (firstLine == null) continue;
+        
         tempBr.close();
-        // If the file has the correct suffix, then parse it.
-        // Also ignore files which are in filesNotToCheck.
-        //for some reason, doing .contains on filesNotToCheck was not returning what we wanted.
-        //So do this manually, trying to match the Absolute path.
+        /* If the file has the correct suffix, then parse it. Ignore files in filesNotToCheck.  contains on 
+         * filesNotToCheck failed to return desired result. So it is done manually, matching AbsolutePath. */
         boolean foundFile = false;
-        for (int i = 0; i<filesNotToCheck.size(); i++) {
+        for (int i = 0; i < filesNotToCheck.size(); i++) {
           if (filesNotToCheck.get(i).getAbsolutePath().equals(files[ind].getAbsolutePath())) {
             foundFile = true;
             break;
           }
         }
 
-        if (_isLanguageLevelFile(files[ind]) && !foundFile) {
+        if (_isLanguageLevelFile(files[ind]) && ! foundFile) {
           System.out.flush();
           SourceFile sf;
           File f = files[ind];
@@ -157,13 +158,11 @@ public class LanguageLevelConverter {
             final Set<String> topLevelClasses = new HashSet<String>();
             for (TypeDefBase t: sf.getTypes()) {
               t.visit(new JExpressionIFAbstractVisitor_void() {
-                public void forClassDef(ClassDef that) {
-                  topLevelClasses.add(that.getName().getText());
-                }
+                public void forClassDef(ClassDef that) { topLevelClasses.add(that.getName().getText()); }
               });
             }
-            sourceToTopLevelClassMap.put(f,topLevelClasses);
-          }
+            sourceToTopLevelClassMap.put(f, topLevelClasses);
+          } 
           catch (ParseException pe) {
             // If there is a ParseException, go to next file.
             _addParseException(pe);
@@ -173,13 +172,22 @@ public class LanguageLevelConverter {
           //Now create a LanguageLevelVisitor to do the first pass over the file.
           LanguageLevelVisitor llv = null;
           if (isElementaryFile(f)) {
-            llv = new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs);
+            llv = 
+              new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, 
+                                    new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                    languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else if (isIntermediateFile(f)) {
-            llv = new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs);
+            llv = 
+              new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable,
+                                      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                      languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else if (isAdvancedFile(f)) {
-            llv = new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs);
+            llv = 
+              new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, 
+                                  new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                  languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else {
             throw new RuntimeException("Internal Bug: Invalid file format not caught initially.  Please report this bug.");
@@ -341,14 +349,15 @@ public class LanguageLevelConverter {
             SourceFile sf = pair.getFirst();
             LanguageLevelVisitor llv = pair.getSecond();
             File f = files[ind];
-            // Do code augmentation.  This will involve a line-by-line copy, editing
-            // lines as appropriate.
+            
+            // Do code augmentation.  This will involve a line-by-line copy, editing lines as appropriate.
             String augmentedFilePath = f.getAbsolutePath();
             augmentedFilePath = augmentedFilePath.substring(0, augmentedFilePath.length() - 4); //remove the .dj# extension
             File augmentedFile = new File(augmentedFilePath + ".java"); //replace it with .java
-            BufferedReader br = new BufferedReader(new FileReader(f));
+            BufferedReader br = new BufferedReader(new FileReader(f), INPUT_BUFFER_SIZE);
             BufferedWriter bw = new BufferedWriter(new FileWriter(augmentedFile));
             
+//            _log.log("Augmenting the source file " + sf);
             Augmentor a = new Augmentor(SAFE_SUPPORT_CODE, br, bw, llv);
             sf.visit(a);
             

@@ -122,14 +122,13 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
     _addAndIgnoreError("The field 'super' does not exist in interfaces.  Only classes have a 'super' field", that);
   }
 
-  /*
-   * Make sure that the method is not declared to be private or protected.  Make it public and abstract
+  /* Make sure that the method is not declared to be private or protected.  Make it public and abstract
    * if it is not already declared to be so (since this is the default in the absence of modifiers). 
    * Make sure the method name is not the same as the interface name.
    */
   public void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     MethodData md = createMethodData(that, _symbolData);
     
@@ -141,7 +140,7 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
       _addAndIgnoreError("Interface methods cannot be made protected.  They must be public.", that.getMav());
     }
     
- //All interface methods are considered public by default.
+ // All interface methods are considered public by default.
     md.addModifier("public"); //(if it was already public, won't be added)
     md.addModifier("abstract"); //and all interface methods are abstract. 
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -149,9 +148,7 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
       _addAndIgnoreError("Only constructors can have the same name as the class they appear in, and constructors cannot appear in interfaces.",
                          that);
     }
-    else {
-      _symbolData.addMethod(md);
-    }
+    else _symbolData.addMethod(md);
 //    forAbstractMethodDefOnly(that);
   }
   
@@ -252,31 +249,40 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
                                                      new ReferenceType[0]);
       amd2.visit(_ibav);
       assertEquals("There should be no errors", 0, errors.size());
-      assertTrue("The method def should be public", _ibav._symbolData.getMethods().get(0).hasModifier("public"));
+      assertTrue("The method def should be public", 
+                 _ibav._symbolData.getMethods().get(0).hasModifier("public"));
 
     }
 
     public void testForInstanceInitializerDoFirst() {
-      InstanceInitializer ii = new InstanceInitializer(JExprParser.NO_SOURCE_INFO, 
-                                                       new Block(JExprParser.NO_SOURCE_INFO, 
-                                                                 new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0])));
+      InstanceInitializer ii = 
+        new InstanceInitializer(JExprParser.NO_SOURCE_INFO, 
+                                new Block(JExprParser.NO_SOURCE_INFO, 
+                                          new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0])));
       ii.visit(_ibav);
       assertEquals("There should be one error.", 1, errors.size());
-      assertEquals("The error message should be correct.", "This open brace must mark the beginning of an interface body", errors.get(0).getFirst());    
+      assertEquals("The error message should be correct.", 
+                   "This open brace must mark the beginning of an interface body", 
+                   errors.get(0).getFirst());    
     }
 
     public void testForSimpleThisReferenceDoFirst() {
      SimpleThisReference tl = new SimpleThisReference(JExprParser.NO_SOURCE_INFO);
      tl.visit(_ibav);
      assertEquals("There should be one error", 1, errors.size());
-     assertEquals("The error message should be correct", "The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", errors.get(0).getFirst());
+     assertEquals("The error message should be correct", 
+                  "The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", 
+                  errors.get(0).getFirst());
     }
     
     public void testForComplexThisReferenceDoFirst() {
-     ComplexThisReference tl = new ComplexThisReference(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+     ComplexThisReference tl = new ComplexThisReference(JExprParser.NO_SOURCE_INFO, 
+                                                        new NullLiteral(JExprParser.NO_SOURCE_INFO));
      tl.visit(_ibav);
      assertEquals("There should be one error", 1, errors.size());
-     assertEquals("The error message should be correct", "The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", errors.get(0).getFirst());
+     assertEquals("The error message should be correct", 
+                  "The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", 
+                  errors.get(0).getFirst());
 
     }
     
@@ -284,14 +290,19 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
      SimpleSuperReference sr = new SimpleSuperReference(JExprParser.NO_SOURCE_INFO);
      sr.visit(_ibav);
      assertEquals("There should be one error", 1, errors.size());
-     assertEquals("The error message should be correct", "The field 'super' does not exist in interfaces.  Only classes have a 'super' field", errors.get(0).getFirst());
+     assertEquals("The error message should be correct", 
+                  "The field 'super' does not exist in interfaces.  Only classes have a 'super' field", 
+                  errors.get(0).getFirst());
     }
     
     public void testForComplexSuperReferenceDoFirst() {
-      ComplexSuperReference cr = new ComplexSuperReference(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      ComplexSuperReference cr = new ComplexSuperReference(JExprParser.NO_SOURCE_INFO, 
+                                                           new NullLiteral(JExprParser.NO_SOURCE_INFO));
       cr.visit(_ibav);
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "The field 'super' does not exist in interfaces.  Only classes have a 'super' field", errors.get(0).getFirst());
+      assertEquals("The error message should be correct", 
+                   "The field 'super' does not exist in interfaces.  Only classes have a 'super' field", 
+                   errors.get(0).getFirst());
     }
 
     
@@ -302,7 +313,8 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
                                                        new VariableDeclarator[] {
         new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
                                           new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                          new Word (JExprParser.NO_SOURCE_INFO, "field0"), new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 2.345))});
+                                          new Word (JExprParser.NO_SOURCE_INFO, "field0"), 
+                                          new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 2.345))});
 
       vdecl0.visit(_ibav);
       assertEquals("There should be no errors", 0, errors.size());
@@ -321,7 +333,9 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
                                new Word (JExprParser.NO_SOURCE_INFO, "field2"))});
       vdecl.visit(_ibav);
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "All fields in interfaces must be assigned a value when they are declared", errors.getLast().getFirst());
+      assertEquals("The error message should be correct", 
+                   "All fields in interfaces must be assigned a value when they are declared", 
+                   errors.getLast().getFirst());
     }
     
     public void testForAbstractMethodDef() {

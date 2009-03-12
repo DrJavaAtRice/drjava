@@ -38,10 +38,10 @@ package edu.rice.cs.javalanglevels;
 
 import org.objectweb.asm.*;
 import edu.rice.cs.javalanglevels.tree.*;
-import edu.rice.cs.javalanglevels.tree.Type; // resove ambiguity
+import edu.rice.cs.javalanglevels.tree.Type; // resolve ambiguity
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import edu.rice.cs.javalanglevels.parser.ParseException;
-//import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.Log;
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.Modifier;
@@ -52,19 +52,17 @@ import edu.rice.cs.plt.reflect.EmptyClassLoader;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
+
 import junit.framework.TestCase;
 
-/**
- * Top-level Language Level Visitor that represents what is common between all Language Levels.  
- * Enforces constraints during the first walk of the AST (checking for general errors and building 
- * the symbol table).
- * This class enforces things that are common to all contexts reachable at any Language Level, as well as
- * top level constraints.
- */
+/** Top-level Language Level Visitor that represents what is common between all Language Levels.  Enforces constraints
+  * during the first walk of the AST (checking for general errors and building the symbol table).  This class enforces
+  * things that are common to all contexts reachable at any Language Level, as well as top level constraints.
+  */
 public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor_void {
   
-  /**Errors we have encountered during this pass: string is the text of the error, JExpressionIF is the part of
-    * the AST where the error occurs*/
+  /** Errors we have encountered during this pass: string is the text of the error, JExpressionIF is the part of
+    * the AST where the error occurs. */
   protected static LinkedList<Pair<String, JExpressionIF>> errors;
   
   /**Stores the classes we have referenced, and all their information, once they are resolved.*/
@@ -115,7 +113,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * ClassDefs and LanguageLevelVisitors.
    */
   static Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>> _classesToBeParsed;
-//  protected static final Log _log = new Log("/Users/cork/drjava/javalanglevels/LLVisitor.txt", true);
+//  protected static final Log _log = new Log("LLVisitor.txt", false);
   
   /** This constructor is called from the subclasses of LanguageLevelVisitor.
     * @param file  The File corresponding to the source file we are visiting
@@ -179,16 +177,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   
   /**@return the source file*/
-  public File getFile() {
-    return _file;
-  }
+  public File getFile() { return _file; }
   
-  /**
-   * Return true if this data is a constructor.
-   * It is considered to be a constructor if it is a method data,
-   * its name and return type are the same, and its return type matches
-   * its enclosing sd.
-   */
+  /** Returns true if this data is a constructor. It is considered to be a constructor if it is a method data,
+    * its name and return type are the same, and its return type matches its enclosing sd.
+    */
   protected boolean isConstructor(Data d) {
     if (!(d instanceof MethodData)) return false;
     MethodData md = (MethodData) d;
@@ -198,10 +191,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       (md.getReturnType() == md.getSymbolData());
   }
   
-  /**
-   * Takes a classname and returns only the final segment of it.  This removes all the 
-   * dots and dollar signs.
-   */
+  /** Takes a classname and returns only the final segment of it.  This removes all the dots and dollar signs. */
   public static String getUnqualifiedClassName(String className) { 
     int lastIndexOfDot = className.lastIndexOf(".");
     if (lastIndexOfDot != -1) {
@@ -244,13 +234,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
   };
   
-  /**
-   * Use the ASM class reader to read the class file corresponding to the class in
-   * the specified directory, and use the information from ASM to build a SymbolData corresponding
-   * to the class.
-   * @param qualifiedClassName  The fully qualified class name of the class we are looking up
-   * @param directoryName  The directory where the class is located.
-   */
+  /** Uses the ASM class reader to read the class file corresponding to the class in the specified directory, and uses
+    * the information from ASM to build a SymbolData corresponding to the class.
+    * @param qualifiedClassName  The fully qualified class name of the class we are looking up
+    * @param directoryName  The directory where the class is located.
+    */
   private SymbolData _classFile2SymbolData(String qualifiedClassName, String directoryName) {
     ClassReader reader = null;
     try {
@@ -330,13 +318,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           else { args[i] = new VariableData(argType); }
         }
         if (exceptions == null) { exceptions = new String[0]; }
-        for (int i = 0; i < exceptions.length; i++) {
-          exceptions[i] = exceptions[i].replace('/', '.');
-        }
+        for (int i = 0; i < exceptions.length; i++) { exceptions[i] = exceptions[i].replace('/', '.'); }
         
         if (valid) {
-          MethodData m = new MethodData(methodName, _createMav(access), new TypeParameter[0], returnType,
-                                        args, exceptions, sd, null);
+          MethodData m = 
+            MethodData.make(methodName, _createMav(access), new TypeParameter[0], returnType, args, exceptions, sd, null);
           for (VariableData arg : args) { arg.setEnclosingData(m); }
           sd.addMethod(m, false, true);
         }
@@ -1180,9 +1166,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return resultSd;
   }
   
-  /**
-   * Creates a ModifiersAndVisibility from the provided modifier flags.
-   */
+  /** Creates a ModifiersAndVisibility from the provided modifier flags. */
   private ModifiersAndVisibility _createMav(int flags) {
     LinkedList<String> strings = new LinkedList<String>();
     if (Modifier.isAbstract(flags)) { strings.addLast("abstract"); }
@@ -1199,13 +1183,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, strings.toArray(new String[strings.size()]));
   }
   
-  
-  /**
-   * The Qualified Class Name is the package, followed by a dot, followed by the rest of the class name.
-   * If the provided className is already qualified, just return it.  If the package is not empty,
-   * and the className does not start with the package, append the package name onto the className, and return it.
-   * @param className  The className to qualify.
-   */
+  /** The Qualified Class Name is the package, followed by a dot, followed by the rest of the class name.
+    * If the provided className is already qualified, just return it.  If the package is not empty,
+    * and the className does not start with the package, append the package name onto the className, and return it.
+    * @param className  The className to qualify.
+    */
   protected String getQualifiedClassName(String className) {
     if (!_package.equals("") && !className.startsWith(_package)) {return _package + "." + className;}
     else { return className;}
@@ -1213,17 +1195,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   
   
-  /**
-   * Do what is necessary to process this TypeDefBase from the context of enclosing.
-   * This method is very similar to addSymbolData, except that it uses an enclosing data for reference.
-   */
+  /** Does what is necessary to process this TypeDefBase from the context of enclosing.
+    * This method is very similar to addSymbolData, except that it uses an enclosing data for reference.
+    */
   protected SymbolData addInnerSymbolData(TypeDefBase typeDefBase, String qualifiedClassName, String partialName, 
                                           Data enclosing, boolean isClass) {
     //try to look up in symbol table, in case it has already been defined
     SymbolData sd = symbolTable.get(qualifiedClassName);
     
     //try to look up in enclosing's list of inner classes
-    if (sd == null) {sd = enclosing.getInnerClassOrInterface(partialName);}
+    if (sd == null) { sd = enclosing.getInnerClassOrInterface(partialName); }
     
     if (sd != null && !sd.isContinuation()) {
       _addAndIgnoreError("This class has already been defined.", typeDefBase);
@@ -1235,8 +1216,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       if (sd.getOuterData() != enclosing) {sd = null;}
     }
     
-    
-    //create a new symbolData for it--this is the first time we've seen it
+    // create a new symbolData for it--this is the first time we've seen it
     if (sd == null) { 
       sd = new SymbolData(qualifiedClassName);
       sd.setOuterData(enclosing);
@@ -1324,13 +1304,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   }
   
   
-  /**
-   * This method takes in a TypeDefBase (which is either a ClassDef or an InterfaceDef), generates a SymbolData, and 
-   * adds the name and SymbolData pair to the symbol table.  It checks that this class is not already in the symbol 
-   * table.
-   * @param typeDefBase  The AST node for the class def, interface def, inner class def, or inner interface def.
-   * @param qualifiedClassName  The name for the class.
-   */
+  /** This method takes in a TypeDefBase (which is either a ClassDef or an InterfaceDef), generates a SymbolData, and 
+    * adds the name and SymbolData pair to the symbol table.  It checks that this class is not already in the symbol 
+    * table.
+    * @param typeDefBase  The AST node for the class def, interface def, inner class def, or inner interface def.
+    * @param qualifiedClassName  The name for the class.
+    */
   protected SymbolData addSymbolData(TypeDefBase typeDefBase, String qualifiedClassName) {
     String name = qualifiedClassName;
     SymbolData sd = symbolTable.get(name);
@@ -1368,7 +1347,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         // Couldn't resolve the interface.
         return null;
       }
-      
     }
     
     if (sd == null) { // create a new SymbolData.
@@ -1376,18 +1354,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       symbolTable.put(name, sd);
     }
     
-    
     //Set the package to be the current package
     sd.setPackage(_package);
-    
-    
+     
     SymbolData superClass = null;
     
     if (typeDefBase instanceof InterfaceDef) {
       //add Object as the super class of this, so that it will know it implements Object's methods.
       superClass = getSymbolData("Object", typeDefBase.getSourceInfo(), false);
       sd.setInterface(true);
-      
     }
     
     else if (typeDefBase instanceof ClassDef) {
@@ -1406,14 +1381,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       sd.setInterface(false);
     }
     
-    
-    
     else {throw new RuntimeException("Internal Program Error: typeDefBase was not a ClassDef or InterfaceDef." + 
                                      "  Please report this bug.");}
     
     // get the SymbolData of the superclass which must be in the symbol table
     // since we visited the type in forClassDef() although it may be a continuation. 
-    
     
     // there is a continuation in the symbol table, update the fields
     sd.setMav(typeDefBase.getMav());
@@ -1427,11 +1399,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return sd;
   }
   
-  /**
-   * Convert the specified array of FormalParameters into an array of VariableDatas which is then returned.
-   * All formal parameters are automatically made final.
-   * TODO: At the advanced level, this may need to be overwritten?
-   */
+  /** Convert the specified array of FormalParameters into an array of VariableDatas which is then returned.
+    * All formal parameters are automatically made final.
+    * TODO: At the advanced level, this may need to be overwritten?
+    */
   protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, Data enclosing) {
     VariableData[] varData = new VariableData[fps.length];
     VariableDeclarator vd;
@@ -1456,10 +1427,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return varData;
   }
   
-  
-  
   /* Create a MethodData corresponding to the MethodDef within the context of the SymbolData sd. */
   protected MethodData createMethodData(MethodDef that, SymbolData sd) {
+//    _log.log("createMethodData(" + that + ", " + sd + ") called.");
     that.getMav().visit(this);
     that.getName().visit(this);
     
@@ -1470,14 +1440,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     String rtString = that.getResult().getName();
     SymbolData returnType;
     //TODO: Overwrite this at the Advanced level (or maybe not)
-    if (rtString.equals("void")) {// && level.equals("Elementary")) {  
-      returnType = SymbolData.VOID_TYPE;
-    }
-    else {
-      returnType = getSymbolData(rtString, that.getResult().getSourceInfo());
-    }
-    MethodData md = new MethodData(that.getName().getText(), that.getMav(), that.getTypeParams(), returnType, 
+    if (rtString.equals("void"))  returnType = SymbolData.VOID_TYPE;
+    else returnType = getSymbolData(rtString, that.getResult().getSourceInfo());
+
+    MethodData md = MethodData.make(that.getName().getText(), that.getMav(), that.getTypeParams(), returnType, 
                                    new VariableData[0], throwStrings, sd, that);
+//    _log.log("createMethodData called.  Created MethodData " + md + '\n' + "with modifiers:" + md.getMav());
     // Turn the parameters from a FormalParameterList to a VariableData[]
     VariableData[] vds = formalParameters2VariableData(that.getParams(), md);
     
@@ -1493,8 +1461,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     return md;
   }
-  
-  
   
   /** This method assumes that the modifiers for this particular VariableDeclaration
     * have already been checked.  It does no semantics checking.  It simiply converts
@@ -1586,10 +1552,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     _addError("Illegal combination of modifiers. Can't use " + first + " and " + second + " together.", that);
   }
   
-  /**
-   * Check for problems with modifiers that are common to all language levels:
-   * duplicate modifiers and illegal combinations of modifiers.
-   */
+  /** Check for problems with modifiers that are common to all language levels: duplicate modifiers and illegal
+    * combinations of modifiers.
+    */
   public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
     Arrays.sort(modifiersAndVisibility);
@@ -1616,59 +1581,39 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       for (int i = 0; i < modifiersAndVisibility.length; i++) {
         s = modifiersAndVisibility[i];
         if (s.equals("public") || s.equals("protected") || s.equals("private")) {
-          if (!visibility.equals("package")) {
-            _badModifiers(visibility, s, that);
-          }
-          else if (s.equals("private") && isAbstract) {
-            _badModifiers("private", "abstract", that);
-          }
-          else {
-            visibility = s;
-          }
+          if (! visibility.equals("package")) _badModifiers(visibility, s, that);
+          else if (s.equals("private") && isAbstract) _badModifiers("private", "abstract", that);
+          else visibility = s;
         }
-        else if (s.equals("abstract")) {
-          isAbstract = true;
-        }
+        else if (s.equals("abstract")) isAbstract = true;
         else if (s.equals("final")) { 
           isFinal = true;
-          if (isAbstract) {
-            _badModifiers("final", "abstract", that);
-          }
+          if (isAbstract) _badModifiers("final", "abstract", that);
         }
         else if (s.equals("static")) { 
           isStatic = true;
-          if (isAbstract) {
-            _badModifiers("static", "abstract", that);
-          }
+          if (isAbstract)  _badModifiers("static", "abstract", that);
         }
         else if (s.equals("native")) { 
           isNative = true;
-          if (isAbstract) {
-            _badModifiers("native", "abstract", that);
-          }
+          if (isAbstract) _badModifiers("native", "abstract", that);
         }
         else if (s.equals("synchronized")) { 
           isSynchronized = true;
-          if (isAbstract) {
-            _badModifiers("synchronized", "abstract", that);
-          }
+          if (isAbstract) _badModifiers("synchronized", "abstract", that);
         }
         else if (s.equals("volatile")) { 
           isVolatile = true;
-          if (isFinal) {
-            _badModifiers("final", "volatile", that);
-          }
+          if (isFinal) _badModifiers("final", "volatile", that);
         }
       }
-      forJExpressionDoFirst(that);
+      forJExpressionDoFirst(that);  // Does nothing!
     }
   }
   
-  /**
-   * Check for problems with ClassDefs that are common to all Language Levels:
-   * Make sure that the top level class is not private, and that the class name has
-   * not already been imported.s
-   */
+  /** Check for problems with ClassDefs that are common to all Language Levels.  Make sure that the top level class is
+    * not private, and that the class name has not already been imported.
+    */
   public void forClassDefDoFirst(ClassDef that) {
     String name = that.getName().getText();
     Iterator<String> iter = _importedFiles.iterator();
@@ -1692,10 +1637,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     forTypeDefBaseDoFirst(that);
   }
   
-  /**
-   * Check for problems with InterfaceDefs that are common to all language levels:
-   * specifically, top level interfaces cannot be private or final.
-   */
+  /** Check for problems with InterfaceDefs that are common to all language levels: specifically, top level interfaces 
+    * cannot be private or final.
+    */
   public void forInterfaceDefDoFirst(InterfaceDef that) {
     //top level interfaces cannot be private or final.
     String[] mavStrings = that.getMav().getModifiers();
@@ -1725,10 +1669,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     forTypeDefBaseDoFirst(that);  
   }
   
-  /**
-   * This sets the package name field in order to find other classes
-   * in the same package.
-   */
+  /** This sets the package name field in order to find other classes in the same package. */
   public void forPackageStatementOnly(PackageStatement that) {
     CompoundWord cWord = that.getCWord();
     Word[] words = cWord.getWords();
@@ -1900,7 +1841,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    */
   public void forSourceFile(SourceFile that) {
     forSourceFileDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     // The parser enforces that there is either zero or one PackageStatement.
     for (int i = 0; i < that.getPackageStatements().length; i++) that.getPackageStatements()[i].visit(this);
@@ -1946,7 +1887,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /**Do nothing.  This is handled in the forVariableDeclarationOnly case.*/
   public void forVariableDeclaration(VariableDeclaration that) {
     forVariableDeclarationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     forVariableDeclarationOnly(that);
   }
@@ -1978,12 +1919,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * no code augmentation is done.
    */
   public void createConstructor(SymbolData sd) {
-    if (LanguageLevelConverter.isAdvancedFile(_file)) {return;}
+    if (LanguageLevelConverter.isAdvancedFile(_file)) return;
     
     SymbolData superSd = sd.getSuperClass();
     
     //there was an error somewhere else.  just return.
-    if (sd.isContinuation()) {return;}
+    if (sd.isContinuation()) return;
     
     LinkedList<MethodData> superMethods = superSd.getMethods();
     String superUnqualifiedName = getUnqualifiedClassName(superSd.getName());
@@ -2051,7 +1992,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * File file is passed in so this can remain a static method
    */
   protected static void createAccessors(SymbolData sd, File file) {
-    if (LanguageLevelConverter.isAdvancedFile(file)) {return;}
+    if (LanguageLevelConverter.isAdvancedFile(file)) return;
     LinkedList<VariableData> fields = sd.getVars();
     Iterator<VariableData> iter = fields.iterator();
     while (iter.hasNext()) {
@@ -2073,9 +2014,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
   }
   
-  /**
-   * Create a method called toString that returns type String.
-   * Overridden at the Advanced Level files, because no code augmentation is done for
+  /** Create a method called toString that returns type String. Overridden at the Advanced Level files, because n code augmentation is done for
    * them so you don't want to create this method.
    */ 
   protected void createToString(SymbolData sd) {
@@ -2144,7 +2083,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    */
   public void forMemberType(MemberType that) {
     forMemberTypeDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forMemberTypeOnly(that);
   }
   
@@ -2156,7 +2095,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /** Try to resolve the type of the instantiation, and make sure there are no errors*/
   public void forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) {
     forSimpleNamedClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getArguments().visit(this);
     

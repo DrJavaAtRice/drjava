@@ -59,117 +59,34 @@ import edu.rice.cs.javalanglevels.tree.*;
  **/
 public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionIFVisitor_void {
   /* Methods to visit an item. */
-  public void forJExpressionDoFirst(JExpression that) {
-    defaultDoFirst(that);
-  }
-
-  public void forJExpressionOnly(JExpression that) {
-    defaultCase(that);
-  }
-
-  public void forSourceFileDoFirst(SourceFile that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forSourceFileOnly(SourceFile that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forModifiersAndVisibilityOnly(ModifiersAndVisibility that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forCompoundWordDoFirst(CompoundWord that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forCompoundWordOnly(CompoundWord that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forWordDoFirst(Word that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forWordOnly(Word that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forTypeDefBaseDoFirst(TypeDefBase that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forTypeDefBaseOnly(TypeDefBase that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forClassDefDoFirst(ClassDef that) {
-    forTypeDefBaseDoFirst(that);
-  }
-
-  public void forClassDefOnly(ClassDef that) {
-    forTypeDefBaseOnly(that);
-  }
-
-  public void forInnerClassDefDoFirst(InnerClassDef that) {
-    forClassDefDoFirst(that);
-  }
-
-  public void forInnerClassDefOnly(InnerClassDef that) {
-    forClassDefOnly(that);
-  }
-
-  public void forInterfaceDefDoFirst(InterfaceDef that) {
-    forTypeDefBaseDoFirst(that);
-  }
-
-  public void forInterfaceDefOnly(InterfaceDef that) {
-    forTypeDefBaseOnly(that);
-  }
-
-  public void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
-    forInterfaceDefDoFirst(that);
-  }
-
-  public void forInnerInterfaceDefOnly(InnerInterfaceDef that) {
-    forInterfaceDefOnly(that);
-  }
-
-  public void forConstructorDefDoFirst(ConstructorDef that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forConstructorDefOnly(ConstructorDef that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forInitializerDoFirst(Initializer that) {
-    forJExpressionDoFirst(that);
-  }
-
-  public void forInitializerOnly(Initializer that) {
-    forJExpressionOnly(that);
-  }
-
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
-    forInitializerDoFirst(that);
-  }
-
-  public void forInstanceInitializerOnly(InstanceInitializer that) {
-    forInitializerOnly(that);
-  }
-
-  public void forStaticInitializerDoFirst(StaticInitializer that) {
-    forInitializerDoFirst(that);
-  }
-
-  public void forStaticInitializerOnly(StaticInitializer that) {
-    forInitializerOnly(that);
-  }
+  public void forJExpressionDoFirst(JExpression that) { defaultDoFirst(that); }
+  public void forJExpressionOnly(JExpression that) { defaultCase(that); }
+  public void forSourceFileDoFirst(SourceFile that) { forJExpressionDoFirst(that); }
+  public void forSourceFileOnly(SourceFile that) { forJExpressionOnly(that);}
+  public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) { forJExpressionDoFirst(that); }
+  public void forModifiersAndVisibilityOnly(ModifiersAndVisibility that) { forJExpressionOnly(that); }
+  public void forCompoundWordDoFirst(CompoundWord that) { forJExpressionDoFirst(that); }
+  public void forCompoundWordOnly(CompoundWord that) { forJExpressionOnly(that); }
+  public void forWordDoFirst(Word that) { forJExpressionDoFirst(that); }
+  public void forWordOnly(Word that) { forJExpressionOnly(that); }
+  public void forTypeDefBaseDoFirst(TypeDefBase that) { forJExpressionDoFirst(that); }
+  public void forTypeDefBaseOnly(TypeDefBase that) { forJExpressionOnly(that); }
+  public void forClassDefDoFirst(ClassDef that) { forTypeDefBaseDoFirst(that); }
+  public void forClassDefOnly(ClassDef that) { forTypeDefBaseOnly(that); }
+  public void forInnerClassDefDoFirst(InnerClassDef that) { forClassDefDoFirst(that); }
+  public void forInnerClassDefOnly(InnerClassDef that) { forClassDefOnly(that); }
+  public void forInterfaceDefDoFirst(InterfaceDef that) { forTypeDefBaseDoFirst(that);  }
+  public void forInterfaceDefOnly(InterfaceDef that) { forTypeDefBaseOnly(that); }
+  public void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) { forInterfaceDefDoFirst(that);  }
+  public void forInnerInterfaceDefOnly(InnerInterfaceDef that) { forInterfaceDefOnly(that); }
+  public void forConstructorDefDoFirst(ConstructorDef that) { forJExpressionDoFirst(that); }
+  public void forConstructorDefOnly(ConstructorDef that) { forJExpressionOnly(that); }
+  public void forInitializerDoFirst(Initializer that) { forJExpressionDoFirst(that); }
+  public void forInitializerOnly(Initializer that) { forJExpressionOnly(that); }
+  public void forInstanceInitializerDoFirst(InstanceInitializer that) { forInitializerDoFirst(that); }
+  public void forInstanceInitializerOnly(InstanceInitializer that) { forInitializerOnly(that); }
+  public void forStaticInitializerDoFirst(StaticInitializer that) { forInitializerDoFirst(that); }
+  public void forStaticInitializerOnly(StaticInitializer that) { forInitializerOnly(that); }
 
   public void forPackageStatementDoFirst(PackageStatement that) {
     forJExpressionDoFirst(that);
@@ -1526,7 +1443,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
   /* Implementation of JExpressionIFVisitor_void methods to implement depth-first traversal. */
   public void forSourceFile(SourceFile that) {
     forSourceFileDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getPackageStatements().length; i++) that.getPackageStatements()[i].visit(this);
     for (int i = 0; i < that.getImportStatements().length; i++) that.getImportStatements()[i].visit(this);
     for (int i = 0; i < that.getTypes().length; i++) that.getTypes()[i].visit(this);
@@ -1535,13 +1452,13 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forModifiersAndVisibility(ModifiersAndVisibility that) {
     forModifiersAndVisibilityDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forModifiersAndVisibilityOnly(that);
   }
 
   public void forCompoundWord(CompoundWord that) {
     forCompoundWordDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getWords().length; i++) that.getWords()[i].visit(this);
     forCompoundWordOnly(that);
   }
@@ -1549,13 +1466,13 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forWord(Word that) {
     forWordDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forWordOnly(that);
   }
 
   public void forClassDef(ClassDef that) {
     forClassDefDoFirst(that);
-    if (prune(that)) { return; }    
+    if (prune(that)) return;    
     that.getMav().visit(this);
     that.getName().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
@@ -1567,7 +1484,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forInnerClassDef(InnerClassDef that) {
     forInnerClassDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     that.getName().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
@@ -1578,7 +1495,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
   }
   public void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
@@ -1588,7 +1505,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forInnerInterfaceDef(InnerInterfaceDef that) {
     forInnerInterfaceDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
@@ -1598,7 +1515,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forConstructorDef(ConstructorDef that) {
     forConstructorDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getMav().visit(this);
     for (int i = 0; i < that.getParameters().length; i++) that.getParameters()[i].visit(this);
@@ -1609,42 +1526,42 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forInstanceInitializer(InstanceInitializer that) {
     forInstanceInitializerDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCode().visit(this);
     forInstanceInitializerOnly(that);
   }
 
   public void forStaticInitializer(StaticInitializer that) {
     forStaticInitializerDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCode().visit(this);
     forStaticInitializerOnly(that);
   }
 
   public void forPackageStatement(PackageStatement that) {
     forPackageStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCWord().visit(this);
     forPackageStatementOnly(that);
   }
 
   public void forClassImportStatement(ClassImportStatement that) {
     forClassImportStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCWord().visit(this);
     forClassImportStatementOnly(that);
   }
 
   public void forPackageImportStatement(PackageImportStatement that) {
     forPackageImportStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCWord().visit(this);
     forPackageImportStatementOnly(that);
   }
 
   public void forLabeledStatement(LabeledStatement that) {
     forLabeledStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLabel().visit(this);
     that.getStatement().visit(this);
     forLabeledStatementOnly(that);
@@ -1653,21 +1570,21 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBlock(Block that) {
     forBlockDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getStatements().visit(this);
     forBlockOnly(that);
   }
 
   public void forExpressionStatement(ExpressionStatement that) {
     forExpressionStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getExpression().visit(this);
     forExpressionStatementOnly(that);
   }
 
   public void forSwitchStatement(SwitchStatement that) {
     forSwitchStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getTest().visit(this);
     for (int i = 0; i < that.getCases().length; i++) that.getCases()[i].visit(this);
     forSwitchStatementOnly(that);
@@ -1675,7 +1592,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forIfThenStatement(IfThenStatement that) {
     forIfThenStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getTestExpression().visit(this);
     that.getThenStatement().visit(this);
     forIfThenStatementOnly(that);
@@ -1683,7 +1600,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forIfThenElseStatement(IfThenElseStatement that) {
     forIfThenElseStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getTestExpression().visit(this);
     that.getThenStatement().visit(this);
     that.getElseStatement().visit(this);
@@ -1692,7 +1609,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forWhileStatement(WhileStatement that) {
     forWhileStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCondition().visit(this);
     that.getCode().visit(this);
     forWhileStatementOnly(that);
@@ -1700,7 +1617,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forDoStatement(DoStatement that) {
     forDoStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCode().visit(this);
     that.getCondition().visit(this);
     forDoStatementOnly(that);
@@ -1708,7 +1625,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forForStatement(ForStatement that) {
     forForStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getInit().visit(this);
     that.getCondition().visit(this);
     that.getUpdate().visit(this);
@@ -1718,53 +1635,53 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forLabeledBreakStatement(LabeledBreakStatement that) {
     forLabeledBreakStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLabel().visit(this);
     forLabeledBreakStatementOnly(that);
   }
 
   public void forUnlabeledBreakStatement(UnlabeledBreakStatement that) {
     forUnlabeledBreakStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forUnlabeledBreakStatementOnly(that);
   }
 
   public void forLabeledContinueStatement(LabeledContinueStatement that) {
     forLabeledContinueStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLabel().visit(this);
     forLabeledContinueStatementOnly(that);
   }
 
   public void forUnlabeledContinueStatement(UnlabeledContinueStatement that) {
     forUnlabeledContinueStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forUnlabeledContinueStatementOnly(that);
   }
 
   public void forVoidReturnStatement(VoidReturnStatement that) {
     forVoidReturnStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forVoidReturnStatementOnly(that);
   }
 
   public void forValueReturnStatement(ValueReturnStatement that) {
     forValueReturnStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forValueReturnStatementOnly(that);
   }
 
   public void forThrowStatement(ThrowStatement that) {
     forThrowStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getThrown().visit(this);
     forThrowStatementOnly(that);
   }
 
   public void forSynchronizedStatement(SynchronizedStatement that) {
     forSynchronizedStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLockExpr().visit(this);
     that.getBlock().visit(this);
     forSynchronizedStatementOnly(that);
@@ -1772,7 +1689,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forTryCatchFinallyStatement(TryCatchFinallyStatement that) {
     forTryCatchFinallyStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getTryBlock().visit(this);
     for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this);
     that.getFinallyBlock().visit(this);
@@ -1781,7 +1698,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forNormalTryCatchStatement(NormalTryCatchStatement that) {
     forNormalTryCatchStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getTryBlock().visit(this);
     for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this);
     forNormalTryCatchStatementOnly(that);
@@ -1789,13 +1706,13 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forEmptyStatement(EmptyStatement that) {
     forEmptyStatementDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forEmptyStatementOnly(that);
   }
 
   public void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
     that.getResult().visit(this);
@@ -1807,7 +1724,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
     that.getResult().visit(this);
@@ -1818,14 +1735,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forFormalParameter(FormalParameter that) {
     forFormalParameterDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getDeclarator().visit(this);
     forFormalParameterOnly(that);
   }
 
   public void forVariableDeclaration(VariableDeclaration that) {
     forVariableDeclarationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getMav().visit(this);
     for (int i = 0; i < that.getDeclarators().length; i++) that.getDeclarators()[i].visit(this);
     forVariableDeclarationOnly(that);
@@ -1833,14 +1750,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forUninitializedVariableDeclarator(UninitializedVariableDeclarator that) {
     forUninitializedVariableDeclaratorDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     forUninitializedVariableDeclaratorOnly(that);
   }
 
   public void forInitializedVariableDeclarator(InitializedVariableDeclarator that) {
     forInitializedVariableDeclaratorDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getInitializer().visit(this);
     forInitializedVariableDeclaratorOnly(that);
@@ -1848,7 +1765,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forTypeParameter(TypeParameter that) {
     forTypeParameterDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getVariable().visit(this);
     that.getBound().visit(this);
     forTypeParameterOnly(that);
@@ -1856,27 +1773,27 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forArrayInitializer(ArrayInitializer that) {
     forArrayInitializerDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getItems().length; i++) that.getItems()[i].visit(this);
     forArrayInitializerOnly(that);
   }
 
   public void forPrimitiveType(PrimitiveType that) {
     forPrimitiveTypeDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forPrimitiveTypeOnly(that);
   }
 
   public void forArrayType(ArrayType that) {
     forArrayTypeDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getElementType().visit(this);
     forArrayTypeOnly(that);
   }
 
   public void forMemberType(MemberType that) {
     forMemberTypeDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forMemberTypeOnly(that);
@@ -1884,26 +1801,26 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forClassOrInterfaceType(ClassOrInterfaceType that) {
     forClassOrInterfaceTypeDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getTypeArguments().length; i++) that.getTypeArguments()[i].visit(this);
     forClassOrInterfaceTypeOnly(that);
   }
 
   public void forTypeVariable(TypeVariable that) {
     forTypeVariableDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forTypeVariableOnly(that);
   }
 
   public void forVoidReturn(VoidReturn that) {
     forVoidReturnDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forVoidReturnOnly(that);
   }
 
   public void forLabeledCase(LabeledCase that) {
     forLabeledCaseDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLabel().visit(this);
     that.getCode().visit(this);
     forLabeledCaseOnly(that);
@@ -1911,14 +1828,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forDefaultCase(DefaultCase that) {
     forDefaultCaseDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCode().visit(this);
     forDefaultCaseOnly(that);
   }
 
   public void forCatchBlock(CatchBlock that) {
     forCatchBlockDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getException().visit(this);
     that.getBlock().visit(this);
     forCatchBlockOnly(that);
@@ -1926,7 +1843,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleAssignmentExpression(SimpleAssignmentExpression that) {
     forSimpleAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forSimpleAssignmentExpressionOnly(that);
@@ -1934,7 +1851,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forPlusAssignmentExpression(PlusAssignmentExpression that) {
     forPlusAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forPlusAssignmentExpressionOnly(that);
@@ -1942,7 +1859,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forMinusAssignmentExpression(MinusAssignmentExpression that) {
     forMinusAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forMinusAssignmentExpressionOnly(that);
@@ -1950,7 +1867,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forMultiplyAssignmentExpression(MultiplyAssignmentExpression that) {
     forMultiplyAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forMultiplyAssignmentExpressionOnly(that);
@@ -1958,7 +1875,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forDivideAssignmentExpression(DivideAssignmentExpression that) {
     forDivideAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forDivideAssignmentExpressionOnly(that);
@@ -1966,7 +1883,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forModAssignmentExpression(ModAssignmentExpression that) {
     forModAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forModAssignmentExpressionOnly(that);
@@ -1974,7 +1891,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forLeftShiftAssignmentExpression(LeftShiftAssignmentExpression that) {
     forLeftShiftAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forLeftShiftAssignmentExpressionOnly(that);
@@ -1982,7 +1899,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forRightSignedShiftAssignmentExpression(RightSignedShiftAssignmentExpression that) {
     forRightSignedShiftAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forRightSignedShiftAssignmentExpressionOnly(that);
@@ -1990,7 +1907,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forRightUnsignedShiftAssignmentExpression(RightUnsignedShiftAssignmentExpression that) {
     forRightUnsignedShiftAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forRightUnsignedShiftAssignmentExpressionOnly(that);
@@ -1998,7 +1915,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBitwiseAndAssignmentExpression(BitwiseAndAssignmentExpression that) {
     forBitwiseAndAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forBitwiseAndAssignmentExpressionOnly(that);
@@ -2006,7 +1923,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBitwiseOrAssignmentExpression(BitwiseOrAssignmentExpression that) {
     forBitwiseOrAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forBitwiseOrAssignmentExpressionOnly(that);
@@ -2014,7 +1931,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBitwiseXorAssignmentExpression(BitwiseXorAssignmentExpression that) {
     forBitwiseXorAssignmentExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getValue().visit(this);
     forBitwiseXorAssignmentExpressionOnly(that);
@@ -2022,7 +1939,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forOrExpression(OrExpression that) {
     forOrExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forOrExpressionOnly(that);
@@ -2030,7 +1947,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forAndExpression(AndExpression that) {
     forAndExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forAndExpressionOnly(that);
@@ -2038,7 +1955,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBitwiseOrExpression(BitwiseOrExpression that) {
     forBitwiseOrExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forBitwiseOrExpressionOnly(that);
@@ -2046,7 +1963,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBitwiseXorExpression(BitwiseXorExpression that) {
     forBitwiseXorExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forBitwiseXorExpressionOnly(that);
@@ -2054,7 +1971,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forBitwiseAndExpression(BitwiseAndExpression that) {
     forBitwiseAndExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forBitwiseAndExpressionOnly(that);
@@ -2062,7 +1979,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forEqualsExpression(EqualsExpression that) {
     forEqualsExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forEqualsExpressionOnly(that);
@@ -2070,7 +1987,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forNotEqualExpression(NotEqualExpression that) {
     forNotEqualExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forNotEqualExpressionOnly(that);
@@ -2078,7 +1995,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forLessThanExpression(LessThanExpression that) {
     forLessThanExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forLessThanExpressionOnly(that);
@@ -2086,7 +2003,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forLessThanOrEqualExpression(LessThanOrEqualExpression that) {
     forLessThanOrEqualExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forLessThanOrEqualExpressionOnly(that);
@@ -2094,7 +2011,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forGreaterThanExpression(GreaterThanExpression that) {
     forGreaterThanExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forGreaterThanExpressionOnly(that);
@@ -2102,7 +2019,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forGreaterThanOrEqualExpression(GreaterThanOrEqualExpression that) {
     forGreaterThanOrEqualExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forGreaterThanOrEqualExpressionOnly(that);
@@ -2110,7 +2027,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forLeftShiftExpression(LeftShiftExpression that) {
     forLeftShiftExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forLeftShiftExpressionOnly(that);
@@ -2118,7 +2035,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forRightSignedShiftExpression(RightSignedShiftExpression that) {
     forRightSignedShiftExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forRightSignedShiftExpressionOnly(that);
@@ -2126,7 +2043,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forRightUnsignedShiftExpression(RightUnsignedShiftExpression that) {
     forRightUnsignedShiftExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forRightUnsignedShiftExpressionOnly(that);
@@ -2134,7 +2051,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forPlusExpression(PlusExpression that) {
     forPlusExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forPlusExpressionOnly(that);
@@ -2142,7 +2059,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forMinusExpression(MinusExpression that) {
     forMinusExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forMinusExpressionOnly(that);
@@ -2150,7 +2067,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forMultiplyExpression(MultiplyExpression that) {
     forMultiplyExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forMultiplyExpressionOnly(that);
@@ -2158,7 +2075,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forDivideExpression(DivideExpression that) {
     forDivideExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forDivideExpressionOnly(that);
@@ -2166,7 +2083,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forModExpression(ModExpression that) {
     forModExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forModExpressionOnly(that);
@@ -2174,7 +2091,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forNoOpExpression(NoOpExpression that) {
     forNoOpExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getLeft().visit(this);
     that.getRight().visit(this);
     forNoOpExpressionOnly(that);
@@ -2182,63 +2099,63 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forPositivePrefixIncrementExpression(PositivePrefixIncrementExpression that) {
     forPositivePrefixIncrementExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forPositivePrefixIncrementExpressionOnly(that);
   }
 
   public void forNegativePrefixIncrementExpression(NegativePrefixIncrementExpression that) {
     forNegativePrefixIncrementExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forNegativePrefixIncrementExpressionOnly(that);
   }
 
   public void forPositivePostfixIncrementExpression(PositivePostfixIncrementExpression that) {
     forPositivePostfixIncrementExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forPositivePostfixIncrementExpressionOnly(that);
   }
 
   public void forNegativePostfixIncrementExpression(NegativePostfixIncrementExpression that) {
     forNegativePostfixIncrementExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forNegativePostfixIncrementExpressionOnly(that);
   }
 
   public void forPositiveExpression(PositiveExpression that) {
     forPositiveExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forPositiveExpressionOnly(that);
   }
 
   public void forNegativeExpression(NegativeExpression that) {
     forNegativeExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forNegativeExpressionOnly(that);
   }
 
   public void forBitwiseNotExpression(BitwiseNotExpression that) {
     forBitwiseNotExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forBitwiseNotExpressionOnly(that);
   }
 
   public void forNotExpression(NotExpression that) {
     forNotExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forNotExpressionOnly(that);
   }
 
   public void forConditionalExpression(ConditionalExpression that) {
     forConditionalExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getCondition().visit(this);
     that.getForTrue().visit(this);
     that.getForFalse().visit(this);
@@ -2247,7 +2164,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forInstanceofExpression(InstanceofExpression that) {
     forInstanceofExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     that.getType().visit(this);
     forInstanceofExpressionOnly(that);
@@ -2255,7 +2172,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forCastExpression(CastExpression that) {
     forCastExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getValue().visit(this);
     forCastExpressionOnly(that);
@@ -2263,55 +2180,55 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forIntegerLiteral(IntegerLiteral that) {
     forIntegerLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forIntegerLiteralOnly(that);
   }
 
   public void forLongLiteral(LongLiteral that) {
     forLongLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forLongLiteralOnly(that);
   }
 
   public void forDoubleLiteral(DoubleLiteral that) {
     forDoubleLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forDoubleLiteralOnly(that);
   }
 
   public void forFloatLiteral(FloatLiteral that) {
     forFloatLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forFloatLiteralOnly(that);
   }
 
   public void forBooleanLiteral(BooleanLiteral that) {
     forBooleanLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forBooleanLiteralOnly(that);
   }
 
   public void forCharLiteral(CharLiteral that) {
     forCharLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forCharLiteralOnly(that);
   }
 
   public void forStringLiteral(StringLiteral that) {
     forStringLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forStringLiteralOnly(that);
   }
 
   public void forNullLiteral(NullLiteral that) {
     forNullLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forNullLiteralOnly(that);
   }
 
   public void forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) {
     forSimpleNamedClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getArguments().visit(this);
     forSimpleNamedClassInstantiationOnly(that);
@@ -2319,7 +2236,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forComplexNamedClassInstantiation(ComplexNamedClassInstantiation that) {
     forComplexNamedClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getType().visit(this);
     that.getArguments().visit(this);
@@ -2328,7 +2245,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     forSimpleAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getArguments().visit(this);
     that.getBody().visit(this);
@@ -2337,7 +2254,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     forComplexAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getType().visit(this);
     that.getArguments().visit(this);
@@ -2347,7 +2264,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleUninitializedArrayInstantiation(SimpleUninitializedArrayInstantiation that) {
     forSimpleUninitializedArrayInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getDimensionSizes().visit(this);
     forSimpleUninitializedArrayInstantiationOnly(that);
@@ -2355,7 +2272,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forComplexUninitializedArrayInstantiation(ComplexUninitializedArrayInstantiation that) {
     forComplexUninitializedArrayInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getType().visit(this);
     that.getDimensionSizes().visit(this);
@@ -2364,7 +2281,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleInitializedArrayInstantiation(SimpleInitializedArrayInstantiation that) {
     forSimpleInitializedArrayInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     that.getInitializer().visit(this);
     forSimpleInitializedArrayInstantiationOnly(that);
@@ -2372,7 +2289,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forComplexInitializedArrayInstantiation(ComplexInitializedArrayInstantiation that) {
     forComplexInitializedArrayInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getType().visit(this);
     that.getInitializer().visit(this);
@@ -2381,14 +2298,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleNameReference(SimpleNameReference that) {
     forSimpleNameReferenceDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     forSimpleNameReferenceOnly(that);
   }
 
   public void forComplexNameReference(ComplexNameReference that) {
     forComplexNameReferenceDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getName().visit(this);
     forComplexNameReferenceOnly(that);
@@ -2396,33 +2313,33 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleThisReference(SimpleThisReference that) {
     forSimpleThisReferenceDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forSimpleThisReferenceOnly(that);
   }
 
   public void forComplexThisReference(ComplexThisReference that) {
     forComplexThisReferenceDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     forComplexThisReferenceOnly(that);
   }
 
   public void forSimpleSuperReference(SimpleSuperReference that) {
     forSimpleSuperReferenceDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forSimpleSuperReferenceOnly(that);
   }
 
   public void forComplexSuperReference(ComplexSuperReference that) {
     forComplexSuperReferenceDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     forComplexSuperReferenceOnly(that);
   }
 
   public void forSimpleMethodInvocation(SimpleMethodInvocation that) {
     forSimpleMethodInvocationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getName().visit(this);
     that.getArguments().visit(this);
     forSimpleMethodInvocationOnly(that);
@@ -2430,7 +2347,7 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forComplexMethodInvocation(ComplexMethodInvocation that) {
     forComplexMethodInvocationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getName().visit(this);
     that.getArguments().visit(this);
@@ -2439,14 +2356,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleThisConstructorInvocation(SimpleThisConstructorInvocation that) {
     forSimpleThisConstructorInvocationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getArguments().visit(this);
     forSimpleThisConstructorInvocationOnly(that);
   }
 
   public void forComplexThisConstructorInvocation(ComplexThisConstructorInvocation that) {
     forComplexThisConstructorInvocationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getArguments().visit(this);
     forComplexThisConstructorInvocationOnly(that);
@@ -2454,14 +2371,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forSimpleSuperConstructorInvocation(SimpleSuperConstructorInvocation that) {
     forSimpleSuperConstructorInvocationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getArguments().visit(this);
     forSimpleSuperConstructorInvocationOnly(that);
   }
 
   public void forComplexSuperConstructorInvocation(ComplexSuperConstructorInvocation that) {
     forComplexSuperConstructorInvocationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getEnclosing().visit(this);
     that.getArguments().visit(this);
     forComplexSuperConstructorInvocationOnly(that);
@@ -2469,14 +2386,14 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forClassLiteral(ClassLiteral that) {
     forClassLiteralDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getType().visit(this);
     forClassLiteralOnly(that);
   }
 
   public void forArrayAccess(ArrayAccess that) {
     forArrayAccessDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getArray().visit(this);
     that.getIndex().visit(this);
     forArrayAccessOnly(that);
@@ -2484,76 +2401,69 @@ public class JExpressionIFPrunableDepthFirstVisitor_void implements JExpressionI
 
   public void forParenthesized(Parenthesized that) {
     forParenthesizedDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     that.getValue().visit(this);
     forParenthesizedOnly(that);
   }
 
   public void forEmptyExpression(EmptyExpression that) {
     forEmptyExpressionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forEmptyExpressionOnly(that);
   }
 
 //  public void forEmptyDimensionExpression(EmptyDimensionExpression that) {
 //    forEmptyDimensionExpressionDoFirst(that);
-//    if (prune(that)) { return; }
+//    if (prune(that)) return;
 //    forEmptyDimensionExpressionOnly(that);
 //  }
 
   public void forBracedBody(BracedBody that) {
     forBracedBodyDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this);
     forBracedBodyOnly(that);
   }
 
   public void forUnbracedBody(UnbracedBody that) {
     forUnbracedBodyDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this);
     forUnbracedBodyOnly(that);
   }
 
   public void forParenthesizedExpressionList(ParenthesizedExpressionList that) {
     forParenthesizedExpressionListDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this);
     forParenthesizedExpressionListOnly(that);
   }
 
   public void forUnparenthesizedExpressionList(UnparenthesizedExpressionList that) {
     forUnparenthesizedExpressionListDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this);
     forUnparenthesizedExpressionListOnly(that);
   }
 
   public void forDimensionExpressionList(DimensionExpressionList that) {
     forDimensionExpressionListDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this);
     forDimensionExpressionListOnly(that);
   }
-
-
+  
   public void forEmptyForCondition(EmptyForCondition that) {
     forEmptyForConditionDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     forEmptyForConditionOnly(that);
   }
 
-  /** This method is called by default from cases that do not 
-   ** override forCASEDoFirst.
-  **/
+  /** This method is called by default from cases that do not override forCASEDoFirst. */
   protected void defaultDoFirst(JExpressionIF that) {}
-  /** This method is called by default from cases that do not 
-   ** override forCASEOnly.
-  **/
+  /** This method is called by default from cases that do not override forCASEOnly. */
   protected void defaultCase(JExpressionIF that) {}
   
-  protected boolean prune(JExpressionIF that) {
-    return true;
-  }
+  protected boolean prune(JExpressionIF that) { return true; }
   
 }

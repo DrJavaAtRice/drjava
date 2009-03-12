@@ -41,10 +41,7 @@ import java.util.*;
 import junit.framework.TestCase;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 
-/**
- * Abstract type, representing the data for a given braced body-class, 
- * interface, method, or just a body.
- */
+/** Abstract type, representing the data for a given braced body-class, interface, method, or just a body. */
 public abstract class Data {
   
   /**The name of this data.*/
@@ -71,7 +68,7 @@ public abstract class Data {
   /**Iterator over _blocks*/
   protected Iterator<BlockData> _blockIterator;
 
-  /*This is the default constructor for a Data.  It takes in the outerData, and sets
+  /* This is the default constructor for a Data.  It takes in the outerData, and sets
    * all lists and the name to empty, except that the outer data is asdded to the enclosing data list. */
   public Data(Data outerData) {
     _name = "";
@@ -88,9 +85,7 @@ public abstract class Data {
   }
   
   /**Return the name of this data.*/
-  public String getName() {
-    return _name;
-  }
+  public String getName() { return _name; }
   
   /** Set the name of this data.
    *  @param name  The new name of this data.
@@ -224,17 +219,12 @@ public abstract class Data {
     return success;
   }
   
-  /**
-   * @return the modifiersAndVisibility for this data.
-   */
-  public ModifiersAndVisibility getMav() {
-    return _modifiersAndVisibility;
-  }
+  /** @return the modifiersAndVisibility for this data. */
+  public ModifiersAndVisibility getMav() { return _modifiersAndVisibility; }
   
-  /**
-   * Assign the specified modifiersAndVisiblity to this data.
-   * @param modifiersAndVisibility  The ModifiersAndVisibility to assign to this data.
-   */
+  /** Assigns the specified modifiersAndVisiblity to this data.
+    * @param modifiersAndVisibility  The ModifiersAndVisibility to assign to this data.
+    */
   public void setMav(ModifiersAndVisibility modifiersAndVisibility) {
     _modifiersAndVisibility = modifiersAndVisibility;
   }
@@ -242,21 +232,12 @@ public abstract class Data {
   /**Return the enclosing getSymbolData()*/
   public abstract SymbolData getSymbolData();
 
-
-
-  /**
-   * @return the directly enclosing outer data.
-   */
-  public Data getOuterData() {
-    return _outerData;
-  }
-
-
+  /** @return the directly enclosing outer data. */
+  public Data getOuterData() { return _outerData; }
   
-  /**
-   * Set the outer data to the specified value--throw an exception if the data already has an outer data.
-   * @param outerData  The Data that encloses this data.
-   */
+  /** Sets the outer data to the specified value--throw an exception if the data already has an outer data.
+    * @param outerData  The Data that encloses this data.
+    */
   public void setOuterData(Data outerData) {
     if (_outerData == null) {
       _outerData = outerData;
@@ -423,9 +404,7 @@ public abstract class Data {
    * Set the inner classes of this data to the specified list.
    * @param innerClasses  The LinkedList of inner classes.
    */
-  public void setInnerClasses(LinkedList<SymbolData> innerClasses) {
-    _innerClasses = innerClasses;
-  }  
+  public void setInnerClasses(LinkedList<SymbolData> innerClasses) { _innerClasses = innerClasses; }  
   
   /**
    * Add the specified SymbolData to the end of the list of inner classes.
@@ -448,14 +427,12 @@ public abstract class Data {
   }
   
   //TODO: now that we have this, can we factor out some code in VariableData?
-  /**
-   * Add the specified modifier to the modifiers and visibility for this data, if it is not
-   * already present.
-   * @param modifier  The String to add.
-   */
+  /** Add the specified modifier to the modifiers and visibility for this data, if it is not already present.
+    * @param modifier  The String to add.
+    */
   public void addModifier(String modifier) {
-    if (!hasModifier(modifier)) {
-      if (_modifiersAndVisibility == null) {setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]));}
+    if (! hasModifier(modifier)) {
+      if (_modifiersAndVisibility == null) { setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0])); }
       String[] modifiers = _modifiersAndVisibility.getModifiers();
       String[] newModifiers = new String[modifiers.length + 1];
       newModifiers[0] = modifier;
@@ -466,13 +443,11 @@ public abstract class Data {
     }    
   }
   
-  /**
-   * Check to see if varName is used in this Data's scope.  If so, find a 
-   * new name for the variable by appending a counter to its name until an unused variable
-   * name results.  Return the new name.
-   * @param varName  The initial String name of the variable we are creating.
-   * @return  The new variable name which does not shadow anything in vars.
-   */
+  /** Check if varName is used in this Data's scope.  If so, find a new name for the variable by appending a counter to 
+    * its name until an unused variable name results.  Return the new name.
+    * @param varName  The initial String name of the variable we are creating.
+    * @return  The new variable name which does not shadow anything in vars.
+    */
   public String createUniqueName(String varName) {
     VariableData vd = TypeChecker.getFieldOrVariable(varName, this, getSymbolData(), new NullLiteral(JExprParser.NO_SOURCE_INFO), getVars(), true, false);
     String newName = varName;
@@ -537,10 +512,7 @@ public abstract class Data {
 
       //abstract
       assertTrue("Should be abstract", _d.hasModifier("abstract"));
-      
     }
-  
-   
    
     public void testAddVar() {
       _d = new SymbolData("myName");

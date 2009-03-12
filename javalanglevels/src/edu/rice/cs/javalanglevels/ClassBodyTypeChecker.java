@@ -644,14 +644,14 @@ public class ClassBodyTypeChecker extends Bob {
       _cbbtc._symbolData = _sd1;
       mDef.visit(_cbbtc);
       assertEquals("There should be one error.", 1, errors.size());
-      assertEquals("There error message should be correct", "methodName() in " + _sd1.getName() + " cannot override methodName() in aiya; attempting to use different return types",
+      assertEquals("The error message should be correct", "methodName() in " + _sd1.getName() + " cannot override methodName() in aiya; attempting to use different return types",
                    errors.get(0).getFirst());
       mDef = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
                                    new Word(JExprParser.NO_SOURCE_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0]);
       
       mDef.visit(_cbbtc);
       assertEquals("There should be two errors.", 2, errors.size());
-      assertEquals("There error message should be correct", "methodName() in " + _sd1.getName() + " cannot override methodName() in aiya; attempting to use different return types",
+      assertEquals("The error message should be correct", "methodName() in " + _sd1.getName() + " cannot override methodName() in aiya; attempting to use different return types",
                    errors.get(1).getFirst());
     }
     

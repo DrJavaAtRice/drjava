@@ -827,59 +827,38 @@ public class SymbolData extends TypeData {
       private Iterator<SymbolData> _first = _innerClasses.iterator();
       private Iterator<SymbolData> _second = _innerInterfaces.iterator();
       
-      public boolean hasNext() {
-        return _first.hasNext() || _second.hasNext();
-      }
+      public boolean hasNext() { return _first.hasNext() || _second.hasNext(); }
       
       public SymbolData next() {
-        if (_first.hasNext())
-          return _first.next();
-        else
-          return _second.next();
+        if (_first.hasNext()) return _first.next();
+        else return _second.next();
       }
       
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
+      public void remove() { throw new UnsupportedOperationException(); }
     };
-    
   }
   
   
   /**Add the specified innerInterface to the list of innerInterfaces*/
-  public void addInnerInterface(SymbolData innerInterface) {
-    _innerInterfaces.addLast(innerInterface);
-  }
+  public void addInnerInterface(SymbolData innerInterface) { _innerInterfaces.addLast(innerInterface); }
   
   /**Increment the local class num and return it*/
-  public int preincrementLocalClassNum() {
-    return ++_localClassNum;
-  }
+  public int preincrementLocalClassNum() { return ++_localClassNum; }
   
   /**Set the anonymous inner class num to the specified value*/
-  public void setAnonymousInnerClassNum(int i) {
-    _anonymousInnerClassNum=i;
-  }
+  public void setAnonymousInnerClassNum(int i) { _anonymousInnerClassNum=i; }
   
   /**Increment the anonymous inner class num, and return it*/
-  public int preincrementAnonymousInnerClassNum() {
-    return ++_anonymousInnerClassNum;
-  }
+  public int preincrementAnonymousInnerClassNum() { return ++_anonymousInnerClassNum; }
   
   /**@return the anonymous inner class num*/
-  public int getAnonymousInnerClassNum() {
-    return _anonymousInnerClassNum;
-  }
+  public int getAnonymousInnerClassNum() { return _anonymousInnerClassNum; }
   
   /**Return the local class num, and then decrement it*/
-  public int postdecrementLocalClassNum() {
-    return _localClassNum--;
-  }
+  public int postdecrementLocalClassNum() { return _localClassNum--; }
   
   /**Return the anonymous inner class num, and then decrement it*/
-  public int postdecrementAnonymousInnerClassNum() {
-    return _anonymousInnerClassNum--;
-  }  
+  public int postdecrementAnonymousInnerClassNum() { return _anonymousInnerClassNum--; }  
   
   /**
    * When you add a field to a SymbolData, it is given an initial value.
@@ -1095,35 +1074,32 @@ public class SymbolData extends TypeData {
   
   /**@return true if this is a primitive char or a Character with autoboxing enabled*/
   boolean isFloatType(JavaVersion version) {
-    return (this==FLOAT_TYPE) || (this.getName().equals("java.lang.Float") && LanguageLevelConverter.versionSupportsAutoboxing(version));//Double.valueOf(System.getProperty("java.specification.version")) >= 1.5);
+    return (this==FLOAT_TYPE) || (getName().equals("java.lang.Float") && 
+                                  LanguageLevelConverter.versionSupportsAutoboxing(version));
   }
   
   
   /**@return true if this is a primitive double or a Double with autoboxing enabled*/
   boolean isDoubleType(JavaVersion version) {
-    return (this==DOUBLE_TYPE) || (this.getName().equals("java.lang.Double") && LanguageLevelConverter.versionSupportsAutoboxing(version));//Double.valueOf(System.getProperty("java.specification.version")) >= 1.5);
+    return (this == DOUBLE_TYPE) || 
+      (getName().equals("java.lang.Double") && LanguageLevelConverter.versionSupportsAutoboxing(version));
   }
   
-  
-  
-  /**Compare the ModifiersAndVisibility of the 2 method data to determine if overwriting can override the access priviledges of overwritten.  */
-  public static boolean _isAssignable(MethodData overwritten, MethodData overwriting) {
-    if (overwritten.hasModifier("public")) { //a public method can only be overwritten by a public method.
+  /** Compares the ModifiersAndVisibility of the 2 method data to determine if overwriting can override the access 
+    * priviledges of overwritten.  
+    */
+  private static boolean _isCompatible(MethodData overwritten, MethodData overwriting) {
+    if (overwritten.hasModifier("public")) { // A public method can only be overwritten by a public method.
       return overwriting.hasModifier("public");
     }
-    if (overwritten.hasModifier("protected")) { //a protected method can only be overwritten by a protected or public method
+    if (overwritten.hasModifier("protected")) { // A protected method can only be overwritten by protected/public method
       return overwriting.hasModifier("protected") || overwriting.hasModifier("public");
     } 
-    
-    if (!overwritten.hasModifier("private")) { //only private methods can be overwritten by private methods
+    if (! overwritten.hasModifier("private")) { // only private methods can be overwritten by private methods
       return !overwriting.hasModifier("private");
     }
     return true;
-      
-    
   }
-  
-  
   
   /**Call checkDifferentReturnTypes with addError set to true by default*/
   protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, JavaVersion version) {
@@ -1166,37 +1142,41 @@ public class SymbolData extends TypeData {
           methodSignature.append(")");
           String methodSigString = methodSignature.toString();
           // This entire method is only called from the type checker, so add an error to its error list.
-          if (addError) { TypeChecker.errors.addLast(new Pair<String, JExpressionIF>(methodSigString + " in " + sd.getName() + 
-                             " cannot override " + methodSigString + " in " +
-                             currSd.getName() + "; attempting to use different return types",
-                                                                                   md.getJExpression())); }
+          if (addError) { 
+            TypeChecker.errors.addLast(new Pair<String, JExpressionIF>(methodSigString + " in " + sd.getName() + 
+                                                                       " cannot override " + methodSigString + " in " +
+                                                                       currSd.getName() + 
+                                                                       "; attempting to use different return types",
+                                                                       md.getJExpression())); }
           return true;
         }
-        if (!_isAssignable(matchingMd, md)) {
+        
+        if (! _isCompatible(matchingMd, md)) {  // check compatibility of visiblity modifiers
           String access = "package";
-          if (matchingMd.hasModifier("private")) {access = "private";}
-          if (matchingMd.hasModifier("public")) {access = "public";}
-          if (matchingMd.hasModifier("protected")) {access = "protected";}
-          if (addError) {TypeChecker.errors.addLast(new Pair<String, JExpressionIF>(md.getName() + " in " + md.getSymbolData().getName() + " cannot override " + matchingMd.getName() + " in " + matchingMd.getSymbolData().getName() + ".  You are attempting to assign weaker access priviledges. In " + matchingMd.getSymbolData().getName() + ", "  + matchingMd.getName() + " was " + access, md.getJExpression()));} 
+          if (matchingMd.hasModifier("private")) access = "private";
+          if (matchingMd.hasModifier("public")) access = "public";
+          if (matchingMd.hasModifier("protected")) access = "protected";
+          if (addError) {
+            TypeChecker.errors.
+              addLast(new Pair<String, JExpressionIF>(md.getName() + " in " + md.getSymbolData().getName() +
+                                                      " cannot override " + matchingMd.getName() + " in " +
+                                                      matchingMd.getSymbolData().getName() + 
+                                                      ".  You are attempting to assign weaker access priviledges. In " +
+                                                      matchingMd.getSymbolData().getName() + ", " + matchingMd.getName() +
+                                                      " was " + access, md.getJExpression())); } 
           return true;
         }
       }
-      else {
-        if (checkDifferentReturnTypes(md, currSd, version)) {
-          return true;
-        }
-      }
+      else if (checkDifferentReturnTypes(md, currSd, version)) return true;
     }
     return false;
   }
   
-  /**
-   * Check to see if methodName is used in this SymbolData's scope.  If so, find a 
-   * new name for the method by appending a counter to its name until an unused method
-   * name results.  Return the new name.
-   * @param methodName  The initial String name of the variable we are creating.
-   * @return  The new variable name which does not shadow anything in vars.
-   */
+  /** Checks to see if methodName is used in this SymbolData's scope.  If so, finds a new name for the method by 
+    * appending a counter to its name until an unused method name results.  Returns the new name.
+    * @param methodName  The initial String name of the variable we are creating.
+    * @return  The new variable name which does not shadow anything in vars.
+    */
   public String createUniqueMethodName(String methodName) {
     LinkedList<SymbolData> toCheck = new LinkedList<SymbolData>();
     toCheck.add(this);
@@ -1204,9 +1184,7 @@ public class SymbolData extends TypeData {
     while(toCheck.size() > 0) {
       SymbolData sd = toCheck.removeFirst();
       LinkedList<MethodData> methods = sd.getMethods();
-      for(MethodData md : methods) {
-        names.add(md.getName());
-      }
+      for(MethodData md : methods) { names.add(md.getName()); }
       if (sd.getSuperClass() != null) { toCheck.add(sd.getSuperClass()); }
       toCheck.addAll(sd.getInterfaces());
       if (sd.getOuterData() != null) { toCheck.add(sd.getOuterData().getSymbolData()); }
@@ -1622,7 +1600,8 @@ public class SymbolData extends TypeData {
       assertTrue("There should be a conflict.", checkDifferentReturnTypes(md3, _sd, JavaVersion.JAVA_5));
       assertEquals("There should be one error.", 1, TypeChecker.errors.size());
       assertEquals("The error message should be correct.", 
-                   "methodName() in i.like.monkey cannot override methodName() in superClass; attempting to use different return types",
+                   "methodName() in i.like.monkey cannot override methodName() in superClass;" + 
+                   " attempting to use different return types",
                    TypeChecker.errors.get(0).getFirst());
       // Create a super super class and give it a method.
       SymbolData superSuperSd = new SymbolData("superSuperClass");
@@ -1674,7 +1653,10 @@ public class SymbolData extends TypeData {
       md7.getParams()[0].setEnclosingData(md7);
       assertTrue("There should be a conflict", checkDifferentReturnTypes(md7, _sd, JavaVersion.JAVA_5));
       assertEquals("There should be three errors", 3, TypeChecker.errors.size());
-      assertEquals("The error message should be correct", "superSuperMethodName in myData cannot override superSuperMethodName in " + superSuperSd.getName() + ".  You are attempting to assign weaker access priviledges. In " + superSuperSd.getName() + ", superSuperMethodName was public", TypeChecker.errors.get(2).getFirst());
+      assertEquals("The error message should be correct", 
+                   "superSuperMethodName in myData cannot override superSuperMethodName in " + superSuperSd.getName() + 
+                   ".  You are attempting to assign weaker access priviledges. In " + superSuperSd.getName() + 
+                   ", superSuperMethodName was public", TypeChecker.errors.get(2).getFirst());
                                       
       
       //Test a method that narrows the return type of the super class's method
@@ -1695,7 +1677,9 @@ public class SymbolData extends TypeData {
       assertEquals("There should still be 3 errors", 3, TypeChecker.errors.size());
       assertTrue("There should be a conflict in 1.4", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_1_4));
       assertEquals("There should now be 4 errors", 4, TypeChecker.errors.size());
-      assertEquals("The error message should be correct", TypeChecker.errors.getLast().getFirst(), "superSuperMethodName(char) in superClass cannot override superSuperMethodName(char) in " + superSuperSd.getName() + "; attempting to use different return types");
+      assertEquals("The error message should be correct", TypeChecker.errors.getLast().getFirst(), 
+                   "superSuperMethodName(char) in superClass cannot override superSuperMethodName(char) in " + 
+                   superSuperSd.getName() + "; attempting to use different return types");
     }
     
     public void test_createErrorMessage() {
@@ -2076,19 +2060,19 @@ public class SymbolData extends TypeData {
       MethodData md2 = new MethodData("Overwriting", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(JExprParser.NO_SOURCE_INFO));
 
       //tests a wide variety of possibilities, but not all possibilities.
-      assertTrue("Should be assignable", _isAssignable(md, md2));
+      assertTrue("Should be assignable", _isCompatible(md, md2));
       md.setMav(_protectedMav);
-      assertTrue("Should be assignable", _isAssignable(md, md2));
+      assertTrue("Should be assignable", _isCompatible(md, md2));
       md.setMav(_privateMav);
-      assertTrue("Should be assignable", _isAssignable(md, md2));
+      assertTrue("Should be assignable", _isCompatible(md, md2));
       md.setMav(_packageMav);
-      assertTrue("Should be assignable", _isAssignable(md, md2));
+      assertTrue("Should be assignable", _isCompatible(md, md2));
       md2.setMav(_protectedMav);
-      assertTrue("Should be assignable", _isAssignable(md, md2));
+      assertTrue("Should be assignable", _isCompatible(md, md2));
       md2.setMav(_privateMav);
-      assertFalse("Should not be assignable", _isAssignable(md, md2));
+      assertFalse("Should not be assignable", _isCompatible(md, md2));
       md2.setMav(_packageMav);
-      assertTrue("Should be assignable", _isAssignable(md, md2));
+      assertTrue("Should be assignable", _isCompatible(md, md2));
       
     }
     

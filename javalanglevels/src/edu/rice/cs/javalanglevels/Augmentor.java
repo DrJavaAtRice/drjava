@@ -38,6 +38,7 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
+import edu.rice.cs.javalanglevels.util.Log;
 import java.io.*;
 import java.util.*;
 import junit.framework.TestCase;
@@ -45,6 +46,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
+  public static final Log _log = new Log("Augmentor.txt", true);
   
   private static final String newLine = System.getProperty("line.separator");
   private static final int indentWidth = 2; // TODO: get this from DrJava?
@@ -73,13 +75,12 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
   /** The Data enclosing whatever we are currently augmenting.*/
   private Data _enclosingData;
   
-  /*
-   * Main constructor for Augmentor: Used by the LanguageLevelConverter when converting language level files.
-   * @param safeSupportCode  true if the user wants safe support code to be generated (this comes with a high overhead)
-   * @param fileIn  A BufferedReader corresponding to the LanguageLevel file we should read from
-   * @param fileOut  A BufferedWriter corresponding to the .java file we should write to.
-   * @param llv  The LanguageLevelVisitor that was used to traverse the language level file.
-   */
+  /** Main constructor for Augmentor: Used by the LanguageLevelConverter when converting language level files.
+    * @param safeSupportCode  true if the user wants safe support code to be generated (this comes with a high overhead)
+    * @param fileIn  A BufferedReader corresponding to the LanguageLevel file we should read from
+    * @param fileOut  A BufferedWriter corresponding to the .java file we should write to.
+    * @param llv  The LanguageLevelVisitor that was used to traverse the language level file.
+    */
   public Augmentor(boolean safeSupportCode, BufferedReader fileIn, BufferedWriter fileOut, LanguageLevelVisitor llv) {
     _fileIn = fileIn;
     _fileInLine = 1;
@@ -92,49 +93,44 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     _enclosingData = null;
   }
   
-  /**
-   * Create another Augmentor that shares the same static fields as the current Augmentor,
-   * but has a new _enclosingData d.
-   * This constructor should only be called from within another Augmentor.
-   * @param d  The EnclosingData from which this Augmentor works.
-   */
-  protected Augmentor(Data d) { 
-    _enclosingData = d;
-  }
+  /** Create another Augmentor sharing the same static fields as the current Augmentor, but with a new _enclosingData d.
+    * This constructor should only be called from within another Augmentor.
+    * @param d  The EnclosingData from which this Augmentor works.
+    */
+  protected Augmentor(Data d) { _enclosingData = d; }
   
-  
-  
-  /**
-   * Do the augmenting appropriate for a Variable Declaration:  At the Elementary Level,
-   * all class-level Variable Declarations should be augmented with "private final".  At
-   * the IntermediateLevel, all Variable Declarations should be augmented with "final".
-   * No augmentation is necessary at the Advanced level.
-   * Always read up to the start of the VariableDeclaration before beginning augmentation.
-   * @param that  The VariableDeclaration we are augmenting.
-   */
-  public void forVariableDeclaration(VariableDeclaration that) {
-    _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
+  /** Writes out implicit variableDeclarationModfiers that must be added to augmented file. */
+  protected void augmentVariableDeclarationModifiers(VariableDeclaration that) {
     String variableDeclarationModifiers = "";
     if (_isElementaryFile()) { variableDeclarationModifiers = "private final "; }
     else if (_isIntermediateFile()) { 
       //make static fields public final, make instance fields private final
-      String[] mavs = that.getMav().getModifiers();
       variableDeclarationModifiers = "private final ";
+      String[] mavs = that.getMav().getModifiers();
       for (int i = 0; i<mavs.length; i++) {
-        if (mavs[i].equals("static")) {variableDeclarationModifiers = "public final "; break;}
+        if (mavs[i].equals("static")) { variableDeclarationModifiers = "public final "; break; }
       }
     }
       
     _writeToFileOut(variableDeclarationModifiers);
-    
+  }
+  
+  /** Do the augmenting appropriate for a Variable Declaration:  At the Elementary Level, all class-level Variable 
+    * Declarations should be augmented with "private final".  At the IntermediateLevel, all Variable Declarations should
+    * be augmented with "final".  No augmentation is necessary at the Advanced level. Always read up to the start of the
+    * VariableDeclaration before beginning augmentation.
+    * @param that  The VariableDeclaration we are augmenting.
+    */
+  public void forVariableDeclaration(VariableDeclaration that) {
+    _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
+    augmentVariableDeclarationModifiers(that);
     super.forVariableDeclaration(that);
   }
   
-  /**
-   * All formal parameters at the Elementary and Intermediate level (parameters to a method or in a catch clause) are augmented to be final.
-   * Always read up to the start of the FormalParameter before beginning augmentation.
-   * @param that  The FormalParameter we are augmenting.
-   */
+  /** All formal parameters at the Elementary and Intermediate level (parameters to a method or in a catch clause) are augmented to be final.
+    * Always read up to the start of the FormalParameter before beginning augmentation.
+    * @param that  The FormalParameter we are augmenting.
+    */
   public void forFormalParameter(FormalParameter that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     if (_isElementaryFile() || _isIntermediateFile()) {
@@ -143,16 +139,12 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     // We don't bother to visit the declarator, since it does not need to be augmented.
   }
   
-
-  
-  /**
-   * Do the augmentation necessary for a ConstructorDef.  Not allowed at the Elementary level, so don't worry
-   * about that.  At the Intermediate Level, augment with public by default.
-   * At all levels, the Formal Parameters to the MethodDef need to be visited so that
-   * they can be augmented with final.   
-   * Always read up to the start of the ConstructorDef before beginning augmentation.
-   * @param that  The ConstructorDef we are augmenting.
-   */
+  /** Do the augmentation necessary for a ConstructorDef.  Not allowed at the Elementary level, so don't worry
+    * about that.  At the Intermediate Level, augment with public by default.  At all levels, the Formal Parameters
+    * to the MethodDef need to be visited so that they can be augmented with final.   
+    * Always read up to the start of the ConstructorDef before beginning augmentation.
+    * @param that  The ConstructorDef we are augmenting.
+    */
   public void forConstructorDef(ConstructorDef that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     
@@ -167,82 +159,105 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
         }
       }
       
-      if (!hasVisibilityModifier) {
-        _writeToFileOut("public ");
-      }
-      
+      if (! hasVisibilityModifier) _writeToFileOut("public ");
     }
     for (FormalParameter fp : that.getParameters()) { fp.visit(this); }
     // We don't bother visiting the rest of the method declaration
   }
-
   
-  
-  
-  
-  /**
-   * Do the augmentation necessary for a MethodDef.  At the Elementary level, all methods are automatically
-   * augmented to be "public".  At the IntermediateLevel, if the user did not specify a visibility level,
-   * the method is automatically augmented to be "public".  Otherwise, the user's modifier is left unchanged.
-   * At all levels, the Formal Parameters to the MethodDef need to be visited so that
-   * they can be augmented with final.   
-   * Always read up to the start of the MethodDef before beginning augmentation.
-   * @param that  The MethodDef being visited.
-   */
+  /** Do the augmentation necessary for a MethodDef.  At the Elementary level, all methods are automatically
+    * augmented to be "public".  At the IntermediateLevel, if the user did not specify a visibility level,
+    * the method is automatically augmented to be "public".  Otherwise, the user's modifier is left unchanged.
+    * At all levels, the Formal Parameters to the MethodDef need to be visited so that
+    * they can be augmented with final.   
+    * Always read up to the start of the MethodDef before beginning augmentation.
+    * @param that  The MethodDef being visited.
+    */
   public void forMethodDef(MethodDef that) {
-    _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
-    if (_isElementaryFile()) { 
-      _writeToFileOut("public ");
-    }
+    SourceInfo mdSourceInfo = that.getSourceInfo();
+    _readAndWriteThroughIndex(mdSourceInfo.getStartLine(), mdSourceInfo.getStartColumn() - 1);
     
-    if (_isIntermediateFile()) { //if this is an Intermediate level file, want to check and see if the method has modifiers.  If not,
-                                 //make it public by default
+    if (_isElementaryFile()) _writeToFileOut("public ");
+    
+    if (_isIntermediateFile()) { 
+      /* Check if the method has explicit modifiers.  Unfortunately, the information in that.getMav().getModifiers() 
+       * is not reliable regarding what modifiers EXPLICITLY appear in the .dj1 file, so we have to do additional work. */
+      
       String[] modifiers = that.getMav().getModifiers();
-      boolean hasVisibilityModifier = false;
-      for (int i = 0; i<modifiers.length; i++) {
-        if ((modifiers[i].equals("private")) || (modifiers[i].equals("public")) || (modifiers[i].equals("protected"))) {
-          hasVisibilityModifier = true;
+      String visibilityModifier = null;
+      for (int i = 0; i < modifiers.length; i++) {
+        if (modifiers[i].equals("private") || modifiers[i].equals("public") || modifiers[i].equals("protected")) {
+          visibilityModifier = modifiers[i];
           break;
         }
       }
+
+//  This patch was created in an attempt to fix an augmentation bug by brute force; it didn't work      
+//      if (visibilityModifier != null) {
+//        // Check for explicit appearance in text
+//        String text = _peek(mdSourceInfo.getEndLine(), mdSourceInfo.getEndColumn());
+//        _log.log("Checking for presence of visibility modifier " + visibilityModifier + " in file " + _fileIn +  " on line " + _fileInLine + ":\n'" + text + "'");
+//        int len = text.length();
+//        // This analysis can be broken by deviously constructed comments
+//        int startModifier = text.indexOf(visibilityModifier);  // offset of modifier
+//        if (startModifier < 0) startModifier = len;  // This should never happen
+//        int startName = text.indexOf(that.getName().getText());  // offset of method name
+//        if (startName < 0) startName = len;  // This should never happen
+//        if (startName <= startModifier) { 
+//          visibilityModifier = null; // modifier does not explicitlly appear in text
+//          _log.log("No modifier was found");
+//        }
+//        else _log.log("Modifier was found");
+//      }
       
-      if (!hasVisibilityModifier) {
+      if (visibilityModifier == null) {
         _writeToFileOut("public ");
+//  A continuation of the preceding unsucessful patch
+//        MethodData md = 
+//          _enclosingData.getSymbolData().getMethod(that.getName().getText(), 
+//                                                   formalParameters2TypeDatas(that.getParams(), _enclosingData));
+//        if (md == null) { 
+//          throw new RuntimeException("Internal Program Error: Can't find method data for " + that.getName() + 
+//                                     " Please report this bug."); 
+//        }
+//        md.addModifier("public");  // this operation is idempotent
       }
-      
+        
     }
+    
     for (FormalParameter fp : that.getParams()) { fp.visit(this); }
     // We don't bother visiting the rest of the method declaration
   }
   
   
-  /**
-   * Delegate the augmentation of this AbstractMethodDef to forMethodDef.
-   * @param that  The AbstractMethodDef being augmented.
-   */
-  public void forAbstractMethodDef(AbstractMethodDef that) {
-    forMethodDef(that);
-  }
+  /** Delegate the augmentation of this AbstractMethodDef to forMethodDef.
+    * @param that  The AbstractMethodDef being augmented.
+    */
+  public void forAbstractMethodDef(AbstractMethodDef md) { forMethodDef(md); }
   
-  /**
-   * Delegate the augmenetation of this method def's declaration to forMethodDef.  Then, visit the
-   * body with a MethodBodyAugmentor so that each piece of the body can be correctly augmented.
-   * @param that  The ConcreteMethodDef being augmented.
-   */
+  /** Delegate the augmentation of this method def's declaration to forMethodDef.  Then, visit the body with a 
+    * MethodBodyAugmentor so that each piece of the body can be correctly augmented.
+    * @param that  The ConcreteMethodDef being augmented.
+    */
   public void forConcreteMethodDef(ConcreteMethodDef that) {
     forMethodDef(that);
-    MethodData md = _enclosingData.getSymbolData().getMethod(that.getName().getText(), formalParameters2TypeDatas(that.getParams(), _enclosingData));
-    if (md == null) { throw new RuntimeException("Internal Program Error: Can't find method data for " + that.getName() + " Please report this bug."); }
+    MethodData md = 
+      _enclosingData.getSymbolData().getMethod(that.getName().getText(), 
+                                               formalParameters2TypeDatas(that.getParams(), _enclosingData));
+    _log.log("Augmenting ConcreteMethodDef " + that + " with MethodData " + md);
+    if (md == null) { 
+      throw new RuntimeException("Internal Program Error: Can't find method data for " + that.getName() + 
+                                 " Please report this bug."); 
+    }
     that.getBody().visit(new MethodBodyAugmentor(md));
   }
   
-  /**
-   * Class Defs can only appear at the top level of a source file.
-   * If this ClassDef appears in an Elementary Level file and is specified to be public, then it needs to be augmented with public.
-   * Visit the body of the class definition with a new Augmentor.
-   * Then, (so that this appears after the rest of the class body) add any necessary augmented methods.
-   * @param cd  The ClassDef we're augmenting.
-   */
+  /** Class Defs can only appear at the top level of a source file.  If this ClassDef appears in an Elementary Level
+    * file and is specified to be public, then it needs to be augmented with public.  Visit the body of the class 
+    * definition with a new Augmentor.  Then, (so that this appears after the rest of the class body) add any necessary
+    * augmented methods.
+    * @param cd  The ClassDef we're augmenting.
+    */
   public void forClassDef(ClassDef cd) {
     String className = cd.getName().getText();
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(className));
@@ -264,7 +279,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     className = LanguageLevelVisitor.getUnqualifiedClassName(sd.getName());
     _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);
     
-    //Do all that crazy augmentation stuff.
+    // Do all that crazy augmentation stuff.
     if (_isElementaryFile() || _isIntermediateFile()) {
       writeConstructor(className, sd, baseIndent);
       writeAccessors(sd, baseIndent);
@@ -382,14 +397,13 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
   }
   
   
-  /*
-   * Look up this Anonymous Inner Class inside its enclosing data, and then visit its body.  Then, if it
+  /* Look up this Anonymous Inner Class inside its enclosing data, and then visit its body.  Then, if it
    * is from an Elementary or Intermediate Level file, augment with the necessary automatically generated methods.
    * @param e  The AnonymousClassInstantiation we are augmenting.
    */
   public void forAnonymousClassInstantiation(AnonymousClassInstantiation e) {
     SymbolData sd = _enclosingData.getNextAnonymousInnerClass();
-
+    _log.log("Augmenting anonymous class " + e + " with SymbolData " + sd);
     if (sd == null) {
       throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.");
     }
@@ -407,12 +421,11 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
       String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
       writeToString(sd, baseIndent, valueToStringName);
       if (!_safeSupportCode) { writeAnonEquals(baseIndent);}
-      else {writeEquals(className, sd, baseIndent, valueEqualsName);}
+      else { writeEquals(className, sd, baseIndent, valueEqualsName); }
       writeHashCode(className, sd, baseIndent, true, valueHashCodeName);
       _writeToFileOut(indentString(baseIndent, 0));
 
     }
-
   }
   
   /**Delegate to for AnonymousClassInstantiation(e).*/
@@ -426,32 +439,29 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     forAnonymousClassInstantiation(e);
   }
 
-
- 
-  /**
-   * Sort the Class and Interface defs based on the order they appear in the file.  Then visit each in turn.
-   * Finally, write whatever remains in the file.  (If this is an ElementaryLevel file that needs to import
-   * junit.framework.TestCase, make this the very first line of the augmented file.  This is okay, because at the
-   * ElementaryLevel, there are no package statements we might get in trouble with.
-   */
+  /** Sort the Class and Interface defs based on the order they appear in the file.  Then visit each in turn.
+    * Finally, write whatever remains in the file.  (If this is an ElementaryLevel file that needs to import
+    * junit.framework.TestCase, make this the very first line of the augmented file.  This is okay, because at the
+    * ElementaryLevel, there are no package statements we might get in trouble with.
+    */
   public void forSourceFile(SourceFile sf) {
     TypeDefBase[] cds = sf.getTypes();
     
     // We intentionally neglect to visit the package and import statements
     
       
-    //If importedPackages contains "junit.framework", then we had to import it while type checking this file.  Because we assumed
-    //it was imported, the generated java file needs to import it as well.
+    /* If importedPackages contains "junit.framework", then we had to import it while type checking this file.  Because
+     * we assumed it was imported, the generated java file needs to import it as well. */
     if (_isElementaryFile() && _llv._importedPackages.contains("junit.framework")) { // This assumes there are no package statements
       _writeToFileOut("import junit.framework.*;" + newLine);
     }
 
     //Visit each class and interface def in turn.
-    for (TypeDefBase cd : cds) {
-      cd.visit(this);
-    }
+    for (TypeDefBase cd : cds) { cd.visit(this); }
  
     //Write out whatever is left in the file.
+    _log.log("Processed source file through line " + _fileInLine + " and column " + _fileInColumn);
+    _log.log("Now dumping remainder of file through line " + sf.getSourceInfo().getEndLine());
     _readAndWriteThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
   }
   
@@ -491,7 +501,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
         break;
       }
     }
-    if (constructor == null) { return; }
+    if (constructor == null) return;
     
     
     // Write the method signature.
@@ -596,7 +606,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
         break;
       }
     }
-    if (toString == null) { return; }
+    if (toString == null) return;
     
     LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd); //This builds up a list of all MethodData accessors for the VariableDatas of this class.
     MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
@@ -695,7 +705,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
         break;
       }
     }
-    if (equals == null) { return; }
+    if (equals == null) return;
 
     LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd);
     MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
@@ -866,7 +876,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
         break;
       }
     }
-    if (hashCode == null) { return; }
+    if (hashCode == null) return;
 
     LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd);
     MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
@@ -1428,16 +1438,17 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     return allMethods;
   }
 
-  /**
-   * Read _fileIn through the given line & column and write to output.  When
-   * completed, the current cursor will be one character after
-   * (line, column).
-   * @param line The line number to read through.
-   * @param column The column to read to (or 0 to read to through the end of the previous line).
-   */
-  private static void _readAndWriteThroughIndex(int line, int column) {
+  /** Reads _fileIn through the given (line, column) returning this text.  On completion, the current cursor 
+    * (_fileInLine, fileInColumn) is one character after (line, column).
+    * @param line The line number to read through.
+    * @param column The column to read to (or 0 to read to through the end of the previous line).
+    */
+  private static String _readThroughIndex(int line, int column) {
+
     if (_fileInLine > line || (_fileInLine == line && _fileInColumn - 1 > column)) {
-      throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + " through a point that is already past: line " + line + ", column " + column + "; (currently at " + _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
+      throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + 
+                                 " at a point that is already past: line " + line + ", column " + column + 
+                                 "; (currently at " + _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
     }
     
     try {
@@ -1446,7 +1457,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
         String l = _fileIn.readLine();
         if (l == null) {
           _fileOut.flush();
-          throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + " past the end of file: line " + line + ", column " + column + "; (currently at " + _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
+          throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + 
+                                     " past the end of file: line " + line + ", column " + column + "; (currently at " +
+                                     _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
         }
         
         result.append(l).append(newLine);
@@ -1465,34 +1478,56 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
       _fileInLine = line;
       _fileInColumn = column + 1;
       
-      _writeToFileOut(result.toString());
+      return result.toString();
     }
-    catch (IOException ioe) {
-      throw new Augmentor.Exception(ioe);
-    }
+    catch (IOException ioe) { throw new Augmentor.Exception(ioe); }
+  }
+    
+  /** Reads _fileIn through the given line & column and write to output.  On completion, the current cursor is one 
+    * character after (line, column).
+    * @param line The line number to read through.
+    * @param column The column to read to (or 0 to read to through the end of the previous line).
+    */
+  private static void _readAndWriteThroughIndex(int line, int column) {
+    String text = _readThroughIndex(line, column);
+    _writeToFileOut(text);
   }
   
   private static void _writeToFileOut(String s) {
+    try { _fileOut.write(s); }
+    catch (IOException ioe) { throw new Augmentor.Exception(ioe); }
+  }
+  
+  /** Reads _fileIn through the specified (line, column) but leaves the file cursor unchanged.
+    * @param line The line number to read through.
+    * @param column The column to read to (or 0 to read to through the end of the previous line).
+    */
+  private static String _peek(int line, int column) {
+    
     try {
-      _fileOut.write(s);
-    }
-    catch (IOException ioe) {
-      throw new Augmentor.Exception(ioe);
-    }
+      _fileIn.mark(LanguageLevelConverter.INPUT_BUFFER_SIZE);
+      // Save the cursor
+      int fileInLine = _fileInLine;
+      int fileInColumn = _fileInColumn;
+      String text = _readThroughIndex(line, column);
+      _fileIn.reset();
+      // Reset the cursor
+      _fileInLine = fileInLine;
+      _fileInColumn = fileInColumn;
+      return text;
+      }
+      catch (IOException ioe) { throw new Augmentor.Exception(ioe); }
   }
   
   public static class MethodBodyAugmentor extends Augmentor {
     
-    protected MethodBodyAugmentor(Data enclosing) {
-      super(enclosing);
+    /** Mandatory forwarding constructor. */
+    protected MethodBodyAugmentor(Data enclosing) { super(enclosing); }
+    
+    /** Writes out implicit variableDeclarationModfiers that must be added to augmented file. */
+    protected void augmentVariableDeclarationModifiers(VariableDeclaration that) {
+      if (! _isAdvancedFile()) _writeToFileOut("final ");
     }
-  
-    public void forVariableDeclaration(VariableDeclaration that) {
-      _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
-      if (!_isAdvancedFile())
-        _writeToFileOut("final ");
-    }
-  
   }
   
   public static class Exception extends RuntimeException {
@@ -1501,11 +1536,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     }
   }
   
-  /**
-   * A JUnit test case class.
-   * Every method starting with the word "test" will be called when running
-   * the test with JUnit.
-   */
+  /** Test class for the Augmentor class. */
   public static class AugmentorTest extends TestCase {
 
     public AugmentorTest() {

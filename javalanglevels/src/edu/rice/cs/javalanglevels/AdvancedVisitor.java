@@ -101,7 +101,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     SymbolData superSd = sd.getSuperClass();
     
     //If sd is a continuation, there was an error somewhere else.  just return.
-    if (sd.isContinuation()) {return;}
+    if (sd.isContinuation()) return;
     
     String name = getUnqualifiedClassName(sd.getName());
     
@@ -113,7 +113,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     }
     
     //otherwise, it doesn't have a constructor, so let's add it!
-    MethodData md = new MethodData(name,
+    MethodData md = MethodData.make(name,
                                    new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}), 
                                    new TypeParameter[0], 
                                    sd, 
@@ -127,10 +127,9 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
   }
 
   
-  /**
-   * Check the modifiers and visibility specifiers that the user has given.  Make sure they are appropriate.
-   * Only abstract, public, private, protected, and static and final are allowed at this level.
-   */
+  /** Check the modifiers and visibility specifiers that the user has given.  Make sure they are appropriate.
+    * Only abstract, public, private, protected, and static and final are allowed at this level.
+    */
   public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
     StringBuffer sb = new StringBuffer();
@@ -138,7 +137,8 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     int count = 0;    
     for(int i = 0; i < modifiersAndVisibility.length; i++) {
       temp = modifiersAndVisibility[i];
-      if (!(temp.equals("abstract") || temp.equals("public") || temp.equals("private") || temp.equals("protected") || temp.equals("static") || temp.equals("final"))) {
+      if (!(temp.equals("abstract") || temp.equals("public") || temp.equals("private") || temp.equals("protected") || 
+            temp.equals("static") || temp.equals("final"))) {
         sb.append(" \"" + temp + "\"");
         count++;
       }
@@ -323,7 +323,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    */
   public void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = addSymbolData(that, className); //does the class initalization
@@ -384,7 +384,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    */
   public void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     String className = that.getName().getText();
     that.getMav().visit(this);
@@ -416,7 +416,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    */
   protected void handleInnerClassDef(InnerClassDef that, Data data, String name) {
     forInnerClassDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     that.getMav().visit(this);
     that.getName().visit(this);
@@ -452,7 +452,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    */
   protected void handleInnerInterfaceDef(InnerInterfaceDef that, SymbolData symbolData, String name) {
     forInnerInterfaceDefDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     that.getMav().visit(this);
     that.getName().visit(this);
@@ -468,15 +468,12 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     forInnerInterfaceDefOnly(that);
   }
 
-  
-
-   /**
-   * Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.
-   * Do not generate automatic accessors for the anonymous class--this will be done in type checker pass.
-   * @param that  The AnonymousClassInstantiation being visited
-   * @param enclosing  The enclosing Data
-   * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
-   */
+  /** Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.
+    * Do not generate automatic accessors for the anonymous class--this will be done in type checker pass.
+    * @param that  The AnonymousClassInstantiation being visited
+    * @param enclosing  The enclosing Data
+    * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
+    */
   public void anonymousClassInstantiationHelper(AnonymousClassInstantiation that, Data enclosing, SymbolData superC) {
     that.getArguments().visit(this); 
     
@@ -485,7 +482,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     enclosing.addInnerClass(sd);
     sd.setOuterData(enclosing);
     
-    if (superC != null && !superC.isInterface()) {
+    if (superC != null && ! superC.isInterface()) {
       sd.setSuperClass(superC); //the super class is what was passed in
     }
     sd.setPackage(_package);
@@ -500,16 +497,15 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
 
   }
   
-  /**
-   * Look up the super type of this class instantiation and add it to the symbol table.
-   * Visit the body of the class instantiation.  All handling of this as an anonymous inner class (i.e. adding it to
-   * the enclosing SD's list of inner classes, creating a symbol data for the anonyomous inner class, etc) will be handled
-   * in the TypeChecker pass.  This is because no one will depend on that symbolData until we create it.
-   * @param that  The SimpleAnonymousClassInstantiation being processed.
-   */
+  /** Look up the super type of this class instantiation and add it to the symbol table.  Visit the body of the class
+    * instantiation.  All handling of this as an anonymous inner class (i.e. adding it to the enclosing SD's list of
+    * inner classes, creating a symbol data for the anonyomous inner class, etc) is handled in the TypeChecker pass.  
+    * This is because no one will depend on that symbolData until we create it.
+    * @param that  The SimpleAnonymousClassInstantiation being processed.
+    */
   public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, Data data) {
     forSimpleAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
 
     //resolve the super class and make sure it will be in the SymbolTable.
     SymbolData superC = getSymbolData(that.getType().getName(), that.getSourceInfo());
@@ -529,7 +525,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    */
   public void complexAnonymousClassInstantiationHelper(ComplexAnonymousClassInstantiation that, Data data) {
     forComplexAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) {return;}
+    if (prune(that)) return;
     
     //visit the enclosing 
     that.getEnclosing().visit(this);
@@ -548,7 +544,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
   /*Resolve the ArrayType by looking it up.*/  
   public void forArrayType(ArrayType that) {
     forArrayTypeDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     getSymbolData(that.getName(), that.getSourceInfo());
   }
 

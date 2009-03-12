@@ -101,16 +101,16 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
    */
   public void forCatchBlock(CatchBlock that) {
     forCatchBlockDoFirst(that);
-    if (prune(that)) { return; }
+    if (prune(that)) return;
     
     Block b = that.getBlock();
     forBlockDoFirst(b);
-    if (prune(b)) { return; }
+    if (prune(b)) return;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     
     VariableData exceptionVar = formalParameters2VariableData(new FormalParameter[]{ that.getException() }, bd)[0];
-    if (prune(that.getException())) { return; }
+    if (prune(that.getException())) return;
     bd.addVar(exceptionVar);
     
     b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
@@ -144,24 +144,18 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
 //    }
 //  }
 
-  /**
-   * Delegate to method in LLV
-   */
+  /** Delegate to method in LLV. */
   public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _bodyData);
   }
 
-  /**
-   * Delegate to method in LLV
-   */
+  /** Delegate to method in LLV. */
   public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _bodyData);
   }
   
-  /**
-   * If this is the body of a constructor, it is not legal to reference the 'this' literal.
-   * So, check to see if this is a constructor, and if so, throw an error.
-   * This should catch both the ComplexThisReference and the SimpleThisReference case.
+  /** If this is the body of a constructor, referencing 'this' is illegal. So, check to see if this is a constructor,
+    * and if so, throw an error. This should catch both the ComplexThisReference and the SimpleThisReference case.
    */
   //TODO: Long term, it might be nice to create a ConstructorBodyIntermediateVisitor, so this check is not necessary here.
   public void forThisReferenceDoFirst(ThisReference that) {

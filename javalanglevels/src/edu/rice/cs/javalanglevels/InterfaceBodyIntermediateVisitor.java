@@ -43,12 +43,9 @@ import java.io.*;
 
 import junit.framework.TestCase;
 
-
-/*
- * Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the
- * first walk of the AST (checking for langauge specific errors and building the symbol table).
- * This class enforces things that are common to all contexts reachable within an interface body at 
- * the Intermediate Language Level. 
+/* Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the first walk of 
+ * the AST (checking for langauge specific errors and building the symbol table). This class enforces things that are 
+ * common to all contexts reachable within an interface body at the Intermediate Language Level. 
  */
 public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
   
@@ -101,16 +98,13 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     _addAndIgnoreError("The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", that);
   }
 
-  /*
-   * Make sure that the method is not declared to be private or protected.  Make it public and abstract
+  /* Make sure that the method is not declared to be private or protected.  Make it public and abstract
    * if it is not already declared to be so (since this is the default in the absence of modifiers). 
    * Make sure the method name is not the same as the interface name.
    */
   public void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (_checkError()) {
-      return;
-    }
+    if (_checkError()) return;
     
     MethodData md = createMethodData(that, _symbolData);
     
@@ -122,31 +116,26 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       _addAndIgnoreError("Interface methods cannot be made protected.  They must be public.", that.getMav());
     }
     
- //All interface methods are considered public by default.
-    md.addModifier("public"); //(if it was already public, won't be added)
+ // All interface methods are considered public by default.
+    md.addModifier("public");
     md.addModifier("abstract"); //and all interface methods are abstract. 
     String className = getUnqualifiedClassName(_symbolData.getName());
     if (className.equals(md.getName())) {
-      _addAndIgnoreError("Only constructors can have the same name as the class they appear in, and constructors cannot appear in interfaces.",
-                         that);
+      _addAndIgnoreError("Only constructors can have the same name as the class they appear in, " + 
+                         "and constructors cannot appear in interfaces.", that);
     }
-    else {
-      _symbolData.addMethod(md);
-    }
+    else _symbolData.addMethod(md);
   }
-  
- 
   
   /** Throw an error: Interfaces cannot have constructors */
   public void forConstructorDefDoFirst(ConstructorDef that) {
       _addAndIgnoreError("Constructor definitions cannot appear in interfaces", that);
   }
   
-  /**
-   * Call the super method to convert these to a VariableData array, then make sure that
-   * each VariableData is final, as required at the Intermediate level.
-   * @param enclosingData  The Data immediately enclosing the variables
-   */
+  /** Call the super method to convert these to a VariableData array, then make sure that
+    * each VariableData is final, as required at the Intermediate level.
+    * @param enclosingData  The Data immediately enclosing the variables
+    */
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
     VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
     for (int i = 0; i < vds.length; i++) {

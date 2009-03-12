@@ -42,27 +42,21 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
-/**
- * Represents the data for a given primitive type.
- */
+/** Represents the data for a given primitive type. */
 public class PrimitiveData extends SymbolData {
       
-  /**
-   * All PrimitiveData have public modifiers and visibility and are not continuations.
-   * Delegate the initialization of the fields to SymbolData, and then set the two special fields.
-   * @param name  The name of this data.
-   */
+  /** All PrimitiveData have public modifiers and visibility and are not continuations. Delegate the initialization of
+    * the fields to SymbolData, and then set the two special fields.
+    * @param name  The name of this data.
+    */
   public PrimitiveData(String name) {
     super(name);
     setIsContinuation(false);
     setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
   }
   
-  /**
-   * All primitives are primitive types.
-   * @return true.
-   */
-  public boolean isPrimitiveType() {
-    return true;
-  }
+  /** All primitives are primitive types.
+    * @return true.
+    */
+  public boolean isPrimitiveType() { return true; }
 }

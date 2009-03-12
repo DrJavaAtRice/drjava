@@ -41,9 +41,7 @@ import edu.rice.cs.javalanglevels.parser.*;
 import java.util.*;
 import junit.framework.TestCase;
 
-/**
- * Represents the data for a given variable.
- */
+/** Represents the data for a given variable. */
 public class VariableData {
   
   /**The name of this variable*/
@@ -86,10 +84,9 @@ public class VariableData {
     _generated = false;
   }
   
-  /**
-   * This constructor is only used when reading method parameters in a class file because
-   * class files only store the types of method parameters.
-   */
+  /** This constructor is only used when reading method parameters in a class file because class files only store the
+    * types of method parameters.
+    */
   public VariableData(SymbolData type) {
     _name = "";
     _modifiersAndVisibility = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
@@ -97,7 +94,7 @@ public class VariableData {
     _hasBeenAssigned = false;
   }
 
-  /**Check the values of the fields*/
+  /** Checks the values of the fields*/
   public boolean equals(Object obj) { 
     if (obj == null) return false;
     if ((obj.getClass() != this.getClass())) {
@@ -115,9 +112,7 @@ public class VariableData {
   }
   
   /**Hash on the name and enclosing data, since within each enclosing data, the variable name should be unique*/
-  public int hashCode() {
-    return getEnclosingData().hashCode() ^ getName().hashCode();
-  }
+  public int hashCode() { return getEnclosingData().hashCode() ^ getName().hashCode(); }
   
   /**@return a readable representation of the Variable data*/
   public String toString() {
@@ -134,9 +129,7 @@ public class VariableData {
   public ModifiersAndVisibility getMav() { return _modifiersAndVisibility; }
   
   /**Set the modifiers and visibility to the specified value*/
-  public void setMav(ModifiersAndVisibility mav) {
-    _modifiersAndVisibility = mav;
-  }
+  public void setMav(ModifiersAndVisibility mav) { _modifiersAndVisibility = mav; }
   
   /**@return the InstanceData corresponding to the type of this variable.*/
   public InstanceData getType() {  return _type; }
@@ -162,7 +155,7 @@ public class VariableData {
 
   /** Add "private" to the modifiers and visibility for this class, if it is not already there. */
   public void setPrivate() {
-    if (!hasModifier("private")) {
+    if (! hasModifier("private")) {
       String[] modifiers = _modifiersAndVisibility.getModifiers();
       String[] newModifiers = new String[modifiers.length + 1];
       newModifiers[0] = "private";
@@ -175,7 +168,7 @@ public class VariableData {
   
   /** Add the specified modifier to the modifiers and visibility for this class, if it is not already there. */
   public void addModifier(String s) {
-    if (!hasModifier(s)) {
+    if (! hasModifier(s)) {
       String[] modifiers = _modifiersAndVisibility.getModifiers();
       String[] newModifiers = new String[modifiers.length + 1];
       newModifiers[0] = s;
@@ -186,24 +179,22 @@ public class VariableData {
     }
   }
 
-  /** Add "private" and "final" to the modifiers and visibility for this class, if it is not already there. */
+  /** Adds "private" and "final" to the modifiers and visibility for this class, if it is not already there. */
   public void setPrivateAndFinal() {
    setPrivate();
    setFinal();
   }
   
-  /** Add "final" and "static" to the modifiers and visibility for this class, if it is not already there. */
+  /** Adds "final" and "static" to the modifiers and visibility for this class, if it is not already there. */
   public void setFinalAndStatic() {
    setFinal();
    addModifier("static");
   }
   
-  /**Returns true if this VariableData is final. */
-  public boolean isFinal() {
-    return hasModifier("final");
-  }
+  /** Returns true if this VariableData is final. */
+  public boolean isFinal() { return hasModifier("final"); }
   
-  /**Return true if this variable has the modifier specified*/
+  /** Returns true if this variable has the modifier specified*/
   public boolean hasModifier(String modifier) {
     String[] mavStrings = _modifiersAndVisibility.getModifiers();
     for (int i = 0; i < mavStrings.length; i++) {

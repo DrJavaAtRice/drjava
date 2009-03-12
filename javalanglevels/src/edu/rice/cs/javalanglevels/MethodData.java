@@ -37,14 +37,15 @@
 package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
+import edu.rice.cs.javalanglevels.util.Log;
 import java.util.*;
 import junit.framework.TestCase;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 
-/**
- * Represents the data for a given method.
- */
+/** Represents the data for a given method. */
 public class MethodData extends BodyData {
+  
+//  protected static final Log _log = new Log("MethodData.txt", false);
 
   /**Generic Type Parameters.  Not used at any language level.*/
   private TypeParameter[] _typeParameters;
@@ -64,8 +65,7 @@ public class MethodData extends BodyData {
   /**True if this method was auto-generated during our language level conversion.  False otherwise*/
   private boolean _generated;
 
-  /**
-   * Constructor for MethodData.
+  /** Constructor for MethodData.
    * @param name  The String name of the method
    * @param modifiersAndVisibility  The modifiers of the method
    * @param typeParameters  The generic type parameters of the method.  Not used.
@@ -91,22 +91,29 @@ public class MethodData extends BodyData {
   
   /**Constructor used by the LanguageLevelConverter, where only the name and params matter*/
   public MethodData(String name, VariableData[] params) {
-    this(name, new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]), new TypeParameter[0], null, params, new String[0], null, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+    this(name, new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]), new TypeParameter[0], null, 
+         params, new String[0], null, new NullLiteral(JExprParser.NO_SOURCE_INFO));
   }
+  
+  /** Factory methods used for debugging purposes among other things. */
+  public static MethodData make(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters, 
+                    SymbolData returnType, VariableData[] params, String[] thrown, SymbolData enclosingClass, 
+                     JExpression jexpr) {
+
+    MethodData md = 
+      new MethodData(name, modifiersAndVisibility, typeParameters, returnType, params, thrown, enclosingClass, jexpr);
+//    _log.log("Allocated: " + md + '\n' + "With modifiers: " + md.getMav());
+    return md;
+  }
+  public static MethodData make(String name, VariableData[] params) { return new MethodData(name, params); }
   
   /**@return true if this method was generated during the LanguageLevel conversion process*/
-  public boolean isGenerated() {
-    return _generated;
-  }
+  public boolean isGenerated() { return _generated; }
   
   /**@param generated  true or false--whether to set this method to generated or not*/
-  public void setGenerated(boolean generated) {
-    _generated = generated;
-  }
+  public void setGenerated(boolean generated) { _generated = generated; }
   
-  /**
-   * Two MethodDatas are equal if ...
-   */ 
+  /** Two MethodDatas are equal if ... */ 
   public boolean equals (Object obj) {
     if (obj == null) return false;
     if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
@@ -123,39 +130,24 @@ public class MethodData extends BodyData {
       _vars.equals(md.getVars());
   }
   
-  /**
-   * Define a hashCode() method that hashes on the method name and its enclosing data.
-   */
-  public int hashCode() {
-    return getName().hashCode() ^ getEnclosingData().hashCode();
-  }
+  /** Define a hashCode() method that hashes on the method name and its enclosing data. */
+  public int hashCode() { return getName().hashCode() ^ getEnclosingData().hashCode(); }
   
   public boolean isMethodData() { return true; }  
   
-  public MethodData getMethodData() {
-    return this;
-  }
+  public MethodData getMethodData() { return this; }
   
-
   /**@return the type parameters*/
-  public TypeParameter[] getTypeParameters() {
-    return _typeParameters;
-  }
+  public TypeParameter[] getTypeParameters() { return _typeParameters; }
   
   /**@return the return type*/
-  public SymbolData getReturnType() {
-    return _returnType;
-  }
+  public SymbolData getReturnType() { return _returnType; }
   
   /**set the return type to be rt*/
-  public void setReturnType(SymbolData rt) {
-    _returnType = rt;
-  }
+  public void setReturnType(SymbolData rt) { _returnType = rt; }
   
   /**@return the method params*/
-  public VariableData[] getParams() {
-    return _params;
-  }
+  public VariableData[] getParams() { return _params; }
   
   /**Set the method params to be p*/
   public void setParams(VariableData[] p) {
@@ -163,38 +155,32 @@ public class MethodData extends BodyData {
   }
   
   /**@return the thrown array for this method*/
-  public String[] getThrown() {
-    return _thrown;
-  }
+  public String[] getThrown() { return _thrown; }
   
-  /**Set thrown to be thrown*/
-  public void setThrown(String[] thrown) {
-    _thrown = thrown;
-  }
+  /** Sets thrown to be thrown*/
+  public void setThrown(String[] thrown) { _thrown = thrown; }
   
-  /**@return the modifiers and visibility*/
-  public ModifiersAndVisibility getMav() {
-    return _modifiersAndVisibility;
-  }
+  /** @return the modifiers and visibility*/
+  public ModifiersAndVisibility getMav() { return _modifiersAndVisibility; }
     
-  /**Make this method public*/
+  /** Makes this method public.  Only used in ClassBodyElementaryVisitor. */
   public void addPublicMav() {
     String[] oldMav = _modifiersAndVisibility.getModifiers();
-    String[] modifiers = new String[oldMav.length+1];
-    modifiers[0]="public";
-    for (int i = 0; i<oldMav.length; i++) {
+    String[] modifiers = new String[oldMav.length + 1];
+    modifiers[0] = "public";
+    for (int i = 0; i < oldMav.length; i++) {
       modifiers[i+1] = oldMav[i];
     }
     _modifiersAndVisibility = new ModifiersAndVisibility(_modifiersAndVisibility.getSourceInfo(), modifiers);
   }
   
 
-  /**@return the JExpression corresponding to this method*/
-  public JExpression getJExpression() {
-    return _jexpr;
-  }
+  /** @return the JExpression corresponding to this method*/
+  public JExpression getJExpression() { return _jexpr; }
   
-  /**Test the methods declared above*/
+  public String toString() { return "MethodData<" + _name + ">" ; }
+  
+  /** Tests the methods declared above*/
   public static class MethodDataTest extends TestCase {
     
     private MethodData _md;
@@ -205,12 +191,9 @@ public class MethodData extends BodyData {
     private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
     
-    public MethodDataTest() {
-      this("");
-    }
-    public MethodDataTest(String name) {
-      super(name);
-    }
+    public MethodDataTest() { this(""); }
+    
+    public MethodDataTest(String name) { super(name); }
     
     public void testEquals() {
       VariableData vd = new VariableData("v", _publicMav, SymbolData.INT_TYPE, true, _md);
@@ -265,7 +248,6 @@ public class MethodData extends BodyData {
                            new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
      assertFalse("Two MethodDatas with different type parameters are not equal", _md.equals(_md2));
      
-
     //different thrown
     _md2 = new MethodData("m", _publicMav2, tp, SymbolData.INT_TYPE, new VariableData[]{vd},
                            new String[] {"I throw this", "maybe this too"}, SymbolData.BOOLEAN_TYPE, mdef);
