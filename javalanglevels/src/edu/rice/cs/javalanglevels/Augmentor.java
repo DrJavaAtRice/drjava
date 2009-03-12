@@ -46,7 +46,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
-  public static final Log _log = new Log("Augmentor.txt", true);
+//  public static final Log _log = new Log("Augmentor.txt", true);
   
   private static final String newLine = System.getProperty("line.separator");
   private static final int indentWidth = 2; // TODO: get this from DrJava?
@@ -244,7 +244,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     MethodData md = 
       _enclosingData.getSymbolData().getMethod(that.getName().getText(), 
                                                formalParameters2TypeDatas(that.getParams(), _enclosingData));
-    _log.log("Augmenting ConcreteMethodDef " + that + " with MethodData " + md);
+//    _log.log("Augmenting ConcreteMethodDef " + that + " with MethodData " + md);
     if (md == null) { 
       throw new RuntimeException("Internal Program Error: Can't find method data for " + that.getName() + 
                                  " Please report this bug."); 
@@ -403,7 +403,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
    */
   public void forAnonymousClassInstantiation(AnonymousClassInstantiation e) {
     SymbolData sd = _enclosingData.getNextAnonymousInnerClass();
-    _log.log("Augmenting anonymous class " + e + " with SymbolData " + sd);
+//    _log.log("Augmenting anonymous class " + e + " with SymbolData " + sd);
     if (sd == null) {
       throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.");
     }
@@ -460,8 +460,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     for (TypeDefBase cd : cds) { cd.visit(this); }
  
     //Write out whatever is left in the file.
-    _log.log("Processed source file through line " + _fileInLine + " and column " + _fileInColumn);
-    _log.log("Now dumping remainder of file through line " + sf.getSourceInfo().getEndLine());
+//    _log.log("Processed source file through line " + _fileInLine + " and column " + _fileInColumn);
+//    _log.log("Now dumping remainder of file through line " + sf.getSourceInfo().getEndLine());
     _readAndWriteThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
   }
   
