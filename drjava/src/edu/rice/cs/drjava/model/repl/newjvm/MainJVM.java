@@ -733,7 +733,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     @Override public void restart(boolean force) {
       if (force) { super.restart(force); }
-      // otherwise, ignore
+      // otherwise, ignore and say that we are ready
+      // we want to suppress the work of actually resetting the interpreter JVM,
+      // but we do need the notification that the interpreter is ready
+      _interactionsModel.interpreterReady(_workingDir);
     }
   }
   

@@ -232,8 +232,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
       public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
       public synchronized void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
+      public synchronized void interpreterReady(File wd) { interpreterReadyCount++; }
     };
-    
     _model.addListener(listener);
     
     // Set up two documents
@@ -244,6 +244,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     assertNumOpenDocs(2);
     listener.assertNewCount(1);
     listener.assertSwitchCount(1);
+    listener.assertInterpreterResettingCount(0);
 
     // Close one
     _model.closeFile(_model.getActiveDocument());
@@ -251,6 +252,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     listener.assertCloseCount(1);
     listener.assertAbandonCount(1);
     listener.assertSwitchCount(2);
+    listener.assertInterpreterResettingCount(0);
     assertActiveDocument(doc1);
     assertContents(FOO_TEXT, _model.getActiveDocument());
 
@@ -258,11 +260,13 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     _model.closeFile(_model.getActiveDocument());
     listener.assertCloseCount(2);
     listener.assertAbandonCount(2);
+    listener.assertInterpreterResettingCount(0);
 
     // Ensure a new document was created
     assertNumOpenDocs(1);
     listener.assertNewCount(2);
     listener.assertSwitchCount(3);
+    listener.assertInterpreterResettingCount(0);
     assertLength(0, _model.getActiveDocument());
     
     _log.log("Starting second phase of testCloseFiles");
@@ -273,19 +277,23 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     doc2 = setupDocument(BAR_TEXT);
     assertNumOpenDocs(2);
     listener.assertNewCount(3);
+    listener.assertInterpreterResettingCount(0);
     
     _log.log("Just before calling _model.closeAllFiles()");
-
     // Close all files, ensure new one was created
     _model.closeAllFiles();
     Utilities.clearEventQueue();
+    // we want a ready notification here; closeAllFiles is supposed to reset
+    // the interactions pane, but the interpreter is supposed to be in a fresh running state
+    // so it should immediately say "ready" without resetting the interpreter itself
+    listener.assertInterpreterReadyCount(1);
     assertNumOpenDocs(1);
-    assertLength(0, _model.getActiveDocument()); 
+    assertLength(0, _model.getActiveDocument());
     
     listener.assertNewCount(4);
     listener.assertCloseCount(4);
     listener.assertAbandonCount(4);
-
+    
     _model.removeListener(listener);
 //    _log.log("testCloseFiles completed");
   }
