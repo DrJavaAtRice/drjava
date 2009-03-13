@@ -477,9 +477,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return new File(getProjectFile().getParent(), path);
     }//if
     
+    // maybe we have an inner class; remove names from the end and see if we find
+    // a file for it that way.
+    // Example:
+    // some/package/SomeClass/Inner/AnotherInner.java (not found)
+    // some/package/SomeClass/Inner.java (not found)
+    // some/package/SomeClass.java (not found)
     path = path.replace('.', File.separatorChar);
-    File tempFile = new File(getProjectFile().getParent(), path+".java");
-    
+    File tempFile = new File(getProjectRoot(), path+".java");
     while(path.length() > 0){
       if(tempFile.exists()){
         return tempFile;
@@ -489,7 +494,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         break;
       
       path = path.substring(0, path.lastIndexOf(File.separatorChar));
-      tempFile = new File(getProjectFile().getParent(), path+".java");
+      tempFile = new File(getProjectRoot(), path+".java");
     }
     
     return null;
