@@ -74,6 +74,12 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       else if (name.equals(previousWordAction)) {
         _actions[i] = new PreviousWordAction(previousWordAction, false);
       }
+      else if (name.equals(selectionNextWordAction)){
+        _actions[i] = new NextWordAction(selectionNextWordAction, true);
+      }
+      else if (name.equals(selectionPreviousWordAction)) {
+        _actions[i] = new PreviousWordAction(selectionPreviousWordAction, true);
+      }
       else if (name.equals(selectWordAction)) {
         _actions[i] = new SelectWordAction();
       }
