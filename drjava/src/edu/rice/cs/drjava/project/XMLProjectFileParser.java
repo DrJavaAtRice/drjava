@@ -75,7 +75,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
   protected String _srcFileBase;
   protected XMLConfig _xc;
   
-  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("xmlparser.log",false);
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("xmlparser.log", false);
     
   /** @param projFile the file to parse
    *  @return the project file IR
@@ -103,8 +103,10 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
         s = _xc.get(".root");
         LOG.log("root = '"+s+"'");
         File root = new File(_parent, s);
+        LOG.log("_parent = " + _parent);
         pfir.setProjectRoot(root);
         _srcFileBase = root.getCanonicalPath();
+        LOG.log("_srcFileBase from reading the prject root = " + _srcFileBase);
       }
       catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: "+e.getMessage()+"\n"+StringOps.getStackTrace(e)); }
       
@@ -128,7 +130,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       try {
         s = _xc.get(".build");
         LOG.log("build = '"+s+"'");
-        File buildDir = new File(_parent, s);
+        File buildDir = (!new File(s).isAbsolute())?new File(_parent, s):new File(s);
         pfir.setBuildDirectory(buildDir);
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
@@ -137,7 +139,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       try {
         s = _xc.get(".work");
         LOG.log("work = '"+s+"'");
-        File workDir = new File(_parent, s);
+        File workDir = (!new File(s).isAbsolute())?new File(_parent, s):new File(s);
         pfir.setWorkingDirectory(workDir);
       }
       catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: "+e.getMessage()+"\n"+StringOps.getStackTrace(e)); }
@@ -161,6 +163,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       
       try { // must all be present
         // read source files and included files
+        
         pfir.setSourceFiles(readSourceFiles("source", _srcFileBase));
         pfir.setAuxiliaryFiles(readSourceFiles("included", ""));      
         
@@ -251,7 +254,10 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       }
       catch(XMLConfigException e) { active = false; /* it's ok if it doesn't exist */ }
       
-      DocFile docF = new DocFile(((rootPath.length()>0)?new File(rootPath,name):new File(name)).getAbsoluteFile(),
+      /* added to check if file path name refers to absolute. Intended to eliminate project errors over network paths */
+      Boolean absName = (new File(name)).isAbsolute();   
+      
+      DocFile docF = new DocFile(((rootPath.length()>0 && !absName)?new File(rootPath,name):new File(name)).getAbsoluteFile(),
                                  new Pair<Integer,Integer>(selectFrom,selectTo),
                                  new Pair<Integer,Integer>(scrollCol,scrollCol),
                                  active,

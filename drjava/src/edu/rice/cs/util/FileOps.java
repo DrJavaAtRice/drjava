@@ -150,6 +150,7 @@ public abstract class FileOps {
   public static boolean isAncestorOf(File ancestor, File f) {
     ancestor = ancestor.getAbsoluteFile();
     f = f.getAbsoluteFile();
+    _log.log("ancestor = " +ancestor + "     f = " + f);
     while ((!ancestor.equals(f)) && (f!=null)) {
       f = f.getParentFile();
     }
@@ -196,6 +197,7 @@ public abstract class FileOps {
     */
   public static String stringMakeRelativeTo(File f, File b) throws IOException, SecurityException {
     try {
+      
       File[] roots = File.listRoots();
       File fRoot = null;
       File bRoot = null;
@@ -204,9 +206,10 @@ public abstract class FileOps {
         if (isAncestorOf(r, b)) { bRoot = r; }
         if ((fRoot!=null) && (bRoot!=null)) { break; }
       }
-      if ((fRoot==null) || (!fRoot.equals(bRoot))) {
-        // f and b have different file system roots
-        // just make f absolute and canonical
+      
+      //Makes exception for //server/folder
+      if (((fRoot==null) || (!fRoot.equals(bRoot))) && (!f.getAbsoluteFile().getCanonicalFile().toString().startsWith(File.separator + File.separator))) {
+        
         return f.getAbsoluteFile().getCanonicalFile().toString();
       }
     }
