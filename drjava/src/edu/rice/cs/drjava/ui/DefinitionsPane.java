@@ -311,11 +311,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   };
 
-//  /** The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
-//   *  disabled depending on Debug Mode.
-//   */
-//  private volatile JMenuItem _toggleBreakpointMenuItem;
-
 //  /** The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
 //   *  disabled depending on Debug Mode.
 //   */
@@ -756,7 +751,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           _mainFrame.debuggerToggleBreakpoint();
         }
       });
-//      _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
+      _popMenu.add(breakpointItem);
     }
   }
 
