@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.Utilities;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -51,10 +52,10 @@ import edu.rice.cs.plt.iter.IterUtil;
   */
 public class LanguageLevelConverter {
   
-//  public static final Log _log = new Log("LLConverter.txt", true);
-
+  public static final Log _log = new Log("LLConverter.txt", true);
+  
   public static Options OPT = Options.DEFAULT;
-    
+  
   /* For Corky's version: set this to false */
   private static final boolean SAFE_SUPPORT_CODE = false;
   public static final int INPUT_BUFFER_SIZE = 8192;  // This reportedly is the current default in the JDK.
@@ -80,7 +81,7 @@ public class LanguageLevelConverter {
   
   /**Parse, Visit, Type Check, and Convert any language level files in the array of files*/
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
-  convert(File[] files, Options options) {
+    convert(File[] files, Options options) {
     Map<File,Set<String>> sourceToTopLevelClassMap = new Hashtable<File,Set<String>>();
     return convert(files, options, sourceToTopLevelClassMap);
   }
@@ -89,7 +90,7 @@ public class LanguageLevelConverter {
     * @param sourceToTopLevelClassMap a map from source file to names of top-level classes created from that source file;
     *        an empty map should be passed in; it will be filled out by this method */
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
-  convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
+    convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
     OPT = options;
     LanguageLevelVisitor._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
@@ -103,8 +104,8 @@ public class LanguageLevelConverter {
     
     // Similarly, we need a Hashtable for a shared symbolTable.
     Symboltable languageLevelVisitorSymbolTable = new Symboltable();
-
-    //And a linked list thing to share visited files.
+    
+    //And a linked list to share visited files.
     LinkedList<Pair<LanguageLevelVisitor, SourceFile>> languageLevelVisitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
     
     // We are doing two passes on the files, and the second pass needs the first's corresponding
@@ -128,30 +129,32 @@ public class LanguageLevelConverter {
     
     //will maintain the files we visit along with their visitors (for type checking step).
     LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visited = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
-
+    
     
     for (int ind = 0; ind < originalNumOfFiles; ind++) {
+      File f = files[ind];
       
       try {
-        BufferedReader tempBr = new BufferedReader(new FileReader(files[ind]));
+        BufferedReader tempBr = new BufferedReader(new FileReader(f));
         String firstLine = tempBr.readLine();
         if (firstLine == null) continue;
-        
         tempBr.close();
+        
         /* If the file has the correct suffix, then parse it. Ignore files in filesNotToCheck.  contains on 
          * filesNotToCheck failed to return desired result. So it is done manually, matching AbsolutePath. */
-        boolean foundFile = false;
-        for (int i = 0; i < filesNotToCheck.size(); i++) {
-          if (filesNotToCheck.get(i).getAbsolutePath().equals(files[ind].getAbsolutePath())) {
-            foundFile = true;
+//        boolean foundFile = false;
+        
+        for (File fntc: files) {
+          if (fntc.getAbsolutePath().equals(f.getAbsolutePath())) {
+//            foundFile = true;
             break;
           }
         }
-
-        if (_isLanguageLevelFile(files[ind]) && ! foundFile) {
+        
+        if (_isLanguageLevelFile(f) /* && ! foundFile*/) {
           System.out.flush();
           SourceFile sf;
-          File f = files[ind];
+//          File f = files[ind];
           JExprParser jep = new JExprParser(f);
           try { 
             sf = jep.SourceFile();
@@ -192,7 +195,7 @@ public class LanguageLevelConverter {
           else {
             throw new RuntimeException("Internal Bug: Invalid file format not caught initially.  Please report this bug.");
           }
-
+          
           
           // First pass
           sf.visit(llv);
@@ -206,18 +209,18 @@ public class LanguageLevelConverter {
         // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
         _addVisitorError(new Pair<String, JExpressionIF>(ioe.getMessage(), new NullLiteral(JExprParser.NO_SOURCE_INFO)));
       }
-
+      
     }
     
-    
+//    Utilities.show("Visited " + visited + " in first pass");
     //Resolve continuations and create constructors.  Also accumulate errors.
     LanguageLevelVisitor.errors = new LinkedList<Pair<String, JExpressionIF>>(); //clear out error list
     
     
-        //Resolve continuations
+    //Resolve continuations
     //Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = llv.continuations;
     
-    while (!continuations.isEmpty()) {
+    while (! continuations.isEmpty()) {
       Enumeration<String> en = continuations.keys();
       
       while (en.hasMoreElements()) {
@@ -244,111 +247,95 @@ public class LanguageLevelConverter {
     
     // At this point, there should be no continuations and visitedFiles should be completely populated.
     // Check for errors; don't type-check if there are errors.
-    if (languageLevelVisitorErrors.size() > 0) {
-      _visitorErrors.addAll(languageLevelVisitorErrors);
+    if (languageLevelVisitorErrors.size() > 0)  _visitorErrors.addAll(languageLevelVisitorErrors);
+    
+    else { //Let's TYPE CHECK!!!
+      
+      
+      for (int ind = 0; ind < visited.size(); ind++) {
+        
+        LanguageLevelVisitor llv = visited.get(ind).getFirst();
+        SourceFile sf = visited.get(ind).getSecond();
+        
+        //TODO: This is a terrible hack to get around the following problem.  Basically, when we autobox in isAssignableTo in SymbolData, 
+        //we look through the object hierarchy for the primitive.  If its corresponding boxed object isn't in the symboltable, we're in trouble.
+        //So, for those special cases, go ahead and make sure the object types are in the symbol table before we start type checking.
+        //I'd like to make this better, but at least it works for now.
+        
+        
+        //Before you type check, make sure that all boxed types of primitives are in the symbol table
+        if (llv.symbolTable.get("java.lang.Integer") == null) {llv.getSymbolData("java.lang.Integer", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Double")==null) {llv.getSymbolData("java.lang.Double", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Character")==null) {llv.getSymbolData("java.lang.Character", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Boolean")==null) {llv.getSymbolData("java.lang.Boolean", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Long")==null) {llv.getSymbolData("java.lang.Long", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Byte")==null) {llv.getSymbolData("java.lang.Byte", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Short")==null) {llv.getSymbolData("java.lang.Short", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Float")==null) {llv.getSymbolData("java.lang.Float", JExprParser.NO_SOURCE_INFO);}
+        
+        
+        // Type check.
+        TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, llv.symbolTable, llv._importedFiles, llv._importedPackages);
+        sf.visit(btc);
+        if (btc.errors.size() > 0) _visitorErrors.addAll(btc.errors);
+      }
+      
+      // Set up code augmentation.  We will NOT try to augment files unless they appear in the visited List.  Unlisted LL files cannot be found
+      // reliably during type checking because there is no naming convention that tells the type checker what files to look for.
+      
+      Iterator<Pair<LanguageLevelVisitor, SourceFile>> iter = visited.iterator();
+      LinkedList<File> newFiles = new LinkedList<File>();
+      for (int ind = 0; iter.hasNext(); ind++) { // Note unusual loop termination condition; iter, ind in lock step
+        Pair<LanguageLevelVisitor, SourceFile> currPair = iter.next();
+        File fileToAdd = currPair.getFirst()._file;
+        
+        if (_isLanguageLevelFile(fileToAdd)) { // fileToAdd is a visited LL file
+//          Utilities.show(fileToAdd + " is a LL file for augmentation");
+          newFiles.addLast(fileToAdd);
+          mediator.put(ind, new Pair<SourceFile, LanguageLevelVisitor>(currPair.getSecond(), currPair.getFirst())); 
+        }
+        
+        // Also make sure not to re-check these files whether we visited source or class file. 
+        // We only want to perform code augmentation since these files have already been visited.
+        if (! filesNotToCheck.contains(fileToAdd)) filesNotToCheck.addLast(fileToAdd);
+      }
+      files = newFiles.toArray(new File[newFiles.size()]);
+//      Utilities.show("Created files array: " + Arrays.toString(files));
     }
     
-    
-    //Let's TYPE CHECK!!!
-          
-          else {
-            
-            for (int ind = 0; ind<visited.size(); ind++) {
-  
-              LanguageLevelVisitor llv = visited.get(ind).getFirst();
-              SourceFile sf = visited.get(ind).getSecond();
-              
-              //TODO: This is a terrible hack to get around the following problem.  Basically, when we autobox in isAssignableTo in SymbolData, 
-              //we look through the object hierarchy for the primitive.  If its corresponding boxed object isn't in the symboltable, we're in trouble.
-              //So, for those special cases, go ahead and make sure the object types are in the symbol table before we start type checking.
-              //I'd like to make this better, but at least it works for now.
-              
-              
-              //Before you type check, make sure that all boxed types of primitives are in the symbol table
-              if (llv.symbolTable.get("java.lang.Integer") == null) {llv.getSymbolData("java.lang.Integer", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Double")==null) {llv.getSymbolData("java.lang.Double", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Character")==null) {llv.getSymbolData("java.lang.Character", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Boolean")==null) {llv.getSymbolData("java.lang.Boolean", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Long")==null) {llv.getSymbolData("java.lang.Long", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Byte")==null) {llv.getSymbolData("java.lang.Byte", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Short")==null) {llv.getSymbolData("java.lang.Short", JExprParser.NO_SOURCE_INFO);}
-              if (llv.symbolTable.get("java.lang.Float")==null) {llv.getSymbolData("java.lang.Float", JExprParser.NO_SOURCE_INFO);}
-              
-              
-              // Type check.
-              TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, llv.symbolTable, llv._importedFiles, llv._importedPackages);
-              sf.visit(btc);
-              if (btc.errors.size() > 0) {
-                _visitorErrors.addAll(btc.errors);
-              }
-              
-              // Add those files to be compiled to the array of files.
-              if (llv.visitedFiles.size() > 0) {            
-                LinkedList<File> newFiles = new LinkedList<File>();
-                for (int i = 0; i < files.length; i++) {
-                  newFiles.addLast(files[i]);
-                }
-                Iterator<Pair<LanguageLevelVisitor, SourceFile>> iter = llv.visitedFiles.iterator();
-                while (iter.hasNext()) {
-                  Pair<LanguageLevelVisitor,SourceFile> currPair = iter.next();
-                  File fileToAdd = currPair.getFirst()._file;
-                  // if currSf is not null, then this visitedFile came from visiting the source file, not the class file. 
-                  // We want to compile this source file; add it to the list of files after creating the mediator entry
-                  // if necessary.
-                  SourceFile currSf = currPair.getSecond();
-                  if (currSf != null) {
-                    if (newFiles.contains(fileToAdd)) {
-                      // Messy, but we must make a mediator entry so that code augmentation has all the data it needs
-                      // since we will skip visiting this file here.  
-                      // Can just pass llv since it will contain the correct symbolTable.
-                      mediator.put(new Integer(newFiles.indexOf(fileToAdd)), new Pair<SourceFile, LanguageLevelVisitor>(currSf, currPair.getFirst())); 
-                    }
-                    // Now, if we aren't already compiling this file, and we visited the source, add it to the list of
-                    // files to be compiled.
-                    if (!newFiles.contains(fileToAdd) && currSf != null) {
-                      mediator.put(new Integer(newFiles.size()), new Pair<SourceFile, LanguageLevelVisitor>(currSf, currPair.getFirst()));
-                      newFiles.addLast(fileToAdd);
-                    }
-                    
-                  }
-                  // Also make sure not to re-check these files whether we visited source or class file. 
-                  // We only want to perform code augmentation since these files have already been visited.
-                  if (!filesNotToCheck.contains(fileToAdd)) {
-                    filesNotToCheck.addLast(fileToAdd);
-                  }
-                }
-                files = newFiles.toArray(new File[newFiles.size()]);
-              }
-              
-              mediator.put(new Integer(ind), new Pair<SourceFile, LanguageLevelVisitor>(sf, llv));
-            }
-          }
+//        mediator.put(new Integer(ind), new Pair<SourceFile, LanguageLevelVisitor>(sf, llv));
+//      }
+//  }
     
     
     //If there were any errors in the llv pass or the type checking pass, just return them.
     if (_parseExceptions.size() > 0 || _visitorErrors.size() > 0) {
       return new Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>(_parseExceptions, _visitorErrors);
     }
-    
+//    Utilities.show("Processed LL files: " + Arrays.toString(files));
+//    Utilities.show("mediator is: " + mediator);
     // Now do code augmentation.
     for (int ind = 0; ind < files.length; ind++) {
+      File f = files[ind];
       try {
-        BufferedReader tempBr = new BufferedReader(new FileReader(files[ind]));
+//        Utilities.show("File is: " + f + " mediator is: " + mediator.get(ind));
+        BufferedReader tempBr = new BufferedReader(new FileReader(f));
         String firstLine = tempBr.readLine();
         tempBr.close(); // Important to close the reader, otherwise Windows will not allow the renameTo call later.
-        if (firstLine == null) {
-          continue;
-        }
-
-        // If the file has the correct beginner tag at the beginning, then parse it.
-        // It should not end in .beginner since that's just a temporary copy which gets
-        // deleted after the compile.
-        if (_isLanguageLevelFile(files[ind])) {
+        if (firstLine == null) continue;
+        
+        // If the file has an appropriate LL extension, then parse it.
+        if (_isLanguageLevelFile(f)) {
           Pair<SourceFile, LanguageLevelVisitor> pair = mediator.get(new Integer(ind));
+          if (pair == null) {
+            _log.log("Not augmenting " + f + " no mediator");
+//            Utilities.show("Not augmenting " + f + " no mediator");
+          }
+          
           if (pair != null) { //if pair is null, we do not actually need to augment this file--it wasn't visited.  Maybe we used the class file?
             SourceFile sf = pair.getFirst();
             LanguageLevelVisitor llv = pair.getSecond();
-            File f = files[ind];
+//            File f = files[ind];
             
             // Do code augmentation.  This will involve a line-by-line copy, editing lines as appropriate.
             String augmentedFilePath = f.getAbsolutePath();
@@ -357,7 +344,8 @@ public class LanguageLevelConverter {
             BufferedReader br = new BufferedReader(new FileReader(f), INPUT_BUFFER_SIZE);
             BufferedWriter bw = new BufferedWriter(new FileWriter(augmentedFile));
             
-//            _log.log("Augmenting the source file " + sf);
+            _log.log("Augmenting the source file " + sf);
+//            Utilities.show("Augmenting the source file " + sf.getSourceInfo().getFile());
             Augmentor a = new Augmentor(SAFE_SUPPORT_CODE, br, bw, llv);
             sf.visit(a);
             
@@ -376,9 +364,9 @@ public class LanguageLevelConverter {
       }
     }
     return new Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>(_parseExceptions,
-                                                                                       _visitorErrors);
+                                                                                              _visitorErrors);
   }
-    
+  
   /**If a file name ends with .dj0, it is an Elementary File*/
   public static boolean isElementaryFile(File f) {
     return f.getPath().endsWith(".dj0");
@@ -410,7 +398,7 @@ public class LanguageLevelConverter {
     return version.supports(JavaVersion.JAVA_5);
     // If we care to support it, also allows JSR-14
   }
-
+  
   /**Only 1.5 supports for each*/
   public static boolean versionSupportsForEach(JavaVersion version) {
     return version.supports(JavaVersion.JAVA_5);
@@ -430,7 +418,7 @@ public class LanguageLevelConverter {
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-        llc.convert(files, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+      llc.convert(files, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {
       System.out.println(p);
