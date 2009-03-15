@@ -343,12 +343,11 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
                                                            Iterable<File> classPath, Iterable<File> bootClassPath) {
-    /* Rename any .dj0 files in files to be .java files, so the correct thing is compiled.  The hashset is used to 
-     * make sure we never send in duplicate files. This can happen if the java file was sent in along with the 
-     * corresponding .dj* file. The dj* file is renamed to a .java file and thus we have two of the same file in 
-     * the list.  By adding the renamed file to the hashset, the hashset efficiently removes duplicates.
+    /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
+     * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
      */
     HashSet<File> javaFileSet = new HashSet<File>();
+    LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
     boolean containsLanguageLevels = false;
     for (File f : files) {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
@@ -358,25 +357,16 @@ public class DefaultCompilerModel implements CompilerModel {
         containsLanguageLevels = true;
         File javaFile = new File(fileName.substring(0, lastIndex) + ".java");
         javaFileSet.add(javaFile);
+        newFiles.add(javaFile);
 
-        // Delete the .java file, it will be regenerated later
+        // Delete the stale .java file (if it exists), a file with this name will subsequently be generated
         javaFile.delete();
       }
       else { javaFileSet.add(canonicalFile); }
     }
     
-    LanguageLevelConverter llc = new LanguageLevelConverter();
-    Options llOpts;
-    if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
-    else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
-    Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
-    /* LanguageLevels Bug Workaround:  JUnit test files can generate spurious conversion errors.  This
-     * problem can be mitigated by compiling JUnit test files, which contain the substring "Test", last.  
-     */
-    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
-      llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
-    
     if (containsLanguageLevels) {
+      Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
       final File buildDir = _model.getBuildDirectory();
       final File sourceDir = _model.getProjectRoot();
 //      System.out.println("Build dir  : "+buildDir);
@@ -399,7 +389,7 @@ public class DefaultCompilerModel implements CompilerModel {
             dir = new File(buildDir,rel);
           }
           Set<String> classNames = dirToClassNameMap.get(dir);
-          if (classNames==null) classNames = new HashSet<String>();
+          if (classNames == null) classNames = new HashSet<String>();
           classNames.addAll(e.getValue());
           dirToClassNameMap.put(dir,classNames);
 //          System.out.println(e.getKey()+" --> "+dir);
@@ -418,14 +408,14 @@ public class DefaultCompilerModel implements CompilerModel {
           public boolean accept(File dir, String name) {
 //            System.out.println("\t"+name);
             int endPos = name.lastIndexOf(".class");
-            if (endPos<0) return false; // can't be a class file
+            if (endPos < 0) return false; // can't be a class file
             int dollarPos = name.indexOf('$');
-            if ((dollarPos>=0) && (dollarPos<endPos)) endPos = dollarPos;
+            if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
             // class name goes to the .class or the first $, whichever comes first
             Set<String> classNames = e.getValue();
             if (classNames.contains(name.substring(0,endPos))) { 
               // this is a class file that is generated from a .dj? file
-              new File(dir,name).delete();
+              new File(dir, name).delete();
               // don't need to return true, we're deleting the file here already
 //              System.out.println("\t\tDeleted");
             }
@@ -433,13 +423,30 @@ public class DefaultCompilerModel implements CompilerModel {
           }
         });
       }
-    }
+      /* Perform language levels conversion, creating corresponding .java files. */
+      LanguageLevelConverter llc = new LanguageLevelConverter();
+      Options llOpts;
+      if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
+      else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
+      
+      // NOTE: the following workaround ("_testFileSort(files)" instead of simply "files") may no longer be necessary.
+      /* Perform the conversion incorporating the following Bug Workaround:  Forward references can generate spurious 
+       * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
+       * containing the substring "Test") last.  
+       */
+      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
+        llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
+      /* Add any errors encountered in conversion to the compilation error log. */
+      errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
+      errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
+      
+//      // Confirm that the .java files corresponding to .dj* files exist.
+//      for (File f: newFiles)
+//        if (! f.exists()) Utilities.show(f + " does not exist");
 
-    files = new LinkedList<File>(javaFileSet);
+    }
     
-    errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
-    errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
-    if (containsLanguageLevels) { return files; }
+    if (containsLanguageLevels) { return new LinkedList<File>(javaFileSet); }
     else { return null; }
   }
   

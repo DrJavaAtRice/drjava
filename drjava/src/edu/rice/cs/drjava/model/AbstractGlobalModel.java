@@ -494,7 +494,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         break;
       
       path = path.substring(0, path.lastIndexOf(File.separatorChar));
-      tempFile = new File(getProjectRoot(), path+".java");
+      tempFile = new File(getProjectRoot(), path + ".java");
     }
     
     return null;

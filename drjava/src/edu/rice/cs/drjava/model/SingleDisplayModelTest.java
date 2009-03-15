@@ -281,7 +281,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     
     _log.log("Just before calling _model.closeAllFiles()");
     // Close all files, ensure new one was created
-    _model.closeAllFiles();
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.closeAllFiles(); } });
+    Utilities.clearEventQueue();
     Utilities.clearEventQueue();
     // we want a ready notification here; closeAllFiles is supposed to reset
     // the interactions pane, but the interpreter is supposed to be in a fresh running state

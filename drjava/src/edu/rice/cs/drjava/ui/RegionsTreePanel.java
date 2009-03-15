@@ -635,21 +635,24 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
-    if (regionNode == null) throw new UnexpectedException("Region node for region " + r + " is null");
+//    if (regionNode == null) throw new UnexpectedException("Region node for region " + r + " is null");  // should not happen but it does
+    if (regionNode != null) {
+
 //    _regionManager.removeRegion(r);
-    _regionToTreeNode.remove(r);
-    
+      _regionToTreeNode.remove(r);
+      
 //    DefaultMutableTreeNode docNode = _regionManager.getTreeNode(doc);
-    DefaultMutableTreeNode parent = (DefaultMutableTreeNode) regionNode.getParent();  // TreeNode for document
-    _regTreeModel.removeNodeFromParent(regionNode);
+      DefaultMutableTreeNode parent = (DefaultMutableTreeNode) regionNode.getParent();  // TreeNode for document
+      _regTreeModel.removeNodeFromParent(regionNode);
 //    System.err.println("panel region count in " + r.getDocument() + " = " + parent.getChildCount());
-    // check for empty subtree for this document (rooted at parent)
-    if (parent.getChildCount() == 0) {
-      // this document has no more regions, remove it
-      OpenDefinitionsDocument doc = r.getDocument();  // r must not have been disposed above
-      _docToTreeNode.remove(doc);
-      _regTreeModel.removeNodeFromParent(parent);
+      // check for empty subtree for this document (rooted at parent)
+      if (parent.getChildCount() == 0) {
+        // this document has no more regions, remove it
+        OpenDefinitionsDocument doc = r.getDocument();  // r must not have been disposed above
+        _docToTreeNode.remove(doc);
+        _regTreeModel.removeNodeFromParent(parent);
 //      if (parent == _cachedDocNode) _cachedDoc = null;
+      }
     }
 //    expandTree();
     _changeState.updateButtons();
