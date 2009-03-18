@@ -239,9 +239,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Timer to step into another line of code. The delay for each step is recorded in milliseconds. */
   private volatile Timer _automaticTraceTimer;
   
-  /** Amount of time in between each step into action within the automatic trace function. */
-  private volatile int AUTO_STEP_RATE = 1000; 
-  
   /** The current highlight displaying the current location, used for FindAll and the of the debugger's thread,
     * if there is one.  If there is none, this is null.
     */
@@ -5621,32 +5618,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void debuggerAutomaticTrace() {
     if(isDebuggerReady() && !_model.getDebugger().isAutomaticTraceEnabled()) {
       try {
-        String rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
+        int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
         
-        if(!rate.equals("")) 
-          AUTO_STEP_RATE = Integer.parseInt(rate);
-        
-        _automaticTraceTimer = new Timer(AUTO_STEP_RATE, new ActionListener() {
+        _automaticTraceTimer = new Timer(rate, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            try { //System.out.println("_automaticTraceTimer.actionPerformed "+System.identityHashCode(a[0]));
-              _model.getDebugger().automaticTrace(); }
-            catch (IllegalStateException ise) {
-              // This may happen if the user if stepping very frequently,
-              // and is even more likely if they are using both hotkeys
-              // and UI buttons. Ignore it in this case.
-              // Hopefully, there are no other situations where
-              // the user can be trying to step while there are no
-              // suspended threads.
-            }
-            catch (DebugException de) {
-              _showError(de, "Debugger Error",
-                         "Could not create a step request.");
+            if (_model.getDebugger().isAutomaticTraceEnabled()) {
+              // hasn't been disabled in the meantime
+              debuggerStep(Debugger.StepType.STEP_INTO);
             }
           }
         });
-        _automaticTraceTimer.setRepeats(false); 
-        _model.getDebugger().automaticTrace(); 
-        _model.getDebugger().enableAutomaticTrace();
+        _automaticTraceTimer.setRepeats(false);
+        _model.getDebugger().setAutomaticTraceEnabled(true);
+        debuggerStep(Debugger.StepType.STEP_INTO);
       }
       catch (IllegalStateException ise) {
         // This may happen if the user if stepping very frequently,
@@ -5655,10 +5639,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // Hopefully, there are no other situations where
         // the user can be trying to step while there are no
         // suspended threads.
-      }
-      catch (DebugException de) {
-        _showError(de, "Debugger Error",
-                   "Could not create a step request.");
       }
     }
   }
@@ -8276,7 +8256,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getInteractionsModel().autoImport();               
       if(_model.getDebugger().isAutomaticTraceEnabled()) {
         //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE="+AUTO_STEP_RATE+", "+System.identityHashCode(_automaticTraceTimer));                                
-        if(!_automaticTraceTimer.isRunning())
+        if((_automaticTraceTimer!=null) && (!_automaticTraceTimer.isRunning()))
           _automaticTraceTimer.start();
       }
     }
@@ -8301,8 +8281,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void currThreadDied() {
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
-      _model.getDebugger().disableAutomaticTrace();
-      _automaticTraceTimer.stop();
+      _model.getDebugger().setAutomaticTraceEnabled(false);
+      if (_automaticTraceTimer!=null) _automaticTraceTimer.stop();
       if (isDebuggerReady()) {
         try {        
           if (!_model.getDebugger().hasSuspendedThreads()) {

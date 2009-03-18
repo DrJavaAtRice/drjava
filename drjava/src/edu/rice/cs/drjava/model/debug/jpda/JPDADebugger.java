@@ -380,26 +380,9 @@ public class JPDADebugger implements Debugger {
     _resumeHelper(false);
   }
   
-  
-  /**
-   * Automatically traces through a program, stepping into every single line of code at a constant rate determined by the auto step rate, which can be set
-   * in the debugger options found in preferences.
-   */
-  public /*synchronized */void automaticTrace() throws DebugException {
-    assert EventQueue.isDispatchThread();
-    _ensureReady();
-    _stepHelper(Debugger.StepType.STEP_INTO, true); 
-  }
-  
-  /** Enables automatic trace when button has been pressed*/
-  public /*synchronized*/ void enableAutomaticTrace() {
-    _isAutomaticTraceEnabled = true;
-  }
-  
-  
-  /** Disables automatic trace when thread has ended*/
-  public /*synchronized*/ void disableAutomaticTrace() {
-    _isAutomaticTraceEnabled = false;
+  /** Enables or disables automatic trace. */
+  public /*synchronized*/ void setAutomaticTraceEnabled(boolean e) {
+    _isAutomaticTraceEnabled = e;
   }
     
   /*

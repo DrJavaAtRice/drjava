@@ -81,14 +81,8 @@ public interface Debugger {
   /** Sets the current thread we are debugging to the thread referenced by d. */
   public void setCurrentThread(DebugThreadData d) throws DebugException;
   
-  /** Automatically traces through a program, stepping into every single line*/
-  public void automaticTrace() throws DebugException;
-  
-  /** Enables automatic trace*/
-  public void enableAutomaticTrace();
-  
-  /** Disables the automatic trace*/
-  public void disableAutomaticTrace();
+  /** Enables or disables automatic trace. */
+  public void setAutomaticTraceEnabled(boolean e);
     
   /** Returns whether automatic trace has been enabled within the debugger*/
   public boolean isAutomaticTraceEnabled(); 
@@ -105,7 +99,7 @@ public interface Debugger {
   public void step(StepType type) throws DebugException;
   
   /** Adds a watch on the given field or variable.
-    * @param field the name of the field we will watchSTEP_INTO
+    * @param field the name of the field we will watch
     */
   public void addWatch(String field) throws DebugException;
   

@@ -77,15 +77,9 @@ public class NoDebuggerAvailable implements Debugger {
   /** Sets the current thread which is being debugged to the thread referenced by d. */
   public void setCurrentThread(DebugThreadData d) { }
 
-  /** Automatically traces through a program, stepping into every single line*/
-  public void automaticTrace() throws DebugException { }
-  
   /** Enables automatic trace*/
-  public void enableAutomaticTrace() { }
+  public void setAutomaticTraceEnabled(boolean e) { }
   
-  /** Disables the automatic trace*/
-  public void disableAutomaticTrace() { }
-    
   /** Returns whether automatic trace has been enabled within the debugger*/
   public boolean isAutomaticTraceEnabled() { return false; } 
 

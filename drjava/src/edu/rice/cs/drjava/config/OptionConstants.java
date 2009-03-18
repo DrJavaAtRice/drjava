@@ -77,7 +77,7 @@ public interface OptionConstants {
     new VectorOption<String>("interactions.auto.import.classes", new StringOption("",""), new Vector<String>());
   
   /* The default rate at which the debugger steps into or over every line of code*/
-  public static final StringOption AUTO_STEP_RATE = new StringOption("1000", "");
+  public static final NonNegativeIntegerOption AUTO_STEP_RATE = new NonNegativeIntegerOption("auto.step.rate", 1000);
   
   /** The extension for an old DrJava project file */
   public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
