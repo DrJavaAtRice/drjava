@@ -638,20 +638,15 @@ SourceFile SourceFile() :
 void MethodDefLookahead() :
 {}
 {
-//  ( <PUBLIC> | <PROTECTED> | <PRIVATE> | <STATIC> | <ABSTRACT> | <FINAL> |
-// <NATIVE> | <SYNCHRONIZED> )*
   ModifiersAndVisibility()
- [ TypeParameters() ]
-  ReturnType() <IDENTIFIER> <LPAREN>//(FormalParameter() | <RPAREN>)
+  [ TypeParameters() ]
+  ReturnType() <IDENTIFIER> <LPAREN> (FormalParameter() | <RPAREN>)
 }
   
 void ConstructorDefLookahead() :
 {}
 {
-//  ( <PUBLIC> | <PROTECTED> | <PRIVATE> | <STATIC> | <ABSTRACT> | <FINAL> |
-// <NATIVE> | <SYNCHRONIZED> )*
-  ModifiersAndVisibility()
-  <IDENTIFIER> <LPAREN>(FormalParameter() | <RPAREN>)
+  ModifiersAndVisibility() <IDENTIFIER> FormalParameters() (<THROWS> | <LBRACE>)
 }
 
 // This production is to determine lookahead only.  It will be used instead
@@ -942,7 +937,6 @@ BodyItemI BodyItem() :
     | LOOKAHEAD(ModifiersAndVisibility() <INTERFACE>) temp = InnerInterfaceDef()
     | LOOKAHEAD(2) temp = Initializer()
     | LOOKAHEAD(MethodDefLookahead()) temp = MethodDef()
-//    | LOOKAHEAD(ModifiersAndVisibility() <IDENTIFIER> FormalParameters() [ <THROWS> NameList() ] <LBRACE>)
     | LOOKAHEAD(ConstructorDefLookahead()) temp = ConstructorDef()
     | LOOKAHEAD(ModifiersAndVisibility() Type() <IDENTIFIER>) temp = VariableDeclaration() (<SEMICOLON> | _errorString(";("))
     | temp = Statement()
