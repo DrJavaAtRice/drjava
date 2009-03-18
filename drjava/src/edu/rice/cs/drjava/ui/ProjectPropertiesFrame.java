@@ -573,9 +573,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     chooser.setDialogType(JFileChooser.CUSTOM_DIALOG);
 
     chooser.setDialogTitle("Select Main Document");
-//  Utilities.show("Main Document Root is: " + root);
     chooser.setCurrentDirectory(projRoot);
-    //String mainClass = _getMainClass();
     File   mainFile  = _getMainFile();
     if (mainFile != FileOps.NULL_FILE){
       chooser.setSelectedFile(mainFile);
@@ -605,20 +603,31 @@ public class ProjectPropertiesFrame extends SwingFrame {
         
         File mainClass = chooser.getSelectedFile();
         
-        //File sourceRoot = _model.getProjectRoot();
         File sourceRoot = new File(_projRootSelector.getFileField().getText());
         
         if(sourceRoot == null || mainClass == null)
           return;
         
+        if(!mainClass.getAbsolutePath().startsWith(sourceRoot.getAbsolutePath())){
+          //TODO: Cleanup dialog
+          JOptionPane.showMessageDialog(ProjectPropertiesFrame.this, "Main Class must be in either Project Root or one of its sub-directories.", "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
+          
+          _mainDocumentSelector.setText("");
+          return;
+        }
+        
+        //Strip off the source root path
         String qualifiedName = mainClass.getAbsolutePath().substring(sourceRoot.getAbsolutePath().length());
         
+        //Strip off any leading slashes
         if(qualifiedName.startsWith(""+File.separatorChar))
           qualifiedName = qualifiedName.substring(1);
         
+        //Remove the .java extension if it exists
         if(qualifiedName.toLowerCase().endsWith(".java"))
           qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
           
+        //Replace path seperators with java standard '.' package seperators.
         _mainDocumentSelector.setText(qualifiedName.replace(File.separatorChar, '.'));
       }
     });

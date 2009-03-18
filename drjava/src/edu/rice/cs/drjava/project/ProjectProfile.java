@@ -96,6 +96,8 @@ public class ProjectProfile implements ProjectFileIR {
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
   private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
+  private String _version = "unknown";
+  
   /** Constructs a File for fileName and forwards this call to the main constructor. */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
   
@@ -736,5 +738,13 @@ public class ProjectProfile implements ProjectFileIR {
     ret += ")"; // close the bookmarks expression
     
     return ret;
+  }
+  
+  public String getDrJavaVersion(){
+    return _version;
+  }
+  
+  public void setDrJavaVersion(String version){
+    _version = version;
   }
 }

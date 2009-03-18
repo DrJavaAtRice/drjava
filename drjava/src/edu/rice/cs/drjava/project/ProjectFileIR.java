@@ -116,4 +116,18 @@ public interface ProjectFileIR {
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
   public void setAutoRefreshStatus(boolean b);
+  
+  /**
+   * The version of dr java that created this project (as determined from its serialization as a .pjt or .xml file)
+   * 
+   * @return The version string, if known, or "unknown" otherwise.
+   */
+  public String getDrJavaVersion();
+  
+  /**
+   * Sets the version of DrJava that built this project.
+   * 
+   * @param version - the version string, should be called with "unknown" if the version could not be determined.
+   */
+  public void setDrJavaVersion(String version);
 }

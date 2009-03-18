@@ -93,6 +93,8 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       String version = xcParent.get("drjava.version", "unknown");
       LOG.log("version = '"+version+"'");
       
+      pfir.setDrJavaVersion(version);
+      
       // create a sub-configuration so we don't have to prefix everything with "drjava/project/"
       _xc = new XMLConfig(xcParent, xcParent.getNodes("drjava/project").get(0));
       LOG.log(_xc.toString());

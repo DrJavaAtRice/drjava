@@ -93,6 +93,9 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     catch(SExpParseException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
+    
+    //We don't store version information in .pjt files.  Yet another reason to use the .xml format.
+    pfir.setDrJavaVersion("unknown");
 
     try { for (SEList exp : forest) evaluateExpression(exp, pfir, new DocFileListVisitor(_parent)); }
     catch(PrivateProjectException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
@@ -160,8 +163,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       try{
         List<DocFile> fList = exp.getRest().accept(flv);
         if(fList.size() == 1){
-          String main = fList.get(0).getPath().replace(File.separatorChar,'.');
-          main = main.substring(0, main.length() - 5);
+          String main = fList.get(0).getAbsolutePath();
           
           pfir.setMainClass(main);
           
