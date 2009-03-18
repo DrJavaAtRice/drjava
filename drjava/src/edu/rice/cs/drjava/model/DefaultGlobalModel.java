@@ -188,7 +188,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
-      if (t.compiler().isAvailable()) { compilers.add(t.compiler()); }
+      // only add compiler if it supports JAVA_5
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_5)) {
+          compilers.add(t.compiler());
+      }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
       if (_javadocModel == null && t.javadoc().isAvailable()) { _javadocModel = t.javadoc(); }
     }
