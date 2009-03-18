@@ -54,11 +54,9 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 
-/**
- * Contains the CompilerErrors for a particular file after
- * a compile has ended.
- * @version $Id$
- */
+/** Contains the CompilerErrors for a set of compiled file after a compile has ended.
+  * @version $Id$
+  */
 public class CompilerErrorModel {
   private static final String newLine = StringOps.EOL;
   /** An array of errors to be displayed in the CompilerErrorPanel associated with this model.  After model
@@ -83,7 +81,7 @@ public class CompilerErrorModel {
   /** The number of compile errors. Used for display purposes only.*/
   private int _numCompilerErrors;
   
-  /** The number of compile errors. Used for display purposes only.*/
+  /** The number of compile warnings. Used for display purposes only.*/
   private int _numWarnings;
   
   
@@ -103,7 +101,8 @@ public class CompilerErrorModel {
   /** The global model which created/controls this object. */
   private final GlobalModel _model;
   
-  /** Constructs an empty CompilerErrorModel with no errors and a dummy global model. */
+  /** Constructs an empty CompilerErrorModel with no errors and a dummy global model.  As a side effect, it 
+    * opens any documents containing errors/warnings that are not currently open. */
   public CompilerErrorModel() {
     _model = new DummyGlobalModel() {
       public OpenDefinitionsDocument getDocumentForFile(File file) {
@@ -139,9 +138,9 @@ public class CompilerErrorModel {
     _numErrors = errors.length;
     _positions = new Position[errors.length];
     
-    _numWarnings =0;
+    _numWarnings = 0;
     _numCompilerErrors = 0;
-    for (int i =0; i<errors.length; i++){
+    for (int i =0; i < errors.length; i++){
       if (errors[i].isWarning()) _numWarnings++;
       else _numCompilerErrors++;
     }
@@ -154,11 +153,11 @@ public class CompilerErrorModel {
   }
   
   /** Accessor for errors maintained here.
-   * @param idx the index of the error to retrieve
-   * @return the error at index idx
-   * @throws NullPointerException if this object was improperly initialized
-   * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
-   */
+    * @param idx the index of the error to retrieve
+    * @return the error at index idx
+    * @throws NullPointerException if this object was improperly initialized
+    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
+    */
   public DJError getError(int idx) { return _errors[idx]; }
   
   /** Returns the position of the given error in the document representing its file. */

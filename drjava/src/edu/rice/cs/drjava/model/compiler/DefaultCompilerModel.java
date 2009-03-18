@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
 import java.util.*;
 
 import edu.rice.cs.drjava.model.DJError;
@@ -163,7 +164,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * This method formerly only compiled documents which were out of sync with their class file, as a performance 
     * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
     * case this command would not recompile a file in some situations when it should.  Since we value correctness over
-    * performance, we now always compile all open documents.</p>                                                                                                                              @throws IOException if a filesystem-related problem prevents compilation
+    * performance, we now always compile all open documents.</p>
+    * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
     if (_prepareForCompile()) { _doCompile(defDocs); }
@@ -312,7 +314,7 @@ public class DefaultCompilerModel implements CompilerModel {
             errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
           }
           else {
-            /** If compiling a language level file, do not show warnings, as these are not caught by the language level parser */
+            /** If compiling a language level file, do not show warnings which are ignored in language level analysis */
             errors.addAll(compiler.compile(preprocessedFiles, classPath, null, buildDir, bootClassPath, null, false));
           }
         }
@@ -320,7 +322,6 @@ public class DefaultCompilerModel implements CompilerModel {
       _distributeErrors(errors);
     }
     else { 
-      // TODO: Is this necessary?
       _distributeErrors(Collections.<DJError>emptyList());
     }
   }
@@ -336,18 +337,30 @@ public class DefaultCompilerModel implements CompilerModel {
     otherFiles.addAll(testFiles);
     return otherFiles;
   }
+   
+  private void _showConflictingFilesMessage(File file) throws IOException {
     
+    String fileName = file.getPath();
+    int lastIndex = fileName.lastIndexOf(".java");
+    String otherName = new File(fileName.substring(0, lastIndex) + ".dj*").getPath();
+    
+    JOptionPane.showMessageDialog(null,"The set of open files includes both a language level file and the " +
+                                  "coresponding augmented source file: \n\n" + fileName + "\n" + otherName,
+                                  "Compilation has been aborted.",
+                                  JOptionPane.ERROR_MESSAGE);
+    throw new IOException("Cannot compile onflicting open files " + fileName + " and " + otherName);
+  }
   /** Compiles the language levels files in the list.  Adds any errors to the given error list.
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
-                                                           Iterable<File> classPath, Iterable<File> bootClassPath) {
+  private List<File> 
+    _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
+                                Iterable<File> classPath, Iterable<File> bootClassPath) throws IOException {
     /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
      * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
      */
     HashSet<File> javaFileSet = new HashSet<File>();
-    LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
     boolean containsLanguageLevels = false;
     for (File f : files) {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
@@ -356,13 +369,17 @@ public class DefaultCompilerModel implements CompilerModel {
       if (lastIndex != -1) {
         containsLanguageLevels = true;
         File javaFile = new File(fileName.substring(0, lastIndex) + ".java");
+        if (javaFileSet.contains(javaFile)) { _showConflictingFilesMessage(javaFile); }
         javaFileSet.add(javaFile);
-        newFiles.add(javaFile);
 
         // Delete the stale .java file (if it exists), a file with this name will subsequently be generated
         javaFile.delete();
       }
-      else { javaFileSet.add(canonicalFile); }
+      else {
+        if (javaFileSet.contains(canonicalFile)) { // canonicalFile was already added for a corresponding .dj* file
+          _showConflictingFilesMessage(canonicalFile); }  
+        javaFileSet.add(canonicalFile); 
+      }
     }
     
     if (containsLanguageLevels) {
@@ -439,10 +456,6 @@ public class DefaultCompilerModel implements CompilerModel {
       /* Add any errors encountered in conversion to the compilation error log. */
       errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
       errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
-      
-//      // Confirm that the .java files corresponding to .dj* files exist.
-//      for (File f: newFiles)
-//        if (! f.exists()) Utilities.show(f + " does not exist");
 
     }
     
