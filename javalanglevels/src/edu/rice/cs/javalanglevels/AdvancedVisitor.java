@@ -232,10 +232,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     }
   }
 
-
-
-  /*
-   * TryCatchStatements cannot appear at the top level of a file, so give an error
+  /* TryCatchStatements cannot appear at the top level of a file, so give an error
    * if one appears here.
    */
   public void forTryCatchStatementDoFirst(TryCatchStatement that) {
@@ -243,8 +240,6 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     super.forTryCatchStatementDoFirst(that);
   }
   
-
-
   /**
    * Check to see if the specified className is a class defined in the current file.
    * If it is, it will be stored in _classNamesInThisFile.

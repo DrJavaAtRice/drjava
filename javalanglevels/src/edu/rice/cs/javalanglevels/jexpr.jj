@@ -925,7 +925,7 @@ UnbracedBody UnbracedBody() :
   { return new UnbracedBody(_loc(first), items.toArray(new BodyItemI[items.size()])); }
 }
 
-// A BodyItem is a method declaration, field declaration, statments, initializer, constructor, or inner declaration.
+// A BodyItem is a method declaration, field declaration, statements, initializer, constructor, or inner declaration.
 BodyItemI BodyItem() :
 {
   BodyItemI temp;
@@ -974,7 +974,7 @@ MethodDef MethodDef() :
       // This is obsolete but allowed as per JLS 8.4
       (
        LOOKAHEAD(<LBRACKET>)
-       <LBRACKET> <RBRACKET>
+         <LBRACKET> <RBRACKET>
        {
       if (returnType instanceof Type) {
         returnType = new ArrayType(_loc(returnType), ((Type)returnType).getName() + "[]", (Type) returnType);

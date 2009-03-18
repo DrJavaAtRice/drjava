@@ -87,8 +87,9 @@ public class LanguageLevelConverter {
   }
   
   /**Parse, Visit, Type Check, and Convert any language level files in the array of files
-    * @param sourceToTopLevelClassMap a map from source file to names of top-level classes created from that source file;
+    * @param sourceToTopLevelClassMap a map from source files to names of top-level classes created from that source file;
     *        an empty map should be passed in; it will be filled out by this method */
+  // "Visit" is an extremely vague notion; I presume it means construct a symbol table for the file.
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
     convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
     OPT = options;
@@ -96,7 +97,7 @@ public class LanguageLevelConverter {
     // We need a LinkedList for errors to be shared by the visitors to each file.
     LinkedList<Pair<String, JExpressionIF>> languageLevelVisitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
     
-    //keep track of the continuations to resolve
+    //keep track of the continuations to resolve  // What precisely is a continuation?
     Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
     
     //and the newSDs we've created
@@ -105,7 +106,7 @@ public class LanguageLevelConverter {
     // Similarly, we need a Hashtable for a shared symbolTable.
     Symboltable languageLevelVisitorSymbolTable = new Symboltable();
     
-    //And a linked list to share visited files.
+    // And a linked list to share visited files.
     LinkedList<Pair<LanguageLevelVisitor, SourceFile>> languageLevelVisitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
     
     // We are doing two passes on the files, and the second pass needs the first's corresponding
@@ -122,7 +123,7 @@ public class LanguageLevelConverter {
     // been visited.
     int originalNumOfFiles = files.length;
     
-    // Find the ones that are LL files.
+    // Find the ones (of what?) that are LL files.
     // Do the passes first for ALL files before proceeding to code augmentation.
     // Otherwise if one class' superclass get augmented first, then it sees a lot
     // of illegal constructs (e.g. public and constructors).

@@ -515,21 +515,23 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
    * @param thisSD  The SymbolData that is being type checked (from which we're referencing name)
    * @param dataType  The String that tells us whether name is a field, method, or class.
    */
-  public static boolean checkAccessibility(JExpression piece, ModifiersAndVisibility mav, String name, SymbolData enclosingSD, SymbolData thisSD, String dataType) {
+  public static boolean checkAccessibility(JExpression piece, ModifiersAndVisibility mav, String name, 
+                                           SymbolData enclosingSD, SymbolData thisSD, String dataType) {
     return checkAccessibility(piece, mav, name, enclosingSD, thisSD, dataType, true);
   }
 
 
-  /**Call this version when you don't want to add an error--only take in what is necessary to do the check, give default values
-   * for anything that will not be used.
-   */
+  /** Call this version when you don't want to add an error--only take in what is necessary to do the check, give default
+    * values for anything that will not be used.
+    */
   public static boolean checkAccessibility(ModifiersAndVisibility mav, SymbolData enclosingSD, SymbolData thisSD) { 
     return checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), mav, "", enclosingSD, thisSD,"", false);
   }
 
 
-  /**Can you reference name from thisSD where name isdefined in enclosingSD*/
-  public static boolean checkAccessibility(JExpression piece, ModifiersAndVisibility mav, String name, SymbolData enclosingSD, SymbolData thisSD, String dataType, boolean addError) {
+  /**Can you reference name from thisSD where name isdefined in enclosingSD */
+  public static boolean checkAccessibility(JExpression piece, ModifiersAndVisibility mav, String name, 
+                                           SymbolData enclosingSD, SymbolData thisSD, String dataType, boolean addError) {
 
       if (thisSD.isOuterData(enclosingSD) || enclosingSD.isOuterData(thisSD) || thisSD==enclosingSD) {
         return true;

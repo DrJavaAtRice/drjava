@@ -42,6 +42,7 @@ import edu.rice.cs.javalanglevels.tree.Type; // resolve ambiguity
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import edu.rice.cs.javalanglevels.parser.ParseException;
 import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.Utilities;
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.Modifier;
@@ -290,6 +291,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
       
       public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
+        /* Private fields cannot be ignored because they are used in code augmentation for generating constructors,
+         * equals, and hashCode. */
         String typeString = org.objectweb.asm.Type.getType(desc).getClassName();
         SymbolData type = getSymbolDataForClassFile(typeString, lookupInfo);
         if (type != null) { sd.addVar(new VariableData(name, _createMav(access), type, true, sd)); }
@@ -297,6 +300,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
       
       public MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] exceptions) {
+        if (Modifier.isPrivate(access)) return null; // ignore private methods in class files; they are invisible
         boolean valid = true;
         String methodName;
         SymbolData returnType;
@@ -675,7 +679,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     if (sd != null && ! sd.isContinuation()) { return sd; }
     if (sourceFile != null) {
       // First see if we even need to resolve this class. If not, create a continuation and return it.
-      if (!resolve) {
+      if (! resolve) {
         if (sd != null) { return sd; }
         else {
           sd = new SymbolData(qualifiedClassName);
@@ -880,16 +884,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return SymbolData.KEEP_GOING;
   }
   
-  /**
-   * Call getSymbolData with default values
-   * By default, resolve will be false.  It's only true when looking up a superclass.
-   * By default, fromClassFile will be false, since this is only true when we are trying to resolve types from the 
-   * context of a class file.
-   * By default addError will be true, since we want to display errors.
-   * By default checkImportedStuff will be true, since we want to consider imported packages and classes initially.
-   * @param className  The String name of the class to resolve
-   * @param si  The SourceInfo corresponding to the reference to the type
-   */
+  /** Calls getSymbolData with default values By default, resolve is false.  It's only true when looking up a 
+    * superclass. By default, fromClassFile is false, since this is only true when we are trying to resolve types from
+    * the context of a class file. By default addError is true, since we want to display errors.  By default 
+    * checkImportedStuff is true, since we want to consider imported packages and classes initially.
+    * @param className  The String name of the class to resolve
+    * @param si  The SourceInfo corresponding to the reference to the type
+    */
   protected SymbolData getSymbolData(String className, SourceInfo si) {
     return getSymbolData(className, si, false, false, true, true);
   }
@@ -913,8 +914,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return sd;
   }
   
-  /**
-   * Call getSymbolData with some default values
+  /** Calls getSymbolData with some default values
    * By default addError will be true, since we want to display errors.
    * By default checkImportedStuff will be true, since we want to consider imported packages and classes initially.
    * @param className  The String name of the class to resolve
@@ -1021,6 +1021,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       String newName = className;
       int lastDollar = newName.lastIndexOf("$");
       newName = newName.substring(lastDollar + 1, newName.length());
+//      Utilities.show("Invalid class name " + newName + " and " + className);
       _addAndIgnoreError("Invalid class name " + newName, new NullLiteral(si));
     }
     return null;
@@ -1193,8 +1194,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     else { return className;}
   }
   
-  
-  
   /** Does what is necessary to process this TypeDefBase from the context of enclosing.
     * This method is very similar to addSymbolData, except that it uses an enclosing data for reference.
     */
@@ -1207,6 +1206,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     if (sd == null) { sd = enclosing.getInnerClassOrInterface(partialName); }
     
     if (sd != null && !sd.isContinuation()) {
+//      Utilities.show("This class has already been defined sd = " + sd);
       _addAndIgnoreError("This class has already been defined.", typeDefBase);
       return null;
     }
@@ -2295,8 +2295,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData bartSD = _llv._classFile2SymbolData("Bart", "testFiles");
       assertFalse("bartSD should not be null", bartSD == null);
       assertFalse("bartSD should not be a continuation", bartSD.isContinuation());
-      MethodData md1 = 
-        new MethodData("myMethod", _privateMav, 
+       MethodData md1 = 
+        new MethodData("myMethod", _protectedMav, 
                        new TypeParameter[0], SymbolData.BOOLEAN_TYPE, 
                        new VariableData[] { new VariableData(SymbolData.INT_TYPE) }, 
                        new String[] {"java.lang.Exception"}, bartSD, null);
@@ -2318,11 +2318,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                    bartSD.getSuperClass());
       assertEquals("Bart's Variable Data should be a linked list containing only vd1", bartsVD, bartSD.getVars());
       assertEquals("The first method data of bart's should be correct", md2, bartSD.getMethods().getFirst());
+
       assertEquals("The second method data of bart's should be correct", md1, bartSD.getMethods().getLast());
-      
       assertEquals("Bart's Method Data should be a linked list containing only md1", bartsMD, bartSD.getMethods());
     }
-    
+   
     public void testLookupFromClassesToBeParsed() {
       // Create a ClassDef.  Recreate the ClassOrInterfaceType for Object instead of using 
       // JExprParser.NO_TYPE since otherwise the ElementaryVisitor will complain that the

@@ -989,26 +989,25 @@ public class SymbolData extends TypeData {
     return null;
   }
   
-  /**Set the list of methods to the specified one*/
+  /**Sets the list of methods to the specified one*/
   public void setMethods(LinkedList<MethodData> methods) {
     _methods = methods;
   }
   
-  /**Call repeatedSignature with fromClassFile set to false by default.*/
+  /**Calls repeatedSignature with fromClassFile set to false by default.*/
   public static MethodData repeatedSignature(LinkedList<MethodData> listOfMethods, MethodData method) {
     return repeatedSignature(listOfMethods, method, false);
   }
   
   
-  /**
-   * Check if two methods in this SymbolData have the same name and parameters.
-   * @param listOfMethods  The methods in this SymbolData
-   * @param method  The MethodData for the method to be added
-   * @param fromClassFile  Whether or not a class file is adding this method.
-   *                       Important because bridge methods, which differ only in return type,
-   *                       can be added from a class file and are legal but cannot exist in source code.
-   * @return  The MethodData that was already in listOfMethods that method duplicates if there is one or null otherwise.
-   */
+  /** Checks if two methods in this SymbolData have the same name and parameters.
+    * @param listOfMethods  The methods in this SymbolData
+    * @param method  The MethodData for the method to be added
+    * @param fromClassFile  Whether or not a class file is adding this method.
+    *                       Important because bridge methods, which differ only in return type,
+    *                       can be added from a class file and are legal but cannot exist in source code.
+    * @return  The MethodData that was already in listOfMethods that method duplicates if there is one or null otherwise.
+    */
   public static MethodData repeatedSignature(LinkedList<MethodData> listOfMethods, MethodData method, boolean fromClassFile) {
     Iterator<MethodData> iter = listOfMethods.iterator();
     VariableData[] methodParams = method.getParams();
@@ -1095,8 +1094,8 @@ public class SymbolData extends TypeData {
     if (overwritten.hasModifier("protected")) { // A protected method can only be overwritten by protected/public method
       return overwriting.hasModifier("protected") || overwriting.hasModifier("public");
     } 
-    if (! overwritten.hasModifier("private")) { // only private methods can be overwritten by private methods
-      return !overwriting.hasModifier("private");
+    if (! overwritten.hasModifier("private")) { // default methods can be overridden by a non-private method
+      return ! overwriting.hasModifier("private");
     }
     return true;
   }
@@ -1106,15 +1105,14 @@ public class SymbolData extends TypeData {
       return checkDifferentReturnTypes(md, sd, true, version);
     }
   
-  /**
-   * Called to make sure that no method has the same name and parameters as a method
-   * it inherits while having different return types.
-   * @param md  The MethodData we're currently trying to add
-   * @param sd  The SymbolData of the class whose enclosingDatas we're examining for 
-   *            different return types.
-   * @param addError  true if errors should be added to the type checker
-   * @return  Whether there exists a conflict
-   */
+  /** Called to make sure that no method has the same name and parameters as a method it inherits while having
+    * different return types.
+    * @param md  The MethodData we're currently trying to add
+    * @param sd  The SymbolData of the class whose enclosingDatas we're examining for 
+    *            different return types.
+    * @param addError  true if errors should be added to the type checker
+    * @return  Whether there exists a conflict
+    */
   protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, boolean addError, JavaVersion version) {
     // We only want to check the super class and interfaces, not outer classes.
     LinkedList<SymbolData> interfaces = sd.getInterfaces();    
@@ -1129,6 +1127,7 @@ public class SymbolData extends TypeData {
       SymbolData currSd = iter.next();
       MethodData matchingMd = repeatedSignature(currSd.getMethods(), md);
       if (matchingMd != null) {
+        if (matchingMd.hasModifier("private")) return false;
         boolean subclass = md.getReturnType().isSubClassOf(matchingMd.getReturnType());
         if (matchingMd.getReturnType() != md.getReturnType() && !(subclass && LanguageLevelConverter.versionIs15(version))) {
           StringBuffer methodSignature = new StringBuffer(md.getName() + "(");
