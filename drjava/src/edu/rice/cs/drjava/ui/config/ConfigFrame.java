@@ -818,7 +818,12 @@ public class ConfigFrame extends SwingFrame {
                                                   "Auto-Import after Breakpoint/Step", this,
                                                   "<html>Whether the Debugger should automatically import packages<br>"+
                                                   "and classes again after a breakpoint or step.</html>"));
-
+    
+    addOptionComponent(panel, new StringOptionComponent(OptionConstants.AUTO_STEP_RATE,
+                                                        "Auto-Step Rate in ms",
+                                                        this,
+                                                        "<html>A defined rate in ms at which the debugger automatically steps into/over each line of code.<br>" +
+                                                        "Value entered must be an integer value. </html>"));                                                            
     panel.displayComponents();
   }
 

@@ -236,6 +236,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private final Timer _debugStepTimer;
   
+  /** Timer to step into another line of code. The delay for each step is recorded in milliseconds. */
+  private volatile Timer _automaticTraceTimer;
+  
+  /** Amount of time in between each step into action within the automatic trace function. */
+  private volatile int AUTO_STEP_RATE = 1000; 
+  
   /** The current highlight displaying the current location, used for FindAll and the of the debugger's thread,
     * if there is one.  If there is none, this is null.
     */
@@ -2421,6 +2427,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
+    
+  /** Action that automatically traces through entire program*/
+  private final Action _automaticTraceDebugAction = new AbstractAction("Automatic Trace") {
+    public void actionPerformed(ActionEvent ae) { 
+      debuggerAutomaticTrace(); 
+    }
+  };
+  
   /** Action that steps into the next method call.  Only runs in the event thread. */
   private final Action _stepIntoDebugAction = new AbstractAction("Step Into") {
     public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_INTO); }
@@ -2456,6 +2470,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _clearAllBreakpointsAction = new AbstractAction("Clear All Breakpoints") {
     public void actionPerformed(ActionEvent ae) { debuggerClearAllBreakpoints(); }
   };
+
   
   /** Action that shows the breakpoints tab.  Only runs in the event thread. */
   private final Action _breakpointsPanelAction = new AbstractAction("Breakpoints") {
@@ -5601,6 +5616,53 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+    
+  /** Automatically traces through the entire program with a defined rate for stepping into each line of code*/
+  void debuggerAutomaticTrace() {
+    if(isDebuggerReady() && !_model.getDebugger().isAutomaticTraceEnabled()) {
+      try {
+        String rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
+        
+        if(!rate.equals("")) 
+          AUTO_STEP_RATE = Integer.parseInt(rate);
+        
+        _automaticTraceTimer = new Timer(AUTO_STEP_RATE, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            try { //System.out.println("_automaticTraceTimer.actionPerformed "+System.identityHashCode(a[0]));
+              _model.getDebugger().automaticTrace(); }
+            catch (IllegalStateException ise) {
+              // This may happen if the user if stepping very frequently,
+              // and is even more likely if they are using both hotkeys
+              // and UI buttons. Ignore it in this case.
+              // Hopefully, there are no other situations where
+              // the user can be trying to step while there are no
+              // suspended threads.
+            }
+            catch (DebugException de) {
+              _showError(de, "Debugger Error",
+                         "Could not create a step request.");
+            }
+          }
+        });
+        _automaticTraceTimer.setRepeats(false); 
+        _model.getDebugger().automaticTrace(); 
+        _model.getDebugger().enableAutomaticTrace();
+      }
+      catch (IllegalStateException ise) {
+        // This may happen if the user if stepping very frequently,
+        // and is even more likely if they are using both hotkeys
+        // and UI buttons. Ignore it in this case.
+        // Hopefully, there are no other situations where
+        // the user can be trying to step while there are no
+        // suspended threads.
+      }
+      catch (DebugException de) {
+        _showError(de, "Debugger Error",
+                   "Could not create a step request.");
+      }
+    }
+  }
+  
   /** Steps in the debugger. */
   void debuggerStep(Debugger.StepType type) {
     if (isDebuggerReady()) {
@@ -6050,6 +6112,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _setUpAction(_toggleBreakpointAction, "Toggle Breakpoint", "Set or clear a breakpoint on the current line");
       _setUpAction(_clearAllBreakpointsAction, "Clear Breakpoints", "Clear all breakpoints in all classes");
       _setUpAction(_resumeDebugAction, "Resume", "Resume the current suspended thread");
+      _setUpAction(_automaticTraceDebugAction, "Automatic Trace", "Automatically trace through entire program");
       _setUpAction(_stepIntoDebugAction, "Step Into", "Step into the current line or method call");
       _setUpAction(_stepOverDebugAction, "Step Over", "Step over the current line or method call");
       _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
@@ -6427,6 +6490,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
     _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
+    _addMenuItem(debugMenu, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE);
     _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
     _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
     _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
@@ -6452,6 +6516,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _debuggerEnabledMenuItem.setSelected(isEnabled);
     //_suspendDebugAction.setEnabled(false);
     _resumeDebugAction.setEnabled(false);
+    _automaticTraceDebugAction.setEnabled(false);
     _stepIntoDebugAction.setEnabled(false);
     _stepOverDebugAction.setEnabled(false);
     _stepOutDebugAction.setEnabled(false);
@@ -6467,6 +6532,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
     //_suspendDebugAction.setEnabled(!isSuspended);
     _resumeDebugAction.setEnabled(isSuspended);
+    _automaticTraceDebugAction.setEnabled(isSuspended);
     _stepIntoDebugAction.setEnabled(isSuspended);
     _stepOverDebugAction.setEnabled(isSuspended);
     _stepOutDebugAction.setEnabled(isSuspended);
@@ -8186,7 +8252,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Must be executed in evevt thread.*/
     public void debuggerStarted() { EventQueue.invokeLater(new Runnable() { public void run() { showDebugger(); } }); }
     
-    /* Must be executed in evevt thread.*/
+    /* Must be executed in eventt thread.*/
     public void debuggerShutdown() {
       EventQueue.invokeLater(new Runnable() {
         public void run() {
@@ -8207,7 +8273,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
       _setThreadDependentDebugMenuItems(true);
-      _model.getInteractionsModel().autoImport();
+      _model.getInteractionsModel().autoImport();               
+      if(_model.getDebugger().isAutomaticTraceEnabled()) {
+        //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE="+AUTO_STEP_RATE+", "+System.identityHashCode(_automaticTraceTimer));                                
+        if(!_automaticTraceTimer.isRunning())
+          _automaticTraceTimer.start();
+      }
     }
     
     /* Must be executed in the event thread. */
@@ -8230,9 +8301,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void currThreadDied() {
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
-      
+      _model.getDebugger().disableAutomaticTrace();
+      _automaticTraceTimer.stop();
       if (isDebuggerReady()) {
-        try {
+        try {        
           if (!_model.getDebugger().hasSuspendedThreads()) {
             // no more suspended threads, resume default debugger state
             // all thread dependent debug menu items are disabled

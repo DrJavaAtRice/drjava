@@ -81,6 +81,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JPanel _buttonPanel;
   private JButton _closeButton;
   private JButton _resumeButton;
+  private JButton _automaticTraceButton;
   private JButton _stepIntoButton;
   private JButton _stepOverButton;
   private JButton _stepOutButton;
@@ -417,6 +418,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _resumeButton = new JButton(resumeAction);
     
+    Action automaticTrace = new AbstractAction("Automatic Trace") {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.debuggerAutomaticTrace();
+      }
+    };
+    _automaticTraceButton = new JButton(automaticTrace);
+    
     Action stepIntoAction = new AbstractAction("Step Into") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.StepType.STEP_INTO);
@@ -449,6 +457,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
     mainButtons.add(_resumeButton);
+    mainButtons.add(_automaticTraceButton);
     mainButtons.add(_stepIntoButton);
     mainButtons.add(_stepOverButton);
     mainButtons.add(_stepOutButton);
@@ -460,6 +469,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     c.weightx = 1.0;
     
     gbLayout.setConstraints(_resumeButton, c);
+    gbLayout.setConstraints(_automaticTraceButton, c);
     gbLayout.setConstraints(_stepIntoButton, c);
     gbLayout.setConstraints(_stepOverButton, c);
     gbLayout.setConstraints(_stepOutButton, c);
@@ -629,6 +639,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   public void setThreadDependentButtons(boolean isSuspended) {
     _resumeButton.setEnabled(isSuspended);
+    _automaticTraceButton.setEnabled(isSuspended);
     _stepIntoButton.setEnabled(isSuspended);
     _stepOverButton.setEnabled(isSuspended);
     _stepOutButton.setEnabled(isSuspended);

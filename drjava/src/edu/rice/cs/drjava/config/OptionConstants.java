@@ -76,6 +76,9 @@ public interface OptionConstants {
   public static final VectorOption<String> INTERACTIONS_AUTO_IMPORT_CLASSES =
     new VectorOption<String>("interactions.auto.import.classes", new StringOption("",""), new Vector<String>());
   
+  /* The default rate at which the debugger steps into or over every line of code*/
+  public static final StringOption AUTO_STEP_RATE = new StringOption("1000", "");
+  
   /** The extension for an old DrJava project file */
   public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
 
@@ -94,7 +97,7 @@ public interface OptionConstants {
   
   public static final VectorOption<String> EXTRA_COMPILERS =
     new VectorOption<String>("extra.compilers", new StringOption("",""), new Vector<String>());
-  
+ 
   /* ---------- Color Options ---------- */
   
   public static final ColorOption DEFINITIONS_NORMAL_COLOR = new ColorOption("definitions.normal.color", Color.black);
@@ -751,6 +754,10 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DEBUG_RESUME =
     new KeyStrokeOption("key.debug.resume", KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
   
+    /** The key binding for automatically tracing through each line of a program*/
+  public static final KeyStrokeOption KEY_DEBUG_AUTOMATIC_TRACE = 
+    new KeyStrokeOption("key.debug.automatic.trace", KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
+  
   /** The key binding for stepping into in the debugger */
   public static final KeyStrokeOption KEY_DEBUG_STEP_INTO =
     new KeyStrokeOption("key.debug.step.into", KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
@@ -774,6 +781,8 @@ public interface OptionConstants {
   /** The key binding for clearing all breakpoints. */
   public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
     new KeyStrokeOption("key.debug.clear.all.breakpoints", KeyStrokeOption.NULL_KEYSTROKE);
+ 
+
   
   /** The key binding for toggling a bookmark. */
   public static final KeyStrokeOption KEY_BOOKMARKS_TOGGLE =

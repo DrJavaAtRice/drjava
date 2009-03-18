@@ -325,6 +325,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     forceReset |= !wd.equals(workDir);
     // update the setting
     DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    getDebugger().disableAutomaticTrace();
     _interactionsModel.resetInterpreter(wd, forceReset);
     debug.logEnd();
   }

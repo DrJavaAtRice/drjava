@@ -60,6 +60,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.drjava.model.debug.*;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+
 
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
@@ -127,6 +130,9 @@ public class JPDADebugger implements Debugger {
   /** If not null, this field holds an error caught by the EventHandlerThread. */
   private volatile Throwable _eventHandlerError;
   
+  /*Determines whether automatic trace has been enabled*/
+  private volatile boolean _isAutomaticTraceEnabled = false;
+    
   /** Builds a new JPDADebugger to debug code in the Interactions JVM, using the JPDA/JDI interfaces.
     * Does not actually connect to the interpreterJVM until startUp().
     */
@@ -372,6 +378,35 @@ public class JPDADebugger implements Debugger {
     assert EventQueue.isDispatchThread();
     _ensureReady();
     _resumeHelper(false);
+  }
+  
+  
+  /**
+   * Automatically traces through a program, stepping into every single line of code at a constant rate determined by the auto step rate, which can be set
+   * in the debugger options found in preferences.
+   */
+  public /*synchronized */void automaticTrace() throws DebugException {
+    assert EventQueue.isDispatchThread();
+    _ensureReady();
+    _stepHelper(Debugger.StepType.STEP_INTO, true); 
+  }
+  
+  /** Enables automatic trace when button has been pressed*/
+  public /*synchronized*/ void enableAutomaticTrace() {
+    _isAutomaticTraceEnabled = true;
+  }
+  
+  
+  /** Disables automatic trace when thread has ended*/
+  public /*synchronized*/ void disableAutomaticTrace() {
+    _isAutomaticTraceEnabled = false;
+  }
+    
+  /*
+   * Determines whether automatic trace has been enabled on the debugger
+   */ 
+  public boolean isAutomaticTraceEnabled() {
+    return _isAutomaticTraceEnabled;
   }
   
   /** Resumes the given thread, copying back any variables from its associated debug interpreter.
