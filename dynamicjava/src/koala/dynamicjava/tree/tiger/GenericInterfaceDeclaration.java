@@ -51,30 +51,30 @@ public class GenericInterfaceDeclaration extends InterfaceDeclaration {
   
   /**
    * Creates a new class declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the class to declare
    * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
    * @param body  the list of fields declarations
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl,
+  public GenericInterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl,
                                      List<Node> body, TypeParameter[] typeParams) {
-    this(flags, name, impl, body, typeParams, SourceInfo.NONE);
+    this(mods, name, impl, body, typeParams, SourceInfo.NONE);
   }
   
   /**
    * Creates a new class declaration
-   * @param flags      the access flags
+   * @param mods       the modifiers
    * @param name       the name of the class to declare
    * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
    * @param body       the list of members declarations
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
-                                     TypeParameter[] typeParams, SourceInfo si) {
-    super(flags, name, impl, body, si);
+  public GenericInterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl,
+                                     List<Node> body, TypeParameter[] typeParams, SourceInfo si) {
+    super(mods, name, impl, body, si);
     _typeParameters = typeParams;
   }
   

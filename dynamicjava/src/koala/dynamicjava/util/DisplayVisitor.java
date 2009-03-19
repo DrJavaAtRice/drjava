@@ -66,7 +66,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    * @return null
    */
-  public Void visit(PackageDeclaration node) {
+  @Override public Void visit(PackageDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" PackageDeclaration "+node.getName()+" {");
     displayProperties(node);
     print("}");
@@ -78,7 +78,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * @param node the node to visit
    * @return null
    */
-  public Void visit(ImportDeclaration node) {
+  @Override public Void visit(ImportDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" ImportDeclaration "+node.getName()
             +(node.isPackage() ? ".*" : "")+" {");
     displayProperties(node);
@@ -90,14 +90,14 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an EmptyStatement
    * @param node the node to visit
    */
-  public Void visit(EmptyStatement node) {
+  @Override public Void visit(EmptyStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" EmptyStatement {");
     displayProperties(node);
     print("}");
     return null;
   }
   
-  public Void visit(ExpressionStatement node) {
+  @Override public Void visit(ExpressionStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" ExpressionStatement {");
     print("expression:");
     indent();
@@ -112,7 +112,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a WhileStatement
    * @param node the node to visit
    */
-  public Void visit(WhileStatement node) {
+  @Override public Void visit(WhileStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" WhileStatement {");
     print("condition:");
     indent();
@@ -131,7 +131,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ForStatement
    * @param node the node to visit
    */
-  public Void visit(ForStatement node) {
+  @Override public Void visit(ForStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" ForStatement {");
     print("initialization:");
     if (node.getInitialization() != null) {
@@ -168,7 +168,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a DoStatement
    * @param node the node to visit
    */
-  public Void visit(DoStatement node) {
+  @Override public Void visit(DoStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" DoStatement {");
     print("condition:");
     indent();
@@ -187,7 +187,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SwitchStatement
    * @param node the node to visit
    */
-  public Void visit(SwitchStatement node) {
+  @Override public Void visit(SwitchStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" SwitchStatement {");
     print("selector:");
     indent();
@@ -208,7 +208,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SwitchBlock
    * @param node the node to visit
    */
-  public Void visit(SwitchBlock node) {
+  @Override public Void visit(SwitchBlock node) {
     print("l."+node.getSourceInfo().getStartLine()+" SwitchBlock {");
     print("expression:");
     indent();
@@ -235,7 +235,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a LabeledStatement
    * @param node the node to visit
    */
-  public Void visit(LabeledStatement node) {
+  @Override public Void visit(LabeledStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" LabeledStatement {");
     print("label:");
     indent();
@@ -254,7 +254,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BreakStatement
    * @param node the node to visit
    */
-  public Void visit(BreakStatement node) {
+  @Override public Void visit(BreakStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" BreakStatement {");
     print("label:");
     indent();
@@ -269,7 +269,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a TryStatement
    * @param node the node to visit
    */
-  public Void visit(TryStatement node) {
+  @Override public Void visit(TryStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" TryStatement {");
     print("tryBlock:");
     indent();
@@ -296,7 +296,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a CatchStatement
    * @param node the node to visit
    */
-  public Void visit(CatchStatement node) {
+  @Override public Void visit(CatchStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" CatchStatement {");
     print("exception:");
     indent();
@@ -315,7 +315,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ThrowStatement
    * @param node the node to visit
    */
-  public Void visit(ThrowStatement node) {
+  @Override public Void visit(ThrowStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" ThrowStatement {");
     print("expression:");
     indent();
@@ -330,7 +330,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ReturnStatement
    * @param node the node to visit
    */
-  public Void visit(ReturnStatement node) {
+  @Override public Void visit(ReturnStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" ReturnStatement {");
     print("expression:");
     indent();
@@ -349,7 +349,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SynchronizedStatement
    * @param node the node to visit
    */
-  public Void visit(SynchronizedStatement node) {
+  @Override public Void visit(SynchronizedStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" SynchronizedStatement {");
     print("lock:");
     indent();
@@ -368,7 +368,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ContinueStatement
    * @param node the node to visit
    */
-  public Void visit(ContinueStatement node) {
+  @Override public Void visit(ContinueStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" ContinueStatement {");
     print("label:");
     indent();
@@ -383,7 +383,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an IfThenStatement
    * @param node the node to visit
    */
-  public Void visit(IfThenStatement node) {
+  @Override public Void visit(IfThenStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" IfThenStatement {");
     print("condition:");
     indent();
@@ -402,7 +402,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an IfThenElseStatement
    * @param node the node to visit
    */
-  public Void visit(IfThenElseStatement node) {
+  @Override public Void visit(IfThenElseStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" IfThenElseStatement {");
     print("condition:");
     indent();
@@ -425,7 +425,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a Literal
    * @param node the node to visit
    */
-  public Void visit(Literal node) {
+  @Override public Void visit(Literal node) {
     print("l."+node.getSourceInfo().getStartLine()+" Literal ("+
           node.getType()+") <"+node.getValue()+"> {");
     displayProperties(node);
@@ -437,7 +437,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ThisExpression
    * @param node the node to visit
    */
-  public Void visit(ThisExpression node) {
+  @Override public Void visit(ThisExpression node) {
     print("l."+node.getSourceInfo().getStartLine()+" ThisExpression {");
     print("className:");
     indent();
@@ -452,7 +452,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a AmbiguousName
    * @param node the node to visit
    */
-  public Void visit(AmbiguousName node) {
+  @Override public Void visit(AmbiguousName node) {
     print("l."+node.getSourceInfo().getStartLine()+" AmbiguousName {");
     print("representation:");
     indent();
@@ -467,7 +467,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an ObjectFieldAccess
    * @param node the node to visit
    */
-  public Void visit(ObjectFieldAccess node) {
+  @Override public Void visit(ObjectFieldAccess node) {
     print("l."+node.getSourceInfo().getStartLine()+" ObjectFieldAccess {");
     print("expression:");
     indent();
@@ -486,7 +486,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a StaticFieldAccess
    * @param node the node to visit
    */
-  public Void visit(StaticFieldAccess node) {
+  @Override public Void visit(StaticFieldAccess node) {
     print("l."+node.getSourceInfo().getStartLine()+" StaticFieldAccess {");
     print("fieldType:");
     indent();
@@ -505,7 +505,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ArrayAccess
    * @param node the node to visit
    */
-  public Void visit(ArrayAccess node) {
+  @Override public Void visit(ArrayAccess node) {
     print("l."+node.getSourceInfo().getStartLine()+" ArrayAccess {");
     print("expression:");
     indent();
@@ -524,7 +524,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SimpleFieldAccess
    * @param node the node to visit
    */
-  public Void visit(SimpleFieldAccess node) {
+  @Override public Void visit(SimpleFieldAccess node) {
     print(indentation+"l."+node.getSourceInfo().getStartLine()+" SimpleFieldAccess {");
     print("fieldName:");
     indent();
@@ -539,7 +539,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SuperFieldAccess
    * @param node the node to visit
    */
-  public Void visit(SuperFieldAccess node) {
+  @Override public Void visit(SuperFieldAccess node) {
     print(indentation+"l."+node.getSourceInfo().getStartLine()+" SuperFieldAccess {");
     print("fieldName:");
     indent();
@@ -554,7 +554,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ObjectMethodCall
    * @param node the node to visit
    */
-  public Void visit(ObjectMethodCall node) {
+  @Override public Void visit(ObjectMethodCall node) {
     print("l."+node.getSourceInfo().getStartLine()+" ObjectMethodCall {");
     print("expression:");
     indent();
@@ -585,7 +585,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SimpleMethodCall
    * @param node the node to visit
    */
-  public Void visit(SimpleMethodCall node) {
+  @Override public Void visit(SimpleMethodCall node) {
     print("l."+node.getSourceInfo().getStartLine()+" SimpleMethodCall {");
     print("methodName:");
     indent();
@@ -608,7 +608,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a StaticMethodCall
    * @param node the node to visit
    */
-  public Void visit(StaticMethodCall node) {
+  @Override public Void visit(StaticMethodCall node) {
     print("l."+node.getSourceInfo().getStartLine()+" StaticMethodCall {");
     print("methodType:");
     indent();
@@ -635,7 +635,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ConstructorCall
    * @param node the node to visit
    */
-  public Void visit(ConstructorCall node) {
+  @Override public Void visit(ConstructorCall node) {
     print("l."+node.getSourceInfo().getStartLine()+" ConstructorCall {");
     print("expression:");
     indent();
@@ -664,7 +664,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SuperMethodCall
    * @param node the node to visit
    */
-  public Void visit(SuperMethodCall node) {
+  @Override public Void visit(SuperMethodCall node) {
     print("l."+node.getSourceInfo().getStartLine()+" SuperMethodCall {");
     print("methodName:");
     indent();
@@ -687,7 +687,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BooleanTypeName
    * @param node the node to visit
    */
-  public Void visit(BooleanTypeName node) {
+  @Override public Void visit(BooleanTypeName node) {
     handlePrimitiveTypeName(node, "boolean");
     return null;
   }
@@ -696,7 +696,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ByteTypeName
    * @param node the node to visit
    */
-  public Void visit(ByteTypeName node) {
+  @Override public Void visit(ByteTypeName node) {
     handlePrimitiveTypeName(node, "byte");
     return null;
   }
@@ -705,7 +705,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ShortTypeName
    * @param node the node to visit
    */
-  public Void visit(ShortTypeName node) {
+  @Override public Void visit(ShortTypeName node) {
     handlePrimitiveTypeName(node, "short");
     return null;
   }
@@ -714,7 +714,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a CharTypeName
    * @param node the node to visit
    */
-  public Void visit(CharTypeName node) {
+  @Override public Void visit(CharTypeName node) {
     handlePrimitiveTypeName(node, "char");
     return null;
   }
@@ -723,7 +723,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a IntTypeName
    * @param node the node to visit
    */
-  public Void visit(IntTypeName node) {
+  @Override public Void visit(IntTypeName node) {
     handlePrimitiveTypeName(node, "int");
     return null;
   }
@@ -732,7 +732,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a LongTypeName
    * @param node the node to visit
    */
-  public Void visit(LongTypeName node) {
+  @Override public Void visit(LongTypeName node) {
     handlePrimitiveTypeName(node, "long");
     return null;
   }
@@ -741,7 +741,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a FloatTypeName
    * @param node the node to visit
    */
-  public Void visit(FloatTypeName node) {
+  @Override public Void visit(FloatTypeName node) {
     handlePrimitiveTypeName(node, "float");
     return null;
   }
@@ -750,7 +750,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a DoubleTypeName
    * @param node the node to visit
    */
-  public Void visit(DoubleTypeName node) {
+  @Override public Void visit(DoubleTypeName node) {
     handlePrimitiveTypeName(node, "double");
     return null;
   }
@@ -759,7 +759,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a VoidTypeName
    * @param node the node to visit
    */
-  public Void visit(VoidTypeName node) {
+  @Override public Void visit(VoidTypeName node) {
     handlePrimitiveTypeName(node, "void");
     return null;
   }
@@ -773,7 +773,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ReferenceTypeName
    * @param node the node to visit
    */
-  public Void visit(ReferenceTypeName node) {
+  @Override public Void visit(ReferenceTypeName node) {
     print("l."+node.getSourceInfo().getStartLine()+" ReferenceTypeName {");
     print("representation:");
     indent();
@@ -788,7 +788,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ArrayTypeName
    * @param node the node to visit
    */
-  public Void visit(ArrayTypeName node) {
+  @Override public Void visit(ArrayTypeName node) {
     print("l."+node.getSourceInfo().getStartLine()+" ArrayTypeName {");
     if (node.getElementType() != null) {
       print("elementType:");
@@ -803,7 +803,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a TypeExpression
    * @param node the node to visit
    */
-  public Void visit(TypeExpression node) {
+  @Override public Void visit(TypeExpression node) {
     print("l."+node.getSourceInfo().getStartLine()+" TypeExpression {");
     print("type:");
     indent();
@@ -818,7 +818,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a PostIncrement
    * @param node the node to visit
    */
-  public Void visit(PostIncrement node) {
+  @Override public Void visit(PostIncrement node) {
     displayUnary(node);
     return null;
   }
@@ -827,7 +827,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a PostDecrement
    * @param node the node to visit
    */
-  public Void visit(PostDecrement node) {
+  @Override public Void visit(PostDecrement node) {
     displayUnary(node);
     return null;
   }
@@ -836,7 +836,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a PreIncrement
    * @param node the node to visit
    */
-  public Void visit(PreIncrement node) {
+  @Override public Void visit(PreIncrement node) {
     displayUnary(node);
     return null;
   }
@@ -845,7 +845,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a PreDecrement
    * @param node the node to visit
    */
-  public Void visit(PreDecrement node) {
+  @Override public Void visit(PreDecrement node) {
     displayUnary(node);
     return null;
   }
@@ -854,7 +854,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ArrayInitializer
    * @param node the node to visit
    */
-  public Void visit(ArrayInitializer node) {
+  @Override public Void visit(ArrayInitializer node) {
     print("l."+node.getSourceInfo().getStartLine()+" ArrayInitializer {");
     print("cells:");
     indent();
@@ -875,7 +875,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an ArrayAllocation
    * @param node the node to visit
    */
-  public Void visit(ArrayAllocation node) {
+  @Override public Void visit(ArrayAllocation node) {
     print("l."+node.getSourceInfo().getStartLine()+" ArrayAllocation {");
     print("elementType:");
     indent();
@@ -906,7 +906,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an SimpleAllocation
    * @param node the node to visit
    */
-  public Void visit(SimpleAllocation node) {
+  @Override public Void visit(SimpleAllocation node) {
     print("l."+node.getSourceInfo().getStartLine()+" SimpleAllocation {");
     print("creationType:");
     indent();
@@ -929,7 +929,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an AnonymousAllocation
    * @param node the node to visit
    */
-  public Void visit(AnonymousAllocation node) {
+  @Override public Void visit(AnonymousAllocation node) {
     print("l."+node.getSourceInfo().getStartLine()+" AnonymousAllocation {");
     print("creationType:");
     indent();
@@ -958,7 +958,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an InnerAllocation
    * @param node the node to visit
    */
-  public Void visit(InnerAllocation node) {
+  @Override public Void visit(InnerAllocation node) {
     print("l."+node.getSourceInfo().getStartLine()+" InnerAllocation {");
     print("expression:");
     indent();
@@ -985,7 +985,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an AnonymousInnerAllocation
    * @param node the node to visit
    */
-  public Void visit(AnonymousInnerAllocation node) {
+  @Override public Void visit(AnonymousInnerAllocation node) {
     print("l."+node.getSourceInfo().getStartLine()+" AnonymousInnerAllocation {");
     print("expression:");
     indent();
@@ -1018,7 +1018,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a CastExpression
    * @param node the node to visit
    */
-  public Void visit(CastExpression node) {
+  @Override public Void visit(CastExpression node) {
     print("l."+node.getSourceInfo().getStartLine()+" CastExpression {");
     print("targetType:");
     indent();
@@ -1037,7 +1037,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a NotExpression
    * @param node the node to visit
    */
-  public Void visit(NotExpression node) {
+  @Override public Void visit(NotExpression node) {
     displayUnary(node);
     return null;
   }
@@ -1046,7 +1046,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ComplementExpression
    * @param node the node to visit
    */
-  public Void visit(ComplementExpression node) {
+  @Override public Void visit(ComplementExpression node) {
     displayUnary(node);
     return null;
   }
@@ -1055,7 +1055,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a PlusExpression
    * @param node the node to visit
    */
-  public Void visit(PlusExpression node) {
+  @Override public Void visit(PlusExpression node) {
     displayUnary(node);
     return null;
   }
@@ -1064,7 +1064,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a MinusExpression
    * @param node the node to visit
    */
-  public Void visit(MinusExpression node) {
+  @Override public Void visit(MinusExpression node) {
     displayUnary(node);
     return null;
   }
@@ -1073,7 +1073,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a MultiplyExpression
    * @param node the node to visit
    */
-  public Void visit(MultiplyExpression node) {
+  @Override public Void visit(MultiplyExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1082,7 +1082,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a DivideExpression
    * @param node the node to visit
    */
-  public Void visit(DivideExpression node) {
+  @Override public Void visit(DivideExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1091,7 +1091,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a RemainderExpression
    * @param node the node to visit
    */
-  public Void visit(RemainderExpression node) {
+  @Override public Void visit(RemainderExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1100,7 +1100,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a AddExpression
    * @param node the node to visit
    */
-  public Void visit(AddExpression node) {
+  @Override public Void visit(AddExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1109,7 +1109,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a SubtractExpression
    * @param node the node to visit
    */
-  public Void visit(SubtractExpression node) {
+  @Override public Void visit(SubtractExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1118,7 +1118,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ShiftLeftExpression
    * @param node the node to visit
    */
-  public Void visit(ShiftLeftExpression node) {
+  @Override public Void visit(ShiftLeftExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1127,7 +1127,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ShiftRightExpression
    * @param node the node to visit
    */
-  public Void visit(ShiftRightExpression node) {
+  @Override public Void visit(ShiftRightExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1136,7 +1136,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a UnsignedShiftRightExpression
    * @param node the node to visit
    */
-  public Void visit(UnsignedShiftRightExpression node) {
+  @Override public Void visit(UnsignedShiftRightExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1145,7 +1145,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a LessExpression
    * @param node the node to visit
    */
-  public Void visit(LessExpression node) {
+  @Override public Void visit(LessExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1154,7 +1154,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a GreaterExpression
    * @param node the node to visit
    */
-  public Void visit(GreaterExpression node) {
+  @Override public Void visit(GreaterExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1163,7 +1163,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a LessOrEqualExpression
    * @param node the node to visit
    */
-  public Void visit(LessOrEqualExpression node) {
+  @Override public Void visit(LessOrEqualExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1172,7 +1172,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a GreaterOrEqualExpression
    * @param node the node to visit
    */
-  public Void visit(GreaterOrEqualExpression node) {
+  @Override public Void visit(GreaterOrEqualExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1181,7 +1181,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a InstanceOfExpression
    * @param node the node to visit
    */
-  public Void visit(InstanceOfExpression node) {
+  @Override public Void visit(InstanceOfExpression node) {
     print("l."+node.getSourceInfo().getStartLine()+" InstanceOfExpression {");
     print("expression:");
     indent();
@@ -1200,7 +1200,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a EqualExpression
    * @param node the node to visit
    */
-  public Void visit(EqualExpression node) {
+  @Override public Void visit(EqualExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1209,7 +1209,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a NotEqualExpression
    * @param node the node to visit
    */
-  public Void visit(NotEqualExpression node) {
+  @Override public Void visit(NotEqualExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1218,7 +1218,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BitAndExpression
    * @param node the node to visit
    */
-  public Void visit(BitAndExpression node) {
+  @Override public Void visit(BitAndExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1227,7 +1227,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ExclusiveOrExpression
    * @param node the node to visit
    */
-  public Void visit(ExclusiveOrExpression node) {
+  @Override public Void visit(ExclusiveOrExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1236,7 +1236,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BitOrExpression
    * @param node the node to visit
    */
-  public Void visit(BitOrExpression node) {
+  @Override public Void visit(BitOrExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1245,7 +1245,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an AndExpression
    * @param node the node to visit
    */
-  public Void visit(AndExpression node) {
+  @Override public Void visit(AndExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1254,7 +1254,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an OrExpression
    * @param node the node to visit
    */
-  public Void visit(OrExpression node) {
+  @Override public Void visit(OrExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1263,7 +1263,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ConditionalExpression
    * @param node the node to visit
    */
-  public Void visit(ConditionalExpression node) {
+  @Override public Void visit(ConditionalExpression node) {
     print("l."+node.getSourceInfo().getStartLine()+" ConditionalExpression {");
     print("conditionExpression:");
     indent();
@@ -1286,7 +1286,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an SimpleAssignExpression
    * @param node the node to visit
    */
-  public Void visit(SimpleAssignExpression node) {
+  @Override public Void visit(SimpleAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1295,7 +1295,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an MultiplyAssignExpression
    * @param node the node to visit
    */
-  public Void visit(MultiplyAssignExpression node) {
+  @Override public Void visit(MultiplyAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1304,7 +1304,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an DivideAssignExpression
    * @param node the node to visit
    */
-  public Void visit(DivideAssignExpression node) {
+  @Override public Void visit(DivideAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1313,7 +1313,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an RemainderAssignExpression
    * @param node the node to visit
    */
-  public Void visit(RemainderAssignExpression node) {
+  @Override public Void visit(RemainderAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1322,7 +1322,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an AddAssignExpression
    * @param node the node to visit
    */
-  public Void visit(AddAssignExpression node) {
+  @Override public Void visit(AddAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1331,7 +1331,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an SubtractAssignExpression
    * @param node the node to visit
    */
-  public Void visit(SubtractAssignExpression node) {
+  @Override public Void visit(SubtractAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1340,7 +1340,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an ShiftLeftAssignExpression
    * @param node the node to visit
    */
-  public Void visit(ShiftLeftAssignExpression node) {
+  @Override public Void visit(ShiftLeftAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1349,7 +1349,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an ShiftRightAssignExpression
    * @param node the node to visit
    */
-  public Void visit(ShiftRightAssignExpression node) {
+  @Override public Void visit(ShiftRightAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1358,7 +1358,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an UnsignedShiftRightAssignExpression
    * @param node the node to visit
    */
-  public Void visit(UnsignedShiftRightAssignExpression node) {
+  @Override public Void visit(UnsignedShiftRightAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1367,7 +1367,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BitAndAssignExpression
    * @param node the node to visit
    */
-  public Void visit(BitAndAssignExpression node) {
+  @Override public Void visit(BitAndAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1376,7 +1376,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ExclusiveOrAssignExpression
    * @param node the node to visit
    */
-  public Void visit(ExclusiveOrAssignExpression node) {
+  @Override public Void visit(ExclusiveOrAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1385,7 +1385,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BitOrAssignExpression
    * @param node the node to visit
    */
-  public Void visit(BitOrAssignExpression node) {
+  @Override public Void visit(BitOrAssignExpression node) {
     displayBinary(node);
     return null;
   }
@@ -1394,7 +1394,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a BlockStatement
    * @param node the node to visit
    */
-  public Void visit(BlockStatement node) {
+  @Override public Void visit(BlockStatement node) {
     print("l."+node.getSourceInfo().getStartLine()+" BlockStatement {");
     print("statements:");
     indent();
@@ -1411,7 +1411,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ClassDeclaration
    * @param node the node to visit
    */
-  public Void visit(ClassDeclaration node) {
+  @Override public Void visit(ClassDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" ClassDeclaration {");
     print("name:");
     indent();
@@ -1444,7 +1444,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits an InterfaceDeclaration
    * @param node the node to visit
    */
-  public Void visit(InterfaceDeclaration node) {
+  @Override public Void visit(InterfaceDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" InterfaceDeclaration {");
     print("name:");
     indent();
@@ -1473,11 +1473,11 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ConstructorDeclaration
    * @param node the node to visit
    */
-  public Void visit(ConstructorDeclaration node) {
+  @Override public Void visit(ConstructorDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" ConstructorDeclaration {");
-    print("accessFlags:");
+    print("modifiers:");
     indent();
-    print(""+node.getAccessFlags());
+    node.getModifiers().acceptVisitor(this);
     unindent();
     print("name:");
     indent();
@@ -1516,11 +1516,11 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a MethodDeclaration
    * @param node the node to visit
    */
-  public Void visit(MethodDeclaration node) {
+  @Override public Void visit(MethodDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" MethodDeclaration {");
-    print("accessFlags:");
+    print("modifiers:");
     indent();
-    print(""+node.getAccessFlags());
+    node.getModifiers().acceptVisitor(this);
     unindent();
     print("returnType:");
     indent();
@@ -1557,11 +1557,12 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a FormalParameter
    * @param node the node to visit
    */
-  public Void visit(FormalParameter node) {
+  @Override public Void visit(FormalParameter node) {
     print("l."+node.getSourceInfo().getStartLine()+" FormalParameter {");
-    if (node.isFinal()) {
-      print("final");
-    }
+    print("modifiers:");
+    indent();
+    node.getModifiers().acceptVisitor(this);
+    unindent();
     print("type:");
     indent();
     node.getType().acceptVisitor(this);
@@ -1579,11 +1580,11 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a FieldDeclaration
    * @param node the node to visit
    */
-  public Void visit(FieldDeclaration node) {
+  @Override public Void visit(FieldDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" FieldDeclaration {");
-    print("accessFlags:");
+    print("modifiers:");
     indent();
-    print(""+node.getAccessFlags());
+    node.getModifiers().acceptVisitor(this);
     unindent();
     print("type:");
     indent();
@@ -1608,11 +1609,11 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a VariableDeclaration
    * @param node the node to visit
    */
-  public Void visit(VariableDeclaration node) {
+  @Override public Void visit(VariableDeclaration node) {
     print("l."+node.getSourceInfo().getStartLine()+" VariableDeclaration {");
-    print("isFinal:");
+    print("modifiers:");
     indent();
-    print(""+node.isFinal());
+    node.getModifiers().acceptVisitor(this);
     unindent();
     print("type:");
     indent();
@@ -1637,7 +1638,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a ClassInitializer
    * @param node the node to visit
    */
-  public Void visit(ClassInitializer node) {
+  @Override public Void visit(ClassInitializer node) {
     print("l."+node.getSourceInfo().getStartLine()+" ClassInitializer {");
     print("block:");
     indent();
@@ -1652,7 +1653,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
    * Visits a InstanceInitializer
    * @param node the node to visit
    */
-  public Void visit(InstanceInitializer node) {
+  @Override public Void visit(InstanceInitializer node) {
     print("l."+node.getSourceInfo().getStartLine()+" InstanceInitializer {");
     print("block:");
     indent();
@@ -1660,6 +1661,17 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     unindent();
     displayProperties(node);
     print("}");
+    return null;
+  }
+  
+  @Override public Void visit(ModifierSet mods) {
+    for (Annotation ann : mods.getAnnotations()) {
+      ann.acceptVisitor(this);
+      print(" ");
+    }
+    for (ModifierSet.Modifier m : mods.getFlags()) {
+      print(m.getName() + " ");
+    }
     return null;
   }
   

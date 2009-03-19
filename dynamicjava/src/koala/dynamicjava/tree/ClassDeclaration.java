@@ -55,7 +55,7 @@ public class ClassDeclaration extends TypeDeclaration {
 
   /**
    * Creates a new class declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the class to declare
    * @param ext   the tokens that compose the name of the parent class.
    *              The list can be null. The superclass property is then
@@ -64,13 +64,13 @@ public class ClassDeclaration extends TypeDeclaration {
    *              Token). Can be null.
    * @param body  the list of members declarations
    */
-  public ClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body) {
-    this(flags, name, ext, impl, body, SourceInfo.NONE);
+  public ClassDeclaration(ModifierSet mods, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body) {
+    this(mods, name, ext, impl, body, SourceInfo.NONE);
   }
 
   /**
    * Creates a new class declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the class to declare
    * @param ext   the tokens that compose the name of the parent class.
    *              The list can be null. The superclass property is then
@@ -79,9 +79,9 @@ public class ClassDeclaration extends TypeDeclaration {
    *              Token). Can be null.
    * @param body  the list of members declarations
    */
-  public ClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
+  public ClassDeclaration(ModifierSet mods, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
                           SourceInfo si) {
-    super(flags, name, impl, body, si);
+    super(mods, name, impl, body, si);
     superclass = (ext == null) ? OBJECT : ext;
   }
   
@@ -118,7 +118,6 @@ public class ClassDeclaration extends TypeDeclaration {
   }
 
   protected String toStringHelper() {
-   return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+
-          " "+getInterfaces()+" "+getMembers();
+    return getModifiers()+" "+getName()+" "+getInterfaces()+" "+getMembers();
   }
 }

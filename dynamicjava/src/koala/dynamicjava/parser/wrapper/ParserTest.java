@@ -41,8 +41,11 @@ import junit.framework.*;
 import koala.dynamicjava.parser.impl.*;
 import koala.dynamicjava.tree.*;
 
+import java.io.File;
 import java.io.StringReader;
 import java.util.*;
+
+import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
 
 /**
  * Tests the interactions parser.
@@ -51,8 +54,8 @@ import java.util.*;
 public class ParserTest extends TestCase {
   
   List<Node> expectedAST;
-      
-  public ParserTest( String name ){
+  
+  public ParserTest( String name ) {
     super(name);
   }
   
@@ -86,11 +89,11 @@ public class ParserTest extends TestCase {
                                   int startLine, int startColumn, 
                                   int endLine, int endColumn)
   {
-    CustomParseException custom = CustomParseException.makeCustom(ex);
-    assertEquals("Wrong begin line of error", startLine, custom.getBeginLine());
-    assertEquals("Wrong begin column of error", startColumn, custom.getBeginColumn());
-    assertEquals("Wrong end line of error", endLine, custom.getEndLine());
-    assertEquals("Wrong end column of error", endColumn, custom.getEndColumn());
+    SourceInfo si = new ParseError(ex, (File) null).getSourceInfo();
+    assertEquals("Wrong begin line of error", startLine, si.getStartLine());
+    assertEquals("Wrong begin column of error", startColumn, si.getStartColumn());
+    assertEquals("Wrong end line of error", endLine, si.getEndLine());
+    assertEquals("Wrong end column of error", endColumn, si.getEndColumn());
   }
 
   protected void setUp(){
@@ -98,7 +101,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testPackageDeclaration() throws ParseException {
-    expectedAST.add(new PackageDeclaration("edu.rice.cs.javaast", SourceInfo.NONE));
+    expectedAST.add(new PackageDeclaration(ModifierSet.make(), "edu.rice.cs.javaast", SourceInfo.NONE));
     verifyOutput("package edu.rice.cs.javaast;", expectedAST);
   }  
   
@@ -118,40 +121,38 @@ public class ParserTest extends TestCase {
   }  
   
   public void testClassDeclaration() throws ParseException {
-    int accessFlags = 0;
-    accessFlags |= java.lang.reflect.Modifier.PUBLIC;
-    accessFlags |= java.lang.reflect.Modifier.ABSTRACT;
+    ModifierSet mods = ModifierSet.make(PUBLIC, ABSTRACT);
     List<Node> body = new LinkedList<Node>();
-    expectedAST.add(new ClassDeclaration(accessFlags, "Foo", new ReferenceTypeName("Bar"), null, body, SourceInfo.NONE));
+    expectedAST.add(new ClassDeclaration(mods, "Foo", new ReferenceTypeName("Bar"), null, body, SourceInfo.NONE));
     verifyOutput("public abstract class Foo extends Bar{}", expectedAST);
   }
   
   public void testInterfaceDeclaration() throws ParseException {
-    int accessFlags = 0;
     List<Node> body = new LinkedList<Node>();
-    expectedAST.add(new InterfaceDeclaration(accessFlags, "i", null, body, SourceInfo.NONE));
+    expectedAST.add(new InterfaceDeclaration(ModifierSet.make(), "i", null, body, SourceInfo.NONE));
     verifyOutput("interface i{}", expectedAST);
   }
   
   public void testMethodDeclaration() throws ParseException {
-    int accessFlags = 0;
-    accessFlags |= java.lang.reflect.Modifier.STATIC;
-    accessFlags |= java.lang.reflect.Modifier.PUBLIC;
+    ModifierSet mods = ModifierSet.make(STRICT, PUBLIC);
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<? extends ReferenceTypeName> excepts = new LinkedList<ReferenceTypeName>();
     List<Node> stmts = new LinkedList<Node>();
     stmts.add(new ReturnStatement(new IntegerLiteral("1")));
     BlockStatement body = new BlockStatement(stmts);
     
-    expectedAST.add(new MethodDeclaration(accessFlags, new IntTypeName(), "getCount", params, excepts, body));
+    expectedAST.add(new MethodDeclaration(mods, new IntTypeName(), "getCount", params, excepts, body));
     
-    verifyOutput("static public int getCount(){ return 1; }", expectedAST);
+    verifyOutput("strictfp public int getCount(){ return 1; }", expectedAST);
   }
   
   public void testLocalVariableDeclarationList() throws ParseException {
-    VariableDeclaration iVD = new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0"));
-    VariableDeclaration jVD = new VariableDeclaration(false, new IntTypeName(), "j", null);
-    VariableDeclaration kVD = new VariableDeclaration(false, new IntTypeName(), "k", new IntegerLiteral("2"));
+    VariableDeclaration iVD = new VariableDeclaration(ModifierSet.make(),
+                                                      new IntTypeName(), "i", new IntegerLiteral("0"));
+    VariableDeclaration jVD = new VariableDeclaration(ModifierSet.make(),
+                                                      new IntTypeName(), "j", null);
+    VariableDeclaration kVD = new VariableDeclaration(ModifierSet.make(),
+                                                      new IntTypeName(), "k", new IntegerLiteral("2"));
   
     expectedAST.add(iVD);
     expectedAST.add(jVD);
@@ -244,7 +245,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testIfStatement3() throws ParseException {
-    expectedAST.add(new IfThenStatement(new ObjectFieldAccess(new AmbiguousName("SomeClass"), "CONSTANT"),
+    expectedAST.add(new IfThenStatement(new AmbiguousName("SomeClass", "CONSTANT"),
                                         new IfThenElseStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, SourceInfo.NONE), 
                                                                 new ReturnStatement(new BooleanLiteral(true)), 
                                                                 new ReturnStatement(new BooleanLiteral(false)))));
@@ -276,7 +277,7 @@ public class ParserTest extends TestCase {
     args.add(new AmbiguousName("something"));
     
     List<Node> init = new LinkedList<Node> ();
-    init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
+    init.add(new VariableDeclaration(ModifierSet.make(), new IntTypeName(), "i", new IntegerLiteral("0")));
     
     List<Node> updt = new LinkedList<Node> ();
     updt.add(new ExpressionStatement(new PostIncrement(new AmbiguousName("i")), true));
@@ -351,7 +352,8 @@ public class ParserTest extends TestCase {
     stmts2.add(new ThrowStatement(new AmbiguousName("ioe")));
 
     List<CatchStatement> catchSt = new LinkedList<CatchStatement>();
-    catchSt.add(new CatchStatement(new FormalParameter(false, new ReferenceTypeName("IOException"), "ioe"), new BlockStatement(stmts2), SourceInfo.NONE));
+    catchSt.add(new CatchStatement(new FormalParameter(ModifierSet.make(), new ReferenceTypeName("IOException"), "ioe"),
+                                   new BlockStatement(stmts2), SourceInfo.NONE));
                 
     expectedAST.add(new TryStatement(new BlockStatement(stmts1),
                                      catchSt,
@@ -471,14 +473,13 @@ public class ParserTest extends TestCase {
   
   public void testAnonymousInnerClass() throws ParseException {
     List<Node> members = new LinkedList<Node>();
-    int accessFlags = 0;
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<? extends ReferenceTypeName> excepts = new LinkedList<ReferenceTypeName>();
     List<Node> stmts = new LinkedList<Node>();
     stmts.add(new ExpressionStatement(new ObjectMethodCall(new AmbiguousName("o"), "n", null, SourceInfo.NONE), true));
     BlockStatement body = new BlockStatement(stmts);
     
-    members.add(new MethodDeclaration(accessFlags, new VoidTypeName(), "m", params, excepts, body));
+    members.add(new MethodDeclaration(ModifierSet.make(), new VoidTypeName(), "m", params, excepts, body));
     
     Expression expected = new AnonymousAllocation(new ReferenceTypeName("C"), null, members); 
     verifyExprOutput(" new C() { void m() { o.n(); } }", expected);
@@ -501,8 +502,9 @@ public class ParserTest extends TestCase {
     idnt.add(new Identifier("awt"));
     idnt.add(new Identifier("event"));
     idnt.add(new Identifier("ActionEvent"));
+    idnt.add(new Identifier("x"));
     
-    Expression expected = new ObjectFieldAccess(new AmbiguousName(idnt), "x");
+    Expression expected = new AmbiguousName(idnt);
     verifyExprOutput("X.java.awt.event.ActionEvent.x", expected);
   }
   
@@ -512,8 +514,9 @@ public class ParserTest extends TestCase {
     idnt.add(new Identifier("awt"));
     idnt.add(new Identifier("event"));
     idnt.add(new Identifier("ActionEvent"));
+    idnt.add(new Identifier("x"));
 
-    Expression expected = new ObjectFieldAccess(new AmbiguousName(idnt), "x");
+    Expression expected = new AmbiguousName(idnt);
     verifyExprOutput("java.awt.event.ActionEvent.x", expected);
   }
   
@@ -535,7 +538,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testMemberAccess()  throws ParseException {
-    Expression expected = new ObjectFieldAccess(new AmbiguousName("r"), "f");
+    Expression expected = new AmbiguousName("r", "f");
     verifyExprOutput("r.f", expected);
   }
   

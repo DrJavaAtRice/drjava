@@ -39,11 +39,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/05/23
  */
 
-public class ConstructorDeclaration extends Node {
-  /**
-   * The accessFlags property name
-   */
-  public final static String ACCESS_FLAGS = "accessFlags";
+public class ConstructorDeclaration extends Declaration {
 
   /**
    * The name property name
@@ -64,11 +60,6 @@ public class ConstructorDeclaration extends Node {
    * The statements property name
    */
   public final static String STATEMENTS = "statements";
-
-  /**
-   * The access flags
-   */
-  private int accessFlags;
 
   /**
    * The name of this constructor
@@ -99,7 +90,7 @@ public class ConstructorDeclaration extends Node {
 
   /**
    * Creates a new method declaration
-   * @param flags   the access flags
+   * @param mods    the modifiers
    * @param name    the name of this constructor
    * @param params  the parameters list
    * @param excepts the exception list (a list of list of token)
@@ -108,15 +99,15 @@ public class ConstructorDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or params is null or
    *            excepts is null or stmts is null
    */
-  public ConstructorDeclaration(int flags, String name,
+  public ConstructorDeclaration(ModifierSet mods, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorCall eci, List<Node> stmts) {
-    this(flags, name, params, excepts, eci, stmts, SourceInfo.NONE);
+    this(mods, name, params, excepts, eci, stmts, SourceInfo.NONE);
   }
 
   /**
    * Creates a new method declaration
-   * @param flags   the access flags
+   * @param mods    the modifiers
    * @param name    the name of this constructor
    * @param params  the parameters list
    * @param excepts the exception list (a list of list of token)
@@ -125,37 +116,21 @@ public class ConstructorDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or params is null or
    *            excepts is null or stmts is null
    */
-  public ConstructorDeclaration(int flags, String name,
+  public ConstructorDeclaration(ModifierSet mods, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorCall eci, List<Node> stmts,
                                 SourceInfo si) {
-    super(si);
+    super(mods, si);
 
     if (name == null)    throw new IllegalArgumentException("name == null");
     if (params == null)  throw new IllegalArgumentException("params == null");
     if (excepts == null) throw new IllegalArgumentException("excepts == null");
     if (stmts == null)   throw new IllegalArgumentException("stmts == null");
-
-    accessFlags           = flags;
     this.name             = name;
     parameters            = params;
     constructorInvocation = eci;
     statements            = stmts;
     exceptions            = excepts;
-  }
-
-  /**
-   * Returns the access flags for this constructor
-   */
-  public int getAccessFlags() {
-    return accessFlags;
-  }
-
-  /**
-   * Sets the access flags for this constructor
-   */
-  public void setAccessFlags(int f) {
-    firePropertyChange(ACCESS_FLAGS, accessFlags, accessFlags = f);
   }
 
   /**
@@ -257,6 +232,6 @@ public class ConstructorDeclaration extends Node {
   }
   
   public String toStringHelper() {
-    return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorCall()+" "+getStatements();
+    return getModifiers()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorCall()+" "+getStatements();
   }
 }

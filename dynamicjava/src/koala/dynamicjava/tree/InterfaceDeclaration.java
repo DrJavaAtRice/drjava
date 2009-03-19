@@ -42,25 +42,25 @@ import koala.dynamicjava.tree.visitor.*;
 public class InterfaceDeclaration extends TypeDeclaration {
   /**
    * Creates a new interface declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the interface to declare
    * @param impl  the list of implemented interfaces. Can be null.
    * @param body  the list of fields declarations
    */
-  public InterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body) {
-    this(flags, name, impl, body, SourceInfo.NONE);
+  public InterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body) {
+    this(mods, name, impl, body, SourceInfo.NONE);
   }
 
   /**
    * Creates a new interface declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the interface to declare
    * @param impl  the list of implemented interfaces. Can be null.
    * @param body  the list of fields declarations
    */
-  public InterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
+  public InterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
                               SourceInfo si) {
-    super(flags, name, impl, body, si);
+    super(mods, name, impl, body, si);
   }
 
   /**
@@ -78,6 +78,6 @@ public class InterfaceDeclaration extends TypeDeclaration {
   }
 
   protected String toStringHelper() {
-    return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getInterfaces()+" "+getMembers();
+    return getModifiers()+" "+getName()+" "+getInterfaces()+" "+getMembers();
   }
 }

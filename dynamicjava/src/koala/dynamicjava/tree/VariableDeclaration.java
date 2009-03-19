@@ -37,11 +37,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/05/11
  */
 
-public class VariableDeclaration extends Node {
-  /**
-   * The final property name
-   */
-  public final static String FINAL = "final";
+public class VariableDeclaration extends Declaration {
   
   /**
    * The type property name
@@ -57,11 +53,6 @@ public class VariableDeclaration extends Node {
    * The initializer property name
    */
   public final static String INITIALIZER = "initializer";
-  
-  /**
-   * Whether this variable is final
-   */
-  private boolean finalVariable;
   
   /**
    * The type of this variable
@@ -80,33 +71,32 @@ public class VariableDeclaration extends Node {
   
   /**
    * Creates a new variable declaration
-   * @param fin    is this variable final?
+   * @param mods   the modifiers
    * @param type   the type of this variable
    * @param name   the name of this variable
    * @param init   the initializer
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public VariableDeclaration(boolean fin, TypeName type, String name, Expression init) {
-    this(fin, type, name, init, SourceInfo.NONE);
+  public VariableDeclaration(ModifierSet mods, TypeName type, String name, Expression init) {
+    this(mods, type, name, init, SourceInfo.NONE);
   }
   
   /**
    * Creates a new variable declaration
-   * @param fin    is this variable final?
+   * @param mods   the modifiers
    * @param type   the type of this variable
    * @param name   the name of this variable
    * @param init   the initializer
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public VariableDeclaration(boolean fin, TypeName type, String name, Expression init,
+  public VariableDeclaration(ModifierSet mods, TypeName type, String name, Expression init,
                              SourceInfo si) {
-    super(si);
+    super(mods, si);
     
     // TODO: restore this check? -- we're allowing an inferred type for now
     //if (type == null) throw new IllegalArgumentException("type == null");
     if (name == null) throw new IllegalArgumentException("name == null");
     
-    finalVariable = fin;
     this.type     = type;
     this.name     = name;
     initializer   = init;
@@ -117,20 +107,6 @@ public class VariableDeclaration extends Node {
           (((ArrayTypeName)type).getElementType());
       }
     }
-  }
-  
-  /**
-   * Returns true if this variable is final
-   */
-  public boolean isFinal() {
-    return finalVariable;
-  }
-  
-  /**
-   * Sets the final flag
-   */
-  public void setFinal(boolean b) {
-    firePropertyChange(FINAL, finalVariable, finalVariable = b);
   }
   
   /**
@@ -192,6 +168,6 @@ public class VariableDeclaration extends Node {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+isFinal()+" "+getType()+" "+getName()+" "+getInitializer()+")";
+    return "("+getClass().getName()+": "+getModifiers()+" "+getType()+" "+getName()+" "+getInitializer()+")";
   }
 }

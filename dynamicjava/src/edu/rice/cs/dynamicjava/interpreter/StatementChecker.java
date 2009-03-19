@@ -269,14 +269,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     if (node.getType() == null) {
       // We infer the variable's type.  We can assume the initializer is non-null.
       Type initT = checkType(node.getInitializer());
-      LocalVariable v = new LocalVariable(node.getName(), initT, node.isFinal());
+      LocalVariable v = new LocalVariable(node.getName(), initT, node.getModifiers().isFinal());
       setVariable(node, v);
       setErasedType(node, ts.erasedClass(initT));
       return new LocalContext(context, v);
     }
     else {
       Type t = checkTypeName(node.getType());
-      LocalVariable v = new LocalVariable(node.getName(), t, node.isFinal());
+      LocalVariable v = new LocalVariable(node.getName(), t, node.getModifiers().isFinal());
       setVariable(node, v);
       setErasedType(node, ts.erasedClass(t));
       TypeContext newContext = new LocalContext(context, v);
@@ -362,7 +362,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     setErasedType(node, ts.erasedClass(returnT));
     for (FormalParameter p : node.getParameters()) {
       Type t = sigChecker.check(p.getType());
-      setVariable(p, new LocalVariable(p.getName(), t, p.isFinal()));
+      setVariable(p, new LocalVariable(p.getName(), t, p.getModifiers().isFinal()));
     }
     for (ReferenceTypeName n : node.getExceptions()) { sigChecker.check(n); }
     
@@ -451,7 +451,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   @Override public TypeContext visit(ForEachStatement node) {
     FormalParameter p = node.getParameter();
     Type paramT = checkTypeName(p.getType());
-    LocalVariable var = setVariable(p, new LocalVariable(p.getName(), paramT, p.isFinal()));
+    LocalVariable var = setVariable(p, new LocalVariable(p.getName(), paramT, p.getModifiers().isFinal()));
     TypeContext newContext = new LocalContext(context, var);
     Type collType = checkType(node.getCollection());
 
@@ -617,7 +617,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       if (!ts.isReifiable(caughtT)) {
         throw new ExecutionError("reifiable.type", c);
       }
-      setVariable(p, new LocalVariable(p.getName(), caughtT, p.isFinal()));
+      setVariable(p, new LocalVariable(p.getName(), caughtT, p.getModifiers().isFinal()));
       setErasedType(c, ts.erasedClass(caughtT));
       caughtTypes.add(caughtT);
     }
@@ -744,7 +744,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         if (ambigName.getIdentifiers().size() == 1) {
           String name = ambigName.getRepresentation();
           if (!context.variableExists(name, opt.typeSystem())) {
-            Node decl = new VariableDeclaration(false, null, name, assign.getRightExpression(), node.getSourceInfo());
+            Node decl = new VariableDeclaration(ModifierSet.make(), null, name, assign.getRightExpression(),
+                                                node.getSourceInfo());
             setStatementTranslation(node, decl);
             return decl.acceptVisitor(this);
           }

@@ -29,7 +29,11 @@
 package koala.dynamicjava.parser.wrapper;
 
 
+import java.io.File;
+
+import edu.rice.cs.plt.text.TextUtil;
 import koala.dynamicjava.parser.impl.ParseException;
+import koala.dynamicjava.parser.impl.Token;
 import koala.dynamicjava.tree.SourceInfo;
   
 /**
@@ -40,107 +44,71 @@ import koala.dynamicjava.tree.SourceInfo;
  * @version 1.0 - 1999/05/03
  */
 
-public class ParseError extends Error {
-    /**
-     * Constructs a ParseError with no detailed message
-     * The ParseException that generated the ParseError or
-     * null if generated for another reason
-     */
-    private ParseException pe = null;
+public class ParseError extends Error implements SourceInfo.Wrapper {
+    private SourceInfo _si;
     
-    /**
-     * The file name
-     * @serial
-     */
-    private String filename;
-
-    /**
-     * The line in the source code where the error occured
-     * @serial
-     */
-    private int line;
-
-    /**
-     * The column in the source code where the error occured
-     * @serial
-     */
-    private int column;
-
     
-    /**
-     * Constructs a ParseError with no detail message. 
-     */
-    public ParseError() {
-        this("");
-    }
-
     /**
      * Constructs an <code>ExecutionError</code> with the specified 
      * detail message. 
      * @param s the detail message.
      */
-    public ParseError(String s) {
-        this(s, "", -1, -1);
-    }
-    
-    /**
-     * Constructs a ParseError with the specified 
-     * detail message. 
-     * @param e the ParseException.
-     */
-    public ParseError(ParseException e) {
-        this(CustomParseException.makeCustom(e).getShortMessage(), "", -1, -1);
-        pe = e;
-    }
-    
-    public ParseError(Throwable t) {
-        this(t.getMessage(), "", -1, -1);
-    }
-    
-    /**
-     * Constructs an <code>ExecutionError</code> with the specified 
-     * detail message, filename, line and column. 
-     * @param s  the detail message.
-     * @param fn the file name.
-     * @param l  the line in the source code.
-     * @param c  the column in the source code.
-     */
-    public ParseError(String s, String fn, int l, int c) {
-        super(s);
-        filename = fn;
-        line     = l;
-        column   = c;
-    }
-    
     public ParseError(String s, SourceInfo si) {
-      this(s, si.getFilename(), si.getStartLine(), si.getStartColumn());
+      super(s);
+      _si = si;
     }
     
     /**
-     * Returns the name of the source file
+     * Constructs a ParseError based on a ParseException.
+     * @param e  the ParseException.
+     * @param f  the source file, or {@code null} if it is unknown.
      */
-    public String getFilename() {
-      return filename;
-    }
-
-    /**
-     * Returns the line in the source code where the error occured
-     */
-    public int getLine() {
-      return line;
+    public ParseError(ParseException e, File f) {
+      super(parseExceptionMessage(e), e);
+      _si = parseExceptionLocation(e, f);
     }
     
-    /**
-     * Returns the column in the source code where the error occured
-     */
-    public int getColumn() {
-      return column;
+    public ParseError(Throwable t, SourceInfo si) {
+      super(t.getMessage(), t);
+      _si = si;
     }
     
-    /**
-     * Returns the ParseException
-     */
-    public ParseException getParseException() {
-      return pe;
+    public SourceInfo getSourceInfo() { return _si; }
+    
+    
+    private static String parseExceptionMessage(ParseException e) {
+      if (e.expectedTokenSequences == null) { return e.getMessage(); }
+      else {
+        int maxSize = 0;
+        for (int i = 0; i < e.expectedTokenSequences.length; i++) {
+          if (maxSize < e.expectedTokenSequences[i].length) {
+            maxSize = e.expectedTokenSequences[i].length;
+          }
+        }
+        String retval = "Syntax Error: \"";
+        Token tok = e.currentToken.next;
+        
+        for (int i = 0; i < maxSize; i++) {
+          if (i != 0) retval += " ";
+          if (tok.kind == 0) {
+            retval += e.tokenImage[0];
+            break;
+          }
+          retval += TextUtil.javaEscape(tok.image);
+          tok = tok.next; 
+        }
+        retval += "\"";
+        return retval;
+      }
     }
+    
+    private static SourceInfo parseExceptionLocation(ParseException e, File f) {
+      Token t = e.currentToken;
+      if (t == null) { return SourceInfo.point(f, 0, 0); }
+      else {
+        if (t.next != null) { t = t.next; }
+        return SourceInfo.range(f, t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+      }
+    }
+    
 }

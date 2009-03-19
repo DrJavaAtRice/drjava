@@ -29,7 +29,9 @@
 package koala.dynamicjava.tree;
 
 import java.util.*;
-import java.lang.reflect.Modifier;
+import koala.dynamicjava.tree.visitor.Visitor;
+
+import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
 
 /**
  * This class represents an enum declaration
@@ -38,18 +40,17 @@ import java.lang.reflect.Modifier;
  */
 
 public class EnumDeclaration extends ClassDeclaration {
- 
   
   /**
    * Creates a new enum declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the enum to declare
    * @param impl  the list of implemented interfaces (a list of list of
    *              Token). Can be null.
    * @param body  the list of members declarations
    */
-  public EnumDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, EnumBody body) {
-    this(flags, name, impl, body, SourceInfo.NONE);
+  public EnumDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, EnumBody body) {
+    this(mods, name, impl, body, SourceInfo.NONE);
   }
 
 //  /** Flag is set if symbol has a synthetic attribute.
@@ -71,13 +72,13 @@ public class EnumDeclaration extends ClassDeclaration {
 
  /**
    * Creates a new enum declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the enum to declare
    * @param impl  the list of implemented interfaces (a list of list of
    *              Token). Can be null.
    * @param body  the list of members declarations
    */
-  public EnumDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, EnumBody body,
+  public EnumDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, EnumBody body,
                           SourceInfo si) {
     // the first parameter should be (flags | 0x4000), 
     // but this causes problems when trying to create 
@@ -88,7 +89,7 @@ public class EnumDeclaration extends ClassDeclaration {
     // The only real consequence of this is that Class.isEnum() 
     // will return false, but since dynamicjava uses 
     // TigerUtilities.isEnum(), this doesn't pose too big of a problem.
-    super(flags, 
+    super(mods, 
           name, new ReferenceTypeName("java.lang.Enum"), impl,
       AddValues(name,
         HandleConstructors(name,
@@ -112,7 +113,7 @@ public class EnumDeclaration extends ClassDeclaration {
                                                                               new ArrayInitializer(cells),
                                                                               SourceInfo.NONE));
     Statement valuesBody = new ReturnStatement(alloc);
-    newbody.add(new MethodDeclaration(Modifier.PUBLIC | Modifier.STATIC,
+    newbody.add(new MethodDeclaration(ModifierSet.make(PUBLIC, STATIC),
                                       new ArrayTypeName(enumType, 1, false),
                                       "values",
                                       Collections.<FormalParameter>emptyList(),
@@ -125,7 +126,9 @@ public class EnumDeclaration extends ClassDeclaration {
     //   if ("THIRD".equals(name)) return Foo.THIRD;
     //   throw new IllegalArgumentException();
     // }
-    FormalParameter nameParam = new FormalParameter(false, new ReferenceTypeName("java", "lang", "String"), "name");
+    FormalParameter nameParam = new FormalParameter(ModifierSet.make(),
+                                                    new ReferenceTypeName("java", "lang", "String"),
+                                                    "name");
     List<Node> valueOfBody = new LinkedList<Node>();
     for (EnumConstant c : consts) {
       String cn = c.getName();
@@ -136,7 +139,7 @@ public class EnumDeclaration extends ClassDeclaration {
     }
     valueOfBody.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("IllegalArgumentException"),
                                                             Collections.<Expression>emptyList())));
-    newbody.add(new MethodDeclaration(Modifier.PUBLIC | Modifier.STATIC,
+    newbody.add(new MethodDeclaration(ModifierSet.make(PUBLIC, STATIC),
                                       enumType,
                                       "valueOf",
                                       Collections.singletonList(nameParam),
@@ -149,8 +152,8 @@ public class EnumDeclaration extends ClassDeclaration {
     Iterator<Node> it = body.listIterator();
 
     List<FormalParameter> addToConsDeclaration = new LinkedList<FormalParameter>();
-    addToConsDeclaration.add(new FormalParameter(false, new ReferenceTypeName("String"), "$1"));
-    addToConsDeclaration.add(new FormalParameter(false, new IntTypeName(),               "$2"));
+    addToConsDeclaration.add(new FormalParameter(ModifierSet.make(), new ReferenceTypeName("String"), "$1"));
+    addToConsDeclaration.add(new FormalParameter(ModifierSet.make(), new IntTypeName(),               "$2"));
 
     List<Expression> args = new LinkedList<Expression>();
     args.add(new AmbiguousName("$1"));
@@ -177,7 +180,7 @@ public class EnumDeclaration extends ClassDeclaration {
     }
 
     if (noConstructor) {
-      body.add(new ConstructorDeclaration(Modifier.PRIVATE, name, addToConsDeclaration,
+      body.add(new ConstructorDeclaration(ModifierSet.make(PRIVATE), name, addToConsDeclaration,
                                           new LinkedList<ReferenceTypeName>(),
                                           new ConstructorCall(null, args, true),
                                           new LinkedList<Node>()));
@@ -185,12 +188,14 @@ public class EnumDeclaration extends ClassDeclaration {
     return body;
   }
 
-  public static class EnumConstant {
+  public static class EnumConstant extends Declaration {
     String name;
     List<Expression> args;
     List<Node> classBody;
 
-    public EnumConstant(String _name, List<? extends Expression> _args, List<Node> _classBody) {
+    public EnumConstant(ModifierSet mods, String _name, List<? extends Expression> _args, List<Node> _classBody,
+                        SourceInfo si) {
+      super(mods, si);
       name = _name;
       args = (_args == null) ? null : new ArrayList<Expression>(_args);
       classBody = _classBody;
@@ -199,6 +204,10 @@ public class EnumDeclaration extends ClassDeclaration {
     String           getName() {return name;}
     List<Expression> getArguments() {return args;}
     List<Node>        getClassBody() {return classBody;}
+    
+    public <T> T acceptVisitor(Visitor<T> visitor) {
+      return visitor.visit(this);
+    }
   }
 
   public static class EnumBody {
@@ -222,11 +231,6 @@ public class EnumDeclaration extends ClassDeclaration {
   static List<Node> makeEnumBodyDeclarationsFromEnumConsts(String enumTypeName, EnumBody body) {
     List<EnumConstant> consts = body.getConstants();
     List<Node> decls = body.getDeclarations();
-
-    int accessFlags  = Modifier.PUBLIC;
-        accessFlags |= Modifier.STATIC;
-        accessFlags |= Modifier.FINAL;
-        accessFlags |= 0x4000; // Modifier.ENUM; /**/ or ACC_ENUM
 
     ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
 
@@ -252,7 +256,7 @@ public class EnumDeclaration extends ClassDeclaration {
         allocExpr = new SimpleAllocation(enumType, args);
       }
 
-      decls.add(new FieldDeclaration(accessFlags, enumType, ec.getName(), allocExpr));
+      decls.add(new FieldDeclaration(ModifierSet.make(PUBLIC, STATIC, FINAL, ENUM), enumType, ec.getName(), allocExpr));
     }
     return decls;
   }

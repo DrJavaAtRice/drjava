@@ -37,11 +37,7 @@ import java.util.*;
  * @version 1.0 - 1999/05/10
  */
 
-public abstract class TypeDeclaration extends Node {
-  /**
-   * The accessFlags property name
-   */
-  public final static String ACCESS_FLAGS = "accessFlags";
+public abstract class TypeDeclaration extends Declaration {
 
   /**
    * The name property name
@@ -57,11 +53,6 @@ public abstract class TypeDeclaration extends Node {
    * The members property name
    */
   public final static String MEMBERS = "members";
-
-  /**
-   * The access flags
-   */
-  private int accessFlags;
 
   /**
    * The name of this class
@@ -80,37 +71,20 @@ public abstract class TypeDeclaration extends Node {
 
   /**
    * Creates a new class declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the class to declare
    * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
    * @param body  the list of fields declarations
    * @exception IllegalArgumentException if name is null or body is null
    */
-  protected TypeDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
+  protected TypeDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
                             SourceInfo si) {
-    super(si);
-
+    super(mods, si);
     if (name == null) throw new IllegalArgumentException("name == null");
     if (body == null) throw new IllegalArgumentException("body == null");
-
-    accessFlags = flags;    
     this.name = name;
     interfaces = impl;
     members = body;
-  }
-
-  /**
-   * Returns the access flags for this class
-   */
-  public int getAccessFlags() {
-    return accessFlags;
-  }
-
-  /**
-   * Sets the access flags for this constructor
-   */
-  public void setAccessFlags(int f) {
-    firePropertyChange(ACCESS_FLAGS, accessFlags, accessFlags = f);
   }
 
   /**

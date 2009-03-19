@@ -46,24 +46,29 @@ public class JavaCCParser implements SourceCodeParser {
   /**
    * The parser
    */
-  private Parser parser;
+  private final Parser _parser;
+  private final File _f;
   
   public JavaCCParser(InputStream is, File f) {
-    parser = new Parser(is);
-    parser.setFile(f);
+    _parser = new Parser(is);
+    _parser.setFile(f);
+    _f = f;
   }
   
   public JavaCCParser(InputStream is) {
-    parser = new Parser(is);
+    _parser = new Parser(is);
+    _f = null;
   }
   
   public JavaCCParser(Reader r, File f) {
-    parser = new Parser(r);
-    parser.setFile(f);
+    _parser = new Parser(r);
+    _parser.setFile(f);
+    _f = f;
   }
   
   public JavaCCParser(Reader r) {
-    parser = new Parser(r);
+    _parser = new Parser(r);
+    _f = null;
   }
   
   /**
@@ -73,19 +78,19 @@ public class JavaCCParser implements SourceCodeParser {
    */
   public List<Node> parseStream() {
     try {
-      return parser.parseStream();
+      return _parser.parseStream();
     }
     catch (ParseException e) {
-      throw new ParseError(e);
+      throw new ParseError(e, _f);
     }
     catch (TokenMgrError e) {
-      throw new ParseError(e);
+      throw new ParseError(e, SourceInfo.point(_f, 0, 0));
     }
     catch (Error e) {
       // JavaCharStream does not use a useful exception type for escape character errors
       String msg = e.getMessage();
       if (msg != null && msg.startsWith("Invalid escape character")) {
-        throw new ParseError(e);
+        throw new ParseError(e, SourceInfo.point(_f, 0, 0));
       }
       else { throw e; }
     }
@@ -97,19 +102,19 @@ public class JavaCCParser implements SourceCodeParser {
    */
   public CompilationUnit parseCompilationUnit() {
     try {
-      return parser.parseCompilationUnit();
+      return _parser.parseCompilationUnit();
     }
     catch (ParseException e) {
-      throw new ParseError(e);
+      throw new ParseError(e, _f);
     }
     catch (TokenMgrError e) {
-      throw new ParseError(e);
+      throw new ParseError(e, SourceInfo.point(_f, 0, 0));
     }
     catch (Error e) {
       // JavaCharStream does not use a useful exception type for escape character errors
       String msg = e.getMessage();
       if (msg != null && msg.startsWith("Invalid escape character")) {
-        throw new ParseError(e);
+        throw new ParseError(e, SourceInfo.point(_f, 0, 0));
       }
       else { throw e; }
     }

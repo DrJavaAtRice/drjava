@@ -39,7 +39,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/24
  */
 
-public class ConstructorCall extends PrimaryExpression implements ExpressionContainer {
+public class ConstructorCall extends PrimaryExpression implements ExpressionContainer, StatementExpression {
   /**
    * The arguments property name
    */
@@ -86,7 +86,7 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
     super(si);
     
     expression = exp;
-    arguments  = (args == null) ? null : new ArrayList<Expression>(args);
+    arguments  = (args == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(args);
     superCall  = sup;
   }
   
@@ -116,7 +116,7 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
    */
   public void setArguments(List<? extends Expression> l) {
     firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
+                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
   }
   
   /**

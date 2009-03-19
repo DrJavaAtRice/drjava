@@ -51,7 +51,7 @@ public class GenericClassDeclaration extends ClassDeclaration {
   
   /**
    * Creates a new class declaration
-   * @param flags the access flags
+   * @param mods  the modifiers
    * @param name  the name of the class to declare
    * @param ext   the tokens that compose the name of the parent class.
    * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
@@ -59,14 +59,14 @@ public class GenericClassDeclaration extends ClassDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext,
+  public GenericClassDeclaration(ModifierSet mods, String name, ReferenceTypeName ext,
                                  List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
-    this(flags, name, ext, impl, body, typeParams, SourceInfo.NONE);
+    this(mods, name, ext, impl, body, typeParams, SourceInfo.NONE);
   }
   
   /**
    * Creates a new class declaration
-   * @param flags      the access flags
+   * @param mods       the modifiers
    * @param name       the name of the class to declare
    * @param ext        the tokens that compose the name of the parent class.
    * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
@@ -74,10 +74,10 @@ public class GenericClassDeclaration extends ClassDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext,
+  public GenericClassDeclaration(ModifierSet mods, String name, ReferenceTypeName ext,
                                  List<? extends ReferenceTypeName> impl, List<Node> body,
                                  TypeParameter[] typeParams, SourceInfo si) {
-    super(flags, name, ext, impl, body, si);
+    super(mods, name, ext, impl, body, si);
     _typeParameters = typeParams;
   }
   

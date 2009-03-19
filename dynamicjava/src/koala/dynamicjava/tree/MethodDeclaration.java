@@ -39,12 +39,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/05/11
  */
 
-public class MethodDeclaration extends Node {
-  /**
-   * The accessFlags property name
-   */
-  public final static String ACCESS_FLAGS = "accessFlags";
-
+public class MethodDeclaration extends Declaration {
   /**
    * The type property name
    */
@@ -69,11 +64,6 @@ public class MethodDeclaration extends Node {
    * The body property name
    */
   public final static String BODY = "body";
-
-  /**
-   * The access flags
-   */
-  private int accessFlags;
 
   /**
    * The return type of this method
@@ -102,7 +92,7 @@ public class MethodDeclaration extends Node {
 
   /**
    * Creates a new method declaration
-   * @param flags   the access flags
+   * @param mods    the modifiers
    * @param type    the return type of this method
    * @param name    the name of the method to declare
    * @param params  the parameters list
@@ -111,14 +101,14 @@ public class MethodDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public MethodDeclaration(int flags, TypeName type, String name,
+  public MethodDeclaration(ModifierSet mods, TypeName type, String name,
                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body) {
-    this(flags, type, name, params, excepts, body, SourceInfo.NONE);
+    this(mods, type, name, params, excepts, body, SourceInfo.NONE);
   }
 
   /**
    * Creates a new method declaration
-   * @param flags   the access flags
+   * @param mods    the modifiers
    * @param type    the return type of this method
    * @param name    the name of the method to declare
    * @param params  the parameters list
@@ -127,36 +117,21 @@ public class MethodDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public MethodDeclaration(int flags, TypeName type, String name,
+  public MethodDeclaration(ModifierSet mods, TypeName type, String name,
                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
                            SourceInfo si) {
-    super(si);
+    super(mods, si);
 
     if (type == null)    throw new IllegalArgumentException("type == null");
     if (name == null)    throw new IllegalArgumentException("name == null");
     if (params == null)  throw new IllegalArgumentException("params == null");
     if (excepts == null) throw new IllegalArgumentException("excepts == null");
 
-    accessFlags = flags;
     returnType  = type;
     this.name   = name;
     parameters  = params;
     this.body   = body;
     exceptions = excepts;
-  }
-
-  /**
-   * Returns the access flags for this method
-   */
-  public int getAccessFlags() {
-    return accessFlags;
-  }
-
-  /**
-   * Sets the access flags for this constructor
-   */
-  public void setAccessFlags(int f) {
-    firePropertyChange(ACCESS_FLAGS, accessFlags, accessFlags = f);
   }
 
   /**
@@ -242,16 +217,6 @@ public class MethodDeclaration extends Node {
     firePropertyChange(BODY, body, body = bs);
   }
 
-  // Not strictly needed. just added as a convenience /**/
-  public boolean isVarArgs(){
-    return (accessFlags & 0x00000080) != 0; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
-  }
-  
-  // Not strictly needed. just added as a convenience /**/
-  public boolean isBridge(){
-    return (accessFlags & 0x00000040) != 0; // java.lang.reflect.Modifier.BRIDGE == 0x00000040 /**/
-  }
-  
 
   /**
    * Allows a visitor to traverse the tree
@@ -268,6 +233,6 @@ public class MethodDeclaration extends Node {
   }
 
   public String toStringHelper() {
- return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getReturnType()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getBody();
+ return getModifiers()+" "+getReturnType()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getBody();
   }
 }

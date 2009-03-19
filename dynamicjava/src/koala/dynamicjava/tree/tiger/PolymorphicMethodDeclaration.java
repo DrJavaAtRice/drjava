@@ -50,7 +50,7 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
   private TypeParameter[] _typeParameters;
   /**
    * Creates a new method declaration
-   * @param flags   the access flags
+   * @param mods    the modifiers
    * @param type    the return type of this method
    * @param name    the name of the method to declare
    * @param params  the parameters list
@@ -60,15 +60,15 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
+  public PolymorphicMethodDeclaration(ModifierSet mods, TypeName type, String name,
                                       List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                       BlockStatement body, TypeParameter[] typeParams) {
-    this(flags, type, name, params, excepts, body, typeParams, SourceInfo.NONE);
+    this(mods, type, name, params, excepts, body, typeParams, SourceInfo.NONE);
   }
   
   /**
    * Creates a new method declaration
-   * @param flags   the access flags
+   * @param mods    the modifiers
    * @param type    the return type of this method
    * @param name    the name of the method to declare
    * @param params  the parameters list
@@ -78,10 +78,10 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
+  public PolymorphicMethodDeclaration(ModifierSet mods, TypeName type, String name,
                                       List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                       BlockStatement body, TypeParameter[] typeParams, SourceInfo si) {
-    super(flags, type, name, params, excepts, body, si);
+    super(mods, type, name, params, excepts, body, si);
     _typeParameters = typeParams;
   }
   

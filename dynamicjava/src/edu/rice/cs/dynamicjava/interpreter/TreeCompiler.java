@@ -1,7 +1,7 @@
 package edu.rice.cs.dynamicjava.interpreter;
 
-import java.util.*;
 import java.lang.reflect.Modifier;
+import java.util.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Runnable2;
@@ -22,6 +22,7 @@ import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.interpreter.NodeProperties;
   
 import static org.objectweb.asm.Opcodes.*;
+import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
 
 /**
  * Compiles an AST class declaration by producing a stub class, where each method consists of
@@ -185,14 +186,14 @@ public class TreeCompiler {
       extendsT = NodeProperties.getType(cd.getSuperclass());
       if (cd.getInterfaces() != null) { implementsTs = cd.getInterfaces(); }
       members = cd.getMembers();
-      accessFlags = cd.getAccessFlags();
+      accessFlags = cd.getModifiers().getBitVector();
       isInterface = false;
     }
     else if (ast instanceof InterfaceDeclaration) {
       InterfaceDeclaration id = (InterfaceDeclaration) ast;
       if (id.getInterfaces() != null) { implementsTs = id.getInterfaces(); }
       members = id.getMembers();
-      accessFlags = id.getAccessFlags() | Modifier.INTERFACE;
+      accessFlags = id.getModifiers().getBitVector(INTERFACE);
       isInterface = true;
     }
     else if (ast instanceof AnonymousAllocation) {
@@ -438,7 +439,7 @@ public class TreeCompiler {
     // Promote default access to protected -- a subclass may logically appear in the same
     // package but, due to implementation constraints, be loaded by a different class loader.
     // In that situation, default access isn't permitted at run time.
-    int access = defaultToProtectedAccess(ast.getAccessFlags());
+    int access = defaultToProtectedAccess(ast.getModifiers().getBitVector());
     MethodVisitor mv = _classWriter.visitMethod(access, "<init>", methodDescriptor,
                                                 methodSig, extractClassNames(exceptions));
 
@@ -591,8 +592,8 @@ public class TreeCompiler {
   }
   
   private void compileMethod(MethodDeclaration ast, boolean isInterface) {
-    int access = ast.getAccessFlags();
-    if (isInterface) { access = defaultToPublicAccess(access) | Modifier.ABSTRACT; }
+    int access = isInterface ? ast.getModifiers().getBitVector(ABSTRACT) : ast.getModifiers().getBitVector();
+    if (isInterface) { access = defaultToPublicAccess(access); }
     List<FormalParameter> params = ast.getParameters();
     Type returnT = NodeProperties.getType(ast.getReturnType());
     List<? extends ReferenceTypeName> exceptions = ast.getExceptions();
@@ -660,8 +661,8 @@ public class TreeCompiler {
   }
   
   private void compileField(final FieldDeclaration ast, boolean isInterface) {
-    int access = ast.getAccessFlags();
-    if (isInterface) { access = defaultToPublicAccess(access) | Modifier.STATIC | Modifier.FINAL; }
+    int access = isInterface ? ast.getModifiers().getBitVector(STATIC, FINAL) : ast.getModifiers().getBitVector();
+    if (isInterface) { access = defaultToPublicAccess(access); }
     final boolean isStatic = Modifier.isStatic(access);
     final Type t = NodeProperties.getType(ast.getType());
     Expression init = ast.getInitializer();
@@ -1184,7 +1185,7 @@ public class TreeCompiler {
   private static int defaultToPublicAccess(int accessFlags) {
     if (!Modifier.isPublic(accessFlags) && !Modifier.isProtected(accessFlags) &&
         !Modifier.isPrivate(accessFlags)) {
-      accessFlags |= Modifier.PUBLIC;
+      accessFlags |= PUBLIC.getBits();
     }
     return accessFlags;
   }
@@ -1193,7 +1194,7 @@ public class TreeCompiler {
   private static int defaultToProtectedAccess(int accessFlags) {
     if (!Modifier.isPublic(accessFlags) && !Modifier.isProtected(accessFlags) &&
         !Modifier.isPrivate(accessFlags)) {
-      accessFlags |= Modifier.PROTECTED;
+      accessFlags |= PROTECTED.getBits();
     }
     return accessFlags;
   }

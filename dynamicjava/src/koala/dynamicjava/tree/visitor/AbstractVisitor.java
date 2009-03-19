@@ -891,6 +891,10 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
     return defaultCase(node);
   }
   
+  public T visit(EnumDeclaration.EnumConstant node) {
+    return defaultCase(node);
+  }
+  
   /**
    * Visits a ClassInitializer
    * @param node the node to visit
@@ -904,6 +908,15 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
    * @param node the node to visit
    */
   public T visit(InstanceInitializer node) {
+    return defaultCase(node);
+  }
+
+  
+  public T visit(ModifierSet node) {
+    return defaultCase(node);
+  }
+  
+  public T visit(Annotation node) {
     return defaultCase(node);
   }
   

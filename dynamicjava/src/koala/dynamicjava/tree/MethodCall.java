@@ -75,7 +75,7 @@ public abstract class MethodCall extends PrimaryExpression
     if (mn == null) throw new IllegalArgumentException("mn == null");
     
     methodName = mn;
-    arguments  = (args == null) ? null : new ArrayList<Expression>(args);
+    arguments  = (args == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(args);
   }
   
   /**
@@ -108,6 +108,6 @@ public abstract class MethodCall extends PrimaryExpression
    */
   public void setArguments(List<? extends Expression> l) {
     firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
+                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
   }
 }

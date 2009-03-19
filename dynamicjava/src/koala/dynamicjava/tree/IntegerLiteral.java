@@ -28,8 +28,6 @@
 
 package koala.dynamicjava.tree;
 
-import koala.dynamicjava.parser.wrapper.ParseError;
-
 import java.math.BigInteger;
 
 /**
@@ -44,7 +42,7 @@ public class IntegerLiteral extends Literal {
    * Initializes a literal
    * @param rep the representation of the literal
    */
-  public IntegerLiteral(String rep) {
+  public IntegerLiteral(String rep) throws NumberFormatException {
     this(rep, SourceInfo.NONE);
   }
   
@@ -52,7 +50,7 @@ public class IntegerLiteral extends Literal {
    * Initializes a literal
    * @param rep the representation of the literal
    */
-  public IntegerLiteral(String rep, SourceInfo si) {
+  public IntegerLiteral(String rep, SourceInfo si) throws NumberFormatException {
     super(rep,
           parse(rep),
           int.class,
@@ -62,7 +60,7 @@ public class IntegerLiteral extends Literal {
   /**
    * Parses the representation of an integer
    */
-  private static Integer parse(String s) {
+  private static Integer parse(String s) throws NumberFormatException {
     int radix = 10;
     int start = 0;
     boolean negate = false;
@@ -76,7 +74,7 @@ public class IntegerLiteral extends Literal {
     if (negate) { val = val.negate(); }
     int result = val.intValue();
     if (val.bitLength() > 32 || (radix == 10 && !val.equals(BigInteger.valueOf(result)))) {
-      throw new ParseError(new NumberFormatException("Literal is out of range: "+s));
+      throw new NumberFormatException("Literal is out of range: "+s);
     }
     return result;
   }

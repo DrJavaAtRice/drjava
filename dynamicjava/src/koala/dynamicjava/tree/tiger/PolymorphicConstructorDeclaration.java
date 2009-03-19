@@ -53,10 +53,10 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
    * @exception IllegalArgumentException if name is null or
    *            params is null or excepts is null
    */
-  public PolymorphicConstructorDeclaration(int flags, String name,
+  public PolymorphicConstructorDeclaration(ModifierSet mods, String name,
                                       List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, 
                                       ConstructorCall eci, List<Node> stmts, TypeParameter[] typeParams) {
-    this(flags, name, params, excepts, eci, stmts, typeParams, SourceInfo.NONE);
+    this(mods, name, params, excepts, eci, stmts, typeParams, SourceInfo.NONE);
   }
   
   /**
@@ -64,11 +64,11 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
    * @exception IllegalArgumentException if name is null or
    *            params is null or excepts is null
    */
-  public PolymorphicConstructorDeclaration(int flags, String name,
+  public PolymorphicConstructorDeclaration(ModifierSet mods, String name,
                                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                            ConstructorCall eci, List<Node> stmts, TypeParameter[] typeParams,
                                            SourceInfo si) {
-    super(flags, name, params, excepts, eci, stmts, si);
+    super(mods, name, params, excepts, eci, stmts, si);
     
     _typeParameters = typeParams;
   }

@@ -1,7 +1,5 @@
 package edu.rice.cs.dynamicjava.interpreter;
 
-import java.lang.reflect.Modifier;
-
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -80,7 +78,7 @@ public class ClassMemberChecker {
       
       for (FormalParameter param : node.getParameters()) {
         Type t = sigChecker.check(param.getType());
-        setVariable(param, new LocalVariable(param.getName(), t, param.isFinal()));
+        setVariable(param, new LocalVariable(param.getName(), t, param.getModifiers().isFinal()));
       }
       
       for (TypeName tn : node.getExceptions()) { sigChecker.check(tn); }
@@ -101,12 +99,12 @@ public class ClassMemberChecker {
     
     @Override public Void visit(MethodDeclaration node) {
       super.visit(node);
-      int access = node.getAccessFlags();
-      if (Modifier.isAbstract(access) && node.getBody() != null) {
+      ModifierSet mods = node.getModifiers();
+      if (mods.isAbstract() && node.getBody() != null) {
         setErrorStrings(node, node.getName());
         throw new ExecutionError("abstract.method.body", node);
       }
-      else if (!Modifier.isAbstract(access) && node.getBody() == null) {
+      else if (!mods.isAbstract() && node.getBody() == null) {
         setErrorStrings(node, node.getName());
         throw new ExecutionError("missing.method.body", node);
       }
@@ -133,7 +131,7 @@ public class ClassMemberChecker {
       
       for (FormalParameter param : node.getParameters()) {
         Type t = sigChecker.check(param.getType());
-        setVariable(param, new LocalVariable(param.getName(), t, param.isFinal()));
+        setVariable(param, new LocalVariable(param.getName(), t, param.getModifiers().isFinal()));
       }
       
       for (TypeName tn : node.getExceptions()) { sigChecker.check(tn); }
@@ -153,13 +151,6 @@ public class ClassMemberChecker {
   private class InterfaceMemberSignatureVisitor extends SignatureVisitor {
 
     @Override public Void visit(MethodDeclaration node) {
-      int access = node.getAccessFlags();
-      if (Modifier.isProtected(access) || Modifier.isPrivate(access) || Modifier.isStatic(access) ||
-          Modifier.isStrict(access) || Modifier.isNative(access) || Modifier.isSynchronized(access) ||
-          Modifier.isFinal(access)) {
-        setErrorStrings(node, node.getName());
-        throw new ExecutionError("interface.method.modifier", node);
-      }
       super.visit(node);
       if (node.getBody() != null) {
         setErrorStrings(node, node.getName());
@@ -169,11 +160,6 @@ public class ClassMemberChecker {
     }
     
     @Override public Void visit(FieldDeclaration node) {
-      int access = node.getAccessFlags();
-      if (Modifier.isProtected(access) || Modifier.isPrivate(access)) {
-        setErrorStrings(node, node.getName());
-        throw new ExecutionError("interface.field.modifier", node);
-      }
       super.visit(node);
       if (node.getInitializer() == null) {
         setErrorStrings(node, node.getName());
@@ -217,12 +203,14 @@ public class ClassMemberChecker {
       DJConstructor k = getConstructor(node);
       TypeContext sigContext = new FunctionSignatureContext(_context, k);
       TypeContext bodyContext = new FunctionContext(sigContext, k);
+      ExpressionChecker callChecker = new ExpressionChecker(bodyContext, _opt);
       ConstructorCall call = node.getConstructorCall();
-      if (call == null) { call = new ConstructorCall(null, null, true); }
-      new ExpressionChecker(bodyContext, _opt).check(call);
+      if (call != null) { callChecker.checkConstructorCall(call); }
       for (Node n : node.getStatements()) {
         bodyContext = n.acceptVisitor(new StatementChecker(bodyContext, _opt));
       }
+      // if the call is implicit, check it *after* checking the body (better error messages this way) 
+      if (call == null) { callChecker.checkConstructorCall(new ConstructorCall(null, null, true)); }
       return null;
     }
     

@@ -37,12 +37,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/05/11
  */
 
-public class FieldDeclaration extends Node {
-  /**
-   * The accessFlags property name
-   */
-  public final static String ACCESS_FLAGS = "accessFlags";
-
+public class FieldDeclaration extends Declaration {
   /**
    * The type property name
    */
@@ -57,11 +52,6 @@ public class FieldDeclaration extends Node {
    * The initializer property name
    */
   public final static String INITIALIZER = "initializer";
-
-  /**
-   * The access flags
-   */
-  private int accessFlags;
 
   /**
    * The type of this field
@@ -80,32 +70,30 @@ public class FieldDeclaration extends Node {
 
   /**
    * Creates a new field declaration
-   * @param flags  the access flags
+   * @param mods   the modifiers
    * @param type   the type of this field
    * @param name   the name of this field
    * @param init   the initializer. Can be null
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public FieldDeclaration(int flags, TypeName type, String name, Expression init) {
-    this(flags, type, name, init, SourceInfo.NONE);
+  public FieldDeclaration(ModifierSet mods, TypeName type, String name, Expression init) {
+    this(mods, type, name, init, SourceInfo.NONE);
   }
 
   /**
    * Creates a new field declaration
-   * @param flags  the access flags
+   * @param mods   the modifiers
    * @param type   the type of this field
    * @param name   the name of this field
    * @param init   the initializer. Can be null
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public FieldDeclaration(int flags, TypeName type, String name, Expression init,
+  public FieldDeclaration(ModifierSet mods, TypeName type, String name, Expression init,
                           SourceInfo si) {
-    super(si);
+    super(mods, si);
 
     if (type == null) throw new IllegalArgumentException("type == null");
     if (name == null) throw new IllegalArgumentException("name == null");
-
-    accessFlags = flags;
     this.type   = type;
     this.name   = name;
     initializer = init;
@@ -116,20 +104,6 @@ public class FieldDeclaration extends Node {
           (((ArrayTypeName)type).getElementType());
       }
     }
-  }
-
-  /**
-   * Returns the access flags for this method
-   */
-  public int getAccessFlags() {
-    return accessFlags;
-  }
-
-  /**
-   * Sets the access flags for this constructor
-   */
-  public void setAccessFlags(int f) {
-    firePropertyChange(ACCESS_FLAGS, accessFlags, accessFlags = f);
   }
 
   /**
@@ -191,6 +165,6 @@ public class FieldDeclaration extends Node {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getType()+" "+getName()+" "+getInitializer()+")";
+    return "("+getClass().getName()+": "+getModifiers()+" "+getType()+" "+getName()+" "+getInitializer()+")";
   }
 }

@@ -167,6 +167,77 @@ public class ExpressionChecker {
     return new TypeNameChecker(context, opt).checkList(l);
   }
   
+  /**
+   * Handle a valid constructor call: one that appears as the first line of a constructor.
+   * ConstructorCalls handled via {@link #check(Expression)} will always be treated as errors.
+   */
+  public void checkConstructorCall(ConstructorCall node) {
+    if (node.getExpression() != null) {
+      throw new ExecutionError("not.implemented", node);
+    }
+    
+    Iterable<? extends Expression> args = node.getArguments();
+    checkList(args);
+    
+    // TODO: implement explicit type arguments in constructor calls
+    Iterable<Type> targs = IterUtil.empty();
+    
+    Type type;
+    if (node.isSuper()) { type = context.getSuperType(ts); }
+    else { type = SymbolUtil.thisType(context.getThis()); }
+    if (type == null) {
+      throw new IllegalArgumentException("Can't check a ConstructorCall in this context");
+    }
+    
+    try {
+      ConstructorInvocation inv = ts.lookupConstructor(type, targs, args, Option.<Type>none());
+      
+      // TODO: Check accessibility of constructor
+      // Note that super constructor calls *have to* be accessible, even if accessibility
+      // checking is turned off -- a call to a private constructor cannot be compiled
+      // in a way that it will run successfully (since constructor calls are the only code
+      // that is directly compiled rather than being interpreted, we don't have this problem
+      // elsewhere)
+      checkThrownExceptions(inv.thrown(), node);
+      node.setArguments(CollectUtil.makeList(inv.args()));
+      setConstructor(node, inv.constructor());
+      setType(node, type);
+    }
+    catch (InvalidTypeArgumentException e) {
+      throw new ExecutionError("type.argument", node);
+    }
+    catch (TypeSystemException e) {
+      setErrorStrings(node, ts.userRepresentation(type), nodeTypesString(args));
+      throw new ExecutionError("no.such.constructor", node);
+    }
+  }
+  
+  /** Verify that the thrown exceptions are expected in this context. */
+  private void checkThrownExceptions(Iterable<? extends Type> thrownTypes, Node node) {
+    Iterable<Type> allowed = IterUtil.compose(TypeSystem.RUNTIME_EXCEPTION,
+                                              context.getDeclaredThrownTypes());
+    for (Type thrown : thrownTypes) {
+      if (ts.isAssignable(TypeSystem.EXCEPTION, thrown)) {
+        boolean valid = false;
+        for (Type t : allowed) {
+          if (ts.isAssignable(t, thrown)) { valid = true; break; }
+        }
+        if (!valid) {
+          setErrorStrings(node, ts.userRepresentation(thrown));
+          throw new ExecutionError("uncaught.exception", node);
+        }
+      }
+    }
+  }
+  
+  private String nodeTypesString(Iterable<? extends Node> nodes) {
+    Lambda<Node, String> typeString = new Lambda<Node, String>() {
+      public String value(Node n) { return ts.userRepresentation(getType(n)); }
+    };
+    return IterUtil.toString(IterUtil.map(nodes, typeString), "", ", ", "");
+  }
+  
+  
   
   private class ExpressionVisitor extends AbstractVisitor<Type> implements Lambda<Expression, Type> {
   
@@ -176,13 +247,6 @@ public class ExpressionChecker {
     public ExpressionVisitor(Option<Type> exp) { expected = exp; }
     
     public Type value(Expression e) { return e.acceptVisitor(this); }
-    
-    private String nodeTypesString(Iterable<? extends Node> nodes) {
-      Lambda<Node, String> typeString = new Lambda<Node, String>() {
-        public String value(Node n) { return ts.userRepresentation(getType(n)); }
-      };
-      return IterUtil.toString(IterUtil.map(nodes, typeString), "", ", ", "");
-    }
     
     
     @Override public Type visit(AmbiguousName node) {
@@ -387,20 +451,6 @@ public class ExpressionChecker {
      */
     @Override public Type visit(ObjectFieldAccess node) {
       Expression receiver = node.getExpression();
-      if (receiver instanceof AmbiguousName) {
-        Node resolved = resolveAmbiguousName((AmbiguousName) receiver);
-        if (resolved instanceof ReferenceTypeName) {
-          // this is actually a StaticFieldAccess
-          Expression translation =
-            new StaticFieldAccess((ReferenceTypeName) resolved, node.getFieldName(), node.getSourceInfo());
-          translation.acceptVisitor(this);
-          setTranslation(node, translation);
-          setVariableType(node, getVariableType(translation));
-          return setType(node, getType(translation));
-        }
-        else { receiver = (Expression) resolved; }
-      }
-      
       Type receiverT = check(receiver);
       try {
         ObjectFieldReference ref = ts.lookupField(receiver, node.getFieldName());
@@ -471,8 +521,8 @@ public class ExpressionChecker {
      * @return  The type of the expression
      */
     @Override public Type visit(SimpleMethodCall node) {
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+      Iterable<? extends Expression> args = node.getArguments();
+      checkList(args);
       
       Iterable<Type> targs = IterUtil.empty();
       
@@ -554,8 +604,8 @@ public class ExpressionChecker {
       
       Type receiverT = check(receiver);
       
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+      Iterable<? extends Expression> args = node.getArguments();
+      checkList(args);
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicObjectMethodCall) {
@@ -594,8 +644,8 @@ public class ExpressionChecker {
         throw new ExecutionError("super.undefined", node);
       }
       
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+      Iterable<? extends Expression> args = node.getArguments();
+      checkList(args);
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicSuperMethodCall) {
@@ -632,8 +682,8 @@ public class ExpressionChecker {
     @Override public Type visit(StaticMethodCall node) {
       Type t = checkTypeName(node.getMethodType());
       
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+      Iterable<? extends Expression> args = node.getArguments();
+      checkList(args);
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicStaticMethodCall) {
@@ -747,8 +797,8 @@ public class ExpressionChecker {
         throw new ExecutionError("allocation.type", node);
       }
       
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+      Iterable<? extends Expression> args = node.getArguments();
+      checkList(args);
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicSimpleAllocation) {
@@ -783,8 +833,8 @@ public class ExpressionChecker {
         throw new ExecutionError("allocation.type", node);
       }
       
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+      Iterable<? extends Expression> args = node.getArguments();
+      checkList(args);
       
       Iterable<Type> targs = IterUtil.empty();
       if (node instanceof PolymorphicAnonymousAllocation) {
@@ -838,8 +888,8 @@ public class ExpressionChecker {
           throw new ExecutionError("allocation.type", node);
         }
         
-        Iterable<? extends Expression> args = IterUtil.empty();
-        if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+        Iterable<? extends Expression> args = node.getArguments();
+        checkList(args);
         
         Iterable<Type> targs = IterUtil.empty();
         if (node instanceof PolymorphicInnerAllocation) {
@@ -891,8 +941,8 @@ public class ExpressionChecker {
         }
         setSuperType(node, t);
         
-        Iterable<? extends Expression> args = IterUtil.empty();
-        if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
+        Iterable<? extends Expression> args = node.getArguments();
+        checkList(args);
         
         Iterable<Type> targs = IterUtil.empty();
         if (node instanceof PolymorphicAnonymousInnerAllocation) {
@@ -932,71 +982,11 @@ public class ExpressionChecker {
       return setType(node, ts.makeClassType(c));
     }
     
-    /**
-     * Visits a ConstructorCall.
-     * @return  The type of this or super.
-     */
     @Override public Type visit(ConstructorCall node) {
-      if (node.getExpression() != null) {
-        throw new ExecutionError("not.implemented", node);
-      }
-      
-      Iterable<? extends Expression> args = IterUtil.empty();
-      if (node.getArguments() != null) { args = node.getArguments(); checkList(args); }
-      
-      // TODO: implement explict type arguments in constructor calls
-      Iterable<Type> targs = IterUtil.empty();
-      
-      Type result;
-      if (node.isSuper()) { result = context.getSuperType(ts); }
-      else { result = SymbolUtil.thisType(context.getThis()); }
-      if (result == null) {
-        throw new IllegalArgumentException("Can't check a ConstructorCall in this context");
-      }
-      
-      try {
-        ConstructorInvocation inv = ts.lookupConstructor(result, targs, args, expected);
-        
-        // TODO: Check accessibility of constructor
-        // Note that super constructor calls *have to* be accessible, even if accessibility
-        // checking is turned off -- a call to a private constructor cannot be compiled
-        // in a way that it will run successfully (since constructor calls are the only code
-        // that is directly compiled rather than being interpreted, we don't have this problem
-        // elsewhere)
-        checkThrownExceptions(inv.thrown(), node);
-        node.setArguments(CollectUtil.makeList(inv.args()));
-        setConstructor(node, inv.constructor());
-        return setType(node, result);
-      }
-      catch (InvalidTypeArgumentException e) {
-        throw new ExecutionError("type.argument", node);
-      }
-      catch (TypeSystemException e) {
-        setErrorStrings(node, ts.userRepresentation(result), nodeTypesString(args));
-        throw new ExecutionError("no.such.constructor", node);
-      }
+      throw new ExecutionError("constructor.call", node);
     }
     
-    /** Verify that the thrown exceptions are expected in this context. */
-    private void checkThrownExceptions(Iterable<? extends Type> thrownTypes, Node node) {
-      Iterable<Type> allowed = IterUtil.compose(TypeSystem.RUNTIME_EXCEPTION,
-                                                context.getDeclaredThrownTypes());
-      for (Type thrown : thrownTypes) {
-        if (ts.isAssignable(TypeSystem.EXCEPTION, thrown)) {
-          boolean valid = false;
-          for (Type t : allowed) {
-            if (ts.isAssignable(t, thrown)) { valid = true; break; }
-          }
-          if (!valid) {
-            setErrorStrings(node, ts.userRepresentation(thrown));
-            throw new ExecutionError("uncaught.exception", node);
-          }
-        }
-      }
-    }
-    
-    
-    
+
     /**
      * Visits an ArrayAccess.  JLS 15.13.
      * @return  The type of the expression

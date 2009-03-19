@@ -39,15 +39,12 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/05/13
  */
 
-public class PackageDeclaration extends Node {
+public class PackageDeclaration extends Declaration {
   /**
    * The name property name
    */
   public final static String NAME = "name";
   
-  /**
-   * The name of the package
-   */
   private String name;
   
   /**
@@ -55,8 +52,8 @@ public class PackageDeclaration extends Node {
    * @param ident a list of tokens that represents a package name.
    *              The list can be null.
    */
-  public PackageDeclaration(List<IdentifierToken> ident) {
-    this(ident, SourceInfo.NONE);
+  public PackageDeclaration(ModifierSet mods, List<IdentifierToken> ident) {
+    this(mods, ident, SourceInfo.NONE);
   }
   
   /**
@@ -64,8 +61,8 @@ public class PackageDeclaration extends Node {
    * @param ident a list of tokens that represents a package name.
    *              The list can be null.
    */
-  public PackageDeclaration(List<IdentifierToken> ident, SourceInfo si) {
-    super(si);
+  public PackageDeclaration(ModifierSet mods, List<IdentifierToken> ident, SourceInfo si) {
+    super(mods, si);
     name = TreeUtilities.listToName(ident);
   }
   
@@ -73,8 +70,8 @@ public class PackageDeclaration extends Node {
    * Creates a new package declaration node
    * @param nm    a string that represents a package name.
    */
-  public PackageDeclaration(String nm, SourceInfo si) {
-    super(si);
+  public PackageDeclaration(ModifierSet mods, String nm, SourceInfo si) {
+    super(mods, si);
     name = nm;
   }
   

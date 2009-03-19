@@ -2,7 +2,6 @@ package edu.rice.cs.dynamicjava.symbol;
 
 import java.util.List;
 import java.util.LinkedList;
-import java.lang.reflect.Modifier;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Box;
@@ -44,7 +43,7 @@ public class TreeClass implements DJClass {
   private final String _fullName;
   private final DJClass _declaring; // may be null
   private final Node _ast;
-  private final int _accessFlags;
+  private final ModifierSet _mods;
   private final Thunk<Class<?>> _loaded;
   private final List<TreeConstructor> _constructors;
   private final List<TreeField> _fields;
@@ -68,8 +67,8 @@ public class TreeClass implements DJClass {
     _fullName = fullName;
     _declaring = declaring;
     _ast = ast;
-    if (_ast instanceof TypeDeclaration) { _accessFlags = ((TypeDeclaration) _ast).getAccessFlags(); }
-    else { _accessFlags = 0; }
+    if (_ast instanceof TypeDeclaration) { _mods = ((TypeDeclaration) _ast).getModifiers(); }
+    else { _mods = ModifierSet.make(); }
     _loaded = LazyThunk.make(new Thunk<Class<?>>() {
       public Class<?> value() {
         try { return loader.loadClass(_fullName); }
@@ -157,10 +156,10 @@ public class TreeClass implements DJClass {
   
   public boolean isInterface() { return _ast instanceof InterfaceDeclaration; }
   
-  public boolean isStatic() { return Modifier.isStatic(_accessFlags); }
-  public boolean isAbstract() { return Modifier.isAbstract(_accessFlags); }
-  public boolean isFinal() { return Modifier.isFinal(_accessFlags); }
-  public Access accessibility() { return extractAccessibility(_accessFlags); }
+  public boolean isStatic() { return _mods.isStatic(); }
+  public boolean isAbstract() { return _mods.isAbstract(); }
+  public boolean isFinal() { return _mods.isFinal(); }
+  public Access accessibility() { return extractAccessibility(_mods); }
   public boolean hasRuntimeBindingsParams() { return true; }
   
   /** The class that declares this class, or {@code null} if this is declared at a top-level or local scope */
@@ -271,10 +270,10 @@ public class TreeClass implements DJClass {
     }
     public String declaredName() { return _f.getName(); }
     public Type type() { return NodeProperties.getType(_f.getType()); }
-    public boolean isFinal() { return Modifier.isFinal(_f.getAccessFlags()) || isInterface(); }
-    public boolean isStatic() { return Modifier.isStatic(_f.getAccessFlags()) || isInterface(); }
+    public boolean isFinal() { return _f.getModifiers().isFinal() || isInterface(); }
+    public boolean isStatic() { return _f.getModifiers().isStatic() || isInterface(); }
     public Access accessibility() {
-      return isInterface() ? Access.PUBLIC : extractAccessibility(_f.getAccessFlags());
+      return isInterface() ? Access.PUBLIC : extractAccessibility(_f.getModifiers());
     }
     public Box<Object> boxForReceiver(Object receiver) {
       return _loaded.value().boxForReceiver(receiver);
@@ -328,7 +327,7 @@ public class TreeClass implements DJClass {
     public ExplicitTreeConstructor(ConstructorDeclaration k) {
       _k = k;
     }
-    public Access accessibility() { return extractAccessibility(_k.getAccessFlags()); }
+    public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
     public Iterable<VariableType> declaredTypeParameters() {
       if (_k instanceof PolymorphicConstructorDeclaration) {
         TypeParameter[] ps = ((PolymorphicConstructorDeclaration)_k).getTypeParameters();
@@ -373,11 +372,11 @@ public class TreeClass implements DJClass {
     }
     
     public String declaredName() { return _m.getName(); }
-    public boolean isStatic() { return Modifier.isStatic(_m.getAccessFlags()); }
-    public boolean isAbstract() { return Modifier.isAbstract(_m.getAccessFlags()) || isInterface(); }
-    public boolean isFinal() { return Modifier.isFinal(_m.getAccessFlags()); }
+    public boolean isStatic() { return _m.getModifiers().isStatic(); }
+    public boolean isAbstract() { return _m.getModifiers().isAbstract() || isInterface(); }
+    public boolean isFinal() { return _m.getModifiers().isFinal(); }
     public Access accessibility() {
-      return isInterface() ? Access.PUBLIC : extractAccessibility(_m.getAccessFlags());
+      return isInterface() ? Access.PUBLIC : extractAccessibility(_m.getModifiers());
     }
     
     public Type returnType() { return NodeProperties.getType(_m.getReturnType()); }
@@ -407,10 +406,10 @@ public class TreeClass implements DJClass {
     
   
   /** Convert a reflection modifier int to an appropriate Access object */
-  private static Access extractAccessibility(int mods) {
-    if (Modifier.isPublic(mods)) { return Access.PUBLIC; }
-    else if (Modifier.isProtected(mods)) { return Access.PROTECTED; }
-    else if (Modifier.isPrivate(mods)) { return Access.PRIVATE; }
+  private static Access extractAccessibility(ModifierSet mods) {
+    if (mods.isPublic()) { return Access.PUBLIC; }
+    else if (mods.isProtected()) { return Access.PROTECTED; }
+    else if (mods.isPrivate()) { return Access.PRIVATE; }
     else { return Access.PACKAGE; }
   }
   

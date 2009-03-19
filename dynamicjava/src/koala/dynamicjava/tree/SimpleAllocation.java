@@ -84,7 +84,7 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
 
     if (tp == null) throw new IllegalArgumentException("tp == null");
     creationType = tp;
-    arguments = (args == null) ? null : new ArrayList<Expression>(args);
+    arguments = (args == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(args);
   }
   
   /**
@@ -116,7 +116,7 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
    */
   public void setArguments(List<? extends Expression> l) {
     firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
+                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
   }
   
   /**

@@ -105,8 +105,8 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
     
     expression = exp;
     className = cn;
-    classTypeArguments = (ctargs == null) ? null : new ArrayList<TypeName>(ctargs);
-    arguments  = (args == null) ? null : new ArrayList<Expression>(args);
+    classTypeArguments = (ctargs == null) ? new ArrayList<TypeName>(0) : new ArrayList<TypeName>(ctargs);
+    arguments  = (args == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(args);
   }
   
   /**
@@ -153,7 +153,8 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    * Sets the inner class type arguments.
    */
   public void setClassTypeArguments(List<TypeName> l) {
-    firePropertyChange(CLASS_TYPE_ARGUMENTS, classTypeArguments, classTypeArguments = l);
+    firePropertyChange(CLASS_TYPE_ARGUMENTS, classTypeArguments,
+                       (l == null) ? new ArrayList<TypeName>(0) : new ArrayList<TypeName>(l));
   }
   
   /**
@@ -169,7 +170,7 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    */
   public void setArguments(List<? extends Expression> l) {
     firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
+                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
   }
   
   /**
