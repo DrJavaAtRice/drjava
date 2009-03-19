@@ -83,6 +83,13 @@ public class ModifierSet extends Node {
     return new ModifierSet(EnumSet.of(mod, mods), new LinkedList<Annotation>());
   }
   
+  public static ModifierSet make(Annotation ann, Annotation... anns) {
+    LinkedList<Annotation> l = new LinkedList<Annotation>();
+    l.add(ann);
+    for (Annotation a : anns) { l.add(a); }
+    return new ModifierSet(EnumSet.noneOf(Modifier.class), l);
+  }
+  
   public enum Modifier {
     PUBLIC {
       public int getBits() { return 0x0001; }

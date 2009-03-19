@@ -14,6 +14,7 @@ import java.util.*;
 import java.io.File;
 
 import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.collect.ConsList;
 import edu.rice.cs.plt.collect.CollectUtil;
 
@@ -1319,12 +1320,6 @@ PARSER_END(Parser)
     { return new ModifierSet(flags, annots, _range(first, token)); }
   }
   
-  Annotation annotation() :
-  {}
-  {
-    "@" { return _throwParseException("Annotation parsing is not yet implemented"); }
-  }
-
   PackageDeclaration packageDeclaration(DeclType level) :
   { ModifierSet mods; PackageDeclaration decl; }
   {
@@ -2110,19 +2105,13 @@ PARSER_END(Parser)
   }
   {
     b="{" [ init=variableInitializer()
-             {
-      list.add(init);
-    }
+             { list.add(init); }
            ( LOOKAHEAD(2)
               "," init=variableInitializer()
-              {
-             list.add(init);
-           }
+              { list.add(init); }
            )* ]
              [ t="," ] e="}"
-           {
-             return new ArrayInitializer(list, _range(b, e));
-           }
+           { return new ArrayInitializer(list, _range(b, e)); }
   }
   
   /**
@@ -3576,6 +3565,53 @@ PARSER_END(Parser)
   }
   
     
+  // Productions for Annotations /////////////////////////////////////////////////////
+  
+  Annotation annotation() :
+  {
+    Token first;
+    ReferenceTypeName type;
+    Token id;
+    Expression exp;
+    List<Pair<String, Expression>> vals = new LinkedList<Pair<String, Expression>>();
+  }
+  {
+    first="@" type=referenceTypeName()
+    [
+      "("
+      (
+        LOOKAHEAD(2) id=<IDENTIFIER> "=" exp=annotationValue() { vals.add(Pair.make(id.image, exp)); }
+          ( "," id=<IDENTIFIER> "=" exp=annotationValue() { vals.add(Pair.make(id.image, exp)); } )*
+      |
+        exp=annotationValue() { vals.add(Pair.make("value", exp)); }
+      )
+      ")"
+    ]
+    { return new Annotation(type, vals, _range(first, token)); }
+  }
+  
+  Expression annotationValue() :
+  { Expression exp; }
+  {
+    exp=conditionalExpression() { return exp; }
+  | exp=annotation() { return exp; }
+  | exp=annotationArrayValue() { return exp; }
+  }
+  
+  ArrayInitializer annotationArrayValue() :
+  { Token first; Expression val; List<Expression> vals = new LinkedList<Expression>(); }
+  {
+    first="{"
+    [
+      val=annotationValue() { vals.add(val); }
+      ( LOOKAHEAD(2) "," val=annotationValue() { vals.add(val); } )*
+    ]
+    [ "," ]
+    "}"
+    { return new ArrayInitializer(vals, _range(first, token)); }
+  }
+
+
   // Lookahead productions ////////////////////////////////////////////////////////
   
   /** Distinguish a cast expression from a parenthesized expression. */

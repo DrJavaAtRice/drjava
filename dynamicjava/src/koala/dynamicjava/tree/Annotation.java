@@ -5,7 +5,7 @@ import java.util.List;
 import edu.rice.cs.plt.tuple.Pair;
 import koala.dynamicjava.tree.visitor.Visitor;
 
-public class Annotation extends Node {
+public class Annotation extends Expression {
   
   private final ReferenceTypeName type;
   private final List<Pair<String, Expression>> values;

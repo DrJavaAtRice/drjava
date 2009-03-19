@@ -45,6 +45,10 @@ import java.io.File;
 import java.io.StringReader;
 import java.util.*;
 
+import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.tuple.Pair;
+
 import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
 
 /**
@@ -161,6 +165,67 @@ public class ParserTest extends TestCase {
     verifyOutput("int i=0, j, k=2;", expectedAST);
   }
   
+  private Annotation makeAnnotation(String name, String[] argNames, Expression... argVals) {
+    if (argNames.length != argVals.length) { throw new IllegalArgumentException("Mistmatched name/value pairs"); }
+    ReferenceTypeName type = new ReferenceTypeName(name);
+    List<Pair<String, Expression>> vals =
+      CollectUtil.makeList(IterUtil.zip(IterUtil.make(argNames), IterUtil.make(argVals)));
+    return new Annotation(type, vals);
+  }
+  
+  public void testMarkerAnnotation() throws ParseException {
+    Annotation a = makeAnnotation("Marker", new String[0]);
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(a), new IntTypeName(), "x", null));
+    verifyOutput("@Marker int x;", expectedAST);
+  }
+
+  public void testSingleValueAnnotation() throws ParseException {
+    Annotation a = makeAnnotation("Single", new String[]{"value"}, new IntegerLiteral("23"));
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(a), new IntTypeName(), "x", null));
+    verifyOutput("@Single(23) int x;", expectedAST);
+  }
+
+  public void testArrayValueAnnotation() throws ParseException {
+    List<Expression> cells = Arrays.<Expression>asList(new IntegerLiteral("1"),
+                                                       new IntegerLiteral("2"),
+                                                       new IntegerLiteral("3"));
+    Annotation a = makeAnnotation("Single", new String[]{"value"}, new ArrayInitializer(cells));
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(a), new IntTypeName(), "x", null));
+    verifyOutput("@Single({1, 2, 3}) int x;", expectedAST);
+  }
+
+  public void testArrayValueWithCommaAnnotation() throws ParseException {
+    List<Expression> cells = Arrays.<Expression>asList(new IntegerLiteral("1"),
+                                                       new IntegerLiteral("2"),
+                                                       new IntegerLiteral("3"));
+    Annotation a = makeAnnotation("Single", new String[]{"value"}, new ArrayInitializer(cells));
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(a), new IntTypeName(), "x", null));
+    verifyOutput("@Single({1, 2, 3, }) int x;", expectedAST);
+  }
+
+  public void testEmptyArrayValueAnnotation() throws ParseException {
+    List<Expression> cells = Collections.emptyList();
+    Annotation a = makeAnnotation("Single", new String[]{"value"}, new ArrayInitializer(cells));
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(a), new IntTypeName(), "x", null));
+    verifyOutput("@Single({}) int x;", expectedAST);
+  }
+
+  public void testAnnotationValueAnnotation() throws ParseException {
+    Annotation a = makeAnnotation("Single", new String[]{"value"}, new IntegerLiteral("23"));
+    Annotation b = makeAnnotation("Wrapper", new String[]{"value"}, a);
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(b), new IntTypeName(), "x", null));
+    verifyOutput("@Wrapper(@Single(23)) int x;", expectedAST);
+  }
+
+  public void testNormalAnnotation() throws ParseException {
+    Annotation a = makeAnnotation("Normal", new String[]{"a", "b", "c"},
+                                  new StringLiteral("\"foo\""),
+                                  new StringLiteral("\"bar\""),
+                                  new IntegerLiteral("15"));
+    expectedAST.add(new VariableDeclaration(ModifierSet.make(a), new IntTypeName(), "x", null));
+    verifyOutput("@Normal(a=\"foo\", b=\"bar\", c=15) int x;", expectedAST);
+  }
+
   public void testLabeledStatement() throws ParseException {
     
     expectedAST.add(new LabeledStatement("v", new ExpressionStatement(new SimpleAllocation(new ReferenceTypeName("Object"), null), true)));

@@ -58,12 +58,13 @@ public class CharacterLiteral extends Literal {
   
   /**
    * Decodes the representation of a Java literal character.
-   * The input is not checked since this method always called
-   * on a string produced by the parser.
    * @param rep the representation of the character
    * @return the character represented by the given string
    */
   private static char decodeCharacter(String rep) {
+    if (rep.charAt(0) != '\'' || rep.charAt(rep.length()-1) != '\'') {
+      throw new IllegalArgumentException("Malformed character literal");
+    }
     if (rep.length() == 3) {
       return rep.charAt(1);
     }

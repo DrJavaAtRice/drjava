@@ -58,12 +58,13 @@ public class StringLiteral extends Literal {
   
   /**
    * Decodes the representation of a Java literal string.
-   * The input is not checked since this method always called
-   * on a string produced by the parser.
    * @param rep the representation of the character
    * @return the character represented by the given string
    */
   public static String decodeString(String rep) {
+    if (rep.charAt(0) != '"' || rep.charAt(rep.length()-1) != '"') {
+      throw new IllegalArgumentException("Malformed String literal");
+    }
     char[] buf = new char[rep.length()-2];
     int    len = 0;
     int    i   = 1;

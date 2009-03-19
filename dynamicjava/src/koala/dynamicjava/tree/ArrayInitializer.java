@@ -101,12 +101,9 @@ public class ArrayInitializer extends Expression {
   }
   
   /**
-   * Returns the element type
-   * @exception IllegalStateException if elementType is null
+   * Returns the element type, or {@code null} if it's not set
    */
   public TypeName getElementType() {
-    if (elementType == null) throw new IllegalStateException("elementType == null");
-    
     return elementType;
   }
   
