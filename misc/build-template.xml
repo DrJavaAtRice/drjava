@@ -724,7 +724,7 @@
         <!-- Additional test output files should be listed here -->
       </fileset>
       <!-- *** This should be removed if there are no generated sources *** -->
-      <fileset dir="${basedir}">
+      <fileset dir="${basedir}" defaultexcludes="no">
         <patternset refid="generated-sources" />
       </fileset>
       <fileset dir="${basedir}" defaultexcludes="no">
