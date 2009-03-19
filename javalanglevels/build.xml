@@ -577,7 +577,7 @@
         <include name="forIntermediateLevelTest/**/*.java" />
         <!-- Additional test output files should be listed here -->
       </fileset>
-      <fileset dir="${basedir}">
+      <fileset dir="${basedir}" defaultexcludes="no">
         <patternset refid="generated-sources" />
       </fileset>
       <fileset dir="${basedir}" defaultexcludes="no">
