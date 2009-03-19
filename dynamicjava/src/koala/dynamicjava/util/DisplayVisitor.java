@@ -441,7 +441,7 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     print("l."+node.getSourceInfo().getStartLine()+" ThisExpression {");
     print("className:");
     indent();
-    print(node.getClassName());
+    print(node.getClassName().toString());
     unindent();
     displayProperties(node);
     print("}");

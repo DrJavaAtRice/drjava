@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -42,24 +44,40 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class SuperMethodCall extends MethodCall {
   /**
-   * Creates a new node
-   * @param mn    the method name
-   * @param args  the arguments. null if no arguments.
-   * @exception IllegalArgumentException if mn is null
+   * The className property name
    */
-  public SuperMethodCall(String mn, List<? extends Expression> args) {
-    this(mn, args, SourceInfo.NONE);
+  public final static String CLASS_NAME = "className";
+  
+  /**
+   * The class that qualify that object
+   */
+  private Option<String> className;
+  
+  public SuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args, SourceInfo si) {
+    super(mn, args, si);
+    if (cn == null) throw new IllegalArgumentException("cn == null");
+    className = cn;
+  }
+  
+  public SuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args) {
+    this(cn, mn, args, SourceInfo.NONE);
   }
   
   /**
-   * Creates a new node
-   * @param mn    the method name
-   * @param args  the arguments. null if no arguments.
-   * @exception IllegalArgumentException if mn is null
+   * Returns the name of the class that qualify that object
    */
-  public SuperMethodCall(String mn, List<? extends Expression> args,
-                         SourceInfo si) {
-    super(mn, args, si);
+  public Option<String> getClassName() {
+    return className;
+  }
+  
+  /**
+   * Sets the name of the class that qualifies that object
+   * @exception IllegalArgumentException if s is null or body is null
+   */
+  public void setClassName(Option<String> cn) {
+    if (cn == null) throw new IllegalArgumentException("cn == null");
+    
+    firePropertyChange(CLASS_NAME, className, className = cn);
   }
   
   /**
@@ -79,6 +97,6 @@ public class SuperMethodCall extends MethodCall {
    * Implementation of toString for use in unit testing
    */
   public String toStringHelper() {
-    return getMethodName()+" "+getArguments();
+    return getClassName()+" "+getMethodName()+" "+getArguments();
   }
 }

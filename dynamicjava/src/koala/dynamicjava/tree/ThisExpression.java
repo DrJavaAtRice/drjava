@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -49,41 +51,31 @@ public class ThisExpression extends PrimaryExpression {
   /**
    * The class that qualify that object
    */
-  private String className;
+  private Option<String> className;
   
-  /**
-   * Initializes the expression
-   * @param ids   the identifiers (tokens) that qualify this 'this'.
-   *              Can be null.
-   * @exception IllegalArgumentException if ids is null or body is null
-   */
-  public ThisExpression(List<IdentifierToken> ids, SourceInfo si) {
+  public ThisExpression(Option<String> cn, SourceInfo si) {
     super(si);
-    
-    if (ids == null) throw new IllegalArgumentException("ids == null");
-    
-    className = TreeUtilities.listToName(ids);
+    if (cn == null) throw new IllegalArgumentException("cn == null");
+    className = cn;
   }
   
-  public ThisExpression() {
-    this(new LinkedList<IdentifierToken>(), SourceInfo.NONE);
-  }
+  public ThisExpression(Option<String> cn) { this(cn, SourceInfo.NONE); }
   
   /**
    * Returns the name of the class that qualify that object
    */
-  public String getClassName() {
+  public Option<String> getClassName() {
     return className;
   }
   
   /**
-   * Sets the name of the class that qualify that object
+   * Sets the name of the class that qualifies that object
    * @exception IllegalArgumentException if s is null or body is null
    */
-  public void setClassName(String s) {
-    if (s == null) throw new IllegalArgumentException("s == null");
+  public void setClassName(Option<String> cn) {
+    if (cn == null) throw new IllegalArgumentException("cn == null");
     
-    firePropertyChange(CLASS_NAME, className, className = s);
+    firePropertyChange(CLASS_NAME, className, className = cn);
   }
   
   /**

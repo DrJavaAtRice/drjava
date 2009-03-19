@@ -12,7 +12,12 @@ public class CompositeException extends InterpreterException {
   private final SizedIterable<InterpreterException> _exceptions;
   
   public CompositeException(Iterable<? extends InterpreterException> exceptions) {
+    super(extractCause(exceptions));
     _exceptions = IterUtil.snapshot(exceptions);
+  }
+  
+  private static InterpreterException extractCause(Iterable<? extends InterpreterException> exceptions) {
+    return IterUtil.isEmpty(exceptions) ? null : IterUtil.first(exceptions);
   }
 
   public void printUserMessage(PrintWriter out) {

@@ -183,7 +183,7 @@ public class ExpressionChecker {
     Iterable<Type> targs = IterUtil.empty();
     
     Type type;
-    if (node.isSuper()) { type = context.getSuperType(ts); }
+    if (node.isSuper()) { type = context.getThis().immediateSuperclass(); }
     else { type = SymbolUtil.thisType(context.getThis()); }
     if (type == null) {
       throw new IllegalArgumentException("Can't check a ConstructorCall in this context");
@@ -373,24 +373,28 @@ public class ExpressionChecker {
       else { return setType(node, SymbolUtil.typeOfPrimitiveClass(node.getType())); }
     }
     
+    private DJClass resolveThis(Option<String> outerName, Node node) {
+      DJClass result;
+      if (outerName.isNone()) {
+        result = context.getThis();
+        if (result == null) { throw new ExecutionError("this.undefined", node); }
+      }
+      else {
+        result = context.getThis(outerName.unwrap());
+        if (result == null) {
+          setErrorStrings(node, outerName.unwrap());
+          throw new ExecutionError("undefined.class", node);
+        }
+      }
+      return result;
+    }
+    
     /**
      * Visits a ThisExpression
      * @return  The type of this, according to the context.
      */
     @Override public Type visit(ThisExpression node) {
-      String name = node.getClassName();
-      DJClass thisC;
-      if (name.equals("")) {
-        thisC = context.getThis();
-        if (thisC == null) { throw new ExecutionError("this.undefined", node); }
-      }
-      else {
-        thisC = context.getThis(name);
-        if (thisC == null) {
-          setErrorStrings(node, name);
-          throw new ExecutionError("undefined.class", node);
-        }
-      }
+      DJClass thisC = resolveThis(node.getClassName(), node);
       setDJClass(node, thisC);
       return setType(node, SymbolUtil.thisType(thisC));
     }
@@ -473,7 +477,8 @@ public class ExpressionChecker {
      * @return  The type of the expression
      */
     @Override public Type visit(SuperFieldAccess node) {
-      Type t = context.getSuperType(ts);
+      DJClass c = resolveThis(node.getClassName(), node);
+      Type t = c.immediateSuperclass();
       if (t == null) {
         throw new ExecutionError("super.undefined", node);
       }
@@ -483,7 +488,7 @@ public class ExpressionChecker {
         FieldReference ref = ts.lookupField(obj, node.getFieldName());
         // TODO: Check accessibility of field
         setField(node, ref.field());
-        setDJClass(node, context.getThis());
+        setDJClass(node, c);
         setVariableType(node, ref.type());
         Type result = ts.capture(ref.type());
         addRuntimeCheck(node, result, ref.field().type());
@@ -639,7 +644,8 @@ public class ExpressionChecker {
      * @return The type of the expression
      */
     @Override public Type visit(SuperMethodCall node) {
-      Type t = context.getSuperType(ts);
+      DJClass c = resolveThis(node.getClassName(), node);
+      Type t = c.immediateSuperclass();
       if (t == null) {
         throw new ExecutionError("super.undefined", node);
       }
@@ -660,7 +666,7 @@ public class ExpressionChecker {
         checkThrownExceptions(inv.thrown(), node);
         node.setArguments(CollectUtil.makeList(inv.args()));
         setMethod(node, inv.method());
-        setDJClass(node, context.getThis());
+        setDJClass(node, c);
         Type result = ts.capture(inv.returnType());
         debug.logValue("Type of method call " + node.getMethodName(), ts.wrap(result));
         addRuntimeCheck(node, result, inv.method().returnType());

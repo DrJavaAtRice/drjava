@@ -142,10 +142,4 @@ public class ClassContext extends DelegatingContext {
    */
   @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
   
-  /**
-   * Return the type referenced by {@code super} in the current context, or {@code null}
-   * if there is no such type (for example, in a static context).
-   */
-  @Override public Type getSuperType(TypeSystem ts) { return _c.immediateSuperclass(); }
-  
 }

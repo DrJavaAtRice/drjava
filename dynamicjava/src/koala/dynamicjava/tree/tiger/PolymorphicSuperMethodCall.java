@@ -32,6 +32,8 @@ import koala.dynamicjava.tree.*;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 public class PolymorphicSuperMethodCall extends SuperMethodCall {
@@ -42,25 +44,28 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
 
   /**
    * Creates a new node
+   * @param cn    the outer class name (if any)
    * @param mn    the method name
    * @param args  the arguments. null if no arguments.
    * @param targs the type arguments
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<? extends Expression> args, List<TypeName> targs) {
-    this(mn, args, targs, SourceInfo.NONE);
+  public PolymorphicSuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args,
+                                    List<TypeName> targs) {
+    this(cn, mn, args, targs, SourceInfo.NONE);
   }
   
   /**
    * Creates a new node
+   * @param cn    the outer class name (if any)
    * @param mn    the method name
    * @param args  the arguments. null if no arguments.
    * @param targs the type arguments
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<? extends Expression> args, List<TypeName> targs,
+  public PolymorphicSuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args, List<TypeName> targs,
                                     SourceInfo si) {
-    super(mn, args, si);
+    super(cn, mn, args, si);
     _typeArgs = targs;
   }
   

@@ -25,7 +25,6 @@ public class BaseContext implements TypeContext {
   public LocalVariable getLocalVariable(String name, TypeSystem ts) { return null; }
   public String getPackage() { return ""; }
   public Type getReturnType() { return null; }
-  public Type getSuperType(TypeSystem ts) { return null; }
   public DJClass getThis() { return null; }
   public DJClass getThis(String className) { return null; }
   public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException { return null; }

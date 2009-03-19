@@ -47,6 +47,7 @@ import java.util.*;
 
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 
 import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
@@ -586,9 +587,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testDotThis() throws ParseException {
-    List<IdentifierToken> ident = new LinkedList<IdentifierToken>();
-    ident.add(new Identifier("List"));
-    Expression expected = new ThisExpression(ident, SourceInfo.NONE);
+    Expression expected = new ThisExpression(Option.some("List"), SourceInfo.NONE);
     verifyExprOutput("List.this", expected);
   }
   
@@ -608,7 +607,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testSuperMemberAccess()  throws ParseException {
-    Expression expected = new SuperFieldAccess("d");
+    Expression expected = new SuperFieldAccess(Option.<String>none(), "d");
     verifyExprOutput("super.d", expected);
   }
   

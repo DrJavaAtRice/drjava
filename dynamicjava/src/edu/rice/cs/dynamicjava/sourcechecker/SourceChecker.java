@@ -110,7 +110,10 @@ public class SourceChecker {
       new SourceChecker(opt).check(sources, cp);
       System.out.println("Completed checking successfully.");
     }
-    catch (InterpreterException e) { e.printUserMessage(new PrintWriter(System.out, true)); }
+    catch (InterpreterException e) {
+      debug.log(e);
+      e.printUserMessage(new PrintWriter(System.out, true));
+    }
   }
   
 }

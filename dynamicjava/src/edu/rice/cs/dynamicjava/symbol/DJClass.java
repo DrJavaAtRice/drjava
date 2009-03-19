@@ -2,6 +2,7 @@ package edu.rice.cs.dynamicjava.symbol;
 
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.VariableType;
+import edu.rice.cs.plt.tuple.Option;
 
 /** Represents a class declaration. */
 public interface DJClass {
@@ -39,7 +40,7 @@ public interface DJClass {
   
   /** List the declared supertypes of this class */
   public Iterable<Type> declaredSupertypes();
-  
+
   public Iterable<DJField> declaredFields();
   
   public Iterable<DJConstructor> declaredConstructors();

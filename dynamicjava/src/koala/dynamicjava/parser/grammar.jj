@@ -276,7 +276,8 @@ public class Parser {
     
     @Override public Primary dotThis(Option<List<TypeName>> targs, Token t) throws ParseException {
       if (targs.isNone()) {
-        return new ExpressionPrimary(new ThisExpression(ids(), _range(this, t)));
+        Option<String> cn = Option.some(TreeUtilities.listToName(ids()));
+        return new ExpressionPrimary(new ThisExpression(cn, _range(this, t)));
       }
       else { return _throwParseException("Unexpected type arguments"); }
     }
@@ -480,7 +481,7 @@ public class Parser {
   class ThisExpressionPrimary extends CompletedPrimary {
     public ThisExpressionPrimary(Token t) { super(_range(t, t)); }
     public Expression asExpression() {
-      return new ThisExpression(new LinkedList<IdentifierToken>(), getSourceInfo());
+      return new ThisExpression(Option.<String>none(), getSourceInfo());
     }
     @Override public Primary withArgs(List<Expression> args, Token last) {
       return new ConstructorCallPrimary(new ConstructorCall(null, args, false, _range(this, last)));
@@ -511,8 +512,9 @@ public class Parser {
       _ids = ids;
     }
     @Override public Primary dotId(Option<List<TypeName>> targs, Token id) {
-      if (targs.isNone()) { return new SuperFieldAccessPrimary(_ids, id, _range(this, id)); }
-      else { return new PartialSuperMethodCallPrimary(_ids, targs, id, _range(this, id)); }
+      Option<String> cn = (_ids == null) ? Option.<String>none() : Option.some(TreeUtilities.listToName(_ids));
+      if (targs.isNone()) { return new SuperFieldAccessPrimary(cn, id, _range(this, id)); }
+      else { return new PartialSuperMethodCallPrimary(cn, targs, id, _range(this, id)); }
     }
     @Override public Primary withArgs(List<Expression> args, Token last) {
       Expression outer = null;
@@ -548,20 +550,18 @@ public class Parser {
    * method arguments.
    */
   class SuperFieldAccessPrimary extends CompletedPrimary {
-    private final List<IdentifierToken> _className; // may be null
+    private final Option<String> _className;
     private final String _name;
-    public SuperFieldAccessPrimary(List<IdentifierToken> className, Token id, SourceInfo si) {
+    public SuperFieldAccessPrimary(Option<String> className, Token id, SourceInfo si) {
       super(si);
       _className = className;
       _name = id.image;
     }
     public Expression asExpression() throws ParseException {
-      if (_className != null) { return _throwParseException("Qualified super field accesses are not yet supported"); }
-      return new SuperFieldAccess(_name, getSourceInfo());
+      return new SuperFieldAccess(_className, _name, getSourceInfo());
     }
     @Override public Primary withArgs(List<Expression> args, Token last) throws ParseException {
-      if (_className != null) { return _throwParseException("Qualified super method calls are not yet supported"); }
-      return new ExpressionPrimary(new SuperMethodCall(_name, args, _range(this, last))); 
+      return new ExpressionPrimary(new SuperMethodCall(_className, _name, args, _range(this, last))); 
     }
   }
   
@@ -570,10 +570,10 @@ public class Parser {
    * a method name.
    */
   class PartialSuperMethodCallPrimary extends Primary {
-    private final List<IdentifierToken> _className; // may be null
+    private final Option<String> _className;
     private final Option<List<TypeName>> _targs;
     private final String _name;
-    PartialSuperMethodCallPrimary(List<IdentifierToken> className, Option<List<TypeName>> targs, Token id,
+    PartialSuperMethodCallPrimary(Option<String> className, Option<List<TypeName>> targs, Token id,
                                   SourceInfo si) {
       super(si);
       _className = className;
@@ -581,10 +581,13 @@ public class Parser {
       _name = id.image;
     }
     @Override public Primary withArgs(List<Expression> args, Token last) throws ParseException {
-      if (_className != null) { _throwParseException("Qualified super method calls are not yet supported"); }
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) { return new ExpressionPrimary(new SuperMethodCall(_name, args, si)); }
-      else { return new ExpressionPrimary(new PolymorphicSuperMethodCall(_name, args, _targs.unwrap(), si)); }  
+      if (_targs.isNone()) {
+        return new ExpressionPrimary(new SuperMethodCall(_className, _name, args, si));
+      }
+      else {
+        return new ExpressionPrimary(new PolymorphicSuperMethodCall(_className, _name, args, _targs.unwrap(), si));
+      }  
     }
   }
   
@@ -1721,7 +1724,7 @@ PARSER_END(Parser)
         ( "[" "]" { dim++; } )*
           [ "throws" exceptions=ReferenceTypeNameList() ]
           (
-            LOOKAHEAD({ !level.equals(DeclType.INTERFACE_MEMBER) }) body=block()
+            body=block()
           | ";"
           )
         {
@@ -1748,11 +1751,11 @@ PARSER_END(Parser)
           }
           
           if (typeParameters == null) {
-            return new MethodDeclaration(mods, typ, id.image, params, exceptions, body, _range(mods, body));
+            return new MethodDeclaration(mods, typ, id.image, params, exceptions, body, _range(mods, token));
           }
           else {
             return new PolymorphicMethodDeclaration(mods, typ, id.image, params, exceptions, body, typeParameters,
-                                                    _range(mods, body));
+                                                    _range(mods, token));
           }
         }
     }
@@ -1985,6 +1988,7 @@ PARSER_END(Parser)
         node = unmodifiedTypeDeclaration(mods, DeclType.INTERFACE_MEMBER)
       | LOOKAHEAD(methodLookahead()) node=unmodifiedMethodDeclaration(mods, DeclType.INTERFACE_MEMBER)
       | LOOKAHEAD(variableLookahead()) list=unmodifiedVariableDeclaration(mods, DeclType.INTERFACE_MEMBER)
+      | ";"
       )
       {
         if (node != null) { list.add(node); }
@@ -2051,8 +2055,7 @@ PARSER_END(Parser)
   }
   {
     [ consts = enumConstants() ]
-    ";"
-    ( ns = classBodyDeclaration() { decls.addAll(ns); } )*
+    [";" ( ns = classBodyDeclaration() { decls.addAll(ns); } )* ]
     {
       return new EnumDeclaration.EnumBody((consts==null) ? new LinkedList<EnumDeclaration.EnumConstant>() : consts,
                                           decls);

@@ -209,14 +209,6 @@ public abstract class DelegatingContext implements TypeContext {
   }
   
   /**
-   * Return the type referenced by {@code super} in the current context, or {@code null}
-   * if there is no such type (for example, in a static context).
-   */
-  public Type getSuperType(TypeSystem ts) {
-    return _next.getSuperType(ts);
-  }
-  
-  /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.
    */
