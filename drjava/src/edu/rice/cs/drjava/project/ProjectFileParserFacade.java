@@ -80,7 +80,7 @@ public class ProjectFileParserFacade {
     return fixup(ProjectFileParser.ONLY.parse(projFile));
   }
   
-  private static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ParserFacadeFixup.txt", true);
+  private static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ParserFacadeFixup.txt", false);
   
   /**
    * Here we check versions, and see if we need to apply a fixup to account for specify main-class as a classname instead of as a file.   
