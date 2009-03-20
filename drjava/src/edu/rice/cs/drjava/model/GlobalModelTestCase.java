@@ -134,6 +134,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _log.log("Tearing down " + this);
 //    System.err.println("Tearing down " + this);
     _model.dispose();
+    // We have disposed of the model, remove all interaction listeners to ensure
+    // we do not get any late notifications from the interpreter JVM.
+    // This fixes the "MainJVM is disposed" errors.
+    _model.getInteractionsModel().removeAllInteractionListeners();
 
     /*boolean ret =*/ IOUtil.deleteOnExitRecursively(_tempDir);
     //assertTrue("delete temp directory " + _tempDir, ret);
