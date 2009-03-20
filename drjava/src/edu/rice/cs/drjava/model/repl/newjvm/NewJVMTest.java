@@ -40,7 +40,6 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -48,7 +47,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import java.io.File;
 import java.rmi.RemoteException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -82,17 +80,17 @@ public final class NewJVMTest extends DrJavaTestCase {
     _log.log("NewJVMTest.testPrintln executing");
     
     _jvm.resetFlags();
-    _jvm.interpret("System.err.print(\"err\");");
+    assertTrue(_jvm.interpret("System.err.print(\"err\");"));
     assertEquals("system err buffer", "err", _jvm.errBuf());
     assertEquals("void return flag", true, _jvm.voidReturnFlag());
 
     _jvm.resetFlags();
-    _jvm.interpret("System.err.print(\"err2\");");
+    assertTrue(_jvm.interpret("System.err.print(\"err2\");"));
     assertEquals("system err buffer", "err2", _jvm.errBuf());
     assertEquals("void return flag", true, _jvm.voidReturnFlag());
 
     _jvm.resetFlags();
-    _jvm.interpret("System.out.print(\"out\");");
+    assertTrue(_jvm.interpret("System.out.print(\"out\");"));
     assertEquals("system out buffer", "out", _jvm.outBuf());
     assertEquals("void return flag", true, _jvm.voidReturnFlag());
     
@@ -104,7 +102,7 @@ public final class NewJVMTest extends DrJavaTestCase {
    _log.log("NewJVMTest.testReturnConstant executing");
 
    _jvm.resetFlags();
-   _jvm.interpret("5");
+   assertTrue(_jvm.interpret("5"));
    assertEquals("result", "5", _jvm.returnBuf());
 
    debug.logEnd();
@@ -116,7 +114,7 @@ public final class NewJVMTest extends DrJavaTestCase {
 
     // Check that a constant is returned
     _jvm.resetFlags();
-    _jvm.interpret("5");
+    assertTrue(_jvm.interpret("5"));
     assertEquals("result", "5", _jvm.returnBuf());
     
     // Now restart interpreter
@@ -124,7 +122,7 @@ public final class NewJVMTest extends DrJavaTestCase {
 
     // Now evaluate another constant
     _jvm.resetFlags();
-    _jvm.interpret("4");
+    assertTrue(_jvm.interpret("4"));
     assertEquals("result", "4", _jvm.returnBuf());
     
     debug.logEnd();
@@ -136,7 +134,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     _log.log("NewJVMTest.testThrowRuntimeException executing");
     
     _jvm.resetFlags();
-    _jvm.interpret("throw new RuntimeException();");
+    assertTrue(_jvm.interpret("throw new RuntimeException();"));
     assertTrue("exception message", _jvm.exceptionMsgBuf().startsWith("java.lang.RuntimeException"));
 
     debug.logEnd();
@@ -147,8 +145,8 @@ public final class NewJVMTest extends DrJavaTestCase {
     _log.log("NewJVMTest.testToStringThrowsRuntimeException executing");
     
     _jvm.resetFlags();
-    _jvm.interpret("class A { public String toString() { throw new RuntimeException(); } };" +
-                   "new A()");
+    assertTrue(_jvm.interpret("class A { public String toString() { throw new RuntimeException(); } };" +
+                              "new A()"));
     assertTrue("exception should have been thrown by toString",
                _jvm.exceptionMsgBuf() != null);
     
@@ -176,27 +174,27 @@ public final class NewJVMTest extends DrJavaTestCase {
   public void testSwitchActiveInterpreter() throws InterruptedException {
     debug.logStart();
     
-    _jvm.interpret("int x = 6;");
+    assertTrue(_jvm.interpret("int x = 6;"));
     _jvm.addInterpreter("monkey");
 
     // x should be defined in active interpreter
     _jvm.resetFlags();
-    _jvm.interpret("x");
+    assertTrue(_jvm.interpret("x"));
     assertEquals("result", "6", _jvm.returnBuf());
 
     // switch interpreter
     _jvm.setActiveInterpreter("monkey");
     _jvm.resetFlags();
-    _jvm.interpret("x");
+    assertTrue(_jvm.interpret("x"));
     assertNotNull("exception was thrown", _jvm.exceptionMsgBuf());
 
     // define x to 3 and switch back
-    _jvm.interpret("int x = 3;");
+    assertTrue(_jvm.interpret("int x = 3;"));
     _jvm.setToDefaultInterpreter();
 
     // x should have its old value
     _jvm.resetFlags();
-    _jvm.interpret("x");
+    assertTrue(_jvm.interpret("x"));
     assertEquals("result", "6", _jvm.returnBuf());
 
     // test syntax error handling
