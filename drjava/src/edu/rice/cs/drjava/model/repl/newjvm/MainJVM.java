@@ -744,15 +744,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private class RestartingState extends State {
 
     public InterpreterJVMRemoteI interpreter(boolean used) {
-      try { State s = _state.ensureNotState(this, STARTUP_TIMEOUT);
-        // When the JVM isn't in the restarting state anymore, start the JVM.
-        // This gets it out of the fresh state and into the starting state.
-        // Otherwise the interpreter may finish restarting but stay in the
-        // fresh state, and asking the fresh state for the interpreter returns null
-        s.start();
-        s = _state.value();
-        InterpreterJVMRemoteI i = s.interpreter(used);
-      return i; }
+      try { return _state.ensureNotState(this, STARTUP_TIMEOUT).interpreter(used); }
       catch (TimeoutException e) { return null; }
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
@@ -771,7 +763,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     
     @Override public void stopped(int status) {
-      if (_state.compareAndSet(this, new FreshState())) { _state.value().start(); }
+      if (_state.compareAndSet(this, new StartingState())) { _doStartup(); }
       else { _state.value().stopped(status); }
     }
   }
