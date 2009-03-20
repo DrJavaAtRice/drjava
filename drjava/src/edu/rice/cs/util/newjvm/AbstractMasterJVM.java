@@ -167,6 +167,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
           public void run(Process p) {
             debug.log("Remote JVM quit");
             _monitor.set(State.FRESH);
+            debug.log("Entered state " + State.FRESH);
             debug.logStart("handleSlaveQuit");
             handleSlaveQuit(p.exitValue());
             debug.logEnd("handleSlaveQuit");
@@ -178,6 +179,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       debug.log(e);
       debug.logEnd("invoking remote JVM process (failed)");
       _monitor.set(State.FRESH);
+      debug.log("Entered state " + State.FRESH);
       handleSlaveWontStart(e);
     }
 
@@ -187,6 +189,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
         debug.log(e);
         attemptQuit(newSlave);
         _monitor.set(State.FRESH);
+        debug.log("Entered state " + State.FRESH);
         handleSlaveWontStart(e);
         return;
       }
@@ -194,6 +197,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       handleSlaveConnected(newSlave);
       _slave = newSlave;
       _monitor.set(State.RUNNING);
+      debug.log("Entered state " + State.RUNNING);
     }
   }
   
@@ -206,6 +210,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     attemptQuit(_slave);
     _slave = null;
     _monitor.set(State.FRESH);
+    debug.log("Entered state " + State.FRESH);
   }
     
   /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails. */
