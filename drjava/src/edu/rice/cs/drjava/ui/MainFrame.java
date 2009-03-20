@@ -2424,7 +2424,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-    
+  private JMenuItem _automaticTraceMenuItem;
+  
+  public void setAutomaticTraceMenuItemStatus() {
+      if (_automaticTraceMenuItem!=null)
+          _automaticTraceMenuItem.setSelected(_model.getDebugger().isAutomaticTraceEnabled());
+  }
+  
   /** Action that automatically traces through entire program*/
   private final Action _automaticTraceDebugAction = new AbstractAction("Automatic Trace") {
     public void actionPerformed(ActionEvent ae) { 
@@ -6470,10 +6476,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
     _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
-    _addMenuItem(debugMenu, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE);
     _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
     _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
     _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
+    _automaticTraceMenuItem = _newCheckBoxMenuItem(_automaticTraceDebugAction);
+    _setMenuShortcut(_automaticTraceMenuItem, _detachTabbedPanesAction, KEY_DETACH_DEBUGGER);
+    debugMenu.add(_automaticTraceMenuItem);
     
     debugMenu.addSeparator();
     _detachDebugFrameMenuItem = _newCheckBoxMenuItem(_detachDebugFrameAction);
