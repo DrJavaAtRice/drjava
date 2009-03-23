@@ -39,8 +39,14 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JButton;
+import javax.swing.AbstractAction;
+import java.awt.event.ActionEvent;
+import javax.swing.JOptionPane;
 import java.util.*;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -54,6 +60,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
+import edu.rice.cs.util.swing.ScrollableListDialog;
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
   * (as opposed to testing DrJava).  TO DO: convert edu.rice.cs.util.Pair to edu.rice.cs.plt.tuple.Pair; requires 
@@ -355,7 +362,6 @@ public class DefaultCompilerModel implements CompilerModel {
       String fileName = canonicalFile.getPath();
       int lastIndex = fileName.lastIndexOf(".dj");
       if (lastIndex != -1) {
-        
         containsLanguageLevels = true;
         File javaFile = new File(fileName.substring(0, lastIndex) + ".java");
         
@@ -399,63 +405,71 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     if (containsLanguageLevels) {
-      Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
+      /* Check if we should delete class files in directories with language level files. */
       final File buildDir = _model.getBuildDirectory();
       final File sourceDir = _model.getProjectRoot();
-//      System.out.println("Build dir  : "+buildDir);
-//      System.out.println("Source root: "+sourceDir);
-      // Delete the .class files that match the following pattern:
-      // XXX.dj? --> XXX.class
-      //             XXX$*.class
-      // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
-      // We create a map from parent directory to class names in that directory.
-      // Then we scan the files in each directory and delete files that match the class names listed for it.
-      // dirToClassNameMap: key=parent directory, value=set of classes in this directory
-      Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
-      for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
-        try {
-          File dir = e.getKey().getParentFile();
-          if (buildDir != null && buildDir != FileOps.NULL_FILE &&
-              sourceDir != null && sourceDir != FileOps.NULL_FILE) {
-            // build directory set
-            String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
-            dir = new File(buildDir,rel);
+      if (!DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
+            .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(0))) {
+        // not "never"
+        final HashSet<File> dirsWithLLFiles = new HashSet<File>();
+        for(File f: newFiles) {
+          try {
+            File dir = f.getParentFile();
+            if (buildDir != null && buildDir != FileOps.NULL_FILE &&
+                sourceDir != null && sourceDir != FileOps.NULL_FILE) {
+              // build directory set
+              String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
+              dir = new File(buildDir,rel);
+            }            
+            dirsWithLLFiles.add(dir);
           }
-          Set<String> classNames = dirToClassNameMap.get(dir);
-          if (classNames == null) classNames = new HashSet<String>();
-          classNames.addAll(e.getValue());
-          dirToClassNameMap.put(dir,classNames);
-//          System.out.println(e.getKey()+" --> "+dir);
-//          for(String name: e.getValue()) {
-//            System.out.println("\t"+name);
-//          }
+          catch(IOException ioe) { /* just don't add this directory */ }
         }
-        catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
-      }
-      // Now that we have a map from parent directories to the class names that should be deleted
-      // in them, we scan the files in each directory, then check if the names match the class names.      
-      for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
-//        System.out.println("Processing dir: "+e.getKey());
-//        System.out.println("\t"+java.util.Arrays.toString(e.getValue().toArray(new String[0])));
-        e.getKey().listFiles(new java.io.FilenameFilter() {
-          public boolean accept(File dir, String name) {
-//            System.out.println("\t"+name);
-            int endPos = name.lastIndexOf(".class");
-            if (endPos < 0) return false; // can't be a class file
-            int dollarPos = name.indexOf('$');
-            if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
-            // class name goes to the .class or the first $, whichever comes first
-            Set<String> classNames = e.getValue();
-            if (classNames.contains(name.substring(0,endPos))) { 
-              // this is a class file that is generated from a .dj? file
+        
+        if (DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
+            .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(1))) {
+          // "ask me"
+          final JButton deleteButton = new JButton(new AbstractAction("Delete Class Files") {
+            public void actionPerformed(ActionEvent e) {
+              // no op
+            }
+          });
+          final JButton keepButton = new JButton(new AbstractAction("Keep Class Files") {
+            public void actionPerformed(ActionEvent e) {
+              // clear the set, i.e. do not delete anything
+              dirsWithLLFiles.clear();
+            }
+          });
+          ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
+            .setTitle("Delete Class Files")
+            .setText("We suggest that you delete all class files in the directories with language\n"+
+                     "level files. Do you want to delete the class files in the following directories?")
+            .setItems(new ArrayList<File>(dirsWithLLFiles))
+            .setMessageType(JOptionPane.QUESTION_MESSAGE)
+            .setFitToScreen(true)
+            .clearButtons()
+            .addButton(deleteButton)
+            .addButton(keepButton)
+            .build();
+          
+          dialog.showDialog();
+        }
+        
+        // Delete all class files in the directories listed. If the user was asked and said "keep",
+        // then the set will be empty
+        for(File f: dirsWithLLFiles) {
+          f.listFiles(new java.io.FilenameFilter() {
+            public boolean accept(File dir, String name) {
+              int endPos = name.lastIndexOf(".class");
+              if (endPos < 0) return false; // can't be a class file
               new File(dir, name).delete();
               // don't need to return true, we're deleting the file here already
-//              System.out.println("\t\tDeleted");
+              return false;
             }
-            return false;
-          }
-        });
+          });
+        }
       }
+      
       /* Perform language levels conversion, creating corresponding .java files. */
       LanguageLevelConverter llc = new LanguageLevelConverter();
       Options llOpts;
@@ -467,16 +481,16 @@ public class DefaultCompilerModel implements CompilerModel {
        * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
        * containing the substring "Test") last.  
        */
+      Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
         llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
       /* Add any errors encountered in conversion to the compilation error log. */
       errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
       errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
       
-//      // Confirm that the .java files corresponding to .dj* files exist.
-//      for (File f: newFiles)
-//        if (! f.exists()) Utilities.show(f + " does not exist");
-
+      // Since we (optionally) delete all class files in LL directories, we don't need the code
+      // to smart-delete class files anymore.
+      // smartDeleteClassFiles(sourceToTopLevelClassMap);
     }
     
     if (containsLanguageLevels) { return new LinkedList<File>(javaFileSet); }
@@ -555,6 +569,65 @@ public class DefaultCompilerModel implements CompilerModel {
       _active = compiler;
     }
     _compilers.add(compiler);
+  }
+  
+  /** Delete the .class files that match the following pattern:
+    * XXX.dj? --> XXX.class
+    *             XXX$*.class
+    * @param sourceToTopLevelClassMap a map from directories to classes in them
+    */
+  public void smartDeleteClassFiles(Map<File,Set<String>> sourceToTopLevelClassMap) {
+    final File buildDir = _model.getBuildDirectory();
+    final File sourceDir = _model.getProjectRoot();
+    // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
+    // We create a map from parent directory to class names in that directory.
+    // Then we scan the files in each directory and delete files that match the class names listed for it.
+    // dirToClassNameMap: key=parent directory, value=set of classes in this directory
+    Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
+    for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
+      try {
+        File dir = e.getKey().getParentFile();
+        if (buildDir != null && buildDir != FileOps.NULL_FILE &&
+            sourceDir != null && sourceDir != FileOps.NULL_FILE) {
+          // build directory set
+          String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
+          dir = new File(buildDir,rel);
+        }
+        Set<String> classNames = dirToClassNameMap.get(dir);
+        if (classNames == null) classNames = new HashSet<String>();
+        classNames.addAll(e.getValue());
+        dirToClassNameMap.put(dir,classNames);
+//          System.out.println(e.getKey()+" --> "+dir);
+//          for(String name: e.getValue()) {
+//            System.out.println("\t"+name);
+//          }
+      }
+      catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
+    }
+    // Now that we have a map from parent directories to the class names that should be deleted
+    // in them, we scan the files in each directory, then check if the names match the class names.      
+    for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
+//        System.out.println("Processing dir: "+e.getKey());
+//        System.out.println("\t"+java.util.Arrays.toString(e.getValue().toArray(new String[0])));
+      e.getKey().listFiles(new java.io.FilenameFilter() {
+        public boolean accept(File dir, String name) {
+//            System.out.println("\t"+name);
+          int endPos = name.lastIndexOf(".class");
+          if (endPos < 0) return false; // can't be a class file
+          int dollarPos = name.indexOf('$');
+          if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
+          // class name goes to the .class or the first $, whichever comes first
+          Set<String> classNames = e.getValue();
+          if (classNames.contains(name.substring(0,endPos))) { 
+            // this is a class file that is generated from a .dj? file
+            new File(dir, name).delete();
+            // don't need to return true, we're deleting the file here already
+//              System.out.println("\t\tDeleted");
+          }
+          return false;
+        }
+      });
+    }
   }
   
 }

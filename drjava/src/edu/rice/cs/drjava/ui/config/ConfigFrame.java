@@ -1057,6 +1057,11 @@ public class ConfigFrame extends SwingFrame {
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + 
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", this, true));
 
+    addOptionComponent(panel, 
+                       new ForcedChoiceOptionComponent(OptionConstants.DELETE_LL_CLASS_FILES,
+                                                       "Delete language level class files?", this,
+                                                       "Whether DrJava should delete class files in directories with language level files."));
+
     panel.displayComponents();
   }
 

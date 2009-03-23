@@ -95,6 +95,7 @@ public class ScrollableListDialog<T> extends JDialog {
     protected Icon _icon = null;
     protected boolean _fitToScreen = true;
     protected List<JButton> _buttons = new ArrayList<JButton>();
+    protected List<JComponent> _additional = new ArrayList<JComponent>();
     protected boolean _selectable = false;
     public Builder() { addOkButton(); }
     public Builder<T> setOwner(Frame owner) { _owner = owner; return this; }
@@ -110,10 +111,11 @@ public class ScrollableListDialog<T> extends JDialog {
     public Builder<T> clearButtons() { _buttons.clear(); return this; }
     public Builder<T> addOkButton() { _buttons.add(new JButton("OK")); return this; }
     public Builder<T> addButton(JButton b) { _buttons.add(b); return this; }
+    public Builder<T> addAdditionalComponent(JComponent c) { _additional.add(c); return this; }
     public Builder<T> setSelectable(boolean b) { _selectable = b; return this; }
     public ScrollableListDialog<T> build() {
       return new ScrollableListDialog<T>(_owner, _dialogTitle, _leaderText, _listItems, _selectedItems, _messageType, 
-                                         _width, _height, _icon, _fitToScreen, _buttons, _selectable);
+                                         _width, _height, _icon, _fitToScreen, _buttons, _additional, _selectable);
     }
   }  
   
@@ -141,13 +143,15 @@ public class ScrollableListDialog<T> extends JDialog {
     *        dimensions, {@link #WIDTH_RATIO}, and {@link #HEIGHT_RATIO}. If {@code false}, the provided width and
     *        height will be used.
     * @param buttons The list of buttons to display
+    * @param additional The list of additional components to display
+    * @param selectable true if items can be selected
     * 
     * @throws IllegalArgumentException if {@code listItems} is {@code null.}
     * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
     */
   private ScrollableListDialog(Frame owner, String dialogTitle, String leaderText, List<T> listItems, List<T> selItems,
                                int messageType, int width, int height, Icon icon, boolean fitToScreen, 
-                               List<JButton> buttons, boolean selectable) {
+                               List<JButton> buttons, List<JComponent> additional, boolean selectable) {
     super(owner, dialogTitle, true);
     this.listItems = listItems;
     
@@ -217,6 +221,7 @@ public class ScrollableListDialog<T> extends JDialog {
     buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
     //allow children to add additional buttons, if overridden
     _addButtons(buttonPanel, buttons);
+    _addAdditionalComponents(buttonPanel, additional);
     
     /* create the dialog */
     final JPanel contentPanel = new JPanel();
@@ -322,6 +327,18 @@ public class ScrollableListDialog<T> extends JDialog {
     }
     
     getRootPane().setDefaultButton(buttons.get(0));
+  }
+  
+  /**
+   * Adds additional components to the bottom of the dialog.
+   * @param buttonPanel The JPanel that should contain the components.
+   * @param additional The list of components
+   */
+  protected void _addAdditionalComponents(JPanel buttonPanel, List<JComponent> additional) {
+    int i = 0;
+    for (JComponent c: additional) {
+      buttonPanel.add(c);
+    }
   }
   
   /**

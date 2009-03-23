@@ -1403,4 +1403,21 @@ public interface OptionConstants {
 
   /** The request URL that the user generated the last time the DrJava survey was taken. */
   public static final StringOption LAST_DRJAVA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
+  
+  /** . */
+  public static final ArrayList<String> DELETE_LL_CLASS_FILES_CHOICES =
+    DeleteLLClassFileChoices.evaluate();
+  static class DeleteLLClassFileChoices {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(3);
+      aList.add("never");
+      aList.add("ask me");
+      aList.add("always");
+      return aList;
+    }
+  }
+  
+  /** Whether to delete language level class files. */
+  public static final ForcedChoiceOption DELETE_LL_CLASS_FILES =
+    new ForcedChoiceOption("delete.ll.class.files", DELETE_LL_CLASS_FILES_CHOICES.get(2), DELETE_LL_CLASS_FILES_CHOICES);
 }
