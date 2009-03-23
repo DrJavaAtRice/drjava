@@ -5619,34 +5619,41 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-    
   /** Automatically traces through the entire program with a defined rate for stepping into each line of code*/
   void debuggerAutomaticTrace() {
-    if(isDebuggerReady() && !_model.getDebugger().isAutomaticTraceEnabled()) {
-      try {
-        int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
-        
-        _automaticTraceTimer = new Timer(rate, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            if (_model.getDebugger().isAutomaticTraceEnabled()) {
-              // hasn't been disabled in the meantime
-              debuggerStep(Debugger.StepType.STEP_INTO);
+    if(isDebuggerReady())  {
+      if(!_model.getDebugger().isAutomaticTraceEnabled()) {
+        try {
+          int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
+          
+          _automaticTraceTimer = new Timer(rate, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              if (_model.getDebugger().isAutomaticTraceEnabled()) {
+                // hasn't been disabled in the meantime
+                debuggerStep(Debugger.StepType.STEP_INTO);
+              }
             }
-          }
-        });
-        _automaticTraceTimer.setRepeats(false);
-        _model.getDebugger().setAutomaticTraceEnabled(true);
-        debuggerStep(Debugger.StepType.STEP_INTO);
+          });
+          _automaticTraceTimer.setRepeats(false);
+          _model.getDebugger().setAutomaticTraceEnabled(true);
+          _debugPanel.setAutomaticTraceButtonText();
+          debuggerStep(Debugger.StepType.STEP_INTO);
+        }
+        catch (IllegalStateException ise) {
+          // This may happen if the user if stepping very frequently,
+          // and is even more likely if they are using both hotkeys
+          // and UI buttons. Ignore it in this case.
+          // Hopefully, there are no other situations where
+          // the user can be trying to step while there are no
+          // suspended threads.
+        }        
       }
-      catch (IllegalStateException ise) {
-        // This may happen if the user if stepping very frequently,
-        // and is even more likely if they are using both hotkeys
-        // and UI buttons. Ignore it in this case.
-        // Hopefully, there are no other situations where
-        // the user can be trying to step while there are no
-        // suspended threads.
+      else {
+        _model.getDebugger().setAutomaticTraceEnabled(false);
+        _debugPanel.setAutomaticTraceButtonText();
+        if (_automaticTraceTimer!=null) _automaticTraceTimer.stop();
       }
-    }
+    }    
   }
   
   /** Steps in the debugger. */

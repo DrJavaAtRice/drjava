@@ -423,6 +423,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         _frame.debuggerAutomaticTrace();
       }
     };
+    
     _automaticTraceButton = new JButton(automaticTrace);
     
     Action stepIntoAction = new AbstractAction("Step Into") {
@@ -639,15 +640,27 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   public void setThreadDependentButtons(boolean isSuspended) {
     _resumeButton.setEnabled(isSuspended);
-    _automaticTraceButton.setEnabled(isSuspended);
     _stepIntoButton.setEnabled(isSuspended);
     _stepOverButton.setEnabled(isSuspended);
     _stepOutButton.setEnabled(isSuspended);
+    setAutomaticTraceButtonText();
+    
+    _automaticTraceButton.setEnabled(isSuspended);
   }
+  
   public void disableButtons() {
     setThreadDependentButtons(false);
   }
 
+  /**Sets the AutomaticTraceButton text as well as the Automatic Trace check box menu item under Debugger based on whether automatic trace is enabled or not*/
+  public void setAutomaticTraceButtonText() {
+     if(_model.getDebugger().isAutomaticTraceEnabled()) 
+      _automaticTraceButton.setText("Disable Trace"); 
+     else 
+      _automaticTraceButton.setText("Automatic Trace");
+     _frame.setAutomaticTraceMenuItemStatus();
+  }
+  
   public void setStatusText(String text) { _statusBar.setText(text); }
 
   public String getStatusText() { return _statusBar.getText(); }
