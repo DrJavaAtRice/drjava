@@ -1838,6 +1838,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
     if (! suppressReset) resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();
+    setActiveDocument(getDocumentNavigator().getDocuments().get(0));
   }
   
   /** If the document is untitled, brings it to the top so that the
