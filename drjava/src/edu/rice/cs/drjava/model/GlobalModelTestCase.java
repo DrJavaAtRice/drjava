@@ -671,6 +671,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       Assert.assertEquals(s, expected, actual);
     }
 
+    public void assertEquals(String s, Object expected, Object actual) {
+      if (!hasClearedEventQueue) {
+        Utilities.clearEventQueue();
+        hasClearedEventQueue = true;
+      }
+      Assert.assertEquals(s, expected, actual);
+    }
+
     public void assertFileNotFoundCount(int i) {
       assertEquals("number of times fileNotFound fired", i, fileNotFoundCount);
     }
