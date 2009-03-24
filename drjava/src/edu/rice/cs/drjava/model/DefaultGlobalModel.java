@@ -301,10 +301,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
-    try { _jvmStarter.join(); } // some tests were reach this point before _jvmStarter has completed
-    catch (InterruptedException e) { throw new UnexpectedException(e); }
+    ensureJVMStarterFinished();
     _jvm.dispose();
     _notifier.removeAllListeners();  // removes the global model listeners!
+  }
+
+  /** Ensures that the _jvmStarter thread has executed. Never called in practice outside of GlobalModelTestCase.setUp(). */
+  public void ensureJVMStarterFinished() {
+    try { _jvmStarter.join(); } // some tests were reach this point before _jvmStarter has completed
+    catch (InterruptedException e) { throw new UnexpectedException(e); }
   }
   
   /** Disposes of external resources. Kills the slave JVM. */

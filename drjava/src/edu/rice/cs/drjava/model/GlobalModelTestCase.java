@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.regex.*;
 import java.util.List;
+import junit.framework.Assert;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -109,6 +110,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _log.log("Setting up " + this);
     super.setUp();  // declared to throw Exception
     _model = new TestGlobalModel();
+    // ensure that the JVM is ready to run; the GlobalModelJUnitTest test cases sometimes received a
+    // late _junitModel.junitJVMReady() notification after the unit tests had already been started, and
+    // that was interpreted as trying to start JUnit tests while tests were already running.
+    _model.ensureJVMStarterFinished();
     // create an interactions pane which is essential to the function of the interactions model; 
     _interactionsController =  // InteractionsController constructor creates an interactions pane
       new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument(),
@@ -546,6 +551,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     /** Remembers when this listener was created. */
     protected volatile Exception _startupTrace;
     
+    protected volatile boolean hasClearedEventQueue;
     protected volatile int fileNotFoundCount;
     protected volatile int newCount;
     protected volatile int openCount;
@@ -631,6 +637,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       undoableEditCount = 0;
       interactionIncompleteCount = 0;
       filePathContainsPoundCount = 0;
+      hasClearedEventQueue = false;
     }
 
     public void projectModified() { }
@@ -646,6 +653,22 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void listenerFail(String message) {
       String header = "\nTestListener creation stack trace:\n" + StringOps.getStackTrace(_startupTrace);
       MultiThreadedTestCase.listenerFail(message + header);
+    }
+    
+    public void assertEquals(String s, int expected, int actual) {
+      if (!hasClearedEventQueue) {
+        Utilities.clearEventQueue();
+        hasClearedEventQueue = true;
+      }
+      Assert.assertEquals(s, expected, actual);
+    }
+    
+    public void assertEquals(String s, boolean expected, boolean actual) {
+      if (!hasClearedEventQueue) {
+        Utilities.clearEventQueue();
+        hasClearedEventQueue = true;
+      }
+      Assert.assertEquals(s, expected, actual);
     }
 
     public void assertFileNotFoundCount(int i) {

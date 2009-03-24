@@ -75,9 +75,23 @@ public class Utilities {
   }
   
   public static void main(String[] args) { clearEventQueue(); }
+
+  /** Clears the event queue by waiting until all events currently in the queue
+    * have been processed. Calls clearEventQueue(true);
+    */
+  public static void clearEventQueue() { clearEventQueue(true); }
   
-  public static void clearEventQueue() {
-    Utilities.invokeAndWait(new Runnable() { public void run() { } });
+  /** Clears the event queue by waiting until all events currently in the queue
+    * have been processed. If newEvents is set to true, the method will also wait for
+    * all events that have been put in the queue by the events that were just
+    * processed, and so on.
+    * @param newEvents true if the method should also clear new events that were added by the events just cleared
+    */
+  public static void clearEventQueue(boolean newEvents) {
+    final EventQueue q = java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue();
+    do {
+      Utilities.invokeAndWait(new Runnable() { public void run() { } });
+    } while(newEvents && (null!=q.peekEvent()));
   }
   
   /** Show a modal debug message box with an OK button regardless of TEST_MODE.

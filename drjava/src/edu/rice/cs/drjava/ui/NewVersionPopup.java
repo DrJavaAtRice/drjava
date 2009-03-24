@@ -149,7 +149,7 @@ public class NewVersionPopup extends JDialog {
     cp.add(_bottomPanel, BorderLayout.SOUTH);    
     getRootPane().setDefaultButton(_closeButton);
     pack();
-    Utilities.clearEventQueue();  // Why? In principle, its inclusion does not change the semantics of the program
+    Utilities.clearEventQueue(false);  // Why? In principle, its inclusion does not change the semantics of the program
     
     EventQueue.invokeLater(new Runnable() {
       public void run() {

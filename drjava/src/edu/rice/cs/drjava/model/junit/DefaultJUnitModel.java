@@ -98,7 +98,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private volatile JUnitErrorModel _junitErrorModel;
   
   /** State flag to prevent starting new tests on top of old ones and to prevent resetting interactions after compilation
-    * is forced by unit testing.
+    * is forced by unit testing. This field is NOT REDUNDANT, it is used in junitJVMReady.
     */
   private volatile boolean _testInProgress = false;
   
@@ -466,7 +466,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
             if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
           }
-          catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOf already called in junitStarted
+          catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
             _notifyJUnitEnded();  // balances junitStarted()
             _testInProgress = false;
           }
@@ -524,7 +524,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //       is used to prevent a new test from being started and overrunning the existing one.
 //      Utilities.show("DefaultJUnitModel.nonTestCase(" + isTestAll + ") called");
     _notifyNonTestCase(isTestAll);
-    _testInProgress = false;  // redundant but doesn't hurt
+    _testInProgress = false;
   }
   
   /** Called to indicate that an illegal class file was encountered
@@ -566,7 +566,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifyJUnitEnded();
-    _testInProgress = false;  // redundant but doesn't hurt
+    _testInProgress = false;
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
   }
   
@@ -587,6 +587,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifyJUnitEnded();
-    _testInProgress = false;   // may be redundant
+    _testInProgress = false;
   }
 }
