@@ -4956,15 +4956,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {      
       File projectFile = _saveChooser.getSelectedFile();
-      if (projectFile == null || (projectFile.exists() && ! _verifyOverwrite())) { return; }
       
+      if (projectFile == null || projectFile.getParentFile() == null) { return; }
       String fileName = projectFile.getName();
       // ensure that saved file has extesion ".xml"
       if (! fileName.endsWith(".xml")) {
         int lastIndex = fileName.lastIndexOf(".");
         if (lastIndex == -1) projectFile = new File (projectFile.getAbsolutePath() + ".xml");
-        else projectFile = new File(fileName.substring(0, lastIndex) + ".xml");
+        else projectFile = new File(projectFile.getParentFile(), fileName.substring(0, lastIndex) + ".xml");
       }
+      if (projectFile == null ||
+          projectFile.getParentFile() == null ||
+          (projectFile.exists() && ! _verifyOverwrite())) { return; }
       
       _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
