@@ -53,6 +53,9 @@ public class LineEnumRule extends JComponent {
   /** Width of the rule */
   static int SIZE = 35;
 
+  /** White space between numbers and code*/
+  static int WHITE_SPACE = 7;
+  
   /** Vertical increment between line numbers */
   private int _increment;
 
@@ -78,7 +81,7 @@ public class LineEnumRule extends JComponent {
     _newFont = _getLineNumFont();
     _nfm = getFontMetrics(_newFont);
     // XXX: 3 is the magic number for Swing's JTextPane border padding.
-    SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
+    SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3 +10;
   }
 
   /** Return a new Dimension using our set width, and the height of the definitions pane */
@@ -95,7 +98,7 @@ public class LineEnumRule extends JComponent {
       //_pane.getFont().deriveFont( 8f );
     _nfm = getFontMetrics(_newFont);
     // XXX: 3 is the magic number for Swing's JTextPane border padding.
-    SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
+    SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3 + WHITE_SPACE;
   }
 
   /** Paints the line enumeration component.*/
@@ -135,8 +138,8 @@ public class LineEnumRule extends JComponent {
 
       // When we paint, we get a good look at the Graphics hints.
       // Use them to update our estimate of total width.
-      SIZE = (int) _nfm.getStringBounds("99999", g).getWidth() + BORDER_PADDING;
-      int offset = SIZE - ((int) (_nfm.getStringBounds(text, g).getWidth() + 1));
+      SIZE = (int) _nfm.getStringBounds("99999", g).getWidth() + BORDER_PADDING + WHITE_SPACE;
+      int offset = SIZE - ((int) (_nfm.getStringBounds(text, g).getWidth() + 3)) - WHITE_SPACE;
 
       //g.drawLine(SIZE-1, i, SIZE-tickLength-1, i);
       if (text != null) {
