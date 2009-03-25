@@ -551,7 +551,7 @@
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
-             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
+             access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
       <classpath>
         <pathelement location="${java5-tools}" />
         <fileset refid="libs" />
