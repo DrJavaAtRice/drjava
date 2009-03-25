@@ -75,7 +75,9 @@ public class SourceChecker {
   private void typeCheck(Iterable<CompilationUnit> sources, Iterable<? extends File> cp) throws InterpreterException {
     ClassLoader loader = new PathClassLoader(null, cp);
     Library classLib = SymbolUtil.classLibrary(loader);
+    debug.logStart("creating TreeLibrary");
     Library sourceLib = new TreeLibrary(sources, loader, _opt);
+    debug.logEnd("creating TreeLibrary");
     TypeContext context = new TopLevelContext(new LibraryContext(new LibraryContext(classLib), sourceLib), loader);
     CompilationUnitChecker checker = new CompilationUnitChecker(context, _opt);
     List<InterpreterException> errors = new ArrayList<InterpreterException>();

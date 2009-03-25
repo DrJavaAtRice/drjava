@@ -61,6 +61,9 @@ public class TypeParameter extends ReferenceTypeName {
     if (in_bound == null) {
       throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null.");
     }
+    if (in_interfaceBounds == null) {
+      throw new IllegalArgumentException("Parameter 'interfaceBounds' to the TypeParameter constructor was null.");
+    }
     _bound = in_bound;
     _interfaceBounds = in_interfaceBounds;
 }

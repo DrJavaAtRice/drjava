@@ -719,8 +719,7 @@ public class ExpressionChecker {
     
     private void addRuntimeCheck(Node node, Type expectedType, Type declaredActualType) {
       if (!ts.isSubtype(ts.erase(declaredActualType), ts.erase(expectedType))) {
-        Thunk<Class<?>> erasedExpectedType = ts.erasedClass(expectedType);
-        if (erasedExpectedType != null) { setCheckedType(node, erasedExpectedType); }
+        setCheckedType(node, ts.erasedClass(expectedType));
       }
     }
     

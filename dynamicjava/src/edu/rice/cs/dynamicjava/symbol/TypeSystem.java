@@ -72,15 +72,24 @@ public abstract class TypeSystem {
     return t.isSome() ? Option.some(new TypeWrapper(t.unwrap())) : Option.<TypeWrapper>none();
   }
   
+  /**
+   * A wrapper for types that provides an alternate {@code toString()} and {@code equals()} implementation:
+   * {@code toString()} is defined in terms of {@link #userRepresentation}; {@code equals()} is defined
+   * in terms of {@link #isEqual}.  (Note that a corresponding {@code hashCode()} function is not implemented.)
+   */
   public class TypeWrapper {
     private Type _t;
     public TypeWrapper(Type t) { _t = t; }
+    /** Produce a string using {@link #userRepresentation}. */
     public String toString() { return userRepresentation(_t); }
+    /** Compare two TypeWrappers using {@link #isEqual}. */
     public boolean equals(Object o) {
       if (this == o) { return true; }
       else if (!(o instanceof TypeWrapper)) { return false; }
       else { return isEqual(_t, ((TypeWrapper) o)._t); }
     }
+    /** Throws an UnsupportedOperationException. */
+    public int hashCode() { throw new UnsupportedOperationException(); }
   }
   
   
@@ -126,7 +135,7 @@ public abstract class TypeSystem {
    */
   public abstract boolean isStatic(Type t);
   
-  /** Determine {@code t} is valid in the {@code extends} clause of a class definition */
+  /** Determine if {@code t} is valid in the {@code extends} clause of a class definition */
   public abstract boolean isExtendable(Type t);
   
   /** Determine if {@code t} is valid in the {@code implements} clause of a class definition */
@@ -153,8 +162,10 @@ public abstract class TypeSystem {
   /** Determine if {@link #assign} would succeed given a constant expression of the given type and value */
   public abstract boolean isAssignable(Type target, Type expT, Object expValue);
   
+  /** Determine if {@link #makePrimitive} would succeed given an expression of the given type */
   public abstract boolean isPrimitiveConvertible(Type t);
   
+  /** Determine if {@link #makeReference} would succeed given an expression of the given type */
   public abstract boolean isReferenceConvertible(Type t);
   
   /** Compute a common supertype of {@code t1} and {@code t2}. */
@@ -166,7 +177,7 @@ public abstract class TypeSystem {
 
   /* Unary Operations on Types */
   
-  /** Compute the capture {@code t}.  Capture eliminates wildcards in a {@link ParameterizedClassType}. */
+  /** Compute the capture of {@code t}.  Capture eliminates wildcards in a {@link ParameterizedClassType}. */
   public abstract Type capture(Type t);
   
   /**
@@ -176,10 +187,9 @@ public abstract class TypeSystem {
   public abstract Type erase(Type t);
   
   /**
-   * Determine the class corresponding to the erasure of {@code t}, or {@code null} if no such class object 
-   * exists.  To prevent over-eager loading of user-defined classes, computation of the result
-   * is delayed by wrapping it in a thunk.  (A DJClass return type would be incorrect, as there's no such
-   * thing (for example) as an array DJClass.)
+   * Determine the class corresponding to the erasure of {@code t}.  To prevent over-eager loading of
+   * user-defined classes, computation of the result is delayed by wrapping it in a thunk.  (A DJClass
+   * return type would be incorrect, as there's no such thing (for example) as an array DJClass.)
    */
   public abstract Thunk<Class<?>> erasedClass(Type t);
   

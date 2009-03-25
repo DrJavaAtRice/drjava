@@ -172,7 +172,7 @@ public class TreeClass implements DJClass {
       paramAsts = IterUtil.asIterable(((GenericClassDeclaration)_ast).getTypeParameters());
     }
     else if (_ast instanceof GenericInterfaceDeclaration) {
-      paramAsts = IterUtil.asIterable(((GenericClassDeclaration)_ast).getTypeParameters());
+      paramAsts = IterUtil.asIterable(((GenericInterfaceDeclaration)_ast).getTypeParameters());
     }
     return IterUtil.mapSnapshot(paramAsts, NodeProperties.NODE_TYPE_VARIABLE);
   }
@@ -283,12 +283,12 @@ public class TreeClass implements DJClass {
   
   private abstract class TreeConstructor implements DJConstructor {
     private final Thunk<DJConstructor> _loaded;
-    private final Type _outerType;
+    private final DJClass _outerClass;
     
     public TreeConstructor() {
       _loaded = LazyThunk.make(new Thunk<DJConstructor>() {
         public DJConstructor value() {
-          Type firstT = (_outerType == null) ? RUNTIME_BINDINGS_TYPE : _outerType;
+          Type firstT = (_outerClass == null) ? RUNTIME_BINDINGS_TYPE : SymbolUtil.thisType(_outerClass);
           Iterable<LocalVariable> params = IterUtil.compose(new LocalVariable("", firstT, false),
                                                             TreeConstructor.this.declaredParameters());
           DJClass c = SymbolUtil.wrapClass(TreeClass.this.load());
@@ -302,13 +302,12 @@ public class TreeClass implements DJClass {
           throw new RuntimeException("Can't find constructor in loaded class");
         }
       });
-      DJClass outer = SymbolUtil.dynamicOuterClass(TreeClass.this);
-      _outerType = (outer == null) ? null : SymbolUtil.thisType(outer);
+      _outerClass = SymbolUtil.dynamicOuterClass(TreeClass.this);
     }
     
     public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {
-      if (_outerType == null) { args = IterUtil.compose(bindings, args); }
+      if (_outerClass == null) { args = IterUtil.compose(bindings, args); }
       return _loaded.value().evaluate(outer, args, bindings, options);
     }
   }

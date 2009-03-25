@@ -111,13 +111,49 @@ public class TypeNameChecker {
     visitor = new TypeNameVisitor();
   }
   
+  /** Get the type corresponding to {@code t}; verify that it is well-formed. */
   public Type check(TypeName t) {
+    Type result = t.acceptVisitor(visitor);
+    ensureWellFormed(t);
+    return result;
+  }
+  
+  /**
+   * Get the type corresponding to {@code t}; verify that it is structurally well-formed, but
+   * delay full well-formedness checking until a later {@link #ensureWellFormed} call. 
+   */
+  public Type checkStructure(TypeName t) {
     return t.acceptVisitor(visitor);
   }
   
+  /** Invoke {@link #check} on each element of a list. */
   public Iterable<Type> checkList(Iterable<? extends TypeName> l) {
-    return IterUtil.mapSnapshot(l, visitor);
+    Iterable<Type> result = IterUtil.mapSnapshot(l, visitor);
+    ensureWellFormedList(l);
+    return result;
   }
+  
+  /** Invoke {@link #checkStructure} on each element of a list. */
+  public Iterable<Type> checkStructureForList(Iterable<? extends TypeName> l) {
+    Iterable<Type> result = IterUtil.mapSnapshot(l, visitor);
+    return result;
+  }
+  
+  /**
+   * Verify that a TypeName that has already been checked is well-formed (according to
+   * {@link TypeSystem#isWellFormed}).
+   */
+  public void ensureWellFormed(TypeName t) {
+    if (!ts.isWellFormed(getType(t))) {
+      throw new ExecutionError("malformed.type", t);
+    }
+  }
+  
+  /** Invoke {@link #ensureWellFormed} on each element of a list. */
+  public void ensureWellFormedList(Iterable<? extends TypeName> l) {
+    for (TypeName t : l) { ensureWellFormed(t); }
+  }
+  
   
   /** Tag the given type parameters with a new VariableType, and set the bounds appropriately. */
   public void checkTypeParameters(TypeParameter[] tparams) {
@@ -126,16 +162,15 @@ public class TypeNameChecker {
     }
     TypeNameVisitor v = new TypeNameVisitor();
     for (TypeParameter param : tparams) {
-      Type firstBound = param.getBound().acceptVisitor(v);
-      Iterable<Type> restBounds = checkList(param.getInterfaceBounds());
-      BoundedSymbol bounds = getTypeVariable(param).symbol();
-      if (IterUtil.isEmpty(restBounds)) { bounds.initializeUpperBound(firstBound); }
-      else {
-        bounds.initializeUpperBound(new IntersectionType(IterUtil.compose(firstBound, restBounds)));
+      Type upperBound = param.getBound().acceptVisitor(v);
+      for (Type t : checkList(param.getInterfaceBounds())) {
+        upperBound = ts.meet(upperBound, t);
       }
+      BoundedSymbol bounds = getTypeVariable(param).symbol();
+      bounds.initializeUpperBound(upperBound);
       bounds.initializeLowerBound(TypeSystem.NULL);
     }
-  }  
+  }
   
   private class TypeNameVisitor extends AbstractVisitor<Type> implements Lambda<TypeName, Type> {
   
@@ -282,7 +317,7 @@ public class TypeNameChecker {
         }
         catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
         catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
-        catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }
+        catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
           else { throw new ExecutionError("ambiguous.name", node); }
