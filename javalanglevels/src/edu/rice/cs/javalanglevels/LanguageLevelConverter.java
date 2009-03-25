@@ -52,7 +52,7 @@ import edu.rice.cs.plt.iter.IterUtil;
   */
 public class LanguageLevelConverter {
   
-  public static final Log _log = new Log("LLConverter.txt", true);
+  public static final Log _log = new Log("LLConverter.txt", false);
   
   public static Options OPT = Options.DEFAULT;
   

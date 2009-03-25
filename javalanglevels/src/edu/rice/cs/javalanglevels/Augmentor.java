@@ -462,7 +462,12 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     //Write out whatever is left in the file.
 //    _log.log("Processed source file through line " + _fileInLine + " and column " + _fileInColumn);
 //    _log.log("Now dumping remainder of file through line " + sf.getSourceInfo().getEndLine());
-    _readAndWriteThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
+    //_readAndWriteThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
+    String remainder = _readThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
+    _writeToFileOut(remainder);
+    // if the remainder doesn't end with a newline, then we didn't write a line number comment yet
+    // write it now
+    if (!remainder.endsWith(newLine)) _writeToFileOut(" //["+_fileInLine+"]");
   }
   
   /**
@@ -1444,7 +1449,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     * @param column The column to read to (or 0 to read to through the end of the previous line).
     */
   private static String _readThroughIndex(int line, int column) {
-
+    System.out.println("_readThroughIndex line="+line+", column="+column);
     if (_fileInLine > line || (_fileInLine == line && _fileInColumn - 1 > column)) {
       throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + 
                                  " at a point that is already past: line " + line + ", column " + column + 
@@ -1462,7 +1467,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
                                      _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
         }
         
-        result.append(l).append(newLine);
+        result.append(l);
+        if (l.length()>0) result.append(' ');
+        result.append("//[").append(_fileInLine).append(']').append(newLine);
         _fileInLine++;
         _fileInColumn = 1;
       }
@@ -1477,7 +1484,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
       result.append(chars);
       _fileInLine = line;
       _fileInColumn = column + 1;
-      
+      System.out.println("\tnow line="+line+", column="+column);
       return result.toString();
     }
     catch (IOException ioe) { throw new Augmentor.Exception(ioe); }
