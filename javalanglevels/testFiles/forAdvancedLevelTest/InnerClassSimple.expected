@@ -1,10 +1,10 @@
-class InnerClassSimple {
-  
-  class X {
-    int w;
-    
-    void m() {
-      w = 3;
-    }
-  }
+class InnerClassSimple { //[1]
+  //[2]
+  class X { //[3]
+    int w; //[4]
+    //[5]
+    void m() { //[6]
+      w = 3; //[7]
+    } //[8]
+  } //[9]
 }

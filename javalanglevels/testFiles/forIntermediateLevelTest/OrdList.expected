@@ -1,4 +1,4 @@
-interface OrdList extends List {
-//  OrdList insert(int i);t
-  public OrdList insert(final int i); 
-}
+interface OrdList extends List { //[1]
+//  OrdList insert(int i);t //[2]
+  public OrdList insert(final int i);  //[3]
+} //[4]

@@ -1,19 +1,19 @@
-//This makes sure that you can use an unqualified name to reference an InnerClass from within a method.
-
-class RefInnerClassWithinMethod {
-  
-  void myMethod() {
-    MyInnerClass c;
-  }
-    
-  class MyInnerClass {
-    
-  }
-
-}
-
-    
-
-  
-
+//This makes sure that you can use an unqualified name to reference an InnerClass from within a method. //[1]
+//[2]
+class RefInnerClassWithinMethod { //[3]
+  //[4]
+  void myMethod() { //[5]
+    MyInnerClass c; //[6]
+  } //[7]
+    //[8]
+  class MyInnerClass { //[9]
+    //[10]
+  } //[11]
+//[12]
+} //[13]
+//[14]
+    //[15]
+//[16]
+  //[17]
+//[18]
   

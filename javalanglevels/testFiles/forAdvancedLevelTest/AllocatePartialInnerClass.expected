@@ -1,8 +1,8 @@
-class AllocatePartialInnerClass {
-  MyInnerClass2 c = new MyInnerClass2();
-  
-  class MyInnerClass2 {
-  }
-  
-  
-}
+class AllocatePartialInnerClass { //[1]
+  MyInnerClass2 c = new MyInnerClass2(); //[2]
+  //[3]
+  class MyInnerClass2 { //[4]
+  } //[5]
+  //[6]
+  //[7]
+} //[8]

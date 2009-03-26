@@ -1,12 +1,12 @@
-/**Test that a do loop can be correctly handled */
-class FunWithDoLoops {
-  int myWhilingMethod(int y, int x) {
-    int k = x;
-    do {
-      k = x*4;
-    }
-    while (k < (x*y));
-    
-    return 365 * k;
-  }
-}
+/**Test that a do loop can be correctly handled */ //[1]
+class FunWithDoLoops { //[2]
+  int myWhilingMethod(int y, int x) { //[3]
+    int k = x; //[4]
+    do { //[5]
+      k = x*4; //[6]
+    } //[7]
+    while (k < (x*y)); //[8]
+    //[9]
+    return 365 * k; //[10]
+  } //[11]
+} //[12]

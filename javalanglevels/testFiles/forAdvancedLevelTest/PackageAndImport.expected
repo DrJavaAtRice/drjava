@@ -1,6 +1,6 @@
-package forAdvancedLevelTest;
-import java.util.*;
-
-class PackageAndImport {
- static Hashtable ht = new Hashtable(); 
-}
+package forAdvancedLevelTest; //[1]
+import java.util.*; //[2]
+//[3]
+class PackageAndImport { //[4]
+ static Hashtable ht = new Hashtable();  //[5]
+} //[6]

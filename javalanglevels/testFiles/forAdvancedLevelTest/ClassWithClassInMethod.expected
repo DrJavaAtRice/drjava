@@ -1,7 +1,7 @@
-public class ClassWithClassInMethod {
-  void myMethod(int i, int j) {
-    class ThisIsMyInnerClass {
-      int j;
-    }
-  }
-}
+public class ClassWithClassInMethod { //[1]
+  void myMethod(int i, int j) { //[2]
+    class ThisIsMyInnerClass { //[3]
+      int j; //[4]
+    } //[5]
+  } //[6]
+} //[7]

@@ -1,23 +1,23 @@
-//This makes sure that you can use an unqualified name to reference an InnerClass from within a method.
-// (when the class is defined after the method)
-
-class FormalParamPartialReference {
-
-  void myMethod(MyInnerClass a) {
-    MyInnerClass c = a;
-  }
-
-  
-  class MyInnerClass {
-    
-  }
-
-  
-    
-}
-
-    
-
-  
-
+//This makes sure that you can use an unqualified name to reference an InnerClass from within a method. //[1]
+// (when the class is defined after the method) //[2]
+//[3]
+class FormalParamPartialReference { //[4]
+//[5]
+  void myMethod(MyInnerClass a) { //[6]
+    MyInnerClass c = a; //[7]
+  } //[8]
+//[9]
+  //[10]
+  class MyInnerClass { //[11]
+    //[12]
+  } //[13]
+//[14]
+  //[15]
+    //[16]
+} //[17]
+//[18]
+    //[19]
+//[20]
+  //[21]
+//[22]
   

@@ -1,26 +1,26 @@
-//This makes sure that you can use an unqualified name to reference an inner  class, 
-//before the local class has been defined.
-
-class RefInnerClassCrazy {
-  
-  class MyInnerClass {
-    
-  }
-  
-  void myMethod() {
-    class YourClass {
-      void myMethod2() {
-        class AnotherClass {
-          MyInnerClass c;
-        }
-      }
-    }
-  }
-
-}
-
-    
-
-  
-
+//This makes sure that you can use an unqualified name to reference an inner  class,  //[1]
+//before the local class has been defined. //[2]
+//[3]
+class RefInnerClassCrazy { //[4]
+  //[5]
+  class MyInnerClass { //[6]
+    //[7]
+  } //[8]
+  //[9]
+  void myMethod() { //[10]
+    class YourClass { //[11]
+      void myMethod2() { //[12]
+        class AnotherClass { //[13]
+          MyInnerClass c; //[14]
+        } //[15]
+      } //[16]
+    } //[17]
+  } //[18]
+//[19]
+} //[20]
+//[21]
+    //[22]
+//[23]
+  //[24]
+//[25]
   

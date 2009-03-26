@@ -1,4 +1,4 @@
-class InnerInterfacesInClassesCanBePrivate {
-  private interface InnerInterface { 
-  }
-}
+class InnerInterfacesInClassesCanBePrivate { //[1]
+  private interface InnerInterface {  //[2]
+  } //[3]
+} //[4]

@@ -1,25 +1,25 @@
-class ArrayDeclarations {
-  Integer[] iArray = new Integer[5];
-  
-  char c[];
-  
-  char initializedC[] = new char[] {'e', 'j', 's'};
-  
-  double[][] d = new double[5][5];
-  
-  Object[][][] o = new Object[2][][];
-  
-  int i, crazyArray[];
-  
-  double[] noNew = {1.2, 3.4, 5.2};
-  
-//  String[][][] definitelyIllegal = new String[4][][3];
-  
-  int nestedInitializer[][] = new int[][] { {1,2}, null};
-  
-  int myMethod() {
-    return iArray[0];
-    
-//    o.field().field = value;
-  } 
-}
+class ArrayDeclarations { //[1]
+  Integer[] iArray = new Integer[5]; //[2]
+  //[3]
+  char c[]; //[4]
+  //[5]
+  char initializedC[] = new char[] {'e', 'j', 's'}; //[6]
+  //[7]
+  double[][] d = new double[5][5]; //[8]
+  //[9]
+  Object[][][] o = new Object[2][][]; //[10]
+  //[11]
+  int i, crazyArray[]; //[12]
+  //[13]
+  double[] noNew = {1.2, 3.4, 5.2}; //[14]
+  //[15]
+//  String[][][] definitelyIllegal = new String[4][][3]; //[16]
+  //[17]
+  int nestedInitializer[][] = new int[][] { {1,2}, null}; //[18]
+  //[19]
+  int myMethod() { //[20]
+    return iArray[0]; //[21]
+    //[22]
+//    o.field().field = value; //[23]
+  }  //[24]
+} //[25]

@@ -42,4 +42,4 @@ class OneLine extends Maggie { private final int stuff; public double method(fin
         i() ^ 
         j();
   }
-}
+} //[1]

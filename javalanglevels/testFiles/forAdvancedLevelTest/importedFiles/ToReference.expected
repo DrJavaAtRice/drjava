@@ -1,14 +1,14 @@
-package forAdvancedLevelTest.importedFiles;
-import forAdvancedLevelTest.importedFiles2.AlsoReferenced;
-
-public class ToReference {
-
-  public String toString2() { 
-    AlsoReferenced arp;
-    return "imported from elspeth.importedFiles";
-  }
-
-  public int yourMethod() {
-    return 24;
-  }
-} 
+package forAdvancedLevelTest.importedFiles; //[1]
+import forAdvancedLevelTest.importedFiles2.AlsoReferenced; //[2]
+//[3]
+public class ToReference { //[4]
+//[5]
+  public String toString2() {  //[6]
+    AlsoReferenced arp; //[7]
+    return "imported from elspeth.importedFiles"; //[8]
+  } //[9]
+//[10]
+  public int yourMethod() { //[11]
+    return 24; //[12]
+  } //[13]
+}  //[14]

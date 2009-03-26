@@ -68,4 +68,4 @@ class A extends Object {private final char c;
                                                                                       return getClass().hashCode() ^ 
                                                                                           c();
                                                                                     }
-                                                                                  }//isn't the end of a line fun?
+                                                                                  }//isn't the end of a line fun? //[1]

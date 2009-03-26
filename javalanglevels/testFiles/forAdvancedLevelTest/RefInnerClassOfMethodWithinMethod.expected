@@ -1,23 +1,23 @@
-//This makes sure that you can use an unqualified name to reference a local class of
-//a method from within the method, after the local class has been defined.
-
-class RefInnerClassOfMethodWithinMethod {
-  
-  void myMethod() {
-    class MyInnerClass {
-    
-    }
-
-    MyInnerClass c;
-    
-
-  }
-    
-
-}
-
-    
-
-  
-
+//This makes sure that you can use an unqualified name to reference a local class of //[1]
+//a method from within the method, after the local class has been defined. //[2]
+//[3]
+class RefInnerClassOfMethodWithinMethod { //[4]
+  //[5]
+  void myMethod() { //[6]
+    class MyInnerClass { //[7]
+    //[8]
+    } //[9]
+//[10]
+    MyInnerClass c; //[11]
+    //[12]
+//[13]
+  } //[14]
+    //[15]
+//[16]
+} //[17]
+//[18]
+    //[19]
+//[20]
+  //[21]
+//[22]
   

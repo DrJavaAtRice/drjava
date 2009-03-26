@@ -1,12 +1,12 @@
-class InnerClass {
-  
-  int s;
-  
-  class X {
-    int w;
-    
-    void m() {
-      System.out.println(s);
-    }
-  }
+class InnerClass { //[1]
+  //[2]
+  int s; //[3]
+  //[4]
+  class X { //[5]
+    int w; //[6]
+    //[7]
+    void m() { //[8]
+      System.out.println(s); //[9]
+    } //[10]
+  } //[11]
 }

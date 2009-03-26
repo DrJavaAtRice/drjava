@@ -1,17 +1,17 @@
-//This test makes sure that ComplexAnonymousInnerClass instantiations are correctly parsed and augmented
-
-class ComplexAnonClassInstantiation {
-  int i = new E().new W() {
-    public int q = 5;
-  }.q;
-    
-}
-
-class E {
-  E() {
-  }
-  class W {
-    W() {
-    }
-  }
-}
+//This test makes sure that ComplexAnonymousInnerClass instantiations are correctly parsed and augmented //[1]
+//[2]
+class ComplexAnonClassInstantiation { //[3]
+  int i = new E().new W() { //[4]
+    public int q = 5; //[5]
+  }.q; //[6]
+    //[7]
+} //[8]
+//[9]
+class E { //[10]
+  E() { //[11]
+  } //[12]
+  class W { //[13]
+    W() { //[14]
+    } //[15]
+  } //[16]
+} //[17]

@@ -1,4 +1,4 @@
-class InnerClassesInClassesCanBePrivate {
-  private class InnerClass { 
-  }
-}
+class InnerClassesInClassesCanBePrivate { //[1]
+  private class InnerClass {  //[2]
+  } //[3]
+} //[4]

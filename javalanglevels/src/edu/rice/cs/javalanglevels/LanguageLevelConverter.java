@@ -52,7 +52,7 @@ import edu.rice.cs.plt.iter.IterUtil;
   */
 public class LanguageLevelConverter {
   
-  public static final Log _log = new Log("LLConverter.txt", false);
+  // public static final Log _log = new Log("LLConverter.txt", false);
   
   public static Options OPT = Options.DEFAULT;
   
@@ -329,7 +329,7 @@ public class LanguageLevelConverter {
         if (_isLanguageLevelFile(f)) {
           Pair<SourceFile, LanguageLevelVisitor> pair = mediator.get(new Integer(ind));
           if (pair == null) {
-            _log.log("Not augmenting " + f + " no mediator");
+	    // _log.log("Not augmenting " + f + " no mediator");
 //            Utilities.show("Not augmenting " + f + " no mediator");
           }
           
@@ -345,7 +345,7 @@ public class LanguageLevelConverter {
             BufferedReader br = new BufferedReader(new FileReader(f), INPUT_BUFFER_SIZE);
             BufferedWriter bw = new BufferedWriter(new FileWriter(augmentedFile));
             
-            _log.log("Augmenting the source file " + sf);
+            // _log.log("Augmenting the source file " + sf);
 //            Utilities.show("Augmenting the source file " + sf.getSourceInfo().getFile());
             Augmentor a = new Augmentor(SAFE_SUPPORT_CODE, br, bw, llv);
             sf.visit(a);

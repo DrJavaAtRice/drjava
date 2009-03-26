@@ -1,4 +1,4 @@
-package forAdvancedLevelTest.importedFiles2;
-
-public class AlsoReferenced {
-}
+package forAdvancedLevelTest.importedFiles2; //[1]
+//[2]
+public class AlsoReferenced { //[3]
+} //[4]

@@ -1,11 +1,11 @@
-package forAdvancedLevelTest;
-
-public class ToReference {
-  public String toString2() { 
-    return "packaged in testsrc";
-  }
-      
-    public String myMethod() {
-      return "24 oceans";
-    }
-}
+package forAdvancedLevelTest; //[1]
+//[2]
+public class ToReference { //[3]
+  public String toString2() {  //[4]
+    return "packaged in testsrc"; //[5]
+  } //[6]
+      //[7]
+    public String myMethod() { //[8]
+      return "24 oceans"; //[9]
+    } //[10]
+} //[11]

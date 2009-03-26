@@ -1,21 +1,21 @@
-class A {
-  int afield;
-  
-  class B {
-    int bfield;
-  }
-  
-  class C {
-    int cfield;
-    
-    void method() {
-      class D {
-        class E {
-          int efield;
-        }
-      }
-//      B b = new B(2);
-    }
-  }
-  
+class A { //[1]
+  int afield; //[2]
+  //[3]
+  class B { //[4]
+    int bfield; //[5]
+  } //[6]
+  //[7]
+  class C { //[8]
+    int cfield; //[9]
+    //[10]
+    void method() { //[11]
+      class D { //[12]
+        class E { //[13]
+          int efield; //[14]
+        } //[15]
+      } //[16]
+//      B b = new B(2); //[17]
+    } //[18]
+  } //[19]
+  //[20]
 }

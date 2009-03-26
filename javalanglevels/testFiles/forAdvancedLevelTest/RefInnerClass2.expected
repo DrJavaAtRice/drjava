@@ -1,21 +1,21 @@
-//This makes sure that you can use an unqualified name to reference an inner  class, 
-//before the local class has been defined.
-
-class RefInnerClass2 {
-
-  MyInnerClass c;
- 
-
-  
-  class MyInnerClass {
-    
-  }
-  
-
-}
-
-    
-
-  
-
+//This makes sure that you can use an unqualified name to reference an inner  class,  //[1]
+//before the local class has been defined. //[2]
+//[3]
+class RefInnerClass2 { //[4]
+//[5]
+  MyInnerClass c; //[6]
+ //[7]
+//[8]
+  //[9]
+  class MyInnerClass { //[10]
+    //[11]
+  } //[12]
+  //[13]
+//[14]
+} //[15]
+//[16]
+    //[17]
+//[18]
+  //[19]
+//[20]
   
