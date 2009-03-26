@@ -550,6 +550,10 @@ public class ConfigFrame extends SwingFrame {
                                                 "The color for numbers in the Definitions Pane."));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this,
                                                 "The background color of the Definitions Pane.", true));
+    addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEFINITIONS_LINE_NUMBER_COLOR, "Line Number Color", this,
+                                                "The color for line numbers in the Definitions Pane."));
+    addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, "Line Number Background Color", this,
+                                                "The background color for line numbers in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this,
                                                 "The color for matching brace highlights in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.COMPILER_ERROR_COLOR, "Compiler Error Color", this,

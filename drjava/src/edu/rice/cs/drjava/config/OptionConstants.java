@@ -122,6 +122,14 @@ public interface OptionConstants {
   /** Color for background of definitions pane. */
   public static final ColorOption DEFINITIONS_BACKGROUND_COLOR =
     new ColorOption("definitions.background.color", Color.white);
+
+  /** Color for background of line numbers in definitions pane. */
+  public static final ColorOption DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR =
+    new ColorOption("definitions.line.number.background.color",new Color(250, 250, 250));
+
+  /** Color for background of line numbers in definitions pane. */
+  public static final ColorOption DEFINITIONS_LINE_NUMBER_COLOR =
+    new ColorOption("definitions.line.number.color", Color.black);
   
   /** Color for highlighting brace-matching. */
   public static final ColorOption DEFINITIONS_MATCH_COLOR =

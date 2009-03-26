@@ -172,6 +172,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   public void chooseColor() {
     Color c = JColorChooser.showDialog(_parent, "Choose '" + getLabelText() + "'", _color);
     if (c != null) {
+      _color = c;
       notifyChangeListeners();
       _updateField(c);
     }    

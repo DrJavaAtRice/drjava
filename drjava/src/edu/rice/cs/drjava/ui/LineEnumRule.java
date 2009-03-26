@@ -107,14 +107,14 @@ public class LineEnumRule extends JComponent {
 
     // Set a white background
     Color backg = DrJava.getConfig().getSetting
-      (OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+      (OptionConstants.DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR);
     g.setColor(backg);
     g.fillRect(drawHere.x, drawHere.y, drawHere.width, drawHere.height);
 
     // Do the ruler labels in a small font that's black.
     g.setFont(_newFont);
     Color foreg = DrJava.getConfig().getSetting
-      (OptionConstants.DEFINITIONS_NORMAL_COLOR);
+      (OptionConstants.DEFINITIONS_LINE_NUMBER_COLOR);
     g.setColor(foreg);
 
     // Use clipping bounds to calculate first tick and last tick location.

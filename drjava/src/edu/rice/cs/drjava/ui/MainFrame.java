@@ -3354,6 +3354,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
     config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
     config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
+    config.addOptionListener(DEFINITIONS_LINE_NUMBER_COLOR, new LineEnumColorOptionListener());
+    config.addOptionListener(DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, new LineEnumColorOptionListener());
     config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
     config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
@@ -9554,6 +9556,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void optionChanged(OptionEvent<Boolean> oce) { _updateDefScrollRowHeader(); }
   }
   
+  /** The OptionListener for DEFINITIONS_LINE_NUMBER_COLOR and DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR. */
+  private class LineEnumColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) { _updateLineNums(); }
+  }
+
   /** The OptionListener for QUIT_PROMPT. */
   private class QuitPromptOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) { _promptBeforeQuit = oce.value.booleanValue(); }
