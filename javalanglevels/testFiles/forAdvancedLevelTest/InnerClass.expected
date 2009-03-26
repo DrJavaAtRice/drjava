@@ -1,12 +1,15 @@
-class InnerClass { //[1]
-  //[2]
-  int s; //[3]
-  //[4]
-  class X { //[5]
-    int w; //[6]
-    //[7]
-    void m() { //[8]
-      System.out.println(s); //[9]
-    } //[10]
-  } //[11]
+// Language Level Converter line number map: dj*->java. Entries: 12
+//     1->4         2->5         3->6         4->7         5->8         6->9         7->10        8->11   
+//     9->12       10->13       11->14       12->15   
+class InnerClass {
+  
+  int s;
+  
+  class X {
+    int w;
+    
+    void m() {
+      System.out.println(s);
+    }
+  }
 }

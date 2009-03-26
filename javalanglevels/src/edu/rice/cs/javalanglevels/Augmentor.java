@@ -63,6 +63,15 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
   /** The destination file. */
   static private BufferedWriter _fileOut;
   
+  /** The current line number in _fileOut. */
+  static private int _fileOutLine;
+  
+  /** The dj* line number to which the current line number in _fileOut corresponds. */
+  static private int _fileOutCorrespondingLine;
+
+  /** A map from original dj* line number to generated java line number. */
+  static private TreeMap<Integer,Integer> _lineNumberMap;
+  
   /** The symbol information from this source tree. */
   static private LanguageLevelVisitor _llv;
   
@@ -86,6 +95,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     _fileInLine = 1;
     _fileInColumn = 1;
     _fileOut = fileOut;
+    _fileOutLine = 1;
+    _fileOutCorrespondingLine = 1;
+    _lineNumberMap = new TreeMap<Integer,Integer>();
     _llv = llv;
     _safeSupportCode = safeSupportCode;
     _endOfClassVarDefs = new LinkedList<String>();
@@ -464,10 +476,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
 //    _log.log("Now dumping remainder of file through line " + sf.getSourceInfo().getEndLine());
     //_readAndWriteThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
     String remainder = _readThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
-    _writeToFileOut(remainder);
-    // if the remainder doesn't end with a newline, then we didn't write a line number comment yet
-    // write it now
-    if (!remainder.endsWith(newLine)) _writeToFileOut(" //["+_fileInLine+"]");
+    if (!remainder.endsWith(newLine)) remainder = remainder + newLine; // make sure file ends in a newLine
+    _writeToFileOut(remainder, true);
   }
   
   /**
@@ -1466,9 +1476,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
                                      _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
         }
         
-        result.append(l);
-        if (l.trim().length()>0) result.append(' ');
-        result.append("//[").append(_fileInLine).append(']').append(newLine);
+        result.append(l).append(newLine);
+        
         _fileInLine++;
         _fileInColumn = 1;
       }
@@ -1495,11 +1504,30 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     */
   private static void _readAndWriteThroughIndex(int line, int column) {
     String text = _readThroughIndex(line, column);
-    _writeToFileOut(text);
+    _writeToFileOut(text, true); // yes, writing straight from input
   }
   
-  private static void _writeToFileOut(String s) {
-    try { _fileOut.write(s); }
+  private static void _writeToFileOut(String s) { _writeToFileOut(s, false); }
+  
+  /** Write the string to _fileOut. If fromInput is true, the string is coming straight from the input file,
+    * which means the corresponding line number should be incremented as well.
+    * @param s The string to write.
+    * @param fromInput true if the corresponding line number should be incremented as well */
+  private static void _writeToFileOut(String s, boolean fromInput) {
+    try {
+      String[] lines = s.split(newLine, -1);
+      for(int i=0; i<lines.length-1; ++i) {
+        _fileOut.write(lines[i]);
+        // add line number to map if it doesn't exist yet
+        if (_lineNumberMap.get(_fileOutCorrespondingLine)==null) _lineNumberMap.put(_fileOutCorrespondingLine, _fileOutLine);
+        // end-of-line line number mapping; disabled since we output the entire map at the beginning of the file
+        // _fileOut.write("//["+_fileOutCorrespondingLine+"]");
+        _fileOut.write(newLine);
+        ++_fileOutLine;
+        if (fromInput) ++_fileOutCorrespondingLine; // true if we are copying straight from input
+      }
+      _fileOut.write(lines[lines.length-1]);
+    }
     catch (IOException ioe) { throw new Augmentor.Exception(ioe); }
   }
   
@@ -1522,6 +1550,13 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
       return text;
       }
       catch (IOException ioe) { throw new Augmentor.Exception(ioe); }
+  }
+  
+  /** Returns a copy of the line number map that maps original dj* line numbers
+    * to generated java line numbers.
+    * @return copy of line number map */
+  public static SortedMap<Integer,Integer> getLineNumberMap() {
+    return new TreeMap<Integer,Integer>(_lineNumberMap);
   }
   
   public static class MethodBodyAugmentor extends Augmentor {

@@ -1,9 +1,12 @@
-class InnerClassArrayField { //[1]
- OneType.TwoType[] ottt =  //[2]
-   new OneType.TwoType[0];  //[3]
-} //[4]
-//[5]
-class OneType { //[6]
-  class TwoType { //[7]
-  } //[8]
-} //[9]
+// Language Level Converter line number map: dj*->java. Entries: 9
+//     1->4         2->5         3->6         4->7         5->8         6->9         7->10        8->11   
+//     9->12   
+class InnerClassArrayField {
+ OneType.TwoType[] ottt = 
+   new OneType.TwoType[0]; 
+}
+
+class OneType {
+  class TwoType {
+  }
+}

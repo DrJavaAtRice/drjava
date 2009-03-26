@@ -1,9 +1,12 @@
-/**This file tests that a value can be assigned to an element in an array.*/ //[1]
-//[2]
-class TestArrayAssignment { //[3]
-  int[] i = new int[5]; //[4]
-  //[5]
-  void assignValue() { //[6]
-    i[4]=2+5; //[7]
-  } //[8]
-} //[9]
+// Language Level Converter line number map: dj*->java. Entries: 9
+//     1->4         2->5         3->6         4->7         5->8         6->9         7->10        8->11   
+//     9->12   
+/**This file tests that a value can be assigned to an element in an array.*/
+
+class TestArrayAssignment {
+  int[] i = new int[5];
+  
+  void assignValue() {
+    i[4]=2+5;
+  }
+}

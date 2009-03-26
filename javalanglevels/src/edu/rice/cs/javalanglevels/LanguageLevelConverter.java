@@ -60,6 +60,9 @@ public class LanguageLevelConverter {
   private static final boolean SAFE_SUPPORT_CODE = false;
   public static final int INPUT_BUFFER_SIZE = 8192;  // This reportedly is the current default in the JDK.
   
+  /**Number of line number mappings (from dj* to java) per line. */
+  public static final int LINE_NUM_MAPPINGS_PER_LINE = 8;
+    
   /**Holds any parse exceptions that are encountered*/
   private LinkedList<JExprParseException> _parseExceptions = new LinkedList<JExprParseException>();
   
@@ -329,7 +332,7 @@ public class LanguageLevelConverter {
         if (_isLanguageLevelFile(f)) {
           Pair<SourceFile, LanguageLevelVisitor> pair = mediator.get(new Integer(ind));
           if (pair == null) {
-	    // _log.log("Not augmenting " + f + " no mediator");
+     // _log.log("Not augmenting " + f + " no mediator");
 //            Utilities.show("Not augmenting " + f + " no mediator");
           }
           
@@ -343,7 +346,8 @@ public class LanguageLevelConverter {
             augmentedFilePath = augmentedFilePath.substring(0, augmentedFilePath.length() - 4); //remove the .dj# extension
             File augmentedFile = new File(augmentedFilePath + ".java"); //replace it with .java
             BufferedReader br = new BufferedReader(new FileReader(f), INPUT_BUFFER_SIZE);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(augmentedFile));
+            StringWriter sw = new StringWriter();
+            BufferedWriter bw = new BufferedWriter(sw);
             
             // _log.log("Augmenting the source file " + sf);
 //            Utilities.show("Augmenting the source file " + sf.getSourceInfo().getFile());
@@ -352,6 +356,28 @@ public class LanguageLevelConverter {
             
             br.close();
             bw.close();
+            
+            // write out the line number map and the augmented java file
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(augmentedFile)));
+            SortedMap<Integer,Integer> lineNumberMap = a.getLineNumberMap();
+            pw.println("// Language Level Converter line number map: dj*->java. Entries: "+lineNumberMap.size());
+            // We print out LINE_NUM_MAPPINGS_PER_LINE mappings per line, so we need numLines
+            // at the top of the file, and one more for a descriptive comment.
+            // That means we need to increase the line numbers in the generated java file by numLines+1
+            int numLines = (int)Math.ceil(((double)lineNumberMap.size())/LINE_NUM_MAPPINGS_PER_LINE);
+            int mapCount = 0;
+            for(Map.Entry<Integer,Integer> e: lineNumberMap.entrySet()) {
+              // e.getKey(): dj* line number; e.getValue(): java line number (must be increased by numLines)
+              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==0) pw.print("//");
+              pw.printf(" %5d->%-5d", e.getKey(), (e.getValue()+numLines+1));
+              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==LINE_NUM_MAPPINGS_PER_LINE-1) pw.println();
+              ++mapCount;
+            }
+            if (mapCount%LINE_NUM_MAPPINGS_PER_LINE!=0) pw.println(); // print a newline unless we just printed one
+            
+            String augmented = sw.toString();
+            pw.write(augmented, 0, augmented.length());
+            pw.close();
           }
         }
       }
