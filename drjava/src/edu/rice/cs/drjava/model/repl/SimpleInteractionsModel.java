@@ -104,8 +104,9 @@ public class SimpleInteractionsModel extends InteractionsModel {
   
   /** Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
+   * @param indices varargs with the values for the indices in arrays; ignored
    */
-  public String getVariableToString(String var) {
+  public String getVariableToString(String var, int... indices) {
     try {
       Option<Object> value = _interpreter.interpret(var);
       try { return TextUtil.toString(value.unwrap("")); }
@@ -117,7 +118,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
-  public String getVariableType(String var) {
+  public String getVariableType(String var, int... indices) {
     return null; // TODO: implement
 //    Class c = _interpreter.getVariableClass(var);
 //    return c.getName();

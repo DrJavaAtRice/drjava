@@ -78,17 +78,19 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
+    * @param indices varargs with the values for the indices in arrays
     */
-  public String getVariableToString(String var) {
-    Option<String> result = _jvm.getVariableToString(var);
+  public String getVariableToString(String var, int... indices) {
+    Option<String> result = _jvm.getVariableToString(var, indices);
     return result.unwrap("");
   }
   
   /** Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
+   * @param indices varargs with the values for the indices in arrays; only the number of arguments matters here
    */
-  public String getVariableType(String var) {
-    Option<String> result = _jvm.getVariableType(var);
+  public String getVariableType(String var, int... indices) {
+    Option<String> result = _jvm.getVariableType(var, indices);
     return result.unwrap("");
   }
   

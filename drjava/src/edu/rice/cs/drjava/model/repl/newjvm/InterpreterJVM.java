@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-
+import java.lang.reflect.Array;
 import java.util.*;
 import java.io.*;
 
@@ -240,33 +240,45 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (lv == null) { return new Object[0]; }
     return new Object[]{ env.second().get(lv) };
   }
-  
-  
+
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
+    * @param indices varargs with the values for the indices in arrays
     * @return null if the variable is not defined, "null" if the value is null; otherwise,
     * its string representation
     */
-  public String getVariableToString(String var) {
+  public String getVariableToString(String var, int... indices) {
     Object[] val = getVariable(var);
     if (val.length == 0) { return null; }
     else {
-      try { return TextUtil.toString(val[0]); }
+      Object o = val[0];
+      for(int i=0; i<indices.length; ++i) {
+        if (!o.getClass().isArray()) { return "<error: value is not an array>"; }
+        o = Array.get(o, indices[i]);
+      }
+      try { return TextUtil.toString(o); }
       catch (Throwable t) { return "<error in toString()>"; }
     }
   }
   
   /** Gets the type of a variable in the current interpreter.
     * @param var the name of the variable
+    * @param indices varargs with the values for the indices in arrays; only the number of arguments matters here
     */
-  public String getVariableType(String var) {
+  public String getVariableType(String var, int... indices) {
     Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
     if (env == null) { return null; }
     LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
     if (lv == null) { return null; }
-    else { return _interpreterOptions.typeSystem().userRepresentation(lv.type()); }
+    else {
+      Type t = lv.type();
+      for(int i=0; i<indices.length; ++i) {
+        if (!_interpreterOptions.typeSystem().isArray(t)) { return "<error: value is not an array>"; }
+        t = _interpreterOptions.typeSystem().arrayElementType(t);
+      }
+      return _interpreterOptions.typeSystem().userRepresentation(t);
+    }
   }
-  
   
   /** Adds a named Interpreter to the list.
     * @param name the unique name for the interpreter

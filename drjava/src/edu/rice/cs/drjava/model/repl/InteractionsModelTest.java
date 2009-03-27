@@ -571,11 +571,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       }
     }
         
-    public String getVariableToString(String var) {
+    public String getVariableToString(String var, int... indices) {
       fail("cannot getVariableToString in a test");
       return null;
     }
-    public String getVariableType(String var) {
+    public String getVariableType(String var, int... indices) {
       fail("cannot getVariableClassName in a test");
       return null;
     }
