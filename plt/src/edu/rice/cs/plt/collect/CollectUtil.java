@@ -834,5 +834,118 @@ public final class CollectUtil {
     }
     return result;
   }
+  
+  /**
+   * Get the maximal elements of the given list, based on the given order.  All elements in
+   * {@code vals} either appear in the result or precede some element in the result.  Where
+   * two elements are equivalent (each precedes the other), the second will always be
+   * discarded.  
+   */
+  public static<T> List<T> maxList(Iterable<? extends T> vals, Order<? super T> order) {
+    switch (IterUtil.sizeOf(vals, 2)) {
+      case 0: return Collections.emptyList();
+      case 1: return Collections.singletonList(IterUtil.first(vals));
+      default:
+        LinkedList<? extends T> workList = makeLinkedList(vals);
+        LinkedList<T> result = new LinkedList<T>();
+        Iterable<T> remainingTs = IterUtil.compose(workList, result);
+        while (!workList.isEmpty()) {
+          // prefer discarding later elements when two are equivalent
+          T t = workList.removeLast();
+          boolean discard = IterUtil.or(remainingTs, LambdaUtil.bindFirst(order, t));
+          if (!discard) { result.addFirst(t); }
+        }
+        return result;
+    }
+  }
+  
+  /**
+   * Get the minimal elements of the given list, based on the given order.  All elements in
+   * {@code vals} either appear in the result or are preceded by some element in the result.
+   * Where two elements are equivalent (each precedes the other), the second will always be
+   * discarded.
+   */
+  public static<T> List<T> minList(Iterable<? extends T> vals, Order<? super T> order) {
+    return maxList(vals, inverse(order));
+  }
+  
+  /** Get a TotalOrder based on the natural (compareTo-based) order associated with the given type. */
+  @SuppressWarnings("unchecked") public static <T extends Comparable<? super T>> TotalOrder<T> naturalOrder() {
+    return (TotalOrder<T>) NaturalOrder.INSTANCE;
+  }
+    
+  private static final class NaturalOrder<T extends Comparable<? super T>>
+      extends TotalOrder<T> implements Serializable {
+    private static final NaturalOrder<Comparable<Object>> INSTANCE = new NaturalOrder<Comparable<Object>>();
+    private NaturalOrder() {}
+    public int compare(T arg1, T arg2) { return arg1.compareTo(arg2); }
+  }
+  
+  /** Wrap a Comparator as a TotalOrder. */
+  public static <T> TotalOrder<T> asTotalOrder(Comparator<? super T> comp) {
+    return new ComparatorTotalOrder<T>(comp);
+  }
+  
+  private static final class ComparatorTotalOrder<T> extends TotalOrder<T> {
+    private final Comparator<? super T> _comp;
+    public ComparatorTotalOrder(Comparator<? super T> comp) { _comp = comp; }
+    public int compare(T arg1, T arg2) { return _comp.compare(arg1, arg2); }
+  }
+  
+  /** Create an inverse of the given order. */
+  public static <T> Order<T> inverse(Order<? super T> ord) {
+    return new InverseOrder<T>(ord);
+  }
+  
+  private static final class InverseOrder<T> implements Order<T> {
+    private final Order<? super T> _ord;
+    public InverseOrder(Order<? super T> ord) { _ord = ord; }
+    public boolean contains(T arg1, T arg2) { return _ord.contains(arg2, arg1); }
+  }
+
+  /** Create an inverse of the given comparator (or TotalOrder). */
+  public static <T> TotalOrder<T> inverse(Comparator<? super T> ord) {
+    return new InverseTotalOrder<T>(ord);
+  }
+  
+  private static final class InverseTotalOrder<T> extends TotalOrder<T> {
+    private final Comparator<? super T> _ord;
+    public InverseTotalOrder(Comparator<? super T> ord) { _ord = ord; }
+    public int compare(T arg1, T arg2) { return _ord.compare(arg2, arg1); }
+  }
+  
+  /**
+   * A partial order checking whether the first element is a subset of the second; implemented with
+   * {@link IterUtil#containsAll} and {@link Collection#containsAll}.
+   */
+  public static final Order<Iterable<?>> SUBSET_ORDER = new SubsetOrder();
+  
+  private static final class SubsetOrder implements Order<Iterable<?>>, Serializable {
+    private SubsetOrder() {}
+    public boolean contains(Iterable<?> sub, Iterable<?> sup) { return IterUtil.containsAll(sup, sub); }
+  }
+  
+  /**
+   * A partial order checking whether the first element is a substring of the second; implemented with
+   * {@link String#contains}.
+   */
+  public static final Order<String> SUBSTRING_ORDER = new SubstringOrder();
+  
+  private static final class SubstringOrder implements Order<String>, Serializable {
+    private SubstringOrder() {}
+    public boolean contains(String sub, String sup) { return sup.contains(sub); }
+  }
+  
+  /**
+   * A partial order checking whether the first element is a prefix of the second; implemented with
+   * {@link String#contains}.
+   */
+  public static final Order<String> STRING_PREFIX_ORDER = new StringPrefixOrder();
+  
+  private static final class StringPrefixOrder implements Order<String>, Serializable {
+    private StringPrefixOrder() {}
+    public boolean contains(String pre, String s) { return s.startsWith(pre); }
+  }
+  
 
 }

@@ -2045,6 +2045,35 @@ public final class IterUtil {
     return result;
   }
   
+  /**
+   * Use the {@link #cross(Iterable)} function to apply a distribution rule to the given composite object.
+   * Given constructors {@code $} and {@code %}, for example, this method transforms an object of the form
+   * {@code (a$b) % (c$d$e)} to {@code (a%c) $ (a%d) $ (a%e) $ (b%c) $ (b%d) $ (b%e)}.  For maximum flexibility,
+   * the types produced by the {@code $} and {@code %} constructors may be different from each other and from
+   * the type of atomic elements.  Additionally, the type of {@code $} applied to some {@code %}-constructed
+   * elements may be different than the type of {@code $} applied to atomic elements (and the same for {@code %}).
+   * @param <S1> The original object type, composed of {@code T1}s.
+   * @param <T1> The type of {@code S1}'s components, composed of {@code A}s.
+   * @param <A> The type of atomic components of a {@code T1} or {@code S2}.
+   * @param <S2> The type of a {@code T2}'s components in the result, composed of {@code A}s.
+   * @param <T2> The result type, composed of {@code S2}s.
+   * @param original  The original object
+   * @param breakS  Decomposes an {@code S1} into its constituent elements.
+   * @param breakT Decomposes a {@code T1} into its constituent elements.
+   * @param makeS Construct an {@code S2} from the given elements.
+   * @param makeT Construct a {@code T2} from the given elements.
+   */
+  public static<S1, T1, A, S2, T2> T2 distribute(S1 original,
+                                                 Lambda<? super S1, ? extends Iterable<? extends T1>> breakS,
+                                                 Lambda<? super T1, ? extends Iterable<? extends A>> breakT,
+                                                 Lambda<? super Iterable<A>, ? extends S2> makeS,
+                                                 Lambda<? super Iterable<S2>, ? extends T2> makeT) {
+    // to make things concrete, assume original is a sum of products, and we want a product of sums
+    Iterable<Iterable<? extends A>> sumOfProducts = map(breakS.value(original), breakT);
+    Iterable<Iterable<A>> productOfSums = cross(sumOfProducts);
+    return makeT.value(map(productOfSums, makeS));
+  }
+  
   
   /** Lazily create an iterable containing the values of the given thunks. */
   public static <R> SizedIterable<R> valuesOf(Iterable<? extends Thunk<? extends R>> iter) {

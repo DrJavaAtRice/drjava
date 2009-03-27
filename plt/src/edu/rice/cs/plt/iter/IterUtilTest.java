@@ -38,6 +38,8 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.util.*;
+
+import edu.rice.cs.plt.lambda.Lambda;
 import static edu.rice.cs.plt.iter.IterUtil.*;
 
 /**
@@ -144,6 +146,22 @@ public class IterUtilTest extends TestCase {
     byte[] bytes = { 1, 15, 3 };
     Iterator<Byte> iter = asIterator(new ByteArrayInputStream(bytes));
     assertIterator(iter, (byte) 1, (byte) 15, (byte) 3);
+  }
+  
+  public void testDistribute() {
+    String[][] orig = { { "a", "b" }, { "c", "d", "e" } };
+    String[][] expected = { { "a", "c" }, { "a", "d" }, { "a", "e" }, { "b", "c" }, { "b", "d" }, { "b", "e" } };
+    class ArrayElements<T> implements Lambda<T[], Iterable<T>> {
+      public Iterable<T> value(T[] arg) { return asIterable(arg); }
+    }
+    class MakeArray<T> implements Lambda<Iterable<T>, T[]> {
+      private final Class<T> _c;
+      public MakeArray(Class<T> c) { _c = c; }
+      public T[] value(Iterable<T> arg) { return toArray(arg, _c); }
+    }
+    String[][] result = distribute(orig, new ArrayElements<String[]>(), new ArrayElements<String>(),
+                                   new MakeArray<String>(String.class), new MakeArray<String[]>(String[].class));
+    assertTrue(Arrays.deepEquals(expected, result));
   }
   
 }

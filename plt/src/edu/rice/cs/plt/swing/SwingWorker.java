@@ -105,7 +105,9 @@ public abstract class SwingWorker<R, I> extends IncrementalTaskController<I, R> 
         });
       }
     }
-    intermediateListeners().add(new IntermediateListener());
+    @SuppressWarnings("unchecked") // javac 6 bug (Eclipse and javac 5 are fine)
+    Runnable1<I> listener = new IntermediateListener();
+    intermediateListeners().add(listener);
   }
   
   

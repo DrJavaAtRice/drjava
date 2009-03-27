@@ -40,13 +40,16 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import edu.rice.cs.plt.debug.ThreadSnapshot;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.ReadOnlyIterator;
 import edu.rice.cs.plt.iter.SizedIterable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
@@ -664,6 +667,18 @@ public final class IOUtil {
     try { return toString(reader); }
     finally { reader.close(); }
   }
+
+  /**
+   * Get the contents of a file as a sequence of lines, accessed via an iterator.  Lines are
+   * broken as determined by {@link BufferedReader#readLine}.  The result iterator's {@code next()}
+   * method throws a {@link WrappedException} wrapping an {@link IOException} if an error occurs while
+   * reading.
+   * @throws IOException  If the file can't be found or an error occurs when reading the first line (for lookahead)
+   */  
+  public static Iterator<String> readLines(File file) throws IOException {
+    FileReader reader = new FileReader(file);
+    return readLines(reader);
+  }
   
   /**
    * Produce an Adler-32 hash for the given file.  The result is an int (32 bits).
@@ -1095,6 +1110,33 @@ public final class IOUtil {
    */
   public static String toString(Reader r) throws IOException {
     return toStringBuffer(r).toString();
+  }
+  
+  /**
+   * Get the contents of a reader as a sequence of lines, accessed via an iterator.  Lines are
+   * broken as determined by {@link BufferedReader#readLine}.  The Reader is closed once iteration
+   * has been completed. The result iterator's {@code next()} method throws a {@link WrappedException}
+   * wrapping an {@link IOException} if an error occurs while reading.
+   * @throws IOException  If an error occurs when reading the first line (for lookahead).  
+   */
+  public static Iterator<String> readLines(Reader r) throws IOException {
+    final BufferedReader br = asBuffered(r);
+    final String firstLine = br.readLine();
+    if (firstLine == null) { br.close(); }
+    return new ReadOnlyIterator<String>() {
+      String lookahead = firstLine;
+      public boolean hasNext() { return lookahead != null; }
+      public String next() {
+        if (lookahead == null) { throw new NoSuchElementException(); }
+        try {
+          String result = lookahead;
+          lookahead = br.readLine();
+          if (lookahead == null) { br.close(); }
+          return result;
+        }
+        catch (IOException e) { throw new WrappedException(e); }
+      }
+    };
   }
   
   /**
