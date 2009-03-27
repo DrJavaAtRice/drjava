@@ -735,54 +735,54 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       OpenDefinitionsDocument prevDoc = prevPane.getOpenDefDocument();
       
       if (error.file() != null) {
-        try {
-          java.util.List<OpenDefinitionsDocument> openDocs = model.getProjectDocuments();
-          
+        try {          
           boolean open = false;
-          for(OpenDefinitionsDocument doc : openDocs)
-            if(doc.getFile().equals(error.file()))
+          for(OpenDefinitionsDocument doc : model.getOpenDefinitionsDocuments()) {
+            if(doc.getFile().equals(error.file())) {
               open = true;
-          
-          if(!open)
-            throw new IOException("Tried to switch to file not open in project.");
-          
-          OpenDefinitionsDocument doc = model.getDocumentForFile(error.file());
-          CompilerErrorModel errorModel = getErrorModel();
-          
-          Position pos = errorModel.getPosition(error); // null if error has no Position
-//          Utilities.showDebug("The position of the error is: " + pos);
-          // switch to correct def pane and move caret to error position
-//          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
-          
-          if (! prevDoc.equals(doc)) {
-            model.setActiveDocument(doc);
-            EventQueue.invokeLater(new Runnable() { public void run() { model.addToBrowserHistory(); } });
-          }
-          else model.refreshActiveDocument();
-          
-//          Utilities.showDebug("setting active document has completed");
-          
-          DefinitionsPane defPane = _frame.getCurrentDefPane();
-          
-          if (pos != null) {
-            int errPos = pos.getOffset();
-            if (errPos >= 0 && errPos <= doc.getLength()) {
-              defPane.centerViewOnOffset(errPos);
-              
-              /* The folowing fixes a bug where, if two consecutive errors are in the same position, the previous error
-               * is unhighlighted and the new error is not highlighted because the CaretListener does not act because there
-               * is no change in caret position. (This is the only place where updateHighlight was called from before) */
-              defPane.getErrorCaretListener().updateHighlight(errPos);
+              break;
             }
-            
           }
-          // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
-          // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
-          // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefinitionsPane.  For example,
-          // the display behaved as if the editor were in "overwrite" mode.
+          
+          if(open) {
+            OpenDefinitionsDocument doc = model.getDocumentForFile(error.file());
+            CompilerErrorModel errorModel = getErrorModel();
+            
+            Position pos = errorModel.getPosition(error); // null if error has no Position
+//          Utilities.showDebug("The position of the error is: " + pos);
+            // switch to correct def pane and move caret to error position
+//          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
+            
+            if (! prevDoc.equals(doc)) {
+              model.setActiveDocument(doc);
+              EventQueue.invokeLater(new Runnable() { public void run() { model.addToBrowserHistory(); } });
+            }
+            else model.refreshActiveDocument();
+            
+//          Utilities.showDebug("setting active document has completed");
+            
+            DefinitionsPane defPane = _frame.getCurrentDefPane();
+            
+            if (pos != null) {
+              int errPos = pos.getOffset();
+              if (errPos >= 0 && errPos <= doc.getLength()) {
+                defPane.centerViewOnOffset(errPos);
+                
+                /* The folowing fixes a bug where, if two consecutive errors are in the same position, the previous error
+                 * is unhighlighted and the new error is not highlighted because the CaretListener does not act because there
+                 * is no change in caret position. (This is the only place where updateHighlight was called from before) */
+                defPane.getErrorCaretListener().updateHighlight(errPos);
+              }
+              
+            }
+            // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
+            // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
+            // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefinitionsPane.  For example,
+            // the display behaved as if the editor were in "overwrite" mode.
 //          _frame._switchDefScrollPane(); // resets an out-of-kilter DefinitionsPane on the first error after a compilation
-          defPane.requestFocusInWindow();
-          defPane.getCaret().setVisible(true);
+            defPane.requestFocusInWindow();
+            defPane.getCaret().setVisible(true);
+          }
         }
         catch (IOException ioe) {
           // Don't highlight the source if file can't be opened

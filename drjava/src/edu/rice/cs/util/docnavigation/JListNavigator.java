@@ -123,19 +123,17 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     this.setCellRenderer(_renderer);
   }
   
-  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("JListNavigator.txt", true);
-  
   /** Adds the document doc to this navigator.  Should only be executed in event thread.
     * @param doc the document to add
     */
-  public void addDocument(ItemT doc) { LOG.log("addCoument("+doc+")", new Throwable()); synchronized(_model) { _model.addElement(doc); } }
+  public void addDocument(ItemT doc) { synchronized(_model) { _model.addElement(doc); } }
   
   /** Adds the document to this navigator and ignores the specified path.  Should only be
     * executed in event thread.
     * @param doc the document to add -- assumed to be of type T
     * @param path  unused parameter in this class 
     */
-  public void addDocument(ItemT doc, String path) { LOG.log("addCoument("+doc+")", new Throwable()); addDocument(doc); }
+  public void addDocument(ItemT doc, String path) { addDocument(doc); }
   
   /** A typesafe version of {@code _model.get(i)}.  This is a workaround for the
     * non-generic implementation of DefaultListModel, and should be removed once that
