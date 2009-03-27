@@ -1256,9 +1256,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   //    static boolean SHOW_GETDOC = false;
   
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("_openFiles.txt", true);
+  
   /** Opens all the files in the list, and notifies about the last file opened. */
   private OpenDefinitionsDocument[] _openFiles(File[] files)
     throws IOException, OperationCanceledException, AlreadyOpenException {
+    
+    //Log call stack
+    LOG.log("_openFiles(...)", new Throwable());
+    //End log
+    
     
     ArrayList<OpenDefinitionsDocument> alreadyOpenDocuments = new ArrayList<OpenDefinitionsDocument>();
     ArrayList<OpenDefinitionsDocument> retDocs = new ArrayList<OpenDefinitionsDocument>();
@@ -3356,7 +3363,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** throws UnsupportedOperationException */
-    public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }        
+    public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }
     
     public String toString() { return getFileName(); }
     

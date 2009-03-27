@@ -736,6 +736,16 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       
       if (error.file() != null) {
         try {
+          java.util.List<OpenDefinitionsDocument> openDocs = model.getProjectDocuments();
+          
+          boolean open = false;
+          for(OpenDefinitionsDocument doc : openDocs)
+            if(doc.getFile().equals(error.file()))
+              open = true;
+          
+          if(!open)
+            throw new IOException("Tried to switch to file not open in project.");
+          
           OpenDefinitionsDocument doc = model.getDocumentForFile(error.file());
           CompilerErrorModel errorModel = getErrorModel();
           
