@@ -138,7 +138,5 @@ public final class DebugWatchDataTest extends DrJavaTestCase {
     assertEquals("should not have a type",
                  DebugWatchData.NO_TYPE, data.getType());
     assertTrue("should not appear changed", !data.isChanged());
-  }
-  
-  
+  } 
 }
