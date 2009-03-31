@@ -292,7 +292,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
-    
     File buildDir = _model.getBuildDirectory();
 //    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
     
@@ -335,7 +334,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
       }
     }
-    
+
 //    System.err.println("classDirs = " + classDirsAndRoots.keySet());
     
     /** set of dirs potentially containing test classes */
@@ -344,10 +343,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    System.err.println("openDocFiles = " + openDocFiles);
     
     /* Names of test classes. */
-    ArrayList<String> classNames = new ArrayList<String>();
+    final ArrayList<String> classNames = new ArrayList<String>();
     
     /* Source files corresonding to potential test class files */
-    ArrayList<File> files = new ArrayList<File>();
+    final ArrayList<File> files = new ArrayList<File>();
     
     /* Flag indicating if project is open */
     boolean isProject = _model.isProjectActive();
@@ -444,35 +443,43 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
     
-    // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
-    // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
-//    Utilities.show("Preparing to synchronize");
-    synchronized(_compilerModel.getCompilerLock()) {
-      /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-      List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
-      if (tests == null || tests.isEmpty()) {
-        nonTestCase(allTests);
-        return;
-      }
-      
-      /** Run the junit test suite that has already been set up on the slave JVM */
-      _testInProgress = true;
-//        System.err.println("Spawning test thread");
-      new Thread(new Runnable() {
-        public void run() { 
-          try {
-//              Utilities.show("Starting JUnit");
-            _notifyJUnitStarted(); 
-            boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
-            if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
-          }
-          catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
-            _notifyJUnitEnded();  // balances junitStarted()
-            _testInProgress = false;
+    /** Run the junit test suite that has already been set up on the slave JVM */
+    _testInProgress = true;
+    // System.err.println("Spawning test thread");
+    new Thread(new Runnable() {
+      public void run() { 
+        // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
+        // Utilities.show("Preparing to synchronize");
+        
+        // The call to findTestClasses had to be moved out of the event thread (bug 2722310)
+        // The event thread is still blocked in findTestClasses when JUnit needs to
+        // have a class prepared. This invokes EventHandlerThread._handleClassPrepareEvent, which puts a call to
+        // _debugger.getPendingRequestManager().classPrepared(e); (which presumably
+        // deals with preparing the class) on the event thread using invokeLater.
+        // This, however, doesn't get executed because the event thread is still blocking --> deadlock.
+        synchronized(_compilerModel.getCompilerLock()) {
+          // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
+          /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
+          List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
+          if (tests == null || tests.isEmpty()) {
+            nonTestCase(allTests);
+            return;
           }
         }
-      }).start();
-    }
+        
+        try {
+          // Utilities.show("Starting JUnit");
+          
+          _notifyJUnitStarted(); 
+          boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
+          if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
+        }
+        catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
+          _notifyJUnitEnded();  // balances junitStarted()
+          _testInProgress = false;
+        }
+      }
+    }).start();
   }
   
 //-------------------------------- Helpers --------------------------------//
