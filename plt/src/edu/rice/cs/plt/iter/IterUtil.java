@@ -2046,6 +2046,26 @@ public final class IterUtil {
   }
   
   /**
+   * Use the {@link #cross(Iterable)} function to lazily apply a distribution rule to the given composite
+   * object list.  Given a list of conjunctions, for example, this method transforms the list into an
+   * equivalent list of disjunctions.
+   * @param <T1> The original object's components, each composed of {@code A}s.
+   * @param <A> The type of atomic components of a {@code T1} or {@code S2}.
+   * @param <S2> The type of the result's components, again composed of {@code A}s.
+   * @param original  A list of original {@code T1}s.
+   * @param breakT Decomposes a {@code T1} into its constituent elements.
+   * @param makeS Construct an {@code S2} from the given elements.
+   */
+  public static <T1, A, S2> Iterable<S2> distribute(Iterable<? extends T1> original,
+                                                    Lambda<? super T1, ? extends Iterable<? extends A>> breakT,
+                                                    Lambda<? super Iterable<A>, ? extends S2> makeS) {
+    // to make things concrete, assume original is a sum of products, and we want a product of sums
+    Iterable<Iterable<? extends A>> sumOfProducts = map(original, breakT);
+    Iterable<Iterable<A>> productOfSums = cross(sumOfProducts);
+    return map(productOfSums, makeS);
+  }
+
+  /**
    * Use the {@link #cross(Iterable)} function to apply a distribution rule to the given composite object.
    * Given constructors {@code $} and {@code %}, for example, this method transforms an object of the form
    * {@code (a$b) % (c$d$e)} to {@code (a%c) $ (a%d) $ (a%e) $ (b%c) $ (b%d) $ (b%e)}.  For maximum flexibility,
@@ -2063,15 +2083,12 @@ public final class IterUtil {
    * @param makeS Construct an {@code S2} from the given elements.
    * @param makeT Construct a {@code T2} from the given elements.
    */
-  public static<S1, T1, A, S2, T2> T2 distribute(S1 original,
-                                                 Lambda<? super S1, ? extends Iterable<? extends T1>> breakS,
-                                                 Lambda<? super T1, ? extends Iterable<? extends A>> breakT,
-                                                 Lambda<? super Iterable<A>, ? extends S2> makeS,
-                                                 Lambda<? super Iterable<S2>, ? extends T2> makeT) {
-    // to make things concrete, assume original is a sum of products, and we want a product of sums
-    Iterable<Iterable<? extends A>> sumOfProducts = map(breakS.value(original), breakT);
-    Iterable<Iterable<A>> productOfSums = cross(sumOfProducts);
-    return makeT.value(map(productOfSums, makeS));
+  public static <S1, T1, A, S2, T2> T2 distribute(S1 original,
+                                                  Lambda<? super S1, ? extends Iterable<? extends T1>> breakS,
+                                                  Lambda<? super T1, ? extends Iterable<? extends A>> breakT,
+                                                  Lambda<? super Iterable<A>, ? extends S2> makeS,
+                                                  Lambda<? super Iterable<S2>, ? extends T2> makeT) {
+    return makeT.value(distribute(breakS.value(original), breakT, makeS));
   }
   
   
