@@ -38,8 +38,6 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.rice.cs.plt.iter.IterUtil;
-
 import static edu.rice.cs.plt.collect.CollectUtil.*;
 
 /**
@@ -51,24 +49,52 @@ public class CollectUtilTest extends TestCase {
     assertEquals(Arrays.asList(expected), actual);
   }
   
+  private List<String> list(String... ss) {
+    return Arrays.asList(ss);
+  }
+  
   public void testMaxList() {
-    assertList(maxList(IterUtil.<String>make(), STRING_PREFIX_ORDER));
-    assertList(maxList(IterUtil.make("b"), STRING_PREFIX_ORDER), "b");
-    assertList(maxList(IterUtil.make("a", "b", "ab"), STRING_PREFIX_ORDER), "b", "ab");
-    assertList(maxList(IterUtil.make("ab", "b", "a"), STRING_PREFIX_ORDER), "ab", "b");
-    assertList(maxList(IterUtil.make("abc", "ab", "a"), STRING_PREFIX_ORDER), "abc");
-    assertList(maxList(IterUtil.make("a", "ab", "abc"), STRING_PREFIX_ORDER), "abc");
-    assertList(maxList(IterUtil.make("a", "ab", "a", "b", "ab"), STRING_PREFIX_ORDER), "ab", "b");
+    assertList(maxList(list(), STRING_PREFIX_ORDER));
+    assertList(maxList(list("b"), STRING_PREFIX_ORDER), "b");
+    assertList(maxList(list("a", "b", "ab"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(maxList(list("ab", "b", "a"), STRING_PREFIX_ORDER), "ab", "b");
+    assertList(maxList(list("abc", "ab", "a"), STRING_PREFIX_ORDER), "abc");
+    assertList(maxList(list("a", "ab", "abc"), STRING_PREFIX_ORDER), "abc");
+    assertList(maxList(list("a", "ab", "a", "b", "ab"), STRING_PREFIX_ORDER), "ab", "b");
+  }
+  
+  public void testComposeMaxLists() {
+    assertList(composeMaxLists(list(), list(), STRING_PREFIX_ORDER));
+    assertList(composeMaxLists(list(), list("a", "b", "c"), STRING_PREFIX_ORDER), "a", "b", "c");
+    assertList(composeMaxLists(list("a", "b", "c"), list(), STRING_PREFIX_ORDER), "a", "b", "c");
+    assertList(composeMaxLists(list("b", "ab"), list("b"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(composeMaxLists(list("ab", "b"), list("b"), STRING_PREFIX_ORDER), "ab", "b");
+    assertList(composeMaxLists(list("b"), list("b", "ab"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(composeMaxLists(list("b"), list("ab", "b"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(composeMaxLists(list("ab", "cd"), list("ef", "c"), STRING_PREFIX_ORDER), "ab", "cd", "ef");
+    assertList(composeMaxLists(list("ef", "c"), list("ab", "cd"), STRING_PREFIX_ORDER), "ef", "ab", "cd");
   }
   
   public void testMinList() {
-    assertList(minList(IterUtil.<String>make(), STRING_PREFIX_ORDER));
-    assertList(minList(IterUtil.make("b"), STRING_PREFIX_ORDER), "b");
-    assertList(minList(IterUtil.make("a", "b", "ab"), STRING_PREFIX_ORDER), "a", "b");
-    assertList(minList(IterUtil.make("ab", "b", "a"), STRING_PREFIX_ORDER), "b", "a");
-    assertList(minList(IterUtil.make("abc", "ab", "a"), STRING_PREFIX_ORDER), "a");
-    assertList(minList(IterUtil.make("a", "ab", "abc"), STRING_PREFIX_ORDER), "a");
-    assertList(minList(IterUtil.make("a", "ab", "a", "b", "ab"), STRING_PREFIX_ORDER), "a", "b");
+    assertList(minList(list(), STRING_PREFIX_ORDER));
+    assertList(minList(list("b"), STRING_PREFIX_ORDER), "b");
+    assertList(minList(list("a", "b", "ab"), STRING_PREFIX_ORDER), "a", "b");
+    assertList(minList(list("ab", "b", "a"), STRING_PREFIX_ORDER), "b", "a");
+    assertList(minList(list("abc", "ab", "a"), STRING_PREFIX_ORDER), "a");
+    assertList(minList(list("a", "ab", "abc"), STRING_PREFIX_ORDER), "a");
+    assertList(minList(list("a", "ab", "a", "b", "ab"), STRING_PREFIX_ORDER), "a", "b");
+  }
+  
+  public void testComposeMinLists() {
+    assertList(composeMinLists(list(), list(), STRING_PREFIX_ORDER));
+    assertList(composeMinLists(list(), list("a", "b", "c"), STRING_PREFIX_ORDER), "a", "b", "c");
+    assertList(composeMinLists(list("a", "b", "c"), list(), STRING_PREFIX_ORDER), "a", "b", "c");
+    assertList(composeMinLists(list("b", "ab"), list("b"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(composeMinLists(list("ab", "b"), list("b"), STRING_PREFIX_ORDER), "ab", "b");
+    assertList(composeMinLists(list("b"), list("b", "ab"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(composeMinLists(list("b"), list("ab", "b"), STRING_PREFIX_ORDER), "b", "ab");
+    assertList(composeMinLists(list("ab", "cd"), list("ef", "c"), STRING_PREFIX_ORDER), "ab", "ef", "c");
+    assertList(composeMinLists(list("ef", "c"), list("ab", "cd"), STRING_PREFIX_ORDER), "ef", "c", "ab");
   }
   
   public void testPrefixStringOrder() {

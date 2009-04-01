@@ -841,7 +841,7 @@ public final class CollectUtil {
    * two elements are equivalent (each precedes the other), the second will always be
    * discarded.  
    */
-  public static<T> List<T> maxList(Iterable<? extends T> vals, Order<? super T> order) {
+  public static <T> List<T> maxList(Iterable<? extends T> vals, Order<? super T> order) {
     switch (IterUtil.sizeOf(vals, 2)) {
       case 0: return Collections.emptyList();
       case 1: return Collections.singletonList(IterUtil.first(vals));
@@ -860,13 +860,46 @@ public final class CollectUtil {
   }
   
   /**
+   * Get the maximal elements of the given lists, each known to be a list of maximal elements, based
+   * on the given order.  The result is the same as {@code maxList(IterUtil.compose(vals1, vals2), order)},
+   * but the implementation is more efficient, because it can avoid performing redundant comparisons.
+   */
+  public static <T> List<T> composeMaxLists(Iterable<? extends T> vals1, Iterable<? extends T> vals2,
+                                            Order<? super T> order) {
+    List<T> results2 = new LinkedList<T>();
+    for (T t : vals2) {
+      // does t precede anything in vals1?
+      boolean discard = IterUtil.or(vals1, LambdaUtil.bindFirst(order, t));
+      if (!discard) { results2.add(t); }
+    }
+    List<T> results1 = new LinkedList<T>();
+    for (T t : vals1) {
+      // does t precede anything in (what's left of) vals2?
+      boolean discard = IterUtil.or(results2, LambdaUtil.bindFirst(order, t));
+      if (!discard) { results1.add(t); }
+    }
+    results1.addAll(results2);
+    return results1;
+  }
+  
+  /**
    * Get the minimal elements of the given list, based on the given order.  All elements in
    * {@code vals} either appear in the result or are preceded by some element in the result.
    * Where two elements are equivalent (each precedes the other), the second will always be
    * discarded.
    */
-  public static<T> List<T> minList(Iterable<? extends T> vals, Order<? super T> order) {
+  public static <T> List<T> minList(Iterable<? extends T> vals, Order<? super T> order) {
     return maxList(vals, inverse(order));
+  }
+  
+  /**
+   * Get the minimal elements of the given lists, each known to be a list of minimal elements, based
+   * on the given order.  The result is the same as {@code minList(IterUtil.compose(vals1, vals2), order)},
+   * but the implementation is more efficient, because it can avoid performing redundant comparisons.
+   */
+  public static <T> List<T> composeMinLists(Iterable<? extends T> vals1, Iterable<? extends T> vals2,
+                                            Order<? super T> order) {
+    return composeMaxLists(vals1, vals2, inverse(order));
   }
   
   /** Get a TotalOrder based on the natural (compareTo-based) order associated with the given type. */
