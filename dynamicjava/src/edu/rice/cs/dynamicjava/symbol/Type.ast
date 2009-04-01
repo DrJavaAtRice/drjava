@@ -8,6 +8,7 @@ tabsize 2;
 outputdir type;
 allownulls no;
 addgetterprefixes no;
+useplt yes;
 
 package edu.rice.cs.dynamicjava.symbol.type;
 

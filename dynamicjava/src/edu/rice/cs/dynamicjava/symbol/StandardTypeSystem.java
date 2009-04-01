@@ -40,11 +40,11 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public abstract boolean isSubtype(Type subT, Type superT);
   
-  /** Compute a common supertype of {@code t1} and {@code t2}. */
-  public abstract Type join(Type t1, Type t2);
+  /** Compute a common supertype of the given list of types. */
+  public abstract Type join(Iterable<? extends Type> ts);
 
-  /** Compute a common subtype of {@code t1} and {@code t2}. */
-  public abstract Type meet(Type t1, Type t2);
+  /** Compute a common subtype of the given list of types. */
+  public abstract Type meet(Iterable<? extends Type> ts);
   
   /** Produce types that are bounded by the corresponding type argument and parameter. */
   protected abstract Iterable<Type> captureTypeArgs(Iterable<? extends Type> targs,
@@ -94,7 +94,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is a primitive. */
   public boolean isPrimitive(Type t) { return t.apply(IS_PRIMITIVE); }
   
-  private static final TypeVisitor<Boolean> IS_PRIMITIVE = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_PRIMITIVE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forPrimitiveType(PrimitiveType t) { return true; }
   };
@@ -102,7 +102,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is a reference. */
   public boolean isReference(Type t) { return t.apply(IS_REFERENCE); }
   
-  private static final TypeVisitor<Boolean> IS_REFERENCE = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_REFERENCE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forReferenceType(ReferenceType t) { return true; }
     @Override public Boolean forVariableType(VariableType t) { return true; }
@@ -113,16 +113,16 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is an array. */
   public boolean isArray(Type t) { return t.apply(IS_ARRAY); }
   
-  private static final TypeVisitor<Boolean> IS_ARRAY = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_ARRAY = new TypeAbstractVisitor<Boolean>() {
+    private final Predicate<Type> PRED = LambdaUtil.asPredicate(this);
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forArrayType(ArrayType t) { return true; }
     @Override public Boolean forVariableType(VariableType t) { return t.symbol().upperBound().apply(this); }
-    @Override public Boolean forIntersectionType(IntersectionType t) { return IterUtil.or(t.ofTypes(), IS_ARRAY_PRED); }
-    @Override public Boolean forUnionType(UnionType t) { return IterUtil.and(t.ofTypes(), IS_ARRAY_PRED); }
-  };
-
-  private static final Predicate<Type> IS_ARRAY_PRED = new Predicate<Type>() {
-    public boolean contains(Type t) { return t.apply(IS_ARRAY); }
+    @Override public Boolean forIntersectionType(IntersectionType t) { return IterUtil.or(t.ofTypes(), PRED); }
+    @Override public Boolean forUnionType(UnionType t) {
+      // BOTTOM is not an array type
+      return !IterUtil.isEmpty(t.ofTypes()) && IterUtil.and(t.ofTypes(), PRED);
+    }
   };
 
   /**
@@ -142,7 +142,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   public boolean isReifiable(Type t) { return t.apply(IS_REIFIABLE); }
   
   // cannot be defined statically, because it relies on the definition of non-static "IS_UNBOUNDED_WILDCARD"
-  private final TypeVisitor<Boolean> IS_REIFIABLE = new TypeAbstractVisitor<Boolean>() {
+  private final TypeVisitorLambda<Boolean> IS_REIFIABLE = new TypeAbstractVisitor<Boolean>() {
     
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forPrimitiveType(PrimitiveType t) { return true; }
@@ -161,7 +161,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   };
   
   // cannot be defined statically, because it relies on the definition of non-static "isEqual"
-  private final TypeVisitor<Boolean> IS_UNBOUNDED_WILDCARD = new TypeAbstractVisitor<Boolean>() {
+  private final TypeVisitorLambda<Boolean> IS_UNBOUNDED_WILDCARD = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forWildcard(Wildcard t) { 
       return isEqual(t.symbol().upperBound(), OBJECT) && isEqual(t.symbol().lowerBound(), NULL);
@@ -174,7 +174,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public boolean isConcrete(Type t) { return t.apply(IS_CONCRETE); }
   
-  private static final TypeVisitor<Boolean> IS_CONCRETE = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_CONCRETE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forPrimitiveType(PrimitiveType t) { return true; }
     @Override public Boolean forArrayType(ArrayType t) { return true; }
@@ -200,7 +200,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public boolean isStatic(Type t) { return t.apply(IS_STATIC); }
   
-  private static final TypeVisitor<Boolean> IS_STATIC = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_STATIC = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return true; }
     
     @Override public Boolean forClassType(ClassType t) {
@@ -216,7 +216,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is valid in the {@code extends} clause of a class definition */
   public boolean isExtendable(Type t) { return t.apply(IS_EXTENDABLE); }
   
-  private static final TypeVisitor<Boolean> IS_EXTENDABLE = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_EXTENDABLE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     
     @Override public Boolean forClassType(ClassType t) {
@@ -228,7 +228,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is valid in the {@code implements} clause of a class definition */
   public boolean isImplementable(Type t) { return t.apply(IS_IMPLEMENTABLE); }
   
-  private static final TypeVisitor<Boolean> IS_IMPLEMENTABLE = new TypeAbstractVisitor<Boolean>() {
+  private static final TypeVisitorLambda<Boolean> IS_IMPLEMENTABLE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forClassType(ClassType t) { return t.ofClass().isInterface(); }
   };
@@ -306,7 +306,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   public Type capture(Type t) { return t.apply(CAPTURE); }
   
   // cannot be defined statically, because it relies on the definition of non-static "capture"
-  private final TypeVisitor<Type> CAPTURE = new TypeAbstractVisitor<Type>() {
+  private final TypeVisitorLambda<Type> CAPTURE = new TypeAbstractVisitor<Type>() {
     public Type defaultCase(Type t) { return t; }
     @Override public Type forParameterizedClassType(ParameterizedClassType t) { return capture(t); }
   };
@@ -330,7 +330,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public Type erase(Type t) { return t.apply(ERASE); }
   
-  private static final TypeVisitor<Type> ERASE = new TypeAbstractVisitor<Type>() {
+  private static final TypeVisitorLambda<Type> ERASE = new TypeAbstractVisitor<Type>() {
     public Type defaultCase(Type t) { return t; }
     
     @Override public Type forNullType(NullType t) { return OBJECT; }
@@ -379,7 +379,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public Thunk<Class<?>> erasedClass(Type t) { return t.apply(ERASED_CLASS); }
   
-  private static final TypeVisitor<Thunk<Class<?>>> ERASED_CLASS = new TypeVisitor<Thunk<Class<?>>>() {
+  private static final TypeVisitorLambda<Thunk<Class<?>>> ERASED_CLASS = new TypeVisitorLambda<Thunk<Class<?>>>() {
     public Thunk<Class<?>> forBooleanType(BooleanType t) { return LambdaUtil.<Class<?>>valueLambda(boolean.class); }
     public Thunk<Class<?>> forCharType(CharType t) { return LambdaUtil.<Class<?>>valueLambda(char.class); }
     public Thunk<Class<?>> forByteType(ByteType t) { return LambdaUtil.<Class<?>>valueLambda(byte.class); }
@@ -456,23 +456,21 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   // not defined statically because it relies on non-static meet() and join()
-  private final TypeVisitor<Type> ARRAY_ELEMENT_TYPE = new TypeAbstractVisitor<Type>() {
+  private final TypeVisitorLambda<Type> ARRAY_ELEMENT_TYPE = new TypeAbstractVisitor<Type>() {
     public Type defaultCase(Type t) { throw new IllegalArgumentException(); }
     @Override public Type forArrayType(ArrayType t) { return t.ofType(); }
     @Override public Type forVariableType(VariableType t) { return t.symbol().upperBound().apply(this); }
     @Override public Type forIntersectionType(IntersectionType t) {
-      Type result = OBJECT;
-      for (Type componentT : t.ofTypes()) {
-        if (componentT.apply(IS_ARRAY)) { result = meet(result, componentT.apply(this)); }
-      }
-      return result;
+      // at least one element has an array type
+      return meet(IterUtil.map(t.ofTypes(), new Lambda<Type, Type>() {
+        public Type value(Type arrayT) {
+          return arrayT.apply(IS_ARRAY) ? arrayT.apply(ARRAY_ELEMENT_TYPE) : TOP;
+        }
+      }));
     }
     @Override public Type forUnionType(UnionType t) {
-      Type result = NULL;
-      for (Type componentT : t.ofTypes()) { // each component is guaranteed to be an array
-        result = join(result, componentT.apply(this));
-      }
-      return result;
+      // there is at least one element, and all have array types
+      return join(IterUtil.map(t.ofTypes(), this)); 
     }
   };
   
@@ -524,37 +522,20 @@ public abstract class StandardTypeSystem extends TypeSystem {
     else {
       final PrecomputedRecursionStack<Type, Type> stack = PrecomputedRecursionStack.make();
       
-      // TODO: Make sure CopyDepthFirstVisitor isn't making unnecessary copies
-      return t.apply(new TypeCopyDepthFirstVisitor() {
-        
-        // TODO: This should be automatically defined in TypeCopyDepthFirstVisitor
-        public Type defaultCase(Type t) { 
-          throw new IllegalArgumentException("Visitor unexpectedly reached default case");
-        }
-        
-        @Override public Type forParameterizedClassType(ParameterizedClassType t) {
-          Iterable<Type> newArgs = applyToList(t.typeArguments());
-          return (newArgs == null) ? t : new ParameterizedClassType(t.ofClass(), newArgs);
-        }
+      return t.apply(new TypeUpdateVisitor() {
         
         @Override public Type forVariableType(VariableType t) {
           Type result = sigma.get(t);
           return (result == null) ? t : result;
         }
         
-        @Override public Type forIntersectionType(IntersectionType t) {
-          Iterable<Type> newTypes = applyToList(t.ofTypes());
-          return (newTypes == null) ? t : new IntersectionType(newTypes);
-        }
-        
         @Override public Type forWildcard(final Wildcard t) {
           final Wildcard newWildcard = new Wildcard(new BoundedSymbol(new Object()));
-          final TypeVisitor<Type> visitor = this;
           Thunk<Type> substituteBounds = new Thunk<Type>() {
             public Type value() {
               BoundedSymbol bounds = t.symbol();
-              Type newUpper = bounds.upperBound().apply(visitor);
-              Type newLower = bounds.lowerBound().apply(visitor);
+              Type newUpper = recur(bounds.upperBound());
+              Type newLower = recur(bounds.lowerBound());
               if (newUpper == bounds.upperBound() && newLower == bounds.lowerBound()) { return t; }
               else {
                 newWildcard.symbol().initializeUpperBound(newUpper);
@@ -564,18 +545,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
             }
           };
           return stack.apply(substituteBounds, newWildcard, t);
-        }
-        
-        // returns null if no change is necessary
-        private Iterable<Type> applyToList(Iterable<? extends Type> ts) {
-          Iterable<Type> newTs = EMPTY_TYPE_ITERABLE;
-          boolean changed = false;
-          for (Type t : ts) {
-            Type newT = t.apply(this);
-            newTs = IterUtil.compose(newTs, newT);
-            changed = changed || (t != newT);
-          }
-          return changed ? newTs : null;
         }
         
       });
@@ -1017,7 +986,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * @return  Two typed expressions equivalent to {@code e1} and {@code e2} with the joined type
    * @throws UnsupportedConversionException  If the two types are incompatible.
    */
-  public Pair<Expression, Expression> join(final Expression e1, final Expression e2) 
+  public Pair<Expression, Expression> mergeConditional(final Expression e1, final Expression e2) 
     throws UnsupportedConversionException {
     return NodeProperties.getType(e1).apply(new TypeAbstractVisitor<Pair<Expression, Expression>>() {
       public Pair<Expression, Expression> defaultCase(Type t1) {
@@ -1334,6 +1303,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     });
   }
   
+  /** Get a class's immediate supertype.  The result is either null or the result of a {@link #meet} call. */
   protected Type immediateSupertype(ClassType t) {
     return t.apply(new TypeAbstractVisitor<Type>() {
       public Type defaultCase(Type t) { throw new IllegalArgumentException(); }
@@ -1345,37 +1315,22 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   protected Type immediateSupertype(SimpleClassType t) {
     if (t.equals(OBJECT)) { return null; }
-    else {
-      Type result = null;
-      for (Type sup : t.ofClass().declaredSupertypes()) {
-        result = (result == null) ? sup : meet(result, sup);
-      }
-      if (result == null) result = OBJECT;
-      return result;
-    }
+    else { return meet(IterUtil.compose(OBJECT, t.ofClass().declaredSupertypes())); }
   }
   
   protected Type immediateSupertype(RawClassType t) {
-    Type result = null;
-    for (Type sup : t.ofClass().declaredSupertypes()) {
-      Type erasedSup = erase(sup);
-      result = (result == null) ? erasedSup : meet(result, erasedSup);
-    }
-    if (result == null) result = OBJECT;
-    return result;
+    Iterable<Type> erasedSups = IterUtil.map(t.ofClass().declaredSupertypes(), new Lambda<Type, Type>() {
+      public Type value(Type t) { return t.apply(ERASE); }
+    });
+    return meet(IterUtil.compose(OBJECT, erasedSups));
   }
   
   protected Type immediateSupertype(ParameterizedClassType t) {
     ParameterizedClassType tCap = capture(t);
-    SubstitutionMap sigma = 
-      new SubstitutionMap(SymbolUtil.allTypeParameters(tCap.ofClass()), tCap.typeArguments());
-    Type result = null;
-    for (Type sup : t.ofClass().declaredSupertypes()) {
-      Type instantiatedSup = substitute(sup, sigma);
-      result = (result == null) ? instantiatedSup : meet(result, instantiatedSup);
-    }
-    if (result == null) result = OBJECT;
-    return result;
+    DJClass c = tCap.ofClass();
+    Iterable<? extends Type> sups =
+      substitute(c.declaredSupertypes(), SymbolUtil.allTypeParameters(c), tCap.typeArguments());
+    return meet(IterUtil.compose(OBJECT, sups));
   }
   
   
@@ -1886,7 +1841,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
           public ConstructorInvocation value(DJConstructor k, SignatureChecker checker) {
             SubstitutionMap sigma = new SubstitutionMap(checker.typeParameters(),
                                                         checker.typeArguments());
-            // TODO: Handle the thrown types
+            // TODO: Handle the thrown types (using sigma)
             return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
                                              k.thrownTypes());
           }

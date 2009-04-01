@@ -9,9 +9,14 @@ import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.PermutationIterable;
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.collect.Order;
 
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
+import static edu.rice.cs.plt.iter.IterUtil.map;
+import static edu.rice.cs.plt.iter.IterUtil.collapse;
+import static edu.rice.cs.plt.collect.CollectUtil.maxList;
+import static edu.rice.cs.plt.collect.CollectUtil.minList;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ExtendedTypeSystem extends StandardTypeSystem {
@@ -21,281 +26,381 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** Determine if the type is well-formed. */
   public boolean isWellFormed(Type t) { return WELL_FORMED.contains(t); }
   
-  private final Predicate<Type> WELL_FORMED = new Predicate<Type>() {
-    public boolean contains(Type t) {
-      return t.apply(new TypeAbstractVisitor<Boolean>() {
-        @Override public Boolean defaultCase(Type t) { return true; }
-        @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
-        @Override public Boolean forSimpleClassType(SimpleClassType t) {
-          return IterUtil.isEmpty(SymbolUtil.allTypeParameters(t.ofClass()));
-        }
-        @Override public Boolean forRawClassType(RawClassType t) {
-          return !IterUtil.isEmpty(SymbolUtil.allTypeParameters(t.ofClass()));
-        }
-        @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
-          Iterable<? extends Type> args = t.typeArguments();
-          if (IterUtil.and(args, WELL_FORMED)) {
-            Iterable<VariableType> params = SymbolUtil.allTypeParameters(t.ofClass());
-            if (IterUtil.sizeOf(params) == IterUtil.sizeOf(args)) {
-              Iterable<Type> captArgs = captureTypeArgs(args, params);
-              for (Pair<Type, Type> pair : IterUtil.zip(args, captArgs)) {
-                if (pair.first() != pair.second() && !pair.second().apply(this)) { return false; }
-              }
-              return inBounds(params, captArgs);
-            }
-          }
-          return false;
-        }
-        @Override public Boolean forVariableType(VariableType t) {
-          Type lower = t.symbol().lowerBound();
-          Type upper = t.symbol().upperBound();
-          return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper);
-        }
-        @Override public Boolean forBoundType(BoundType t) {
-          return IterUtil.and(t.ofTypes(), WELL_FORMED);
-        }
-      });
+  private final Predicate<Type> WELL_FORMED = LambdaUtil.asPredicate(new TypeAbstractVisitor<Boolean>() {
+    @Override public Boolean defaultCase(Type t) { return true; }
+    @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
+    @Override public Boolean forSimpleClassType(SimpleClassType t) {
+      return IterUtil.isEmpty(SymbolUtil.allTypeParameters(t.ofClass()));
     }
-  };
-
+    @Override public Boolean forRawClassType(RawClassType t) {
+      return !IterUtil.isEmpty(SymbolUtil.allTypeParameters(t.ofClass()));
+    }
+    @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
+      Iterable<? extends Type> args = t.typeArguments();
+      if (IterUtil.and(args, WELL_FORMED)) {
+        Iterable<VariableType> params = SymbolUtil.allTypeParameters(t.ofClass());
+        if (IterUtil.sizeOf(params) == IterUtil.sizeOf(args)) {
+          Iterable<Type> captArgs = captureTypeArgs(args, params);
+          for (Pair<Type, Type> pair : IterUtil.zip(args, captArgs)) {
+            if (pair.first() != pair.second() && !pair.second().apply(this)) { return false; }
+          }
+          return inBounds(params, captArgs);
+        }
+      }
+      return false;
+    }
+    @Override public Boolean forVariableType(VariableType t) {
+      Type lower = t.symbol().lowerBound();
+      Type upper = t.symbol().upperBound();
+      return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper);
+    }
+    @Override public Boolean forBoundType(BoundType t) {
+      return IterUtil.and(t.ofTypes(), WELL_FORMED);
+    }
+  });
+  
   /** Determine if the given types may be treated as equal.  This is recursive, transitive, and symmetric. */
-  public boolean isEqual(Type t1, Type t2) { return t1.equals(t2) || (isSubtype(t1, t2) && isSubtype(t2, t1)); }
+  public boolean isEqual(Type t1, Type t2) {
+    if (t1.equals(t2)) { return true; }
+    else {
+      NormSubtype sub = new NormSubtype();
+      Type t1Norm = NORMALIZE.value(t1);
+      Type t2Norm = NORMALIZE.value(t2);
+      return sub.contains(t1Norm, t2Norm) && sub.contains(t2Norm, t1Norm);
+    }
+  }
   
   /**
    * Determine if {@code subT} is a subtype of {@code superT}.  This is a recursive
    * (in terms of {@link #isEqual}), transitive relation.
    */
   public boolean isSubtype(Type subT, Type superT) {
-    //debug.logStart(new String[]{"subT", "superT"}, subT, superT);
-    boolean result = isSubtype(subT, superT, new RecursionStack2<Type, Type>());
-    //debug.logEnd("result", result);
-    return result;
+    return new NormSubtype().contains(NORMALIZE.value(subT), NORMALIZE.value(superT));
   }
   
-  private boolean isSubtype(final Type subT, final Type superT, final RecursionStack2<Type, Type> stack) {
-    //debug.logStart(new String[]{"subT", "superT"}, subT, superT); try {
-            
-    if (subT.equals(superT)) { return true; } // what follows assumes the types are not syntactically equal
+  /** Tests subtyping for normalized types. */
+  private class NormSubtype implements Order<Type>, Lambda2<Type, Type, Boolean> {
+    // to avoid conflicts, no indirectly-recursive calls should be made that assume an empty stack (like join)
+    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>();
     
-    // Handle easy superT cases:
-    Boolean result = superT.apply(new TypeAbstractVisitor<Boolean>() {
-      public Boolean defaultCase(Type superT) { return null; }
-      
-      @Override public Boolean forVariableType(final VariableType superT) {
-        return subT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(final Type subT) {
-            Thunk<Boolean> checkLowerBound = new Thunk<Boolean>() {
-              public Boolean value() { return isSubtype(subT, superT.symbol().lowerBound(), stack); }
-            };
-            return stack.apply(checkLowerBound, false, subT, superT);
-          }
-          @Override public Boolean forVariableType(VariableType subT) {
-            return defaultCase(subT) ? true : null;
-          }
-          @Override public Boolean forIntersectionType(IntersectionType subT) {
-            return defaultCase(subT) ? true : null;
-          }
-          @Override public Boolean forBottomType(BottomType subT) { return true; }
-        });
-      }
-      
-      @Override public Boolean forIntersectionType(IntersectionType superT) {
-        if (subT instanceof BottomType) { return true; }
-        else {
-          return IterUtil.and(superT.ofTypes(), new Predicate<Type>() {
-            public boolean contains(Type t) { return isSubtype(subT, t, stack); }
-          });
-        }
-      }
-      
-      @Override public Boolean forUnionType(final UnionType superT) {
-        return subT.apply(new TypeAbstractVisitor<Boolean>() {
-          @Override public Boolean defaultCase(Type t) {
-            return IterUtil.or(superT.ofTypes(), new Predicate<Type>() {
-              public boolean contains(Type t) { return isSubtype(subT, t, stack); }
-            });
-          }
-          public Boolean forVariableType(VariableType t) { return defaultCase(subT) ? true : null; }
-          public Boolean forUnionType(UnionType t) { return null; }
-          public Boolean forBottomType(BottomType t) { return true; }
-        });
-      }
-      
-      @Override public Boolean forTopType(TopType superT) { return true; }
-    });
+    public Boolean value(Type subT, Type superT) { return contains(subT, superT); }
     
-    if (result != null) { return result; }
+    public Predicate<Type> supertypes(Type sub) { return LambdaUtil.bindFirst((Order<Type>) this, sub); }
     
-    // Handle subT-based cases:
-    return subT.apply(new TypeAbstractVisitor<Boolean>() {
-      
-      public Boolean defaultCase(Type t) { return false; }
-      
-      public Boolean forCharType(CharType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          @Override public Boolean forCharType(CharType superT) { return true; }
-          @Override public Boolean forIntType(IntType superT) { return true; }
-          @Override public Boolean forLongType(LongType superT) { return true; }
-          @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
-        });
-      }
-      
-      public Boolean forByteType(ByteType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          @Override public Boolean forIntegerType(IntegerType superT) { return true; }
-          @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
-        });
-      }
-      
-      public Boolean forShortType(ShortType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          @Override public Boolean forShortType(ShortType superT) { return true; }
-          @Override public Boolean forIntType(IntType superT) { return true; }
-          @Override public Boolean forLongType(LongType superT) { return true; }
-          @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
-        });
-      }
-      
-      public Boolean forIntType(IntType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          @Override public Boolean forIntType(IntType superT) { return true; }
-          @Override public Boolean forLongType(LongType superT) { return true; }
-          @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
-        });
-      }
-      
-      public Boolean forLongType(LongType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          @Override public Boolean forLongType(LongType superT) { return true; }
-          @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
-        });
-      }
-      
-      public Boolean forFloatType(FloatType subT) { return superT instanceof FloatingPointType; }
-      
-      public Boolean forNullType(NullType subT) { return isReference(superT); }
-      
-      public Boolean forSimpleArrayType(SimpleArrayType subT) { return handleArrayType(subT); }
-      
-      public Boolean forVarargArrayType(VarargArrayType subT) { return handleArrayType(subT); }
-      
-      private Boolean handleArrayType(final ArrayType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          
-          @Override public Boolean forArrayType(ArrayType superT) {
-            if (isPrimitive(subT.ofType())) {
-              // types may be inequal if one is vararg and the other is not
-              return subT.ofType().equals(superT.ofType());
-            }
-            else { return isSubtype(subT.ofType(), superT.ofType(), stack); }
-          }
-          
-          @Override public Boolean forClassType(ClassType superT) { 
-            return isSubtype(CLONEABLE_AND_SERIALIZABLE, superT, stack);
-          }
-          
-        });
-      }
-      
-      public Boolean forClassType(final ClassType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          @Override public Boolean forClassType(ClassType superT) {
-            Type newSub = immediateSupertype(subT);
-            if (newSub == null) { return false; }
-            else { return isSubtype(newSub, superT, stack); }
-          }
-        });
-      }
-      
-      public Boolean forParameterizedClassType(final ParameterizedClassType subT) {
-        return superT.apply(new TypeAbstractVisitor<Boolean>() {
-          public Boolean defaultCase(Type superT) { return false; }
-          
-          @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
-            if (subT.ofClass().equals(superT.ofClass())) {
+    public Predicate<Type> subtypes(Type sup) { return LambdaUtil.bindSecond((Order<Type>) this, sup); }
+    
+    public boolean contains(final Type subT, final Type superT) {
+      //debug.logStart(new String[]{"subT", "superT"}, subT, superT); try {
               
-              Thunk<Boolean> containedArgs = new Thunk<Boolean>() {
+      if (subT.equals(superT)) { return true; } // what follows assumes the types are not syntactically equal
+      
+      // Handle easy superT cases; return null if subT cases need to be considered, too
+      Boolean result = superT.apply(new TypeAbstractVisitor<Boolean>() {
+        public Boolean defaultCase(Type superT) { return null; }
+        
+        @Override public Boolean forVariableType(final VariableType superT) {
+          return subT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(final Type subT) {
+              Thunk<Boolean> checkLowerBound = new Thunk<Boolean>() {
                 public Boolean value() {
-                  boolean result = true;
-                  ParameterizedClassType subCapT = capture(subT);
-                  for (final Pair<Type, Type> args : IterUtil.zip(subCapT.typeArguments(), 
-                                                                  superT.typeArguments())) {
-                    result &= args.second().apply(new TypeAbstractVisitor<Boolean>() {
-                      public Boolean defaultCase(Type superArg) { return isEqual(args.first(), superArg); }
-                      @Override public Boolean forWildcard(Wildcard superArg) {
-                        return isSubtype(superArg.symbol().lowerBound(), args.first(), stack) &&
-                          isSubtype(args.first(), superArg.symbol().upperBound(), stack);
-                      }
-                    });
-                    if (!result) { break; }
-                  }
-                  return result;
+                  Type bound = NORMALIZE.value(superT.symbol().lowerBound());
+                  return NormSubtype.this.contains(subT, bound);
                 }
               };
-              
-              return stack.apply(containedArgs, true, subT, superT) || forClassType(superT);
+              Thunk<Boolean> checkInfinite = new Thunk<Boolean>() {
+                public Boolean value() { return NormSubtype.this.contains(subT, NULL); }
+              };
+              return _stack.apply(checkLowerBound, checkInfinite, subT, superT);
             }
-            else { return forClassType(superT); }
+            @Override public Boolean forVariableType(VariableType subT) {
+              return defaultCase(subT) ? true : null;
+            }
+            @Override public Boolean forIntersectionType(IntersectionType subT) {
+              return defaultCase(subT) ? true : null;
+            }
+            @Override public Boolean forBottomType(BottomType subT) { return true; }
+          });
+        }
+        
+        @Override public Boolean forIntersectionType(IntersectionType superT) {
+          if (subT instanceof BottomType) { return true; }
+          else { return IterUtil.and(superT.ofTypes(), supertypes(subT)); }
+        }
+        
+        @Override public Boolean forUnionType(final UnionType superT) {
+          return subT.apply(new TypeAbstractVisitor<Boolean>() {
+            @Override public Boolean defaultCase(Type t) {
+              return IterUtil.or(superT.ofTypes(), supertypes(subT)); 
+            }
+            public Boolean forVariableType(VariableType t) { return defaultCase(subT) ? true : null; }
+            public Boolean forUnionType(UnionType t) { return null; }
+            public Boolean forBottomType(BottomType t) { return true; }
+          });
+        }
+        
+        @Override public Boolean forTopType(TopType superT) { return true; }
+      });
+      
+      if (result != null) { return result; }
+      
+      // Handle subT-based cases:
+      return subT.apply(new TypeAbstractVisitor<Boolean>() {
+        
+        public Boolean defaultCase(Type t) { return false; }
+        
+        public Boolean forCharType(CharType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forCharType(CharType superT) { return true; }
+            @Override public Boolean forIntType(IntType superT) { return true; }
+            @Override public Boolean forLongType(LongType superT) { return true; }
+            @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
+          });
+        }
+        
+        public Boolean forByteType(ByteType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forIntegerType(IntegerType superT) { return true; }
+            @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
+          });
+        }
+        
+        public Boolean forShortType(ShortType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forShortType(ShortType superT) { return true; }
+            @Override public Boolean forIntType(IntType superT) { return true; }
+            @Override public Boolean forLongType(LongType superT) { return true; }
+            @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
+          });
+        }
+        
+        public Boolean forIntType(IntType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forIntType(IntType superT) { return true; }
+            @Override public Boolean forLongType(LongType superT) { return true; }
+            @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
+          });
+        }
+        
+        public Boolean forLongType(LongType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forLongType(LongType superT) { return true; }
+            @Override public Boolean forFloatingPointType(FloatingPointType superT) { return true; }
+          });
+        }
+        
+        public Boolean forFloatType(FloatType subT) { return superT instanceof FloatingPointType; }
+        
+        public Boolean forNullType(NullType subT) { return isReference(superT); }
+        
+        public Boolean forSimpleArrayType(SimpleArrayType subT) { return handleArrayType(subT); }
+        
+        public Boolean forVarargArrayType(VarargArrayType subT) { return handleArrayType(subT); }
+        
+        private Boolean handleArrayType(final ArrayType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            
+            @Override public Boolean forArrayType(ArrayType superT) {
+              if (isPrimitive(subT.ofType())) {
+                // types may be inequal if one is vararg and the other is not
+                return subT.ofType().equals(superT.ofType());
+              }
+              else { return NormSubtype.this.contains(subT.ofType(), superT.ofType()); }
+            }
+            
+            @Override public Boolean forClassType(ClassType superT) { 
+              return NormSubtype.this.contains(CLONEABLE_AND_SERIALIZABLE, superT);
+            }
+            
+          });
+        }
+        
+        public Boolean forClassType(final ClassType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forClassType(ClassType superT) {
+              Type newSub = immediateSupertype(subT);
+              if (newSub == null) { return false; }
+              // immediateSupertype() always returns a normalized type
+              else { return NormSubtype.this.contains(newSub, superT); }
+            }
+          });
+        }
+        
+        public Boolean forParameterizedClassType(final ParameterizedClassType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            
+            @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
+              if (subT.ofClass().equals(superT.ofClass())) {
+                
+                Thunk<Boolean> containedArgs = new Thunk<Boolean>() {
+                  public Boolean value() {
+                    boolean result = true;
+                    ParameterizedClassType subCapT = capture(subT);
+                    for (final Pair<Type, Type> args : IterUtil.zip(subCapT.typeArguments(), 
+                                                                    superT.typeArguments())) {
+                      result &= args.second().apply(new TypeAbstractVisitor<Boolean>() {
+                        public Boolean defaultCase(Type superArg) {
+                          Type subArg = args.first();
+                          return NormSubtype.this.contains(subArg, superArg) &&
+                                 NormSubtype.this.contains(superArg, subArg);
+                        }
+                        @Override public Boolean forWildcard(Wildcard superArg) {
+                          Type subArg = args.first();
+                          return NormSubtype.this.contains(superArg.symbol().lowerBound(), subArg) &&
+                                 NormSubtype.this.contains(subArg, superArg.symbol().upperBound());
+                        }
+                      });
+                      if (!result) { break; }
+                    }
+                    return result;
+                  }
+                };
+                
+                return _stack.apply(containedArgs, false, subT, superT) || forClassType(superT);
+              }
+              else { return forClassType(superT); }
+            }
+            
+            @Override public Boolean forClassType(ClassType superT) {
+              Type newSub = immediateSupertype(subT);
+              if (newSub == null) { return false; }
+              else {
+                // results of immediateSupertype() and erase() are always normalized
+                return NormSubtype.this.contains(newSub, superT) || NormSubtype.this.contains(erase(subT), superT);
+              }
+            }
+            
+          });
+        }
+        
+        public Boolean forVariableType(final VariableType subT) {
+          Thunk<Boolean> checkUpperBound = new Thunk<Boolean>() {
+            public Boolean value() {
+              Type bound = NORMALIZE.value(subT.symbol().upperBound());
+              return NormSubtype.this.contains(bound, superT);
+            }
+          };
+          Thunk<Boolean> checkInfinite = new Thunk<Boolean>() {
+            public Boolean value() { return NormSubtype.this.contains(OBJECT, superT); }
+          };
+          return _stack.apply(checkUpperBound, checkInfinite, subT, superT);
+        }
+        
+        public Boolean forIntersectionType(IntersectionType subT) {
+          return IterUtil.or(subT.ofTypes(), subtypes(superT)); 
+        }
+        
+        public Boolean forUnionType(UnionType subT) {
+          return IterUtil.and(subT.ofTypes(), subtypes(superT)); 
+        }
+        
+        public Boolean forBottomType(BottomType subT) { return true; }
+      });
+      //} finally { debug.logEnd(); }
+    }
+  };
+  
+  /**
+   * Converts the type to a normalized form:<ul>
+   * <li>Unions are minimal, have at least two elements, and contain no nested unions.</li>
+   * <li>Intersections are minimal, have at least two elements, and contain no nested unions or intersections.</li>
+   * <li>All component types are normalized.  (Wildcard bounds are "component types"; variable bounds and
+   * class supertypes are not.)</li>
+   */
+  private final TypeUpdateVisitor NORMALIZE = new TypeUpdateVisitor() {
+    @Override public Type forIntersectionTypeOnly(IntersectionType t, Iterable<? extends Type> normTypes) {
+      Type result = MEET_NORM.value(normTypes);
+      return t.equals(result) ? t : result;
+    }
+    @Override public Type forUnionTypeOnly(UnionType t, Iterable<? extends Type> normTypes) {
+      Type result = JOIN_NORM.value(normTypes);
+      return t.equals(result) ? t : result;
+    }
+    @Override public Type forWildcardOnly(Wildcard w) {
+      // we assume wildcards don't contain themselves in this type system
+      BoundedSymbol b = w.symbol();
+      Type newUpper = recur(b.upperBound());
+      Type newLower = recur(b.lowerBound());
+      if (newUpper == b.upperBound() && newLower == b.lowerBound()) { return w; }
+      else { return new Wildcard(new BoundedSymbol(new Object(), newUpper, newLower)); }
+    }
+  };
+  
+  public Type join(Iterable<? extends Type> ts) {
+    return JOIN_NORM.value(map(ts, NORMALIZE));
+  }
+  
+  /** Produce the normalized union of normalized types (may return a union or some other form). */
+  private final Lambda<Iterable<? extends Type>, Type> JOIN_NORM = new Lambda<Iterable<? extends Type>, Type>() {
+    public Type value(Iterable<? extends Type> elements) {
+      List<Type> disjuncts = maxList(collapse(map(elements, DISJUNCTS)), new NormSubtype());
+      switch (disjuncts.size()) {
+        case 0: return BOTTOM;
+        case 1: return disjuncts.get(0);
+        default: return new UnionType(disjuncts);
+      }
+    }
+  };
+  
+  public Type meet(Iterable<? extends Type> ts) {
+    return MEET_NORM.value(map(ts, NORMALIZE));
+  }
+  
+  /** Produce the normalized intersection of normalized types (may return a union, intersection, or some other form). */
+  private final Lambda<Iterable<? extends Type>, Type> MEET_NORM = new Lambda<Iterable<? extends Type>, Type>() {
+    public Type value(Iterable<? extends Type> elements) {
+      if (IterUtil.or(elements, LambdaUtil.bindSecond(LambdaUtil.INSTANCE_OF, UnionType.class))) {
+        // elements contain at least one union
+        Iterable<Iterable<Type>> posElements = map(elements, new Lambda<Type, Iterable<Type>>() {
+          public Iterable<Type> value(Type element) {
+            // convert sum-of-products (normalized) form to product-of-sums
+            // javac 1.5/1.6 requires explicit type args
+            return IterUtil.<Type, Type, Type, Type, Iterable<Type>>
+              distribute(element, DISJUNCTS, CONJUNCTS, JOIN_NORM, LambdaUtil.<Iterable<Type>>identity());
           }
-          
-          @Override public Boolean forClassType(ClassType superT) {
-            Type newSub = immediateSupertype(subT);
-            if (newSub == null) { return false; }
-            else { return isSubtype(meet(newSub, erase(subT)), superT, stack); }
-          }
-          
         });
+       // each element of conjuncts is atomic or a union of atomics
+        List<Type> conjuncts = minList(collapse(posElements), new NormSubtype());
+        // convert back to sum-of-products
+        // javac 1.5/1.6 requires explicit type args
+        return IterUtil.<Iterable<Type>, Type, Type, Type, Type>
+          distribute(conjuncts, LambdaUtil.<Iterable<Type>>identity(), DISJUNCTS, MEET_ATOMIC, JOIN_NORM);
       }
-      
-      public Boolean forVariableType(final VariableType subT) {
-        // If variables are always Objects, we should test that superT is Object in the infinite case
-        Thunk<Boolean> checkUpperBound = new Thunk<Boolean>() {
-          public Boolean value() { return isSubtype(subT.symbol().upperBound(), superT, stack); }
-        };
-        return stack.apply(checkUpperBound, false, subT, superT);
-      }
-      
-      public Boolean forIntersectionType(IntersectionType subT) {
-        return IterUtil.or(subT.ofTypes(), new Predicate<Type>() {
-          public boolean contains(Type t) { return isSubtype(t, superT, stack); }
-        });
-      }
-      
-      public Boolean forUnionType(UnionType subT) {
-        return IterUtil.and(subT.ofTypes(), new Predicate<Type>() {
-          public boolean contains(Type t) { return isSubtype(t, superT, stack); }
-        });
-      }
-      
-      public Boolean forBottomType(BottomType subT) { return true; }
-    });
-    //} finally { debug.logEnd(); }
-  }
+      else { return MEET_ATOMIC.value(collapse(map(elements, CONJUNCTS))); }
+    }
+  };
   
-  /** Compute a common supertype of {@code t1} and {@code t2}. */
-  public Type join(Type t1, Type t2) {
-    //debug.logValues(new String[]{ "t1", "t2" }, wrap(t1), wrap(t2));
-    if (isSubtype(t1, t2)) { return t2; }
-    else if (isSubtype(t2, t1)) { return t1; }
-    else { return new UnionType(IterUtil.make(t1, t2)); }
-    // TODO: This solution ignores the possibility that neither is a subtype of the other,
-    // but that some of the types of two unions are identical or subtypes
-  }
+  /** Produce the normalized intersection of atomic (not union or intersection) types. */ 
+  private final Lambda<Iterable<? extends Type>, Type> MEET_ATOMIC = new Lambda<Iterable<? extends Type>, Type>() {
+    public Type value(Iterable<? extends Type> atoms) {
+      List<Type> conjuncts = minList(atoms, new NormSubtype());
+      switch (conjuncts.size()) {
+        case 0: return TOP;
+        case 1: return conjuncts.get(0);
+        default: return new IntersectionType(conjuncts);
+      }
+    }
+  };
   
-  /** Compute a common subtype of {@code t1} and {@code t2}. */
-  public Type meet(Type t1, Type t2) {
-    if (isSubtype(t1, t2)) { return t1; }
-    else if (isSubtype(t2, t1)) { return t2; }
-    else { return new IntersectionType(IterUtil.make(t1, t2)); }
-  }
-  
+  private final TypeVisitorLambda<Iterable<? extends Type>> DISJUNCTS =
+      new TypeAbstractVisitor<Iterable<? extends Type>>() {
+    @Override public Iterable<? extends Type> forValidType(ValidType t) { return IterUtil.singleton(t); }
+    @Override public Iterable<? extends Type> forUnionType(UnionType t) { return t.ofTypes(); }
+  };
+
+  private final TypeVisitorLambda<Iterable<? extends Type>> CONJUNCTS =
+      new TypeAbstractVisitor<Iterable<? extends Type>>() {
+    @Override public Iterable<? extends Type> forValidType(ValidType t) { return IterUtil.singleton(t); }
+    @Override public Iterable<? extends Type> forIntersectionType(IntersectionType t) { return t.ofTypes(); }
+  };
+
   protected Iterable<Type> captureTypeArgs(Iterable<? extends Type> targs,
                                            Iterable<? extends VariableType> params) {
     List<BoundedSymbol> captureVars = new LinkedList<BoundedSymbol>();
@@ -320,6 +425,8 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
         triple.first().initializeUpperBound(new IntersectionType(IterUtil.make(argW.symbol().upperBound(),
                                                                                paramU)));
         triple.first().initializeLowerBound(new UnionType(IterUtil.make(argW.symbol().lowerBound(), paramL)));
+        // These bounds aren't normalized because we can't perform subtype checks on uninstantiated variables.
+        // That's okay, though, because we don't assume anywhere that variable bounds are normalized.
       }
     }
     return newArgs;

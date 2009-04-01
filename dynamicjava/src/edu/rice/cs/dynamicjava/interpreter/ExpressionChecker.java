@@ -1524,7 +1524,7 @@ public class ExpressionChecker {
       }
       
       try {
-        Pair<Expression, Expression> joined = ts.join(node.getIfTrueExpression(),
+        Pair<Expression, Expression> joined = ts.mergeConditional(node.getIfTrueExpression(),
                                                       node.getIfFalseExpression());
         node.setIfTrueExpression(joined.first());
         node.setIfFalseExpression(joined.second());

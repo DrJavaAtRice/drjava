@@ -7,7 +7,7 @@ import edu.rice.cs.plt.lambda.DelayedThunk;
  * <p>Represents a type variable or wildcard.  For simplicity, two kinds of symbols may be 
  * represented.  Declared symbols have a name; generated symbols (including 
  * wildcards) are unnamed.  In both cases, equality is defined in terms of an id object, rather 
- * than by equating names or other parameters.  Clients are responsible for insuring, where 
+ * than by equating names or other parameters.  Clients are responsible for ensuring, where 
  * two symbols have the same {@code id} (according to {@code equals()}), that the other 
  * properties of the symbol are the same.</p>
  * 

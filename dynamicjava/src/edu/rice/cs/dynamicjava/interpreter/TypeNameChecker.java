@@ -160,15 +160,13 @@ public class TypeNameChecker {
     for (TypeParameter tparam : tparams) {
       setTypeVariable(tparam, new VariableType(new BoundedSymbol(tparam, tparam.getRepresentation())));
     }
-    TypeNameVisitor v = new TypeNameVisitor();
     for (TypeParameter param : tparams) {
-      Type upperBound = param.getBound().acceptVisitor(v);
-      for (Type t : checkList(param.getInterfaceBounds())) {
-        upperBound = ts.meet(upperBound, t);
-      }
-      BoundedSymbol bounds = getTypeVariable(param).symbol();
-      bounds.initializeUpperBound(upperBound);
-      bounds.initializeLowerBound(TypeSystem.NULL);
+      Iterable<ReferenceTypeName> bounds = IterUtil.compose(param.getBound(), param.getInterfaceBounds());
+      // meet is guaranteed to be nonempty, and thus not TOP
+      Type upperBound = ts.meet(checkList(bounds));
+      BoundedSymbol b = getTypeVariable(param).symbol();
+      b.initializeUpperBound(upperBound);
+      b.initializeLowerBound(TypeSystem.NULL);
     }
   }
   

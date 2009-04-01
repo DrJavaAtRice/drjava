@@ -168,12 +168,18 @@ public abstract class TypeSystem {
   /** Determine if {@link #makeReference} would succeed given an expression of the given type */
   public abstract boolean isReferenceConvertible(Type t);
   
-  /** Compute a common supertype of {@code t1} and {@code t2}. */
-  public abstract Type join(Type t1, Type t2);
-  
-  /** Compute a common subtype of {@code t1} and {@code t2}. */
-  public abstract Type meet(Type t1, Type t2);
-  
+  /** Compute a common supertype of the given list of types. */
+  public abstract Type join(Iterable<? extends Type> ts);
+
+  /** Compute a common supertype of the given pair of types. */
+  public Type join(Type t1, Type t2) { return join(IterUtil.make(t1, t2)); }
+
+  /** Compute a common subtype of the given list of types. */
+  public abstract Type meet(Iterable<? extends Type> ts);
+
+  /** Compute a common supertype of the given pair of types. */
+  public Type meet(Type t1, Type t2) { return meet(IterUtil.make(t1, t2)); }
+
 
   /* Unary Operations on Types */
   
@@ -281,7 +287,7 @@ public abstract class TypeSystem {
    * @return  Two typed expressions equivalent to {@code e1} and {@code e2} with the joined type
    * @throws UnsupportedConversionException  If the two types are incompatible.
    */
-  public abstract Pair<Expression, Expression> join(Expression e1, Expression e2)
+  public abstract Pair<Expression, Expression> mergeConditional(Expression e1, Expression e2)
     throws UnsupportedConversionException;
 
   /**
