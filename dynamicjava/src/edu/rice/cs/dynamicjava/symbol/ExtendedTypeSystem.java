@@ -7,16 +7,21 @@ import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.recur.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.iter.PermutationIterable;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.collect.Order;
 
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import static edu.rice.cs.plt.iter.IterUtil.map;
+import static edu.rice.cs.plt.iter.IterUtil.singleton;
 import static edu.rice.cs.plt.iter.IterUtil.collapse;
 import static edu.rice.cs.plt.collect.CollectUtil.maxList;
 import static edu.rice.cs.plt.collect.CollectUtil.minList;
+import static edu.rice.cs.plt.collect.CollectUtil.composeMaxLists;
+import static edu.rice.cs.plt.collect.CollectUtil.union;
+import static edu.rice.cs.plt.collect.CollectUtil.intersection;
+import static edu.rice.cs.plt.lambda.LambdaUtil.bindFirst;
+import static edu.rice.cs.plt.lambda.LambdaUtil.bindSecond;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ExtendedTypeSystem extends StandardTypeSystem {
@@ -78,16 +83,19 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     return new NormSubtype().contains(NORMALIZE.value(subT), NORMALIZE.value(superT));
   }
   
-  /** Tests subtyping for normalized types. */
+  /**
+   * Tests subtyping for normalized types.  Due to its use of internal state, unrelated (and possibly parallel)
+   * invocations should use distinct instances.
+   */
   private class NormSubtype implements Order<Type>, Lambda2<Type, Type, Boolean> {
     // to avoid conflicts, no indirectly-recursive calls should be made that assume an empty stack (like join)
     RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>();
     
     public Boolean value(Type subT, Type superT) { return contains(subT, superT); }
     
-    public Predicate<Type> supertypes(Type sub) { return LambdaUtil.bindFirst((Order<Type>) this, sub); }
+    public Predicate<Type> supertypes(Type sub) { return bindFirst((Order<Type>) this, sub); }
     
-    public Predicate<Type> subtypes(Type sup) { return LambdaUtil.bindSecond((Order<Type>) this, sup); }
+    public Predicate<Type> subtypes(Type sup) { return bindSecond((Order<Type>) this, sup); }
     
     public boolean contains(final Type subT, final Type superT) {
       //debug.logStart(new String[]{"subT", "superT"}, subT, superT); try {
@@ -356,7 +364,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** Produce the normalized intersection of normalized types (may return a union, intersection, or some other form). */
   private final Lambda<Iterable<? extends Type>, Type> MEET_NORM = new Lambda<Iterable<? extends Type>, Type>() {
     public Type value(Iterable<? extends Type> elements) {
-      if (IterUtil.or(elements, LambdaUtil.bindSecond(LambdaUtil.INSTANCE_OF, UnionType.class))) {
+      if (IterUtil.or(elements, bindSecond(LambdaUtil.INSTANCE_OF, UnionType.class))) {
         // elements contain at least one union
         Iterable<Iterable<Type>> posElements = map(elements, new Lambda<Type, Iterable<Type>>() {
           public Iterable<Type> value(Type element) {
@@ -391,13 +399,13 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   
   private final TypeVisitorLambda<Iterable<? extends Type>> DISJUNCTS =
       new TypeAbstractVisitor<Iterable<? extends Type>>() {
-    @Override public Iterable<? extends Type> forValidType(ValidType t) { return IterUtil.singleton(t); }
+    @Override public Iterable<? extends Type> forValidType(ValidType t) { return singleton(t); }
     @Override public Iterable<? extends Type> forUnionType(UnionType t) { return t.ofTypes(); }
   };
 
   private final TypeVisitorLambda<Iterable<? extends Type>> CONJUNCTS =
       new TypeAbstractVisitor<Iterable<? extends Type>>() {
-    @Override public Iterable<? extends Type> forValidType(ValidType t) { return IterUtil.singleton(t); }
+    @Override public Iterable<? extends Type> forValidType(ValidType t) { return singleton(t); }
     @Override public Iterable<? extends Type> forIntersectionType(IntersectionType t) { return t.ofTypes(); }
   };
 
@@ -432,142 +440,185 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     return newArgs;
   }
   
-  
-  /**
-   * A set of constraints on TypeVariables used to perform variable inference.  The sets are
-   * immutable.  A ConstraintSet may be created either by using the singletons {@code EMPTY} 
-   * and {@code UNSATISFIABLE} or by invoking {@code andLowerBound}, {@code andUpperBound}, 
-   * {@code and}, or {@code or}.
-   */
-  // cannot be defined statically, because it relies on the definition of non-static methods
-  private class ConstraintSet {
+  private abstract class ConstraintFormula {
+    public abstract boolean isSatisfiable();
+    public abstract boolean isEmpty();
+    public abstract Iterable<ConstraintScenario> scenarios();
+    public abstract ConstraintFormula and(ConstraintFormula that);
     
-    private Map<VariableType, Type> _lowerBounds;
-    private Map<VariableType, Type> _upperBounds;
-    
-    protected ConstraintSet() {
-      _lowerBounds = new HashMap<VariableType, Type>();
-      _upperBounds = new HashMap<VariableType, Type>();
+    public ConstraintFormula or(ConstraintFormula that) {
+      List<ConstraintScenario> scenarios = composeMaxLists(scenarios(), that.scenarios(), SCENARIO_IMPLICATION);
+      if (scenarios.isEmpty()) { return FALSE; }
+      else if (scenarios.size() == 1) { return scenarios.get(0); }
+      else { return new DisjunctiveConstraint(scenarios); }
     }
     
-    protected ConstraintSet(ConstraintSet copy) {
-      _lowerBounds = new HashMap<VariableType, Type>(copy._lowerBounds);
-      _upperBounds = new HashMap<VariableType, Type>(copy._upperBounds);
-    }
-    
-    public boolean isSatisfiable() { return true; }
-    
-    public boolean isEmpty() { return false; }
-    
-    /** @return  The lower bound on {@code var}.  Guaranteed to be a subtype of {@code upperBound(var)} */
-    public Type lowerBound(VariableType var) { 
-      Type result = _lowerBounds.get(var);
-      return (result == null) ? NULL : result; // for full generality, this would use BOTTOM instead
-    }
-    
-    /** @return  The upper bound on {@code var}.  Guaranteed to be a supertype of {@code lowerBound(var)} */
-    public Type upperBound(VariableType var) { 
-      Type result = _upperBounds.get(var);
-      return (result == null) ? OBJECT : result; // for full generality, this would use TOP instead
-    }
-    
-    public ConstraintSet and(ConstraintSet s) {
-      if (!s.isSatisfiable()) { return s; }
-      else if (s.isEmpty()) { return this; }
-      else {
-        ConstraintSet result = new ConstraintSet(this);
-        for (Map.Entry<VariableType, Type> entry : s._lowerBounds.entrySet()) {
-          result = result.andLowerBound(entry.getKey(), entry.getValue());
-        }
-        for (Map.Entry<VariableType, Type> entry : s._upperBounds.entrySet()) {
-          result = result.andUpperBound(entry.getKey(), entry.getValue());
-        }
-        return result;
-      }
-    }
-    
-    public ConstraintSet or(ConstraintSet s) {
-      if (!s.isSatisfiable()) { return this; }
-      else if (s.isEmpty()) { return s; }
-      else {
-        return and(s); // We err on the side of caution -- if X *and* Y hold, then X *or* Y holds
-        // TODO: relax this constraint
-      }
-    }
-    
-    public ConstraintSet andLowerBound(VariableType var, Type bound) {
-      if (isSubtype(bound, upperBound(var))) {
-        // The join is also a subtype of upperBound(var)
-        Type currentLower = lowerBound(var);
-        Type newLower = join(currentLower, bound);
-        if (currentLower == newLower) { return this; }
-        else {
-          ConstraintSet result = new ConstraintSet(this);
-          result._lowerBounds.put(var, newLower);
-          return result;
-        }
-      }
-      else { return UNSATISFIABLE_CONSTRAINTS; }
-    }
-    
-    public ConstraintSet andUpperBound(VariableType var, Type bound) {
-      if (isSubtype(lowerBound(var), bound)) {
-        // The meet is also a supertype of lowerBound(var)
-        Type currentUpper = upperBound(var);
-        Type newUpper = meet(currentUpper, bound);
-        if (currentUpper == newUpper) { return this; }
-        else {
-          ConstraintSet result = new ConstraintSet(this);
-          result._upperBounds.put(var, newUpper);
-          return result;
-        }
-      }
-      else { return UNSATISFIABLE_CONSTRAINTS; }
-    }
     
     public String toString() {
       if (isEmpty()) { return "{}"; }
       else if (!isSatisfiable()) { return "{ false }"; }
       else {
         StringBuilder result = new StringBuilder();
-        result.append("{ ");
-        boolean first = true;
-        
-        for (Map.Entry<VariableType, Type> entry : _lowerBounds.entrySet()) {
-          if (!first) { result.append(", "); }
-          first = false;
-          result.append(entry.getKey() + " :> " + userRepresentation(entry.getValue()));
+        boolean firstScenario = true;
+        for (ConstraintScenario s : scenarios()) {
+          if (!firstScenario) { result.append(" | "); }
+          firstScenario = false;
+          result.append("{ ");
+          boolean firstVar = true;
+          for (VariableType var : s.boundVariables()) {
+            if (firstVar) { result.append(", "); }
+            firstVar = false;
+            result.append(userRepresentation(s.lowerBound(var)));
+            result.append(" <: ");
+            result.append(var.symbol().name());
+            result.append(" <: ");
+            result.append(userRepresentation(s.upperBound(var)));
+          }
+          result.append(" }");
         }
-        for (Map.Entry<VariableType, Type> entry : _upperBounds.entrySet()) {
-          if (!first) { result.append(", "); }
-          first = false;
-          result.append(entry.getKey() + " <: " + userRepresentation(entry.getValue()));
-        }
-        result.append(" }");
         return result.toString();
       }
     }
     
   }
-  
-  // cannot be defined statically, because it relies on the definition of non-static methods
-  private final ConstraintSet EMPTY_CONSTRAINTS = new ConstraintSet() {
-    @Override public boolean isEmpty() { return true; }
-    @Override public ConstraintSet and(ConstraintSet s) { return s; }
-    @Override public ConstraintSet or(ConstraintSet s) { return this; }
-  };
-  
-  // cannot be defined statically, because it relies on the definition of non-static methods
-  public final ConstraintSet UNSATISFIABLE_CONSTRAINTS = new ConstraintSet() {
-    @Override public boolean isSatisfiable() { return false; }
-    @Override public ConstraintSet and(ConstraintSet s) { return this; }
-    @Override public ConstraintSet or(ConstraintSet s) { return s; }
-    @Override public ConstraintSet andLowerBound(VariableType var, Type bound) { return this; }
-    @Override public ConstraintSet andUpperBound(VariableType var, Type bound) { return this; }
-  };
+  private class ConstraintScenario extends ConstraintFormula {
+    // all bounds are normalized and within range null <: T <: Object
+    private final Map<VariableType, Type> _lowerBounds;
+    private final Map<VariableType, Type> _upperBounds;
     
-  /** Used to keep track of the inference method called in the inference recursion stack */
-  private static enum InferenceMode { SUBTYPE, EQUAL, SUPERTYPE };
+    protected ConstraintScenario() {
+      _lowerBounds = new HashMap<VariableType, Type>();
+      _upperBounds = new HashMap<VariableType, Type>();
+    }
+    
+    protected ConstraintScenario(VariableType var, Type upper) {
+      this();
+      _upperBounds.put(var, upper);
+    }
+    
+    protected ConstraintScenario(Type lower, VariableType var) {
+      this();
+      _lowerBounds.put(var, lower);
+    }
+    
+    public boolean isSatisfiable() { return true; }
+    public boolean isEmpty() { return _lowerBounds.isEmpty() && _upperBounds.isEmpty(); }
+    public Iterable<ConstraintScenario> scenarios() { return singleton(this); }
+    
+    public ConstraintFormula and(ConstraintFormula that) {
+      ConstraintFormula result = FALSE;
+      for (ConstraintScenario s : that.scenarios()) {
+        result = result.or(Option.unwrap(this.and(s), FALSE));
+      }
+      return result;
+    }
+    
+    public Option<ConstraintScenario> and(ConstraintScenario that) {
+      ConstraintScenario result = new ConstraintScenario();
+      for (VariableType var : union(_lowerBounds.keySet(), that._lowerBounds.keySet())) {
+        result._lowerBounds.put(var, JOIN_NORM.value(IterUtil.make(lowerBound(var), that.lowerBound(var))));
+      }
+      for (VariableType var : union(_upperBounds.keySet(), that._upperBounds.keySet())) {
+        result._upperBounds.put(var, MEET_NORM.value(IterUtil.make(upperBound(var), that.upperBound(var))));
+      }
+      return result.isWellFormed() ? Option.some(result) : Option.<ConstraintScenario>none(); 
+    }
+    
+    public Set<VariableType> boundVariables() {
+      return union(_lowerBounds.keySet(), _upperBounds.keySet());
+    }
+    
+    public Type upperBound(VariableType var) {
+      Type result = _upperBounds.get(var);
+      return (result == null) ? OBJECT : result;
+    }
+    
+    public Type lowerBound(VariableType var) {
+      Type result = _lowerBounds.get(var);
+      return (result == null) ? NULL : result;
+    }
+    
+    /** Test whether all variables have compatible bounds. */
+    protected boolean isWellFormed() {
+      NormSubtype sub = new NormSubtype();
+      for (VariableType var : intersection(_lowerBounds.keySet(), _upperBounds.keySet())) {
+        if (!sub.contains(lowerBound(var), upperBound(var))) { return false; }
+      }
+      return true;
+    }
+  }
+  
+  private class DisjunctiveConstraint extends ConstraintFormula {
+    private final Iterable<ConstraintScenario> _scenarios;
+    protected DisjunctiveConstraint(Iterable<ConstraintScenario> scenarios) { _scenarios = scenarios; }
+    
+    public boolean isSatisfiable() { return true; }
+    public boolean isEmpty() { return false; }
+    public Iterable<ConstraintScenario> scenarios() { return _scenarios; }
+    
+    public ConstraintFormula and(ConstraintFormula that) {
+      Lambda<ConstraintFormula, Iterable<ConstraintScenario>> scenarios =
+          new Lambda<ConstraintFormula, Iterable<ConstraintScenario>>() {
+        public Iterable<ConstraintScenario> value(ConstraintFormula f) { return f.scenarios(); } 
+      };
+      Lambda<Iterable<ConstraintScenario>, Option<ConstraintScenario>> conjunction =
+          new Lambda<Iterable<ConstraintScenario>, Option<ConstraintScenario>>() {
+        public Option<ConstraintScenario> value(Iterable<ConstraintScenario> scenarios) {
+          Option<ConstraintScenario> result = Option.some(TRUE);
+          for (ConstraintScenario s : scenarios) { // loop invariant: result is a some
+            result = result.unwrap().and(s);
+            if (result.isNone()) { break; }
+          }
+          return result;
+        }
+      };
+      Iterable<Option<ConstraintScenario>> disjuncts =
+          IterUtil.distribute(IterUtil.make(this, that), scenarios, conjunction);
+      ConstraintFormula result = FALSE;
+      for (Option<ConstraintScenario> s : disjuncts) {
+        if (s.isSome()) { result = result.or(s.unwrap()); }
+      }
+      return result;
+    }
+    
+  }
+  
+  // Constraint primitives: only the values/methods below should be used to create new base ConstraintFormulas.
+  
+  private ConstraintScenario TRUE = new ConstraintScenario();
+  
+  private ConstraintFormula FALSE = new ConstraintFormula() {
+    public boolean isSatisfiable() { return false; }
+    public boolean isEmpty() { return false; }
+    public Iterable<ConstraintScenario> scenarios() { return IterUtil.empty(); }
+    public ConstraintFormula and(ConstraintFormula that) { return this; }
+    @Override public ConstraintFormula or(ConstraintFormula that) { return that; }
+  };
+  
+  private ConstraintFormula lowerBound(VariableType var, Type lower) {
+    NormSubtype sub = new NormSubtype();
+    if (sub.contains(NULL, lower) && sub.contains(lower, OBJECT)) { return new ConstraintScenario(lower, var); }
+    else { return FALSE; }
+  }
+  
+  private ConstraintFormula upperBound(VariableType var, Type upper) {
+    NormSubtype sub = new NormSubtype();
+    if (sub.contains(NULL, upper) && sub.contains(upper, OBJECT)) { return new ConstraintScenario(var, upper); }
+    else { return FALSE; }
+  }
+  
+  /** True when one scenario implies another: any substitution satisfying the antecedent satisfies the consequent. */
+  private Order<ConstraintScenario> SCENARIO_IMPLICATION = new Order<ConstraintScenario>() {
+    public boolean contains(ConstraintScenario ant, ConstraintScenario cons) {
+      NormSubtype sub = new NormSubtype();
+      for (VariableType var : cons.boundVariables()) {
+        if (!sub.contains(ant.upperBound(var), cons.upperBound(var))) { return false; }
+        if (!sub.contains(cons.lowerBound(var), ant.lowerBound(var))) { return false; }
+      }
+      return true;
+    }
+  };
+  
   
   /**
    * Top-level entry point for type inference.  Produces the set of types corresponding to the given
@@ -584,551 +635,456 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     //debug.logValues("Beginning inferTypeArguments",
     //                new String[]{ "tparams", "params", "returned", "args", "expected" },
     //                wrap(tparams), wrap(params), wrap(returned), wrap(args), wrap(expected));
-    RecursionStack3<Type, Type, InferenceMode> stack = RecursionStack3.make();
-    Set<? extends VariableType> tparamSet = CollectUtil.makeSet(tparams);
     
-    ConstraintSet constraintsBuilder = EMPTY_CONSTRAINTS;
-    for (Pair<Type, Type> pair : IterUtil.zip(args, params)) {
-      constraintsBuilder = constraintsBuilder.and(inferFromSubtype(pair.first(), pair.second(), 
-                                                                   tparamSet, stack));
-      if (!constraintsBuilder.isSatisfiable()) { break; }
+    Inferencer inf = new Inferencer(CollectUtil.makeSet(tparams));
+    
+    // perform inference for args and returned
+    ConstraintFormula constraints = TRUE;
+    for (Pair<Type, Type> pair : IterUtil.zip(IterUtil.map(args, NORMALIZE), IterUtil.map(params, NORMALIZE))) {
+      constraints = constraints.and(inf.subtypeNorm(pair.first(), pair.second()));
+      if (!constraints.isSatisfiable()) { break; }
     }
-    if (expected.isSome() && constraintsBuilder.isSatisfiable()) {
-      constraintsBuilder = constraintsBuilder.and(inferFromSupertype(expected.unwrap(), returned,
-                                                                     tparamSet, stack));
+    if (expected.isSome() && constraints.isSatisfiable()) {
+      constraints = constraints.and(inf.supertypeNorm(NORMALIZE.value(expected.unwrap()), NORMALIZE.value(returned)));
     }
     
-    final ConstraintSet constraints = constraintsBuilder; // constraints must be redeclared as final
+    // transitivity constraints: inferred bounds must be sub/super-types of declared bounds
+    // (used to improve results where the variable has a self-referencing bound)
+    ConstraintFormula transConstraints = FALSE;
+    for (ConstraintScenario s : constraints.scenarios()) {
+      ConstraintFormula cf = s;
+      for (VariableType param : tparams) {
+        cf = cf.and(inf.subtypeNorm(s.lowerBound(param), NORMALIZE.value(param.symbol().upperBound())));
+        if (!cf.isSatisfiable()) { break; }
+        cf = cf.and(inf.supertypeNorm(s.upperBound(param), NORMALIZE.value(param.symbol().lowerBound())));
+        if (!cf.isSatisfiable()) { break; }
+      }
+      transConstraints = transConstraints.or(cf);
+      if (transConstraints.isEmpty()) { break; }
+    }
+    
     //debug.logValue("constraints", constraints);
-//    System.out.println("Final inference result: " + constraints);
-    if (!constraints.isSatisfiable()) { return null; }
+    if (!transConstraints.isSatisfiable()) { return null; }
 
-    Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
-      public Type value(VariableType param) { return constraints.lowerBound(param); }
-    });
-    if (inBounds(tparams, result)) { return result; }
-    
-    List<Wildcard> constraintWs = new LinkedList<Wildcard>();
-    for (VariableType param : tparams) {
-      BoundedSymbol s = new BoundedSymbol(new Object(), constraints.upperBound(param), constraints.lowerBound(param));
-      constraintWs.add(new Wildcard(s));
+    // try to use lower bounds
+    for (final ConstraintScenario s : transConstraints.scenarios()) {
+      Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
+        public Type value(VariableType param) { return s.lowerBound(param); }
+      });
+      if (inBounds(tparams, result)) { return result; }
     }
-    result = captureTypeArgs(constraintWs, tparams);
-    if (IterUtil.and(result, WELL_FORMED)) { return result; }
-
+    
+    // lower bounds don't work, try to use capture variables
+    for (ConstraintScenario s : transConstraints.scenarios()) {
+      List<Wildcard> constraintWs = new LinkedList<Wildcard>();
+      for (VariableType param : tparams) {
+        BoundedSymbol sym = new BoundedSymbol(new Object(), s.upperBound(param), s.lowerBound(param));
+        constraintWs.add(new Wildcard(sym));
+      }
+      Iterable<Type> result = captureTypeArgs(constraintWs, tparams);
+      if (IterUtil.and(result, WELL_FORMED)) { return result; }
+    }
+    
+    // give up
     return null;
   }
   
-  private boolean containsInferenceVariable(Type t, Set<? extends VariableType> vars) {
-    return containsInferenceVariable(t, vars, new RecursionStack<Type>());
-  }
-  
-  private boolean containsInferenceVariable(Type t, final Set<? extends VariableType> vars, 
-                                            final RecursionStack<Type> stack) {
-    return t.apply(new TypeAbstractVisitor<Boolean>() {
-      public Boolean defaultCase(Type t) { return false; }
-      
-      @Override public Boolean forArrayType(ArrayType t) { 
-        return containsInferenceVariable(t.ofType(), vars, stack);
-      }
-      
-      @Override public Boolean forParameterizedClassType(ParameterizedClassType t) { 
-        return checkList(t.typeArguments());
-      }
-      
-      @Override public Boolean forIntersectionType(IntersectionType t) { 
-        return checkList(t.ofTypes());
-      }
-      
-      private Boolean checkList(Iterable<? extends Type> types) {
-        for (Type t : types) { 
-          if (containsInferenceVariable(t, vars, stack)) { return true; }
-        }
-        return false;
-      }
-      
-      @Override public Boolean forVariableType(final VariableType t) {
-        if (vars.contains(t)) { return true; }
-        else {
-          Thunk<Boolean> handleBounds = new Thunk<Boolean>() {
-            public Boolean value() {
-              return containsInferenceVariable(t.symbol().lowerBound(), vars, stack) ||
-                containsInferenceVariable(t.symbol().upperBound(), vars, stack);
-            }
-          };
-          return stack.apply(handleBounds, false, t);
-        }
-      }
-      
-      @Override public Boolean forWildcard(final Wildcard t) {
-        Thunk<Boolean> handleBounds = new Thunk<Boolean>() {
-          public Boolean value() {
-            return containsInferenceVariable(t.symbol().lowerBound(), vars, stack) ||
-              containsInferenceVariable(t.symbol().upperBound(), vars, stack);
-          }
-        };
-        return stack.apply(handleBounds, false, t);
-      }
-      
-    });
-  }
-  
-  /** 
-   * Produce the constraints on {@code vars} that may be inferred, assuming {@code arg} is a subtype
-   * of {@code param}
-   */
-  private ConstraintSet inferFromSubtype(final Type arg, final Type param,
-                                         final Set<? extends VariableType> vars, 
-                                         final RecursionStack3<Type, Type, InferenceMode> stack) {
-    //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
-    if (containsInferenceVariable(param, vars)) {
-      return param.apply(new TypeAbstractVisitor<ConstraintSet>() {
-        public ConstraintSet defaultCase(Type param) { throw new IllegalArgumentException(); }
-        
-        @Override public ConstraintSet forArrayType(final ArrayType param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            public ConstraintSet defaultCase(Type arg) { return UNSATISFIABLE_CONSTRAINTS; }
-            @Override public ConstraintSet forNullType(NullType arg) { return EMPTY_CONSTRAINTS; }
-            @Override public ConstraintSet forVariableType(VariableType arg) { return handleVariableArg(arg); }
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            @Override public ConstraintSet forBottomType(BottomType arg) { return EMPTY_CONSTRAINTS; }
-            
-            @Override public ConstraintSet forArrayType(ArrayType arg) {
-              if (isPrimitive(arg.ofType())) { 
-                return inferFromEqual(arg.ofType(), param.ofType(), vars, stack);
-              }
-              else { return inferFromSubtype(arg.ofType(), param.ofType(), vars, stack); }
-            }
-          });
-        }
-        
-        @Override public ConstraintSet forParameterizedClassType(final ParameterizedClassType param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            public ConstraintSet defaultCase(Type arg) { return UNSATISFIABLE_CONSTRAINTS; }
-            @Override public ConstraintSet forNullType(NullType arg) { return EMPTY_CONSTRAINTS; }
-            @Override public ConstraintSet forVariableType(VariableType arg) { return handleVariableArg(arg); }
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            @Override public ConstraintSet forBottomType(BottomType arg) { return EMPTY_CONSTRAINTS; }
-            
-            @Override public ConstraintSet forArrayType(ArrayType arg) {
-              return inferFromSubtype(CLONEABLE_AND_SERIALIZABLE, param, vars, stack);
-            }
-            
-            @Override public ConstraintSet forSimpleClassType(SimpleClassType arg) {
-              Type argSuper = immediateSupertype(arg);
-              if (argSuper == null) { return UNSATISFIABLE_CONSTRAINTS; }
-              else { return inferFromSubtype(argSuper, param, vars, stack); }
-            }
-            
-            @Override public ConstraintSet forRawClassType(RawClassType arg) {
-              Type argSuper = immediateSupertype(arg);
-              if (argSuper == null) { return UNSATISFIABLE_CONSTRAINTS; }
-              else { return inferFromSubtype(argSuper, param, vars, stack); }
-            }
-            
-            @Override public ConstraintSet forParameterizedClassType(final ParameterizedClassType arg) {
-              ConstraintSet matchConstraints = UNSATISFIABLE_CONSTRAINTS;
-              if (param.ofClass().equals(arg.ofClass())) {
-                Thunk<ConstraintSet> recurOnTargs = new Thunk<ConstraintSet>() {
-                  public ConstraintSet value() {
-                    ParameterizedClassType argCap = capture(arg);
-                    ConstraintSet result = EMPTY_CONSTRAINTS;
-                    for (Pair<Type, Type> pair : IterUtil.zip(argCap.typeArguments(), param.typeArguments())) {
-                      final Type argArg = pair.first();
-                      final Type paramArg = pair.second();
-                      result = result.and(paramArg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-                        public ConstraintSet defaultCase(Type paramArg) { 
-                          return inferFromEqual(argArg, paramArg, vars, stack);
-                        }
-                        @Override public ConstraintSet forWildcard(Wildcard paramArg) {
-                          ConstraintSet cs = inferFromSupertype(argArg, paramArg.symbol().lowerBound(),
-                                                                vars, stack);
-                          if (cs.isSatisfiable()) {
-                            cs = cs.and(inferFromSubtype(argArg, paramArg.symbol().upperBound(), vars, stack));
-                          }
-                          return cs;
-                        }
-                      }));
-                      if (!result.isSatisfiable()) { break; }
-                    }
-                    return result;
-                  }
-                };
-                matchConstraints = stack.apply(recurOnTargs, EMPTY_CONSTRAINTS, arg, param, 
-                                               InferenceMode.SUBTYPE);
-              }
-              
-              ConstraintSet superConstraints = UNSATISFIABLE_CONSTRAINTS;
-              Type argSuper = immediateSupertype(arg);
-              if (argSuper != null) { superConstraints = inferFromSubtype(argSuper, param, vars, stack); }
-              
-              return matchConstraints.or(superConstraints);
-            }
-          });
-        }
-        
-        @Override public ConstraintSet forVariableType(final VariableType param) {
-          // Note that this might be a capture variable with an inference-variable bound
-          if (vars.contains(param)) { return EMPTY_CONSTRAINTS.andLowerBound(param, arg); }
-          else {
-            Thunk<ConstraintSet> recurOnLowerBound = new Thunk<ConstraintSet>() {
-              public ConstraintSet value() {
-                return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-                  public ConstraintSet defaultCase(Type arg) {
-                    return inferFromSubtype(arg, param.symbol().lowerBound(), vars, stack);
-                  }
-                  
-                  @Override public ConstraintSet forVariableType(VariableType arg) {
-                    ConstraintSet cs1 = inferFromSubtype(arg, param.symbol().lowerBound(), vars, stack);
-                    ConstraintSet cs2 = inferFromSubtype(arg.symbol().upperBound(), param, vars, stack);
-                    return cs1.or(cs2);
-                  }
-                  
-                  @Override public ConstraintSet forIntersectionType(IntersectionType arg) {
-                    ConstraintSet result = inferFromSubtype(arg, param.symbol().lowerBound(), vars, stack);
-                    for (Type supArg : arg.ofTypes()) {
-                      if (result.isEmpty()) { break; }
-                      result = result.or(inferFromSubtype(supArg, param, vars, stack));
-                    }
-                    return result;
-                  }
-                  
-                  @Override public ConstraintSet forBottomType(BottomType arg) { return EMPTY_CONSTRAINTS; }
-                });
-              }
-            };
-            return stack.apply(recurOnLowerBound, UNSATISFIABLE_CONSTRAINTS, arg, param, 
-                               InferenceMode.SUBTYPE);
-          }
-        }
-        
-        @Override public ConstraintSet forIntersectionType(IntersectionType param) {
-          if (arg instanceof BottomType) { return EMPTY_CONSTRAINTS; }
-          else {
-            ConstraintSet result = EMPTY_CONSTRAINTS;
-            for (Type supParam : param.ofTypes()) {
-              result = result.and(inferFromSubtype(arg, supParam, vars, stack));
-              if (!result.isSatisfiable()) { break; }
-            }
-            return result;
-          }
-        }
-        
-        @Override public ConstraintSet forWildcard(final Wildcard param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            public ConstraintSet defaultCase(Type arg) { return UNSATISFIABLE_CONSTRAINTS; }
-            @Override public ConstraintSet forVariableType(VariableType arg) { return handleVariableArg(arg); }
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            @Override public ConstraintSet forWildcard(Wildcard arg) {
-              return inferFromEqual(arg, param, vars, stack);
-            }
-            @Override public ConstraintSet forBottomType(BottomType arg) { return EMPTY_CONSTRAINTS; }
-          });
-        }
-        
-        private ConstraintSet handleVariableArg(final VariableType arg) {
-          Thunk<ConstraintSet> recurOnBound = new Thunk<ConstraintSet>() {
-            public ConstraintSet value() {
-              return inferFromSubtype(arg.symbol().upperBound(), param, vars, stack);
-            }
-          };
-          return stack.apply(recurOnBound, UNSATISFIABLE_CONSTRAINTS, arg, param, InferenceMode.SUBTYPE);
-        }
-        
-        private ConstraintSet handleIntersectionArg(IntersectionType arg) {
-          ConstraintSet result = UNSATISFIABLE_CONSTRAINTS;
-          for (Type supArg : arg.ofTypes()) {
-            result = result.or(inferFromSubtype(supArg, param, vars, stack));
-            if (result.isEmpty()) { break; }
-          }
-          return result;
-        }
-      });
+  private class Inferencer {
+    private final Set<? extends VariableType> _vars;
+    private final RecursionStack2<Type, Type> _subStack;
+    private final RecursionStack2<Type, Type> _supStack;
+    
+    public Inferencer(Set<? extends VariableType> vars) {
+      _vars = vars;
+      _subStack = new RecursionStack2<Type, Type>();
+      _supStack = new RecursionStack2<Type, Type>();
     }
-    else { return isSubtype(arg, param) ? EMPTY_CONSTRAINTS : UNSATISFIABLE_CONSTRAINTS; }
-  }
-  
-  /** 
-   * Produce the constraints on {@code vars} that may be inferred, assuming {@code arg} is a supertype
-   * of {@code param}
-   */
-  private ConstraintSet inferFromSupertype(final Type arg, final Type param,
-                                           final Set<? extends VariableType> vars, 
-                                           final RecursionStack3<Type, Type, InferenceMode> stack) {
-    //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
-    if (containsInferenceVariable(param, vars)) {
-      return param.apply(new TypeAbstractVisitor<ConstraintSet>() {
-        public ConstraintSet defaultCase(Type param) { throw new IllegalArgumentException(); }
-        
-        @Override public ConstraintSet forArrayType(final ArrayType param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            public ConstraintSet defaultCase(Type arg) { return UNSATISFIABLE_CONSTRAINTS; }
-            @Override public ConstraintSet forVariableType(VariableType arg) { return handleVariableArg(arg); }
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            @Override public ConstraintSet forTopType(TopType arg) { return EMPTY_CONSTRAINTS; }
+    
+    public ConstraintFormula subtypeNorm(final Type arg, final Type param) {
+      //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
+      if (!param.apply(_containsVar)) { return new NormSubtype().contains(arg, param) ? TRUE : FALSE; }
+      else {
+        return param.apply(new TypeAbstractVisitor<ConstraintFormula>() {
+          
+          class ArgVisitor extends TypeAbstractVisitor<ConstraintFormula> {
+            @Override public ConstraintFormula defaultCase(Type arg) { return FALSE; }
+            @Override public ConstraintFormula forNullType(NullType arg) { return TRUE; }
+            @Override public ConstraintFormula forBottomType(BottomType arg) { return TRUE; }
             
-            @Override public ConstraintSet forArrayType(ArrayType arg) {
-              if (isPrimitive(arg.ofType())) { 
-                return inferFromEqual(arg.ofType(), param.ofType(), vars, stack);
-              }
-              else { return inferFromSupertype(arg.ofType(), param.ofType(), vars, stack); }
-            }
-            
-            @Override public ConstraintSet forClassType(ClassType arg) {
-              return inferFromSupertype(arg, CLONEABLE_AND_SERIALIZABLE, vars, stack);
-            }
-          });
-        }
-        
-        @Override public ConstraintSet forParameterizedClassType(final ParameterizedClassType param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            public ConstraintSet defaultCase(Type arg) { return UNSATISFIABLE_CONSTRAINTS; }
-            @Override public ConstraintSet forVariableType(VariableType arg) { return handleVariableArg(arg); }
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            @Override public ConstraintSet forTopType(TopType arg) { return EMPTY_CONSTRAINTS; }
-            
-            @Override public ConstraintSet forSimpleClassType(SimpleClassType arg) {
-              Type paramSuper = immediateSupertype(param);
-              if (paramSuper == null) { return UNSATISFIABLE_CONSTRAINTS; }
-              else { return inferFromSupertype(arg, paramSuper, vars, stack); }
-            }
-            
-            @Override public ConstraintSet forRawClassType(RawClassType arg) {
-              Type paramSuper = immediateSupertype(param);
-              if (paramSuper == null) { return UNSATISFIABLE_CONSTRAINTS; }
-              else { return inferFromSupertype(arg, paramSuper, vars, stack); }
-            }
-            
-            @Override public ConstraintSet forParameterizedClassType(final ParameterizedClassType arg) {
-              ConstraintSet matchConstraints = UNSATISFIABLE_CONSTRAINTS;
-              if (param.ofClass().equals(arg.ofClass())) {
-                Thunk<ConstraintSet> recurOnTargs = new Thunk<ConstraintSet>() {
-                  public ConstraintSet value() {
-                    ParameterizedClassType paramCap = capture(param);
-                    ConstraintSet result = EMPTY_CONSTRAINTS;
-                    for (Pair<Type, Type> pair : IterUtil.zip(arg.typeArguments(), paramCap.typeArguments())) {
-                      Type argArg = pair.first();
-                      final Type paramArg = pair.second();
-                      result = result.and(argArg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-                        public ConstraintSet defaultCase(Type argArg) {
-                          ConstraintSet nonWildS = inferFromEqual(argArg, paramArg, vars, stack);
-                          return nonWildS;
-                        }
-                        @Override public ConstraintSet forWildcard(Wildcard argArg) {
-                          ConstraintSet cs = inferFromSubtype(argArg.symbol().lowerBound(), paramArg, vars, stack);
-                          if (cs.isSatisfiable()) {
-                            cs = cs.and(inferFromSupertype(argArg.symbol().upperBound(), paramArg, vars, stack));
-                          }
-                          return cs;
-                        }
-                      }));
-                      if (!result.isSatisfiable()) { break; }
-                    }
-                    return result;
-                  }
-                };
-                matchConstraints = stack.apply(recurOnTargs, EMPTY_CONSTRAINTS, arg, param, 
-                                               InferenceMode.SUPERTYPE);
-              }
-              
-              ConstraintSet superConstraints = UNSATISFIABLE_CONSTRAINTS;
-              Type paramSuper = immediateSupertype(param);
-              if (paramSuper != null) { superConstraints = inferFromSupertype(arg, paramSuper, vars, stack); }
-              
-              return matchConstraints.or(superConstraints);
-            }
-          });
-        }
-        
-        @Override public ConstraintSet forVariableType(final VariableType param) {
-          // Note that this might be a capture variable with an inference-variable bound
-          if (vars.contains(param)) {
-            return EMPTY_CONSTRAINTS.andUpperBound(param, arg);
-          }
-          else {
-            Thunk<ConstraintSet> recurOnUpperBound = new Thunk<ConstraintSet>() {
-              public ConstraintSet value() {
-                return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-                  public ConstraintSet defaultCase(Type arg) {
-                    return inferFromSupertype(arg, param.symbol().upperBound(), vars, stack);
-                  }
-                  
-                  @Override public ConstraintSet forVariableType(VariableType arg) {
-                    ConstraintSet cs1 = inferFromSupertype(arg, param.symbol().upperBound(), vars, stack);
-                    ConstraintSet cs2 = inferFromSupertype(arg.symbol().lowerBound(), param, vars, stack);
-                    return cs1.or(cs2);
-                  }
-                  
-                  @Override public ConstraintSet forIntersectionType(IntersectionType arg) { 
-                    return handleIntersectionArg(arg);
-                  }
-                  
-                  @Override public ConstraintSet forTopType(TopType arg) { return EMPTY_CONSTRAINTS; }
-                });
-              }
-            };
-            return stack.apply(recurOnUpperBound, UNSATISFIABLE_CONSTRAINTS, arg, param, 
-                               InferenceMode.SUPERTYPE);
-          }
-        }
-        
-        @Override public ConstraintSet forIntersectionType(final IntersectionType param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            
-            public ConstraintSet defaultCase(Type arg) {
-              ConstraintSet result = UNSATISFIABLE_CONSTRAINTS;
-              for (Type supParam : param.ofTypes()) {
-                result = result.or(inferFromSupertype(arg, supParam, vars, stack));
-                if (result.isEmpty()) { break; }
-              }
-              return result;
-            }
-            
-            @Override public ConstraintSet forVariableType(final VariableType arg) {
-              Thunk<ConstraintSet> recurOnBound = new Thunk<ConstraintSet>() {
-                public ConstraintSet value() {
-                  return inferFromSupertype(arg.symbol().lowerBound(), param, vars, stack);
+            @Override public ConstraintFormula forVariableType(final VariableType arg) {
+              Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
+                public ConstraintFormula value() {
+                  return subtypeNorm(NORMALIZE.value(arg.symbol().upperBound()), param);
                 }
               };
-              ConstraintSet result = stack.apply(recurOnBound, UNSATISFIABLE_CONSTRAINTS, arg, param,
-                                                 InferenceMode.SUPERTYPE);
-              for (Type supParam : param.ofTypes()) {
+              Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
+                public ConstraintFormula value() { return subtypeNorm(OBJECT, param); }
+              };
+              return _subStack.apply(recurOnBound, infiniteCase, arg, param);
+            }
+            
+            @Override public ConstraintFormula forIntersectionType(IntersectionType arg) {
+              ConstraintFormula result = FALSE;
+              for (Type supArg : arg.ofTypes()) {
+                result = result.or(subtypeNorm(supArg, param));
                 if (result.isEmpty()) { break; }
-                result = result.or(inferFromSupertype(arg, supParam, vars, stack));
               }
               return result;
             }
             
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            
-            @Override public ConstraintSet forTopType(TopType arg) { return EMPTY_CONSTRAINTS; }
-          });
-        }
-        
-        @Override public ConstraintSet forWildcard(final Wildcard param) {
-          return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
-            public ConstraintSet defaultCase(Type arg) { return UNSATISFIABLE_CONSTRAINTS; }
-            @Override public ConstraintSet forVariableType(VariableType arg) { return handleVariableArg(arg); }
-            @Override public ConstraintSet forIntersectionType(IntersectionType arg) { return handleIntersectionArg(arg); }
-            @Override public ConstraintSet forWildcard(Wildcard arg) { 
-              return inferFromEqual(arg, param, vars, stack);
-            }
-            @Override public ConstraintSet forTopType(TopType arg) { return EMPTY_CONSTRAINTS; }
-          });
-        }
-        
-        private ConstraintSet handleVariableArg(final VariableType arg) {
-          Thunk<ConstraintSet> recurOnBound = new Thunk<ConstraintSet>() {
-            public ConstraintSet value() {
-              return inferFromSupertype(arg.symbol().lowerBound(), param, vars, stack);
-            }
-          };
-          return stack.apply(recurOnBound, UNSATISFIABLE_CONSTRAINTS, arg, param, InferenceMode.SUPERTYPE);
-        }
-        
-        private ConstraintSet handleIntersectionArg(IntersectionType arg) {
-          ConstraintSet result = EMPTY_CONSTRAINTS;
-          for (Type supArg : arg.ofTypes()) { 
-            result = result.and(inferFromSupertype(supArg, param, vars, stack));
-            if (!result.isSatisfiable()) { break; }
-          }
-          return result;
-        }
-      });
-    }
-    else {
-      return (isSubtype(param, arg)) ? EMPTY_CONSTRAINTS : UNSATISFIABLE_CONSTRAINTS;
-    }
-  }
-  
-  /** 
-   * Produce the constraints on {@code vars} that may be inferred, assuming {@code arg} is equal to
-   * {@code param}
-   */
-  private ConstraintSet inferFromEqual(final Type arg, final Type param,
-                                       final Set<? extends VariableType> vars, 
-                                       final RecursionStack3<Type, Type, InferenceMode> stack) {
-    //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
-    if (vars.contains(param)) {
-      return param.apply(new TypeAbstractVisitor<ConstraintSet>() {
-        public ConstraintSet defaultCase(Type param) { return UNSATISFIABLE_CONSTRAINTS; }
-        
-        @Override public ConstraintSet forArrayType(ArrayType param) {
-          if (arg instanceof ArrayType) { 
-            return inferFromEqual(((ArrayType) arg).ofType(), param.ofType(), vars, stack);
-          }
-          else { return UNSATISFIABLE_CONSTRAINTS; }
-        }
-        
-        @Override public ConstraintSet forParameterizedClassType(ParameterizedClassType param) {
-          if (arg instanceof ParameterizedClassType) {
-            ParameterizedClassType argCast = (ParameterizedClassType) arg;
-            if (param.ofClass().equals(argCast.ofClass())) {
-              ConstraintSet result = EMPTY_CONSTRAINTS;
-              for (Pair<Type, Type> pair : IterUtil.zip(argCast.typeArguments(), param.typeArguments())) {
-                result = result.and(inferFromEqual(pair.first(), pair.second(), vars, stack));
+            @Override public ConstraintFormula forUnionType(UnionType arg) {
+              ConstraintFormula result = TRUE;
+              for (Type subArg : arg.ofTypes()) {
+                result = result.and(subtypeNorm(subArg, param));
                 if (!result.isSatisfiable()) { break; }
               }
               return result;
             }
-            else { return UNSATISFIABLE_CONSTRAINTS; }
           }
-          else { return UNSATISFIABLE_CONSTRAINTS; }
-        }
-        
-        @Override public ConstraintSet forVariableType(VariableType param) {
-          if (vars.contains(param)) {
-            return EMPTY_CONSTRAINTS.andLowerBound(param, arg).andUpperBound(param, arg);
+          
+          public ConstraintFormula defaultCase(Type param) { throw new IllegalArgumentException(); }
+          
+          @Override public ConstraintFormula forArrayType(final ArrayType param) {
+            return arg.apply(new ArgVisitor() {
+              @Override public ConstraintFormula forArrayType(ArrayType arg) {
+                if (isPrimitive(arg.ofType())) { return equivalentNorm(arg.ofType(), param.ofType()); }
+                else { return subtypeNorm(arg.ofType(), param.ofType()); }
+              }
+            });
           }
-          else { return UNSATISFIABLE_CONSTRAINTS; }
-        }
-        
-        @Override public ConstraintSet forIntersectionType(IntersectionType param) {
-          if (arg instanceof IntersectionType) {
-            Iterable<? extends Type> argSups = ((IntersectionType) arg).ofTypes();
-            if (IterUtil.sizeOf(argSups) != IterUtil.sizeOf(param.ofTypes())) {
-              return UNSATISFIABLE_CONSTRAINTS;
-            }
-            else {
-              ConstraintSet result = UNSATISFIABLE_CONSTRAINTS;
-              for (Iterable<Type> paramSups : PermutationIterable.make(param.ofTypes())) {
-                ConstraintSet thisPerm = EMPTY_CONSTRAINTS;
-                for (Pair<Type, Type> pair : IterUtil.zip(argSups, paramSups)) {
-                  thisPerm = thisPerm.and(inferFromEqual(pair.first(), pair.second(), vars, stack));
-                  if (!thisPerm.isSatisfiable()) { break; }
+          
+          @Override public ConstraintFormula forParameterizedClassType(final ParameterizedClassType param) {
+            return arg.apply(new ArgVisitor() {
+              
+              @Override public ConstraintFormula forArrayType(ArrayType arg) {
+                return subtypeNorm(CLONEABLE_AND_SERIALIZABLE, param);
+              }
+              
+              @Override public ConstraintFormula forClassType(ClassType arg) {
+                Type argSuper = immediateSupertype(arg);
+                if (argSuper == null) { return FALSE; }
+                else { return subtypeNorm(argSuper, param); }
+              }
+              
+              @Override public ConstraintFormula forParameterizedClassType(final ParameterizedClassType arg) {
+                ConstraintFormula cf = FALSE;
+                if (param.ofClass().equals(arg.ofClass())) {
+                  Thunk<ConstraintFormula> recurOnTargs = new Thunk<ConstraintFormula>() {
+                    public ConstraintFormula value() {
+                      ParameterizedClassType argCap = capture(arg);
+                      ConstraintFormula result = TRUE;
+                      for (Pair<Type, Type> pair : IterUtil.zip(argCap.typeArguments(), param.typeArguments())) {
+                        final Type argArg = pair.first();
+                        final Type paramArg = pair.second();
+                        result = result.and(paramArg.apply(new TypeAbstractVisitor<ConstraintFormula>() {
+                          public ConstraintFormula defaultCase(Type paramArg) { 
+                            return equivalentNorm(argArg, paramArg);
+                          }
+                          @Override public ConstraintFormula forWildcard(Wildcard paramArg) {
+                            ConstraintFormula wildResult = supertypeNorm(argArg, paramArg.symbol().lowerBound());
+                            if (wildResult.isSatisfiable()) {
+                              wildResult = wildResult.and(subtypeNorm(argArg, paramArg.symbol().upperBound()));
+                            }
+                            return wildResult;
+                          }
+                        }));
+                        if (!result.isSatisfiable()) { break; }
+                      }
+                      return result;
+                    }
+                  };
+                  cf = _subStack.apply(recurOnTargs, FALSE, arg, param);
                 }
-                result = result.or(thisPerm);
+                if (!cf.isEmpty()) { cf = cf.or(forClassType(arg)); }
+                return cf;
+              }
+            });
+          }
+          
+          @Override public ConstraintFormula forVariableType(final VariableType param) {
+            // Note that this might be a capture variable with an inference-variable bound
+            if (_vars.contains(param)) { return lowerBound(param, arg); }
+            else {
+              return arg.apply(new ArgVisitor() {
+                
+                @Override public ConstraintFormula defaultCase(final Type arg) {
+                  Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
+                    public ConstraintFormula value() {
+                      return subtypeNorm(arg, NORMALIZE.value(param.symbol().lowerBound()));
+                    }
+                  };
+                  Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
+                    public ConstraintFormula value() { return subtypeNorm(arg, NULL); }
+                  };
+                  return _subStack.apply(recurOnBound, infiniteCase, arg, param);
+                }
+                
+                @Override public ConstraintFormula forVariableType(VariableType arg) {
+                  ConstraintFormula result = super.forVariableType(arg);
+                  if (!result.isEmpty()) { result = result.or(defaultCase(arg)); }
+                  return result;
+                }
+                
+                @Override public ConstraintFormula forIntersectionType(IntersectionType arg) {
+                  ConstraintFormula result = super.forIntersectionType(arg);
+                  if (!result.isEmpty()) { result = result.or(defaultCase(arg)); }
+                  return result;
+                }
+                
+              });
+            }
+          }
+          
+          @Override public ConstraintFormula forIntersectionType(final IntersectionType param) {
+            return arg.apply(new ArgVisitor() {
+              @Override public ConstraintFormula defaultCase(Type arg) {
+                ConstraintFormula result = TRUE;
+                for (Type supParam : param.ofTypes()) {
+                  result = result.and(subtypeNorm(arg, supParam));
+                  if (!result.isSatisfiable()) { break; }
+                }
+                return result;
+              }
+              @Override public ConstraintFormula forVariableType(VariableType arg) { return defaultCase(arg); }
+              @Override public ConstraintFormula forIntersectionType(IntersectionType arg) { return defaultCase(arg); }
+            });
+          }
+          
+          @Override public ConstraintFormula forUnionType(final UnionType param) {
+            return arg.apply(new ArgVisitor() {
+              @Override public ConstraintFormula defaultCase(Type arg) {
+                ConstraintFormula result = FALSE;
+                for (Type subParam : param.ofTypes()) {
+                  result = result.or(subtypeNorm(arg, subParam));
+                  if (result.isEmpty()) { break; }
+                }
+                return result;
+              }
+              @Override public ConstraintFormula forVariableType(VariableType arg) {
+                ConstraintFormula result = super.forVariableType(arg);
+                if (!result.isEmpty()) { result = result.or(defaultCase(arg)); }
+                return result;
+              }
+              @Override public ConstraintFormula forIntersectionType(IntersectionType arg) { return defaultCase(arg); }
+            });
+          }
+          
+        });
+      }
+    }
+    
+    public ConstraintFormula supertypeNorm(final Type arg, final Type param) {
+      //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
+      if (!param.apply(_containsVar)) { return new NormSubtype().contains(param, arg) ? TRUE : FALSE; }
+      else {
+        return param.apply(new TypeAbstractVisitor<ConstraintFormula>() {
+          
+          class ArgVisitor extends TypeAbstractVisitor<ConstraintFormula> {
+            @Override public ConstraintFormula defaultCase(Type arg) { return FALSE; }
+            @Override public ConstraintFormula forTopType(TopType arg) { return TRUE; }
+            
+            @Override public ConstraintFormula forVariableType(final VariableType arg) {
+              Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
+                public ConstraintFormula value() {
+                  return supertypeNorm(NORMALIZE.value(arg.symbol().lowerBound()), param);
+                }
+              };
+              Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
+                public ConstraintFormula value() { return supertypeNorm(NULL, param); }
+              };
+              return _subStack.apply(recurOnBound, infiniteCase, arg, param);
+            }
+            
+            @Override public ConstraintFormula forIntersectionType(IntersectionType arg) {
+              ConstraintFormula result = TRUE;
+              for (Type supArg : arg.ofTypes()) {
+                result = result.and(supertypeNorm(supArg, param));
+                if (!result.isSatisfiable()) { break; }
+              }
+              return result;
+            }
+            
+            @Override public ConstraintFormula forUnionType(UnionType arg) {
+              ConstraintFormula result = FALSE;
+              for (Type subArg : arg.ofTypes()) {
+                result = result.or(supertypeNorm(subArg, param));
                 if (result.isEmpty()) { break; }
               }
               return result;
             }
           }
-          else { return UNSATISFIABLE_CONSTRAINTS; }
-        }
-        
-        @Override public ConstraintSet forWildcard(final Wildcard param) {
-          if (arg instanceof Wildcard) {
-            Thunk<ConstraintSet> recurOnBounds = new Thunk<ConstraintSet>() {
-              public ConstraintSet value() {
-                Wildcard argCast = (Wildcard) arg;
-                ConstraintSet result = inferFromEqual(argCast.symbol().upperBound(), param.symbol().upperBound(),
-                                                      vars, stack);
-                if (result.isSatisfiable()) { 
-                  result = result.and(inferFromEqual(argCast.symbol().lowerBound(), param.symbol().lowerBound(),
-                                                     vars, stack));
+          
+          public ConstraintFormula defaultCase(Type param) { throw new IllegalArgumentException(); }
+          
+          @Override public ConstraintFormula forArrayType(final ArrayType param) {
+            return arg.apply(new ArgVisitor() {
+              @Override public ConstraintFormula forArrayType(ArrayType arg) {
+                if (isPrimitive(arg.ofType())) { return equivalentNorm(arg.ofType(), param.ofType()); }
+                else { return supertypeNorm(arg.ofType(), param.ofType()); }
+              }
+              @Override public ConstraintFormula forClassType(ClassType arg) {
+                return supertypeNorm(arg, CLONEABLE_AND_SERIALIZABLE);
+              }
+            });
+          }
+          
+          @Override public ConstraintFormula forParameterizedClassType(final ParameterizedClassType param) {
+            return arg.apply(new ArgVisitor() {
+              
+              @Override public ConstraintFormula forClassType(ClassType arg) {
+                Type paramSuper = immediateSupertype(param);
+                if (paramSuper == null) { return FALSE; }
+                else { return supertypeNorm(arg, paramSuper); }
+              }
+              
+              @Override public ConstraintFormula forParameterizedClassType(final ParameterizedClassType arg) {
+                ConstraintFormula cf = FALSE;
+                if (param.ofClass().equals(arg.ofClass())) {
+                  Thunk<ConstraintFormula> recurOnTargs = new Thunk<ConstraintFormula>() {
+                    public ConstraintFormula value() {
+                      ParameterizedClassType paramCap = capture(param);
+                      ConstraintFormula result = TRUE;
+                      for (Pair<Type, Type> pair : IterUtil.zip(arg.typeArguments(), paramCap.typeArguments())) {
+                        final Type argArg = pair.first();
+                        final Type paramArg = pair.second();
+                        result = result.and(argArg.apply(new TypeAbstractVisitor<ConstraintFormula>() {
+                          public ConstraintFormula defaultCase(Type argArg) { 
+                            return equivalentNorm(argArg, paramArg);
+                          }
+                          @Override public ConstraintFormula forWildcard(Wildcard argArg) {
+                            ConstraintFormula wildResult = subtypeNorm(argArg.symbol().lowerBound(), paramArg);
+                            if (wildResult.isSatisfiable()) {
+                              wildResult = wildResult.and(supertypeNorm(argArg.symbol().upperBound(), paramArg));
+                            }
+                            return wildResult;
+                          }
+                        }));
+                        if (!result.isSatisfiable()) { break; }
+                      }
+                      return result;
+                    }
+                  };
+                  cf = _supStack.apply(recurOnTargs, FALSE, arg, param);
+                }
+                if (!cf.isEmpty()) { cf = cf.or(forClassType(arg)); }
+                return cf;
+              }
+
+            });
+          }
+          
+          @Override public ConstraintFormula forVariableType(final VariableType param) {
+            // Note that this might be a capture variable with an inference-variable bound
+            if (_vars.contains(param)) { return upperBound(param, arg); }
+            else {
+              return arg.apply(new ArgVisitor() {
+                
+                @Override public ConstraintFormula defaultCase(final Type arg) {
+                  Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
+                    public ConstraintFormula value() {
+                      return supertypeNorm(arg, NORMALIZE.value(param.symbol().upperBound()));
+                    }
+                  };
+                  Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
+                    public ConstraintFormula value() { return supertypeNorm(arg, OBJECT); }
+                  };
+                  return _supStack.apply(recurOnBound, infiniteCase, arg, param);
+                }
+                
+                @Override public ConstraintFormula forVariableType(VariableType arg) {
+                  ConstraintFormula result = defaultCase(arg);
+                  if (!result.isEmpty()) { result = result.or(super.forVariableType(arg)); }
+                  return result;
+                }
+                
+                @Override public ConstraintFormula forUnionType(UnionType arg) {
+                  ConstraintFormula result = defaultCase(arg);
+                  if (!result.isEmpty()) { result = result.or(super.forUnionType(arg)); }
+                  return result;
+                }
+                
+              });
+            }
+          }
+          
+          @Override public ConstraintFormula forIntersectionType(final IntersectionType param) {
+            return arg.apply(new ArgVisitor() {
+              @Override public ConstraintFormula defaultCase(Type arg) {
+                ConstraintFormula result = FALSE;
+                for (Type supParam : param.ofTypes()) {
+                  result = result.or(supertypeNorm(arg, supParam));
+                  if (result.isEmpty()) { break; }
                 }
                 return result;
               }
-            };
-            return stack.apply(recurOnBounds, EMPTY_CONSTRAINTS, arg, param, InferenceMode.EQUAL);
+              @Override public ConstraintFormula forVariableType(VariableType arg) {
+                ConstraintFormula result = defaultCase(arg);
+                if (!result.isEmpty()) { result = result.or(super.forVariableType(arg)); }
+                return result;
+              }
+              @Override public ConstraintFormula forUnionType(UnionType arg) { return defaultCase(arg); }
+            });
           }
-          else { return UNSATISFIABLE_CONSTRAINTS; }
+          
+          @Override public ConstraintFormula forUnionType(final UnionType param) {
+            return arg.apply(new ArgVisitor() {
+              @Override public ConstraintFormula defaultCase(Type arg) {
+                ConstraintFormula result = TRUE;
+                for (Type subParam : param.ofTypes()) {
+                  result = result.and(supertypeNorm(arg, subParam));
+                  if (!result.isSatisfiable()) { break; }
+                }
+                return result;
+              }
+              @Override public ConstraintFormula forVariableType(VariableType arg) { return defaultCase(arg); }
+              @Override public ConstraintFormula forIntersectionType(IntersectionType arg) { return defaultCase(arg); }
+              @Override public ConstraintFormula forUnionType(UnionType arg) { return defaultCase(arg); }
+            });
+          }
+          
+        });
+      }
+    }
+    
+    public ConstraintFormula equivalentNorm(final Type arg, final Type param) {
+      ConstraintFormula result = subtypeNorm(arg, param);
+      if (result.isSatisfiable()) { result = result.and(supertypeNorm(arg, param)); }
+      return result;
+    }
+    
+    private final TypeVisitorLambda<Boolean> _containsVar = new TypeAbstractVisitor<Boolean>() {
+      private final RecursionStack<Type> _stack = new RecursionStack<Type>();
+      public Boolean defaultCase(Type t) { return false; }
+      @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
+      @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
+        return checkList(t.typeArguments());
+      }
+      @Override public Boolean forBoundType(BoundType t) {  return checkList(t.ofTypes()); }
+      @Override public Boolean forVariableType(VariableType t) {
+        return _vars.contains(t) || checkBoundedSymbol(t, t.symbol());
+      }
+      @Override public Boolean forWildcard(Wildcard w) { return checkBoundedSymbol(w, w.symbol()); } 
+      
+      private Boolean checkList(Iterable<? extends Type> types) {
+        for (Type t : types) { 
+          if (t.apply(this)) { return true; }
         }
-      });
-    }
-    else {
-      return (isEqual(arg, param)) ? EMPTY_CONSTRAINTS : UNSATISFIABLE_CONSTRAINTS;
-    }
+        return false;
+      }
+      
+      private Boolean checkBoundedSymbol(Type t, final BoundedSymbol s) {
+        final TypeVisitor<Boolean> visitor = this; // handles this shadowing
+        // wildcards here aren't recursive, so don't need to be handled with a stack,
+        // but it doesn't hurt to cover the more general case
+        Thunk<Boolean> handleBounds = new Thunk<Boolean>() {
+          public Boolean value() {
+            return s.lowerBound().apply(visitor) || s.upperBound().apply(visitor);
+          }
+        };
+        return _stack.apply(handleBounds, false, t);
+      }
+      
+    };
   }
-  
+    
 }
