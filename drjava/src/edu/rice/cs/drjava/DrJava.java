@@ -287,6 +287,11 @@ public class DrJava {
       
       else if (arg.equals("-new")) _forceNewInstance = true;
       
+      else if (arg.equals("-delete-after-restart")) {
+        File deleteAfterRestart = new File(args[argIndex++]);
+        deleteAfterRestart.delete();
+      }
+      
       else if (arg.equals("-help") || arg.equals("-?")) {
         displayUsage();
         return false;

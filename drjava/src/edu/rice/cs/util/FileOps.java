@@ -996,4 +996,57 @@ public abstract class FileOps {
     catch(Exception e) { return false; }
     return res;
   }
+
+  /** Generate a new file name that does not yet exist. Maximum of 20 attempts.
+    * Example: generateNewFileName(new File("foo.bar"))
+    * generates "foo.bar", "foo.bar-2", "foo.bar-3", and so on.
+    * @param base base name of the file
+    * @return new file name that does not yet exist
+    * @throws IOException if file name cannot be generated within 100 attempts */
+  public static File generateNewFileName(File base) throws IOException {
+    return generateNewFileName(base.getParentFile(), base.getName());
+  }
+
+  /** Generate a new file name that does not yet exist. Maximum of 20 attempts.
+    * Example: generateNewFileName(new File("."), "foo.bar")
+    * generates "foo.bar", "foo.bar-2", "foo.bar-3", and so on.
+    * @param dir directory of the file
+    * @param name the base file name
+    * @return new file name that does not yet exist
+    * @throws IOException if file name cannot be generated within 100 attempts */
+  public static File generateNewFileName(File dir, String name) throws IOException {
+    return generateNewFileName(dir, name, "", 100);
+  }
+
+  /** Generate a new file name that does not yet exist. Maximum of 20 attempts.
+    * @param dir directory of the file
+    * @param prefix the beginning of the file name
+    * @param suffix the end of the file name
+    * @return new file name that does not yet exist
+    * @throws IOException if file name cannot be generated within 100 attempts */
+  public static File generateNewFileName(File dir, String prefix, String suffix) throws IOException {
+    return generateNewFileName(dir, prefix, suffix, 100);
+  }
+
+  /** Generate a new file name that does not yet exist.
+    * Example: generateNewFileName(new File("."), "foo", ".bar", 10)
+    * generates "foo.bar", "foo-2.bar", "foo-3.bar", and so on.
+    * @param dir directory of the file
+    * @param prefix the beginning of the file name
+    * @param suffix the end of the file name
+    * @param max maximum number of attempts
+    * @return new file name that does not yet exist
+    * @throws IOException if file name cannot be generated within max attempts */
+  public static File generateNewFileName(File dir, String prefix, String suffix, int max) throws IOException {
+    File temp = new File(dir, prefix+suffix);
+    if (temp.exists()) {
+      int count = 2;
+      do {
+        temp = new File(dir, prefix+"-"+count+suffix);
+        ++count;
+      } while(temp.exists() && (count<max));
+      if (temp.exists()) { throw new IOException("Could not generate a file name that did not already exist."); }
+    }
+    return temp;
+  }
 }

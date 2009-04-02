@@ -1068,7 +1068,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Quits DrJava.  Optionally displays a prompt before quitting. */
   private final Action _quitAction = new AbstractAction("Quit") {
-    public void actionPerformed(ActionEvent ae) { _quit(); }
+    public void actionPerformed(ActionEvent ae) { quit(); }
   };
   
   
@@ -2794,7 +2794,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowActivated(WindowEvent ev) { }
     public void windowClosed(WindowEvent ev) { }
-    public void windowClosing(WindowEvent ev) { _quit(); }
+    public void windowClosing(WindowEvent ev) { quit(); }
     public void windowDeactivated(WindowEvent ev) { }
     public void windowDeiconified(WindowEvent ev) {
       try { _model.getActiveDocument().revertIfModifiedOnDisk(); }
@@ -5119,7 +5119,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    }
    */
   
-  private void _quit() {
+  void quit() {
 //    AbstractGlobalModel._log.log("MainFrame.quit() called");
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
