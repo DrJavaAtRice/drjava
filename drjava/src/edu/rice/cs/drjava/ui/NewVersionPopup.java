@@ -82,6 +82,7 @@ public class NewVersionPopup extends JDialog {
   private String[] _msg = null;
   /** the version string of the new version found, or "" */
   private String _newestVersionString = "";
+  /** indeterminate progress bar */
   
   /** Creates a window to display whether a new version of DrJava is available. */
   public NewVersionPopup(MainFrame parent) {
@@ -287,9 +288,12 @@ public class NewVersionPopup extends JDialog {
     JPanel cp = new JPanel(new BorderLayout(5,5));
     cp.setBorder(new EmptyBorder(5,5,5,5));
     setContentPane(cp);
-    cp.add(new JOptionPane("Updating, please wait.",JOptionPane.INFORMATION_MESSAGE,
+    cp.add(new JOptionPane("Waiting for www.sourceforge.net ...",JOptionPane.INFORMATION_MESSAGE,
                            JOptionPane.DEFAULT_OPTION,null,
                            new Object[0]), BorderLayout.CENTER);
+    JProgressBar pb = new JProgressBar(0,100);
+    pb.setIndeterminate(true);
+    cp.add(pb, BorderLayout.SOUTH);
     validate();
     
     new Thread(new Runnable() {
@@ -416,7 +420,7 @@ public class NewVersionPopup extends JDialog {
           
           // ask DrJava to close
           final File finalDestFile = destFile;
-          Runtime.getRuntime().addShutdownHook(new Thread() {
+          Thread restart = new Thread() {
             public void run() {
               try {
                 LOG.log("Restarting...");
@@ -440,8 +444,21 @@ public class NewVersionPopup extends JDialog {
                 // NOTE: it would be nice if this error message would keep the application alive until the user closes it
               }
             }
-          });
-          _mainFrame.quit();
+          };
+          Runtime.getRuntime().addShutdownHook(restart);
+          Utilities.invokeAndWait(new Runnable() { public void run() { _mainFrame.quit(); } });
+          // if we get here, then the user has cancelled the shutdown
+          // remove the hook
+          Runtime.getRuntime().removeShutdownHook(restart);
+          tempClassFile.delete();
+          JOptionPane.showMessageDialog(_mainFrame, 
+                                        "A new version of DrJava was downloaded. However, you chose\n"+
+                                        "not to restart DrJava, so the old version was not automatically\n"+
+                                        "replaced.\n\n"+
+                                        "The new copy is now installed at:\n"+
+                                        finalDestFile.getAbsolutePath()+"\n\n"+
+                                        "The old copy is still installed at:\n"+
+                                        targetFile.getAbsolutePath());
         }
         catch(InterruptedIOException iie) { /* aborted by user */ return; }
         catch(IOException e) { abortUpdate("Error installing update:\n"+e.getMessage()); return; }
