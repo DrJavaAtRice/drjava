@@ -81,5 +81,14 @@ public abstract class Option<T> extends Tuple {
     if (val == null) { return (Option<T>) Null.INSTANCE; }
     else { return new Wrapper<T>(val); }
   }
+  
+  /**
+   * A more general form of the instance method {@link #unwrap(Object)}, allowing {@code forNone}
+   * to have a different type than {@code opt} (the result has a common supertype).
+   */
+  public static <T> T unwrap(Option<? extends T> opt, T forNone) {
+    if (opt.isSome()) { return opt.unwrap(); }
+    else { return forNone; }
+  }
     
 }
