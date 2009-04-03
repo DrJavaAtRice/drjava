@@ -10062,9 +10062,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             }
           }
         };
+        final WindowAdapter regainFrontAfterNative = new WindowAdapter() {
+          public void windowActivated(WindowEvent we) {
+            // remove from the three windows this is installed on
+            MainFrame.this.removeWindowListener(this);
+            _tabbedPanesFrame.removeWindowListener(this);
+            _debugFrame.removeWindowListener(this);
+            // if the window that lost focus because of a native application window
+            // is still the modal window adapter owner, put it back in front
+            if (_modalWindowAdapterOwner==w) {
+              w.toFront();
+              w.requestFocus();
+              toFrontAction.run(we);
+            }
+          }
+        };
         public void toFront(WindowEvent we) {
           Window opposite = we.getOppositeWindow();
-          if (opposite==null) { return; /* probably a native application window, not DrJava */ }
+          if (opposite==null) {
+            // Probably a native application window, not DrJava.
+            // When the user switches back to DrJava, the user may select
+            // a different window to be on top, but we want w to be on top
+            // install a listener on MainFrame, the detached panes window, and the
+            // detached debugger that puts w back on top if one of those windows
+            // gets selected and w is still the modal window adapter owner.
+            // This isn't perfect, since the user may select a window other than
+            // those three, but it is good enough in most cases since those three
+            // windows are the biggest windows.
+            MainFrame.this.addWindowListener(regainFrontAfterNative);
+            _tabbedPanesFrame.addWindowListener(regainFrontAfterNative);
+            _debugFrame.addWindowListener(regainFrontAfterNative);
+            return;
+          }
           if (opposite instanceof Dialog) {
             Dialog d = (Dialog)opposite;
             if (d.isModal()) {
