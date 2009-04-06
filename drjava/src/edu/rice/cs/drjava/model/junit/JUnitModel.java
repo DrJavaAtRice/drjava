@@ -104,8 +104,9 @@ public interface JUnitModel {
   
   /** Cleans up an attempt JUnit test exeuction when suitable test code is not available.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll);
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail);
   
   //----------------------------- Error Results -----------------------------//
   

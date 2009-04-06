@@ -152,7 +152,7 @@ public class JarOptionsDialog extends SwingFrame {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
     if (_lastState != null) setLocation(_lastState.getLocation());
-    else MainFrame.setPopupLoc(this, _mainFrame);
+    else Utilities.setPopupLoc(this, _mainFrame);
     validate();
   }
   
@@ -164,7 +164,7 @@ public class JarOptionsDialog extends SwingFrame {
       super(title);
       _parent = parent;
       setSize(350, 150);
-      MainFrame.setPopupLoc(this, parent);
+      Utilities.setPopupLoc(this, parent);
       JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
       getRootPane().setLayout(new BorderLayout());
       getRootPane().add(waitLabel, BorderLayout.CENTER);
@@ -172,7 +172,7 @@ public class JarOptionsDialog extends SwingFrame {
     }
     
     public void setVisible(boolean vis) {
-      MainFrame.setPopupLoc(this, _parent);
+      Utilities.setPopupLoc(this, _parent);
       super.setVisible(vis);
     }
   }
@@ -189,7 +189,7 @@ public class JarOptionsDialog extends SwingFrame {
     initDone();  // call by mandated by SwingFrame contract
     pack();
     
-    MainFrame.setPopupLoc(this, _mainFrame);   
+    Utilities.setPopupLoc(this, _mainFrame);   
   }
   
   /** Load the initial state from the previous files or with defaults. */

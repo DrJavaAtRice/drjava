@@ -703,7 +703,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   public class JUnitCompileBeforeTestListener extends JUnitTestListener {
     
     /* Method copied by _mainListener in MainFrame. */
-    public void compileBeforeJUnit(final CompilerListener testAfterCompile) {
+    public void compileBeforeJUnit(final CompilerListener testAfterCompile, List<OpenDefinitionsDocument> outOfSync) {
 //      System.err.println("compileBeforeJUnit called in listener " + this);
       synchronized(this) { compileBeforeJUnitCount++; }
       // Compile all open source files

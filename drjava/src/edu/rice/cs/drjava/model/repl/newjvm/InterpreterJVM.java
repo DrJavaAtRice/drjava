@@ -412,9 +412,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Notifies Main JVM that JUnit has been invoked on a non TestCase class.  Unsynchronized because it contains a 
     * remote call and does not involve mutable local state.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll) {
-    try { _mainJVM.nonTestCase(isTestAll); }
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
+    try { _mainJVM.nonTestCase(isTestAll, didCompileFail); }
     catch (RemoteException re) { error.log(re); }
   }
   

@@ -899,10 +899,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void consoleReset() { listenerFail("consoleReset fired unexpectedly"); }
     public void saveUntitled() { listenerFail("saveUntitled fired unexpectedly"); }
     
-    public void compileBeforeJUnit(CompilerListener cl) { compileBeforeJUnitCount++; }
+    public void compileBeforeJUnit(CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) { compileBeforeJUnitCount++; }
 
     public void saveBeforeJavadoc() { listenerFail("saveBeforeJavadoc fired unexpectedly"); }
-    public void nonTestCase(boolean isTestAll) { listenerFail("nonTestCase fired unexpectedly"); }
+    public void nonTestCase(boolean isTestAll, boolean didCompileFail) { listenerFail("nonTestCase fired unexpectedly"); }
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       listenerFail("canAbandonFile fired unexpectedly");
@@ -1228,7 +1228,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
                    junitTestStartedCount);
     }
-    @Override public void nonTestCase(boolean isTestAll) {
+    @Override public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
       _log.log("nonTestCase() called; notifying JUnitDone");
@@ -1254,7 +1254,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private volatile boolean _shouldBeTestAll;
     public JUnitNonTestListener() {  this(false); }
     public JUnitNonTestListener(boolean shouldBeTestAll) { _shouldBeTestAll = shouldBeTestAll; }
-    public void nonTestCase(boolean isTestAll) {
+    public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
       synchronized(this) { nonTestCaseCount++; }
       assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
 //      Utilities.show("synchronizing on _junitLock");

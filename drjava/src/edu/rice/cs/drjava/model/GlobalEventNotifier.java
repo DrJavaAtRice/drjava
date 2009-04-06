@@ -448,10 +448,11 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   
   /** Called when trying to test a non-TestCase class.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll) {
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.nonTestCase(isTestAll); } }
+    try { for (GlobalModelListener l : _listeners) { l.nonTestCase(isTestAll, didCompileFail); } }
     finally { _lock.endRead(); }
   }
   
@@ -467,10 +468,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Called before attempting unit testing if tested class files are out of sync, to give the user a chance to save. Do
     * not continue with JUnit if the user doesn't recompile!
     */
-  public void compileBeforeJUnit(final CompilerListener cl) {
+  public void compileBeforeJUnit(final CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) {
 //    Utilities.show("compileBeforeJUnit invoked with argument " + cl + " in GlobalEventNotifier " + this);
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(cl); } }
+    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(cl, outOfSync); } }
     finally { _lock.endRead(); }
   }
   

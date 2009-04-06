@@ -67,8 +67,9 @@ public interface MainJVMRemoteI extends MasterRemote {
   
   /** Called if JUnit is invoked on a non TestCase class.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll) throws RemoteException;
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail) throws RemoteException;
   
   /** Called if the slave JVM encounters an illegal class file during testing.
     * @param e the ClassFileError object describing the error when loading the class file.

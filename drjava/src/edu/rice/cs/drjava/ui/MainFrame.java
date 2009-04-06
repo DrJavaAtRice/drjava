@@ -8992,32 +8992,43 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /** Compile all open source files if this option is configured or running as a unit test.  Otherwise, pop up a
       * dialog to ask if all open source files should be compiled in order to test the program. 
       */
-    public void compileBeforeJUnit(final CompilerListener testAfterCompile) {
+    public void compileBeforeJUnit(final CompilerListener testAfterCompile, List<OpenDefinitionsDocument> outOfSync) {
 //      System.err.println("in compileBeforeJUnit, TEST_MODE = " + Utilities.TEST_MODE);
       if (DrJava.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || Utilities.TEST_MODE) {
         // Compile all open source files
         _model.getCompilerModel().addListener(testAfterCompile);  // listener removes itself
         _compileAll();
       }
-      else { // pop up a window to ask if all open files should be compiled before testing
-        String title = "Must Compile All Source Files to Run Unit Tests";
-        String msg = "Before you can run unit tests, you must first compile all out of sync source files.\n" + 
-          "Would you like to compile all files and run the specified test(s)?";
-        int rc = JOptionPane.showConfirmDialog(MainFrame.this, msg, title, JOptionPane.YES_NO_OPTION); 
-        
-        switch (rc) {
-          case JOptionPane.YES_OPTION:  // compile all open source files and test
+      else { // pop up a window to ask if all open files should be compiled before testing        
+        final JButton yesButton = new JButton(new AbstractAction("Yes") {
+          public void actionPerformed(ActionEvent e) {
+            // compile all open source files and test
             _model.getCompilerModel().addListener(testAfterCompile);  // listener removes itself
             _compileAll();
-            break;
-          case JOptionPane.CLOSED_OPTION:
-          case JOptionPane.NO_OPTION:  // abort unit testing
-//            _model.getJUnitModel().nonTestCase(true);  // cleans up
+          }
+        });
+        final JButton noButton = new JButton(new AbstractAction("No") {
+          public void actionPerformed(ActionEvent e) {
+            // abort unit testing
+            // _model.getJUnitModel().nonTestCase(true);  // cleans up
             _junitInterrupted("Unit testing cancelled by user.");
-            break;
-          default:
-            throw new UnexpectedException("Invalid returnCode from showConfirmDialog: " + rc);
-        }
+          }
+        });
+        ScrollableListDialog<OpenDefinitionsDocument> dialog = new ScrollableListDialog.Builder<OpenDefinitionsDocument>()
+          .setOwner(MainFrame.this)
+          .setTitle("Must Compile All Source Files to Run Unit Tests")
+          .setText("Before you can run unit tests, you must first compile all out of sync source files.\n"+
+                   "The files below are out of sync. Would you like to compile all files and\n"+
+                   "run the specified test(s)?")
+          .setItems(outOfSync)
+          .setMessageType(JOptionPane.QUESTION_MESSAGE)
+          .setFitToScreen(true)
+          .clearButtons()
+          .addButton(yesButton)
+          .addButton(noButton)
+          .build();
+        
+        dialog.showDialog();
       }
     }
     
@@ -9085,26 +9096,34 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     /** Event that is fired with there is nothing to test.  JUnit is never started. */ 
-    public void nonTestCase(boolean isTestAll) {
+    public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
       assert EventQueue.isDispatchThread();
       
 //      Utilities.showStackTrace(new UnexpectedException("We should not have called nonTestCase"));
-      
-      final String message = isTestAll ?
-        "There are no compiled JUnit TestCases available for execution.\n" +
-        "Perhaps you have not yet saved and compiled your test files."
-        :
-        "The current document is not a valid JUnit test case.\n" +
-        "Please make sure that:\n" +
-        "- it has been compiled and\n" +
-        "- it is a subclass of junit.framework.TestCase.\n";
-      
+      String message;
+      String title = "Cannot Run JUnit Test Cases";
+      if (didCompileFail) {
+        message = "Compile failed. Cannot run JUnit TestCases.\n" +
+          "Please examine the Compiler Output.";
+      }
+      else {        
+        if (isTestAll) {
+          message = "There are no compiled JUnit TestCases available for execution.\n" +
+            "Perhaps you have not yet saved and compiled your test files.";
+        }
+        else {
+          message = "The current document is not a valid JUnit test case.\n" +
+            "Please make sure that:\n" +
+            "- it has been compiled and\n" +
+            "- it is a subclass of junit.framework.TestCase.\n";
+        }
+      }
       JOptionPane.showMessageDialog(MainFrame.this, message,
-                                    "Test Only Executes JUnit test cases",
+                                    title,
                                     JOptionPane.ERROR_MESSAGE);
       // clean up as in JUnitEnded 
       try {
-        showTab(_junitErrorPanel, true);
+        if (!didCompileFail) showTab(_junitErrorPanel, true);
         _resetJUnit();
       }
       finally { 
@@ -9588,80 +9607,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param popup the Popup window
     */
   public void setPopupLoc(Window popup) {
-    MainFrame.setPopupLoc(popup, (popup.getOwner() != null) ? popup.getOwner() : this);
-  }
-  
-  /** Determines the location of the popup using a simple, uniform protocol.  If the popup has an owner, the popup is 
-    * centered over the owner.  If the popup has no owner(owner == null), the popup is centered over the first monitor.
-    * In either case, the popup is moved and scaled if any part of it is not on the screen.  This method should be 
-    * called for all popups to maintain uniformity in the DrJava UI.
-    * @param popup the popup window
-    * @param owner the parent component for the popup
-    */
-  public static void setPopupLoc(Window popup, Component owner) {
-    Rectangle frameRect = popup.getBounds();
-    
-    Point ownerLoc = null;
-    Dimension ownerSize = null;
-    if (owner != null && owner.isVisible()) {
-      ownerLoc = owner.getLocation();
-      ownerSize = owner.getSize();
-    }
-    else {
-      //for multi-monitor support
-      //Question: do we want it to popup on the first monitor always?
-      GraphicsDevice[] dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-      Rectangle rec = dev[0].getDefaultConfiguration().getBounds();
-      ownerLoc = rec.getLocation();
-      ownerSize = rec.getSize();
-    }
-    
-    // center it on owner
-    Point loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
-                          ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
-    frameRect.setLocation(loc);
-    
-    // now find the GraphicsConfiguration the popup is on
-    GraphicsConfiguration gcBest = null;
-    int gcBestArea = -1;
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
-    for (GraphicsDevice gd: gs) {
-      GraphicsConfiguration gc = gd.getDefaultConfiguration();
-      Rectangle isect = frameRect.intersection(gc.getBounds());
-      int gcArea = isect.width*isect.height;
-      if (gcArea > gcBestArea) {
-        gcBest = gc;
-        gcBestArea = gcArea;
-      }
-    }
-    
-    // make it fit on the screen
-    Rectangle screenRect = gcBest.getBounds();
-    Dimension screenSize = screenRect.getSize();
-    Dimension frameSize = popup.getSize();
-    
-    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
-    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
-    
-    frameRect.setSize(frameSize);
-    
-    // center it on owner again
-    loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
-                    ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
-    frameRect.setLocation(loc);
-    
-    // now fit it on the screen
-    if (frameRect.x < screenRect.x) frameRect.x = screenRect.x;
-    if (frameRect.x + frameRect.width > screenRect.x + screenRect.width)
-      frameRect.x = screenRect.x + screenRect.width - frameRect.width;
-    
-    if (frameRect.y < screenRect.y) frameRect.y = screenRect.y;
-    if (frameRect.y + frameRect.height > screenRect.y + screenRect.height)
-      frameRect.y = screenRect.y + screenRect.height - frameRect.height;
-    
-    popup.setSize(frameRect.getSize());
-    popup.setLocation(frameRect.getLocation());
+    Utilities.setPopupLoc(popup, (popup.getOwner() != null) ? popup.getOwner() : this);
   }
   
   /** Drag and drop target. */

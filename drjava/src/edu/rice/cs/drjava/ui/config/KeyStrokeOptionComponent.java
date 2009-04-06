@@ -36,10 +36,10 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -251,7 +251,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
       _inputField.setText(_option.format(_currentKeyStroke));
       //this.setLocation(frame.getLocation());
       this.setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
-      MainFrame.setPopupLoc(this, getOwner());
+      Utilities.setPopupLoc(this, getOwner());
       this.setVisible(true);
     }
 

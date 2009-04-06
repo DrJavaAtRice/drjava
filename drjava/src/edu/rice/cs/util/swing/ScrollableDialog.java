@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.util.swing.Utilities;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -164,7 +164,7 @@ public class ScrollableDialog /* implements Serializable */ {
   
   /** Shows this dialog. */
   public void show() {
-    MainFrame.setPopupLoc(_dialog, _dialog.getOwner());
+    Utilities.setPopupLoc(_dialog, _dialog.getOwner());
     _textArea.setCaretPosition(0);
     _textScroll.getHorizontalScrollBar().setValue(_textScroll.getHorizontalScrollBar().getMinimum());
     _textScroll.getVerticalScrollBar().setValue(_textScroll.getVerticalScrollBar().getMinimum());

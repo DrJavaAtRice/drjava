@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.junit;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import java.util.List;
 
 /**
  * Keeps track of all listeners to a JUnitModel, and has the ability
@@ -81,10 +83,11 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
   
   /** Called when trying to test a non-TestCase class.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll) {
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
     _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll); } }
+    try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll, didCompileFail); } }
     finally { _lock.endRead(); }
   }
   
@@ -95,9 +98,9 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
   }
   
   /** Called before JUnit is started by the DefaultJUnitModel. */
-  public void compileBeforeJUnit(final CompilerListener cl) {
+  public void compileBeforeJUnit(final CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) {
     _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl); } }
+    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl, outOfSync); } }
     finally { _lock.endRead(); }
   }
   

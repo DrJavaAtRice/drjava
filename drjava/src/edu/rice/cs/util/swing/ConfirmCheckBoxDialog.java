@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
 
 /**
@@ -96,7 +96,7 @@ public class ConfirmCheckBoxDialog {
     * @return the JOptionPane result of showing the dialog.
     */
   public int show() {
-    MainFrame.setPopupLoc(_dialog, _dialog.getOwner());
+    Utilities.setPopupLoc(_dialog, _dialog.getOwner());
     _dialog.setVisible(true);
     
     Object val = _optionPane.getValue();

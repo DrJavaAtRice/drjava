@@ -52,6 +52,7 @@ import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -206,7 +207,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
     if (_lastState != null) setLocation(_lastState.getLocation());
-    else MainFrame.setPopupLoc(this, _mainFrame);
+    else Utilities.setPopupLoc(this, _mainFrame);
     validate();
   }
   
@@ -318,7 +319,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     super.setResizable(false);
     
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    MainFrame.setPopupLoc(this, _mainFrame);
+    Utilities.setPopupLoc(this, _mainFrame);
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         _commandLine.requestFocus();

@@ -175,7 +175,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     if (dim.height>FRAME_HEIGHT) { dim.height = FRAME_HEIGHT; }
     else { dim.height -= 80; }
     setSize(dim);
-    MainFrame.setPopupLoc(this, _mainFrame);
+    Utilities.setPopupLoc(this, _mainFrame);
 
     reset();
   }

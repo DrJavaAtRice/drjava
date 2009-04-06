@@ -366,4 +366,8 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** Determines if pos in document is inside a comment or a string. */
   public boolean isShadowed(int pos);
+
+  /** Returns true if one of the words 'class', 'interface' or 'enum' is found
+    * in non-comment text. */
+  public boolean containsClassOrInterfaceOrEnum() throws BadLocationException;
 }

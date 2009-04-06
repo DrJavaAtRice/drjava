@@ -497,6 +497,14 @@ public class DummyGlobalModel implements GlobalModel {
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
     throw new UnsupportedOperationException("Tried to call hasOutOfSyncDocuments on a Dummy");
   }
+
+  public List<OpenDefinitionsDocument> getOutOfSyncDocuments() {
+    throw new UnsupportedOperationException("Tried to call getOutOfSyncDocuments on a Dummy");
+  }
+  
+  public List<OpenDefinitionsDocument> getOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
+    throw new UnsupportedOperationException("Tried to call getOutOfSyncDocuments on a Dummy");
+  }
   
   public void cleanBuildDirectory(){
     throw new UnsupportedOperationException("Tried to call cleanBuildDirectory on a Dummy");

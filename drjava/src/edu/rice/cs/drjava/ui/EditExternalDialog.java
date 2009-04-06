@@ -181,7 +181,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
     if (_lastState != null) setLocation(_lastState.getLocation());
-    else MainFrame.setPopupLoc(this, _mainFrame);
+    else edu.rice.cs.util.swing.Utilities.setPopupLoc(this, _mainFrame);
     validate();
   }
 
@@ -287,7 +287,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     super.setResizable(false);
     
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    MainFrame.setPopupLoc(this, _mainFrame);
+    edu.rice.cs.util.swing.Utilities.setPopupLoc(this, _mainFrame);
     
     _importChooser = new JFileChooser() {
       public void setCurrentDirectory(File dir) {

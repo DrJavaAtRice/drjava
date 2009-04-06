@@ -102,7 +102,7 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   /** Called to demand that all class file must be in sync before running unit tests. It is up to the caller of this 
     * method to check if the documents are out of sync, using OpenDefinitionsDocument.checkIfClassFileInSync().
     */
-  public void compileBeforeJUnit(final CompilerListener l) { }
+  public void compileBeforeJUnit(final CompilerListener l, List<OpenDefinitionsDocument> outOfSync) { }
   
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted() { }
@@ -156,8 +156,9 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   /** Called when trying to test a non-TestCase class.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll) { }
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail) { }
   
   /** Called when trying to test an illegal class file.
     * @param e the ClassFileError thrown when DrJava attempted to load the offending class.

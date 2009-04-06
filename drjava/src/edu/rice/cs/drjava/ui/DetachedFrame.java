@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.util.swing.Utilities;
 import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
@@ -142,7 +143,7 @@ public class DetachedFrame extends SwingFrame {
       setSize(_lastState.getDimension());
     }
     else {
-      MainFrame.setPopupLoc(this, _mainFrame);
+      Utilities.setPopupLoc(this, _mainFrame);
       setSize(700,400);
     }
     validate();

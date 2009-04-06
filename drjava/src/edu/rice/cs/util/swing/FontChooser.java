@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -100,7 +100,7 @@ public class FontChooser extends JDialog {
     FontChooser fd = new FontChooser(parent, font);
     fd.setTitle(title);
     
-    MainFrame.setPopupLoc(fd, parent);
+    Utilities.setPopupLoc(fd, parent);
     fd.setVisible(true);
 
     Font chosenFont = null;

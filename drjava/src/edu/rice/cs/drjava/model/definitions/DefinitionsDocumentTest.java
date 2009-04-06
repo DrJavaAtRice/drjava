@@ -2424,4 +2424,103 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("E", _doc.getMainClassName());
     _doc.remove(0, EIC_TEXT.length());
   }
+  
+    /** Test containsClassOrInterfaceOrEnum. */
+  public void testContainsClassOrInterfaceOrEnum() throws BadLocationException {
+    _doc.insertString(0, "class", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "interface", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "enum", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "foo", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "//class", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "//interface", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "//enum", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "//foo", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*class*/", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*interface*/", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*enum*/", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*foo*/", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+    
+    _doc.insertString(0, "\"class\"", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "\"interface\"", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "\"enum\"", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "\"foo\"", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+    
+    _doc.insertString(0, "/*class*/class", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*interface*/interface", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*enum*/enum", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "/*foo*/foo", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+    
+    _doc.insertString(0, "\"class\"class", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "\"interface\"interface", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "\"enum\"enum", null);
+    assertTrue(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+
+    _doc.insertString(0, "\"foo\"foo", null);
+    assertFalse(_doc.containsClassOrInterfaceOrEnum());
+    _doc.remove(0, _doc.getText().length());
+  }
 }

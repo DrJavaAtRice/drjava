@@ -174,4 +174,77 @@ public class Utilities {
   public static boolean isPlasticLaf(String name) {
     return name != null && name.startsWith(JGOODIES_PACKAGE);
   }
+  
+  /** Determines the location of the popup using a simple, uniform protocol.  If the popup has an owner, the popup is 
+    * centered over the owner.  If the popup has no owner(owner == null), the popup is centered over the first monitor.
+    * In either case, the popup is moved and scaled if any part of it is not on the screen.  This method should be 
+    * called for all popups to maintain uniformity in the DrJava UI.
+    * @param popup the popup window
+    * @param owner the parent component for the popup
+    */
+  public static void setPopupLoc(Window popup, Component owner) {
+    Rectangle frameRect = popup.getBounds();
+    
+    Point ownerLoc = null;
+    Dimension ownerSize = null;
+    if (owner != null && owner.isVisible()) {
+      ownerLoc = owner.getLocation();
+      ownerSize = owner.getSize();
+    }
+    else {
+      //for multi-monitor support
+      //Question: do we want it to popup on the first monitor always?
+      GraphicsDevice[] dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+      Rectangle rec = dev[0].getDefaultConfiguration().getBounds();
+      ownerLoc = rec.getLocation();
+      ownerSize = rec.getSize();
+    }
+    
+    // center it on owner
+    Point loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
+                          ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
+    frameRect.setLocation(loc);
+    
+    // now find the GraphicsConfiguration the popup is on
+    GraphicsConfiguration gcBest = null;
+    int gcBestArea = -1;
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+    for (GraphicsDevice gd: gs) {
+      GraphicsConfiguration gc = gd.getDefaultConfiguration();
+      Rectangle isect = frameRect.intersection(gc.getBounds());
+      int gcArea = isect.width*isect.height;
+      if (gcArea > gcBestArea) {
+        gcBest = gc;
+        gcBestArea = gcArea;
+      }
+    }
+    
+    // make it fit on the screen
+    Rectangle screenRect = gcBest.getBounds();
+    Dimension screenSize = screenRect.getSize();
+    Dimension frameSize = popup.getSize();
+    
+    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
+    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
+    
+    frameRect.setSize(frameSize);
+    
+    // center it on owner again
+    loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
+                    ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
+    frameRect.setLocation(loc);
+    
+    // now fit it on the screen
+    if (frameRect.x < screenRect.x) frameRect.x = screenRect.x;
+    if (frameRect.x + frameRect.width > screenRect.x + screenRect.width)
+      frameRect.x = screenRect.x + screenRect.width - frameRect.width;
+    
+    if (frameRect.y < screenRect.y) frameRect.y = screenRect.y;
+    if (frameRect.y + frameRect.height > screenRect.y + screenRect.height)
+      frameRect.y = screenRect.y + screenRect.height - frameRect.height;
+    
+    popup.setSize(frameRect.getSize());
+    popup.setLocation(frameRect.getLocation());
+  }
 }

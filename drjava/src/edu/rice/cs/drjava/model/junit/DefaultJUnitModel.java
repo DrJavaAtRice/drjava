@@ -213,7 +213,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     try { 
       testFile = doc.getFile(); 
       if (testFile == null) {  // document is untitiled: abort unit testing and return
-        nonTestCase(false);
+        nonTestCase(false, false);
         debug.logEnd("junit(doc): no corresponding file");
         return;
       }
@@ -240,7 +240,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
     
 //    Utilities.show("Retrieved JUnit error model");
-    if (_model.hasOutOfSyncDocuments(lod) || _model.hasModifiedDocuments(lod)) {
+    final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
+    if ((outOfSync.size()>0) || _model.hasModifiedDocuments(lod)) {
       /* hasOutOfSyncDocments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
@@ -251,7 +252,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
           final CompilerListener listenerThis = this;
           try {
-            nonTestCase(allTests);
+            nonTestCase(allTests, false);
           }
           finally {  // always remove this listener after its first execution
             EventQueue.invokeLater(new Runnable() { 
@@ -263,7 +264,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           final CompilerListener listenerThis = this;
           try {
             if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompErrors() > 0) {
-              nonTestCase(allTests);
+              nonTestCase(allTests, _model.getNumCompErrors() > 0);
               return;
             }
             EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
@@ -280,7 +281,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       
 //        Utilities.show("Notifying JUnitModelListener");
       _testInProgress = true;
-      _notifyCompileBeforeJUnit(testAfterCompile);
+      _notifyCompileBeforeJUnit(testAfterCompile, outOfSync);
       _testInProgress = false;
     }
     
@@ -462,7 +463,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
           List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
           if (tests == null || tests.isEmpty()) {
-            nonTestCase(allTests);
+            nonTestCase(allTests, false);
             return;
           }
         }
@@ -497,13 +498,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Helper method to notify JUnitModel listeners that all open files must be compiled before JUnit is run. */
-  private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileBeforeJUnit(testAfterCompile); } });
+  private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, final List<OpenDefinitionsDocument> outOfSync) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileBeforeJUnit(testAfterCompile, outOfSync); } });
   }
   
   /** Helper method to notify JUnitModel listeners that JUnit aborted before any tests could be run. */
-  private void _notifyNonTestCase(final boolean testAll) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll); } });
+  private void _notifyNonTestCase(final boolean testAll, final boolean didCompileFail) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll, didCompileFail); } });
   }
   
   private String getCanonicalPath(File f) throws IOException {
@@ -525,12 +526,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called from the JUnitTestManager if its given className is not a test case.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(final boolean isTestAll) {
+  public void nonTestCase(final boolean isTestAll, boolean didCompileFail) {
     // NOTE: junitStarted is called in a different thread from the testing thread.  The _testInProgress flag
     //       is used to prevent a new test from being started and overrunning the existing one.
 //      Utilities.show("DefaultJUnitModel.nonTestCase(" + isTestAll + ") called");
-    _notifyNonTestCase(isTestAll);
+    _notifyNonTestCase(isTestAll, didCompileFail);
     _testInProgress = false;
   }
   

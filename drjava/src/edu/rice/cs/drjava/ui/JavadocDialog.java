@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.DirectorySelector;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import java.io.File;
@@ -134,7 +135,7 @@ public class JavadocDialog implements DirectorySelector {
       _checkBox.setSelected(true);
       
       // Prompt the user
-      MainFrame.setPopupLoc(_dialog, _frame);
+      Utilities.setPopupLoc(_dialog, _frame);
       _dialog.setVisible(true);
       
       // Get result

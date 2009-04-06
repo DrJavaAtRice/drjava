@@ -441,4 +441,5 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getLineOfOffset(int offset) { throw new UnsupportedOperationException("Dummy method"); }
   public int getOffsetOfLine(int line) { throw new UnsupportedOperationException("Dummy method"); } 
   
+  public boolean containsClassOrInterfaceOrEnum() throws BadLocationException { throw new UnsupportedOperationException("Dummy method"); }
 }

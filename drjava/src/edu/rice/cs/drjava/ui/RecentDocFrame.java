@@ -45,6 +45,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.DisplayManager;
+import edu.rice.cs.util.swing.Utilities;
 
 /** This class extends a Swing view class.  Hence it should only be accessed from the event-handling thread. */
 public class RecentDocFrame extends JWindow {
@@ -273,7 +274,7 @@ public class RecentDocFrame extends JWindow {
   }
   
   /** Centers the frame in the screen. */
-  private void centerH() { MainFrame.setPopupLoc(this, _frame); }
+  private void centerH() { Utilities.setPopupLoc(this, _frame); }
   
   /** Centers the frame in the screen. */
   private void centerV() {

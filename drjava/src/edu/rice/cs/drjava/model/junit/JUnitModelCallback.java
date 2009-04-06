@@ -47,8 +47,9 @@ public interface JUnitModelCallback {
   
   /** Called from the JUnitTestManager if its given className is not a test case.
     * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
-  public void nonTestCase(boolean isTestAll);
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail);
   
   /** Called from the JUnitTestManager if it encounters an illegal class file.
     * @param e the ClassFileError object describing the error

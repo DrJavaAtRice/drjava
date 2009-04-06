@@ -44,6 +44,7 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -101,7 +102,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     initComponents();
     initDone();  // call mandated by SwingFrame contract
     pack();        
-    MainFrame.setPopupLoc(InsertVariableDialog.this, _mainFrame);
+    Utilities.setPopupLoc(InsertVariableDialog.this, _mainFrame);
   }
   
   /** Build the dialog. */

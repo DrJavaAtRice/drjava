@@ -569,10 +569,12 @@ public class ScrollableListSelectionDialog extends JDialog {
     getRootPane().setDefaultButton(okButton);
   }
   
-  /** Shows the dialog.
+  /**
+   * Shows the dialog.
    */
   public void showDialog() {
     pack();
+    Utilities.setPopupLoc(this, getOwner());
     setVisible(true);
   }
   

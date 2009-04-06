@@ -495,6 +495,12 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return true iff no document in given list is out of sync with its primary class file. */
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod);
   
+  /** @return list of open documents that are out of sync with their primary class files. */
+  public List<OpenDefinitionsDocument> getOutOfSyncDocuments();
+  
+  /** @return list of open documents in given list that are out of sync with their primary class files. */
+  public List<OpenDefinitionsDocument> getOutOfSyncDocuments(List<OpenDefinitionsDocument> lod);
+  
   /** Cleans the build directory. */
   public void cleanBuildDirectory();
   

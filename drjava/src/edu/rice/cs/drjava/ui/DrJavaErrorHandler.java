@@ -127,7 +127,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
           if (_errors.size() == 1 && ! Utilities.TEST_MODE &&
               DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
             DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
-            MainFrame.setPopupLoc(popup, popup.getOwner());
+            Utilities.setPopupLoc(popup, popup.getOwner());
             popup.setVisible(true);
           }
         }

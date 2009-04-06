@@ -346,6 +346,7 @@ public class ScrollableListDialog<T> extends JDialog {
    */
   public void showDialog() {
     pack();
+    Utilities.setPopupLoc(this, getOwner());
     setVisible(true);
   }
   

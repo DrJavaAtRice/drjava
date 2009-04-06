@@ -123,7 +123,7 @@ public class DrJavaErrorPopup extends JDialog {
     public void actionPerformed(ActionEvent e) {
       if (! Utilities.TEST_MODE) {
         DrJavaErrorPopup.this.dispose();
-        MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.getFrame());
+        Utilities.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.getFrame());
         DrJavaErrorWindow.singleton().setVisible(true);
       }
     }

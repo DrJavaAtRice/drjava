@@ -50,6 +50,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 /** The frame for displaying the HTML help files.
   * @version $Id$
@@ -250,7 +251,7 @@ public class HTMLFrame extends SwingFrame {
     
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    MainFrame.setPopupLoc(this, null);
+    Utilities.setPopupLoc(this, null);
     
     initDone(); // call mandated by SwingFrame contract
   }

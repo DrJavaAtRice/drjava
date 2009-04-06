@@ -2150,17 +2150,38 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /* Returns a sorted (by time of insertion) collection of all open documents. */
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
+
+  /** @return true if all open documents are in sync with their primary class files. */
+  public boolean hasOutOfSyncDocuments() { return getOutOfSyncDocuments().size()>0; }
+  
+  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) { return getOutOfSyncDocuments().size()>0; }
   
   /** @return true if all open documents are in sync with their primary class files. */
-  public boolean hasOutOfSyncDocuments() { return hasOutOfSyncDocuments(getOpenDefinitionsDocuments()); }
+  public List<OpenDefinitionsDocument> getOutOfSyncDocuments() { return getOutOfSyncDocuments(getOpenDefinitionsDocuments()); }
   
-  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
+  public List<OpenDefinitionsDocument> getOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
+    List<OpenDefinitionsDocument> outOfSync = new ArrayList<OpenDefinitionsDocument>();
     for (OpenDefinitionsDocument doc: lod) {
       if (doc.isSourceFile() &&
           (! isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
-          (! doc.checkIfClassFileInSync())) return true;
+          (! doc.checkIfClassFileInSync())) {
+        // If the document doesn't produce a *.class file, then this will be considered "out-of-sync",
+        // even though it isn't. We don't really have many options here unless we actually parse the
+        // document.
+        // As a heuristic, we check if there is any non-comment text that includes the words "class",
+        // "interface" or "enum". If the file doesn't, we presume it is empty and doesn't generate
+        // a class file; therefore, it cannot ever be out of sync.
+        try {
+          boolean b = doc.containsClassOrInterfaceOrEnum();
+          System.out.println("Checking contents of "+doc+": "+b);
+          if (b) outOfSync.add(doc);
+        }
+        catch(BadLocationException e) {
+          outOfSync.add(doc);
+        }
+      }
     }
-    return false;
+    return outOfSync;
   }
   
   /** Set the indent tab size for all definitions documents.
@@ -3704,6 +3725,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    /** Remove a manager for find results from this document.
 //      * @param rm the global model's region manager. */
 //    public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.remove(rm); }
+
+    /** Returns true if one of the words 'class', 'interface' or 'enum' is found
+      * in non-comment text. */
+    public boolean containsClassOrInterfaceOrEnum() throws BadLocationException {
+      return getDocument().containsClassOrInterfaceOrEnum();
+    }
   } /* End of ConcreteOpenDefDoc */
   
   private static class TrivialFSS implements FileSaveSelector {

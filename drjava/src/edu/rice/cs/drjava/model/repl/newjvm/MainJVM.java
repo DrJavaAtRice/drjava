@@ -232,9 +232,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
  
   /** Called if JUnit is invoked on a non TestCase class.  Forwards from the other JVM to the local JUnit model.
    * @param isTestAll whether or not it was a use of the test all button
+    * @param didCompileFail whether or not a compile before this JUnit attempt failed
    */
-  public void nonTestCase(boolean isTestAll) {
-    _junitModel.nonTestCase(isTestAll);
+  public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
+    _junitModel.nonTestCase(isTestAll, didCompileFail);
   }
  
   /** Called if the slave JVM encounters an illegal class file in testing.  Forwards from
@@ -887,7 +888,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** JUnitModel which does not react to events. */
   public static class DummyJUnitModel implements JUnitModelCallback {
-    public void nonTestCase(boolean isTestAll) { }
+    public void nonTestCase(boolean isTestAll, boolean didCompileFail) { }
     public void classFileError(ClassFileError e) { }
     public void testSuiteStarted(int numTests) { }
     public void testStarted(String testName) { }

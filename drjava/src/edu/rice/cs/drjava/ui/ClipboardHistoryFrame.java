@@ -50,6 +50,7 @@ import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Frame with history of clipboard. */
 public class ClipboardHistoryFrame extends SwingFrame {
@@ -180,7 +181,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
       setSize(Math.max(xs,400), Math.max(ys, 400));
-      MainFrame.setPopupLoc(this, _mainFrame);
+      Utilities.setPopupLoc(this, _mainFrame);
     }
   }
 
@@ -302,7 +303,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));
-    MainFrame.setPopupLoc(this, _mainFrame);
+    Utilities.setPopupLoc(this, _mainFrame);
 
     updateView();
   }
