@@ -43,6 +43,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import org.w3c.dom.Node;
 
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.FileRegion;
@@ -177,7 +178,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
         pfir.setCollapsedPaths(readCollapsed());
       
         // read class paths
-        pfir.setClassPaths(readFiles("classpath"));
+        pfir.setClassPaths(readFiles("classpath", _srcFileBase));
       
         // read breakpoints
         pfir.setBreakpoints(readBreakpoints());
@@ -270,13 +271,25 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     return docFList;
   }
 
-  protected List<File> readFiles(String path) {
-    List<File> fList = new ArrayList<File>();
+  protected List<AbsRelFile> readFiles(String path) {
+    return readFiles(path, "");
+  }
+  
+  protected List<AbsRelFile> readFiles(String path, String rootPath) {
+    List<AbsRelFile> fList = new ArrayList<AbsRelFile>();
     List<Node> defs = _xc.getNodes(path+"/file");
     for(Node n: defs) {
       // now all path names are relative to node n...
       String name = _xc.get(".name",n);
-      fList.add(new File(name).getAbsoluteFile());
+      boolean abs = _xc.getBool(".absolute",n,true); // default to true for backward compatibility
+
+      /* added to check if file path name refers to absolute. Intended to eliminate project errors over network paths */
+      abs |= (new File(name)).isAbsolute();   
+      
+      AbsRelFile f = new AbsRelFile(((rootPath.length()>0 && !abs)?
+                                       new File(rootPath,name):
+                                       new File(name)).getAbsoluteFile(),abs);
+      fList.add(f);
     }
     return fList;
   }

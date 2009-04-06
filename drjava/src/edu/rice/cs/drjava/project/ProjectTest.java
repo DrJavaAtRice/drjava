@@ -40,6 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.util.AbsRelFile;
 
 import static edu.rice.cs.util.StringOps.convertToLiteral;
 
@@ -227,7 +228,7 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
     fb.addCollapsedPath("./[ Source Files ]/dir1/");
-    fb.addClassPathFile(new File(parent, "lib"));
+    fb.addClassPathFile(new AbsRelFile(parent, "lib"));
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass("some.main.ClassName");
@@ -413,7 +414,7 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
     fb.addCollapsedPath("./[ Source Files ]/dir1/");
-    fb.addClassPathFile(new File(parent, "lib"));
+    fb.addClassPathFile(new AbsRelFile(parent, "lib"));
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass("some.main.ClassName");
@@ -471,7 +472,7 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
     fb.addCollapsedPath("./[ Source Files ]/dir1/");
-    fb.addClassPathFile(new File(parent, "lib"));
+    fb.addClassPathFile(new AbsRelFile(parent, "lib"));
     fb.setBuildDirectory(new File(parent, "built"));
     fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass("some.main.ClassName");

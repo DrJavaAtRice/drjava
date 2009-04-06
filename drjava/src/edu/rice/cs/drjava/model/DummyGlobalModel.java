@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 
@@ -449,11 +450,11 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   
-  public Iterable<File> getExtraClassPath() {
+  public Iterable<AbsRelFile> getExtraClassPath() {
     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
   }
   
-  public void setExtraClassPath(Iterable<File> cp) {
+  public void setExtraClassPath(Iterable<AbsRelFile> cp) {
     throw new UnsupportedOperationException("Tried to call setExtraClasspath on a Dummy");
   }
   

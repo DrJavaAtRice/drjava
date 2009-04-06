@@ -75,8 +75,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
 
     //set up list
     _listModel = new DefaultListModel();
-    _list = new JList(_listModel);
-    _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    _list = _makeList(_listModel);
 
     resetToCurrent();
 
@@ -157,6 +156,13 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _panel.add(_buttonPanel, BorderLayout.SOUTH);
 
     _listScrollPane.setPreferredSize(new Dimension(0, NUM_ROWS * PIXELS_PER_ROW));
+  }
+  
+  /** Make the list component. */
+  protected JList _makeList(ListModel lm) {
+    JList l = new JList(lm);
+    l.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    return l;
   }
 
   /** Adds buttons to _buttonPanel */

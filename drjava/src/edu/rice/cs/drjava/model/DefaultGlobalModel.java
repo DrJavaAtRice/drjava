@@ -84,6 +84,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.NullFile;
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -626,7 +627,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       File projRoot = getProjectRoot();
       if (projRoot != null) { result = IterUtil.compose(result, projRoot); }
       
-      Iterable<File> projectExtras = getExtraClassPath();
+      Iterable<AbsRelFile> projectExtras = getExtraClassPath();
       if (projectExtras != null) { result = IterUtil.compose(result, projectExtras); }
     }
     else { result = IterUtil.compose(result, getSourceRootSet()); }
@@ -651,7 +652,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     */
   public void resetInteractionsClassPath() {
 //    System.err.println("Resetting interactions class path");
-    Iterable<File> projectExtras = getExtraClassPath();
+    Iterable<AbsRelFile> projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     

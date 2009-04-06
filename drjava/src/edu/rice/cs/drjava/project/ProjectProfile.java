@@ -46,8 +46,9 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.io.*;
 import org.w3c.dom.Node;
-
 import edu.rice.cs.plt.tuple.Pair;
+
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.FileOps;
@@ -77,7 +78,7 @@ public class ProjectProfile implements ProjectFileIR {
   private File _buildDir = FileOps.NULL_FILE;
   private File _workDir = FileOps.NULL_FILE;
   
-  private List<File> _classPathFiles = new ArrayList<File>();
+  private List<AbsRelFile> _classPathFiles = new ArrayList<AbsRelFile>();
   
   private String _mainClass = null;
   
@@ -139,7 +140,7 @@ public class ProjectProfile implements ProjectFileIR {
   public String[] getCollapsedPaths() { return _collapsedPaths.toArray(new String[_collapsedPaths.size()]); }
     
   /** @return an array full of all the classpath path elements in the classpath for this project file */
-  public Iterable<File> getClassPaths() { return _classPathFiles; }
+  public Iterable<AbsRelFile> getClassPaths() { return _classPathFiles; }
   
   /** @return the name of the file that holds the Jar main class associated with this project */
   public String getMainClass() { return _mainClass; }
@@ -219,7 +220,9 @@ public class ProjectProfile implements ProjectFileIR {
     }
   }
   
-  public void addClassPathFile(File cp) { if (cp != null) _classPathFiles.add(cp); }
+  public void addClassPathFile(AbsRelFile cp) {
+    if (cp != null) _classPathFiles.add(cp);
+  }
   public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
   public void setBuildDirectory(File dir) { 
 //    System.err.println("setBuildDirectory(" + dir + ") called");
@@ -231,9 +234,9 @@ public class ProjectProfile implements ProjectFileIR {
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(String main) { _mainClass = main;  }
   public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new LinkedList<DocFile>(sf); }
-  public void setClassPaths(Iterable<? extends File> cpf) {
-    _classPathFiles = new ArrayList<File>();
-    for (File f : cpf) { _classPathFiles.add(f); }
+  public void setClassPaths(Iterable<? extends AbsRelFile> cpf) {
+    _classPathFiles = new ArrayList<AbsRelFile>();
+    for (AbsRelFile f : cpf) { _classPathFiles.add(f); }
   }
   public void setCollapsedPaths(List<String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
   public void setAuxiliaryFiles(List<DocFile> af) { _auxiliaryFiles = new LinkedList<DocFile>(af); }
@@ -399,9 +402,12 @@ public class ProjectProfile implements ProjectFileIR {
     }
     xc.createNode("drjava/project/classpath");
     if (!_classPathFiles.isEmpty()) {
-      for(File cp: _classPathFiles) {
+      for(AbsRelFile cp: _classPathFiles) {
+        path = cp.keepAbsolute()?cp.getAbsolutePath():FileOps.stringMakeRelativeTo(cp, _projectRoot);
+        path = replace(path, File.separator, "/");
         Node f = xc.createNode("drjava/project/classpath/file", null, false);
-        xc.set(".name", cp.getAbsolutePath(), f, true);
+        xc.set(".name", path, f, true);
+        xc.set(".absolute", String.valueOf(cp.keepAbsolute()), f, true);
       }
     }
     xc.createNode("drjava/project/breakpoints");
@@ -515,7 +521,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write classpaths
     if (!_classPathFiles.isEmpty()) {
       fw.write("\n(classpaths");
-      for (File f: _classPathFiles) {
+      for (AbsRelFile f: _classPathFiles) {
         fw.write("\n" + encodeFileAbsolute(f, "  "));
       }
       fw.write(")"); // close the classpaths expression

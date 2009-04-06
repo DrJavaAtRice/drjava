@@ -131,6 +131,7 @@ import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.NullFile;
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -411,7 +412,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                                 File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refresh) {
+                                 File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh) {
     
     return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags,
                                         refresh);
@@ -597,7 +598,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File[] _projectFiles;
     volatile ArrayList<File> _auxFiles;            // distinct from _auxiliaryFiles in ProjectProfile
     private volatile ArrayList<File> _exclFiles;   // distinct from _excludedFiles in ProjectProile and CompilerErrorPanel
-    volatile Iterable<File> _projExtraClassPath;
+    volatile Iterable<AbsRelFile> _projExtraClassPath;
     private boolean _isProjectChanged = false;
     volatile File _createJarFile;
     volatile int _createJarFlags;
@@ -608,11 +609,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
-           IterUtil.<File>empty(), null, 0, false);
+           IterUtil.<AbsRelFile>empty(), null, 0, false);
     }
     
     ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                             File[] excludedFiles, Iterable<File> cp, File cjf, int cjflags, boolean refreshStatus) {
+                             File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus) {
       _projRoot = pr;
       _mainClass = main;
       _buildDir = bd;
@@ -901,8 +902,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     
-    public Iterable<File> getExtraClassPath() { return _projExtraClassPath; }
-    public void setExtraClassPath(Iterable<File> cp) { 
+    public Iterable<AbsRelFile> getExtraClassPath() { return _projExtraClassPath; }
+    public void setExtraClassPath(Iterable<AbsRelFile> cp) { 
       _projExtraClassPath = cp; 
       setClassPathChanged(true);
     }
@@ -953,8 +954,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getCreateJarFile() { return FileOps.NULL_FILE; }
     public void setCreateJarFlags(int f) { }
     public int getCreateJarFlags() { return 0; }
-    public Iterable<File> getExtraClassPath() { return IterUtil.empty(); }
-    public void setExtraClassPath(Iterable<File> cp) { }
+    public Iterable<AbsRelFile> getExtraClassPath() { return IterUtil.empty(); }
+    public void setExtraClassPath(Iterable<AbsRelFile> cp) { }
     public boolean isProjectChanged() { return false; }
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
@@ -1536,9 +1537,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       for (String s : paths) { builder.addCollapsedPath(s); }
     }
     
-    Iterable<File> exCp = getExtraClassPath();
+    Iterable<AbsRelFile> exCp = getExtraClassPath();
     if (exCp != null) {
-      for (File f : exCp) { builder.addClassPathFile(f); }
+      for (AbsRelFile f : exCp) { builder.addClassPathFile(f); }
     }
 //    else System.err.println("Project ClasspathVector is null!");
     
@@ -1670,7 +1671,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File buildDir = ir.getBuildDirectory ();
     final File workDir = ir.getWorkingDirectory();
     final String mainClass = ir.getMainClass();
-    final Iterable<File> projectClassPaths = ir.getClassPaths();
+    final Iterable<AbsRelFile> projectClassPaths = ir.getClassPaths();
     final File createJarFile  = ir.getCreateJarFile ();
     int createJarFlags = ir.getCreateJarFlags();
     final boolean autoRefresh = ir.getAutoRefreshStatus();
@@ -2276,12 +2277,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Returns a project's extra classpaths; empty for FlatFileGroupingState
     * @return The classpath entries loaded along with the project
     */
-  public Iterable<File> getExtraClassPath() { return _state.getExtraClassPath(); }
+  public Iterable<AbsRelFile> getExtraClassPath() { return _state.getExtraClassPath(); }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     * project preferences..
     */
-  public void setExtraClassPath(Iterable<File> cp) {
+  public void setExtraClassPath(Iterable<AbsRelFile> cp) {
     _state.setExtraClassPath(cp);
     setClassPathChanged(true);
     //System.out.println("Setting project classpath to: " + cp);

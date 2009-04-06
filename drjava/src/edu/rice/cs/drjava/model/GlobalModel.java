@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -455,12 +456,12 @@ public interface GlobalModel extends ILoadDocuments {
   /** Returns only the project's extra classpaths.
     * @return The classpath entries loaded along with the project
     */
-  public Iterable<File> getExtraClassPath();
+  public Iterable<AbsRelFile> getExtraClassPath();
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     * project preferences.
     */
-  public void setExtraClassPath(Iterable<File> cp);
+  public void setExtraClassPath(Iterable<AbsRelFile> cp);
   
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f);

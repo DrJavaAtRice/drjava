@@ -386,6 +386,8 @@ public class ScrollableListDialog<T> extends JDialog {
           .setText("LEADER")
           .setItems(data)
           .setMessageType(JOptionPane.ERROR_MESSAGE)
+          .setSelectable(true)
+          .setSelectedItems(data.subList(0,2))
           .build();
         ld.pack();
         ld.setVisible(true);

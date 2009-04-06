@@ -23,6 +23,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
   HashSet<Integer> selectionCache = new HashSet<Integer>();
   
   protected void init(Vector<?> listData, Vector<?> selData) {
+    setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     CheckBoxListCellRenderer r = new CheckBoxListCellRenderer();
     if (selData!=null) {
       int i = 0;
@@ -53,6 +54,14 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
   public CheckBoxJList(Vector<?> listData, Vector<?> selData) {
     super(listData);
     init(listData, selData);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public CheckBoxJList(ListModel lm) {
+    super(lm);
+    Vector listData = new Vector();
+    for(int i=0; i<lm.getSize(); ++i) listData.add(lm.getElementAt(i));
+    init(listData, new Vector());
   }
   
   // ListSelectionListener implementation

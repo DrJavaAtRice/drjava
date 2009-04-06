@@ -38,10 +38,10 @@ package edu.rice.cs.drjava.project;
 
 import java.io.File;
 import java.io.IOException;
-
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.tuple.Pair;
 
-public class DocFile extends File {
+public class DocFile extends AbsRelFile {
   
   private Pair<Integer, Integer> _sel;
   private Pair<Integer, Integer> _scroll;

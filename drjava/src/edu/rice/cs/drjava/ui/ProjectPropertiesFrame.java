@@ -55,6 +55,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
@@ -89,7 +90,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private FileSelectorComponent _jarFileSelector;
   private FileSelectorComponent _manifestFileSelector;
 
-  private VectorFileOptionComponent _extraClassPathList;
+  private VectorAbsRelFileOptionComponent _extraClassPathList;
   private VectorFileOptionComponent _excludedFilesList;
   
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
@@ -242,7 +243,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     if(mc == null) mc = "";
     _model.setMainClass(mc);
 
-    Vector<File> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
+    Vector<AbsRelFile> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
     _model.setExtraClassPath(IterUtil.snapshot(extras));
 
     _model.setAutoRefreshStatus(_autoRefreshComponent.isSelected());
@@ -518,7 +519,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   }
 
   public Component _extraClassPathComponent() {
-    _extraClassPathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this) {
+    _extraClassPathList = new VectorAbsRelFileOptionComponent(null, "Extra Project Classpaths", this) {
       protected Action _getAddAction() {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {

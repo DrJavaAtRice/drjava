@@ -42,6 +42,7 @@ import java.util.List;
 import edu.rice.cs.drjava.model.FileRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
+import edu.rice.cs.util.AbsRelFile;
 
 public interface ProjectFileIR {
   /** @return an array full of all the source files in this project file. */
@@ -70,7 +71,7 @@ public interface ProjectFileIR {
   public String[] getCollapsedPaths();
     
   /** @return an array full of all the classpath path elements in the classpath for this project file */
-  public Iterable<File> getClassPaths();
+  public Iterable<AbsRelFile> getClassPaths();
   
   /** @return the fully qualified name of the class that holds the Jar main class associated with this project */
   public String getMainClass();
@@ -105,7 +106,7 @@ public interface ProjectFileIR {
   public void setAuxiliaryFiles(List<DocFile> aux);
   public void setExcludedFiles(List<DocFile> ef);
   public void setCollapsedPaths(List<String> paths);
-  public void setClassPaths(Iterable<? extends File> cp);
+  public void setClassPaths(Iterable<? extends AbsRelFile> cp);
   public void setBuildDirectory(File dir);
   public void setWorkingDirectory(File dir);
   public void setMainClass(String main);

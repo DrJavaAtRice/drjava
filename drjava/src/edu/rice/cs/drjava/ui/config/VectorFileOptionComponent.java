@@ -48,7 +48,8 @@ import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
-/** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options. Uses a file chooser for each File element.
+/** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options.
+  * Uses a file chooser for each File element.
  *  @version $Id$
  */
 public class VectorFileOptionComponent extends VectorOptionComponent<File> implements OptionConstants {
