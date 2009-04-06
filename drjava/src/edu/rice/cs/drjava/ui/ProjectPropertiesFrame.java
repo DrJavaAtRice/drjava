@@ -210,12 +210,12 @@ public class ProjectPropertiesFrame extends SwingFrame {
     
     _autoRefreshComponent.setSelected(_getAutoRefreshStatus());
 
-    ArrayList<File> cp = new ArrayList<File>(CollectUtil.makeList(_model.getExtraClassPath()));
+    ArrayList<AbsRelFile> cp = new ArrayList<AbsRelFile>(CollectUtil.makeList(_model.getExtraClassPath()));
     _extraClassPathList.setValue(cp);
 
-    cp = new ArrayList<File>();
-    for(File f: _model.getExclFiles()) { cp.add(f); }
-    _excludedFilesList.setValue(cp);
+    ArrayList<File> ef = new ArrayList<File>();
+    for(File f: _model.getExclFiles()) { ef.add(f); }
+    _excludedFilesList.setValue(ef);
     _applyButton.setEnabled(false);
   }
 
@@ -396,10 +396,12 @@ public class ProjectPropertiesFrame extends SwingFrame {
     //    ExtraProjectClasspaths
     JLabel extrasLabel = new JLabel("Extra Classpath");
     extrasLabel.setToolTipText("<html>The list of extra classpaths to load with the project.<br>"+  
-        "This may include either JAR files or directories. Any<br>"+
-        "classes defined in these classpath locations will be <br>"+
-        "visible in the interactions pane and also accessible <br>"+
-    "by the compiler when compiling the project.</html>");
+                               "This may include either JAR files or directories. Any<br>"+
+                               "classes defined in these classpath locations will be <br>"+
+                               "visible in the interactions pane and also accessible <br>"+
+                               "by the compiler when compiling the project.<br>"+
+                               "The entries are relative to the project file unless<br>"+
+                               "the 'Absolute' checkbox is marked.</html>");
     gridbag.setConstraints(extrasLabel, c);
     panel.add(extrasLabel);
 

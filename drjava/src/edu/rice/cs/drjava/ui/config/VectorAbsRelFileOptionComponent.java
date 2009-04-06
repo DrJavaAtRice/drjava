@@ -42,8 +42,9 @@ import java.io.File;
 import edu.rice.cs.util.AbsRelFile;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
+import javax.swing.table.*;
 
-import java.util.ArrayList;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -71,7 +72,7 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
 
   /** Constructor with flag for move buttons. */
   public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
-    super(opt, text, parent);  // creates all four buttons
+    super(opt, text, parent, new String[] { "File", "Absolute" });  // creates all four buttons
     _moveButtonEnabled = moveButtonEnabled;
     
     // set up JFileChooser
@@ -83,6 +84,11 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
     _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _jfc.setMultiSelectionEnabled(true);
     _fileFilter = ClassPathFilter.ONLY;
+    
+    final TableCellRenderer renderer = _table.getTableHeader().getDefaultRenderer();
+    int w = renderer.getTableCellRendererComponent(_table,_table.getModel().getColumnName(1), false, false, 0, 1).getPreferredSize().width;
+    System.out.println("Column "+1+": w="+w);
+    _table.getColumnModel().getColumn(1).setPreferredWidth(w);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -92,11 +98,48 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
     setDescription(description);
   }
   
-  /** Make the list component. */
-//  protected JList _makeList(ListModel lm) {
-//    return new CheckBoxJList(lm);
-//  }
-  
+  /** Returns the table model. Can be overridden by subclasses. */
+  protected AbstractTableModel _makeTableModel() {
+    return new AbstractTableModel() {
+      public String getColumnName(int col) { return (_columnNames.length==0)?super.getColumnName(col):_columnNames[col]; }
+      public int getRowCount() { return _data.size(); }
+      public int getColumnCount() { return 2; }
+      public Object getValueAt(int row, int col) {
+        switch(col) {
+          case 0: return _data.get(row);
+          case 1: return _data.get(row).keepAbsolute();
+        }
+        throw new IllegalArgumentException("Illegal column");
+      }
+      public Class getColumnClass(int col) {
+        switch(col) {
+          case 0: return String.class;
+          case 1: return Boolean.class;
+        }
+        throw new IllegalArgumentException("Illegal column");
+      }
+      public boolean isCellEditable(int row, int col) {
+        if (col<1) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      public void setValueAt(Object value, int row, int col) {
+        AbsRelFile f = _data.get(row);
+        switch(col) {
+          case 1:
+            f.keepAbsolute((Boolean)value);
+            break;
+          default:
+            throw new IllegalArgumentException("Illegal column");
+        }
+        fireTableCellUpdated(row, col);
+      }
+    };
+  }
+
+
   /** Adds buttons to _buttonPanel */
   protected void _addButtons() {
     super._addButtons();
@@ -104,12 +147,6 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
       _buttonPanel.add(_moveUpButton);
       _buttonPanel.add(_moveDownButton);
     }
-  }
-
-  /** Displays the given value. */
-  public void setValue(ArrayList<File> files) {
-    _listModel.clear();
-    for (File f: files) _listModel.addElement(f);
   }
 
   /** Set the file filter for this vector option component. */
@@ -124,7 +161,8 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
   
   /** Shows a file chooser for adding a file to the element. */
   public void chooseFile() {
-    File selection = (File) _list.getSelectedValue();
+    int[] rows = _table.getSelectedRows();
+    File selection = (rows.length==1)?_data.get(rows[0]):null;
     if (selection != null) {
       File parent = selection.getParentFile();
       if (parent != null) {
@@ -143,8 +181,9 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
       c = _jfc.getSelectedFiles();
     }
     if (c != null) {
+      _table.getSelectionModel().clearSelection();
       for(int i = 0; i < c.length; i++) {
-        _listModel.addElement(new AbsRelFile(c[i]));
+        _addValue(new AbsRelFile(c[i]));
       }
     }
   }
@@ -153,8 +192,6 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
     return new AbstractAction("Add") {
       public void actionPerformed(ActionEvent ae) {
         chooseFile();
-        _list.setSelectedIndex(_listModel.getSize() - 1);
-        notifyChangeListeners();
       }
     };
   }

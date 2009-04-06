@@ -3972,5 +3972,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _documentNavigator.selectDocument(_activeDocument);
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.activeDocumentRefreshed(_activeDocument); } });  
   }
+
+  /** Ensures that the _jvmStarter thread has executed. Never called in practice outside of GlobalModelTestCase.setUp(). */
+  public void ensureJVMStarterFinished() { }
 }
 

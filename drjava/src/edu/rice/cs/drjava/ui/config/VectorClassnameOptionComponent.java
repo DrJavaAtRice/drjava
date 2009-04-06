@@ -59,8 +59,7 @@ public class VectorClassnameOptionComponent extends VectorOptionComponent<String
       public void actionPerformed(ActionEvent e) {
         String input = JOptionPane.showInputDialog(_parent, "Please enter the class name:");
         if (input != null && !input.equals("")) { 
-          _listModel.addElement(input); 
-          notifyChangeListeners(); 
+          _addValue(input);
         }
       }
     };

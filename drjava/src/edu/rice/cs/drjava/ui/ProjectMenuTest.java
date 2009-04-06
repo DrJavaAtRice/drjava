@@ -113,6 +113,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
           _frame = new MainFrame();
           _frame.pack();
           _model = _frame.getModel();
+          _model.ensureJVMStarterFinished();
         }
         catch(IOException e) { throw new UnexpectedException(e); }
       }

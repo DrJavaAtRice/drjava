@@ -42,7 +42,7 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
 
-import java.util.ArrayList;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -99,12 +99,6 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     }
   }
 
-  /** Displays the given value. */
-  public void setValue(ArrayList<File> files) {
-    _listModel.clear();
-    for (File f: files) _listModel.addElement(f);
-  }
-
   /** Set the file filter for this vector option component. */
   public void setFileFilter(FileFilter fileFilter) {
     _fileFilter = fileFilter;
@@ -117,7 +111,8 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
   
   /** Shows a file chooser for adding a file to the element. */
   public void chooseFile() {
-    File selection = (File) _list.getSelectedValue();
+    int[] rows = _table.getSelectedRows();
+    File selection = (rows.length==1)?_data.get(rows[0]):null;
     if (selection != null) {
       File parent = selection.getParentFile();
       if (parent != null) {
@@ -136,8 +131,9 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
       c = _jfc.getSelectedFiles();
     }
     if (c != null) {
+      _table.getSelectionModel().clearSelection();
       for(int i = 0; i < c.length; i++) {
-        _listModel.addElement(c[i]);
+        _addValue(c[i]);
       }
     }
   }
@@ -146,8 +142,6 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     return new AbstractAction("Add") {
       public void actionPerformed(ActionEvent ae) {
         chooseFile();
-        _list.setSelectedIndex(_listModel.getSize() - 1);
-        notifyChangeListeners();
       }
     };
   }

@@ -115,4 +115,7 @@ public interface SingleDisplayModel extends GlobalModel {
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** @return the parsing control */
 //  public LightWeightParsingControl getParsingControl();
+  
+  /** Ensures that the _jvmStarter thread has executed. Never called in practice outside of GlobalModelTestCase.setUp(). */
+  public void ensureJVMStarterFinished();
 }

@@ -42,7 +42,7 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
 
-import java.util.ArrayList;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -85,12 +85,6 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
     }
   }
 
-  /** Displays the given value. */
-  public void setValue(ArrayList<String> entries) {
-    _listModel.clear();
-    for (String e: entries) _listModel.addElement(e);
-  }
-  
   /** Shows a JOptionPane for adding a string to the element. */
   public void chooseString() {
     String s = (String)JOptionPane.showInputDialog(_parent,
@@ -103,7 +97,7 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
     //If a string was returned, add it.
     if ((s != null) && (s.length() > 0)) {
       if (verify(s)) {
-        _listModel.addElement(s);
+        _addValue(s);
       }
     }
   }
@@ -119,8 +113,6 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
     return new AbstractAction("Add") {
       public void actionPerformed(ActionEvent ae) {
         chooseString();
-        _list.setSelectedIndex(_listModel.getSize() - 1);
-        notifyChangeListeners();
       }
     };
   }
