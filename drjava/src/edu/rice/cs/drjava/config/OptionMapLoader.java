@@ -95,9 +95,17 @@ public class OptionMapLoader implements OptionConstants {
   }
   
   public void loadInto(OptionMap map) {
+    java.util.ArrayList<OptionParseException> es = new java.util.ArrayList<OptionParseException>();
     for (OptionParser<?> option : DEFAULTS.keys()) {
-      String val = prop.getProperty(option.name);
-      map.setString(option, val);
+      try {
+        String val = prop.getProperty(option.name);
+        map.setString(option, val);
+      }
+      catch(OptionParseException ope) {
+        es.add(ope);
+        map.setString(option, DEFAULT.prop.getProperty(option.name));
+      }
     }
+    if (es.size()>0) throw new OptionParseException(es.toArray(new OptionParseException[0]));
   }
 }

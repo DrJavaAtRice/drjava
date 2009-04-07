@@ -1385,7 +1385,8 @@ public interface OptionConstants {
       ArrayList<String> aList = new ArrayList<String>(4);
       aList.add("stable versions only");
       aList.add("stable and beta versions only");
-      aList.add("all versions");
+      aList.add("all release versions");
+      aList.add("weekly experimental builds");
       aList.add("none (disabled)");
       return aList;
     }

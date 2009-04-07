@@ -436,7 +436,6 @@ public class DrJava {
     try { config.loadConfiguration(); }
     catch (Exception e) {
       // Problem parsing the config file.  Use defaults and remember what happened (for the UI).
-      config.resetToDefaults();
       config.storeStartupException(e);
     }
     _config = config; // required to support calls on DrJava._initConfig() in unit tests

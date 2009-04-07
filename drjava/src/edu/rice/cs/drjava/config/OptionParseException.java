@@ -44,6 +44,7 @@ public class OptionParseException extends IllegalArgumentException {
   public String key;
   public String value;
   public String message;
+  public OptionParseException[] causes; 
   
   /** Exception indicating that an OptionParser could not parse the specified value for a given configurable option.
     * @param key The name of the configuration option
@@ -54,17 +55,28 @@ public class OptionParseException extends IllegalArgumentException {
     this.key = key;
     this.value = value;
     this.message = message;
+    this.causes = null;
+  }
+  
+  public OptionParseException(OptionParseException[] causes) {
+    this.key = this.value = this.message = null;
+    this.causes = causes;
   }
   
   /** Format a nice message for the user. */
   public String toString() {
+    OptionParseException ope = this;
+    if (causes!=null) {
+      if (causes.length!=1) return "Could not parse configuration options.";
+      ope = causes[0];
+    }
     final StringBuilder sb = new StringBuilder();
     sb.append("Could not parse configuration option.\nOption: ");
-    sb.append(key);
+    sb.append(ope.key);
     sb.append("\nGiven value: \"");
-    sb.append(value);
+    sb.append(ope.value);
     sb.append("\"\n");
-    sb.append(message);
+    sb.append(ope.message);
     return sb.toString();
   }
 }

@@ -205,7 +205,7 @@ public class NewVersionPopup extends JDialog {
   
   protected void downloadAction() {
     closeAction();
-    _openFileDownloadPage(getSFDownloadURL());
+    _openFileDownloadPage(getManualDownloadURL());
   }
   
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("version.txt",false);
@@ -359,7 +359,7 @@ public class NewVersionPopup extends JDialog {
           LOG.log("Copied drjava.jar to "+tempClassFile);
           
           // download new file
-          URL fileURL = new URL("http://prdownloads.sourceforge.net/drjava/"+fileName);
+          URL fileURL = new URL(getAutomaticDownloadURL()+fileName);
           LOG.log("fileURL = "+fileURL);
           
           URLConnection uc = fileURL.openConnection();
@@ -470,8 +470,21 @@ public class NewVersionPopup extends JDialog {
     }).start();
   }
   
-  /** Return the SourceForge download URL. */
-  protected String getSFDownloadURL() {
+  /** Return the automatic download URL. */
+  protected String getAutomaticDownloadURL() {
+    if (_newestVersionString.indexOf("weekly")>0) {
+      return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/files/";
+    }
+    else {
+      return "http://prdownloads.sourceforge.net/drjava/";
+    }
+  }
+  
+  /** Return the manual download URL. */
+  protected String getManualDownloadURL() {
+    if (_newestVersionString.indexOf("weekly")>0) {
+      return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/";
+    }
     final String DRJAVA_FILES_PAGE = "http://sourceforge.net/project/showfiles.php?group_id=44253";
     final String LINK_PREFIX = "<a href=\"/project/showfiles.php?group_id=44253";
     final String LINK_SUFFIX = "\">";
@@ -524,13 +537,18 @@ public class NewVersionPopup extends JDialog {
     Box<String> stableString = new SimpleBox<String>("");
     Box<String> betaString = new SimpleBox<String>("");
     Box<String> devString = new SimpleBox<String>("");
+    Box<String> weeklyString = new SimpleBox<String>("");
     Box<Date> stableTime = new SimpleBox<Date>(new Date(0));
     Box<Date> betaTime = new SimpleBox<Date>(new Date(0));
     Box<Date> devTime = new SimpleBox<Date>(new Date(0));
+    Box<Date> weeklyTime = new SimpleBox<Date>(new Date(0));
     boolean newVersion = false;
     _newestVersionString = "";
     if (availableRef!=null) { availableRef.set(false); }
     switch(_modeBox.getSelectedIndex()) {
+      case 3: if (getTargetFile().toString().endsWith(".jar")) { // only consider weekly builds if using *.jar file
+        newVersion |= checkNewWeeklyVersion(weeklyString,weeklyTime); // fall-through required, not a mistake
+      }
       case 2:
         newVersion |= checkNewDevVersion(devString,devTime); // fall-through required, not a mistake
       case 1:
@@ -542,36 +560,16 @@ public class NewVersionPopup extends JDialog {
         DrJava.getConfig().setSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION, new Date().getTime());
         if (availableRef!=null) { availableRef.set(newVersion); }
         if (newVersion) {
-          String newestType = "";
-          if (stableTime.value().after(betaTime.value())) {
-            // stable newer than beta
-            if (stableTime.value().after(devTime.value())) {
-              // stable newer than beta and dev
-              _newestVersionString = stableString.value();
-              newestType = "stable ";
-            }
-            else {
-              // stable newer than beta, but dev is even newer
-              _newestVersionString = devString.value();
-              newestType = "development ";              
-            }
-          }
-          else {
-            // beta newer than stable
-            if (betaTime.value().after(devTime.value())) {
-              // beta newer than stable and dev
-              _newestVersionString = betaString.value();
-              newestType = "beta ";
-            }
-            else {
-              // beta newer than stable, but dev is even newer
-              _newestVersionString = devString.value();
-              newestType = "development ";              
-            }
-          }
-          
+          TreeMap<Date,String[]> versionSorter = new TreeMap<Date,String[]>();
+          versionSorter.put(stableTime.value(),new String[] {"stable release",      stableString.value() });
+          versionSorter.put(betaTime.value(),  new String[] {"beta release",        betaString.value() });
+          versionSorter.put(devTime.value(),   new String[] {"development release", devString.value() });
+          versionSorter.put(weeklyTime.value(),new String[] {"weekly build",        weeklyString.value() });
+          String newestType = versionSorter.get(versionSorter.lastKey())[0];
+          _newestVersionString = versionSorter.get(versionSorter.lastKey())[1];
+
           return new String[] {
-            "A new "+newestType+"version has been found.",
+            "A new "+newestType+" has been found.",
               "The new version is: "+_newestVersionString,
               "Do you want to download this new version?"};
         }
@@ -630,6 +628,21 @@ public class NewVersionPopup extends JDialog {
     catch(MalformedURLException e) { return false; }
   }
   
+  /** Return true if there is a weekly build available that's newer than this version.
+    * @param versionStringRef a reference that will be filled with the version string, or null if not desired
+    * @param buildTimeRef a reference that will be filled with the build time, or null if not desired
+    * @return true if newer development version is available */
+  public static boolean checkNewWeeklyVersion(Box<String> versionStringRef,
+                                              Box<Date> buildTimeRef) {
+    try {
+      Date newestTime = getBuildTime(new URL("http://www.cs.rice.edu/~javaplt/drjavarice/weekly/LATEST_WEEKLY_VERSION.TXT"), versionStringRef);
+      if (newestTime==null) { return false; }
+      if (buildTimeRef!=null) { buildTimeRef.set(newestTime); }
+      return BUILD_TIME.before(newestTime);
+    }
+    catch(MalformedURLException e) { return false; }
+  }
+  
   /** Returns the build time for the URL, or null if it could not be read. */
   public static Date getBuildTime(URL url) {
     return getBuildTime(url, null);
@@ -660,6 +673,9 @@ public class NewVersionPopup extends JDialog {
       // remove "beta-" prefix
       final String BETA_PREFIX = "beta-";
       if (line.startsWith(BETA_PREFIX)) { line = line.substring(BETA_PREFIX.length()); }
+      // remove "weekly-" prefix
+      final String WEEKLY_PREFIX = "weekly-";
+      if (line.startsWith(WEEKLY_PREFIX)) { line = line.substring(WEEKLY_PREFIX.length()); }
       // if this version string uses the new format with the release at the end, remove it
       int releasePos = line.indexOf("-r");
       if (releasePos>=0) { line = line.substring(0, releasePos); }

@@ -5833,6 +5833,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Check if any errors occurred while parsing the config file, and display a message if necessary. */
   private void _showConfigException() {
     if (DrJava.getConfig().hadStartupException()) {
+      try {
+        DrJava.getConfig().saveConfiguration();
+      }
+      catch(IOException ioe) { /* ignore */ }
       Exception e = DrJava.getConfig().getStartupException();
       _showError(e, "Error in Config File",
                  "Could not read the '.drjava' configuration file\n" +
