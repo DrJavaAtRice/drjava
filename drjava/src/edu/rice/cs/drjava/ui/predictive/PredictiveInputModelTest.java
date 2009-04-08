@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui.predictive;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Unit tests for PredictiveInputModel class.
@@ -95,10 +96,10 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals(0, pim.getMatchingItems().size());
     assertEquals("", pim.getSharedMaskExtension());
     
-    pim.setList("AboutDialog.java",
-                "FileOps.java",
-                "FileOpsTest.java",
-                "Utilities.java");
+    pim.setItems("AboutDialog.java",
+                 "FileOps.java",
+                 "FileOpsTest.java",
+                 "Utilities.java");
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -598,10 +599,10 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals("i .java", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
 
-    pim.setList("AboutDialog.java",
-                "FileOps.java",
-                "FileOpsTest.java",
-                "Utilities.java");
+    pim.setItems("AboutDialog.java",
+                 "FileOps.java",
+                 "FileOpsTest.java",
+                 "Utilities.java");
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -835,10 +836,10 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals("I .JAVa", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
 
-    pim.setList("AboutDialog.java",
-                "FileOps.java",
-                "FileOpsTest.java",
-                "Utilities.java");
+    pim.setItems("AboutDialog.java",
+                 "FileOps.java",
+                 "FileOpsTest.java",
+                 "Utilities.java");
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -1098,9 +1099,9 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
       getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVADOC_1_5_LINK) + "/";
     final String stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
     final String suffix = "/allclasses-1.5.html";
-    List<edu.rice.cs.drjava.ui.MainFrame.JavaAPIListEntry> l = edu.rice.cs.drjava.ui.MainFrame._generateJavaAPIList(base,
-                                                                                                                    stripPrefix,
-                                                                                                                    suffix);
+    Set<edu.rice.cs.drjava.ui.MainFrame.JavaAPIListEntry> l = edu.rice.cs.drjava.ui.MainFrame._generateJavaAPISet(base,
+                                                                                                                  stripPrefix,
+                                                                                                                  suffix);
     assertTrue(l.size()>0);
   }
 }

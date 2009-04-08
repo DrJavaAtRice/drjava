@@ -42,6 +42,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -199,7 +200,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              java.util.List<CloseAction<T>> actions, int cancelIndex, java.util.List<T> items) {
+                              java.util.List<CloseAction<T>> actions, int cancelIndex, Collection<T> items) {
     super(title);
     _strategies = strategies;
     _strategyBox = new JComboBox(_strategies.toArray());
@@ -286,7 +287,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
   /** Return a copy of the list of items in the model.
     * @return list of items */
-  public List<T> getList() { return _pim.getList(); }
+  public List<T> getItems() { return _pim.getItems(); }
 
   /** Set the predictive input model.
     * @param ignoreCase true if case should be ignored
@@ -305,7 +306,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param ignoreCase true if case should be ignored
     * @param items list of items
     */
-  public void setItems(boolean ignoreCase, List<T> items) {
+  public void setItems(boolean ignoreCase, Collection<T> items) {
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
     updateTextField();

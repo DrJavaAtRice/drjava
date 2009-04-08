@@ -51,6 +51,7 @@ import java.io.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -1542,27 +1543,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
         _openJavadocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STATE));
       }
-      generateJavaAPIList();
+      generateJavaAPISet();
     }
   }
 
   
   /** Generate Java API class list. */
-  public static List<JavaAPIListEntry> _generateJavaAPIList(String base,
-                                                            String stripPrefix,
-                                                            String suffix) {
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base,
+                                                          String stripPrefix,
+                                                          String suffix) {
     // TODO: put this in an AsyncTask
-    List<JavaAPIListEntry> l = new ArrayList<JavaAPIListEntry>();
     URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
-    return _generateJavaAPIList(base, stripPrefix, url);
+    return _generateJavaAPISet(base, stripPrefix, url);
   }
   
   /** Generate Java API class list. */
-  public static List<JavaAPIListEntry> _generateJavaAPIList(String base,
-                                                            String stripPrefix,
-                                                            URL url) {
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base,
+                                                          String stripPrefix,
+                                                          URL url) {
     // TODO: put this in an AsyncTask
-    List<JavaAPIListEntry> l = new ArrayList<JavaAPIListEntry>();
+    Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
     try {
       InputStream urls = url.openStream();
       InputStreamReader is = null;
@@ -1583,7 +1583,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
               URL pageURL = new URL(base + link + ".html");
-              l.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
+              s.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
             }
             catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
           }
@@ -1597,12 +1597,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }
-    return l;
+    return s;
   }
   
   /** Generate Java API class list. */
-  public void generateJavaAPIList() {
-    if (_javaAPIList == null) {
+  public void generateJavaAPISet() {
+    if (_javaAPISet == null) {
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       
@@ -1660,26 +1660,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // no valid Javadoc URL
         return;
       }
-      _javaAPIList = _generateJavaAPIList(base, stripPrefix, suffix);
+      _javaAPISet = _generateJavaAPISet(base, stripPrefix, suffix);
       
       // add JUnit 3.8.2
-      List<JavaAPIListEntry> junit382APIList = _generateJavaAPIList(DrJava.getConfig().getSetting(JUNIT_3_8_2_LINK) + "/",
-                                                                    "", // relative links
-                                                                    "/allclasses-junit3.8.2.html");
-      _javaAPIList.addAll(junit382APIList);
+      Set<JavaAPIListEntry> junit382APIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_3_8_2_LINK) + "/",
+                                                                  "", // relative links
+                                                                  "/allclasses-junit3.8.2.html");
+      _javaAPISet.addAll(junit382APIList);
       
       // add additional Javadoc libraries
       for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
         try {
-          List<JavaAPIListEntry> additionalList = _generateJavaAPIList(url + "/",
-                                                                       "", // relative links
-                                                                       new URL(url+"/allclasses-frame.html"));
-          _javaAPIList.addAll(additionalList);
+          Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
+                                                                     "", // relative links
+                                                                     new URL(url+"/allclasses-frame.html"));
+          _javaAPISet.addAll(additionalList);
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
       }
       
-      if (_javaAPIList.size()==0) { _javaAPIList = null; }
+      if (_javaAPISet.size()==0) { _javaAPISet = null; }
     }
   }
   
@@ -1687,13 +1687,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   PredictiveInputFrame<JavaAPIListEntry> _openJavadocDialog = null;
   
   /** The list of Java API classes. */
-  List<JavaAPIListEntry> _javaAPIList = null;
+  Set<JavaAPIListEntry> _javaAPISet = null;
   
   /** Action that asks the user for a file name and goes there.  Only executes in the event thread. */
   private Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
     public void actionPerformed(ActionEvent ae) {
       initOpenJavadocDialog();     
-      _openJavadocDialog.setItems(true, _javaAPIList); // ignore case
+      _openJavadocDialog.setItems(true, _javaAPISet); // ignore case
       hourglassOn();
       _openJavadocDialog.setVisible(true);
     }
@@ -1701,13 +1701,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Opens the Javadoc specified by the word the cursor is on.  Only executes in the event thread. */
   private void _openJavadocUnderCursor() {
-    generateJavaAPIList();
-    if (_javaAPIList == null) {
+    generateJavaAPISet();
+    if (_javaAPISet == null) {
 //      Utilities.show("Cannot load Java API class list. No network connectivity?");
       return;
     }
     PredictiveInputModel<JavaAPIListEntry> pim =
-      new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), _javaAPIList);
+      new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), _javaAPISet);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     String mask = "";
     int loc = getCurrentDefPane().getCaretPosition();
@@ -1817,27 +1817,27 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           String curMask = _completeWordDialog.getMask();
           if (_completeJavaAPICheckbox.isSelected()) {
             DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.TRUE);
-            List<ClassNameAndPackageEntry> l = _completeWordDialog.getList();
-            addJavaAPIToList(l);
-            _completeWordDialog.setItems(true,l);
+            Set<ClassNameAndPackageEntry> s = new HashSet<ClassNameAndPackageEntry>(_completeWordDialog.getItems());
+            addJavaAPIToSet(s);
+            _completeWordDialog.setItems(true,s);
           }
           else {
             // unselected, remove Java API classes from list
-            List<ClassNameAndPackageEntry> l = _completeWordDialog.getList();
-            generateJavaAPIList();
-            if (_javaAPIList==null) {
+            Set<ClassNameAndPackageEntry> s = new HashSet<ClassNameAndPackageEntry>(_completeWordDialog.getItems());
+            generateJavaAPISet();
+            if (_javaAPISet==null) {
               DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
               _completeJavaAPICheckbox.setSelected(false);
               _completeJavaAPICheckbox.setEnabled(false);
-              List<ClassNameAndPackageEntry> n = new ArrayList<ClassNameAndPackageEntry>();
-              for(ClassNameAndPackageEntry entry: l) {
+              Set<ClassNameAndPackageEntry> n = new HashSet<ClassNameAndPackageEntry>();
+              for(ClassNameAndPackageEntry entry: s) {
                 if (!(entry instanceof JavaAPIListEntry)) { n.add(entry); }
               }
               _completeWordDialog.setItems(true,n);
             }
             else {
-              for(JavaAPIListEntry entry: _javaAPIList) { l.remove(entry); }
-              _completeWordDialog.setItems(true,l);
+              for(JavaAPIListEntry entry: _javaAPISet) { s.remove(entry); }
+              _completeWordDialog.setItems(true,s);
             }
           }
           _completeWordDialog.setMask(curMask);
@@ -1982,15 +1982,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  void addJavaAPIToList(List<ClassNameAndPackageEntry> list) {
-    generateJavaAPIList();
-    if (_javaAPIList==null) {
+  void addJavaAPIToSet(Set<ClassNameAndPackageEntry> s) {
+    generateJavaAPISet();
+    if (_javaAPISet==null) {
       DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
       _completeJavaAPICheckbox.setSelected(false);
       _completeJavaAPICheckbox.setEnabled(false);
     }
     else {
-      for(JavaAPIListEntry entry: _javaAPIList) { list.add(entry); }
+      s.addAll(_javaAPISet);
     }
   }
   
@@ -2008,14 +2008,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _completeJavaAPICheckbox.setSelected(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
     _completeJavaAPICheckbox.setEnabled(true);
     ClassNameAndPackageEntry currentEntry = null;
-    ArrayList<ClassNameAndPackageEntry> list;
+    HashSet<ClassNameAndPackageEntry> set;
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
-        (_completeClassList.size()>0)) {
-      list = new ArrayList<ClassNameAndPackageEntry>(_completeClassList.size());
-      list.addAll(_completeClassList);
+        (_completeClassSet.size()>0)) {
+      set = new HashSet<ClassNameAndPackageEntry>(_completeClassSet);
     }
     else {
-      list = new ArrayList<ClassNameAndPackageEntry>(docs.size());
+      set = new HashSet<ClassNameAndPackageEntry>(docs.size());
       for(OpenDefinitionsDocument d: docs) {
         if (d.isUntitled()) continue;
         String str = d.toString();
@@ -2024,17 +2023,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
         GoToFileListEntry entry = new GoToFileListEntry(d, str);
         if (d.equals(_model.getActiveDocument())) currentEntry = entry;
-        list.add(entry);
+        set.add(entry);
       }
     }
     
     if (DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI)) {
-      addJavaAPIToList(list);
+      addJavaAPIToSet(set);
     }
     
     
     PredictiveInputModel<ClassNameAndPackageEntry> pim = 
-      new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), list);
+      new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), set);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     try {
       String mask = "";
@@ -3374,7 +3373,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // The OptionListener for JAVADOC_API_REF_VERSION.
     OptionListener<String> choiceOptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
-        _javaAPIList = null;
+        _javaAPISet = null;
       }
     };
     DrJava.getConfig().addOptionListener(JAVADOC_API_REF_VERSION, choiceOptionListener);
@@ -3384,7 +3383,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-          _javaAPIList = null;
+          _javaAPISet = null;
         }
       }
     };
@@ -3393,7 +3392,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-          _javaAPIList = null;
+          _javaAPISet = null;
         }
       }
     };
@@ -3402,7 +3401,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-          _javaAPIList = null;
+          _javaAPISet = null;
         }
       }
     };
@@ -3411,20 +3410,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
         if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
-          _javaAPIList = null;
+          _javaAPISet = null;
         }
       }
     };
     DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
     OptionListener<String> link382OptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
-        _javaAPIList = null;
+        _javaAPISet = null;
       }
     };
     DrJava.getConfig().addOptionListener(JUNIT_3_8_2_LINK, link382OptionListener);
     OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
       public void optionChanged(OptionEvent<Vector<String>> oce) {
-        _javaAPIList = null;
+        _javaAPISet = null;
       }
     };
     DrJava.getConfig().addOptionListener(JAVADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
@@ -4486,7 +4485,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _openProjectUpdate();
       
       if (_mainListener.someFilesNotFound()) _model.setProjectChanged(true);
-      _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
+      _completeClassSet = new HashSet<GoToFileListEntry>(); // reset auto-completion list
       addToBrowserHistory();
     }
     catch(MalformedProjectFileException e) {
@@ -4549,8 +4548,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return true if the project is closed, false if cancelled
     */
   boolean _closeProject(boolean quitting) {
-    _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
-    _autoImportClassList = new ArrayList<JavaAPIListEntry>(); // reset auto-import list
+    _completeClassSet = new HashSet<GoToFileListEntry>(); // reset auto-completion list
+    _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
     
     if (_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
@@ -5345,10 +5344,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _clean() { _model.cleanBuildDirectory(); }  // The model performs this as an AsyncTask
   
   /** List with entries for the complete dialog. */
-  ArrayList<GoToFileListEntry> _completeClassList = new ArrayList<GoToFileListEntry>();
+  HashSet<GoToFileListEntry> _completeClassSet = new HashSet<GoToFileListEntry>();
   
   /** List with entries for the auto-import dialog. */
-  ArrayList<JavaAPIListEntry> _autoImportClassList = new ArrayList<JavaAPIListEntry>();
+  HashSet<JavaAPIListEntry> _autoImportClassSet = new HashSet<JavaAPIListEntry>();
   
   /** Scan the build directory for class files and update the auto-completion list. */
   private void _scanClassFiles() {
@@ -5398,8 +5397,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             }
           }
         }
-        _completeClassList = new ArrayList<GoToFileListEntry>(hs);
-        _autoImportClassList = new ArrayList<JavaAPIListEntry>(hs2);
+        _completeClassSet = new HashSet<GoToFileListEntry>(hs);
+        _autoImportClassSet = new HashSet<JavaAPIListEntry>(hs2);
       }
     });
     t.setPriority(Thread.MIN_PRIORITY);
@@ -8793,8 +8792,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // The Java API Javadoc version must match the compiler.  Since compiler was changed, we rebuild the API list
-        _javaAPIList = null;
-        generateJavaAPIList();
+        _javaAPISet = null;
+        generateJavaAPISet();
       }
     }
     
@@ -9839,7 +9838,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
         _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
       }
-      generateJavaAPIList();
+      generateJavaAPISet();
     }
   }
   
@@ -9849,13 +9848,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Imports a class. */
   private void _showAutoImportDialog(String s) {
-    generateJavaAPIList();
-    if (_javaAPIList == null) return;
+    generateJavaAPISet();
+    if (_javaAPISet == null) return;
     
-    List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(_javaAPIList);
+    List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(_javaAPISet);
     if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
-        _autoImportClassList.size() > 0) {
-      autoImportList.addAll(_autoImportClassList);
+        _autoImportClassSet.size() > 0) {
+      autoImportList.addAll(_autoImportClassSet);
     }
     else {
       File projectRoot = _model.getProjectRoot();

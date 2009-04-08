@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.ui.predictive;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -571,10 +572,10 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     * @param strategy matching strategy to use
     * @param items list of items
     */
-  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, List<T> items) {
+  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, Collection<T> items) {
     _ignoreCase = ignoreCase;
     _strategy = strategy;
-    setList(items);
+    setItems(items);
   }
 
   /** Create a new predictive input model.
@@ -585,7 +586,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T... items) {
     _ignoreCase = ignoreCase;
     _strategy = strategy;
-    setList(items);
+    setItems(items);
   }
 
   /** Sets the strategy
@@ -598,14 +599,14 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Returns a copy of the list of items.
    * @return list of items
    */
-  public List<T> getList() {
+  public List<T> getItems() {
     return new ArrayList<T>(_items);
   }
   
   /** Sets the list.
    * @param items list of items
    */
-  public void setList(List<T> items) {
+  public void setItems(Collection<T> items) {
     _items = new ArrayList<T>(items);
     Collections.sort(_items);
     updateMatchingStrings(_items);
@@ -614,7 +615,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Sets the list
     * @param items varargs/array of items
     */
-  public void setList(T... items) {
+  public void setItems(T... items) {
     _items = new ArrayList<T>(items.length);
     for(T s: items) _items.add(s);
     Collections.sort(_items);
@@ -624,7 +625,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Sets the list.
     * @param pim other predictive input model
     */
-  public void setList(PredictiveInputModel<T> pim) { setList(pim._items); }  
+  public void setItems(PredictiveInputModel<T> pim) { setItems(pim._items); }  
 
   /** Return the current mask.
     * @return current mask
