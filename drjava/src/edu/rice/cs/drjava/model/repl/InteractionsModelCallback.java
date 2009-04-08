@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.model.repl;
 
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -99,6 +101,11 @@ public interface InteractionsModelCallback {
     * @param message The exception's message
     */
   public void replThrewException(String message);
+  
+  /** Signifies that the most recent interpretation was ended due to an exception being thrown.
+    * @param e The exception
+    */
+  public void replThrewException(EvaluatorException e);
   
   /** Signifies that the most recent interpretation was preempted by a syntax error.
     * @param errorMessage The syntax error message

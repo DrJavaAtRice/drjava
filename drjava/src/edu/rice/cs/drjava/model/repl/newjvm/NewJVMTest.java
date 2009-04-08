@@ -47,6 +47,10 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.rmi.RemoteException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -291,9 +295,18 @@ public final class NewJVMTest extends DrJavaTestCase {
         _log.log("NewJVMTest: " + _returnBuf + " returned by interpretResult callback");
       }
       
-      public Void forException(String msg) {
+      public Void forEvalException(EvaluatorException e) {
         debug.log();
-        _exceptionMsgBuf = msg;
+        StringWriter msg = new StringWriter();
+        e.printUserMessage(new PrintWriter(msg));
+        _exceptionMsgBuf = msg.toString().trim();
+        _done.signal();
+        return null;
+      }
+      
+      public Void forException(String message) {
+        debug.log();
+        _exceptionMsgBuf = message;
         _done.signal();
         return null;
       }

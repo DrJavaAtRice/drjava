@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 /**
  * Super class for any type of result that can occur from a call to interpret.
@@ -58,6 +59,7 @@ public abstract class InterpretResult implements Serializable {
     public T forBooleanValue(Boolean val);
     public T forObjectValue(String valString);
     public T forException(String message);
+    public T forEvalException(EvaluatorException e);
     public T forUnexpectedException(Throwable t);
     public T forBusy();
   }
@@ -75,13 +77,29 @@ public abstract class InterpretResult implements Serializable {
   public static InterpretResult exception(InterpreterException e) { return new ExceptionResult(e); }
   
   private static class ExceptionResult extends InterpretResult {
+    private final EvaluatorException _e;
     private final String _msg;
+    @SuppressWarnings("unchecked")
     public ExceptionResult(InterpreterException e) {
-      StringWriter msg = new StringWriter();
-      e.printUserMessage(new PrintWriter(msg));
-      _msg = msg.toString().trim();
+      if (e instanceof EvaluatorException) {
+        _e = (EvaluatorException)e;
+        _msg = null;
+      }
+      else {
+        // for other InterpreterExceptions, we need to convert to a string here
+        // because they cannot be unmarshalled (not serializable)
+        StringWriter msg = new StringWriter();
+        e.printUserMessage(new PrintWriter(msg));
+        _msg = msg.toString().trim();
+        _e = null;
+      }
     }
-    public <T> T apply(Visitor<T> v) { return v.forException(_msg); }
+    public <T> T apply(Visitor<T> v) {
+      if (_e!=null) 
+        return v.forEvalException(_e);
+      else
+        return v.forException(_msg);
+    }
   }
   
 

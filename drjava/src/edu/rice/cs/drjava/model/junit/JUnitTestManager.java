@@ -170,6 +170,7 @@ public class JUnitTestManager {
     }
     catch(Exception e) { 
       JUnitError[] errors = new JUnitError[1];
+      // TODO: replace LL stack trace elements
       errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", StringOps.getStackTrace(e));
       _reset();
       _jmc.testSuiteEnded(errors);
@@ -308,6 +309,7 @@ public class JUnitTestManager {
     
     // a test didn't fail, we couldn't even open the test.
     if (file == null) {
+      // TODO: replace LL stack trace elements
       return new JUnitError(new File("nofile"), 0, 0, exception, !isFailure, testName, className, stackTrace);
     }
     
@@ -318,6 +320,7 @@ public class JUnitTestManager {
     if (name.endsWith(".dj0") || name.endsWith(".dj0")) adjLineNum = lineNum - 1;
     else adjLineNum = lineNum;
     
+    // TODO: replace LL stack trace elements
     return new JUnitError(file, adjLineNum, 0, exception, !isFailure, testName, className, stackTrace);
   }
   
