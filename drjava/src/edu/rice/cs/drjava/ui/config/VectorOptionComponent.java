@@ -133,6 +133,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
           else {
             _table.getSelectionModel().setSelectionInterval(last,last);
           }
+	  notifyChangeListeners();
         }
       }
     });
@@ -151,6 +152,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
               _tableModel.fireTableRowsUpdated(rows[i]-1,rows[i]);
             }
           }
+	  notifyChangeListeners();
         }
       }
     });
@@ -169,6 +171,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
               _tableModel.fireTableRowsUpdated(rows[i],rows[i]+1);
             }
           }
+	  notifyChangeListeners();
         }
       }
     });
@@ -208,6 +211,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _data.add(value);
     _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
     _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);    
+    notifyChangeListeners();
   }
 
   /** Adds buttons to _buttonPanel */
