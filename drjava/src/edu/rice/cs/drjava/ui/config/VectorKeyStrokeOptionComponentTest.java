@@ -43,62 +43,63 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
+import java.util.Vector;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 
 /** Tests functionality of this OptionComponent. */
-public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
+public final class VectorKeyStrokeOptionComponentTest extends DrJavaTestCase {
 
-//  private static KeyStrokeOptionComponent _option;
-//
-//  protected void setUp() throws Exception {
-//    super.setUp();
-//    _option = new KeyStrokeOptionComponent(OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new DefaultSwingFrame());
-//    DrJava.getConfig().resetToDefaults();
-//    Utilities.clearEventQueue();
-//  }
-//
-//  public void testCancelDoesNotChangeConfig() {
-//    KeyStroke testKeyStroke = KeyStrokeOption.NULL_KEYSTROKE;
-//
-//    _option.setValue(testKeyStroke);
-//    Utilities.clearEventQueue();
-//    _option.resetToCurrent(); // should reset to the original.
-//    Utilities.clearEventQueue();
-//    _option.updateConfig();   // should update with original values therefore no change.
-//    Utilities.clearEventQueue();
-//    assertEquals("Cancel (resetToCurrent) should not change the config",
-//                 OptionConstants.KEY_NEW_FILE.getDefault(),
-//                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
-//  }
-//
-//  public void testApplyDoesChangeConfig() {
-//    KeyStroke testKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0);
-//
-//    _option.setValue(testKeyStroke);
-//    Utilities.clearEventQueue();
-//    _option.updateConfig();
-//    Utilities.clearEventQueue();
-//    assertEquals("Apply (updateConfig) should write change to file",
-//                 testKeyStroke,
-//                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
-//  }
-//
-//  public void testApplyThenResetDefault() {
-//    KeyStroke testKeyStroke = KeyStrokeOption.NULL_KEYSTROKE;
-//
-//    _option.setValue(testKeyStroke);
-//    Utilities.clearEventQueue();
-//    _option.updateConfig();
-//    Utilities.clearEventQueue();
-//    _option.resetToDefault(); // resets to default
-//    Utilities.clearEventQueue();
-//    _option.updateConfig();
-//    Utilities.clearEventQueue();
-//    
-//    assertEquals("Apply (updateConfig) should write change to file",
-//                 OptionConstants.KEY_NEW_FILE.getDefault(),
-//                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
-//  }
+  private static VectorKeyStrokeOptionComponent _option;
+
+  protected void setUp() throws Exception {
+    super.setUp();
+    _option = new VectorKeyStrokeOptionComponent(OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new DefaultSwingFrame());
+    DrJava.getConfig().resetToDefaults();
+    Utilities.clearEventQueue();
+  }
+
+  public void testCancelDoesNotChangeConfig() {
+    Vector<KeyStroke> testKeyStroke = new Vector<KeyStroke>();
+
+    _option.setValue(testKeyStroke);
+    Utilities.clearEventQueue();
+    _option.resetToCurrent(); // should reset to the original.
+    Utilities.clearEventQueue();
+    _option.updateConfig();   // should update with original values therefore no change.
+    Utilities.clearEventQueue();
+    assertEquals("Cancel (resetToCurrent) should not change the config",
+                 OptionConstants.KEY_NEW_FILE.getDefault(),
+                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
+  }
+
+  public void testApplyDoesChangeConfig() {
+    Vector<KeyStroke> testKeyStroke = new Vector<KeyStroke>();
+
+    _option.setValue(testKeyStroke);
+    Utilities.clearEventQueue();
+    _option.updateConfig();
+    Utilities.clearEventQueue();
+    assertEquals("Apply (updateConfig) should write change to file",
+                 testKeyStroke,
+                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
+  }
+
+  public void testApplyThenResetDefault() {
+    Vector<KeyStroke> testKeyStroke = new Vector<KeyStroke>();
+
+    _option.setValue(testKeyStroke);
+    Utilities.clearEventQueue();
+    _option.updateConfig();
+    Utilities.clearEventQueue();
+    _option.resetToDefault(); // resets to default
+    Utilities.clearEventQueue();
+    _option.updateConfig();
+    Utilities.clearEventQueue();
+    
+    assertEquals("Apply (updateConfig) should write change to file",
+                 OptionConstants.KEY_NEW_FILE.getDefault(),
+                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
+  }
 
 }

@@ -51,6 +51,7 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -334,18 +335,18 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
       addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
       addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
-      DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<KeyStroke>() {
-        public void optionChanged(OptionEvent<KeyStroke> oe) {
+      DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
+        public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
           addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<KeyStroke>() {
-        public void optionChanged(OptionEvent<KeyStroke> oe) {
+      DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
+        public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
           addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<KeyStroke>() {
-        public void optionChanged(OptionEvent<KeyStroke> oe) {
+      DrJava.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<Vector<KeyStroke>>() {
+        public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
           addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
         }
       });
@@ -363,15 +364,17 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  @param stroke keystroke that triggers the action
      *  @param action Action to perform
      */
-    public void addActionForKeyStroke(KeyStroke stroke, Action action) {
-      // we don't want multiple keys bound to the same action
+    public void addActionForKeyStroke(Vector<KeyStroke> stroke, Action action) {
+      // remove previous bindings
       KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
       if (keys != null) {
         for (int i = 0; i < keys.length; i++) {
           _keymap.removeKeyStrokeBinding(keys[i]);
         }
       }
-      _keymap.addActionForKeyStroke(stroke, action);
+      for (KeyStroke ks: stroke) {
+        _keymap.addActionForKeyStroke(ks, action);
+      }
       setKeymap(_keymap);
     }
     

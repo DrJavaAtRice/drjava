@@ -51,6 +51,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Vector;
 import java.util.Date;
 
 /** Tests the Definitions Pane
@@ -74,8 +75,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   private static final int BANG = KeyEvent.VK_EXCLAMATION_MARK;
   private static final int ALT = InputEvent.ALT_MASK;
   
-  private static final int DEL_NEXT = OptionConstants.KEY_DELETE_NEXT.getDefault().getKeyCode();
-  private static final int DEL_PREV = OptionConstants.KEY_DELETE_PREVIOUS.getDefault().getKeyCode();
+  private static final int DEL_NEXT = OptionConstants.KEY_DELETE_NEXT.getDefault().get(0).getKeyCode();
+  private static final int DEL_PREV = OptionConstants.KEY_DELETE_PREVIOUS.getDefault().get(0).getKeyCode();
     
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
@@ -413,10 +414,10 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     assertEquals("The text should have been inserted", "a!B9",  doc.getText());
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
-    final KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
-    final Action a = KeyBindingManager.ONLY.get(ks);
+    final Vector<KeyStroke> ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
+    final Action a = KeyBindingManager.ONLY.get(ks.get(0));
     
-    final KeyEvent e = new KeyEvent(defPane, PRESSED, 0, ks.getModifiers(), ks.getKeyCode(), UNDEFINED);
+    final KeyEvent e = new KeyEvent(defPane, PRESSED, 0, ks.get(0).getModifiers(), ks.get(0).getKeyCode(), UNDEFINED);
     
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
@@ -454,7 +455,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
           * However, the stack trace will get printed onto the console.  I don't
           * know how to fix this problem in case someone unfixes the bug.
           */
-         SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+         SwingUtilities.notifyAction(a, ks.get(0), e, e.getSource(), e.getModifiers());
          _frame.validate();
     //    definitions.setCaretPosition(doc.getLength());
        }

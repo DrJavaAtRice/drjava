@@ -112,7 +112,12 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   /** @param k The instance of class KeyStroke to be formatted.
     * @return A String representing the KeyStroke "k".
     */
-  public String format(KeyStroke k) {
+  public String format(KeyStroke k) { return formatKeyStroke(k); }
+  
+  /** @param k The instance of class KeyStroke to be formatted.
+    * @return A String representing the KeyStroke "k".
+    */
+  public static String formatKeyStroke(KeyStroke k) {
     if (k == NULL_KEYSTROKE) {
       return "<none>";
     }

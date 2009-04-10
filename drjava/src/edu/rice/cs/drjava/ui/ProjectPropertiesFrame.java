@@ -612,8 +612,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
           return;
         
         if(!mainClass.getAbsolutePath().startsWith(sourceRoot.getAbsolutePath())){
-          //TODO: Cleanup dialog
-          JOptionPane.showMessageDialog(ProjectPropertiesFrame.this, "Main Class must be in either Project Root or one of its sub-directories.", "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(ProjectPropertiesFrame.this,
+                                        "Main Class must be in either Project Root or one of its sub-directories.", 
+                                        "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
           
           _mainDocumentSelector.setText("");
           return;

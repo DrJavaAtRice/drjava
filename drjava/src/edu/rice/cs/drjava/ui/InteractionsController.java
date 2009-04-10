@@ -47,6 +47,7 @@ import java.awt.event.KeyEvent;
 
 import java.io.File;
 
+import java.util.Vector;
 import java.util.ArrayList;
 import java.util.EventListener;
 
@@ -440,15 +441,15 @@ public class InteractionsController extends AbstractConsoleController {
     
     // Prevent previous word action from going past the prompt
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
       }
     });
     
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
       }
     });
@@ -740,7 +741,7 @@ public class InteractionsController extends AbstractConsoleController {
     void setInputCompletionCommand(final Runnable command) {
       final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
-      im.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CLOSE_SYSTEM_IN), INSERT_END_OF_STREAM);
+      for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_CLOSE_SYSTEM_IN)) im.put(k, INSERT_END_OF_STREAM);
       
       final ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, new AbstractAction() {

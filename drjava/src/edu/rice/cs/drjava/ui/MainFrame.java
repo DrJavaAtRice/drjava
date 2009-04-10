@@ -6179,13 +6179,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     setJMenuBar(_menuBar);
   }
-  
+
   /** Adds an Action as a menu item to the given menu, using the specified configurable keystroke.
     * @param menu Menu to add item to
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
     */
-  private void _addMenuItem(JMenu menu, Action a, Option<KeyStroke> opt) {
+  private void _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt) {
     JMenuItem item;
     item = menu.add(a);
     _setMenuShortcut(item, a, opt);
@@ -6196,18 +6196,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
     */
-  private void _setMenuShortcut(JMenuItem item, Action a, Option<KeyStroke> opt) {
-    KeyStroke ks = DrJava.getConfig().getSetting(opt);
+  private void _setMenuShortcut(JMenuItem item, Action a, VectorOption<KeyStroke> opt) {
+    Vector<KeyStroke> keys = DrJava.getConfig().getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file.
     // Also check that the keystroke isn't the NULL_KEYSTROKE, which
     //  can strangely be triggered by certain keys in Windows.
     KeyBindingManager.ONLY.put(opt, a, item, item.getText());
-    if (ks != KeyStrokeOption.NULL_KEYSTROKE &&
-        KeyBindingManager.ONLY.get(ks) == a) {
-      item.setAccelerator(ks);
-      //KeyBindingManager.Singleton.addListener(opt, item);
+    if ((keys.size()>0) && KeyBindingManager.ONLY.get(keys.get(0)) == a) {
+      item.setAccelerator(keys.get(0));
     }
   }
   
@@ -6495,7 +6493,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
     _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
     _automaticTraceMenuItem = _newCheckBoxMenuItem(_automaticTraceDebugAction);
-    _setMenuShortcut(_automaticTraceMenuItem, _detachTabbedPanesAction, KEY_DETACH_DEBUGGER);
+    _setMenuShortcut(_automaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE);
     debugMenu.add(_automaticTraceMenuItem);
     
     debugMenu.addSeparator();
@@ -9479,36 +9477,34 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final KeyBindingManager kbm = KeyBindingManager.ONLY;
     
     kbm.put(KEY_BACKWARD, actionMap.get(DefaultEditorKit.backwardAction), null, "Backward");
-    kbm.addShiftAction(KEY_BACKWARD, DefaultEditorKit.selectionBackwardAction);
+    kbm.put(KEY_BACKWARD_SELECT, actionMap.get(DefaultEditorKit.selectionBackwardAction), null, "Select Backward");
     
     kbm.put(KEY_BEGIN_DOCUMENT, actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
-    kbm.addShiftAction(KEY_BEGIN_DOCUMENT, DefaultEditorKit.selectionBeginAction);
+    kbm.put(KEY_BEGIN_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionBeginAction), null, "Select Begin Document");
     
-//    kbm.put(KEY_BEGIN_LINE, actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
     kbm.put(KEY_BEGIN_LINE, _beginLineAction, null, "Begin Line");
-//    kbm.addShiftAction(KEY_BEGIN_LINE, DefaultEditorKit.selectionBeginLineAction);
-    kbm.addShiftAction(KEY_BEGIN_LINE, _selectionBeginLineAction);
+    kbm.put(KEY_BEGIN_LINE_SELECT, _selectionBeginLineAction, null, "Select Begin Line");
     
     kbm.put(KEY_PREVIOUS_WORD, actionMap.get(_currentDefDoc.getEditor().previousWordAction), null, "Previous Word");
-    kbm.addShiftAction(KEY_PREVIOUS_WORD, _currentDefDoc.getEditor().selectionPreviousWordAction);
+    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionPreviousWordAction), null, "Select Previous Word");
     
     kbm.put(KEY_DOWN, actionMap.get(DefaultEditorKit.downAction), null, "Down");
-    kbm.addShiftAction(KEY_DOWN, DefaultEditorKit.selectionDownAction);
+    kbm.put(KEY_DOWN_SELECT, actionMap.get(DefaultEditorKit.selectionDownAction), null, "Select Down");
     
     kbm.put(KEY_END_DOCUMENT, actionMap.get(DefaultEditorKit.endAction), null, "End Document");
-    kbm.addShiftAction(KEY_END_DOCUMENT, DefaultEditorKit.selectionEndAction);
+    kbm.put(KEY_END_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionEndAction), null, "Select End Document");
     
-    kbm.put(KEY_END_LINE, actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
-    kbm.addShiftAction(KEY_END_LINE, DefaultEditorKit.selectionEndLineAction);
+    kbm.put(KEY_END_LINE, actionMap.get(DefaultEditorKit.endLineAction), null, "End Line"); // ?
+    kbm.put(KEY_END_LINE_SELECT, actionMap.get(DefaultEditorKit.selectionEndLineAction), null, "Select End Line");
     
     kbm.put(KEY_NEXT_WORD, actionMap.get(_currentDefDoc.getEditor().nextWordAction), null, "Next Word");
-    kbm.addShiftAction(KEY_NEXT_WORD, _currentDefDoc.getEditor().selectionNextWordAction);
+    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionNextWordAction), null, "Select Next Word");
     
     kbm.put(KEY_FORWARD, actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
-    kbm.addShiftAction(KEY_FORWARD, DefaultEditorKit.selectionForwardAction);
+    kbm.put(KEY_FORWARD_SELECT, actionMap.get(DefaultEditorKit.selectionForwardAction), null, "Select Forward");
     
     kbm.put(KEY_UP, actionMap.get(DefaultEditorKit.upAction), null, "Up");
-    kbm.addShiftAction(KEY_UP, DefaultEditorKit.selectionUpAction);
+    kbm.put(KEY_UP_SELECT, actionMap.get(DefaultEditorKit.selectionUpAction), null, "Select Up");
     
 //    kbm.put(KEY_NEXT_RECENT_DOCUMENT, _nextRecentDocAction, null, "Next Recent Document");
 //    kbm.put(KEY_PREV_RECENT_DOCUMENT, _prevRecentDocAction, null, "Previous Recent Document");

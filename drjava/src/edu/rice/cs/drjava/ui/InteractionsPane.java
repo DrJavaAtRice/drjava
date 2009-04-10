@@ -42,6 +42,7 @@ import java.awt.*;
 
 import java.awt.event.KeyEvent;
 import java.awt.datatransfer.*;
+import java.util.Vector;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.UnexpectedException;
@@ -139,6 +140,22 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
       for (int i = 0; i < keys.length; i++) _keymap.removeKeyStrokeBinding(keys[i]);
     }
     _keymap.addActionForKeyStroke(stroke, action);
+    setKeymap(_keymap);
+  }
+
+  /** Assigns the given keystroke to the given action in this pane.
+    * @param stroke keystroke that triggers the action
+    * @param action Action to perform
+    */
+  public void addActionForKeyStroke(Vector<KeyStroke> stroke, Action action) {
+    // remove previous bindings
+    KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
+    if (keys != null) {
+      for (int i = 0; i < keys.length; i++) _keymap.removeKeyStrokeBinding(keys[i]);
+    }
+    for (KeyStroke ks: stroke) {
+      _keymap.addActionForKeyStroke(ks, action);
+    }
     setKeymap(_keymap);
   }
   

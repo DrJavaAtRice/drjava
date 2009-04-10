@@ -328,526 +328,501 @@ public interface OptionConstants {
   
   /* ---------- Key Binding Options ----------- */
   public static int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
+  static class to {
+    public static Vector<KeyStroke> vector(KeyStroke... ks) {
+      Vector<KeyStroke> v = new Vector<KeyStroke>();
+      for(KeyStroke k: ks) { v.add(k); }
+      return v;
+    }
+  }
   
-  /** The key binding for creating a new file
-   */
-  public static final KeyStrokeOption KEY_NEW_FILE =
-    new KeyStrokeOption("key.new.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK));
+  /** The key binding for creating a new file */
+  public static final VectorOption<KeyStroke> KEY_NEW_FILE =
+    new VectorOption<KeyStroke>("key.new.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK)));
+
   /** The key binding for opening an entire project.  I is right next to O, so
-    * it seemed logical that ctrl-I would open a project and ctrl-O open a file
-    */
-  public static final KeyStrokeOption KEY_OPEN_PROJECT =
-    new KeyStrokeOption("key.open.project", KeyStroke.getKeyStroke(KeyEvent.VK_I, MASK));
-  /** The key binding for creating a new JUnit test case
-   */
-  public static final KeyStrokeOption KEY_NEW_TEST =
-    new KeyStrokeOption("key.new.test", KeyStrokeOption.NULL_KEYSTROKE);
+    * it seemed logical that ctrl-I would open a project and ctrl-O open a file */
+  public static final VectorOption<KeyStroke> KEY_OPEN_PROJECT =
+    new VectorOption<KeyStroke>("key.open.project", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_I, MASK)));
   
-  /** The key binding for opening a folder
-   */
-  public static final KeyStrokeOption KEY_OPEN_FOLDER =
-    new KeyStrokeOption("key.open.folder", KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK|SHIFT_MASK));
+  /** The key binding for creating a new JUnit test case */
+  public static final VectorOption<KeyStroke> KEY_NEW_TEST = new VectorOption<KeyStroke>("key.new.test", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for opening a folder */
+  public static final VectorOption<KeyStroke> KEY_OPEN_FOLDER =
+    new VectorOption<KeyStroke>("key.open.folder", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK|SHIFT_MASK)));
   
   /** The key binding for opening a file. */
-  public static final KeyStrokeOption KEY_OPEN_FILE =
-    new KeyStrokeOption("key.open.file", KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK));
+  public static final VectorOption<KeyStroke> KEY_OPEN_FILE =
+    new VectorOption<KeyStroke>("key.open.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK)));
   
   /** The key binding for saving a file. */
-  public static final KeyStrokeOption KEY_SAVE_FILE =
-    new KeyStrokeOption("key.save.file", KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK));
+  public static final VectorOption<KeyStroke> KEY_SAVE_FILE =
+    new VectorOption<KeyStroke>("key.save.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK)));
   
   /** The key binding for saving a file as. */
-  public static final KeyStrokeOption KEY_SAVE_FILE_AS =
-    new KeyStrokeOption("key.save.file.as", KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_SAVE_FILE_AS =
+    new VectorOption<KeyStroke>("key.save.file.as", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK | SHIFT_MASK)));
   
   /** The key binding for saving all files. */
-  public static final KeyStrokeOption KEY_SAVE_ALL_FILES =
-    new KeyStrokeOption("key.save.all.files", KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK | ALT_MASK));
+  public static final VectorOption<KeyStroke> KEY_SAVE_ALL_FILES =
+    new VectorOption<KeyStroke>("key.save.all.files", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK | ALT_MASK)));
   
   /** The key binding for exporting in the old project file format */
-  public static final KeyStrokeOption KEY_EXPORT_OLD =
-    new KeyStrokeOption("key.export.old", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_EXPORT_OLD = new VectorOption<KeyStroke>("key.export.old", new KeyStrokeOption("",null), to.vector());
 
   /** The key binding for renaming a file. */
-  public static final KeyStrokeOption KEY_RENAME_FILE = 
-    new KeyStrokeOption("key.rename.file", KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK));
+  public static final VectorOption<KeyStroke> KEY_RENAME_FILE = 
+    new VectorOption<KeyStroke>("key.rename.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK)));
   
   /** The key binding for reverting a file. */
-  public static final KeyStrokeOption KEY_REVERT_FILE =
-    new KeyStrokeOption("key.revert.file", KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK|SHIFT_MASK));
-  /** The key binding for closing a file
-   */
-  public static final KeyStrokeOption KEY_CLOSE_FILE =
-    new KeyStrokeOption("key.close.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK));
-  /** The key binding for closing all files
-   */
-  public static final KeyStrokeOption KEY_CLOSE_ALL_FILES =
-    new KeyStrokeOption("key.close.all.files",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK |
-                                               ALT_MASK));
+  public static final VectorOption<KeyStroke> KEY_REVERT_FILE =
+    new VectorOption<KeyStroke>("key.revert.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK|SHIFT_MASK)));
   
-  public static final KeyStrokeOption KEY_CLOSE_PROJECT =
-    new KeyStrokeOption("key.close.project",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK | SHIFT_MASK));
+  /** The key binding for closing a file */
+  public static final VectorOption<KeyStroke> KEY_CLOSE_FILE =
+    new VectorOption<KeyStroke>("key.close.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK)));
+  
+  /** The key binding for closing all files */
+  public static final VectorOption<KeyStroke> KEY_CLOSE_ALL_FILES =
+    new VectorOption<KeyStroke>("key.close.all.files", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK|ALT_MASK)));
+  
+  public static final VectorOption<KeyStroke> KEY_CLOSE_PROJECT =
+    new VectorOption<KeyStroke>("key.close.project", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK|SHIFT_MASK)));
   
   /** The key binding for showing the print preview */
-  public static final KeyStrokeOption KEY_PAGE_SETUP =
-    new KeyStrokeOption("key.page.setup", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_PAGE_SETUP =
+    new VectorOption<KeyStroke>("key.page.setup", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for showing the print preview. */
-  public static final KeyStrokeOption KEY_PRINT_PREVIEW =
-    new KeyStrokeOption("key.print.preview", KeyStroke.getKeyStroke(KeyEvent.VK_P, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_PRINT_PREVIEW =
+    new VectorOption<KeyStroke>("key.print.preview", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_P, MASK | SHIFT_MASK)));
   
   /** The key binding for printing a file */
-  public static final KeyStrokeOption KEY_PRINT =
-    new KeyStrokeOption("key.print", KeyStroke.getKeyStroke(KeyEvent.VK_P, MASK));
+  public static final VectorOption<KeyStroke> KEY_PRINT =
+    new VectorOption<KeyStroke>("key.print", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_P, MASK)));
   
   /** The key binding for quitting */
-  public static final KeyStrokeOption KEY_QUIT =
-    new KeyStrokeOption("key.quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, MASK));
+  public static final VectorOption<KeyStroke> KEY_QUIT =
+    new VectorOption<KeyStroke>("key.quit", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_Q, MASK)));
   
   /** The key binding for forced quitting */
-  public static final KeyStrokeOption KEY_FORCE_QUIT =
-    new KeyStrokeOption("key.force.quit", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_FORCE_QUIT =
+    new VectorOption<KeyStroke>("key.force.quit", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for undo-ing */
-  public static final KeyStrokeOption KEY_UNDO =
-    new KeyStrokeOption("key.undo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, MASK));
+  public static final VectorOption<KeyStroke> KEY_UNDO =
+    new VectorOption<KeyStroke>("key.undo", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_Z, MASK)));
   
   /** The key binding for redo-ing */
-  public static final KeyStrokeOption KEY_REDO =
-    new KeyStrokeOption("key.redo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_REDO =
+    new VectorOption<KeyStroke>("key.redo", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_Z, MASK|SHIFT_MASK)));
   
   /** The key binding for cutting */
-  public static final KeyStrokeOption KEY_CUT =
-    new KeyStrokeOption("key.cut", KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK));
+  public static final VectorOption<KeyStroke> KEY_CUT =
+    new VectorOption<KeyStroke>("key.cut", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK)));
   
   /** The key binding for copying */
-  public static final KeyStrokeOption KEY_COPY =
-    new KeyStrokeOption("key.copy", KeyStroke.getKeyStroke(KeyEvent.VK_C, MASK));
+  public static final VectorOption<KeyStroke> KEY_COPY =
+    new VectorOption<KeyStroke>("key.copy", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_C, MASK)));
   
   /** The key binding for pasting */
-  public static final KeyStrokeOption KEY_PASTE =
-    new KeyStrokeOption("key.paste", KeyStroke.getKeyStroke(KeyEvent.VK_V, MASK));
+  public static final VectorOption<KeyStroke> KEY_PASTE =
+    new VectorOption<KeyStroke>("key.paste", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_V, MASK)));
   
   /** The key binding for pasting from history */
-  public static final KeyStrokeOption KEY_PASTE_FROM_HISTORY =
-    new KeyStrokeOption("key.paste.from.history", KeyStroke.getKeyStroke(KeyEvent.VK_V , MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_PASTE_FROM_HISTORY =
+    new VectorOption<KeyStroke>("key.paste.from.history", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_V , MASK|SHIFT_MASK)));
   
   /** The key binding for selecting all text */
-  public static final KeyStrokeOption KEY_SELECT_ALL =
-    new KeyStrokeOption("key.select.all", KeyStroke.getKeyStroke(KeyEvent.VK_A, MASK));
+  public static final VectorOption<KeyStroke> KEY_SELECT_ALL =
+    new VectorOption<KeyStroke>("key.select.all", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_A, MASK)));
   
   /** The key binding for find and replace */
-  public static final KeyStrokeOption KEY_FIND_NEXT =
-    new KeyStrokeOption("key.find.next", KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+  public static final VectorOption<KeyStroke> KEY_FIND_NEXT =
+    new VectorOption<KeyStroke>("key.find.next", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0)));
   
   /** The key binding for find previous (opposite direction) */
-  public static final KeyStrokeOption KEY_FIND_PREV =
-    new KeyStrokeOption("key.find.prev",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F3,  SHIFT_MASK));
-  /** The key binding for find and replace
-   */
-  public static final KeyStrokeOption KEY_FIND_REPLACE =
-    new KeyStrokeOption("key.find.replace",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F, MASK));
-  /** The key binding for goto line
-   */
-  public static final KeyStrokeOption KEY_GOTO_LINE =
-    new KeyStrokeOption("key.goto.line",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK));
+  public static final VectorOption<KeyStroke> KEY_FIND_PREV =
+    new VectorOption<KeyStroke>("key.find.prev", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F3, SHIFT_MASK)));
   
-  /** The key binding for goto file.
-   */
-  public static final KeyStrokeOption KEY_GOTO_FILE =
-    new KeyStrokeOption("key.goto.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK|KeyEvent.SHIFT_MASK));
+  /** The key binding for find and replace */
+  public static final VectorOption<KeyStroke> KEY_FIND_REPLACE =
+    new VectorOption<KeyStroke>("key.find.replace", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F, MASK)));
   
-  /** The key binding for goto this file.
-   */
-  public static final KeyStrokeOption KEY_GOTO_FILE_UNDER_CURSOR =
-    new KeyStrokeOption("key.goto.file.under.cursor",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+  /** The key binding for goto line */
+  public static final VectorOption<KeyStroke> KEY_GOTO_LINE =
+    new VectorOption<KeyStroke>("key.goto.line", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK)));
   
-  /** The key binding for open Javadoc.
-   */
-  public static final KeyStrokeOption KEY_OPEN_JAVADOC =
-    new KeyStrokeOption("key.open.javadoc",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, KeyEvent.SHIFT_MASK));
+  /** The key binding for goto file. */
+  public static final VectorOption<KeyStroke> KEY_GOTO_FILE =
+    new VectorOption<KeyStroke>("key.goto.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK|KeyEvent.SHIFT_MASK)));
   
-  /** The key binding for open Javadoc under cursor.
-   */
-  public static final KeyStrokeOption KEY_OPEN_JAVADOC_UNDER_CURSOR =
-    new KeyStrokeOption("key.open.javadoc.under.cursor",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, MASK));
+  /** The key binding for goto this file. */
+  public static final VectorOption<KeyStroke> KEY_GOTO_FILE_UNDER_CURSOR =
+    new VectorOption<KeyStroke>("key.goto.file.under.cursor", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0)));
   
-  /** The key binding for complete file.
-   */
-  public static final KeyStrokeOption KEY_COMPLETE_FILE =
-    new KeyStrokeOption("key.complete.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, MASK|KeyEvent.SHIFT_MASK));
+  /** The key binding for open Javadoc. */
+  public static final VectorOption<KeyStroke> KEY_OPEN_JAVADOC =
+    new VectorOption<KeyStroke>("key.open.javadoc", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, KeyEvent.SHIFT_MASK)));
   
-  /** The key binding for indenting
-   *
-   public static final KeyStrokeOption KEY_INDENT =
-   new KeyStrokeOption("key.indent",
-   KeyStroke.getKeyStroke(KeyEvent.VK_TAB, MASK)); */
+  /** The key binding for open Javadoc under cursor. */
+  public static final VectorOption<KeyStroke> KEY_OPEN_JAVADOC_UNDER_CURSOR =
+    new VectorOption<KeyStroke>("key.open.javadoc.under.cursor", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, MASK)));
   
-  /** The key binding for commenting out lines
-   */
-  public static final KeyStrokeOption KEY_COMMENT_LINES =
-    new KeyStrokeOption("key.comment.lines",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, MASK));
+  /** The key binding for complete file. */
+  public static final VectorOption<KeyStroke> KEY_COMPLETE_FILE =
+    new VectorOption<KeyStroke>("key.complete.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, MASK|KeyEvent.SHIFT_MASK)));
   
-  /** The key binding for un-commenting lines
-   */
-  public static final KeyStrokeOption KEY_UNCOMMENT_LINES =
-    new KeyStrokeOption("key.uncomment.lines",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
-                                               (MASK | SHIFT_MASK)));
+  /** The key binding for indenting */
+//  public static final VectorOption<KeyStroke> KEY_INDENT =
+//    new VectorOption<KeyStroke>("key.indent", , new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, MASK)));
   
-  /** The key binding for selecting previous document
-   */
-  public static final KeyStrokeOption KEY_PREVIOUS_DOCUMENT =
-    new KeyStrokeOption("key.previous.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, MASK));
-  /** The key binding for selecting next document
-   */
-  public static final KeyStrokeOption KEY_NEXT_DOCUMENT =
-    new KeyStrokeOption("key.next.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, MASK));
+  /** The key binding for commenting out lines */
+  public static final VectorOption<KeyStroke> KEY_COMMENT_LINES =
+    new VectorOption<KeyStroke>("key.comment.lines", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, MASK)));
   
-  /** The key binding for changing the focus to the previous pane
-   */
-  public static final KeyStrokeOption KEY_PREVIOUS_PANE =
-    new KeyStrokeOption("key.previous.pane",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, MASK));
+  /** The key binding for un-commenting lines */
+  public static final VectorOption<KeyStroke> KEY_UNCOMMENT_LINES =
+    new VectorOption<KeyStroke>("key.uncomment.lines", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, MASK|SHIFT_MASK)));
   
-  /** The key binding for changing the focus to the next pane
-   */
-  public static final KeyStrokeOption KEY_NEXT_PANE =
-    new KeyStrokeOption("key.next.pane",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, MASK));
+  /** The key binding for selecting previous document */
+  public static final VectorOption<KeyStroke> KEY_PREVIOUS_DOCUMENT =
+    new VectorOption<KeyStroke>("key.previous.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, MASK)));
   
-  /** The key binding for going to the opening brace.
-   */
-  public static final KeyStrokeOption KEY_OPENING_BRACE =
-    new KeyStrokeOption("key.goto.opening.brace",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, MASK|SHIFT_MASK));
+  /** The key binding for selecting next document */
+  public static final VectorOption<KeyStroke> KEY_NEXT_DOCUMENT =
+    new VectorOption<KeyStroke>("key.next.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, MASK)));
   
-  /** The key binding for going to the closing brace.
-   */
-  public static final KeyStrokeOption KEY_CLOSING_BRACE =
-    new KeyStrokeOption("key.goto.closing.brace",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, MASK|SHIFT_MASK));
+  /** The key binding for changing the focus to the previous pane */
+  public static final VectorOption<KeyStroke> KEY_PREVIOUS_PANE =
+    new VectorOption<KeyStroke>("key.previous.pane", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, MASK)));
   
-  /** The key binding for jumping to the next location in the browser history
-   */
-  public static final KeyStrokeOption KEY_BROWSE_FORWARD =
-    new KeyStrokeOption("key.browse.forward",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ALT_MASK|SHIFT_MASK));
+  /** The key binding for changing the focus to the next pane */
+  public static final VectorOption<KeyStroke> KEY_NEXT_PANE =
+    new VectorOption<KeyStroke>("key.next.pane", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, MASK)));
   
-  /** The key binding for jumping to the previous location in the browser history
-   */
-  public static final KeyStrokeOption KEY_BROWSE_BACK =
-    new KeyStrokeOption("key.browse.back",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ALT_MASK|SHIFT_MASK));
+  /** The key binding for going to the opening brace. */
+  public static final VectorOption<KeyStroke> KEY_OPENING_BRACE =
+    new VectorOption<KeyStroke>("key.goto.opening.brace", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, MASK|SHIFT_MASK)));
   
-  /** The key binding for openning the preferences dialog
-   */
-  public static final KeyStrokeOption KEY_PREFERENCES =
-    new KeyStrokeOption("key.preferences",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, MASK));
+  /** The key binding for going to the closing brace. */
+  public static final VectorOption<KeyStroke> KEY_CLOSING_BRACE =
+    new VectorOption<KeyStroke>("key.goto.closing.brace", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, MASK|SHIFT_MASK)));
   
-  /** The key binding for compiling current document
-   */
-  public static final KeyStrokeOption KEY_COMPILE =
-    new KeyStrokeOption("key.compile", KeyStroke.getKeyStroke(KeyEvent.VK_F5, SHIFT_MASK));
+  /** The key binding for jumping to the next location in the browser history */
+  public static final VectorOption<KeyStroke> KEY_BROWSE_FORWARD =
+    new VectorOption<KeyStroke>("key.browse.forward", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ALT_MASK|SHIFT_MASK)));
   
-  /** The key binding for compiling all
-   */
-  public static final KeyStrokeOption KEY_COMPILE_ALL =
-    new KeyStrokeOption("key.compile.all", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+  /** The key binding for jumping to the previous location in the browser history */
+  public static final VectorOption<KeyStroke> KEY_BROWSE_BACK =
+    new VectorOption<KeyStroke>("key.browse.back", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ALT_MASK|SHIFT_MASK)));
   
-  /** The key binding for running the main method of the current document
-   */
-  public static final KeyStrokeOption KEY_RUN =
-    new KeyStrokeOption("key.run", KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
+  /** The key binding for openning the preferences dialog */
+  public static final VectorOption<KeyStroke> KEY_PREFERENCES =
+    new VectorOption<KeyStroke>("key.preferences", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, MASK)));
   
-  /** The key binding for running the project's main document
-   */
-  public static final KeyStrokeOption KEY_RUN_MAIN =
-    new KeyStrokeOption("key.run.main", KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0));
+  /** The key binding for compiling current document */
+  public static final VectorOption<KeyStroke> KEY_COMPILE =
+    new VectorOption<KeyStroke>("key.compile", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F5, SHIFT_MASK)));
   
-  /** The key binding for testing the current document
-   */
-  public static final KeyStrokeOption KEY_TEST =
-    new KeyStrokeOption("key.test",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK | SHIFT_MASK));
+  /** The key binding for compiling all */
+  public static final VectorOption<KeyStroke> KEY_COMPILE_ALL =
+    new VectorOption<KeyStroke>("key.compile.all", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0)));
   
-  /** The key binding for testing all open JUnit test cases.
-   */
-  public static final KeyStrokeOption KEY_TEST_ALL =
-    new KeyStrokeOption("key.test.all", KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK));
+  /** The key binding for running the main method of the current document */
+  public static final VectorOption<KeyStroke> KEY_RUN =
+    new VectorOption<KeyStroke>("key.run", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0)));
   
-  /** The key binding for generating javadoc for all documents
-   */
-  public static final KeyStrokeOption KEY_JAVADOC_ALL =
-    new KeyStrokeOption("key.javadoc.all", KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK));
+  /** The key binding for running the project's main document */
+  public static final VectorOption<KeyStroke> KEY_RUN_MAIN =
+    new VectorOption<KeyStroke>("key.run.main", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0)));
   
-  /** The key binding for generating javadoc for the current document
-   */
-  public static final KeyStrokeOption KEY_JAVADOC_CURRENT =
-    new KeyStrokeOption("key.javadoc.current",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK | SHIFT_MASK));
+  /** The key binding for testing the current document */
+  public static final VectorOption<KeyStroke> KEY_TEST =
+    new VectorOption<KeyStroke>("key.test", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK|SHIFT_MASK)));
   
-  /** The key binding for executing an interactions history.
-   */
-  public static final KeyStrokeOption KEY_EXECUTE_HISTORY =
-    new KeyStrokeOption("key.execute.history", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for testing all open JUnit test cases. */
+  public static final VectorOption<KeyStroke> KEY_TEST_ALL =
+    new VectorOption<KeyStroke>("key.test.all", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK)));
   
-  /** The key binding for loading an interactions history as a script.
-   */
-  public static final KeyStrokeOption KEY_LOAD_HISTORY_SCRIPT =
-    new KeyStrokeOption("key.load.history.script", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for generating javadoc for all documents */
+  public static final VectorOption<KeyStroke> KEY_JAVADOC_ALL =
+    new VectorOption<KeyStroke>("key.javadoc.all", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK)));
   
-  /** The key binding for saving an interactions history.
-   */
-  public static final KeyStrokeOption KEY_SAVE_HISTORY =
-    new KeyStrokeOption("key.save.history", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for generating javadoc for the current document */
+  public static final VectorOption<KeyStroke> KEY_JAVADOC_CURRENT =
+    new VectorOption<KeyStroke>("key.javadoc.current", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK | SHIFT_MASK)));
   
-  /** The key binding for clearing the interactions history.
-   */
-  public static final KeyStrokeOption KEY_CLEAR_HISTORY =
-    new KeyStrokeOption("key.clear.history", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for executing an interactions history. */
+  public static final VectorOption<KeyStroke> KEY_EXECUTE_HISTORY =
+    new VectorOption<KeyStroke>("key.execute.history", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for resetting the interactions pane.
-   */
-  public static final KeyStrokeOption KEY_RESET_INTERACTIONS =
-    new KeyStrokeOption("key.reset.interactions", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for loading an interactions history as a script. */
+  public static final VectorOption<KeyStroke> KEY_LOAD_HISTORY_SCRIPT =
+    new VectorOption<KeyStroke>("key.load.history.script", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for viewing the interactions classpath.
-   */
-  public static final KeyStrokeOption KEY_VIEW_INTERACTIONS_CLASSPATH =
-    new KeyStrokeOption("key.view.interactions.classpath", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for saving an interactions history. */
+  public static final VectorOption<KeyStroke> KEY_SAVE_HISTORY =
+    new VectorOption<KeyStroke>("key.save.history", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for printing the interactions.
-   */
-  public static final KeyStrokeOption KEY_PRINT_INTERACTIONS =
-    new KeyStrokeOption("key.view.print.interactions", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for clearing the interactions history. */
+  public static final VectorOption<KeyStroke> KEY_CLEAR_HISTORY =
+    new VectorOption<KeyStroke>("key.clear.history", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for lifting the current interaction to definitions.
-   */
-  public static final KeyStrokeOption KEY_LIFT_CURRENT_INTERACTION =
-    new KeyStrokeOption("key.lift.current.interaction", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for resetting the interactions pane. */
+  public static final VectorOption<KeyStroke> KEY_RESET_INTERACTIONS =
+    new VectorOption<KeyStroke>("key.reset.interactions", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding to enter or leave multiline input mode.
-   *
-   public static final KeyStrokeOption KEY_TOGGLE_MULTILINE_INTERACTION =
-   new KeyStrokeOption("key.toggle.multiline.interaction",
-   KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK));
-   */
+  /** The key binding for viewing the interactions classpath. */
+  public static final VectorOption<KeyStroke> KEY_VIEW_INTERACTIONS_CLASSPATH =
+    new VectorOption<KeyStroke>("key.view.interactions.classpath", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for clearing the console.
-   */
-  public static final KeyStrokeOption KEY_CLEAR_CONSOLE =
-    new KeyStrokeOption("key.clear.console", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for printing the interactions. */
+  public static final VectorOption<KeyStroke> KEY_PRINT_INTERACTIONS =
+    new VectorOption<KeyStroke>("key.view.print.interactions", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for printing the console.
-   */
-  public static final KeyStrokeOption KEY_PRINT_CONSOLE =
-    new KeyStrokeOption("key.view.print.console", KeyStrokeOption.NULL_KEYSTROKE);
+  /** The key binding for lifting the current interaction to definitions. */
+  public static final VectorOption<KeyStroke> KEY_LIFT_CURRENT_INTERACTION =
+    new VectorOption<KeyStroke>("key.lift.current.interaction", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for moving the cursor backwards
+  /** The key binding to enter or leave multiline input mode. */
+//  public static final VectorOption<KeyStroke> KEY_TOGGLE_MULTILINE_INTERACTION =
+//   new VectorOption<KeyStroke>("key.toggle.multiline.interaction", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK)));
+
+  /** The key binding for clearing the console. */
+  public static final VectorOption<KeyStroke> KEY_CLEAR_CONSOLE =
+    new VectorOption<KeyStroke>("key.clear.console", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for printing the console. */
+  public static final VectorOption<KeyStroke> KEY_PRINT_CONSOLE =
+    new VectorOption<KeyStroke>("key.view.print.console", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for moving the cursor backwards */
+  public static final VectorOption<KeyStroke> KEY_BACKWARD =
+    new VectorOption<KeyStroke>("key.backward", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)));
+
+  /** The key binding for moving the cursor backwards with selection
    */
-  public static final KeyStrokeOption KEY_BACKWARD =
-    new KeyStrokeOption("key.backward", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+  public static final VectorOption<KeyStroke> KEY_BACKWARD_SELECT =
+    new VectorOption<KeyStroke>("key.backward.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, SHIFT_MASK)));
   
   /** The key binding for moving the cursor to the beginning of the document
    */
-  public static final KeyStrokeOption KEY_BEGIN_DOCUMENT =
-    new KeyStrokeOption("key.begin.document", KeyStroke.getKeyStroke(KeyEvent.VK_HOME, MASK));
+  public static final VectorOption<KeyStroke> KEY_BEGIN_DOCUMENT =
+    new VectorOption<KeyStroke>("key.begin.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, MASK)));
+
+  /** The key binding for moving the cursor to the beginning of the document
+   */
+  public static final VectorOption<KeyStroke> KEY_BEGIN_DOCUMENT_SELECT =
+    new VectorOption<KeyStroke>("key.begin.document.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, SHIFT_MASK|MASK)));
   
   /** The key binding for moving the cursor to the beginning of the current line. */
-  public static final KeyStrokeOption KEY_BEGIN_LINE =
-    new KeyStrokeOption("key.begin.line", KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0));
+  public static final VectorOption<KeyStroke> KEY_BEGIN_LINE =
+    new VectorOption<KeyStroke>("key.begin.line", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0)));
+
+  /** The key binding for moving the cursor to the beginning of the current line. */
+  public static final VectorOption<KeyStroke> KEY_BEGIN_LINE_SELECT =
+    new VectorOption<KeyStroke>("key.begin.line.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, SHIFT_MASK)));
   
-//  /** The key binding for moving the cursor to the beginning of the current paragraph.
-//   * (Doesn't seem to do anything useful...)
-//   */
-//   public static final KeyStrokeOption KEY_BEGIN_PARAGRAPH =
-//   new KeyStrokeOption("key.begin.paragraph", KeyStroke.getKeyStroke(KeyEvent.VK_UP, MASK));
+  /** The key binding for moving the cursor to the beginning of the current paragraph.
+   * (Doesn't seem to do anything useful...)
+   */
+//   public static final VectorOption<KeyStroke> KEY_BEGIN_PARAGRAPH =
+//     new VectorOption<KeyStroke>("key.begin.paragraph", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_UP, MASK)));
   
   /** The key binding for moving the cursor to the beginning of the previous word. */
-  public static final KeyStrokeOption KEY_PREVIOUS_WORD =
-    new KeyStrokeOption("key.previous.word", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, MASK));
+  public static final VectorOption<KeyStroke> KEY_PREVIOUS_WORD =
+    new VectorOption<KeyStroke>("key.previous.word", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, MASK)));
+
+  /** The key binding for moving the cursor to the beginning of the previous word. */
+  public static final VectorOption<KeyStroke> KEY_PREVIOUS_WORD_SELECT =
+    new VectorOption<KeyStroke>("key.previous.word.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, SHIFT_MASK|MASK)));
   
   /** The key binding for deleting the next character. */
-  public static final KeyStrokeOption KEY_DELETE_NEXT =
-    new KeyStrokeOption("key.delete.next", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+  public static final VectorOption<KeyStroke> KEY_DELETE_NEXT =
+    new VectorOption<KeyStroke>("key.delete.next", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)));
   
   /** The key binding for deleting the previous character (with shift set). */
-  public static final KeyStrokeOption KEY_DELETE_PREVIOUS =
-    new KeyStrokeOption("key.delete.previous", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
+  public static final VectorOption<KeyStroke> KEY_DELETE_PREVIOUS =
+    new VectorOption<KeyStroke>("key.delete.previous", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)));
   
   /** The key binding for deleting the next character (with shift set). */
-  public static final KeyStrokeOption KEY_SHIFT_DELETE_NEXT =
-    new KeyStrokeOption("key.delete.next", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_SHIFT_DELETE_NEXT =
+    new VectorOption<KeyStroke>("key.delete.next", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, SHIFT_MASK)));
   
   /** The key binding for deleting the previous character (with shift set). */
-  public static final KeyStrokeOption KEY_SHIFT_DELETE_PREVIOUS =
-    new KeyStrokeOption("key.delete.previous", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_SHIFT_DELETE_PREVIOUS =
+    new VectorOption<KeyStroke>("key.delete.previous", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, SHIFT_MASK)));
   
   /** The key binding for moving the cursor down. */
-  public static final KeyStrokeOption KEY_DOWN =
-    new KeyStrokeOption("key.down", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
+  public static final VectorOption<KeyStroke> KEY_DOWN =
+    new VectorOption<KeyStroke>("key.down", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)));
+
+  /** The key binding for moving the cursor down. */
+  public static final VectorOption<KeyStroke> KEY_DOWN_SELECT =
+    new VectorOption<KeyStroke>("key.down.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, SHIFT_MASK)));
   
   /** The key binding for moving the cursor up. */
-  public static final KeyStrokeOption KEY_UP =
-    new KeyStrokeOption("key.up", KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
+  public static final VectorOption<KeyStroke> KEY_UP =
+    new VectorOption<KeyStroke>("key.up", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)));
+  
+  /** The key binding for moving the cursor up. */
+  public static final VectorOption<KeyStroke> KEY_UP_SELECT =
+    new VectorOption<KeyStroke>("key.up.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_UP, SHIFT_MASK)));
   
   /** The key binding for moving the cursor to the end of the document. */
-  public static final KeyStrokeOption KEY_END_DOCUMENT =
-    new KeyStrokeOption("key.end.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_END, MASK));
+  public static final VectorOption<KeyStroke> KEY_END_DOCUMENT =
+    new VectorOption<KeyStroke>("key.end.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, MASK)));
+
+  /** The key binding for moving the cursor to the end of the document. */
+  public static final VectorOption<KeyStroke> KEY_END_DOCUMENT_SELECT =
+    new VectorOption<KeyStroke>("key.end.document.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, SHIFT_MASK|MASK)));
+
   /** The key binding for moving the cursor to the end of the current line. */
-  public static final KeyStrokeOption KEY_END_LINE =
-    new KeyStrokeOption("key.end.line", KeyStroke.getKeyStroke(KeyEvent.VK_END, 0));
+  public static final VectorOption<KeyStroke> KEY_END_LINE =
+    new VectorOption<KeyStroke>("key.end.line", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0)));
+
+  /** The key binding for moving the cursor to the end of the current line. */
+  public static final VectorOption<KeyStroke> KEY_END_LINE_SELECT =
+    new VectorOption<KeyStroke>("key.end.line.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, SHIFT_MASK)));
   
-//  /** The key binding for moving the cursor to the end of the current paragraph. */
-//  public static final KeyStrokeOption KEY_END_PARAGRAPH =
-//    new KeyStrokeOption("key.end.paragraph", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, MASK));
+  /** The key binding for moving the cursor to the end of the current paragraph. */
+//  public static final VectorOption<KeyStroke> KEY_END_PARAGRAPH =
+//    new VectorOption<KeyStroke>("key.end.paragraph", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, MASK)));
   
   /** The key binding for moving the cursor to the beginning of the next word. */
-  public static final KeyStrokeOption KEY_NEXT_WORD =
-    new KeyStrokeOption("key.next.word", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, MASK));
+  public static final VectorOption<KeyStroke> KEY_NEXT_WORD =
+    new VectorOption<KeyStroke>("key.next.word", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, MASK)));
+
+  /** The key binding for moving the cursor to the beginning of the next word. */
+  public static final VectorOption<KeyStroke> KEY_NEXT_WORD_SELECT =
+    new VectorOption<KeyStroke>("key.next.word.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, SHIFT_MASK|MASK)));
   
   /** The key binding for moving the cursor forwards. */
-  public static final KeyStrokeOption KEY_FORWARD =
-    new KeyStrokeOption("key.forward", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
+  public static final VectorOption<KeyStroke> KEY_FORWARD =
+    new VectorOption<KeyStroke>("key.forward", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)));
+
+  /** The key binding for moving the cursor forwards. */
+  public static final VectorOption<KeyStroke> KEY_FORWARD_SELECT =
+    new VectorOption<KeyStroke>("key.forward.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, SHIFT_MASK)));
   
   /** The key binding for page down. */
-  public static final KeyStrokeOption KEY_PAGE_DOWN =
-    new KeyStrokeOption("key.page.down", KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
+  public static final VectorOption<KeyStroke> KEY_PAGE_DOWN =
+    new VectorOption<KeyStroke>("key.page.down", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0)));
   
   /** The key binding for page up. */
-  public static final KeyStrokeOption KEY_PAGE_UP =
-    new KeyStrokeOption("key.page.up", KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
+  public static final VectorOption<KeyStroke> KEY_PAGE_UP =
+    new VectorOption<KeyStroke>("key.page.up", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0)));
   
-//  public static final KeyStrokeOption KEY_NEXT_RECENT_DOCUMENT = // Key code for '`'
-//    new KeyStrokeOption("key.next.recent.document", KeyStroke.getKeyStroke(KeyEvent.BACK_QUOTE, CTRL_MASK));  
+//  public static final VectorOption<KeyStroke> KEY_NEXT_RECENT_DOCUMENT = // Key code for '`'
+//    new VectorOption<KeyStroke>("key.next.recent.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.BACK_QUOTE, CTRL_MASK)));  
 //  
-//  public static final KeyStrokeOption KEY_PREV_RECENT_DOCUMENT =   // Key code for '~'
-//    new KeyStrokeOption("key.prev.recent.document", KeyStroke.getKeyStroke(KeyEvent.BACK_QUOTE, SHIFT_MASK | CTRL_MASK)); 
+//  public static final VectorOption<KeyStroke> KEY_PREV_RECENT_DOCUMENT =   // Key code for '~'
+//    new VectorOption<KeyStroke>("key.prev.recent.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.BACK_QUOTE, SHIFT_MASK | CTRL_MASK))); 
   
   /** The key binding for cutting a line. */
-  public static final KeyStrokeOption KEY_CUT_LINE =
-    new KeyStrokeOption("key.cut.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, (MASK | ALT_MASK)));
+  public static final VectorOption<KeyStroke> KEY_CUT_LINE =
+    new VectorOption<KeyStroke>("key.cut.line", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_K, MASK|ALT_MASK)));
   
   /** The key binding for clearing a line, emacs-style. */
-  public static final KeyStrokeOption KEY_CLEAR_LINE =
-    new KeyStrokeOption("key.clear.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, MASK));
+  public static final VectorOption<KeyStroke> KEY_CLEAR_LINE =
+    new VectorOption<KeyStroke>("key.clear.line", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_K, MASK)));
   
   /** The key binding for toggling debug mode. */
-  public static final KeyStrokeOption KEY_DEBUG_MODE_TOGGLE =
-    new KeyStrokeOption("key.debug.mode.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_MODE_TOGGLE =
+    new VectorOption<KeyStroke>("key.debug.mode.toggle", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK | SHIFT_MASK)));
   
-//  /** The key binding for suspending the debugger. */
-//  public static final KeyStrokeOption KEY_DEBUG_SUSPEND =
-//    new KeyStrokeOption("key.debug.suspend", KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+  /** The key binding for suspending the debugger. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_SUSPEND =
+//    new VectorOption<KeyStroke>("key.debug.suspend", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0)));
   
   /** The key binding for resuming the debugger. */
-  public static final KeyStrokeOption KEY_DEBUG_RESUME =
-    new KeyStrokeOption("key.debug.resume", KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_RESUME =
+    new VectorOption<KeyStroke>("key.debug.resume", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0)));
   
     /** The key binding for automatically tracing through each line of a program*/
-  public static final KeyStrokeOption KEY_DEBUG_AUTOMATIC_TRACE = 
-    new KeyStrokeOption("key.debug.automatic.trace", KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_AUTOMATIC_TRACE = 
+    new VectorOption<KeyStroke>("key.debug.automatic.trace", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0)));
   
   /** The key binding for stepping into in the debugger */
-  public static final KeyStrokeOption KEY_DEBUG_STEP_INTO =
-    new KeyStrokeOption("key.debug.step.into", KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_INTO =
+    new VectorOption<KeyStroke>("key.debug.step.into", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0)));
   
   /** The key binding for stepping over in the debugger. */
-  public static final KeyStrokeOption KEY_DEBUG_STEP_OVER =
-    new KeyStrokeOption("key.debug.step.over", KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_OVER =
+    new VectorOption<KeyStroke>("key.debug.step.over", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0)));
   
   /** The key binding for stepping out in the debugger. */
-  public static final KeyStrokeOption KEY_DEBUG_STEP_OUT =
-    new KeyStrokeOption("key.debug.step.out", KeyStroke.getKeyStroke(KeyEvent.VK_F12, SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_OUT =
+    new VectorOption<KeyStroke>("key.debug.step.out", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F12, SHIFT_MASK)));
   
   /** The key binding for toggling a breakpoint. */
-  public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
-    new KeyStrokeOption("key.debug.breakpoint.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_BREAKPOINT_TOGGLE =
+    new VectorOption<KeyStroke>("key.debug.breakpoint.toggle", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK)));
   
   /** The key binding for displaying the breakpoints panel. */
-  public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_PANEL =
-    new KeyStrokeOption("key.debug.breakpoint.panel", KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_DEBUG_BREAKPOINT_PANEL =
+    new VectorOption<KeyStroke>("key.debug.breakpoint.panel", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK | SHIFT_MASK)));
   
   /** The key binding for clearing all breakpoints. */
-  public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
-    new KeyStrokeOption("key.debug.clear.all.breakpoints", KeyStrokeOption.NULL_KEYSTROKE);
- 
-
+  public static final VectorOption<KeyStroke> KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
+    new VectorOption<KeyStroke>("key.debug.clear.all.breakpoints", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for toggling a bookmark. */
-  public static final KeyStrokeOption KEY_BOOKMARKS_TOGGLE =
-    new KeyStrokeOption("key.bookmarks.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK));
+  public static final VectorOption<KeyStroke> KEY_BOOKMARKS_TOGGLE =
+    new VectorOption<KeyStroke>("key.bookmarks.toggle", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK)));
   
   /** The key binding for displaying the bookmarks panel. */
-  public static final KeyStrokeOption KEY_BOOKMARKS_PANEL =
-    new KeyStrokeOption("key.bookmarks.panel", KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_BOOKMARKS_PANEL =
+    new VectorOption<KeyStroke>("key.bookmarks.panel", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK | SHIFT_MASK)));
   
   /** The key binding for help. */
-  public static final KeyStrokeOption KEY_HELP =
-    new KeyStrokeOption("key.help", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+  public static final VectorOption<KeyStroke> KEY_HELP =
+    new VectorOption<KeyStroke>("key.help", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0)));
   
   /** The key binding for quickstart. Currently set to the null keystroke. */
-  public static final KeyStrokeOption KEY_QUICKSTART = 
-    new KeyStrokeOption("key.quickstart", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_QUICKSTART = 
+    new VectorOption<KeyStroke>("key.quickstart", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for the about dialog */
-  public static final KeyStrokeOption KEY_ABOUT = 
-    new KeyStrokeOption("key.about", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_ABOUT = 
+    new VectorOption<KeyStroke>("key.about", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for the check new version dialog */
-  public static final KeyStrokeOption KEY_CHECK_NEW_VERSION = 
-    new KeyStrokeOption("key.check.new.version", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_CHECK_NEW_VERSION = 
+    new VectorOption<KeyStroke>("key.check.new.version", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for the DrJava survey dialog */
-  public static final KeyStrokeOption KEY_DRJAVA_SURVEY = 
-    new KeyStrokeOption("key.drjava.survey", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_DRJAVA_SURVEY = 
+    new VectorOption<KeyStroke>("key.drjava.survey", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for the "DrJava Errors" dialog */
-  public static final KeyStrokeOption KEY_DRJAVA_ERRORS = 
-    new KeyStrokeOption("key.drjava.errors", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_DRJAVA_ERRORS = 
+    new VectorOption<KeyStroke>("key.drjava.errors", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for following a file, like using "less" and F. */
-  public static final KeyStrokeOption KEY_FOLLOW_FILE =
-    new KeyStrokeOption("key.follow.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_L, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_FOLLOW_FILE =
+    new VectorOption<KeyStroke>("key.follow.file", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_L, MASK | SHIFT_MASK)));
   
   /** The key binding for executing an external process. */
-  public static final KeyStrokeOption KEY_EXEC_PROCESS =
-    new KeyStrokeOption("key.exec.process",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK | SHIFT_MASK));
+  public static final VectorOption<KeyStroke> KEY_EXEC_PROCESS =
+    new VectorOption<KeyStroke>("key.exec.process", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK | SHIFT_MASK)));
   
   /** The key binding to detach/re-attach the tabbed panes. */
-  public static final KeyStrokeOption KEY_DETACH_TABBEDPANES = 
-    new KeyStrokeOption("key.detach.tabbedpanes", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_DETACH_TABBEDPANES = 
+    new VectorOption<KeyStroke>("key.detach.tabbedpanes", new KeyStrokeOption("",null), to.vector());
 
   /** The key binding to detach/re-attach the debugger panel. */
-  public static final KeyStrokeOption KEY_DETACH_DEBUGGER = 
-    new KeyStrokeOption("key.detach.debugger", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final VectorOption<KeyStroke> KEY_DETACH_DEBUGGER = 
+    new VectorOption<KeyStroke>("key.detach.debugger", new KeyStrokeOption("",null), to.vector());
   
   /** The key binging to close stream input in the ineractions panel. Ctrl-D on all systems.
     * In the console on DOS/Windows, this was typically Ctrl-Z, but Ctrl-Z is now the
     * default for Undo, even on Windows. */
-  public static final KeyStrokeOption KEY_CLOSE_SYSTEM_IN = 
-    new KeyStrokeOption("key.close.system.in", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK));
+  public static final VectorOption<KeyStroke> KEY_CLOSE_SYSTEM_IN = 
+    new VectorOption<KeyStroke>("key.close.system.in", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK)));
 
   
   /* ---------- Find Replace Options ---------- */

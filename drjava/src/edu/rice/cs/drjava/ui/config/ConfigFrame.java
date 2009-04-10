@@ -741,14 +741,13 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  
   /** Adds all of the components for the Key Bindings panel of the preferences window.
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treeset because it automatically sorts element upon insertion
-    TreeSet<KeyStrokeOptionComponent> _comps = new TreeSet<KeyStrokeOptionComponent>();
+    TreeSet<VectorKeyStrokeOptionComponent> _comps = new TreeSet<VectorKeyStrokeOptionComponent>();
 
-    KeyStrokeOptionComponent ksoc;
+    VectorKeyStrokeOptionComponent vksoc;
 
     for (KeyStrokeData ksd: KeyBindingManager.ONLY.getKeyStrokeData()) {
       if (ksd.getOption() != null) {
@@ -756,15 +755,14 @@ public class ConfigFrame extends SwingFrame {
         Action a = ksd.getAction();
         String desc = (String) a.getValue(Action.SHORT_DESCRIPTION);
         if (desc == null || desc.equals("")) desc = ksd.getName();
-
-        ksoc = new KeyStrokeOptionComponent((KeyStrokeOption)ksd.getOption(), ksd.getName(), this, desc);
-        if (ksoc != null) _comps.add(ksoc);
+        vksoc = new VectorKeyStrokeOptionComponent((VectorOption<KeyStroke>)ksd.getOption(), ksd.getName(), this, desc);
+        if (vksoc != null) _comps.add(vksoc);
       }
     }
 
-    Iterator<KeyStrokeOptionComponent> iter = _comps.iterator();
+    Iterator<VectorKeyStrokeOptionComponent> iter = _comps.iterator();
     while (iter.hasNext()) {
-      KeyStrokeOptionComponent x = iter.next();
+      VectorKeyStrokeOptionComponent x = iter.next();
       addOptionComponent(panel, x);
     }
     panel.displayComponents();

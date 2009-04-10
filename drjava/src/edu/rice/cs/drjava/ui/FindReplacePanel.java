@@ -239,13 +239,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     findIM.put(enter, "Do Find");
     findIM.put(ctrlEnter, "Insert Newline");
     findIM.put(ctrlTab, "Insert Tab");
-    findIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), "Cut");
-    findIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), "Copy");
+    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_CUT)) findIM.put(k, "Cut");
+    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_COPY)) findIM.put(k, "Copy");
     replaceIM.put(enter, "Insert Newline");
     replaceIM.put(ctrlEnter, "Insert Newline");
     replaceIM.put(ctrlTab, "Insert Tab");
-    replaceIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), "Cut");
-    replaceIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), "Copy");
+    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_CUT)) replaceIM.put(k, "Cut");
+    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_COPY)) replaceIM.put(k, "Copy");
     
     Action insertTabAction = new DefaultEditorKit.InsertTabAction();
     ActionMap findAM = _findField.getActionMap();

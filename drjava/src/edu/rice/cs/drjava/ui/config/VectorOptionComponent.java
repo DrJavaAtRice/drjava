@@ -49,8 +49,6 @@ import java.util.Vector;
 import java.util.ArrayList;
 
 /** Graphical form of a VectorOption for the Extra Classpath option. Uses a file chooser for each String element.
- *  TODO: define a static make method that adds buttons so that moveUp and moveDown button definitions can be moved
- *  to subclass
  *  @version $Id$
  */
 public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>> implements OptionConstants {
@@ -67,6 +65,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected static final int PIXELS_PER_ROW = 18;
   protected Vector<T> _data;
   protected String[] _columnNames;
+  protected String _description;
 
   /** Builds a new VectorOptionComponent with hidden column name.
     * @param opt the option
@@ -121,8 +120,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
         if (rows.length>0) {
           // remove starting from the back so the indices don't have to be adjusted
           for(int i=rows.length-1; i>=0; --i) {
-            _data.remove(rows[i]);
-            _tableModel.fireTableRowsDeleted(rows[i],rows[i]); System.out.flush();
+            _removeIndex(rows[i]);
           }
           int last = rows[rows.length-1];
           if (last==_data.size()) { // we removed the last element
@@ -133,7 +131,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
           else {
             _table.getSelectionModel().setSelectionInterval(last,last);
           }
-	  notifyChangeListeners();
+          notifyChangeListeners();
         }
       }
     });
@@ -152,7 +150,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
               _tableModel.fireTableRowsUpdated(rows[i]-1,rows[i]);
             }
           }
-	  notifyChangeListeners();
+          notifyChangeListeners();
         }
       }
     });
@@ -171,7 +169,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
               _tableModel.fireTableRowsUpdated(rows[i],rows[i]+1);
             }
           }
-	  notifyChangeListeners();
+          notifyChangeListeners();
         }
       }
     });
@@ -210,8 +208,14 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected void _addValue(T value) {
     _data.add(value);
     _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
-    _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);    
+    _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);
     notifyChangeListeners();
+    notifyChangeListeners();
+  }
+
+  protected void _removeIndex(int i) {
+    _data.remove(i);
+    _tableModel.fireTableRowsDeleted(i,i);
   }
 
   /** Adds buttons to _buttonPanel */
@@ -231,6 +235,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
    * @param description the tooltip text
    */
   public void setDescription(String description) {
+    _description = description;
     _tableScrollPane.setToolTipText(description);
     _table.setToolTipText(description);
     _label.setToolTipText(description);

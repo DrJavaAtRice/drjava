@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.ui;
 
-
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
@@ -44,6 +43,8 @@ import java.awt.Font;
 
 import javax.swing.*;
 import javax.swing.text.*;
+
+import java.util.Vector;
 
 import edu.rice.cs.util.text.ConsoleDocument;
 
@@ -193,41 +194,41 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   
   /** Sets up the view. */
   protected void _setupView() {
-    KeyStroke beginLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE);
-    _pane.addActionForKeyStroke(beginLineKey, gotoPromptPosAction);
-    _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(beginLineKey),
-                                selectToPromptPosAction);
-    KeyStroke endLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE);
-    _pane.addActionForKeyStroke(endLineKey, gotoEndAction);
-    _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(endLineKey),
-                                selectToEndAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE), gotoPromptPosAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE_SELECT), selectToPromptPosAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE), gotoEndAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE_SELECT), selectToEndAction);
 
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE,
-                                         new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoPromptPosAction);
-        _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(oe.value),
-                                    selectToPromptPosAction);
+      }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+        _pane.addActionForKeyStroke(oe.value, selectToPromptPosAction);
      }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_END_LINE,
-                                         new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_END_LINE, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoEndAction);
-        _pane.addActionForKeyStroke(KeyBindingManager.ONLY.addShiftModifier(oe.value),
-                                    selectToEndAction);
+     }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_END_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+        _pane.addActionForKeyStroke(oe.value, selectToEndAction);
      }
     });
     
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
      }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
      }
     });
@@ -335,10 +336,9 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     // We do this here since switchToPrevPaneAction is set after the constructor is called.
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
                                 switchToPrevPaneAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
-                                    switchToPrevPaneAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE), switchToPrevPaneAction);
       }
     });
   }
@@ -350,10 +350,9 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     // constructor is called.
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
                                 switchToNextPaneAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<KeyStroke>() {
-      public void optionChanged(OptionEvent<KeyStroke> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
-                                    switchToNextPaneAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<Vector<KeyStroke>>() {
+      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE), switchToNextPaneAction);
       }
     });
   }
