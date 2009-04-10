@@ -486,7 +486,8 @@ public class FindReplaceMachine {
   private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, int len, 
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
-    boolean inTestCase = (_doc.getFileName().endsWith("Test.java"));
+    boolean inTestCase = (doc.getFileName().endsWith("Test.java"));
+    System.out.println("_findNextInDocSegment, inTestCase="+inTestCase+", _ignoreTestCases="+_ignoreTestCases);
     
     if (!_ignoreTestCases || ! inTestCase) {
       final int docLen = doc.getLength();;     // The length of the segment to be searched
@@ -653,7 +654,7 @@ public class FindReplaceMachine {
   private boolean _shouldIgnore(int foundOffset, OpenDefinitionsDocument odd) {
     
     assert EventQueue.isDispatchThread();
-    
+
     return (_matchWholeWord && ! wholeWordFoundAtCurrent(odd, foundOffset)) || 
       (_ignoreCommentsAndStrings && odd.isShadowed(foundOffset));
   }

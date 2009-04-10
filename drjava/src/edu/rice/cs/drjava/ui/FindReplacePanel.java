@@ -365,9 +365,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     boolean ignoreTestCasesSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_NO_TEST_CASES);
     _ignoreTestCases = new JCheckBox("No Test Cases", ignoreTestCasesSelected);
+    _machine.setIgnoreTestCases(ignoreTestCasesSelected);
     _ignoreTestCases.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
+        _machine.setIgnoreTestCases(isSelected);
         DrJava.getConfig().setSetting(OptionConstants.FIND_NO_TEST_CASES, isSelected);
         _findField.requestFocusInWindow();
       }
