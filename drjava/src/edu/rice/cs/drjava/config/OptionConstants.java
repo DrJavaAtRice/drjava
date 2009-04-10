@@ -824,6 +824,8 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_CLOSE_SYSTEM_IN = 
     new VectorOption<KeyStroke>("key.close.system.in", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK)));
 
+  /** Keystroke option for KeyStrokeOptionComponentTest. */
+  public static final KeyStrokeOption KEY_FOR_UNIT_TESTS_ONLY = new KeyStrokeOption("key.for.unit.tests.only", KeyStroke.getKeyStroke(KeyEvent.VK_N, CTRL_MASK|SHIFT_MASK|MASK));
   
   /* ---------- Find Replace Options ---------- */
   

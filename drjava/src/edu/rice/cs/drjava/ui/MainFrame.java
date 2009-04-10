@@ -9477,31 +9477,31 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final KeyBindingManager kbm = KeyBindingManager.ONLY;
     
     kbm.put(KEY_BACKWARD, actionMap.get(DefaultEditorKit.backwardAction), null, "Backward");
-    kbm.put(KEY_BACKWARD_SELECT, actionMap.get(DefaultEditorKit.selectionBackwardAction), null, "Select Backward");
+    kbm.put(KEY_BACKWARD_SELECT, actionMap.get(DefaultEditorKit.selectionBackwardAction), null, "Backward (Select)");
     
     kbm.put(KEY_BEGIN_DOCUMENT, actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
-    kbm.put(KEY_BEGIN_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionBeginAction), null, "Select Begin Document");
+    kbm.put(KEY_BEGIN_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionBeginAction), null, "Begin Document (Select)");
     
     kbm.put(KEY_BEGIN_LINE, _beginLineAction, null, "Begin Line");
-    kbm.put(KEY_BEGIN_LINE_SELECT, _selectionBeginLineAction, null, "Select Begin Line");
+    kbm.put(KEY_BEGIN_LINE_SELECT, _selectionBeginLineAction, null, "Begin Line (Select)");
     
     kbm.put(KEY_PREVIOUS_WORD, actionMap.get(_currentDefDoc.getEditor().previousWordAction), null, "Previous Word");
-    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionPreviousWordAction), null, "Select Previous Word");
+    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionPreviousWordAction), null, "Previous Word (Select)");
     
     kbm.put(KEY_DOWN, actionMap.get(DefaultEditorKit.downAction), null, "Down");
-    kbm.put(KEY_DOWN_SELECT, actionMap.get(DefaultEditorKit.selectionDownAction), null, "Select Down");
+    kbm.put(KEY_DOWN_SELECT, actionMap.get(DefaultEditorKit.selectionDownAction), null, "Down (Select)");
     
     kbm.put(KEY_END_DOCUMENT, actionMap.get(DefaultEditorKit.endAction), null, "End Document");
-    kbm.put(KEY_END_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionEndAction), null, "Select End Document");
+    kbm.put(KEY_END_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionEndAction), null, "End Document (Select)");
     
     kbm.put(KEY_END_LINE, actionMap.get(DefaultEditorKit.endLineAction), null, "End Line"); // ?
-    kbm.put(KEY_END_LINE_SELECT, actionMap.get(DefaultEditorKit.selectionEndLineAction), null, "Select End Line");
+    kbm.put(KEY_END_LINE_SELECT, actionMap.get(DefaultEditorKit.selectionEndLineAction), null, "End Line (Select)");
     
     kbm.put(KEY_NEXT_WORD, actionMap.get(_currentDefDoc.getEditor().nextWordAction), null, "Next Word");
-    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionNextWordAction), null, "Select Next Word");
+    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionNextWordAction), null, "Next Word (Select)");
     
     kbm.put(KEY_FORWARD, actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
-    kbm.put(KEY_FORWARD_SELECT, actionMap.get(DefaultEditorKit.selectionForwardAction), null, "Select Forward");
+    kbm.put(KEY_FORWARD_SELECT, actionMap.get(DefaultEditorKit.selectionForwardAction), null, "Forward (Select)");
     
     kbm.put(KEY_UP, actionMap.get(DefaultEditorKit.upAction), null, "Up");
     kbm.put(KEY_UP_SELECT, actionMap.get(DefaultEditorKit.selectionUpAction), null, "Select Up");
