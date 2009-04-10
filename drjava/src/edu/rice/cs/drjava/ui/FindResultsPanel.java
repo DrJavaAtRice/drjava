@@ -69,13 +69,15 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 //  protected final RegionManager<MovingDocumentRegion> _regionManager;
   protected final String _searchString;
   protected final boolean _searchAll;
+  protected final boolean _searchSelectedText;
   protected final boolean _matchCase;
   protected final boolean _wholeWord;
   protected final boolean _noComments;
   protected final boolean _noTestCases;
   protected final WeakReference<OpenDefinitionsDocument> _doc;
   protected final FindReplacePanel _findReplace;
-  
+  protected final MovingDocumentRegion _region; //document region used for search limited selection function
+    
   protected JButton _findAgainButton;
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
@@ -93,18 +95,21 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param title for the panel
     * @param searchString string that was searched for
     * @param searchAll whether all files were searched
+    * @param searchSelected whether the selection within the document was searched
     * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
-  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, String title, 
-                          String searchString, boolean searchAll, boolean matchCase, boolean wholeWord, 
+  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, MovingDocumentRegion region, String title, 
+                          String searchString, boolean searchAll, boolean searchSelectedText, boolean matchCase, boolean wholeWord, 
                           boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
                           FindReplacePanel findReplace) {
     super(frame, title, regionManager);
     
 //  _regionManager is inherited from RegionsTreePanel
+    _region = region;
     _searchString = searchString;
     _searchAll    = searchAll;
+    _searchSelectedText = searchSelectedText;
     _matchCase    = matchCase;
     _wholeWord    = wholeWord;
     _noComments   = noComments;
@@ -262,8 +267,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _regTreeModel.nodeStructureChanged(_rootNode);
 //      _requestFocusInWindow();
 //      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
-      _findReplace.findAll(_searchString, _searchAll, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
-                           _regionManager, this);
+      _findReplace.findAll(_searchString, _searchAll, _searchSelectedText, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
+                           _regionManager, _region, this);
       _regTree.scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }

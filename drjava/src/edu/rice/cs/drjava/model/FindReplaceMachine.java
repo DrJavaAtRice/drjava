@@ -59,12 +59,15 @@ public class FindReplaceMachine {
   private OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
 //  private Position _current;                 // Position of the cursor in _doc when machine is stopped
   private int _current;                 // Position of the cursor in _doc when machine is stopped
+  private int _selectionStart;            //start position of the highlighted selection
+  private int _selectionEnd;              //end position of the highlighted selection
 //  private Position _start;                   // Position in _doc from which searching started or will start.
   private String _findWord;                  // Word to find. */
   private String _replaceWord;               // Word to replace _findword.
   private boolean _matchCase;
   private boolean _matchWholeWord;
   private boolean _searchAllDocuments;       // Whether to search all documents (or just the current document)
+  private boolean _searchSelectedText;    // Whether to search only the selection
   private boolean _isForward;                // Whether search direction is forward (false means backward)
   private boolean _ignoreCommentsAndStrings; // Whether to ignore matches in comments and strings
   private boolean _ignoreTestCases;          // Whether to ignore documents that end in *Test.java
@@ -90,6 +93,7 @@ public class FindReplaceMachine {
     setSearchBackwards(false);
     setMatchCase(true);
     setSearchAllDocuments(false);
+    setSearchSelectedText(false);
     setIgnoreCommentsAndStrings(false);
     setIgnoreTestCases(false);
   }
@@ -126,11 +130,14 @@ public class FindReplaceMachine {
   public boolean getMatchCase() { return _matchCase; }
   
   public void setMatchWholeWord() { _matchWholeWord = true; }
+  
   public boolean getMatchWholeWord() { return _matchWholeWord; }
   
   public void setFindAnyOccurrence() { _matchWholeWord = false; }  
   
   public void setSearchAllDocuments(boolean searchAllDocuments) { _searchAllDocuments = searchAllDocuments; }
+  
+  public void setSearchSelectedText(boolean searchSelectedText) { _searchSelectedText = searchSelectedText; }
   
   public void setIgnoreCommentsAndStrings(boolean ignoreCommentsAndStrings) {
     _ignoreCommentsAndStrings = ignoreCommentsAndStrings;
@@ -158,6 +165,8 @@ public class FindReplaceMachine {
   public String getReplaceWord() { return _replaceWord; }
   
   public boolean getSearchAllDocuments() { return _searchAllDocuments; }
+  
+  public boolean getSearchSelectedText() { return _searchSelectedText; }
   
   public OpenDefinitionsDocument getDocument() { return _doc; }
   
@@ -238,24 +247,28 @@ public class FindReplaceMachine {
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
-  
-  /** Replaces all occurences of the find word with the replace word in the current document of in all documents
+
+  /** Replaces all occurrences of the find word with the replace word in the current document of in all documents
     * depending the value of the machine register _searchAllDocuments.
     * @return the number of replacements
     */
-  public int replaceAll() { return replaceAll(_searchAllDocuments); }
+  public int replaceAll(int selectionStart, int selectionEnd) { 
+    _selectionStart = selectionStart; 
+    _selectionEnd = selectionEnd;
+    return replaceAll(_searchAllDocuments, _searchSelectedText); 
+  }
   
-  /** Replaces all occurences of the find word with the replace word in the current document of in all documents
-    * depending the value of the flag searchAll. 
+  /** Replaces all occurences of the find word with the replace word in the current document of in all documents or 
+    * in the current selection of the current document depending the value of the flag searchAll
     * @return the number of replacements
     */
-  private int replaceAll(boolean searchAll) {
+  private int replaceAll(boolean searchAll, boolean searchSelectedText) {
     if (searchAll) {
       int count = 0;           // the number of replacements done so far
       int n = _docIterator.getDocumentCount();
       for (int i = 0; i < n; i++) {
         // replace all in the rest of the documents
-        count += _replaceAllInCurrentDoc();
+        count += _replaceAllInCurrentDoc(false);
         _doc = _docIterator.getNextDocument(_doc);
       }
       
@@ -264,7 +277,13 @@ public class FindReplaceMachine {
       
       return count;
     }
-    else return _replaceAllInCurrentDoc();
+    else if(searchSelectedText) {
+      int count = 0;
+      count += _replaceAllInCurrentDoc(searchSelectedText);
+      return count;
+    }
+    else 
+      return _replaceAllInCurrentDoc(false);
   }
   
   /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.  Starts at
@@ -278,18 +297,22 @@ public class FindReplaceMachine {
     * to change that behavior.  Only executes in event thread.
     * @return the number of replacements
     */
-  private int _replaceAllInCurrentDoc() {
+  private int _replaceAllInCurrentDoc(boolean searchSelectedText) {
     
     assert EventQueue.isDispatchThread();
     
-    if (_isForward) setPosition(0);
-    else setPosition(_doc.getLength());
+    if(!searchSelectedText) {
+      _selectionStart = 0;
+      _selectionEnd = _doc.getLength();
+    }
+    if (_isForward) setPosition(Math.min(_selectionStart, _selectionEnd));
+    else setPosition(Math.max(_selectionStart,_selectionEnd));
     
     int count = 0;
     FindResult fr = findNext(false);  // find next match in current doc   
 //      Utilities.show(fr + " returned by call on findNext()");
     
-    while (! fr.getWrapped()) {
+    while (!fr.getWrapped() && fr.getFoundOffset()<=_selectionEnd) {
       replaceCurrent();
       count++;
 //        Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
@@ -304,7 +327,11 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of processed occurrences
     */
-  public int processAll(Runnable1<FindResult> findAction) { return processAll(findAction, _searchAllDocuments); }
+  public int processAll(Runnable1<FindResult> findAction, int selectionStart, int selectionEnd) { 
+    _selectionStart = selectionStart;
+    _selectionEnd = selectionEnd;
+    return processAll(findAction, _searchAllDocuments, _searchSelectedText); 
+  }
   
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
     * depending the value of the flag searchAll.  Assumes that findAction does not modify the document it processes.
@@ -312,7 +339,7 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
-  private int processAll(Runnable1<FindResult> findAction, boolean searchAll) {
+  private int processAll(Runnable1<FindResult> findAction, boolean searchAll, boolean searchSelectedText) {
     
     assert EventQueue.isDispatchThread();
     
@@ -321,7 +348,7 @@ public class FindReplaceMachine {
       int n = _docIterator.getDocumentCount();
       for (int i = 0; i < n; i++) {
         // process all in the rest of the documents
-        count += _processAllInCurrentDoc(findAction);
+        count += _processAllInCurrentDoc(findAction, false);
         _doc = _docIterator.getNextDocument(_doc);
       }
       
@@ -330,7 +357,12 @@ public class FindReplaceMachine {
       
       return count;
     }
-    else return _processAllInCurrentDoc(findAction);
+    else if(searchSelectedText) {
+      int count = 0;
+      count += _processAllInCurrentDoc(findAction, searchSelectedText);
+      return count;
+    }
+    else return _processAllInCurrentDoc(findAction, false);
   }
   
   /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
@@ -344,15 +376,19 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
-  private int _processAllInCurrentDoc(Runnable1<FindResult> findAction) {
+  private int _processAllInCurrentDoc(Runnable1<FindResult> findAction, boolean searchSelectedText) {
     
-    if (_isForward) setPosition(0);
-    else setPosition(_doc.getLength());
+    if(!searchSelectedText) {
+      _selectionStart = 0;
+      _selectionEnd = _doc.getLength();
+    }
+    if (_isForward) setPosition(Math.min(_selectionStart, _selectionEnd));
+    else setPosition(Math.max(_selectionStart,_selectionEnd));
     
     int count = 0;
     FindResult fr = findNext(false);  // find next match in current doc   
     
-    while (! fr.getWrapped()) {
+    while (! fr.getWrapped() && fr.getFoundOffset()<=_selectionEnd) {
       findAction.run(fr);
       count++;
       fr = findNext(false);           // find next match in current doc
@@ -395,7 +431,7 @@ public class FindReplaceMachine {
 //    System.err.println("findNext(" + searchAll + ") called; initial offset is " + offset);
 //    System.err.println("_doc = [" + _doc.getText() + "], _doc.getLength() = " + _doc.getLength());
     if (_isForward) { 
-      start = offset; 
+      start = offset;
       len = _doc.getLength() - offset; 
     }
     else { 
