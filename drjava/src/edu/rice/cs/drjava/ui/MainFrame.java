@@ -2985,6 +2985,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _showDebugger = _model.getDebugger().isAvailable();
     _findReplace = new FindReplacePanel(this, _model);
     
+    // add listeners to activate/deactivate the find/replace actions in MainFrame together with
+    // those in the Find/Replace panel
+    Utilities.enableDisableWith(_findReplace._findNextAction, _findNextAction);
+    Utilities.enableDisableWith(_findReplace._findPreviousAction, _findPrevAction);
+
     if (_showDebugger) {
       _debugPanel = new DebugPanel(this);
       _breakpointsPanel = new BreakpointsPanel(this, _model.getBreakpointManager());

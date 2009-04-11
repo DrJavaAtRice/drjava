@@ -210,7 +210,6 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
     _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);
     notifyChangeListeners();
-    notifyChangeListeners();
   }
 
   protected void _removeIndex(int i) {

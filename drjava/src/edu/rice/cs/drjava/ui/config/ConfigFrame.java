@@ -755,7 +755,7 @@ public class ConfigFrame extends SwingFrame {
         Action a = ksd.getAction();
         String desc = (String) a.getValue(Action.SHORT_DESCRIPTION);
         if (desc == null || desc.equals("")) desc = ksd.getName();
-        vksoc = new VectorKeyStrokeOptionComponent((VectorOption<KeyStroke>)ksd.getOption(), ksd.getName(), this, desc);
+        vksoc = new VectorKeyStrokeOptionComponent(ksd.getOption(), ksd.getName(), this, desc);
         if (vksoc != null) _comps.add(vksoc);
       }
     }

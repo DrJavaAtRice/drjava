@@ -110,7 +110,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
     return this.getLabelText().compareTo(o.getLabelText());
   }
 
-  Vector<KeyStroke> getKeyStrokes() { return DrJava.getConfig().getSetting(_option); }
+  Vector<KeyStroke> getKeyStrokes() { return new Vector<KeyStroke>(_data); }
   
   /** Adds buttons to _buttonPanel */
   protected void _addButtons() {

@@ -41,6 +41,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.awt.datatransfer.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
@@ -246,5 +248,20 @@ public class Utilities {
     
     popup.setSize(frameRect.getSize());
     popup.setLocation(frameRect.getLocation());
+  }
+  
+  /** Enables/disables the second action whenever the first action is enabled/disabled.
+    * @param observable the action that is observed (leads)
+    * @param observer the action that follows
+    * @return the PropertyChangeListener used to do the observation */
+  public static PropertyChangeListener enableDisableWith(Action observable, final Action observer) {
+    PropertyChangeListener pcl = new PropertyChangeListener() {
+      @SuppressWarnings("unchecked")
+      public void propertyChange(PropertyChangeEvent e) {
+        if (e.getPropertyName().equals("enabled")) { observer.setEnabled((Boolean)e.getNewValue()); }
+      }
+    };
+    observable.addPropertyChangeListener(pcl);
+    return pcl;
   }
 }

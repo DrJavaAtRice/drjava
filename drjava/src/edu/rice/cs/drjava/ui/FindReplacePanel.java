@@ -124,11 +124,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   };
   
   /** The action performed when searching forwards */
-  private Action _findNextAction = new AbstractAction("Find Next") {
+  Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent e) { findNext(); }
   };
   
-  private Action _findPreviousAction =  new AbstractAction("Find Previous") {
+  Action _findPreviousAction =  new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent e) { findPrevious(); }
   };
   
@@ -140,15 +140,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     public void actionPerformed(ActionEvent e) { _doFind(); }
   };
   
-  private Action _replaceAction = new AbstractAction("Replace") {
+  Action _replaceAction = new AbstractAction("Replace") {
     public void actionPerformed(ActionEvent e) { _replace(); }
   };
   
-  private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
+  Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) { _replaceFindNext(); }
   };
   
-  private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
+  Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) { _replaceFindPrevious(); };
   };
   
@@ -350,18 +350,18 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         if(isSelected) {
           _ignoreTestCases.setSelected(false);
           _searchAllDocuments.setSelected(false);
-          _findNextButton.setEnabled(false);
-          _findPreviousButton.setEnabled(false);
-          _replaceFindNextButton.setEnabled(false);
-          _replaceButton.setEnabled(false);
-          _replaceFindPreviousButton.setEnabled(false);
+          _findNextAction.setEnabled(false);
+          _findPreviousAction.setEnabled(false);
+          _replaceFindNextAction.setEnabled(false);
+          _replaceAction.setEnabled(false);
+          _replaceFindPreviousAction.setEnabled(false);
         }
         else {
-          _findNextButton.setEnabled(true);
-          _findPreviousButton.setEnabled(true);
-          _replaceFindNextButton.setEnabled(true);
-          _replaceButton.setEnabled(true);
-          _replaceFindPreviousButton.setEnabled(true);
+          _findNextAction.setEnabled(true);
+          _findPreviousAction.setEnabled(true);
+          _replaceFindNextAction.setEnabled(true);
+          _replaceAction.setEnabled(true);
+          _replaceFindPreviousAction.setEnabled(true);
         }
         DrJava.getConfig().setSetting(OptionConstants.FIND_ONLY_SELECTION, isSelected);
         _findField.requestFocusInWindow();        
@@ -580,7 +580,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Performs "find all" with the specified options. */
   public void findAll(String searchStr, final boolean searchAll, final boolean searchSelectedText, final boolean matchCase,
                       final boolean wholeWord, final boolean noComments, final boolean noTestCases,
-                      final OpenDefinitionsDocument startDoc, final RegionManager<MovingDocumentRegion> rm, MovingDocumentRegion region,
+                      final OpenDefinitionsDocument startDoc, final RegionManager<MovingDocumentRegion> rm, final MovingDocumentRegion region,
                       final FindResultsPanel panel) {
     
     _machine.setSearchBackwards(false);
@@ -623,7 +623,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       /* Accumulate all occurrences of searchStr in results. */
       final int count = _machine.processAll(new Runnable1<FindResult>() {
         public void run(FindResult fr) { results.add(fr); }
-      }, region.getStartOffset(), region.getEndOffset());
+      }, region);
       
       _machine.setDocument(oldDoc);
       _machine.setFirstDoc(oldFirstDoc);
@@ -654,14 +654,24 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       
 //      EventQueue.invokeLater(new Runnable() {
 //        public void run() {
-          if (count > 0) _frame.showFindResultsPanel(panel);
-          else { 
-            Toolkit.getDefaultToolkit().beep();
-            panel.freeResources(); 
-          }
-          _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
+      if (count > 0) _frame.showFindResultsPanel(panel);
+      else { 
+        Toolkit.getDefaultToolkit().beep();
+        panel.freeResources(); 
+      }
+      _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
 //        }
 //      });
+          
+      if (searchSelectedText) {
+        EventQueue.invokeLater(new Runnable() { public void run() { 
+          if (_defPane!=null) {
+            _defPane.requestFocusInWindow();
+            _defPane.setSelectionStart(region.getStartOffset());
+            _defPane.setSelectionEnd(region.getEndOffset());
+          }
+        } });
+      }          
     }
     finally { 
       _frame.hourglassOff(); 
@@ -678,8 +688,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setFindWord(_findField.getText());
     _machine.setReplaceWord(_replaceField.getText());
     _machine.setSearchBackwards(false);
+    OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+    MovingDocumentRegion region = new MovingDocumentRegion(startDoc, 
+                                                           _defPane.getSelectionStart(), 
+                                                           _defPane.getSelectionEnd(), 
+                                                           startDoc._getLineStartPos(_defPane.getSelectionStart()),
+                                                           startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+    _machine.setSelection(region);
     _frame.clearStatusMessage();
-    int count = _machine.replaceAll(_defPane.getSelectionStart(), _defPane.getSelectionEnd());
+    int count = _machine.replaceAll();
     Toolkit.getDefaultToolkit().beep();
     _frame.setStatusMessage("Replaced " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
     _replaceAction.setEnabled(false);

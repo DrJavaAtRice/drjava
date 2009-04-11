@@ -59,8 +59,7 @@ public class FindReplaceMachine {
   private OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
 //  private Position _current;                 // Position of the cursor in _doc when machine is stopped
   private int _current;                 // Position of the cursor in _doc when machine is stopped
-  private int _selectionStart;            //start position of the highlighted selection
-  private int _selectionEnd;              //end position of the highlighted selection
+  private MovingDocumentRegion _selectionRegion; // selected text region
 //  private Position _start;                   // Position in _doc from which searching started or will start.
   private String _findWord;                  // Word to find. */
   private String _replaceWord;               // Word to replace _findword.
@@ -248,13 +247,18 @@ public class FindReplaceMachine {
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
+  /** Set the selected text region.
+    * @param s selected region
+    */
+  public void setSelection(MovingDocumentRegion s) { 
+    _selectionRegion = s;
+  }
+
   /** Replaces all occurrences of the find word with the replace word in the current document of in all documents
     * depending the value of the machine register _searchAllDocuments.
     * @return the number of replacements
     */
-  public int replaceAll(int selectionStart, int selectionEnd) { 
-    _selectionStart = selectionStart; 
-    _selectionEnd = selectionEnd;
+  public int replaceAll() { 
     return replaceAll(_searchAllDocuments, _searchSelectedText); 
   }
   
@@ -302,22 +306,23 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     if(!searchSelectedText) {
-      _selectionStart = 0;
-      _selectionEnd = _doc.getLength();
+      _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
+                                                  _doc._getLineStartPos(0),
+                                                  _doc._getLineEndPos(_doc.getLength()));
     }
-    if (_isForward) setPosition(Math.min(_selectionStart, _selectionEnd));
-    else setPosition(Math.max(_selectionStart,_selectionEnd));
+    if (_isForward) setPosition(_selectionRegion.getStartOffset());
+    else setPosition(_selectionRegion.getEndOffset());
     
     int count = 0;
     FindResult fr = findNext(false);  // find next match in current doc   
-//      Utilities.show(fr + " returned by call on findNext()");
+    //  Utilities.show(fr + " returned by call on findNext()");
     
-    while (!fr.getWrapped() && fr.getFoundOffset()<=_selectionEnd) {
+    while (!fr.getWrapped() && fr.getFoundOffset()<=_selectionRegion.getEndOffset()) {
       replaceCurrent();
       count++;
-//        Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
+      //  Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
       fr = findNext(false);           // find next match in current doc
-//        Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + _doc.getText() + "'");
+      //  Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + _doc.getText().substring(0,fr.getFoundOffset())+"[|]"+_doc.getText().substring(fr.getFoundOffset()) + "'");
     }
     return count;
   }
@@ -327,9 +332,8 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of processed occurrences
     */
-  public int processAll(Runnable1<FindResult> findAction, int selectionStart, int selectionEnd) { 
-    _selectionStart = selectionStart;
-    _selectionEnd = selectionEnd;
+  public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) { 
+    _selectionRegion = region;
     return processAll(findAction, _searchAllDocuments, _searchSelectedText); 
   }
   
@@ -377,18 +381,18 @@ public class FindReplaceMachine {
     * @return the number of replacements
     */
   private int _processAllInCurrentDoc(Runnable1<FindResult> findAction, boolean searchSelectedText) {
-    
     if(!searchSelectedText) {
-      _selectionStart = 0;
-      _selectionEnd = _doc.getLength();
+      _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
+                                                  _doc._getLineStartPos(0),
+                                                  _doc._getLineEndPos(_doc.getLength()));
     }
-    if (_isForward) setPosition(Math.min(_selectionStart, _selectionEnd));
-    else setPosition(Math.max(_selectionStart,_selectionEnd));
+    if (_isForward) setPosition(_selectionRegion.getStartOffset());
+    else setPosition(_selectionRegion.getEndOffset());
     
     int count = 0;
     FindResult fr = findNext(false);  // find next match in current doc   
     
-    while (! fr.getWrapped() && fr.getFoundOffset()<=_selectionEnd) {
+    while (! fr.getWrapped() && fr.getFoundOffset()<=_selectionRegion.getEndOffset()) {
       findAction.run(fr);
       count++;
       fr = findNext(false);           // find next match in current doc
@@ -523,7 +527,6 @@ public class FindReplaceMachine {
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     boolean inTestCase = (doc.getFileName().endsWith("Test.java"));
-    System.out.println("_findNextInDocSegment, inTestCase="+inTestCase+", _ignoreTestCases="+_ignoreTestCases);
     
     if (!_ignoreTestCases || ! inTestCase) {
       final int docLen = doc.getLength();;     // The length of the segment to be searched
