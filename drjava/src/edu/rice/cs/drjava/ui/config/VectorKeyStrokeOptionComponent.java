@@ -92,7 +92,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
       public int getColumnCount() { return 1; }
       public Object getValueAt(int row, int col) {
         switch(col) {
-          case 0: return KeyStrokeOption.formatKeyStroke(_data.get(row));
+          case 0: return KeyStrokeOption.formatKeyStroke((KeyStroke)(_data.get(row)));
         }
         throw new IllegalArgumentException("Illegal column");
       }
@@ -142,6 +142,33 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
     };
   }
   
+  /** Accessor to the current contents of the table.
+    * @return The contents of the list in this component in the form of a Vector.
+    */
+  public Vector<KeyStroke> getValue() {
+    return _data;
+  }
+
+  /** Displays the given value. */
+  public void setValue(Vector<KeyStroke> value) {
+    _data = (Vector<KeyStroke>)value;
+    _tableModel.fireTableDataChanged();
+  }
+
+  /** Displays the given value. */
+  public void setValue(ArrayList<KeyStroke> value) {
+    _data = new Vector<KeyStroke>(value);
+    _tableModel.fireTableDataChanged();
+  }
+  
+  protected void _addValue(KeyStroke value) {
+    _data.add(value);
+    _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
+    _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);
+    notifyChangeListeners();
+    notifyChangeListeners();
+  }
+  
   /** A dialog that allows the user to type in a keystroke to be bound
    * to the action that was clicked. If the user types a keystroke that
    * is bound to another action, the dialog will display that information.
@@ -180,10 +207,12 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
               Vector<KeyStroke> v = conflict.getKeyStrokes();
               v.removeElement(_currentKeyStroke);
               conflict.setValue(v);
+              conflict.resizeTable();
             }
             
             _keyToKSOC.put(_currentKeyStroke, VectorKeyStrokeOptionComponent.this);
             _addValue(_currentKeyStroke);
+            resizeTable();
           }
           _inputField.requestFocusInWindow();
           GetKeyDialog.this.dispose();

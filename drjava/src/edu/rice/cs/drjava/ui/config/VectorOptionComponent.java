@@ -76,6 +76,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     this(opt, text, parent, new String[0]);
   }
   
+  
   /** Builds a new VectorOptionComponent.
     * @param opt the option
     * @param text the label to display
@@ -188,7 +189,9 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _panel.add(_tableScrollPane, BorderLayout.CENTER);
     _panel.add(_buttonPanel, BorderLayout.SOUTH);
 
-    _tableScrollPane.setPreferredSize(new Dimension(0, NUM_ROWS * PIXELS_PER_ROW));
+    int rows = _tableModel.getRowCount();
+    if (rows == 0) rows = 1;
+    _tableScrollPane.setPreferredSize(new Dimension(0,  (rows * PIXELS_PER_ROW) - ((2*rows)-1)));
     if (_columnNames.length==0) {
       _table.setTableHeader(null);
       _tableScrollPane.setColumnHeaderView(null);
@@ -215,6 +218,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected void _removeIndex(int i) {
     _data.remove(i);
     _tableModel.fireTableRowsDeleted(i,i);
+    resizeTable();
   }
 
   /** Adds buttons to _buttonPanel */
@@ -267,6 +271,14 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   public void setValue(ArrayList<T> value) {
     _data = new Vector<T>(value);
     _tableModel.fireTableDataChanged();
+  }
+  
+  /** Resizes the display table */
+  public void resizeTable(){
+    int rows = _tableModel.getRowCount();
+    if (rows == 0) rows = 1;
+    _tableScrollPane.setPreferredSize(new Dimension(0,  (rows * PIXELS_PER_ROW) - ((2*rows)-1)));
+    _parent.validate();
   }
 
   /** Return's this OptionComponent's configurable component. */
