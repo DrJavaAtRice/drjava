@@ -5738,7 +5738,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       Debugger debugger = _model.getDebugger();
       boolean breakpointSet = 
         debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
-      if (breakpointSet) createBookmarks();
+      if (breakpointSet) createBreakpoints();
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
