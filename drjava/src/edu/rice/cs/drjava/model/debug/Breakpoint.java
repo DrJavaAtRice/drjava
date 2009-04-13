@@ -44,5 +44,7 @@ public interface Breakpoint extends DebugBreakpointData, OrderedDocumentRegion {
 
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled);
-  
+
+  /** Update positions and line nubmers from the position that moves with the document. */
+  public void update();
 }

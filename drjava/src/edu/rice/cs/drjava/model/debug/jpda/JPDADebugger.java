@@ -231,9 +231,9 @@ public class JPDADebugger implements Debugger {
       _model.getBreakpointManager().clearRegions();  // oldBreakpoints are removed from the breakpoint manager
       for (int i = 0; i < oldBreakpoints.size(); i++) {
         Breakpoint bp = oldBreakpoints.get(i);
-        int lnr = bp.getLineNumber();
+        bp.update();
         OpenDefinitionsDocument odd = bp.getDocument();
-        setBreakpoint(new JPDABreakpoint(odd, odd._getOffset(lnr), lnr, bp.isEnabled(), this)); 
+        setBreakpoint(new JPDABreakpoint(odd, bp.getLineStartOffset(), bp.isEnabled(), this)); 
       }
     }
     
@@ -483,11 +483,10 @@ public class JPDADebugger implements Debugger {
   /** Toggles whether a breakpoint is set at the given line in the given document.
     * @param doc  Document in which to set or remove the breakpoint
     * @param offset  Start offset on the line to set the breakpoint
-    * @param lineNum  Line on which to set or remove the breakpoint, >=1
     * @param isEnabled  {@code true} if this breakpoint should be enabled
     * @return true if breakpoint is set
     */
-  public boolean toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
+  public boolean toggleBreakpoint(OpenDefinitionsDocument doc, int offset, boolean isEnabled) 
     throws DebugException {
     assert EventQueue.isDispatchThread();
     // ensure that offset is at line start and falls within the document
@@ -503,11 +502,11 @@ public class JPDADebugger implements Debugger {
       }
       else {  // set breakpoint
         try { 
-          setBreakpoint(new JPDABreakpoint(doc, offset, lineNum, isEnabled, this));
+          setBreakpoint(new JPDABreakpoint(doc, offset, isEnabled, this));
           return true;
         }
         catch(LineNotExecutableException lne) { 
-          Utilities.show(lne.getMessage());
+          Utilities.showMessageBox(lne.getMessage(), "Error Toggling Breakpoint");
           return false;
         }
       }
@@ -699,7 +698,14 @@ public class JPDADebugger implements Debugger {
     * @param bp the breakpoint
     */
   public /* synchronized */ void scrollToSource(Breakpoint bp) {
-    openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), false);
+    scrollToSource(bp, false);
+  }
+
+  /** Scrolls to the source of the given breakpoint.
+    * @param bp the breakpoint
+    */
+  public /* synchronized */ void scrollToSource(Breakpoint bp, boolean shouldHighlight) {
+    openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), shouldHighlight);
   }
   
   /** Gets the Breakpoint object at the specified line in the given class.
@@ -1072,6 +1078,7 @@ public class JPDADebugger implements Debugger {
     Object property = request.getProperty("debugAction");
     if (property != null && (property instanceof JPDABreakpoint)) {
       final JPDABreakpoint breakpoint = (JPDABreakpoint) property;
+      breakpoint.update();
       printMessage("Breakpoint hit in class " + breakpoint.getClassName() + "  [line " + breakpoint.getLineNumber() + "]");
       
       EventQueue.invokeLater(new Runnable() { public void run() { _notifier.breakpointReached(breakpoint); } });
@@ -1133,7 +1140,6 @@ public class JPDADebugger implements Debugger {
     if (doc != null) { 
       doc.checkIfClassFileInSync();
       // change UI if in sync in MainFrame listener
-      
       EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadLocationUpdated(doc, line, shouldHighlight); } });
     }
     else printMessage("  (Source for " + className + " not found.)");
@@ -1425,15 +1431,32 @@ public class JPDADebugger implements Debugger {
     }
     catch(DebugException de) { throw new UnexpectedException(de); }
   }
+
+  /** Notifies all listeners that the current thread has been suspended. Synchronization is necessary because it is 
+    * called from unsynchronized listeners and other classes (in same package). 
+    * @param request The BreakPointRequest reached by the debugger
+    */
+  /* synchronized */ void currThreadSuspended(BreakpointRequest request) {
+    assert EventQueue.isDispatchThread();
+    try {
+      _dumpVariablesIntoInterpreterAndSwitch();
+      _switchToSuspendedThread(request);
+    }
+    catch(DebugException de) { throw new UnexpectedException(de); }
+  }
   
   /** Calls the real switchToSuspendedThread, telling it to updateWatches. This is what is usually called. */
-  private void _switchToSuspendedThread() throws DebugException { _switchToSuspendedThread(true); }
+  private void _switchToSuspendedThread() throws DebugException { _switchToSuspendedThread(null, true); }
+
+  /** Calls the real switchToSuspendedThread, telling it to updateWatches. This is what is usually called. */
+  private void _switchToSuspendedThread(BreakpointRequest request) throws DebugException { _switchToSuspendedThread(request, true); }
   
   /** Performs the bookkeeping to switch to the suspened thread on the top of the _suspendedThreads stack.
+    * @param request The BreakPointRequest reached by the debugger, or null if not a breakpoint
     * @param updateWatches  A flag that is false if the current file does not have debug information. This prevents the 
     *                       default interpreter's watch values from being shown.
     */
-  private void _switchToSuspendedThread(boolean updateWatches) throws DebugException {
+  private void _switchToSuspendedThread(BreakpointRequest request, boolean updateWatches) throws DebugException {
     _log.log(this + " executing _switchToSuspendedThread()");
     _runningThread = null;
     if (updateWatches) _updateWatches();
@@ -1443,12 +1466,25 @@ public class JPDADebugger implements Debugger {
     // This makes sure the debug panel will correctly put the
     // current thread in bold.
     _notifier.currThreadSet(new JPDAThreadData(currThread));
-    
-    try {
-      if (currThread.frameCount() > 0) scrollToSource(currThread.frame(0).location());
+
+    boolean usedBreakpointLine = false;
+    if (request!=null) {
+      // we have breakpoint information, use it
+      Object property = request.getProperty("debugAction");
+      if (property != null && (property instanceof JPDABreakpoint)) {
+        final JPDABreakpoint breakpoint = (JPDABreakpoint) property;
+        breakpoint.update();
+        scrollToSource(breakpoint, true);
+        usedBreakpointLine = true;
+      }
     }
-    catch (IncompatibleThreadStateException itse) {
-      throw new UnexpectedException(itse);
+    if (!usedBreakpointLine ) {
+      try {
+        if (currThread.frameCount() > 0) scrollToSource(currThread.frame(0).location());
+      }
+      catch (IncompatibleThreadStateException itse) {
+        throw new UnexpectedException(itse);
+      }
     }
   }
   

@@ -170,7 +170,7 @@ public class EventHandlerThread extends Thread {
         try {
           if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
 //        Utilities.showDebug("EventHandlerThread._handleBreakpointEvent(" + e + ") called");
-            _debugger.currThreadSuspended();
+            _debugger.currThreadSuspended((BreakpointRequest) e.request());
 //        _debugger.scrollToSource(e);
             _debugger.reachedBreakpoint((BreakpointRequest) e.request());
 //      }

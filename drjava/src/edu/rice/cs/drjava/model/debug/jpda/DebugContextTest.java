@@ -73,7 +73,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     path.add(_tempDir);  // directory where doc's file is saved
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),true);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -147,7 +147,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"), 14,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -172,7 +172,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 //    _log.log("adding another breakpoint");
 
     // Set another breakpoint (after is class loaded)
-    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9,true);
+    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(2);
@@ -247,8 +247,8 @@ public final class DebugContextTest extends JPDADebugTestCase {
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3,true);
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"),true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(2);
@@ -347,7 +347,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugStaticField.java", CLASS_WITH_STATIC_FIELD);
 
     // Set a breakpoint
-    _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4,true);
+    _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -438,8 +438,8 @@ public final class DebugContextTest extends JPDADebugTestCase {
     OpenDefinitionsDocument doc = _startupDebugger("Monkey.java", monkey);
 
     // Set a breakpoint
-    _debugger.toggleBreakpoint(doc, monkey.indexOf("innerMethodFoo = 12;"), 10, true);
-    _debugger.toggleBreakpoint(doc, monkey.indexOf("System.out.println(\"localVar = \" + localVar);"), 32, true);
+    _debugger.toggleBreakpoint(doc, monkey.indexOf("innerMethodFoo = 12;"), true);
+    _debugger.toggleBreakpoint(doc, monkey.indexOf("System.out.println(\"localVar = \" + localVar);"), true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(2);
@@ -649,7 +649,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 
     // Set a breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
-    _debugger.toggleBreakpoint(doc, index, 14, true);
+    _debugger.toggleBreakpoint(doc, index, true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -711,7 +711,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 
     // Set a breakpoint
     int index = INNER_CLASS_WITH_LOCAL_VARS.indexOf("numArgs:");
-    _debugger.toggleBreakpoint(doc, index, 7, true);
+    _debugger.toggleBreakpoint(doc, index, true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);

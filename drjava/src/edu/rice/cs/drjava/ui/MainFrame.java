@@ -5737,8 +5737,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     try {
       Debugger debugger = _model.getDebugger();
       boolean breakpointSet = 
-        debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
-      if (breakpointSet) createBreakpoints();
+        debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), true);
+      if (breakpointSet) showBreakpoints();
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
@@ -9348,11 +9348,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _currentDefPane.requestFocusInWindow();
   }
   
-  /** Adds the bookmarks panel to the tabbed pane. */
-  public void createBookmarks() { _createTab(_bookmarksPanel); }
+  /** Adds the bookmarks panel to the tabbed pane and shows it. */
+  public void showBookmarks() { showTab(_bookmarksPanel, true); }
   
-  /** Adds the breakpoints panel to the tabbed pane. */
-  public void createBreakpoints() { _createTab(_breakpointsPanel); }
+  /** Adds the breakpoints panel to the tabbed pane and shows it. */
+  public void showBreakpoints() { showTab(_breakpointsPanel, true); }
   
   private void _createTab(TabbedPanel panel) {
     int numVisible = 0;
@@ -9370,6 +9370,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   public static final Icon FIND_ICON = getIcon("Find16.gif");
+  
   /** Shows the components passed in the appropriate place in the tabbedPane depending on the position of
     * the component in the _tabs list.  Only runs in the event thread.
     * @param c the component to show in the tabbedPane

@@ -1782,7 +1782,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (! modifiedFiles.contains(f)) {
           int lnr = dbd.getLineNumber();
           OpenDefinitionsDocument odd = getDocumentForFile(f);
-          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), lnr, dbd.isEnabled());
+          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), dbd.isEnabled());
         }
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
@@ -3527,7 +3527,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getIntelligentBeginLinePos(currPos);
     }
     
-    /** Gets offset of beginning of given line. */    
+    /** Gets offset of beginning of given 1-based line. */    
     public int _getOffset(int lineNum) { return getDocument()._getOffset(lineNum); }
     
     public String getQualifiedClassName() throws ClassNameNotFoundException {
@@ -3702,13 +3702,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Determines if pos in document is inside a comment or a string. */
     public boolean isShadowed(int pos) { return getDocument().isShadowed(pos); }
     
-    /** Translates an offset into the components text to a line number.
+    /** Translates an offset into the components text to a line 0-based number.
       * @param offset the offset >= 0
       * @return the line number >= 0 
       */
     public int getLineOfOffset(int offset) { return getDefaultRootElement().getElementIndex(offset); }
     
-    /** Translates a line number into an offset.
+    /** Translates a 0-based line number into an offset.
       * @param line number >= 0
       * @return offset >= 0 
       */

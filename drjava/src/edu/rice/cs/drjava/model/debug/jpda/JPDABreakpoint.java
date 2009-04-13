@@ -56,8 +56,6 @@ import edu.rice.cs.plt.object.ObjectUtil;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest.  See the
   * WARNING below about hashing on this type or its subtypes.
-  * TODO: _lineNumber, _startPos, and _endPos should be computed dynamically from _position.  Editing a document 
-  * with breakpoint set can change the proper value for these fields.
   */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
   
@@ -69,7 +67,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   private volatile OpenDefinitionsDocument _doc;
   
   /** @throws DebugException if the document does not have a file */
-  public JPDABreakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean isEnabled, JPDADebugger manager)
+  public JPDABreakpoint(OpenDefinitionsDocument doc, int offset, boolean isEnabled, JPDADebugger manager)
     throws DebugException {
     
     super(manager, doc, offset);
@@ -80,14 +78,8 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     catch(BadLocationException e) { throw new UnexpectedException(e); }
     
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
-    _lineNumber = lineNumber;
     _isEnabled = isEnabled;
-    
-    try {
-      _startPos = doc.createPosition(_doc._getLineStartPos(offset));
-      _endPos = doc.createPosition(_doc._getLineEndPos(offset));
-    }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }
+    update();
     
     if (_manager != null && _manager.isReady()) {
       // the debugger is on, so initialize now
@@ -172,17 +164,18 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   public int getLineEndOffset() { return _endPos.getOffset(); }
   
+  /** Update _startPos, _endPos and _lineNumber from the position that moves with the document. */
   public void update() {
-   try {  // _doc is inherited from DocumentRegion
+    try {  // _doc is inherited from DocumentRegion
       int offset = _position.getOffset();
       _startPos = _doc.createPosition(_doc._getLineStartPos(offset));
       _endPos = _doc.createPosition(_doc._getLineEndPos(offset));
-      _lineNumber = _doc.getLineOfOffset(offset);
+      _lineNumber = _doc.getLineOfOffset(offset)+1; // our line numbers are 1-based
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
   }
   
-  public boolean isEmpty() { return getStartOffset() == getEndOffset(); }
+  public boolean isEmpty() { update(); return getStartOffset() == getEndOffset(); }
     
 //  /** Accessor for this breakpoint's start position
 //    * @return the start position
@@ -200,6 +193,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   public final boolean equals(Object o) {
     if (o == null || ! (o instanceof IDocumentRegion)) return false;
+    update(); 
     IDocumentRegion r = (IDocumentRegion) o;
     return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
   }
@@ -221,6 +215,12 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     int start1 = getStartOffset();
     int start2 = r.getStartOffset();
     return start1 - start2;
+  }
+  
+  /** Returns the line number this DebugAction occurs on */
+  public int getLineNumber() {
+    update();
+    return _lineNumber;
   }
   
   /* WARNING: overriding hashCode to "agree" with equals is disastrous because Breakpoint offsets change!  Hashcode must

@@ -179,9 +179,9 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     
     // Set two breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
-    _debugger.toggleBreakpoint(doc,index, 11, true);
+    _debugger.toggleBreakpoint(doc,index, true);
     index = MONKEY_CLASS.indexOf("System.out.println(\"James likes bananas!\");");
-    _debugger.toggleBreakpoint(doc,index, 17, true);
+    _debugger.toggleBreakpoint(doc,index, true);
     
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
@@ -224,7 +224,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
    SUSPEND_CLASS);
    
    int index = SUSPEND_CLASS.indexOf("int a = 1;");
-   _debugger.toggleBreakpoint(doc,index,5,true);
+   _debugger.toggleBreakpoint(doc,index,true);
    
    // Run the main() method, hitting breakpoints
    synchronized(_notifierLock) {
@@ -271,9 +271,9 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     
     // Set breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
-    _debugger.toggleBreakpoint(doc,index,11,true);
+    _debugger.toggleBreakpoint(doc,index,true);
     index = MONKEY_CLASS.indexOf("System.out.println(\"I just woke up.  I\'m a big boy now.\");");
-    _debugger.toggleBreakpoint(doc,index,16,true);
+    _debugger.toggleBreakpoint(doc,index,true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(2);
@@ -355,7 +355,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
                                                    DEBUG_CLASS);
     
     // Add breakpoint before class is loaded
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -381,7 +381,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     _log.log("adding another breakpoint");
     
     // Set another breakpoint (after is class loaded)
-    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9, true);
+    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(2);
@@ -443,7 +443,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
                                                    DEBUG_CLASS);
     
     // Add breakpoint in DrJavaDebugClass before class is loaded
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),8,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -503,7 +503,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
                                                    DEBUG_CLASS);
     
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -623,7 +623,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
                                                    DEBUG_CLASS);
     
     // Set breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);
@@ -698,7 +698,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     OpenDefinitionsDocument doc = _startupDebugger(file, DEBUG_CLASS_WITH_PACKAGE);
     
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(1);

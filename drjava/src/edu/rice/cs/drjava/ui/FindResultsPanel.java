@@ -289,7 +289,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       int lineEnd = r.getLineEndOffset();
       bm.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd));
     }
-    _frame.createBookmarks();
+    _frame.showBookmarks();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
@@ -334,7 +334,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 //    System.err.println("FindResultsPanel.close() called on " + this);
     _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
     _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
-//    freeResources();
+    _frame.removeCurrentLocationHighlight();
+    freeResources();
     super._close();  // Not redundant.  _close may be called from removeRegion.
   }
   
