@@ -207,12 +207,10 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
               Vector<KeyStroke> v = conflict.getKeyStrokes();
               v.removeElement(_currentKeyStroke);
               conflict.setValue(v);
-              conflict.resizeTable();
             }
             
             _keyToKSOC.put(_currentKeyStroke, VectorKeyStrokeOptionComponent.this);
             _addValue(_currentKeyStroke);
-            resizeTable();
           }
           _inputField.requestFocusInWindow();
           GetKeyDialog.this.dispose();

@@ -112,8 +112,6 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     };
     _table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-    resetToCurrent();
-
     _addButton = new JButton(_getAddAction());
     _removeButton = new JButton(new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
@@ -189,6 +187,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _panel.add(_tableScrollPane, BorderLayout.CENTER);
     _panel.add(_buttonPanel, BorderLayout.SOUTH);
 
+    resetToCurrent();
+
     int rows = _tableModel.getRowCount();
     if (rows == 0) rows = 1;
     _tableScrollPane.setPreferredSize(new Dimension(0,  (rows * PIXELS_PER_ROW) - ((2*rows)-1)));
@@ -213,6 +213,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
     _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);
     notifyChangeListeners();
+    resizeTable();
   }
 
   protected void _removeIndex(int i) {
@@ -265,14 +266,16 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   public void setValue(Vector<T> value) {
     _data = new Vector<T>(value);
     _tableModel.fireTableDataChanged();
+    resizeTable();
   }
 
   /** Displays the given value. */
   public void setValue(ArrayList<T> value) {
     _data = new Vector<T>(value);
     _tableModel.fireTableDataChanged();
+    resizeTable();
   }
-  
+
   /** Resizes the display table */
   public void resizeTable(){
     int rows = _tableModel.getRowCount();
