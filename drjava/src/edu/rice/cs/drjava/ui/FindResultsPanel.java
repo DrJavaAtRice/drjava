@@ -69,7 +69,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 //  protected final RegionManager<MovingDocumentRegion> _regionManager;
   protected final String _searchString;
   protected final boolean _searchAll;
-  protected final boolean _searchSelectedText;
+  protected final boolean _searchSelectionOnly;
   protected final boolean _matchCase;
   protected final boolean _wholeWord;
   protected final boolean _noComments;
@@ -100,7 +100,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, MovingDocumentRegion region, String title, 
-                          String searchString, boolean searchAll, boolean searchSelectedText, boolean matchCase, boolean wholeWord, 
+                          String searchString, boolean searchAll, boolean searchSelectionOnly, boolean matchCase, boolean wholeWord, 
                           boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
                           FindReplacePanel findReplace) {
     super(frame, title, regionManager);
@@ -109,7 +109,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _region = region;
     _searchString = searchString;
     _searchAll    = searchAll;
-    _searchSelectedText = searchSelectedText;
+    _searchSelectionOnly = searchSelectionOnly;
     _matchCase    = matchCase;
     _wholeWord    = wholeWord;
     _noComments   = noComments;
@@ -267,7 +267,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _regTreeModel.nodeStructureChanged(_rootNode);
 //      _requestFocusInWindow();
 //      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
-      _findReplace.findAll(_searchString, _searchAll, _searchSelectedText, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
+      _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
                            _regionManager, _region, this);
       _regTree.scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();

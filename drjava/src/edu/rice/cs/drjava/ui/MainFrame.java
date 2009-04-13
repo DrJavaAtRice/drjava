@@ -2526,12 +2526,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, MovingDocumentRegion region, String title,
-                                                 String searchString, boolean searchAll, boolean searchSelectedText, 
+                                                 String searchString, boolean searchAll, boolean searchSelectionOnly, 
                                                  boolean matchCase, boolean wholeWord, boolean noComments, 
                                                  boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc,
                                                  FindReplacePanel findReplace) {
     
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, searchSelectedText, matchCase,
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, searchSelectionOnly, matchCase,
                                                         wholeWord, noComments, noTestCases, doc, findReplace);
     
     final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =

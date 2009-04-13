@@ -66,7 +66,7 @@ public class FindReplaceMachine {
   private boolean _matchCase;
   private boolean _matchWholeWord;
   private boolean _searchAllDocuments;       // Whether to search all documents (or just the current document)
-  private boolean _searchSelectedText;    // Whether to search only the selection
+  private boolean _searchSelectionOnly;      // Whether to search only the selection
   private boolean _isForward;                // Whether search direction is forward (false means backward)
   private boolean _ignoreCommentsAndStrings; // Whether to ignore matches in comments and strings
   private boolean _ignoreTestCases;          // Whether to ignore documents that end in *Test.java
@@ -92,7 +92,7 @@ public class FindReplaceMachine {
     setSearchBackwards(false);
     setMatchCase(true);
     setSearchAllDocuments(false);
-    setSearchSelectedText(false);
+    setSearchSelectionOnly(false);
     setIgnoreCommentsAndStrings(false);
     setIgnoreTestCases(false);
   }
@@ -136,7 +136,7 @@ public class FindReplaceMachine {
   
   public void setSearchAllDocuments(boolean searchAllDocuments) { _searchAllDocuments = searchAllDocuments; }
   
-  public void setSearchSelectedText(boolean searchSelectedText) { _searchSelectedText = searchSelectedText; }
+  public void setSearchSelectionOnly(boolean searchSelectionOnly) { _searchSelectionOnly = searchSelectionOnly; }
   
   public void setIgnoreCommentsAndStrings(boolean ignoreCommentsAndStrings) {
     _ignoreCommentsAndStrings = ignoreCommentsAndStrings;
@@ -165,7 +165,7 @@ public class FindReplaceMachine {
   
   public boolean getSearchAllDocuments() { return _searchAllDocuments; }
   
-  public boolean getSearchSelectedText() { return _searchSelectedText; }
+  public boolean getSearchSelectionOnly() { return _searchSelectionOnly; }
   
   public OpenDefinitionsDocument getDocument() { return _doc; }
   
@@ -259,14 +259,14 @@ public class FindReplaceMachine {
     * @return the number of replacements
     */
   public int replaceAll() { 
-    return replaceAll(_searchAllDocuments, _searchSelectedText); 
+    return replaceAll(_searchAllDocuments, _searchSelectionOnly); 
   }
   
   /** Replaces all occurences of the find word with the replace word in the current document of in all documents or 
     * in the current selection of the current document depending the value of the flag searchAll
     * @return the number of replacements
     */
-  private int replaceAll(boolean searchAll, boolean searchSelectedText) {
+  private int replaceAll(boolean searchAll, boolean searchSelectionOnly) {
     if (searchAll) {
       int count = 0;           // the number of replacements done so far
       int n = _docIterator.getDocumentCount();
@@ -281,9 +281,9 @@ public class FindReplaceMachine {
       
       return count;
     }
-    else if(searchSelectedText) {
+    else if(searchSelectionOnly) {
       int count = 0;
-      count += _replaceAllInCurrentDoc(searchSelectedText);
+      count += _replaceAllInCurrentDoc(searchSelectionOnly);
       return count;
     }
     else 
@@ -301,11 +301,11 @@ public class FindReplaceMachine {
     * to change that behavior.  Only executes in event thread.
     * @return the number of replacements
     */
-  private int _replaceAllInCurrentDoc(boolean searchSelectedText) {
+  private int _replaceAllInCurrentDoc(boolean searchSelectionOnly) {
     
     assert EventQueue.isDispatchThread();
     
-    if(!searchSelectedText) {
+    if(!searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
                                                   _doc._getLineStartPos(0),
                                                   _doc._getLineEndPos(_doc.getLength()));
@@ -334,7 +334,7 @@ public class FindReplaceMachine {
     */
   public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) { 
     _selectionRegion = region;
-    return processAll(findAction, _searchAllDocuments, _searchSelectedText); 
+    return processAll(findAction, _searchAllDocuments, _searchSelectionOnly); 
   }
   
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
@@ -343,7 +343,7 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
-  private int processAll(Runnable1<FindResult> findAction, boolean searchAll, boolean searchSelectedText) {
+  private int processAll(Runnable1<FindResult> findAction, boolean searchAll, boolean searchSelectionOnly) {
     
     assert EventQueue.isDispatchThread();
     
@@ -361,9 +361,9 @@ public class FindReplaceMachine {
       
       return count;
     }
-    else if(searchSelectedText) {
+    else if(searchSelectionOnly) {
       int count = 0;
-      count += _processAllInCurrentDoc(findAction, searchSelectedText);
+      count += _processAllInCurrentDoc(findAction, searchSelectionOnly);
       return count;
     }
     else return _processAllInCurrentDoc(findAction, false);
@@ -380,8 +380,8 @@ public class FindReplaceMachine {
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
-  private int _processAllInCurrentDoc(Runnable1<FindResult> findAction, boolean searchSelectedText) {
-    if(!searchSelectedText) {
+  private int _processAllInCurrentDoc(Runnable1<FindResult> findAction, boolean searchSelectionOnly) {
+    if(!searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
                                                   _doc._getLineStartPos(0),
                                                   _doc._getLineEndPos(_doc.getLength()));

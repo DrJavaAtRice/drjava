@@ -99,7 +99,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private JCheckBox _searchAllDocuments;
   private JCheckBox _matchWholeWord;
   private JCheckBox _ignoreTestCases;
-  private JCheckBox _searchLimitedSelection;
+  private JCheckBox _searchSelectionOnly;
   
   /* MainFrame _frame is inherited from TabbedPanel */
   
@@ -333,7 +333,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
         if(isSelected)
-          _searchLimitedSelection.setSelected(false);
+          _searchSelectionOnly.setSelected(false);
         _machine.setSearchAllDocuments(isSelected);
         DrJava.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, isSelected);
         _findField.requestFocusInWindow();
@@ -341,12 +341,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     });
     
     boolean searchSelection = DrJava.getConfig().getSetting(OptionConstants.FIND_ONLY_SELECTION);
-    _searchLimitedSelection = new JCheckBox("Search Limited Selection", searchSelection);
-    _machine.setSearchSelectedText(searchSelection);
-    _searchLimitedSelection.addItemListener(new ItemListener() {
+    _searchSelectionOnly = new JCheckBox("Search Selection Only", searchSelection);
+    _machine.setSearchSelectionOnly(searchSelection);
+    _searchSelectionOnly.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
-        _machine.setSearchSelectedText(isSelected);
+        _machine.setSearchSelectionOnly(isSelected);
         if(isSelected) {
           _ignoreTestCases.setSelected(false);
           _searchAllDocuments.setSelected(false);
@@ -401,7 +401,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
         if(isSelected) 
-          _searchLimitedSelection.setSelected(false);
+          _searchSelectionOnly.setSelected(false);
         _machine.setIgnoreTestCases(isSelected);
         DrJava.getConfig().setSetting(OptionConstants.FIND_NO_TEST_CASES, isSelected);
         _findField.requestFocusInWindow();
@@ -432,7 +432,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
     JPanel _ignoreTestCasesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _ignoreTestCasesPanel.add(_ignoreTestCases);
-    _ignoreTestCasesPanel.add(_searchLimitedSelection);
+    _ignoreTestCasesPanel.add(_searchSelectionOnly);
     _ignoreTestCasesPanel.setMaximumSize(new Dimension(200, 40));
     
     BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
@@ -554,7 +554,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     String title = searchStr;
     OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
     boolean searchAll = _machine.getSearchAllDocuments();
-    boolean searchSelectedText = _machine.getSearchSelectedText();
+    boolean searchSelectionOnly = _machine.getSearchSelectionOnly();
 //    StringBuilder tabLabel = new StringBuilder("Find: ");
 //    if (title.length() <= 10) tabLabel.append(title);
 //    else tabLabel.append(title.substring(0,10)).append("...");
@@ -566,11 +566,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                                                            startDoc._getLineStartPos(_defPane.getSelectionStart()),
                                                            startDoc._getLineEndPos(_defPane.getSelectionEnd()));
     final FindResultsPanel panel = 
-      _frame.createFindResultsPanel(rm, region, tabLabel, searchStr, searchAll, searchSelectedText, _machine.getMatchCase(), 
+      _frame.createFindResultsPanel(rm, region, tabLabel, searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), 
                                     _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
                                     _ignoreTestCases.isSelected(), new WeakReference<OpenDefinitionsDocument>(startDoc),
                                     this);
-    findAll(searchStr, searchAll, searchSelectedText, _machine.getMatchCase(), _machine.getMatchWholeWord(),
+    findAll(searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
 //    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
@@ -578,7 +578,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   }
   
   /** Performs "find all" with the specified options. */
-  public void findAll(String searchStr, final boolean searchAll, final boolean searchSelectedText, final boolean matchCase,
+  public void findAll(String searchStr, final boolean searchAll, final boolean searchSelectionOnly, final boolean matchCase,
                       final boolean wholeWord, final boolean noComments, final boolean noTestCases,
                       final OpenDefinitionsDocument startDoc, final RegionManager<MovingDocumentRegion> rm, final MovingDocumentRegion region,
                       final FindResultsPanel panel) {
@@ -593,7 +593,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
     String oldFindWord = _machine.getFindWord();
     boolean oldSearchAll = _machine.getSearchAllDocuments();
-    boolean oldSearchSelectedText = _machine.getSearchSelectedText();
+    boolean oldSearchSelectionOnly = _machine.getSearchSelectionOnly();
     boolean oldMatchCase = _machine.getMatchCase();
     boolean oldWholeWord = _machine.getMatchWholeWord();
     boolean oldNoComments = _machine.getIgnoreCommentsAndStrings();
@@ -604,7 +604,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setDocument(startDoc);
     if (_machine.getFirstDoc() == null) _machine.setFirstDoc(startDoc);
     _machine.setSearchAllDocuments(searchAll);
-    _machine.setSearchSelectedText(searchSelectedText);
+    _machine.setSearchSelectionOnly(searchSelectionOnly);
     _machine.setMatchCase(matchCase);
     if (wholeWord) { _machine.setMatchWholeWord(); }
     else { _machine.setFindAnyOccurrence(); }
@@ -629,7 +629,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _machine.setFirstDoc(oldFirstDoc);
       _machine.setFindWord(oldFindWord);
       _machine.setSearchAllDocuments(oldSearchAll);
-      _machine.setSearchSelectedText(oldSearchSelectedText);
+      _machine.setSearchSelectionOnly(oldSearchSelectionOnly);
       _machine.setMatchCase(oldMatchCase);
       if (oldWholeWord) { _machine.setMatchWholeWord(); }
       else { _machine.setFindAnyOccurrence(); }
@@ -663,7 +663,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //        }
 //      });
           
-      if (searchSelectedText) {
+      if (searchSelectionOnly) {
         EventQueue.invokeLater(new Runnable() { public void run() { 
           if (_defPane!=null) {
             _defPane.requestFocusInWindow();
