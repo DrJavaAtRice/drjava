@@ -483,6 +483,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void addBuildDirectoryClassPath(File f) { _classPathManager.addBuildDirectoryCP(f); }
   public void addProjectFilesClassPath(File f) { _classPathManager.addProjectFilesCP(f); }
   public void addExternalFilesClassPath(File f) { _classPathManager.addExternalFilesCP(f); }
-  public Iterable<File> getClassPath() { return _classPathManager.getClassPath(); }
+  public Iterable<File> getClassPath() {
+    // need to make a serializable snapshot
+    return IterUtil.snapshot(_classPathManager.getClassPath());
+  }
   
 }

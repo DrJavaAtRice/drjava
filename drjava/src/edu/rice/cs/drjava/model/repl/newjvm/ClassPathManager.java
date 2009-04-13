@@ -143,5 +143,6 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   /** Lambda value method */
   public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
   
+  /** Get a dynamic view of the full class path. */
   public synchronized Iterable<File> getClassPath() { return _fullPath; }
 }
