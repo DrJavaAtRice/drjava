@@ -276,19 +276,25 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   
   /** Set the minimum and maximum number of rows to display before using a scrollbar, or 0 for arbitrarily many. */
   public void setRows(int minRows, int maxRows) { _minRows = minRows; _maxRows = maxRows; resizeTable(); }
-  
+
   /** Return the required height of the table. */
   protected int getTableHeight() {
+    int pixelsPerRow = 16;
     int rows = _tableModel.getRowCount();
-    if (rows == 0) rows = 1;
+    if (rows == 0) {
+      rows = 1;
+    }
+    else {
+      pixelsPerRow = _table.getPreferredSize().height/rows;
+    }
     if (_maxRows>0) {
         rows = Math.min(rows, _maxRows);
     }
     if (_minRows>0) {
         rows = Math.max(rows, _minRows);
     }
-    FontMetrics fm = _table.getFontMetrics(_table.getFont());
-    int pixelsPerRow = fm.getHeight() + 1;
+//    FontMetrics fm = _table.getFontMetrics(_table.getFont());
+//    int pixelsPerRow = fm.getHeight() + 1;
     int topBound = _tableScrollPane.getViewportBorderBounds().y;
     return rows * pixelsPerRow + topBound + 2;
   }

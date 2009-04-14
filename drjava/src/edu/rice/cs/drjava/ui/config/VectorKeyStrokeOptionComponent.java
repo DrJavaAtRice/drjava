@@ -142,33 +142,6 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
     };
   }
   
-  /** Accessor to the current contents of the table.
-    * @return The contents of the list in this component in the form of a Vector.
-    */
-  public Vector<KeyStroke> getValue() {
-    return _data;
-  }
-
-  /** Displays the given value. */
-  public void setValue(Vector<KeyStroke> value) {
-    _data = (Vector<KeyStroke>)value;
-    _tableModel.fireTableDataChanged();
-  }
-
-  /** Displays the given value. */
-  public void setValue(ArrayList<KeyStroke> value) {
-    _data = new Vector<KeyStroke>(value);
-    _tableModel.fireTableDataChanged();
-  }
-  
-  protected void _addValue(KeyStroke value) {
-    _data.add(value);
-    _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
-    _table.getSelectionModel().setSelectionInterval(_data.size()-1,_data.size()-1);
-    notifyChangeListeners();
-    notifyChangeListeners();
-  }
-  
   /** A dialog that allows the user to type in a keystroke to be bound
    * to the action that was clicked. If the user types a keystroke that
    * is bound to another action, the dialog will display that information.
