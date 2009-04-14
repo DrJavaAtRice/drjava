@@ -46,12 +46,14 @@ import java.util.Vector;
  */
 public final class VectorOptionTest extends DrJavaTestCase {
   private VectorOption<String> _svo;
+  private VectorOption<Integer> _ivo;
   private VectorOption<Boolean> _bvo;
 
   public void setUp() throws Exception {
     super.setUp();
     // name fields are irrelevant at this point.
     _svo = new VectorOption<String>("whatever", new StringOption("", null), (Vector<String>) null);
+    _ivo = new VectorOption<Integer>("something", new IntegerOption("", null), (Vector<Integer>) null);
     _bvo = new VectorOption<Boolean>("everwhat", new BooleanOption("", null), (Vector<Boolean>) null);
   }
 
@@ -128,7 +130,14 @@ public final class VectorOptionTest extends DrJavaTestCase {
     assertEquals("|", v.get(1));
     assertEquals("22", v.get(2));
 
-    try { _svo.parse("{11,22}"); fail("Illegal header and footer."); } 
+    // parsing this as a vector of strings is okay, because it will treat it
+    // as a singleton vector
+    v = _svo.parse("{11,22}");
+    assertEquals(1, v.size());
+    assertEquals("{11,22}", v.get(0));    
+    
+    // but parsing this as a vector of integers will fail
+    try { _ivo.parse("{11,22}"); fail("Should not have parsed this as singleton list."); } 
     catch (OptionParseException e) { }
 
     Vector<Boolean> bv = _bvo.parse("[true]");

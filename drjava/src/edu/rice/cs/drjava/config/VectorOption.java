@@ -99,6 +99,11 @@ public class VectorOption<T> extends Option<Vector<T>> {
     int startFirstElement = header.length();
     int startFooter = s.length() - footer.length();
 
+    if (!s.startsWith(header) && !s.endsWith(footer)) {
+      // not formatted as a vector, try parsing this as a singleton vector
+      res.add(parser.parse(s));
+      return res;
+    }
     if (startFooter < startFirstElement || !s.startsWith(header) || ! s.endsWith(footer)) {
       throw new OptionParseException(name, s, "Value must start with " + header + " and end " + "with " + footer + 
                                      " to be a valid vector.");
