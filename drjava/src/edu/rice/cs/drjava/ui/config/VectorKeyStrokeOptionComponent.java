@@ -92,7 +92,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
       public int getColumnCount() { return 1; }
       public Object getValueAt(int row, int col) {
         switch(col) {
-          case 0: return KeyStrokeOption.formatKeyStroke((KeyStroke)(_data.get(row)));
+          case 0: return KeyStrokeOption.formatKeyStroke(_data.get(row));
         }
         throw new IllegalArgumentException("Illegal column");
       }
