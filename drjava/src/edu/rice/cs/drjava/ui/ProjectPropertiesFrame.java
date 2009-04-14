@@ -533,6 +533,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
         };
       }
     };
+    _extraClassPathList.setRows(5,5);
     _extraClassPathList.addChangeListener(new OptionComponent.ChangeListener() {
       public Object value(Object oc) {
         _applyButton.setEnabled(true);
@@ -555,6 +556,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
         };
       }
     };
+    _excludedFilesList.setRows(5,5);
     _excludedFilesList.setFileFilter(new JavaSourceFilter());
     _excludedFilesList.addChangeListener(new OptionComponent.ChangeListener() {
       public Object value(Object oc) {

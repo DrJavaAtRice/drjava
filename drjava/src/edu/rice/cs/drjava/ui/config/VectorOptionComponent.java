@@ -61,11 +61,11 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected JButton _moveUpButton;   /* Only used in VectorFileOptionComponent subclass. */
   protected JButton _moveDownButton; /* Only used in VectorFileOptionComponent subclass. */
   protected AbstractTableModel _tableModel;
-  protected static final int NUM_ROWS = 5;
-  protected static final int PIXELS_PER_ROW = 18;
   protected Vector<T> _data;
   protected String[] _columnNames;
   protected String _description;
+  protected int _minRows = 0; // display arbitrarily many
+  protected int _maxRows = 0; // display arbitrarily many
 
   /** Builds a new VectorOptionComponent with hidden column name.
     * @param opt the option
@@ -189,13 +189,11 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
 
     resetToCurrent();
 
-    int rows = _tableModel.getRowCount();
-    if (rows == 0) rows = 1;
-    _tableScrollPane.setPreferredSize(new Dimension(0,  (rows * PIXELS_PER_ROW) - ((2*rows)-1)));
     if (_columnNames.length==0) {
       _table.setTableHeader(null);
       _tableScrollPane.setColumnHeaderView(null);
     }
+    resizeTable();
   }
 
   /** Returns the table model. Can be overridden by subclasses. */
@@ -275,12 +273,29 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _tableModel.fireTableDataChanged();
     resizeTable();
   }
-
-  /** Resizes the display table */
-  public void resizeTable(){
+  
+  /** Set the minimum and maximum number of rows to display before using a scrollbar, or 0 for arbitrarily many. */
+  public void setRows(int minRows, int maxRows) { _minRows = minRows; _maxRows = maxRows; resizeTable(); }
+  
+  /** Return the required height of the table. */
+  protected int getTableHeight() {
     int rows = _tableModel.getRowCount();
     if (rows == 0) rows = 1;
-    _tableScrollPane.setPreferredSize(new Dimension(0,  (rows * PIXELS_PER_ROW) - ((2*rows)-1)));
+    if (_maxRows>0) {
+        rows = Math.min(rows, _maxRows);
+    }
+    if (_minRows>0) {
+        rows = Math.max(rows, _minRows);
+    }
+    FontMetrics fm = _table.getFontMetrics(_table.getFont());
+    int pixelsPerRow = fm.getHeight() + 1;
+    int topBound = _tableScrollPane.getViewportBorderBounds().y;
+    return rows * pixelsPerRow + topBound + 2;
+  }
+  
+  /** Resizes the display table */
+  public void resizeTable() {
+    _tableScrollPane.setPreferredSize(new Dimension(0, getTableHeight()));
     _parent.validate();
   }
 
