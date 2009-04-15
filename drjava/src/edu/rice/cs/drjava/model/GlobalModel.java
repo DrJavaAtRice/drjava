@@ -538,4 +538,10 @@ public interface GlobalModel extends ILoadDocuments {
   
   /* Returns the GlobalEventModifier attached to global model. */
   public GlobalEventNotifier getNotifier();
+  
+  /* Returns the text of the custom manifest supplied for this project. */
+  public String getCustomManifest();
+  
+  /* Sets the text of the custom manifest supplied for this project. */
+  public void setCustomManifest(String manifest);
 }

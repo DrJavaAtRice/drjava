@@ -545,6 +545,14 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call hasUntitliedDocuments on a Dummy!");
   }
   
+  public String getCustomManifest() {
+    throw new UnsupportedOperationException("Tried to call getCustomManifest on a Dummy!");
+  }
+  
+  public void setCustomManifest(String manifest) {
+    throw new UnsupportedOperationException("Tried to call setCustomManifest on a Dummy!");
+  }
+  
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** @return the parsing control */
 //  public LightWeightParsingControl getParsingControl() {

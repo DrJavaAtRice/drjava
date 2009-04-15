@@ -52,6 +52,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.StreamRedirectThread;
+import edu.rice.cs.util.FileOps;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -61,12 +62,15 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
+import java.util.jar.Manifest;
 
 public class JarOptionsDialog extends SwingFrame {
   /** Class to save the frame state, i.e. location. */
@@ -94,23 +98,33 @@ public class JarOptionsDialog extends SwingFrame {
     public Point getLocation() { return _loc; }
   }
   
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("JarOptionsDialog.txt", true);
+  
   /** Bitflags for default selection. */
   public static final int JAR_CLASSES = 1;
   public static final int JAR_SOURCES = 2;
   public static final int MAKE_EXECUTABLE = 4;
+  public static final int JAR_ALL = 8;
+  public static final int CUSTOM_MANIFEST = 16;
   
   /** Determines whether class files should be jar-ed. */
   private JCheckBox _jarClasses; 
   /** Determines whether source files should be jar-ed. */
   private JCheckBox _jarSources;
+  /** Determines whether all files should be jar-ed. */
+  private JCheckBox _jarAll;
   /** Determines whether the jar file should be made executable. */
   private JCheckBox _makeExecutable;
+  /** Determines whether the jar file should include a custom manifest. */
+  private JCheckBox _customManifest;
   /** File selector for the jar output file. */
   private FileSelectorComponent _jarFileSelector;
   /** Text field for the main class. */
   private FileSelectorStringComponent _mainClassField;
   /** Label for main class. */
   private JLabel _mainClassLabel;
+  /** Button for opening edit window in custom manifest. */
+  private JButton _editManifest;
   /** OK button. */
   private JButton _okButton;
   /** Cancel button. */
@@ -127,7 +141,8 @@ public class JarOptionsDialog extends SwingFrame {
   private ProcessingFrame _processingFrame;  
   /** Last frame state. It can be stored and restored. */
   private FrameState _lastState = null;
-  
+  /** Holds the current text of the custom manifest. */
+  private String _customManifestText = "";
   
   /** Returns the last state of the frame, i.e. the location and dimension.
     * @return frame state
@@ -197,7 +212,15 @@ public class JarOptionsDialog extends SwingFrame {
     int f = _model.getCreateJarFlags();
     _jarClasses.setSelected(((f & JAR_CLASSES) != 0));
     _jarSources.setSelected(((f & JAR_SOURCES) != 0));
+    _jarAll.setSelected(((f & JAR_ALL) != 0));
     _makeExecutable.setSelected(((f & MAKE_EXECUTABLE) != 0));
+    _customManifest.setSelected(((f & CUSTOM_MANIFEST) != 0));
+    
+    LOG.log("_customManifestText set off of "+_model);
+    _customManifestText = _model.getCustomManifest();
+    LOG.log("\tto: "+_customManifestText);
+    if(_customManifestText == null)
+      _customManifestText = "";
     
     boolean outOfSync = true;
     if (_model.getBuildDirectory() != null) {
@@ -245,6 +268,7 @@ public class JarOptionsDialog extends SwingFrame {
     
     _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
     _setEnableExecutable(_jarClasses.isSelected());
+    _setEnableCustomManifest(_jarClasses.isSelected());
   }
   
   /** Build the dialog. */
@@ -306,7 +330,7 @@ public class JarOptionsDialog extends SwingFrame {
     // Jar Sources
     _jarSources = new JCheckBox(new AbstractAction("Jar source files") {
       public void actionPerformed(ActionEvent e) {
-        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
+        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected() || _jarAll.isSelected());
       }
     });
     
@@ -316,6 +340,19 @@ public class JarOptionsDialog extends SwingFrame {
     
     gridbag.setConstraints(_jarSources, c);
     panel.add(_jarSources);
+    
+    // Jar All
+    _jarAll = new JCheckBox(new AbstractAction("Jar All files") {
+      public void actionPerformed(ActionEvent e){
+        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected() || _jarAll.isSelected());
+      }
+    });
+    
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    gridbag.setConstraints(_jarAll, c);
+    panel.add(_jarAll);
     
     // Output file
     c.gridx = 0;
@@ -349,7 +386,7 @@ public class JarOptionsDialog extends SwingFrame {
     _jarClasses = new JCheckBox(new AbstractAction("Jar classes") {
       public void actionPerformed(ActionEvent e) {
         _toggleClassOptions();
-        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
+        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected() || _jarAll.isSelected());
       }
     });
     gridBagConstraints = new GridBagConstraints();
@@ -375,6 +412,29 @@ public class JarOptionsDialog extends SwingFrame {
     gridBagConstraints.insets = new Insets(0, 20, 0, 0);
     addclasses.add(_makeMainClassSelectorPanel(), gridBagConstraints);
     
+    //Custom Manifest
+    _editManifest = new JButton(new AbstractAction("Edit Manifest") {
+      public void actionPerformed(ActionEvent e){
+        _editManifest();
+      }
+    });
+    _customManifest = new JCheckBox(new AbstractAction("Custom Manifest") {
+      public void actionPerformed(ActionEvent e){
+        _toggleCustomManifest();
+      }
+    });
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.gridy = 2;
+    addclasses.add(_customManifest, gridBagConstraints);
+    
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(0, 20, 0, 0);
+    addclasses.add(_editManifest, gridBagConstraints);
+    
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -383,6 +443,71 @@ public class JarOptionsDialog extends SwingFrame {
     panel.add(addclasses, gridBagConstraints);
     
     return panel;
+  }
+  
+  /** Open a dialog to allow editing of the manifest file for the jar, returns only when the user has closed the dialog. */
+  private void _editManifest(){
+    final JDialog editDialog = new JDialog(this, "Custom Manifest", true);
+    editDialog.setSize(300,400);
+    
+    JButton okButton = new JButton("OK");
+    JButton cancelButton = new JButton("Cancel");
+    
+    editDialog.setLayout(new BorderLayout());
+    
+    JPanel bottom = new JPanel();
+    bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
+    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    bottom.add(Box.createHorizontalGlue());
+    bottom.add(okButton);
+    bottom.add(cancelButton);
+    bottom.add(Box.createHorizontalGlue());
+    
+    editDialog.add(bottom, BorderLayout.SOUTH);
+    
+    final JTextArea manifest = new JTextArea();
+    JScrollPane pane = new JScrollPane(manifest);
+    pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    
+    pane.getHorizontalScrollBar().setUnitIncrement(10);
+    pane.getVerticalScrollBar().setUnitIncrement(10);
+    
+    editDialog.add(pane, BorderLayout.CENTER);
+    
+    manifest.setText(_customManifestText);
+    okButton.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+        editDialog.setVisible(false);
+      }
+    });
+      
+    cancelButton.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+        manifest.setText(_customManifestText);
+        editDialog.setVisible(false);
+      }
+    });
+    
+    editDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    editDialog.addWindowListener(new WindowAdapter(){
+      public void WindowClosed(WindowEvent e){
+        manifest.setText(_customManifestText);
+        editDialog.setVisible(false);
+      }
+    });
+    
+    
+    editDialog.setLocationRelativeTo(this);
+    editDialog.setVisible(true);
+    
+    _customManifestText = manifest.getText();
+  }
+  
+  /** Toggles the enabled state on _editManifest */
+  private void _toggleCustomManifest(){
+    _editManifest.setEnabled(_customManifest.isSelected() && _jarClasses.isSelected());
+    _setEnableExecutable(!_customManifest.isSelected() && _jarClasses.isSelected());
   }
   
   /** Make the panel that lets you select the jar's main class.
@@ -487,15 +612,24 @@ public class JarOptionsDialog extends SwingFrame {
     _toggleMainClass();
   }
   
+  /** Enables/Disables the custom manifest checkbox */
+  private void _setEnableCustomManifest(boolean b) {
+    _customManifest.setEnabled(b);
+    _toggleCustomManifest();
+  }
+  
   /** Method to run when the jar class file is selected */
   private void _toggleClassOptions() {
     _setEnableExecutable(_jarClasses.isSelected());
+    _setEnableCustomManifest(_jarClasses.isSelected());
   }
   
   /** Method to call when the 'Make Executable' check box is clicked. */
   private void _toggleMainClass() {
     _mainClassField.setEnabled(_makeExecutable.isSelected() && _jarClasses.isSelected());
     _mainClassLabel.setEnabled(_makeExecutable.isSelected() && _jarClasses.isSelected());
+    
+    _customManifest.setEnabled(!_makeExecutable.isSelected() && _jarClasses.isSelected());
   }
   
   /** Method that handels the Cancel button */
@@ -542,6 +676,8 @@ public class JarOptionsDialog extends SwingFrame {
        * @return true on success, false on failure
        */
       private boolean jarBuildDirectory(File dir, JarBuilder jarFile) throws IOException {
+      LOG.log("jarBuildDirectory("+dir+" , "+jarFile+")");
+        
         java.io.FileFilter classFilter = new java.io.FileFilter() {
           public boolean accept(File f) {
             return f.isDirectory() || f.getName().endsWith(".class");
@@ -549,8 +685,13 @@ public class JarOptionsDialog extends SwingFrame {
         };
         
         File[] files = dir.listFiles(classFilter);
+        
+        LOG.log("\tfiles = "+files);
+        
         if (files != null) { // listFiles may return null if there's an IO error
           for (int i = 0; i < files.length; i++) {
+            LOG.log("\t\tfiles["+i+"] = "+files[i]);
+            
             if (files[i].isDirectory()) {
               jarFile.addDirectoryRecursive(files[i], files[i].getName(), classFilter);
             }
@@ -606,18 +747,36 @@ public class JarOptionsDialog extends SwingFrame {
           
           if (_jarClasses.isSelected() && _jarSources.isSelected()) {
             JarBuilder mainJar = null;
-            if (_makeExecutable.isSelected()) {
+            if (_makeExecutable.isSelected() || _customManifest.isSelected()) {
               ManifestWriter mw = new ManifestWriter();
-              mw.setMainClass(_mainClassField.getText());
+              
+              if(_makeExecutable.isSelected())
+                mw.setMainClass(_mainClassField.getText());
+              else
+                mw.setManifestContents(_customManifestText);
+              
               mainJar = new JarBuilder(jarOut, mw.getManifest());
             }
             else {
               mainJar = new JarBuilder(jarOut);
             }
             
-            jarBuildDirectory(_model.getBuildDirectory(), mainJar);
+            //If the project has a set build directory, start there.
+            //Otherwise, start at project root
+            File binRoot = _model.getBuildDirectory();
+            if(binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
+              binRoot = _model.getProjectRoot();
             
-            File sourceJarFile = File.createTempFile(_model.getBuildDirectory().getName(), ".jar");
+            jarBuildDirectory(binRoot, mainJar);
+            
+            //File.createTempFile will fail if the prefix provided is less than 3 characters long.
+            //Not sure why we're using the build directory name here in the first place
+            //But would rather not change it in the general case; just in case.
+            String prefix = _model.getBuildDirectory().getName();
+            if(prefix.length() < 3)
+              prefix = "drjava_tempSourceJar";
+            
+            File sourceJarFile = File.createTempFile(prefix, ".jar");
             JarBuilder sourceJar = new JarBuilder(sourceJarFile);
             jarSources(_model, sourceJar);
             sourceJar.close();
@@ -628,15 +787,31 @@ public class JarOptionsDialog extends SwingFrame {
           }
           else if (_jarClasses.isSelected()) {
             JarBuilder jb;
-            if (_makeExecutable.isSelected()) {
+            if (_makeExecutable.isSelected() || _customManifest.isSelected()) {
               ManifestWriter mw = new ManifestWriter();
-              mw.setMainClass(_mainClassField.getText());
-              jb = new JarBuilder(jarOut, mw.getManifest());
+              if(_makeExecutable.isSelected())
+                mw.setMainClass(_mainClassField.getText());
+              else
+                mw.setManifestContents(_customManifestText);
+              
+              Manifest m = mw.getManifest();
+              
+              if(m != null)
+                jb = new JarBuilder(jarOut, m);
+              else
+                throw new IOException("Manifest is malformed");
             }
             else {
               jb = new JarBuilder(jarOut);
             }
-            jarBuildDirectory(_model.getBuildDirectory(), jb);
+            //If the project has a set build directory, start there.
+            //Otherwise, start at project root
+            File binRoot = _model.getBuildDirectory();
+            if(binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
+              binRoot = _model.getProjectRoot();
+            
+            jarBuildDirectory(binRoot, jb);
+            
             jb.close();
           }
           else {
@@ -648,6 +823,8 @@ public class JarOptionsDialog extends SwingFrame {
         }
         catch (Exception e) {
           e.printStackTrace();
+          
+          LOG.log("construct: "+e, e.getStackTrace());
         }
         return null;
       }
@@ -694,8 +871,21 @@ public class JarOptionsDialog extends SwingFrame {
           }
         }
         else {
-          JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while creating the jar file. This could be because the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.ERROR_MESSAGE);
-          JarOptionsDialog.this.setVisible(false);
+          ManifestWriter mw = new ManifestWriter();
+          if(_makeExecutable.isSelected())
+                mw.setMainClass(_mainClassField.getText());
+              else
+                mw.setManifestContents(_customManifestText);
+              
+          Manifest m = mw.getManifest();
+          
+          if(m != null){
+            JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while creating the jar file. This could be because the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.ERROR_MESSAGE);
+            JarOptionsDialog.this.setVisible(false);
+          }else{
+            JOptionPane.showMessageDialog(JarOptionsDialog.this, "The supplied manifest does not conform to the 1.0 Manifest format specification.", "Error: Malformed Manifest", JOptionPane.ERROR_MESSAGE);
+          }
+          
         }
         _model.refreshActiveDocument();
       }
@@ -713,10 +903,21 @@ public class JarOptionsDialog extends SwingFrame {
     int f = 0;
     if (_jarClasses.isSelected()) f |= JAR_CLASSES;
     if (_jarSources.isSelected()) f |= JAR_SOURCES;
+    if (_jarAll.isSelected()) f |= JAR_ALL;
     if (_makeExecutable.isSelected()) f |= MAKE_EXECUTABLE;
+    if (_customManifest.isSelected()) f |= CUSTOM_MANIFEST;
+    
     if (f!=_model.getCreateJarFlags()) {
       _model.setCreateJarFlags(f);
     }
+    
+    String currentManifest = _model.getCustomManifest();
+    
+    if(currentManifest == null || !(currentManifest.equals(_customManifestText))){
+      LOG.log("Updated Manifest on: "+_model);
+      _model.setCustomManifest(_customManifestText);
+    }
+    
     return true;
   }
   

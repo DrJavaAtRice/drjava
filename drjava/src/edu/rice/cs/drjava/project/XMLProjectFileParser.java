@@ -55,6 +55,8 @@ import edu.rice.cs.util.StringOps;
 
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
+import edu.rice.cs.plt.text.TextUtil;
+
 /** This parser loads XML configuration files using the XMLConfig class in the util package.
  * 
  *  <p> If at some point new information is to be stored in the project file, the following places in the code that need to
@@ -128,6 +130,12 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
         pfir.setCreateJarFlags(flags);
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
+      
+      try{
+        s = _xc.get(".manifest");
+        LOG.log("manifest = '"+s+"'");
+        pfir.setCustomManifest(TextUtil.xmlUnescape(s));
+      }catch(XMLConfigException e) { /* not present is fine */ }
       
       // read build dir
       try {

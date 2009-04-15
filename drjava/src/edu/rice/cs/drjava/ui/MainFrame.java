@@ -114,7 +114,9 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** DrJava's main window. */
-public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {  
+public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
+  private final static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("MainFrame.txt", true);
+  
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
@@ -4605,6 +4607,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private boolean _checkProjectClose() {
+    _log.log("is changed? "+_model.isProjectChanged()+" based on "+_model);
+    
     if (_model.isProjectChanged()) {
       String fname = _model.getProjectFile().getName();
       String text = fname + " has been modified. Would you like to save it?";

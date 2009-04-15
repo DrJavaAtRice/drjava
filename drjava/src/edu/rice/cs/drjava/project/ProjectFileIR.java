@@ -131,4 +131,19 @@ public interface ProjectFileIR {
    * @param version - the version string, should be called with "unknown" if the version could not be determined.
    */
   public void setDrJavaVersion(String version);
+  
+  /**
+   * Accessor for custom manifest in project.
+   * Note that the existance of such a manifest does not mean
+   * that the custom manifest is in USE.
+   * That depends on other JAR creation settings.
+   * 
+   * @see #getCreateJarFlags()
+   */
+  public String getCustomManifest();
+  
+  /**
+   * Mutator for custom manifest.
+   */
+  public void setCustomManifest(String manifest);
 }

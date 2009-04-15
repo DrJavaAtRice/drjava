@@ -133,6 +133,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       if (! root.exists()) throw new IOException("Project root " + root + " no longer exists");
       pfir.setProjectRoot(root);
       _srcFileBase = root.getCanonicalPath();
+    }else if (name.compareToIgnoreCase("proj-manifest") == 0) {
+      List<String> sList = exp.getRest().accept(PathListVisitor.ONLY);
+      if(sList.size() > 1) throw new PrivateProjectException("Cannot have multiple manifests");
+      if(sList.size() > 0)
+        pfir.setCustomManifest(sList.get(0));
     }
     else if (name.compareToIgnoreCase("auxiliary") == 0) {
       List<DocFile> dfList = exp.getRest().accept(flv);

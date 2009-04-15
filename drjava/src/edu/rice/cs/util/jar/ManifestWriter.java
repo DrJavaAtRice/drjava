@@ -49,12 +49,14 @@ import java.io.*;
 public class ManifestWriter {
   private List<String> _classPaths;
   private String _mainClass;
+  private String _rawManifest;
   public static final Manifest DEFAULT = new ManifestWriter().getManifest();
   
   /** Create a new manifest file */
   public ManifestWriter() {
     _classPaths = new LinkedList<String>();
     _mainClass = null;
+    _rawManifest = null;
   }
   
   /** Add a class path to the Manifest
@@ -69,6 +71,12 @@ public class ManifestWriter {
     */
   public void setMainClass(String mainClass) {
     _mainClass = mainClass;
+    _rawManifest = null;
+  }
+  
+  public void setManifestContents(String rawManifest) {
+    _rawManifest =  rawManifest;
+    _mainClass = null;
   }
   
   /** Get an input stream to the contents of the manifest file
@@ -96,6 +104,14 @@ public class ManifestWriter {
       sbuf.append(_mainClass);
       sbuf.append(StringOps.EOL);
     }
+    
+    if(_rawManifest != null) {
+      sbuf.append(_rawManifest); 
+      
+      if(!_rawManifest.endsWith(StringOps.EOL))
+        sbuf.append(StringOps.EOL);
+    }
+    
     try { return new ByteArrayInputStream(sbuf.toString().getBytes("UTF-8")); }
     catch (UnsupportedEncodingException e) { throw new UnexpectedException(e); }
   }

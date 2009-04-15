@@ -58,6 +58,10 @@ import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.util.XMLConfig;
 
+import edu.rice.cs.plt.text.TextUtil;
+
+import edu.rice.cs.util.Log;
+
 import static edu.rice.cs.util.StringOps.*;
 
 /** The internal representation of a project; it is the internal analog of a project file. Includes support for 
@@ -98,6 +102,10 @@ public class ProjectProfile implements ProjectFileIR {
   private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
   private String _version = "unknown";
+  
+  private String _manifest = null;
+  
+  private static Log LOG = new Log("ProjectProfile.txt", true);
   
   /** Constructs a File for fileName and forwards this call to the main constructor. */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
@@ -276,6 +284,15 @@ public class ProjectProfile implements ProjectFileIR {
     path = FileOps.stringMakeRelativeTo(_workDir, _projectFile);
     path = replace(path, File.separator, "/");
     xc.set("drjava/project.work", path);
+    
+    if(_manifest != null) {
+      String cleanManifest = TextUtil.xmlEscape(_manifest);
+      xc.set("drjava/project.manifest", cleanManifest);
+      
+      LOG.log("dirty manifest: "+_manifest);
+      LOG.log("clean manifest: "+cleanManifest);
+    }
+    
     if (_buildDir != null && _buildDir.getPath() != "") {
       path = FileOps.stringMakeRelativeTo(_buildDir, _projectFile);
       path = replace(path, File.separator, "/");
@@ -478,6 +495,13 @@ public class ProjectProfile implements ProjectFileIR {
     fw.write("\n" + encodeFileRelative(_projectRoot, "  ", _projectFile));
     fw.write(")");
 
+    //write the project manifest
+    if(_manifest != null){
+      fw.write("\n(proj-manifest");
+      fw.write("\n"+_manifest);
+      fw.write(")");
+    }
+    
     // write source files
     /* This property has been renamed "source-files" (instead of "source") so that old versions of DrJava will not 
      * recognize it.  In the new project file format, source files are relative to the project root, not the parent
@@ -752,5 +776,15 @@ public class ProjectProfile implements ProjectFileIR {
   
   public void setDrJavaVersion(String version){
     _version = version;
+  }
+  
+  /** Accessor for manifest attribute/ */
+  public String getCustomManifest(){
+    return _manifest;
+  }
+  
+  /** Mutator for manifest attribute. */
+  public void setCustomManifest(String manifest){
+    _manifest = manifest;
   }
 }

@@ -171,4 +171,9 @@ public interface FileGroupingState {
   
   public void setAutoRefreshStatus(boolean b);
   
+  /** Sets the custom manifest on the project */
+  public void setCustomManifest(String manifest);
+  
+  /** Gets the custom manifest on the project */
+  public String getCustomManifest();
 }

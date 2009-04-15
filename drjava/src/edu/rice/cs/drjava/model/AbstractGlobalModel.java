@@ -412,10 +412,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                                 File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh) {
+                                 File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh, String manifest) {
     
     return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags,
-                                        refresh);
+                                        refresh, manifest);
   }
   
   /** @return true if the class path state has been changed. */
@@ -604,16 +604,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile int _createJarFlags;
     volatile boolean _autoRefreshStatus;
     
+    volatile String _manifest = null;
+    
     HashSet<String> _projFilePaths = new HashSet<String>();
     
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
-           IterUtil.<AbsRelFile>empty(), null, 0, false);
+           IterUtil.<AbsRelFile>empty(), null, 0, false, null);
     }
     
     ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                             File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus) {
+                             File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus, String customManifest) {
       _projRoot = pr;
       _mainClass = main;
       _buildDir = bd;
@@ -634,6 +636,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _createJarFile = cjf;
       _createJarFlags = cjflags;
       _autoRefreshStatus = refreshStatus;
+      _manifest = customManifest;
     }
     
     public boolean isProjectActive() { return true; }
@@ -907,6 +910,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _projExtraClassPath = cp; 
       setClassPathChanged(true);
     }
+  
+    // ---- Custom Manifest methods -- ///
+    public String getCustomManifest() { return _manifest; }
+    public void setCustomManifest(String manifest) { _manifest = manifest; }
   }
   
   protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
@@ -970,6 +977,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void cleanBuildDirectory() { }
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
+    
+    public String getCustomManifest(){ return null; }
+    public void setCustomManifest(String manifest) {}
   }
   
   /** Gives the title of the source bin for the navigator.
@@ -1579,6 +1589,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     //add excluded files
     for(File f: _state.getExclFiles()) { builder.addExcludedFile(f); }
     
+    //add custom manifest
+    builder.setCustomManifest(_state.getCustomManifest());
+    
     return builder;
   }
   
@@ -1609,7 +1622,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(), 
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus()));
+                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(), builder.getCustomManifest()));
   }
   
   /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
@@ -1631,7 +1644,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(),
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus()));
+                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(), builder.getCustomManifest()));
   }
   
   public void reloadProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
@@ -1675,6 +1688,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File createJarFile  = ir.getCreateJarFile ();
     int createJarFlags = ir.getCreateJarFlags();
     final boolean autoRefresh = ir.getAutoRefreshStatus();
+    final String manifest = ir.getCustomManifest();
     
     // clear browser, breakpoint, and bookmark histories
 
@@ -1723,7 +1737,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     setFileGroupingState(makeProjectFileGroupingState(projectRoot, mainClass, buildDir, workDir, projectFile, srcFiles,
                                                       auxFiles, excludedFiles, projectClassPaths, createJarFile, 
-                                                      createJarFlags, autoRefresh));
+                                                      createJarFlags, autoRefresh, manifest));
     
     resetInteractions(getWorkingDirectory());  // Reset interactions pane in new working directory
     
@@ -4002,5 +4016,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   /** Ensures that the _jvmStarter thread has executed. Never called in practice outside of GlobalModelTestCase.setUp(). */
   public void ensureJVMStarterFinished() { }
+  
+  public void setCustomManifest(String manifest){ 
+    _state.setProjectChanged(true);
+    _state.setCustomManifest(manifest); 
+  }
+  public String getCustomManifest(){ return _state.getCustomManifest(); }
 }
 
