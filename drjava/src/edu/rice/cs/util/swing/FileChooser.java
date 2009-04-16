@@ -60,16 +60,22 @@ public class FileChooser extends JFileChooser {
   /** Sets up the GUI components of the dialog */
   private void _init(final File root) {
     
-    _root = root; // may be null
-    if (root != null) {
-      if (! root.exists()) _root = null;
-      else if (! root.isDirectory()) _root = root.getParentFile();
-    }
+    setRoot(root);
     
     setFileSelectionMode(FILES_ONLY);
     setDialogType(CUSTOM_DIALOG);
     setApproveButtonText("Select");
   }
+  
+  public void setRoot(File root) {
+    _root = root; // may be null
+    if (root != null) {
+      if (! root.exists()) _root = null;
+      else if (! root.isDirectory()) _root = root.getParentFile();
+    }
+  }
+  
+  public File getRoot() { return _root; }
   
   public boolean isTraversable(File f) {
     if (_root == null) return super.isTraversable(f);

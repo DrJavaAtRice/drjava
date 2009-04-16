@@ -248,6 +248,7 @@ public class JarOptionsDialog extends SwingFrame {
       
       // Main class
       _rootFile = _model.getBuildDirectory();
+      LOG.log("_loadSettings, rootFile="+_rootFile);
       try {
         _rootFile = _rootFile.getCanonicalFile();
       } catch(IOException e) { }
@@ -265,6 +266,7 @@ public class JarOptionsDialog extends SwingFrame {
     }
     
     _jarFileSelector.setFileField(_model.getCreateJarFile());
+    _mainClassField.getFileChooser().setCurrentDirectory(_rootFile);
     
     _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
     _setEnableExecutable(_jarClasses.isSelected());
@@ -514,15 +516,17 @@ public class JarOptionsDialog extends SwingFrame {
     * @return the panel containing the label and the selector for the main class.
     */
   private JPanel _makeMainClassSelectorPanel() {
-    
+    LOG.log("_makeMainClassSelectorPanel, _rootFile="+_rootFile);
     FileChooser chooser = new FileChooser(_rootFile);
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setMultiSelectionEnabled(false);
     chooser.setDialogTitle("Select Main Class");
 //      chooser.setTopMessage("Select the main class for the executable jar file:");
     chooser.setApproveButtonText("Select");
     FileFilter filter = new FileFilter() {
       public boolean accept(File f) {
         String name = f.getName();
-        return  !f.isDirectory() && name.endsWith(".class");
+        return  f.isDirectory() || name.endsWith(".class");
       }
       public String getDescription() { return "Class Files (*.class)"; }
     };
@@ -531,7 +535,18 @@ public class JarOptionsDialog extends SwingFrame {
     _mainClassField = new FileSelectorStringComponent(this, chooser, 20, 12f) {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(JarOptionsDialog.this);
+        if (getText().length()==0) {
+          LOG.log("getFileChooser().setCurrentDirectory(_rootFile);");
+          getFileChooser().setRoot(_rootFile);
+          getFileChooser().setCurrentDirectory(_rootFile);
+        }
         super._chooseFile();
+        if(!getFileChooser().getSelectedFile().getAbsolutePath().startsWith(_rootFile.getAbsolutePath())){
+          JOptionPane.showMessageDialog(JarOptionsDialog.this,
+                                        "Main Class must be in Build Directory or one of its sub-directories.", 
+                                        "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
+          setText("");
+        }
         _mainFrame.installModalWindowAdapter(JarOptionsDialog.this, LambdaUtil.NO_OP, CANCEL);
       }
       public File convertStringToFile(String s) { 
