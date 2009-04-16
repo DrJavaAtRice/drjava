@@ -98,7 +98,7 @@ public class JarOptionsDialog extends SwingFrame {
     public Point getLocation() { return _loc; }
   }
   
-  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("JarOptionsDialog.txt", true);
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("JarOptionsDialog.txt", false);
   
   /** Bitflags for default selection. */
   public static final int JAR_CLASSES = 1;

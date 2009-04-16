@@ -105,7 +105,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private String _manifest = null;
   
-  private static Log LOG = new Log("ProjectProfile.txt", true);
+  private static Log LOG = new Log("ProjectProfile.txt", false);
   
   /** Constructs a File for fileName and forwards this call to the main constructor. */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
