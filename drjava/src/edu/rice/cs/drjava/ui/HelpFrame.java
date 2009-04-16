@@ -50,7 +50,7 @@ import java.net.MalformedURLException;
 public class HelpFrame extends HTMLFrame {
   private static final String HELP_PATH =  "/edu/rice/cs/drjava/docs/user/";
   protected static final String CONTENTS_PAGE = "index.html";
-  protected static final String HOME_PAGE = "intro.html";
+  protected static final String HOME_PAGE = "ch01.html";
   private static final URL INTRO_URL = HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
   protected static final String ICON = "DrJavaHelp.png";
 
