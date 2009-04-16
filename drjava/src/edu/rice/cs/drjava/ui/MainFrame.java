@@ -115,7 +115,7 @@ import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** DrJava's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
-  private final static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("MainFrame.txt", true);
+  private final static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("MainFrame.txt", false);
   
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
