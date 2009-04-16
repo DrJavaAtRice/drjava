@@ -90,7 +90,7 @@ public class ConfigPanel extends JPanel {
     GridBagConstraints c = new GridBagConstraints();
     panel2.setLayout(gridbag);
     c.fill = GridBagConstraints.HORIZONTAL;
-    Insets labelInsets = new Insets(0, 10, 0, 10);
+    Insets labelInsets = new Insets(0, 10, 30, 10);
     Insets compInsets  = new Insets(0, 0, 0, 0);
     for (int i=0; i<_components.size(); i++) {
       OptionComponent<?> comp = _components.get(i);

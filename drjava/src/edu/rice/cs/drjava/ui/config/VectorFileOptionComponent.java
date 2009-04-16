@@ -145,4 +145,6 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
       }
     };
   }
+  
+  protected void _doAction(){}
 }

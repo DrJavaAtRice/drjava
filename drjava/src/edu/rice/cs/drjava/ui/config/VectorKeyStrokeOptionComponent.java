@@ -73,7 +73,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
 
   /** Constructor with flag for move buttons. */
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
-    super(opt, text, parent);  // creates all four buttons
+    super(opt, text, parent, true);  // creates three buttons, no remove
     _moveButtonEnabled = moveButtonEnabled;
     for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
   }
@@ -88,17 +88,26 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   /** Returns the table model. Can be overridden by subclasses. */
   protected AbstractTableModel _makeTableModel() {
     return new AbstractTableModel() {
-      public int getRowCount() { return _data.size(); }
-      public int getColumnCount() { return 1; }
+      public int getRowCount() { return _ksData.size()+1; }
+      public int getColumnCount() {return 2;}
+      public boolean isCellEditable(int row, int col){
+        return true;
+      }
       public Object getValueAt(int row, int col) {
         switch(col) {
-          case 0: return KeyStrokeOption.formatKeyStroke(_data.get(row));
+          case 0:
+            if (row < _ksData.size()) return KeyStrokeOption.formatKeyStroke((KeyStroke)(_ksData.get(row)[0]));
+            else return new JButton("Add");
+          case 1: 
+            if (row < _ksData.size()) return (JButton)(_ksData.get(row)[1]);
+            else return new JLabel();
         }
         throw new IllegalArgumentException("Illegal column");
       }
       public Class getColumnClass(int col) {
         switch(col) {
-          case 0: return String.class;
+          case 0: return JLabel.class;
+          case 1: return JButton.class;
         }
         throw new IllegalArgumentException("Illegal column");
       }
@@ -110,11 +119,17 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
     return this.getLabelText().compareTo(o.getLabelText());
   }
 
-  Vector<KeyStroke> getKeyStrokes() { return new Vector<KeyStroke>(_data); }
+  Vector<KeyStroke> getKeyStrokes() {
+    Vector<KeyStroke> ret = new Vector<KeyStroke>();
+    for (int i = 0; i < _ksData.size(); i++){
+      ret.add((KeyStroke)(_ksData.get(i)[0]));
+    }
+    return ret;
+  }
   
   /** Adds buttons to _buttonPanel */
   protected void _addButtons() {
-    super._addButtons();
+    //_buttonPanel.add(_addButton);
     if (_moveButtonEnabled) {
       _buttonPanel.add(_moveUpButton);
       _buttonPanel.add(_moveDownButton);
@@ -130,7 +145,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   
   /** Also have to remove the keystroke from the map, in addition to what the superclass already does. */
   protected void _removeIndex(int i) {
-    _keyToKSOC.remove(_data.get(i));
+    _keyToKSOC.remove(_ksData.get(i)[0]);
     super._removeIndex(i);
   }
   
@@ -138,8 +153,55 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
     return new AbstractAction("Add") {
       public void actionPerformed(ActionEvent ae) {
         chooseKeyStroke();
+        _tableModel.fireTableDataChanged();
       }
     };
+  }
+  
+  protected void _doAction(){
+    chooseKeyStroke();
+    _tableModel.fireTableDataChanged();
+  }
+  
+  /** Accessor to the current contents of the table.
+    * @return The contents of the list in this component in the form of a Vector.
+    */
+  public Vector<KeyStroke> getValue() {
+    Vector<KeyStroke> ret = new Vector<KeyStroke>();
+    for (int i = 0; i < _ksData.size(); i++){
+      ret.add((KeyStroke)(_ksData.get(i)[0]));
+    }
+    return ret;
+  }
+
+  /** Displays the given value. */
+  public void setValue(Vector<KeyStroke> value) {
+    _ksData = new Vector<Object[]>();
+    for (int i = 0; i < value.size(); i++){
+      Object[] temp = {value.get(i), newRemoveButton()};
+      _ksData.add(temp);
+    }
+    _tableModel.fireTableDataChanged();
+  }
+
+  /** Displays the given value. */
+  public void setValue(ArrayList<KeyStroke> value) {
+    _ksData = new Vector<Object[]>();
+    for (int i = 0; i < value.size(); i++){
+      Object[] temp = {value.get(i), newRemoveButton()};
+      _ksData.add(temp);
+    }
+    _tableModel.fireTableDataChanged();
+  }
+  
+  protected void _addValue(KeyStroke value) {
+    Object[] temp = {value, newRemoveButton()};
+    _ksData.add(temp);
+    _tableModel.fireTableRowsInserted(_ksData.size()-1, _ksData.size()-1);
+    _table.getSelectionModel().setSelectionInterval(_ksData.size()-1,_ksData.size()-1);
+    _tableModel.fireTableDataChanged();
+    notifyChangeListeners();
+    notifyChangeListeners();
   }
   
   /** A dialog that allows the user to type in a keystroke to be bound
@@ -180,10 +242,12 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
               Vector<KeyStroke> v = conflict.getKeyStrokes();
               v.removeElement(_currentKeyStroke);
               conflict.setValue(v);
+              conflict.resizeTable();
             }
             
             _keyToKSOC.put(_currentKeyStroke, VectorKeyStrokeOptionComponent.this);
             _addValue(_currentKeyStroke);
+            resizeTable();
           }
           _inputField.requestFocusInWindow();
           GetKeyDialog.this.dispose();

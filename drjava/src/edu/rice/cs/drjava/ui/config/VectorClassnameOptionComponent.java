@@ -64,4 +64,6 @@ public class VectorClassnameOptionComponent extends VectorOptionComponent<String
       }
     };
   }
+  
+  protected void _doAction(){}
 }

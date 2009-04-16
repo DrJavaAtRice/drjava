@@ -116,4 +116,6 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
       }
     };
   }
+  
+  protected void _doAction(){}
 }
