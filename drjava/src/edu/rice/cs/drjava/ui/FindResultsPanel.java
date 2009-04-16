@@ -117,6 +117,21 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _doc          = doc;
     _findReplace  = findReplace;
     
+    // set "Find Again" button tooltip
+    StringBuilder sb = new StringBuilder();
+    sb.append("<html>Find '").append(title);
+    if (!title.equals(_searchString)) sb.append("...");
+    sb.append("'");
+    if (_searchAll) sb.append(" in all files");
+    else if (_searchSelectionOnly) sb.append(" only in original selection.");
+    sb.append(".");
+    if (_matchCase) sb.append("<br>Case must match.");
+    if (_wholeWord) sb.append("<br>Whole words only.");
+    if (_noComments) sb.append("<br>No comments or strings.");
+    if (_noTestCases) sb.append("<br>No test cases.");
+    sb.append("</html>");
+    _findAgainButton.setToolTipText(sb.toString());
+
     // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
     _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
