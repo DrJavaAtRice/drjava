@@ -195,6 +195,4 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
       }
     };
   }
-  
-  protected void _doAction(){}
 }

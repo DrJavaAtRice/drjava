@@ -62,10 +62,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected JButton _moveDownButton; /* Only used in VectorFileOptionComponent subclass. */
   protected AbstractTableModel _tableModel;
   protected Vector<T> _data;
-  protected Vector<Object[]> _ksData;
   protected String[] _columnNames;
   protected String _description;
-  protected int PIXELS_PER_ROW = 18;
   protected int _minRows = 0; // display arbitrarily many
   protected int _maxRows = 0; // display arbitrarily many
 
@@ -78,113 +76,6 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     this(opt, text, parent, new String[0]);
   }
   
-  /** Builds a new VectorOptionComponent with hidden column name.
-    * @param opt the option
-    * @param text the label to display
-    * @param parent the parent frame
-    */
-  public VectorOptionComponent(VectorOption<T> opt, String text, SwingFrame parent, boolean isKSOC) {
-    super(opt, text, parent);
-    _columnNames = new String[0];
-
-    //set up table
-    _ksData = new Vector<Object[]>();
-    _data = null;
-    
-    _tableModel = _makeTableModel();    
-    _table = new JTable(_tableModel) {
-      {
-        final TableCellRenderer renderer = getTableHeader().getDefaultRenderer();
-        
-        //int w = renderer.getTableCellRendererComponent(this,getModel().getColumnName(0), false, false, 0, 0).getPreferredSize().width;
-        //getColumnModel().getColumn(0).setMinWidth(30);
-        getColumnModel().getColumn(1).setMinWidth(50);
-        getColumnModel().getColumn(1).setMaxWidth(50);
-      }
-      
-      public Component prepareRenderer(final TableCellRenderer renderer,
-                                       final int row, final int column) {
-        final Component prepareRenderer = super.prepareRenderer(renderer, row, column);
-        final TableColumn tableColumn = getColumnModel().getColumn(column);
-        
-        tableColumn.setPreferredWidth(Math.max(prepareRenderer.getPreferredSize().width,tableColumn.getPreferredWidth()));
-        
-        return prepareRenderer;
-      }    
-    };
-    _table.getColumnModel().getColumn(0).setCellRenderer(new AddButtonRenderer());
-    _table.getColumnModel().getColumn(0).setCellEditor( new AddButtonEditor(new JCheckBox()));
-    _table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRenderer());
-    _table.getColumnModel().getColumn(1).setCellEditor( new ButtonEditor(new JCheckBox()));
-    _table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-    resetToCurrent();
-
-    //_addButton = new JButton(_getAddAction());
-    
-    /* Only used in VectorFileOptionComponent subclass */
-    _moveUpButton = new JButton(new AbstractAction("Move Up") {
-      public void actionPerformed(ActionEvent ae) {
-        int[] rows = _table.getSelectedRows();
-        if (rows.length>0) {
-          _table.getSelectionModel().clearSelection();
-          for(int i=0; i<rows.length; ++i) {
-            if (rows[i]>0) {
-              T el = _data.remove(rows[i]);
-              _data.insertElementAt(el, rows[i]-1);
-              _table.getSelectionModel().addSelectionInterval(rows[i]-1,rows[i]-1);
-              _tableModel.fireTableRowsUpdated(rows[i]-1,rows[i]);
-            }
-          }
-          notifyChangeListeners();
-        }
-      }
-    });
-
-    /* Only used in VectorFileOptionComponent subclass */
-    _moveDownButton = new JButton(new AbstractAction("Move Down") {
-      public void actionPerformed(ActionEvent ae) {
-        int[] rows = _table.getSelectedRows();
-        if (rows.length>0) {
-          _table.getSelectionModel().clearSelection();
-          for(int i=0; i<rows.length; ++i) {
-            if (rows[i]<_data.size()-1) {
-              T el = _data.remove(rows[i]);
-              _data.insertElementAt(el, rows[i]+1);
-              _table.getSelectionModel().addSelectionInterval(rows[i]+1,rows[i]+1);
-              _tableModel.fireTableRowsUpdated(rows[i],rows[i]+1);
-            }
-          }
-          notifyChangeListeners();
-        }
-      }
-    });
-    
-    _buttonPanel = new JPanel();
-    _buttonPanel.setBorder(new EmptyBorder(15,15,15,15));
-    _buttonPanel.setLayout(new BoxLayout(_buttonPanel, BoxLayout.X_AXIS));
-    
-    _buttonPanel.add(Box.createHorizontalGlue());
-    JLabel spaceFiller = new JLabel();
-    spaceFiller.setMinimumSize(new Dimension(50,50));
-    _buttonPanel.add(spaceFiller);
-    //_addButtons(); // all buttons needs to be added consecutively as a group for glue to work properly               
-    _buttonPanel.add(Box.createHorizontalGlue());
-
-    _tableScrollPane = new JScrollPane(_table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    _panel = new JPanel(new BorderLayout());
-    _panel.add(_tableScrollPane, BorderLayout.CENTER);
-    _panel.add(_buttonPanel, BorderLayout.SOUTH);
-
-    int rows = _tableModel.getRowCount();
-    if (rows == 0) rows = 1;
-    _tableScrollPane.setPreferredSize(new Dimension(0,  (rows * PIXELS_PER_ROW) - ((2*rows)-1)));
-    if (_columnNames.length==0) {
-      _table.setTableHeader(null);
-      _tableScrollPane.setColumnHeaderView(null);
-    }
-  }
   
   /** Builds a new VectorOptionComponent.
     * @param opt the option
@@ -198,8 +89,6 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
 
     //set up table
     _data = new Vector<T>();
-    _ksData = null;
-
     _tableModel = _makeTableModel();
     _table = new JTable(_tableModel) {
       {
@@ -326,10 +215,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   }
 
   protected void _removeIndex(int i) {
-    if (_data != null)
-      _data.remove(i);
-    else
-      _ksData.remove(i);
+    _data.remove(i);
     _tableModel.fireTableRowsDeleted(i,i);
     resizeTable();
   }
@@ -416,16 +302,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   /** Resizes the display table */
   public void resizeTable() {
     _tableScrollPane.setPreferredSize(new Dimension(0, getTableHeight()));
-    _tableModel.fireTableDataChanged();
     _parent.validate();
-  }
-  
-  /**
-   * Creates a new return button to add to the table
-   */
-  public JButton newRemoveButton(){
-    JButton remove = new JButton("X");
-    return remove;
   }
 
   /** Return's this OptionComponent's configurable component. */
@@ -433,199 +310,4 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
 
   /** Gets an action that adds a component to the set of options. */
   protected abstract Action _getAddAction();
-  
-  protected abstract void _doAction();
-  
-  /**
-   * Button rendering for table cells
-   * taken from http://www.java2s.com/Code/Java/Swing-Components/ButtonTableExample.htm
-   */
-  
-  class ButtonRenderer extends JButton implements TableCellRenderer {
-    
-    public ButtonRenderer() {
-      setOpaque(true);
-    }
-    
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus, int row, int column) {
-      if (row < _ksData.size()){
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(UIManager.getColor("Button.background"));
-        }
-        //setText((value == null) ? "" : value.toString());
-        setText("X");
-        return this;
-      }
-      else{
-        return new JLabel();
-      }
-    }
-  }
-    
-  /**
-   * @version 1.0 11/09/98
-   */
-  
-  class ButtonEditor extends DefaultCellEditor {
-    protected JButton button;
-    
-    private boolean isPushed;
-    
-    public ButtonEditor(JCheckBox checkBox) {
-      super(checkBox);
-      button = new JButton("X");
-      button.setOpaque(true);
-      button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          fireEditingStopped();
-        }
-      });
-    }
-    
-    public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
-      if (row < _ksData.size()){
-        if (isSelected) {
-          button.setForeground(table.getSelectionForeground());
-          button.setBackground(table.getSelectionBackground());
-        } else {
-          button.setForeground(table.getForeground());
-          button.setBackground(table.getBackground());
-        }
-        button.setText("X");
-        isPushed = true;
-        return button;
-      }
-      else{
-        return new JLabel();
-      }
-    }
-    
-    public Object getCellEditorValue() {
-      if (isPushed) {
-        int[] rows = _table.getSelectedRows();
-        if (rows.length>0) {
-          // remove starting from the back so the indices don't have to be adjusted
-          for(int i=rows.length-1; i>=0; --i) {
-            _removeIndex(rows[i]);
-          }
-          int last = rows[rows.length-1];
-          if (last==_ksData.size()) { // we removed the last element
-            if (last>0) { // and there's more than one element in the list
-              _table.getSelectionModel().setSelectionInterval(last-1,last-1);
-            }
-          }
-          else {
-            _table.getSelectionModel().setSelectionInterval(last,last);
-          }
-          notifyChangeListeners();
-        }
-      }
-      isPushed = false;
-      return new String("X");
-    }
-    
-    public boolean stopCellEditing() {
-      isPushed = false;
-      return super.stopCellEditing();
-    }
-    
-    protected void fireEditingStopped() {
-      super.fireEditingStopped();
-    }
-  }
-  
-  /**
-   * Cell rendering for the Add button
-   */
-  class AddButtonRenderer extends JButton implements TableCellRenderer {
-    
-    public AddButtonRenderer() {
-      setOpaque(true);
-    }
-    
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus, int row, int column) {
-      if (row == _ksData.size()){
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(UIManager.getColor("Button.background"));
-        }
-        //setText((value == null) ? "" : value.toString());
-        setText("Add");
-        return this;
-      }
-      else{
-        setOpaque(false);
-        return new JLabel(KeyStrokeOption.formatKeyStroke((KeyStroke)(_ksData.get(row)[0])));
-      }
-    }
-  }
-  
-  /**
-   * @version 1.0 11/09/98
-   */
-  
-  class AddButtonEditor extends DefaultCellEditor {
-    protected JButton button;
-    
-    private boolean isPushed;
-    
-    public AddButtonEditor(JCheckBox checkBox) {
-      super(checkBox);
-      button = new JButton("Add");
-      button.setOpaque(true);
-       button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          fireEditingStopped();
-        }
-      });
-    }
-    
-    public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
-      if (row == _ksData.size()){
-        if (isSelected) {
-          button.setForeground(table.getSelectionForeground());
-          button.setBackground(table.getSelectionBackground());
-        } else {
-          button.setForeground(table.getForeground());
-          button.setBackground(table.getBackground());
-        }
-        button.setText("Add");
-        isPushed = true;
-        return button;
-      }
-      else{
-        button.setOpaque(false);
-        return new JLabel(KeyStrokeOption.formatKeyStroke((KeyStroke)(_ksData.get(row)[0])));
-      }
-    }
-    
-    public Object getCellEditorValue() {
-      if (isPushed) {
-        _doAction();
-      }
-      isPushed = false;
-      return new String("Add");
-    }
-    
-    public boolean stopCellEditing() {
-      isPushed = false;
-      return super.stopCellEditing();
-    }
-    
-    protected void fireEditingStopped() {
-      super.fireEditingStopped();
-    }
-  }
-  
 }
