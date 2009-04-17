@@ -1407,7 +1407,8 @@ public class Student {
       <!-- Key Bindings -->
       <formalpara>
  <title>Key Bindings</title>
- <para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  (We recommend editing these options in the Preferences window.)</para>
+ <para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  Users may bind multiple keys to a single action as long as there are no conflicts and may add or remove key bindings as desired.  (We recommend editing these options in the Preferences window.)</para>
+
       </formalpara>
       
      <!-- Compiler Options -->

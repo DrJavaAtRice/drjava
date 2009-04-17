@@ -837,7 +837,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<section id="keybindings">
 	<title>Key Bindings</title>
 
-	<para>The Key Bindings menu allows you to specify the keyboard shortcuts you use for everything from compiling a document to cutting text to resetting the Interactions Pane.  The only restriction is that the shortcut you choose must be one basic entry--for example, you cannot use Ctrl-X, Ctrl-S to save a file, but you could use Ctrl-Alt-S.  Adding support for a wider range of keyboard shortcuts is a feature request currently under review.</para>
+	<para>The Key Bindings menu allows you to specify the keyboard shortcuts you use for everything from compiling a document to cutting text to resetting the Interactions Pane.  The only restriction is that the shortcut you choose must be one basic entry--for example, you cannot use Ctrl-X, Ctrl-S to save a file, but you could use Ctrl-Alt-S.  However, actions accept multiple key bindings so that a user may bind both Ctrl-X and Ctrl-S to the save file action and use either keystroke combination to save their file.  Adding support for a wider range of keyboard shortcuts is a feature request currently under review.</para>
 
 		<mediaobject>
        		<imageobject>
