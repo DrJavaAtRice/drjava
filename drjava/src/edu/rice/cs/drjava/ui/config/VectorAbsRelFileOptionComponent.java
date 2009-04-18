@@ -45,6 +45,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import java.util.Vector;
+import java.util.List;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -58,11 +59,10 @@ import edu.rice.cs.util.swing.CheckBoxJList;
 public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRelFile> implements OptionConstants {
   private FileFilter _fileFilter;
   private JFileChooser _jfc;
-  protected boolean _moveButtonEnabled = true;
   protected File _baseDir = null;
   
   public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent) {
-    this(opt, text, parent, false);
+    this(opt, text, parent, null);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -71,9 +71,13 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
   }
 
   /** Constructor with flag for move buttons. */
-  public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
-    super(opt, text, parent, new String[] { "File", "Absolute" });  // creates all four buttons
-    _moveButtonEnabled = moveButtonEnabled;
+  public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent,
+                                          String description, boolean moveButtonEnabled) {
+    super(opt, text, parent, new String[] { "File", "Absolute" }, description, moveButtonEnabled);  // creates all four buttons
+
+    // Absolute column
+    _table.getColumnModel().getColumn(1).setMinWidth(80);
+    _table.getColumnModel().getColumn(1).setMaxWidth(80);
     
     // set up JFileChooser
     File workDir = new File(System.getProperty("user.home"));
@@ -87,15 +91,7 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
     
     final TableCellRenderer renderer = _table.getTableHeader().getDefaultRenderer();
     int w = renderer.getTableCellRendererComponent(_table,_table.getModel().getColumnName(1), false, false, 0, 1).getPreferredSize().width;
-    System.out.println("Column "+1+": w="+w);
     _table.getColumnModel().getColumn(1).setPreferredWidth(w);
-  }
-  
-  /** Constructor that allows for a tooltip description. */
-  public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent, String description,
-                                          boolean moveButtonEnabled) {
-    this(opt, text, parent, moveButtonEnabled);
-    setDescription(description);
   }
   
   /** Returns the table model. Can be overridden by subclasses. */
@@ -137,16 +133,6 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
         fireTableCellUpdated(row, col);
       }
     };
-  }
-
-
-  /** Adds buttons to _buttonPanel */
-  protected void _addButtons() {
-    super._addButtons();
-    if (_moveButtonEnabled) {
-      _buttonPanel.add(_moveUpButton);
-      _buttonPanel.add(_moveDownButton);
-    }
   }
 
   /** Set the file filter for this vector option component. */

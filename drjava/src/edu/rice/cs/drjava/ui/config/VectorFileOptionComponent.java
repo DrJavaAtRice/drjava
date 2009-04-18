@@ -43,6 +43,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
 
 import java.util.Vector;
+import java.util.List;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -55,22 +56,21 @@ import edu.rice.cs.util.swing.SwingFrame;
 public class VectorFileOptionComponent extends VectorOptionComponent<File> implements OptionConstants {
   private FileFilter _fileFilter;
   private JFileChooser _jfc;
-  protected boolean _moveButtonEnabled = true;
   protected File _baseDir = null;
   
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent) {
-    this(opt, text, parent, false);
+  public VectorFileOptionComponent(VectorOption<File> opt, String text, SwingFrame parent) {
+    this(opt, text, parent, null);
   }
   
   /** Constructor that allows for a tooltip description. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent, String description) {
+  public VectorFileOptionComponent(VectorOption<File> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
   /** Constructor with flag for move buttons. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
-    super(opt, text, parent);  // creates all four buttons
-    _moveButtonEnabled = moveButtonEnabled;
+  public VectorFileOptionComponent(VectorOption<File> opt, String text, SwingFrame parent,
+                                   String description, boolean moveButtonEnabled) {
+    super(opt, text, parent, new String[] { }, description, moveButtonEnabled);  // creates all four buttons
     
     // set up JFileChooser
     File workDir = new File(System.getProperty("user.home"));
@@ -80,25 +80,9 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     _jfc.setApproveButtonText("Select");
     _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _jfc.setMultiSelectionEnabled(true);
-    _fileFilter = ClassPathFilter.ONLY;
+    _fileFilter = ClassPathFilter.ONLY;    
   }
   
-  /** Constructor that allows for a tooltip description. */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text, SwingFrame parent, String description,
-                                    boolean moveButtonEnabled) {
-    this(opt, text, parent, moveButtonEnabled);
-    setDescription(description);
-  }
-  
-  /** Adds buttons to _buttonPanel */
-  protected void _addButtons() {
-    super._addButtons();
-    if (_moveButtonEnabled) {
-      _buttonPanel.add(_moveUpButton);
-      _buttonPanel.add(_moveDownButton);
-    }
-  }
-
   /** Set the file filter for this vector option component. */
   public void setFileFilter(FileFilter fileFilter) {
     _fileFilter = fileFilter;

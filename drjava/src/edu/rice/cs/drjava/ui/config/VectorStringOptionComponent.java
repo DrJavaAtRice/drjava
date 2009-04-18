@@ -43,6 +43,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
 
 import java.util.Vector;
+import java.util.List;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -51,11 +52,8 @@ import edu.rice.cs.util.swing.SwingFrame;
 /** Graphical form of a VectorOption for the string options. Uses a JOptionPane for each String element.
  */
 public class VectorStringOptionComponent extends VectorOptionComponent<String> implements OptionConstants {
-  protected boolean _moveButtonEnabled = true;
-  protected File _baseDir = null;
-  
   public VectorStringOptionComponent(VectorOption<String> opt, String text, SwingFrame parent) {
-    this(opt, text, parent, false);
+    this(opt, text, parent, null);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -64,25 +62,9 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
   }
 
   /** Constructor with flag for move buttons. */
-  public VectorStringOptionComponent(VectorOption<String> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
-    super(opt, text, parent);  // creates all four buttons
-    _moveButtonEnabled = moveButtonEnabled;    
-  }
-  
-  /** Constructor that allows for a tooltip description. */
-  public VectorStringOptionComponent(VectorOption<String> opt, String text, SwingFrame parent, String description,
-                                     boolean moveButtonEnabled) {
-    this(opt, text, parent, moveButtonEnabled);
-    setDescription(description);
-  }
-  
-  /** Adds buttons to _buttonPanel */
-  protected void _addButtons() {
-    super._addButtons();
-    if (_moveButtonEnabled) {
-      _buttonPanel.add(_moveUpButton);
-      _buttonPanel.add(_moveDownButton);
-    }
+  public VectorStringOptionComponent(VectorOption<String> opt, String text, SwingFrame parent,
+                                     String description, boolean moveButtonEnabled) {
+    super(opt, text, parent, new String[] { }, description, moveButtonEnabled);  // creates all four buttons
   }
 
   /** Shows a JOptionPane for adding a string to the element. */

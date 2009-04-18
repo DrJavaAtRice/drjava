@@ -434,9 +434,9 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, javacLoc);
    
     addOptionComponent(panel, new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH,
-                                                     "Extra Classpath", this,
-                                                     "<html>Any directories or jar files to add to the classpath<br>"+
-                                                     "of the Compiler and Interactions Pane.</html>"));
+                                                            "Extra Classpath", this,
+                                                            "<html>Any directories or jar files to add to the classpath<br>"+
+                                                            "of the Compiler and Interactions Pane.</html>", true));
     addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY,
                                                   "<html><p align=\"right\">" + 
@@ -786,7 +786,7 @@ public class ConfigFrame extends SwingFrame {
     VectorFileOptionComponent sourcePath =
       new VectorFileOptionComponent(OptionConstants.DEBUG_SOURCEPATH, "Sourcepath", this,
                                     "<html>Any directories in which to search for source<br>" +
-                                    "files when stepping in the Debugger.</html>");
+                                    "files when stepping in the Debugger.</html>", true);
     // Source path can only include directories
     sourcePath.setFileFilter(new DirectoryFilter("Source Directories"));
     addOptionComponent(panel, sourcePath);

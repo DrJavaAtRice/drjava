@@ -60,10 +60,8 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   public static final HashMap<KeyStroke, VectorKeyStrokeOptionComponent> _keyToKSOC =
     new HashMap<KeyStroke, VectorKeyStrokeOptionComponent>();
 
-  protected boolean _moveButtonEnabled = true;
-  
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent) {
-    this(opt, text, parent, false);
+    this(opt, text, parent, null);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -72,17 +70,10 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   }
 
   /** Constructor with flag for move buttons. */
-  public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent, boolean moveButtonEnabled) {
-    super(opt, text, parent);  // creates all four buttons
-    _moveButtonEnabled = moveButtonEnabled;
+  public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent,
+                                         String description, boolean moveButtonEnabled) {
+    super(opt, text, parent, new String[] {}, description, moveButtonEnabled);  // creates all four buttons
     for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
-  }
-  
-  /** Constructor that allows for a tooltip description. */
-  public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent, String description,
-                                          boolean moveButtonEnabled) {
-    this(opt, text, parent, moveButtonEnabled);
-    setDescription(description);
   }
   
   /** Returns the table model. Can be overridden by subclasses. */
@@ -111,15 +102,6 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   }
 
   Vector<KeyStroke> getKeyStrokes() { return new Vector<KeyStroke>(_data); }
-  
-  /** Adds buttons to _buttonPanel */
-  protected void _addButtons() {
-    super._addButtons();
-    if (_moveButtonEnabled) {
-      _buttonPanel.add(_moveUpButton);
-      _buttonPanel.add(_moveDownButton);
-    }
-  }
   
   /** Shows a dialog for adding a keystroke to the element. */
   public void chooseKeyStroke() {    

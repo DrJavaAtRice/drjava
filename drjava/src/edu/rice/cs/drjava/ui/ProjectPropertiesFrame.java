@@ -521,7 +521,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   }
 
   public Component _extraClassPathComponent() {
-    _extraClassPathList = new VectorAbsRelFileOptionComponent(null, "Extra Project Classpaths", this) {
+    _extraClassPathList = new VectorAbsRelFileOptionComponent(null, "Extra Project Classpaths", this, null, true) {
       protected Action _getAddAction() {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {
@@ -544,7 +544,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   }
 
   public Component _excludedFilesComponent() {
-    _excludedFilesList = new VectorFileOptionComponent(null, "Files Excluded from Auto-Refresh", this, false) {
+    _excludedFilesList = new VectorFileOptionComponent(null, "Files Excluded from Auto-Refresh", this, null, false) {
       protected Action _getAddAction() {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {
