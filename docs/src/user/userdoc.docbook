@@ -366,7 +366,7 @@ DrJava can also search across more than one line of text (i.e. the search string
    <para>The working directory corresponds to "current" directory of the project, i.e. <command>new File(".")</command> or <command>System.getProperty("user.dir")</command>.</para></formalpara>
   <formalpara>
   <title>Main Document</title>
-  <para>The project facility allows the user to specify a "Main Document" file for your project. When the "Run Project" button is pressed or the "Run Main Document of Project" is then selected in the Project menu, the main method of the "Main Document" file specified will be executed. If no "Main Document" is specified, the "Run Main Document of Project" item will not be available, and the "Run Project" button is replaced by the "Run" button that runs the main method of the current document.</para>
+  <para>The project facility allows the user to specify a "Main Document" file for your project. When the "Run Project" button is pressed or the "Run Main Document of Project" is then selected in the Project menu, the main method of the "Main Document" file specified will be executed. If no "Main Document" is specified, the "Run Main Document of Project" item will not be available, and the "Run Project" button is replaced by the "Run" button that runs the main method of the current document.  The "Main Document" may be specified as a file, using the file selection dialog, or as a fully qualified class name entered directly into the field.  Note that to run inner classes, the name must be entered directly.</para>
   </formalpara>
   <formalpara>
    <title>Extra Classpath</title>
