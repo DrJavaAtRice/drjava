@@ -682,6 +682,29 @@ public class JarOptionsDialog extends SwingFrame {
     SwingWorker worker = new SwingWorker() {
       boolean _success = false;
       
+      private boolean jarAll(File dir, JarBuilder jarFile, final File outputFile) throws IOException {
+        LOG.log("jarOthers("+dir+" , "+jarFile+")");
+        java.io.FileFilter allFilter = new java.io.FileFilter() {
+          public boolean accept(File f) {
+            return !outputFile.equals(f);
+          }
+        };
+        
+        File[] files = dir.listFiles(allFilter);
+        
+        if(files != null) {
+          for(int i = 0; i < files.length; i++){
+            if(files[i].isDirectory()){
+              jarFile.addDirectoryRecursive(files[i], files[i].getName(), allFilter);
+            }else{
+              jarFile.addFile(files[i], "", files[i].getName());
+            }
+          }
+        }
+        
+        return true;
+      }
+      
       /**
        * Takes input of a file which is a directory and compresses all the class files in it
        * into a jar file
@@ -706,6 +729,8 @@ public class JarOptionsDialog extends SwingFrame {
         if (files != null) { // listFiles may return null if there's an IO error
           for (int i = 0; i < files.length; i++) {
             LOG.log("\t\tfiles["+i+"] = "+files[i]);
+            
+            if(files[i] == null || !files[i].exists()) continue;
             
             if (files[i].isDirectory()) {
               jarFile.addDirectoryRecursive(files[i], files[i].getName(), classFilter);
@@ -759,8 +784,8 @@ public class JarOptionsDialog extends SwingFrame {
         try {
           File jarOut = _jarFileSelector.getFileFromField();
           if (! jarOut.exists()) jarOut.createNewFile();  // TODO: what if createNewFile() fails? (mgricken)
-          
-          if (_jarClasses.isSelected() && _jarSources.isSelected()) {
+
+          if ((_jarClasses.isSelected() && _jarSources.isSelected()) || _jarAll.isSelected()) {
             JarBuilder mainJar = null;
             if (_makeExecutable.isSelected() || _customManifest.isSelected()) {
               ManifestWriter mw = new ManifestWriter();
@@ -782,7 +807,8 @@ public class JarOptionsDialog extends SwingFrame {
             if(binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
               binRoot = _model.getProjectRoot();
             
-            jarBuildDirectory(binRoot, mainJar);
+            if(!_jarAll.isSelected())
+              jarBuildDirectory(binRoot, mainJar);
             
             //File.createTempFile will fail if the prefix provided is less than 3 characters long.
             //Not sure why we're using the build directory name here in the first place
@@ -792,10 +818,19 @@ public class JarOptionsDialog extends SwingFrame {
               prefix = "drjava_tempSourceJar";
             
             File sourceJarFile = File.createTempFile(prefix, ".jar");
-            JarBuilder sourceJar = new JarBuilder(sourceJarFile);
-            jarSources(_model, sourceJar);
-            sourceJar.close();
-            mainJar.addFile(sourceJarFile, "", "source.jar");
+            
+            if(!_jarAll.isSelected()){
+              JarBuilder sourceJar = new JarBuilder(sourceJarFile);
+              jarSources(_model, sourceJar);
+              sourceJar.close();
+              mainJar.addFile(sourceJarFile, "", "source.jar");
+            }
+            
+            if(_jarAll.isSelected()){
+              jarAll(_model.getProjectRoot(), mainJar, jarOut);
+              if(!(binRoot.equals(_model.getProjectRoot())))
+                jarBuildDirectory(binRoot, mainJar);
+            }
             
             mainJar.close();
             sourceJarFile.delete();  // TODO: what if delete() fails? (mgricken)
