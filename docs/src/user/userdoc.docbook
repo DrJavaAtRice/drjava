@@ -316,7 +316,7 @@ DrJava can also search across more than one line of text (i.e. the search string
      <formalpara>
       <title>Create Jar File from Project</title>
       <para>You can create a jar file that contains the project's source code, its compiled class files, or both by selecting "Create Jar File from Project" in the Project menu. This will display a dialog that allows you to specify the jar file's location and what gets put into it. If you are placing class files into the jar file, you can make the jar file executable by selecting "Make executable" and entering the main class.  For more control over the properties of the jar, you may enter a custom manifest by selecting "Custom Manifest" and pressing the "Edit Manifest" button.  You may opt to include all source files in the jar, embeded in a seperate jar, or include all files in the project directory by selecting "Jar source files" or "Jar All files" respectively.</para></formalpara>
-      <para>Note that if you have not specified a build directory in the <link linkend="project-properties">Project Properties</link> all classes found in the same directory contaning the project file will included if you place class files in the jar. For class files to be included successfully you must and have recently compiled the project.</para>
+      <para>Note that if you have not specified a build directory in the <link linkend="project-properties">Project Properties</link> all classes found in the same directory contaning the project file will included if you place class files in the jar. For class files to be included successfully you must have recently compiled the project.</para>
     </section>
     <section id="tree-view">
      <title>Tree View</title>
