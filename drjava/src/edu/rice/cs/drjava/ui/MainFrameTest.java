@@ -82,7 +82,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   protected volatile boolean _compileDone;
   protected final Object _compileLock = new Object();
   
-  private final static Log _log = new Log("MainFrameTest.txt", true);
+  private final static Log _log = new Log("MainFrameTest.txt", false);
   
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
