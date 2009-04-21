@@ -37,9 +37,11 @@ package edu.rice.cs.plt.swing;
 import java.io.File;
 import java.io.Reader;
 // import java.io.FileFilter;  not imported to avoid ambiguity
+import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 
+import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -51,6 +53,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 // import javax.swing.filechooser.FileFilter;  not imported to avoid ambiguity
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -60,6 +64,8 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Predicate;
+import edu.rice.cs.plt.reflect.ReflectException;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.io.FilePredicate;
 
@@ -540,6 +546,62 @@ public class SwingUtil {
     invokeAndWait(new Runnable() { public void run() {
       TextAreaMessageDialog.showDialog(null, title, msg); 
     } } );
+  }
+  
+  /**
+   * Load the given applet class from the sources at URL {@code classPath} and display it in a window
+   * with title {@code "Applet Viewer"}.
+   */ 
+  public static void showApplet(URL classPath, String className, int width, int height) throws ReflectException {
+    showApplet("Applet Viewer", classPath, className, width, height, Collections.<String, String>emptyMap());
+  }
+  
+  /**
+   * Load the given applet class from the sources at URL {@code classPath} and display it in a window
+   * with the given title.
+   */ 
+  public static void showApplet(String title, URL classPath, String className, int width, int height)
+      throws ReflectException {
+    showApplet(title, classPath, className, width, height, Collections.<String, String>emptyMap());
+  }
+  
+  /**
+   * Load the given applet class from the sources at URL {@code classPath} and display it in a window
+   * with the given title.
+   */ 
+  public static void showApplet(String title, URL classPath, String className, int width, int height,
+                                Map<String, String> params) throws ReflectException {
+    Applet a = (Applet) ReflectUtil.loadObject(new URLClassLoader(new URL[]{ classPath }), className);
+    showApplet(title, a, width, height, classPath, params);
+  }
+  
+  /** Display the given applet in a window with title {@code "Applet Viewer"}. */
+  public static void showApplet(Applet applet, int width, int height) {
+    showApplet("Applet Viewer", applet, width, height, null, Collections.<String, String>emptyMap());
+  }
+
+  /** Display the given applet in a window with the given title. */
+  public static void showApplet(String title, Applet applet, int width, int height) {
+    showApplet(title, applet, width, height, null, Collections.<String, String>emptyMap());
+  }
+  
+  /**
+   * Display the given applet in a window with the given title; if it is not {@code null}, sources
+   * are assumed to be rooted at the given URL.
+   */
+  public static void showApplet(String title, Applet applet, int width, int height, URL root) {
+    showApplet(title, applet, width, height, root);
+  }
+  
+  /**
+   * Display the given applet in a window with the given title; if it is not {@code null}, sources
+   * are assumed to be rooted at the given URL.
+   */
+  public static void showApplet(String title, Applet applet, int width, int height, URL root,
+                                Map<String, String> params) {
+    JFrame frame = makeDisposableFrame(title, width, height);
+    frame.add(new AppletComponent(applet, width, height, root, params));
+    displayWindow(frame);
   }
   
   /** @return a string with the current clipboard selection, or null if not available. */
