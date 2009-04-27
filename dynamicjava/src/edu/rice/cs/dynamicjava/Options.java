@@ -5,11 +5,13 @@ import edu.rice.cs.dynamicjava.symbol.ExtendedTypeSystem;
 
 public class Options {
   
-  public static final Options DEFAULT = new Options();
+  public static final Options DEFAULT = new Options(ExtendedTypeSystem.INSTANCE);
   
-  public Options() {}
+  private final TypeSystem _ts;
+  
+  public Options(TypeSystem ts) { _ts = ts; }
   
   public boolean semicolonIsOptional() { return true; }
-  public TypeSystem typeSystem() { return ExtendedTypeSystem.INSTANCE; }
+  public TypeSystem typeSystem() { return _ts; }
   
 }

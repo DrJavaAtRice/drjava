@@ -489,6 +489,11 @@ public abstract class StandardTypeSystem extends TypeSystem {
       _values = values;
     }
     
+    public SubstitutionMap(Map<? extends VariableType, ? extends Type> map) {
+      // make a copy to prevent mutation
+      _sigma = new HashMap<VariableType, Type>(map);
+    }
+    
     public boolean isEmpty() {
       if (_sigma == null) { return IterUtil.isEmpty(_vars); }
       else { return _sigma.isEmpty(); }
@@ -499,6 +504,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       return _sigma.get(v);
     }
     
+    // Initialize the map lazily, because in same cases it may not be used at all.
     private void initSigma() {
       _sigma = new HashMap<VariableType, Type>();
       for (Pair<VariableType, Type> pair : IterUtil.zip(_vars, _values)) {
@@ -515,6 +521,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   protected Type substitute(Type t, Iterable<? extends VariableType> params, Iterable<? extends Type> args) {
     return substitute(t, new SubstitutionMap(params, args));
+  }
+  
+  protected Type substitute(Type t, Map<? extends VariableType, ? extends Type> map) {
+    return substitute(t, new SubstitutionMap(map));
   }
   
   protected Type substitute(Type t, final SubstitutionMap sigma) {

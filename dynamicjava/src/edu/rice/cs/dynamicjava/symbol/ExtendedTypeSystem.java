@@ -54,13 +54,19 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       }
       return false;
     }
-    @Override public Boolean forVariableType(VariableType t) {
-      Type lower = t.symbol().lowerBound();
-      Type upper = t.symbol().upperBound();
-      return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper);
-    }
     @Override public Boolean forBoundType(BoundType t) {
       return IterUtil.and(t.ofTypes(), WELL_FORMED);
+    }
+    @Override public Boolean forVariableType(VariableType t) {
+      return checkBoundedSymbol(t.symbol());
+    }
+    @Override public Boolean forWildcard(Wildcard w) {
+      return checkBoundedSymbol(w.symbol());
+    }
+    private boolean checkBoundedSymbol(BoundedSymbol s) {
+      Type lower = s.lowerBound();
+      Type upper = s.upperBound();
+      return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper);
     }
   });
   
@@ -68,7 +74,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   public boolean isEqual(Type t1, Type t2) {
     if (t1.equals(t2)) { return true; }
     else {
-      NormSubtype sub = new NormSubtype();
+      NormSubtyper sub = new NormSubtyper();
       Type t1Norm = NORMALIZE.value(t1);
       Type t2Norm = NORMALIZE.value(t2);
       return sub.contains(t1Norm, t2Norm) && sub.contains(t2Norm, t1Norm);
@@ -80,15 +86,14 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
    * (in terms of {@link #isEqual}), transitive relation.
    */
   public boolean isSubtype(Type subT, Type superT) {
-    return new NormSubtype().contains(NORMALIZE.value(subT), NORMALIZE.value(superT));
+    return new NormSubtyper().contains(NORMALIZE.value(subT), NORMALIZE.value(superT));
   }
   
   /**
    * Tests subtyping for normalized types.  Due to its use of internal state, unrelated (and possibly parallel)
    * invocations should use distinct instances.
    */
-  private class NormSubtype implements Order<Type>, Lambda2<Type, Type, Boolean> {
-    // to avoid conflicts, no indirectly-recursive calls should be made that assume an empty stack (like join)
+  private class NormSubtyper implements Order<Type>, Lambda2<Type, Type, Boolean> {
     RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>();
     
     public Boolean value(Type subT, Type superT) { return contains(subT, superT); }
@@ -112,11 +117,11 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
               Thunk<Boolean> checkLowerBound = new Thunk<Boolean>() {
                 public Boolean value() {
                   Type bound = NORMALIZE.value(superT.symbol().lowerBound());
-                  return NormSubtype.this.contains(subT, bound);
+                  return NormSubtyper.this.contains(subT, bound);
                 }
               };
               Thunk<Boolean> checkInfinite = new Thunk<Boolean>() {
-                public Boolean value() { return NormSubtype.this.contains(subT, NULL); }
+                public Boolean value() { return NormSubtyper.this.contains(subT, NULL); }
               };
               return _stack.apply(checkLowerBound, checkInfinite, subT, superT);
             }
@@ -218,11 +223,11 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
                 // types may be inequal if one is vararg and the other is not
                 return subT.ofType().equals(superT.ofType());
               }
-              else { return NormSubtype.this.contains(subT.ofType(), superT.ofType()); }
+              else { return NormSubtyper.this.contains(subT.ofType(), superT.ofType()); }
             }
             
             @Override public Boolean forClassType(ClassType superT) { 
-              return NormSubtype.this.contains(CLONEABLE_AND_SERIALIZABLE, superT);
+              return NormSubtyper.this.contains(CLONEABLE_AND_SERIALIZABLE, superT);
             }
             
           });
@@ -235,7 +240,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
               Type newSub = immediateSupertype(subT);
               if (newSub == null) { return false; }
               // immediateSupertype() always returns a normalized type
-              else { return NormSubtype.this.contains(newSub, superT); }
+              else { return NormSubtyper.this.contains(newSub, superT); }
             }
           });
         }
@@ -256,13 +261,13 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
                       result &= args.second().apply(new TypeAbstractVisitor<Boolean>() {
                         public Boolean defaultCase(Type superArg) {
                           Type subArg = args.first();
-                          return NormSubtype.this.contains(subArg, superArg) &&
-                                 NormSubtype.this.contains(superArg, subArg);
+                          return NormSubtyper.this.contains(subArg, superArg) &&
+                                 NormSubtyper.this.contains(superArg, subArg);
                         }
                         @Override public Boolean forWildcard(Wildcard superArg) {
                           Type subArg = args.first();
-                          return NormSubtype.this.contains(superArg.symbol().lowerBound(), subArg) &&
-                                 NormSubtype.this.contains(subArg, superArg.symbol().upperBound());
+                          return NormSubtyper.this.contains(superArg.symbol().lowerBound(), subArg) &&
+                                 NormSubtyper.this.contains(subArg, superArg.symbol().upperBound());
                         }
                       });
                       if (!result) { break; }
@@ -281,7 +286,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
               if (newSub == null) { return false; }
               else {
                 // results of immediateSupertype() and erase() are always normalized
-                return NormSubtype.this.contains(newSub, superT) || NormSubtype.this.contains(erase(subT), superT);
+                return NormSubtyper.this.contains(newSub, superT) || NormSubtyper.this.contains(erase(subT), superT);
               }
             }
             
@@ -292,11 +297,11 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           Thunk<Boolean> checkUpperBound = new Thunk<Boolean>() {
             public Boolean value() {
               Type bound = NORMALIZE.value(subT.symbol().upperBound());
-              return NormSubtype.this.contains(bound, superT);
+              return NormSubtyper.this.contains(bound, superT);
             }
           };
           Thunk<Boolean> checkInfinite = new Thunk<Boolean>() {
-            public Boolean value() { return NormSubtype.this.contains(OBJECT, superT); }
+            public Boolean value() { return NormSubtyper.this.contains(OBJECT, superT); }
           };
           return _stack.apply(checkUpperBound, checkInfinite, subT, superT);
         }
@@ -348,7 +353,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** Produce the normalized union of normalized types (may return a union or some other form). */
   private final Lambda<Iterable<? extends Type>, Type> JOIN_NORM = new Lambda<Iterable<? extends Type>, Type>() {
     public Type value(Iterable<? extends Type> elements) {
-      List<Type> disjuncts = maxList(collapse(map(elements, DISJUNCTS)), new NormSubtype());
+      List<Type> disjuncts = maxList(collapse(map(elements, DISJUNCTS)), new NormSubtyper());
       switch (disjuncts.size()) {
         case 0: return BOTTOM;
         case 1: return disjuncts.get(0);
@@ -375,7 +380,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           }
         });
        // each element of conjuncts is atomic or a union of atomics
-        List<Type> conjuncts = minList(collapse(posElements), new NormSubtype());
+        List<Type> conjuncts = minList(collapse(posElements), new NormSubtyper());
         // convert back to sum-of-products
         // javac 1.5/1.6 requires explicit type args
         return IterUtil.<Iterable<Type>, Type, Type, Type, Type>
@@ -388,7 +393,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** Produce the normalized intersection of atomic (not union or intersection) types. */ 
   private final Lambda<Iterable<? extends Type>, Type> MEET_ATOMIC = new Lambda<Iterable<? extends Type>, Type>() {
     public Type value(Iterable<? extends Type> atoms) {
-      List<Type> conjuncts = minList(atoms, new NormSubtype());
+      List<Type> conjuncts = minList(atoms, new NormSubtyper());
       switch (conjuncts.size()) {
         case 0: return TOP;
         case 1: return conjuncts.get(0);
@@ -540,7 +545,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     /** Test whether all variables have compatible bounds. */
     protected boolean isWellFormed() {
-      NormSubtype sub = new NormSubtype();
+      NormSubtyper sub = new NormSubtyper();
       for (VariableType var : intersection(_lowerBounds.keySet(), _upperBounds.keySet())) {
         if (!sub.contains(lowerBound(var), upperBound(var))) { return false; }
       }
@@ -596,13 +601,13 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   };
   
   private ConstraintFormula lowerBound(VariableType var, Type lower) {
-    NormSubtype sub = new NormSubtype();
+    NormSubtyper sub = new NormSubtyper();
     if (sub.contains(NULL, lower) && sub.contains(lower, OBJECT)) { return new ConstraintScenario(lower, var); }
     else { return FALSE; }
   }
   
   private ConstraintFormula upperBound(VariableType var, Type upper) {
-    NormSubtype sub = new NormSubtype();
+    NormSubtyper sub = new NormSubtyper();
     if (sub.contains(NULL, upper) && sub.contains(upper, OBJECT)) { return new ConstraintScenario(var, upper); }
     else { return FALSE; }
   }
@@ -610,7 +615,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** True when one scenario implies another: any substitution satisfying the antecedent satisfies the consequent. */
   private Order<ConstraintScenario> SCENARIO_IMPLICATION = new Order<ConstraintScenario>() {
     public boolean contains(ConstraintScenario ant, ConstraintScenario cons) {
-      NormSubtype sub = new NormSubtype();
+      NormSubtyper sub = new NormSubtyper();
       for (VariableType var : cons.boundVariables()) {
         if (!sub.contains(ant.upperBound(var), cons.upperBound(var))) { return false; }
         if (!sub.contains(cons.lowerBound(var), ant.lowerBound(var))) { return false; }
@@ -702,7 +707,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     public ConstraintFormula subtypeNorm(final Type arg, final Type param) {
       //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
-      if (!param.apply(_containsVar)) { return new NormSubtype().contains(arg, param) ? TRUE : FALSE; }
+      if (!param.apply(_containsVar)) { return new NormSubtyper().contains(arg, param) ? TRUE : FALSE; }
       else {
         return param.apply(new TypeAbstractVisitor<ConstraintFormula>() {
           
@@ -875,7 +880,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     public ConstraintFormula supertypeNorm(final Type arg, final Type param) {
       //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
-      if (!param.apply(_containsVar)) { return new NormSubtype().contains(param, arg) ? TRUE : FALSE; }
+      if (!param.apply(_containsVar)) { return new NormSubtyper().contains(param, arg) ? TRUE : FALSE; }
       else {
         return param.apply(new TypeAbstractVisitor<ConstraintFormula>() {
           

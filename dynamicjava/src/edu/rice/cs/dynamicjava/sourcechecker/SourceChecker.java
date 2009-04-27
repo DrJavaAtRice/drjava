@@ -21,6 +21,7 @@ import edu.rice.cs.dynamicjava.interpreter.ParserException;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.interpreter.TopLevelContext;
 import edu.rice.cs.dynamicjava.interpreter.TypeContext;
+import edu.rice.cs.dynamicjava.symbol.JLSTypeSystem;
 import edu.rice.cs.dynamicjava.symbol.Library;
 import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
 import edu.rice.cs.dynamicjava.symbol.TreeLibrary;
@@ -101,10 +102,11 @@ public class SourceChecker {
     ArgumentParser argParser = new ArgumentParser();
     argParser.supportOption("classpath", "");
     argParser.supportAlias("cp", "classpath");
+    argParser.supportOption("jls");
     argParser.requireParams(1);
     ArgumentParser.Result parsedArgs = argParser.parse(args);
     
-    Options opt = Options.DEFAULT;
+    Options opt = parsedArgs.hasOption("jls") ? new Options(JLSTypeSystem.INSTANCE) : Options.DEFAULT;
     Iterable<File> cp = IOUtil.parsePath(parsedArgs.getUnaryOption("classpath"));
     Iterable<File> sources = IterUtil.map(parsedArgs.params(), IOUtil.FILE_FACTORY);
     
