@@ -67,8 +67,6 @@ import edu.rice.cs.plt.concurrent.StateMonitor;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
-
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
@@ -851,9 +849,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     
     /** Calls replThrewException() */
-    public Void forEvalException(EvaluatorException e) {
+    public Void forEvalException(String message, StackTraceElement[] stackTrace) {
       // TODO: restore location/syntax highlighting functionality
-      _interactionsModel.replThrewException(e);
+      _interactionsModel.replThrewException(message, stackTrace);
       return null;
     }
     
@@ -891,7 +889,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     public void replReturnedVoid() { }
     public void replReturnedResult(String result, String style) { }
-    public void replThrewException(EvaluatorException e) { }
+    public void replThrewException(String message, StackTraceElement[] stackTrace) { }
     public void replThrewException(String message) { }
     public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
                                         int endCol) { }

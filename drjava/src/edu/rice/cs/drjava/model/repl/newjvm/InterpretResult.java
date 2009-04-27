@@ -47,8 +47,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
  * 
  * @version $Id$
  */
-public abstract class InterpretResult implements Serializable {
-  
+public abstract class InterpretResult implements Serializable {  
   public abstract <T> T apply(Visitor<T> v);
 
   public static interface Visitor<T> {
@@ -59,7 +58,7 @@ public abstract class InterpretResult implements Serializable {
     public T forBooleanValue(Boolean val);
     public T forObjectValue(String valString);
     public T forException(String message);
-    public T forEvalException(EvaluatorException e);
+    public T forEvalException(String message, StackTraceElement[] stackTrace);
     public T forUnexpectedException(Throwable t);
     public T forBusy();
   }
@@ -77,26 +76,26 @@ public abstract class InterpretResult implements Serializable {
   public static InterpretResult exception(InterpreterException e) { return new ExceptionResult(e); }
   
   private static class ExceptionResult extends InterpretResult {
-    private final EvaluatorException _e;
     private final String _msg;
+    private final StackTraceElement[] _stackTrace;
     @SuppressWarnings("unchecked")
     public ExceptionResult(InterpreterException e) {
       if (e instanceof EvaluatorException) {
-        _e = (EvaluatorException)e;
-        _msg = null;
+        // for EvaluatorException, we want to keep the stack trace
+        _msg = e.getMessage();
+        _stackTrace = e.getStackTrace();
       }
       else {
         // for other InterpreterExceptions, we need to convert to a string here
-        // because they cannot be unmarshalled (not serializable)
         StringWriter msg = new StringWriter();
         e.printUserMessage(new PrintWriter(msg));
         _msg = msg.toString().trim();
-        _e = null;
+        _stackTrace = null;
       }
     }
     public <T> T apply(Visitor<T> v) {
-      if (_e!=null) 
-        return v.forEvalException(_e);
+      if (_stackTrace!=null) 
+        return v.forEvalException(_msg, _stackTrace);
       else
         return v.forException(_msg);
     }

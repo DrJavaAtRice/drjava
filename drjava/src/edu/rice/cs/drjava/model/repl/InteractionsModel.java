@@ -59,8 +59,6 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
-
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A Swing specific model for the DrJava InteractionsPane.  It glues together an InteractionsDocument, an 
@@ -640,13 +638,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
   
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
-  public void replThrewException(final EvaluatorException e) {
-    Throwable t = e.getCause();
+  public void replThrewException(String message, StackTraceElement[] stackTrace) {
     // TODO: replace LL stack trace elements
-    StringWriter msg = new StringWriter();
-    t.printStackTrace(new PrintWriter(msg)); 
-    final String message = msg.toString().trim();
-    replThrewException(message);
+    StringBuilder sb = new StringBuilder(message);
+    for(StackTraceElement ste: stackTrace) {
+      sb.append("\n\tat ");
+      sb.append(ste);
+    }
+    replThrewException(sb.toString().trim());
   }
   
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */

@@ -47,8 +47,6 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -678,11 +676,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     public ConsoleDocument getConsoleDocument() { return null; }
     
-    @Override public void replThrewException(EvaluatorException e) {
-      StringWriter msg = new StringWriter();
-      e.printUserMessage(new PrintWriter(msg));
-      String message = msg.toString().trim();
-      replThrewException(message);
+    @Override public void replThrewException(String message, StackTraceElement[] stackTrace) {
+      StringBuilder sb = new StringBuilder(message);
+      for(StackTraceElement ste: stackTrace) {
+        sb.append("\n\tat ");
+        sb.append(ste);
+      }
+      replThrewException(sb.toString().trim());
     }
     
     @Override public void replThrewException(String message) {
