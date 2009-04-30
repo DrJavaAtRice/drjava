@@ -58,6 +58,8 @@ import java.lang.reflect.Modifier;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
+
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
   * @version $Id$
@@ -169,9 +171,8 @@ public class JUnitTestManager {
       _jmc.testSuiteEnded(errors);
     }
     catch(Exception e) { 
-      JUnitError[] errors = new JUnitError[1];
-      // TODO: replace LL stack trace elements
-      errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", StringOps.getStackTrace(e));
+      JUnitError[] errors = new JUnitError[1];      
+      errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace());
       _reset();
       _jmc.testSuiteEnded(errors);
 //      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
@@ -225,15 +226,24 @@ public class JUnitTestManager {
       className = testString.substring(0, firstIndex-1);
     
     String classNameAndTest = className + "." + testName;
-    String stackTrace = StringOps.getStackTrace(failure.thrownException());
+    String exception = failure.thrownException().toString();
+    StackTraceElement[] stackTrace = failure.thrownException().getStackTrace();
     
     /* Check to see if the class and test name appear directly in the stack trace. If
      * they don't, then we'll have to do additional work to find the line number. Additionally,
      * if the exception occured in a subclass of the test class, we'll need to adjust our conception
      * of the class name.
      */
+    StringBuilder sb = new StringBuilder();
+    sb.append(exception);
+    sb.append('\n');
+    for(StackTraceElement s: stackTrace) {
+      sb.append("\tat ");
+      sb.append(s);
+    }
+    String combined = sb.toString();
     int lineNum = -1;
-    if (stackTrace.indexOf(classNameAndTest) == -1) {
+    if (combined.indexOf(classNameAndTest) == -1) {
       /* get the stack trace of the junit error */
       String trace = failure.trace();
       /* knock off the first line of the stack trace.
@@ -259,7 +269,7 @@ public class JUnitTestManager {
       // If the exception occurred in a subclass of the test class, then update our
       // concept of the class and test name. Otherwise, we're only here to pick up the
       // line number.
-      if (stackTrace.indexOf(className) == -1) {
+      if (combined.indexOf(className) == -1) {
         className = trace.substring(0,trace.lastIndexOf('.'));
         classNameAndTest = className + "." + testName;
       }
@@ -271,12 +281,12 @@ public class JUnitTestManager {
     }
     
     if (lineNum < 0) {
-      lineNum = _lineNumber(stackTrace, classNameAndTest);
+      lineNum = _lineNumber(combined, classNameAndTest);
     }
     
 //    if (lineNum > -1) _errorsWithPos++;
     
-    String exception =  (isError) ? failure.thrownException().toString(): 
+    String message =  (isError) ? failure.thrownException().toString(): 
       failure.thrownException().getMessage();
     boolean isFailure = (failure.thrownException() instanceof AssertionFailedError) &&
       !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
@@ -309,23 +319,16 @@ public class JUnitTestManager {
     
     // a test didn't fail, we couldn't even open the test.
     if (file == null) {
-      // TODO: replace LL stack trace elements
-      return new JUnitError(new File("nofile"), 0, 0, exception, !isFailure, testName, className, stackTrace);
+      return new JUnitError(new File("nofile"), 0, 0, message, !isFailure, testName, className, exception, stackTrace);
     }
     
-    // The code augmentation for elementary and intermediate level files causes the error to be highlighted on
-    // the wrong line.  The following code adjusts for this discrepancy.
-    String name = file.getName();
-    int adjLineNum;
-    if (name.endsWith(".dj0") || name.endsWith(".dj0")) adjLineNum = lineNum - 1;
-    else adjLineNum = lineNum;
     
-    // TODO: replace LL stack trace elements
-    return new JUnitError(file, adjLineNum, 0, exception, !isFailure, testName, className, stackTrace);
+    return new JUnitError(file, lineNum, 0, message, !isFailure, testName, className, exception, stackTrace);
   }
   
   /** Parses the line number out of the stack trace in the given class name. */
   private int _lineNumber(String sw, String classname) {
+    // TODO: use stack trace elements to find line number
     int lineNum;
     int idxClassname = sw.indexOf(classname);
     if (idxClassname == -1) return -1;

@@ -51,7 +51,7 @@ public class DJError implements Comparable<DJError>, Serializable {
   private File _file;
   
   /** zero-based line number. */
-  private final int _lineNumber;
+  private int _lineNumber;
   
   /** zero-based column number. */
   private final int _startColumn;
@@ -115,6 +115,11 @@ public class DJError implements Comparable<DJError>, Serializable {
     * @return the zero-based line number
     */
   public int lineNumber() { return  _lineNumber; }
+  
+  /** Sets the line number.
+    * @param ln line number
+    */
+  public void setLineNumber(int ln) { _lineNumber = ln; }
   
   /** Gets the column where the error begins.
     * @return the starting column

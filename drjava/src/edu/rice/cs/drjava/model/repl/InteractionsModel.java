@@ -637,9 +637,23 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _interactionIsOver();
   }
   
+  /**
+   * Default behavior set to return what it's given. 
+   * Used to replace line number and file name in a throwable when the error
+   * occurs in a Language Level file.
+   * Overriden in DefaultInteractionModel when a GlobalModel is available
+   * to make a LanguageLevelStackTraceMapper.
+   * @param t the throwable to replace line number and file name
+   * @return the same throwable.
+   */
+  public StackTraceElement[] replaceLLException(StackTraceElement[] sT) {
+    return sT;
+    
+  }
+  
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
   public void replThrewException(String message, StackTraceElement[] stackTrace) {
-    // TODO: replace LL stack trace elements
+    stackTrace = replaceLLException(stackTrace);
     StringBuilder sb = new StringBuilder(message);
     for(StackTraceElement ste: stackTrace) {
       sb.append("\n\tat ");
@@ -648,6 +662,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     replThrewException(sb.toString().trim());
   }
   
+
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
   public void replThrewException(final String message) {
     if (message.endsWith("<EOF>\"")) {

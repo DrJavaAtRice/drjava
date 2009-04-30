@@ -47,7 +47,8 @@ import java.io.Serializable;
 public class JUnitError extends DJError implements Serializable {
   private String _test;
   private String _className;
-  private String _stackTrace;
+  private String _exception;
+  private StackTraceElement[] _stackTrace;
   
   /** Constructor.
    * @param file the file where the error occurred
@@ -58,10 +59,11 @@ public class JUnitError extends DJError implements Serializable {
    * @param test the name of the test that failed
    */
   public JUnitError(File file, int lineNumber, int startColumn, String message, boolean isWarning, String test, 
-                    String className, String stackTrace) {
+                    String className, String exception, StackTraceElement[] stackTrace) {
     super(file, lineNumber, startColumn, message, isWarning);
     _test = test;
     _className = className;
+    _exception = exception;
     _stackTrace = stackTrace;
   }
 
@@ -72,7 +74,7 @@ public class JUnitError extends DJError implements Serializable {
     * @param test the name of the test that failed
     */
   public JUnitError(String message, boolean isWarning, String test) {
-    this(null, -1, -1, message, isWarning, test, "", "No associated stack trace");
+    this(null, -1, -1, message, isWarning, test, "", "No associated stack trace", new StackTraceElement[0]);
   }
 
   /** Gets the test name
@@ -89,5 +91,23 @@ public class JUnitError extends DJError implements Serializable {
     * a stack trace
     * @return the stack trace associated with the error
     */
-  public String stackTrace() { return _stackTrace; }
+  public String exception() { return _exception; }
+  
+  /** Return the array of stack trace elements. */
+  public StackTraceElement[] stackTrace() { return _stackTrace; }
+  
+  /** Set the array of stack trace elements. */
+  public void setStackTrace(StackTraceElement[] stes) { _stackTrace = stes; }
+  
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(_exception);
+    
+    for(StackTraceElement s: _stackTrace) {
+      sb.append('\n');
+      sb.append("\tat ");
+      sb.append(s);
+    }
+    return sb.toString();
+  }
 }

@@ -43,6 +43,9 @@ import com.sun.jdi.event.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.TreeMap;
+
+import java.io.File;
 
 import edu.rice.cs.drjava.model.debug.DebugException;
 
@@ -83,8 +86,8 @@ public class PendingRequestManager {
   }
   
   /** Called if a breakpoint is set and removed before its class is prepared
-   * @param action The DebugAction that was set and removed
-   */
+    * @param action The DebugAction that was set and removed
+    */
   public void removePendingRequest (DocumentDebugAction<?> action) {
     String className = action.getClassName();
     Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
@@ -114,6 +117,28 @@ public class PendingRequestManager {
     }
     catch (AbsentInformationException aie) { /* fall through and return false */ }
     return false;
+  }
+  
+  
+  /**
+   * Method to change Language Level line numbers into their java file counterparts
+   * @param dda the DocumentDebugAction whose line needs to be adjusted
+   * @return the correct line number for the .java file
+   */
+  public int LLDDALineNum(DocumentDebugAction dda){
+    int line = dda.getLineNumber();
+    File f = dda.getFile();
+    
+    if (f.getName().endsWith(".dj0") ||
+        f.getName().endsWith(".dj1") ||
+        f.getName().endsWith(".dj2")){
+      String dn = f.getPath();
+      dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+      f = new File(dn);
+      TreeMap<Integer, Integer> tM = _manager.getLLSTM().ReadLanguageLevelLineBlockRev(f);
+      line = tM.get(dda.getLineNumber());
+    }
+    return line;
   }
   
   /** Called by the EventHandler whenever a ClassPrepareEvent occurs.  This will take the event, get the class that was
@@ -159,7 +184,7 @@ public class PendingRequestManager {
     }
     for (int i = 0; i < actions.size(); i++) {
       DocumentDebugAction<?> a = actions.get(i);
-      int lineNumber = a.getLineNumber();
+      int lineNumber = LLDDALineNum(a);//a.getLineNumber();
       if (lineNumber != DebugAction.ANY_LINE) {
         try {
           List<Location> lines = rt.locationsOfLine(lineNumber);

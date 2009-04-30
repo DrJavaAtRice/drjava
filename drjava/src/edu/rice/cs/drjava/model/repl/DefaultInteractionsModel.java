@@ -37,12 +37,16 @@
 package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
+import java.util.List;
+import java.util.ArrayList;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -200,4 +204,25 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }
+  
+  /**
+   * overides method in InteractionModel.java and changes stackTrace for a
+   * throwable if LL files are present
+   * @param t the throwable to change files name and line number in
+   * @return throwable with replaced file name and line number (if throwable occured in a .dj* file)
+   */
+  public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
+    LanguageLevelStackTraceMapper LLSTM = new LanguageLevelStackTraceMapper(_model);
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: docs){
+      File f = odd.getRawFile();
+      if (f.getName().endsWith(".dj0") ||
+          f.getName().endsWith(".dj1") ||
+          f.getName().endsWith(".dj2")) files.add(f); 
+    }
+    
+   return (LLSTM.replaceStackTrace(stackTrace,files));
+  }  
+  
 }

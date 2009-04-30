@@ -84,7 +84,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     if (_manager != null && _manager.isReady()) {
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
-      Vector<ReferenceType> refTypes = _manager.getReferenceTypes(_className, _lineNumber);
+      Vector<ReferenceType> refTypes = _manager.getReferenceTypes(_className, _manager.LLBreakpointLineNum(this));
       _initializeRequests(refTypes);
       setEnabled(isEnabled);
     }
@@ -128,7 +128,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
         }
         
         // Get locations for the line number, use the first
-        List<Location> lines = rt.locationsOfLine(_lineNumber);
+        List<Location> lines = rt.locationsOfLine(_manager.LLBreakpointLineNum(this));
         if (lines.size() == 0) {
           // Can't find a location on this line
           setEnabled(false);          

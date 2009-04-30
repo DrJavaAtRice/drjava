@@ -203,7 +203,7 @@ public class JUnitPanel extends ErrorPanel {
     else {
       _testLabel.setText("");
     }
-    _stackTextArea.setText(e.stackTrace());
+    _stackTextArea.setText(e.toString());
     _stackTextArea.setCaretPosition(0);
     _frame.setPopupLoc(_stackFrame);
     _stackFrame.setVisible(true);

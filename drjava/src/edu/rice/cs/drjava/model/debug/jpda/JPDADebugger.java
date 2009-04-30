@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -56,6 +57,7 @@ import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -84,7 +86,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class JPDADebugger implements Debugger {
   
   /** A log for recording messages in a file. */
-  private static final Log _log = new Log("GlobalModel.txt", false);
+  private static final Log _log = new Log("JPDADebugger.txt", false);
   
   private static final int OBJECT_COLLECTED_TRIES = 5;
   
@@ -132,6 +134,9 @@ public class JPDADebugger implements Debugger {
   
   /*Determines whether automatic trace has been enabled*/
   private volatile boolean _isAutomaticTraceEnabled = false;
+  
+  /** Used to translate line numbers if LanguageLevel files are present */
+  private LanguageLevelStackTraceMapper _LLSTM;
     
   /** Builds a new JPDADebugger to debug code in the Interactions JVM, using the JPDA/JDI interfaces.
     * Does not actually connect to the interpreterJVM until startUp().
@@ -140,6 +145,7 @@ public class JPDADebugger implements Debugger {
     _model = model;
     _vm = null;
     _eventManager = null;
+    _LLSTM = new LanguageLevelStackTraceMapper(model);
     
     _suspendedThreads = new RandomAccessStack();
     _runningThread = null;
@@ -501,7 +507,7 @@ public class JPDADebugger implements Debugger {
         return false;
       }
       else {  // set breakpoint
-        try { 
+        try {
           setBreakpoint(new JPDABreakpoint(doc, offset, isEnabled, this));
           return true;
         }
@@ -516,16 +522,33 @@ public class JPDADebugger implements Debugger {
       return false;
     }
   }
+
+  
   
   /** Sets a breakpoint.
     * @param breakpoint The new breakpoint to set
     */
-  public /* synchronized */ void setBreakpoint(final Breakpoint breakpoint) throws DebugException {
+  public /* synchronized */ void setBreakpoint(final Breakpoint breakpoint) throws DebugException {    
     assert EventQueue.isDispatchThread();
-    breakpoint.getDocument().checkIfClassFileInSync();
-    
+    breakpoint.getDocument().checkIfClassFileInSync();   
     _model.getBreakpointManager().addRegion(breakpoint);
   }
+  
+  public int LLBreakpointLineNum(Breakpoint breakpoint){
+      int line = breakpoint.getLineNumber();
+      File f = breakpoint.getFile();
+      
+      if (f.getName().endsWith(".dj0") ||
+           f.getName().endsWith(".dj1") ||
+           f.getName().endsWith(".dj2")){
+        String dn = f.getPath();
+        dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+        f = new File(dn);
+        TreeMap<Integer, Integer> tM = _LLSTM.ReadLanguageLevelLineBlockRev(f);
+        line = tM.get(breakpoint.getLineNumber());
+      }
+      return line;
+    }
   
   /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
     * @param bp The breakpoint to remove.
@@ -718,7 +741,7 @@ public class JPDADebugger implements Debugger {
     assert EventQueue.isDispatchThread();
     for (int i = 0; i < _model.getBreakpointManager().getRegions().size(); i++) {
       Breakpoint bp = _model.getBreakpointManager().getRegions().get(i);
-      if ((bp.getLineNumber() == line) && (bp.getClassName().equals(className))) {
+      if ((LLBreakpointLineNum(bp)== line) && (bp.getClassName().equals(className))) {
         return bp;
       }
     }
@@ -1759,5 +1782,14 @@ public class JPDADebugger implements Debugger {
     }
     
     public boolean isEmpty() { return empty(); }
+  }
+  
+  
+  /**
+   * Gets the LanguageLevelStackTraceMapper
+   * @return the LanguageLevelStackTraceMapper used by JPDADebugger
+   */
+  public LanguageLevelStackTraceMapper getLLSTM(){
+    return _LLSTM; 
   }
 }

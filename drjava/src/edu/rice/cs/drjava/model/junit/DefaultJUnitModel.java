@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.junit;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.rmi.RemoteException;
 
 import java.util.List;
@@ -47,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.swing.JOptionPane;
 
@@ -573,6 +576,28 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   public void testSuiteEnded(JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
+    
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: docs){
+      File f = odd.getRawFile();
+      if (f.getName().endsWith(".dj0") ||
+          f.getName().endsWith(".dj1") ||
+          f.getName().endsWith(".dj2")) files.add(f); 
+    }
+    for(JUnitError e: errors){
+      e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+      File f = e.file();
+      if (f.getName().endsWith(".dj0") ||
+          f.getName().endsWith(".dj1") ||
+          f.getName().endsWith(".dj2")) {
+        String dn = f.getName();
+        dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+        StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
+        ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
+        e.setLineNumber(ste.getLineNumber());
+      }
+    }
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifyJUnitEnded();
     _testInProgress = false;

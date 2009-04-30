@@ -121,15 +121,17 @@ public interface CompilerModel {
   public CompilerInterface getActiveCompiler(); 
   
   /** Sets which compiler is the "active" compiler.
-   *
-   * @param compiler Compiler to set active.
-   * @throws IllegalArgumentException  If the compiler is not in the list of available compilers
-   *
-   * @see #getActiveCompiler
-   */
+    *
+    * @param compiler Compiler to set active.
+    * @throws IllegalArgumentException  If the compiler is not in the list of available compilers
+    *
+    * @see #getActiveCompiler
+    */
   public void setActiveCompiler(CompilerInterface compiler);
   
   /** Add a compiler to the active list */
   public void addCompiler(CompilerInterface compiler);
   
+  /** Gets the LanguageLevelStackTraceMapper from the model */
+  public LanguageLevelStackTraceMapper getLLSTM();
 }

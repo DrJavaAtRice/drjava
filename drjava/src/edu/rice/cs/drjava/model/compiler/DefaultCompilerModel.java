@@ -87,6 +87,11 @@ public class DefaultCompilerModel implements CompilerModel {
   /** The lock providing mutual exclustion between compilation and unit testing */
   private Object _compilerLock = new Object();
   
+  /** The LanguageLevelStackTraceMapper that helps translate .java line 
+    * numbers to .dj* line numbers when an error is thrown */
+  public LanguageLevelStackTraceMapper _LLSTM;
+  
+  
   /** Main constructor.  
     * @param m the GlobalModel that is the source of documents for this CompilerModel
     * @param compilers  The compilers to use.  The first will be made active; all are assumed
@@ -100,6 +105,7 @@ public class DefaultCompilerModel implements CompilerModel {
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
+    _LLSTM = new LanguageLevelStackTraceMapper(m);
   }
   
   //--------------------------------- Locking -------------------------------//
@@ -204,6 +210,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Compile the given documents. */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
+    _LLSTM.clearCache();
     final ArrayList<File> filesToCompile = new ArrayList<File>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
     final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
@@ -628,6 +635,14 @@ public class DefaultCompilerModel implements CompilerModel {
         }
       });
     }
+  }
+  
+  
+  /** returns the LanguageLevelStackTraceMapper
+    * @return the LanguageLevelStackTraceMapper
+    * */
+  public LanguageLevelStackTraceMapper getLLSTM(){
+    return _LLSTM;
   }
   
 }
