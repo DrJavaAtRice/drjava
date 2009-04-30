@@ -210,8 +210,10 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        		<imagedata fileref="SystemInInputInteractionsPane.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>	
-
-	</section>
+	
+<para>In newer versions of DrJava, the input box appears in the Interactions Pane and has no "Done" button. To close out of it before hitting "Enter", there is a customizable keyboard shortcut whose default is <filename> Ctrl-D </filename>. The shortcut is labeled <filename>Close System.in</filename> in the Key Bindings section of the preferences</para>
+	
+</section>
 
 
 	<section id="findandreplace">
