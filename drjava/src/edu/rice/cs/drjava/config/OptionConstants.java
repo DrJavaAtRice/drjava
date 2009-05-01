@@ -535,9 +535,9 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_RUN =
     new VectorOption<KeyStroke>("key.run", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0)));
   
-  /** The key binding for running the project's main class */
-  public static final VectorOption<KeyStroke> KEY_RUN_MAIN =
-    new VectorOption<KeyStroke>("key.run.main", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0)));
+  /** The key binding for running the current document as applet. */
+  public static final VectorOption<KeyStroke> KEY_RUN_APPLET =
+    new VectorOption<KeyStroke>("key.run.applet", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F2, SHIFT_MASK)));
   
   /** The key binding for testing the current document */
   public static final VectorOption<KeyStroke> KEY_TEST =

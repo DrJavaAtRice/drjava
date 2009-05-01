@@ -841,6 +841,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile AbstractAction _runAction = new AbstractAction("Run Document's Main Method") {
     public void actionPerformed(ActionEvent ae) { _runMain(); }
   };
+
+  /** Tries to run the current document as an applet. */
+  private volatile AbstractAction _runAppletAction = new AbstractAction("Run Document as Applet") {
+    public void actionPerformed(ActionEvent ae) { _runApplet(); }
+  };
   
   /** Runs JUnit on the document in the definitions pane. */
   private volatile AbstractAction _junitAction = new AbstractAction("Test Current Document") {
@@ -5458,6 +5463,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (IOException ioe) { _showIOError(ioe); }
   }
   
+  /** Internal helper method to run the current document as applet in the interactions pane. */
+  private void _runApplet() {
+    updateStatusField("Running Current Document as Applet");
+    
+    try { _model.getActiveDocument().runApplet(null); }
+    
+    catch (ClassNameNotFoundException e) {
+      // Display a warning message if a class name can't be found.
+      String msg =
+        "DrJava could not find the top level class name in the\n" +
+        "current document, so it could not run the class.  Please\n" +
+        "make sure that the class is properly defined first.";
+      
+      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found", JOptionPane.ERROR_MESSAGE);
+    }
+    catch (FileMovedException fme) { _showFileMovedError(fme); }
+    catch (IOException ioe) { _showIOError(ioe); }
+  }
+  
   private void _junit() {
     hourglassOn(); // turned off in junitStarted/nonTestCase/_junitInterrupted  
     new Thread("Run JUnit on Current Document") {
@@ -5526,7 +5550,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile DecoratedAction _junit_projectPropertiesDecoratedAction;
   private volatile DecoratedAction _junit_runProjectDecoratedAction;
   private volatile DecoratedAction _junit_runDecoratedAction;
-  
+  private volatile DecoratedAction _junit_runAppletDecoratedAction;
+
   /** An AbstractAction that prevents changes to the decoree's enabled flag. */
   private static class DecoratedAction extends AbstractAction {
     /** The AbstractAction that is being decorated. */
@@ -5587,6 +5612,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new DecoratedAction(_projectPropertiesAction, false);
     _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
     _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
+    _runAppletAction = _junit_runAppletDecoratedAction = new DecoratedAction(_runAppletAction, false);
   }
   private void _restoreJUnitActionsEnabled() {
 //    _compileProjectAction.setEnabled(_compileProjectActionEnabled);
@@ -5614,6 +5640,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();
     _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
     _runAction = _junit_runDecoratedAction.getUpdatedDecoree();
+    _runAppletAction = _junit_runAppletDecoratedAction.getUpdatedDecoree();
   }
   
 //  /**
@@ -6092,6 +6119,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
+    _setUpAction(_runAppletAction, "Run", "Run the current document as applet");
     
     _setUpAction(_openJavadocAction, "Open Java API Javadoc...", "Open the Java API Javadoc Web page for a class");
     _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API " +
@@ -6334,6 +6362,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Run
     _addMenuItem(toolsMenu, _runAction, KEY_RUN);
+    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET);
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
     toolsMenu.addSeparator();
     
@@ -7350,6 +7379,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(Utilities.createDelegateAction("Test File", _junitAction));
               m.add(Utilities.createDelegateAction("Preview Javadoc for File", _javadocCurrentAction));
               m.add(Utilities.createDelegateAction("Run File's Main Method", _runAction));
+              m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
             }
             else if (docSelectedCount>1) {
               m.add(Utilities.createDelegateAction("Save All Files ("+docSelectedCount+")", _saveAction));
@@ -8718,6 +8748,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void interactionStarted() {
       _disableInteractionsPane();
       _runAction.setEnabled(false);
+      _runAppletAction.setEnabled(false);
       _runProjectAction.setEnabled(false);
     }
     
@@ -8749,6 +8780,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _enableInteractionsPane();
       _runAction.setEnabled(true);
+      _runAppletAction.setEnabled(true);
       _runProjectAction.setEnabled(_model.isProjectActive());
     }
     
@@ -8762,6 +8794,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       */
     public void interpreterChanged(final boolean inProgress) {
       _runAction.setEnabled(! inProgress);
+      _runAppletAction.setEnabled(! inProgress);
       _runProjectAction.setEnabled(! inProgress);
       if (inProgress) _disableInteractionsPane();
       else _enableInteractionsPane();
@@ -8961,6 +8994,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _junitAllAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
       _runAction.setEnabled(false);
+      _runAppletAction.setEnabled(false);
       _runProjectAction.setEnabled(false);
       _closeInteractionsScript();
       _interactionsPane.setEditable(false);
@@ -8973,6 +9007,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       interactionEnded();
       _runAction.setEnabled(true);
+      _runAppletAction.setEnabled(true);
       _runProjectAction.setEnabled(_model.isProjectActive());
       _junitAction.setEnabled(true);
       _junitAllAction.setEnabled(true);

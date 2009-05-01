@@ -108,8 +108,21 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     * @param typed the "java classname args ..." typed by the user
     * @param expected the expected main class call
     */
-  protected void _assertMainTransformation(final String typed, final String expected) {
-    assertEquals("main transformation should match expected", expected, TestInteractionsModel._testClassCall(typed));
+  protected void _assertJavaTransformation(final String typed, final String expected) {
+    assertEquals("main transformation should match expected",
+                 expected,
+                 TestInteractionsModel._transformJavaCommand(typed));
+  }
+
+  /** Asserts that the given string typed by the user of the form "applet classname" is transformed to the given
+    * expected applet invocation.
+    * @param typed the "applet classname args ..." typed by the user
+    * @param expected the expected applet invocation
+    */
+  protected void _assertAppletTransformation(final String typed, final String expected) {
+    assertEquals("applet transformation should match expected",
+                 expected, 
+                 TestInteractionsModel._transformAppletCommand(typed));
   }
   
   /** Tests that the correct text is returned when interpreting. */
@@ -204,30 +217,29 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertTrue("Code '" + code +  "' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
-  
-  
+    
   /** Tests that "java Classname [args]" runs the class's main method, with simple delimited arguments. */
   public void testInterpretJavaArguments() {
     _log.log("testInterpretJavaArguments started");
     // java Foo a b c
     // Foo.main(new String[]{"a", "b", "c"});
-    _assertMainTransformation("java Foo a b c", "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
+    _assertJavaTransformation("java Foo a b c", "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
     // java Foo "a b c"
     // Foo.main(new String[]{"a b c"});
-    _assertMainTransformation("java Foo \"a b c\"", "Foo.main(new String[]{\"a b c\"});");
+    _assertJavaTransformation("java Foo \"a b c\"", "Foo.main(new String[]{\"a b c\"});");
     // java Foo "a b"c d
     // Foo.main(new String[]{"a bc", "d"});
     //  This is different behavior than Unix or DOS, but it's more
     //  intuitive to the user (and easier to implement).
-    _assertMainTransformation("java Foo \"a b\"c d", "Foo.main(new String[]{\"a bc\",\"d\"});");
+    _assertJavaTransformation("java Foo \"a b\"c d", "Foo.main(new String[]{\"a bc\",\"d\"});");
     
     // java Foo c:\\file.txt
     // Foo.main("c:\\file.txt");
-    _assertMainTransformation("java Foo c:\\\\file.txt", "Foo.main(new String[]{\"c:\\\\file.txt\"});");
+    _assertJavaTransformation("java Foo c:\\\\file.txt", "Foo.main(new String[]{\"c:\\\\file.txt\"});");
     
     // java Foo /home/user/file
     // Foo.main("/home/user/file");
-    _assertMainTransformation("java Foo /home/user/file", "Foo.main(new String[]{\"/home/user/file\"});");
+    _assertJavaTransformation("java Foo /home/user/file", "Foo.main(new String[]{\"/home/user/file\"});");
     _log.log("testInterpretJavaArguments ended");
   }
   
@@ -240,16 +252,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretJavaEscapedArgs started");
     // java Foo \j
     // Foo.main(new String[]{"j"});
-    _assertMainTransformation("java Foo \\j", "Foo.main(new String[]{\"j\"});");
+    _assertJavaTransformation("java Foo \\j", "Foo.main(new String[]{\"j\"});");
     // java Foo \"
     // Foo.main(new String[]{"\""});
-    _assertMainTransformation("java Foo \\\"", "Foo.main(new String[]{\"\\\"\"});");
+    _assertJavaTransformation("java Foo \\\"", "Foo.main(new String[]{\"\\\"\"});");
     // java Foo \\
     // Foo.main(new String[]{"\\"});
-    _assertMainTransformation("java Foo \\\\", "Foo.main(new String[]{\"\\\\\"});");
+    _assertJavaTransformation("java Foo \\\\", "Foo.main(new String[]{\"\\\\\"});");
     // java Foo a\ b
     // Foo.main(new String[]{"a b"});
-    _assertMainTransformation("java Foo a\\ b", "Foo.main(new String[]{\"a b\"});");
+    _assertJavaTransformation("java Foo a\\ b", "Foo.main(new String[]{\"a b\"});");
     _log.log("testInterpretJavaEscapedArgs ended");
   }
   
@@ -260,31 +272,31 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretJavaQuotedEscapedArgs started");
     // java Foo "a \" b"
     // Foo.main(new String[]{"a \" b"});
-    _assertMainTransformation("java Foo \"a \\\" b\"", "Foo.main(new String[]{\"a \\\" b\"});");
+    _assertJavaTransformation("java Foo \"a \\\" b\"", "Foo.main(new String[]{\"a \\\" b\"});");
     // java Foo "\'"
     // Foo.main(new String[]{"\\'"});
-    _assertMainTransformation("java Foo \"\\'\"", "Foo.main(new String[]{\"\\\\'\"});");
+    _assertJavaTransformation("java Foo \"\\'\"", "Foo.main(new String[]{\"\\\\'\"});");
     // java Foo "\\"
     // Foo.main(new String[]{"\\"});
-    _assertMainTransformation("java Foo \"\\\\\"", "Foo.main(new String[]{\"\\\\\"});");
+    _assertJavaTransformation("java Foo \"\\\\\"", "Foo.main(new String[]{\"\\\\\"});");
     // java Foo "\" \d"
     // Foo.main(new String[]{"\" \\d"});
-    _assertMainTransformation("java Foo \"\\\" \\d\"", "Foo.main(new String[]{\"\\\" \\\\d\"});");
+    _assertJavaTransformation("java Foo \"\\\" \\d\"", "Foo.main(new String[]{\"\\\" \\\\d\"});");
     // java Foo "\n"
     // Foo.main(new String[]{"\n"});
-    /*    _assertMainTransformation("java Foo \"\\n\"", "Foo.main(new String[]{\"\\n\"});");
+    /*    _assertJavaTransformation("java Foo \"\\n\"", "Foo.main(new String[]{\"\\n\"});");
      // java Foo "\t"
      // Foo.main(new String[]{"\t"});
-     _assertMainTransformation("java Foo \"\\t\"", "Foo.main(new String[]{\"\\t\"});");
+     _assertJavaTransformation("java Foo \"\\t\"", "Foo.main(new String[]{\"\\t\"});");
      // java Foo "\r"
      // Foo.main(new String[]{"\r"});
-     _assertMainTransformation("java Foo \"\\r\"", "Foo.main(new String[]{\"\\r\"});");
+     _assertJavaTransformation("java Foo \"\\r\"", "Foo.main(new String[]{\"\\r\"});");
      // java Foo "\f"
      // Foo.main(new String[]{"\f"});
-     _assertMainTransformation("java Foo \"\\f\"", "Foo.main(new String[]{\"\\f\"});");
+     _assertJavaTransformation("java Foo \"\\f\"", "Foo.main(new String[]{\"\\f\"});");
      // java Foo "\b"
      // Foo.main(new String[]{"\b"});
-     _assertMainTransformation("java Foo \"\\b\"", "Foo.main(new String[]{\"\\b\"});"); */
+     _assertJavaTransformation("java Foo \"\\b\"", "Foo.main(new String[]{\"\\b\"});"); */
     _log.log("testInterpretJavaQuotedEscapedArgs started");
   }
   
@@ -292,14 +304,110 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   public void testInterpretJavaSingleQuotedArgs() {
     _log.log("testInterpretJavaSingleQuotedArgs started");
     // java Foo 'asdf'
-    _assertMainTransformation("java Foo 'asdf'", "Foo.main(new String[]{\"asdf\"});");
+    _assertJavaTransformation("java Foo 'asdf'", "Foo.main(new String[]{\"asdf\"});");
     
     // java Foo 'a b c'
-    _assertMainTransformation("java Foo 'a b c'", "Foo.main(new String[]{\"a b c\"});");
+    _assertJavaTransformation("java Foo 'a b c'", "Foo.main(new String[]{\"a b c\"});");
     
     // java Foo 'a b'c
-    _assertMainTransformation("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
+    _assertJavaTransformation("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
      _log.log("testInterpretJavaSingleQuotedArgs ended");
+  }
+  
+  /** Tests that "applet Classname [args]" runs the class's main method, with simple delimited arguments. */
+  public void testInterpretAppletArguments() {
+    _log.log("testInterpretAppletArguments started");
+    // applet Foo a b c
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("a","b","c"), 400, 300);
+    _assertAppletTransformation("applet Foo a b c", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a\",\"b\",\"c\"), 400, 300);");
+    // applet Foo "a b c"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("a b c"), 400, 300);
+    _assertAppletTransformation("applet Foo \"a b c\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a b c\"), 400, 300);");
+    // applet Foo "a b"c d
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("a bc","d"), 400, 300);
+    //  This is different behavior than Unix or DOS, but it's more
+    //  intuitive to the user (and easier to implement).
+    _assertAppletTransformation("applet Foo \"a b\"c d", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a bc\",\"d\"), 400, 300);");
+    
+    // applet Foo c:\\file.txt
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("c:\\file.txt"), 400, 300);
+    _assertAppletTransformation("applet Foo c:\\\\file.txt", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"c:\\\\file.txt\"), 400, 300);");
+    
+    // applet Foo /home/user/file
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("/home/user/file"), 400, 300);
+    _assertAppletTransformation("applet Foo /home/user/file", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"/home/user/file\"), 400, 300);");
+    _log.log("testInterpretAppletArguments ended");
+  }
+  
+  /** Tests that escaped characters just return the character itself.  Escaped whitespace is considered a character, 
+    * not a delimiter. (This is how Unix behaves.)
+    *
+    * not currently enforcing any behavior for a simple implementation using a StreamTokenizer
+    */
+  public void testInterpretAppletEscapedArgs() {
+    _log.log("testInterpretAppletEscapedArgs started");
+    // applet Foo \j
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("j"), 400, 300);
+    _assertAppletTransformation("applet Foo \\j", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"j\"), 400, 300);");
+    // applet Foo \"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\""), 400, 300);
+    _assertAppletTransformation("applet Foo \\\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\\"\"), 400, 300);");
+    // applet Foo \\
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\\"), 400, 300);
+    _assertAppletTransformation("applet Foo \\\\", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\\\\"), 400, 300);");
+    // applet Foo a\ b
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("a b"), 400, 300);
+    _assertAppletTransformation("applet Foo a\\ b", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a b\"), 400, 300);");
+    _log.log("testInterpretAppletEscapedArgs ended");
+  }
+  
+  /** Tests that within a quote, everything is correctly escaped.
+    * (Special characters are passed to the program correctly.)
+    */
+  public void testInterpretAppletQuotedEscapedArgs() {
+    _log.log("testInterpretAppletQuotedEscapedArgs started");
+    // applet Foo "a \" b"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("a \" b"), 400, 300);
+    _assertAppletTransformation("applet Foo \"a \\\" b\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a \\\" b\"), 400, 300);");
+    // applet Foo "\'"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\\'"), 400, 300);
+    _assertAppletTransformation("applet Foo \"\\'\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\\\'\"), 400, 300);");
+    // applet Foo "\\"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\\"), 400, 300);
+    _assertAppletTransformation("applet Foo \"\\\\\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\\\\"), 400, 300);");
+    // applet Foo "\" \d"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\" \\d"), 400, 300);
+    _assertAppletTransformation("applet Foo \"\\\" \\d\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\\" \\\\d\"), 400, 300);");
+    // applet Foo "\n"
+    // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\n"), 400, 300);
+    /*    _assertAppletTransformation("applet Foo \"\\n\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\n\"), 400, 300);");
+     // applet Foo "\t"
+     // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\t"), 400, 300);
+     _assertAppletTransformation("applet Foo \"\\t\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\t\"), 400, 300);");
+     // applet Foo "\r"
+     // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\r"), 400, 300);
+     _assertAppletTransformation("applet Foo \"\\r\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\r\"), 400, 300);");
+     // applet Foo "\f"
+     // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\f"), 400, 300);
+     _assertAppletTransformation("applet Foo \"\\f\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\f\"), 400, 300);");
+     // applet Foo "\b"
+     // edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo("\b"), 400, 300);
+     _assertAppletTransformation("applet Foo \"\\b\"", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"\\b\"), 400, 300);"); */
+    _log.log("testInterpretAppletQuotedEscapedArgs started");
+  }
+  
+  /** Tests that single quotes can be used as argument delimiters. */
+  public void testInterpretAppletSingleQuotedArgs() {
+    _log.log("testInterpretAppletSingleQuotedArgs started");
+    // applet Foo 'asdf'
+    _assertAppletTransformation("applet Foo 'asdf'", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"asdf\"), 400, 300);");
+    
+    // applet Foo 'a b c'
+    _assertAppletTransformation("applet Foo 'a b c'", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a b c\"), 400, 300);");
+    
+    // applet Foo 'a b'c
+    _assertAppletTransformation("applet Foo 'a b'c", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a bc\"), 400, 300);");
+     _log.log("testInterpretAppletSingleQuotedArgs ended");
   }
   
   //public void testLoadHistory();

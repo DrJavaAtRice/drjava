@@ -216,6 +216,16 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
 
+  /** Runs this document as applet in the interactions pane. Demands that the definitions be saved 
+   *  and compiled before proceeding. Fires an event to signal when execution is about to begin.
+   *  The class that will be run must have a default (zero-argument) constructor.
+   * 
+   *  @param qualifiedClassName - the fully qualified name of the class contained in this document that will be run as applet
+   *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+   *  @exception IOException propagated from GlobalModel.compileAll()
+   */
+  public void runApplet(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
+
   /** Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
    *  with testing.  Fires the appropriate events as the testing proceeds and finishes.
    *  TODO: this method is redundant and should be deprecated

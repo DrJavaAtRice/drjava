@@ -442,13 +442,18 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * up to date.  Fires an event to signal when execution is about to begin.
       * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
       * event thread execution!
+      * NOTE: the command to run is constructed using {@link MessageFormat}. That means that certain characters,
+      * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
+      * To write curly braces, you need to enclose them in single quotes. Example:
+      * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
       * 
+      * @param command - the command to run, with {0} indicating the place where the class name will be written
       * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
       * 
       * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
       * @exception IOException propagated from GlobalModel.compileAll()
       */
-    public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+    protected void _runInInteractions(final String command, String qualifiedClassName) throws ClassNameNotFoundException, IOException {
       assert EventQueue.isDispatchThread();
 
       _notifier.prepareForRun(ConcreteOpenDefDoc.this);
@@ -491,10 +496,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
               }
               // Load the proper text into the interactions document
               iDoc.clearCurrentInput();
-              iDoc.append("java " + className, null);
+              iDoc.append(java.text.MessageFormat.format(command, className), null);
               
               // Finally, execute the new interaction and record that event
-              new Thread("Running main method") {
+              new Thread("Running document") {
                 public void run() { _interactionsModel.interpretCurrentInteraction(); }
               }.start();
             }
@@ -513,6 +518,36 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       }
       // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
       resetInteractions(workDir);  
+    }
+    
+    /** Runs the main method in this document in the interactions pane after resetting interactions with the source
+      * root for this document as the working directory.  Warns the use if the class files for the doucment are not 
+      * up to date.  Fires an event to signal when execution is about to begin.
+      * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+      * event thread execution!
+      * 
+      * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
+      * 
+      * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+      * @exception IOException propagated from GlobalModel.compileAll()
+      */
+    public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+      _runInInteractions("java {0}", qualifiedClassName);
+    }
+    
+    /** Runs this document as applet in the interactions pane after resetting interactions with the source
+      * root for this document as the working directory.  Warns the use if the class files for the doucment are not 
+      * up to date.  Fires an event to signal when execution is about to begin.
+      * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+      * event thread execution!
+      * 
+      * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
+      * 
+      * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+      * @exception IOException propagated from GlobalModel.compileAll()
+      */
+    public void runApplet(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+      _runInInteractions("applet {0}", qualifiedClassName);
     }
     
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
