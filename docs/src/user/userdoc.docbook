@@ -421,6 +421,13 @@ Welcome to DrJava.
     <para>DrJava also displays either a "Run Project" or a "Run" button in its toolbar, depending on whether you have specified a "Main Class" for the project or not, respectively. "Run Project" will run the main method of the project's "Main Class", while "Run" while execute the main method of the currently open document.</para>
 
     <formalpara>
+      <title>Running the Document as Applet</title>
+      <para>For users who write Java applets, DrJava has a built-in applet viewer that supports calling the <filename>run()</filename> method of a class in the Interactions Pane by simply entering "applet" followed by the class name. Any arguments will be passed to the constructor as strings.  For example, to create <filename>MyApplet(String a, String b)</filename> with arguments "arg1" and "arg2" and then call the object's <filename>run()</filename> method, type the following into the Interactions Pane:</para>
+    </formalpara>
+    <programlisting>applet MyApplet arg1 arg2</programlisting>
+    <para>Another shortcut for this feature is the "Run Document as Applet" command, which can be found in both the Tools menu and the context menu of the document list.  This command will simply insert the appropriate <literal>"applet MyApplet"</literal> text into the Interactions Pane to run the current document as applet.</para>
+
+    <formalpara>
       <title>Keyboard Shortcuts</title>
       <para>Many actions in the Interactions Pane have keyboard shortcuts for ease of use.  Use the Up and Down arrow keys to scroll through a history of the previously entered commands, or <keycode>Ctrl+B</keycode> to clear the current command.  You can also use <keycode>Shift+Enter</keycode> to insert newlines into statements in the Interactions Pane.  DrJava also now supports searching backwards through history.  To use this feature, type in the first few characters of the command you wish to repeat and hit the Tab key.  The last command that matches the characters you typed will appear.  Hitting Tab repeated searches farther back, while Shift-Tab will move you forward in the history.</para>
     </formalpara>
