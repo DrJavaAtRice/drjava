@@ -195,7 +195,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<section id="systemim">
 		<title>System.in</title>
 
-		<para>Many beginner programs rely on keyboard input read through <filename>System.in</filename>.  DrJava provides full support for this.  There are two ways to use <filename>System.in</filename> in DrJava.  First, you can invoke a method in your code that relies on <filename>System.in</filename> in the Interactions Pane.  When you do this, the System.in input box will appear.  Type your input, and press return or click on the "Done" button.</para>
+		<para>Many beginner programs rely on keyboard input read through <filename>System.in</filename>.  DrJava provides full support for this.  There are two ways to use <filename>System.in</filename> in DrJava.  First, you can invoke a method in your code that relies on <filename>System.in</filename> in the Interactions Pane.  When you do this, the System.in input box will appear.  Type your input, and press Return.</para>
 
 		<mediaobject>
        		<imageobject>
@@ -203,7 +203,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        		</imageobject>
      	</mediaobject>
 
-	<para>Alternatively, you can use the <filename>System.in.read()</filename> method in the Interactions Pane directly.  When the input box appears, type your text and then either press return or click on the "Done" button.</para>
+	<para>Alternatively, you can use the <filename>System.in.read()</filename> method in the Interactions Pane directly.  When the input box appears, type your text and then either press Return.</para>
 
 		<mediaobject>
        		<imageobject>
@@ -211,8 +211,29 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        		</imageobject>
      	</mediaobject>	
 	
-<para>In newer versions of DrJava, the input box appears in the Interactions Pane and has no "Done" button. To close out of it before hitting "Enter", there is a customizable keyboard shortcut whose default is <filename> Ctrl-D </filename>. The shortcut is labeled <filename>Close System.in</filename> in the Key Bindings section of the preferences</para>
-	
+<para>When the the input box appears in the Interactions Pane, you can choose to close the input stream by selecting the menu item "Tools, Interactions &amp; Console, Close System.in", or by pressing the keyboard shortcut for it, which is <filename> Ctrl-D </filename>. The shortcut is labeled <filename>Close System.in</filename> in the Key Bindings section of the preferences.</para>
+
+<para>Here is an example of closing the input stream. The text in square brackets was entered by the user.</para>
+
+    <programlisting>
+Welcome to DrJava.  Working directory is /Users/Shared/drjava
+> System.in.read()
+ [1]
+49
+> System.in.read()
+10
+> System.in.read() // press Ctrl-D now
+ []
+-1
+>
+    </programlisting>
+
+<para>The user first types '1' and then presses Return. This lets DrJava read
+a 49, which is the ASCII code for the character '1', and then 10, which is the
+ASCII code for the new line created by Return. In the second input box, the
+user pressed Ctrl-D immediately to close the input stream. This lets DrJava
+read -1, indicating of the end of the stream.</para>	
+
 </section>
 
 
@@ -241,6 +262,11 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<listitem><formalpara>
 	<title>No Comments/String:</title> <para> Ignores any instances found within comments or strings. </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Search Selection Only:</title>
+	<para>TODO</para>
 	</formalpara></listitem>
 
 	</itemizedlist>
@@ -409,7 +435,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</section>
 
 <section id="usingDebugger">
-<title>Using the Debugger:</title>
+<title>Using the Debugger</title>
   <para>To use the debugger, you must first set a <emphasis>breakpoint</emphasis> on the line(s) of code on which you want execution to stop.  To do this, right click on the line of code that you want the breakpoint on and select Toggle Breakpoint from the menu.</para>
 
 	<mediaobject>
@@ -618,7 +644,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<section id="project-running">
 	<title>Running a Project</title>
-	<para>To run the main method of a project, select "Project, Run Main Document."  This will load the class specified as the project's main document in Project Properties, and run its main method.  If you have not specified the file to load in Project Properties, this option is grayed out</para>
+	<para>To run the main method of a project, select "Project, Run Main Class."  This will load the class specified as the project's main class in Project Properties, and run its main method.  If you have not specified the file to load in Project Properties, this option is grayed out</para>
 	
 
 	<mediaobject>
@@ -627,7 +653,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        	</imageobject>
      	</mediaobject>
 
-        <para>If you have configured a main document, then DrJava will also show a "Run Project" toolbar button. If you have not specified a file as main document, a "Run" button is shown instead that runs the main method of the currently shown document.</para>
+        <para>If you have configured a main class, then DrJava will also show a "Run Project" toolbar button. If you have not specified a class as main class, a "Run" button is shown instead that runs the main method of the currently shown document.</para>
 	
 	</section>
 
@@ -663,8 +689,8 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</formalpara>
 
 	<formalpara>	
-		<title>Main Document:</title>
-		<para>This allows you to specify the class that holds the main method for the project.  When this is set, you can use "Project, Run Main Document" to launch the program.</para>
+		<title>Main Class:</title>
+		<para>This allows you to specify the class that holds the main method for the project.  When this is set, you can use "Project, Run Main Class" to launch the program.</para>
 	</formalpara>
 
 	<formalpara>	
@@ -688,7 +714,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 
 	<section id="resourcelocations">
-		<title>Resource Locations:</title>
+		<title>Resource Locations</title>
 		<para>The Resource Locations menu allows you to specify the location of many important resources.  All of these fields are optional and can be left blank if you want default values to take effect.  </para>
     
 	<itemizedlist>
@@ -788,8 +814,8 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</section>
 
 	<section id="fontdisplayoptions">
-		<title>The Font Menu</title>
-	<para>The Fonts Menu allows you to specify how the font should look.  There are four font categories.</para>
+		<title>Fonts Options</title>
+	<para>The Fonts Options allows you to specify how the font should look.  There are four font categories.</para>
 	<itemizedlist>
 	<listitem> <formalpara>
 	<title>Main Font:</title>
@@ -824,7 +850,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</section>
 
 	<section id="displayoptionscolors">
-		<title>The Color Menu</title>
+		<title>Color Options</title>
 
 	<para>The Colors Menu allows you to specify colors for a variety of types of text.  Click on the "..." button to change the color for a type of text.  The color is then demonstrated on the colors menu.</para>
 
@@ -863,7 +889,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</section>
 
 	<section id="debuggeroptions">
-	<title>The Debugger Menu</title>
+	<title>Debugger Options</title>
 	<para>The Debugger Menu gives you more control over the debugger.</para>
 
 	<itemizedlist>
@@ -879,10 +905,19 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<listitem><formalpara>
 		<title>Classes/Packages to Exclude:</title>
-		<para> Allows you to  specify other classes/packages to step over.  This should be a comma separated list with fully qualified names.  You might use this box to exclude instructor provided libraries, for example.</para>
+		<para> Allows you to  specify other classes/packages to step over.  This should be a list with fully qualified names.  To exclude a whole package, add <filename>packagename.*</filename> to the list.  You might use this box to exclude instructor provided libraries, for example <filename>java.util.*</filename> .</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Auto-Import after Breakpoint/Step:</title>
+		<para>TODO</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>	
+		<title>Auto-Step Rate in ms:</title>
+		<para>TODO</para>
 	</formalpara></listitem>
 	</itemizedlist>
-
 
 		<mediaobject>
        		<imageobject>
@@ -893,7 +928,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</section>
 
 	<section id="javadocoptions">
-		<title>Javadoc</title>
+		<title>Javadoc Options</title>
 	
 	<para>The Javadoc menu lets you specify everything you need to generate perfect Javadoc for your source files. For information on Javadoc in general, see the Javadoc section above.</para>
 
@@ -908,6 +943,16 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 		<para>Set the version to whatever version of java your code relies on, and maek sure the corresponding URL is set appropriately.  Because most Javadoc documentation references library files in the Java API, it is important to specify which version of the API to link to.</para></formalpara>
                 <para>This option also controls which URL is used to access the Javadoc pages for the Java API.</para>
 	</listitem>
+
+	<listitem><formalpara>
+   		<title>JUnit 3.8.2 URL</title>
+     		<para>The URL to use when generating links to JUnit 3.8.2 library classes or opening the Javadoc pages for the Java API.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+   		<title>Additional Javadoc URLs</title>
+     		<para>A list of URLs used to open Javadoc pages for user-specified libraries. Please enter the URL to the directory that contains the <filename>allclasses-frame.html</filename> file. For example, to open DrJava's Javadoc, enter <ulink url="http://drjava.org/javadoc/drjava"><filename>http://drjava.org/javadoc/drjava</filename></ulink>.</para>
+	</formalpara></listitem>
 
 	<listitem><formalpara>
 		<title>Default Desination Directory:</title>
