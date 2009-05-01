@@ -75,6 +75,7 @@ import edu.rice.cs.util.swing.Utilities;
 import org.objectweb.asm.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Manages unit testing via JUnit.
   * @version $Id$
@@ -577,20 +578,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void testSuiteEnded(JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: docs){
-      File f = odd.getRawFile();
-      if (f.getName().endsWith(".dj0") ||
-          f.getName().endsWith(".dj1") ||
-          f.getName().endsWith(".dj2")) files.add(f); 
-    }
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
     for(JUnitError e: errors){
       e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
       File f = e.file();
-      if (f.getName().endsWith(".dj0") ||
-          f.getName().endsWith(".dj1") ||
-          f.getName().endsWith(".dj2")) {
+      if (LanguageLevelStackTraceMapper.isLLFile(f)) {
         String dn = f.getName();
         dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
         StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());

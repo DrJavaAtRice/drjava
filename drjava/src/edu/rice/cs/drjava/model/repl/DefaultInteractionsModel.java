@@ -212,15 +212,10 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * @return throwable with replaced file name and line number (if throwable occured in a .dj* file)
    */
   public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
-    LanguageLevelStackTraceMapper LLSTM = new LanguageLevelStackTraceMapper(_model);
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: docs){
-      File f = odd.getRawFile();
-      if (f.getName().endsWith(".dj0") ||
-          f.getName().endsWith(".dj1") ||
-          f.getName().endsWith(".dj2")) files.add(f); 
-    }
+    // use LLSTM from compiler model.
+    LanguageLevelStackTraceMapper LLSTM = _model.getCompilerModel().getLLSTM();
+    final List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
     
    return (LLSTM.replaceStackTrace(stackTrace,files));
   }  

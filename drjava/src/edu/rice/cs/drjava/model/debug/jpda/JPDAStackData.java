@@ -50,8 +50,20 @@ public class JPDAStackData extends DebugStackData {
   public JPDAStackData(StackFrame frame) {
     super(methodName(frame), frame.location().lineNumber());
   }
+
+  /** Object for keeping track of a stack frame.
+   * @param method method name as "myPackage.MyClass.myMethod"
+   * @param lineNum line number
+   */
+  public JPDAStackData(String method, int lineNum) {
+    super(method, lineNum);
+  }
   
-  private static String methodName(StackFrame frame) {
+  /** Translate the type and method information from a JDI StackFrame to a "myPackage.MyClass.myMethod" method name string.
+   * @param frame JDI stack frame
+   * @return "myPackage.MyClass.myMethod" method name string
+   */
+  public static String methodName(StackFrame frame) {
     return frame.location().declaringType().name() + "." + frame.location().method().name();
   }
 }

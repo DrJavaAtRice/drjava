@@ -775,8 +775,7 @@ public class ConfigFrame extends SwingFrame {
       String howto =
         "\nThe debugger is not currently available. To use the debugger,\n" +
         "you can enter the location of the tools.jar file in the\n" +
-        "\"Resource Locations\" pane, in case DrJava does not" +
-        "automatically find it.\n" +
+        "\"Resource Locations\" pane, in case DrJava does not automatically find it.\n" +
         "See the user documentation for more details.\n";
       LabelComponent label = new LabelComponent(howto, this);
       label.setEntireColumn(true);

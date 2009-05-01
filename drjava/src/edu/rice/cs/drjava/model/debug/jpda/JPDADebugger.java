@@ -134,10 +134,7 @@ public class JPDADebugger implements Debugger {
   
   /*Determines whether automatic trace has been enabled*/
   private volatile boolean _isAutomaticTraceEnabled = false;
-  
-  /** Used to translate line numbers if LanguageLevel files are present */
-  private LanguageLevelStackTraceMapper _LLSTM;
-    
+      
   /** Builds a new JPDADebugger to debug code in the Interactions JVM, using the JPDA/JDI interfaces.
     * Does not actually connect to the interpreterJVM until startUp().
     */
@@ -145,7 +142,6 @@ public class JPDADebugger implements Debugger {
     _model = model;
     _vm = null;
     _eventManager = null;
-    _LLSTM = new LanguageLevelStackTraceMapper(model);
     
     _suspendedThreads = new RandomAccessStack();
     _runningThread = null;
@@ -538,13 +534,9 @@ public class JPDADebugger implements Debugger {
       int line = breakpoint.getLineNumber();
       File f = breakpoint.getFile();
       
-      if (f.getName().endsWith(".dj0") ||
-           f.getName().endsWith(".dj1") ||
-           f.getName().endsWith(".dj2")){
-        String dn = f.getPath();
-        dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
-        f = new File(dn);
-        TreeMap<Integer, Integer> tM = _LLSTM.ReadLanguageLevelLineBlockRev(f);
+      if (LanguageLevelStackTraceMapper.isLLFile(f)) {
+        f = LanguageLevelStackTraceMapper.getJavaFileForLLFile(f);
+        TreeMap<Integer, Integer> tM = getLLSTM().ReadLanguageLevelLineBlockRev(f);
         line = tM.get(breakpoint.getLineNumber());
       }
       return line;
@@ -626,7 +618,25 @@ public class JPDADebugger implements Debugger {
     try {
       ThreadReference thread = _suspendedThreads.peek();
       ArrayList<DebugStackData> frames = new ArrayList<DebugStackData>();
-      for (StackFrame f : thread.frames()) { frames.add(new JPDAStackData(f)); }
+      // get a list of language level files whose line numbers need to be translated 
+      final List<File> files = new ArrayList<File>();
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+      for (StackFrame f : thread.frames()) {
+        // map Java line numbers to LL line numbers
+        String method = JPDAStackData.methodName(f);
+        int lineNum = f.location().lineNumber();
+        String sourceName = null;
+        try {
+          sourceName = f.location().sourceName();
+        }
+        catch(com.sun.jdi.AbsentInformationException aie) { sourceName = null; }
+        StackTraceElement ste = new StackTraceElement(f.location().declaringType().name(),
+                                                      f.location().method().name(),
+                                                      sourceName,
+                                                      f.location().lineNumber());
+        ste = getLLSTM().replaceStackTraceElement(ste, files);
+        frames.add(new JPDAStackData(method, ste.getLineNumber()));
+      }
       return frames;
     }
     catch (IncompatibleThreadStateException itse) {
@@ -1790,6 +1800,7 @@ public class JPDADebugger implements Debugger {
    * @return the LanguageLevelStackTraceMapper used by JPDADebugger
    */
   public LanguageLevelStackTraceMapper getLLSTM(){
-    return _LLSTM; 
+    // use LLSTM from compiler model.
+    return _model.getCompilerModel().getLLSTM();
   }
 }

@@ -48,6 +48,7 @@ import java.util.TreeMap;
 import java.io.File;
 
 import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
   * prepared.  (Only DocumentDebugActions have reference types which can be prepared.)
@@ -129,12 +130,8 @@ public class PendingRequestManager {
     int line = dda.getLineNumber();
     File f = dda.getFile();
     
-    if (f.getName().endsWith(".dj0") ||
-        f.getName().endsWith(".dj1") ||
-        f.getName().endsWith(".dj2")){
-      String dn = f.getPath();
-      dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
-      f = new File(dn);
+    if (LanguageLevelStackTraceMapper.isLLFile(f)) {
+      f = LanguageLevelStackTraceMapper.getJavaFileForLLFile(f);
       TreeMap<Integer, Integer> tM = _manager.getLLSTM().ReadLanguageLevelLineBlockRev(f);
       line = tM.get(dda.getLineNumber());
     }

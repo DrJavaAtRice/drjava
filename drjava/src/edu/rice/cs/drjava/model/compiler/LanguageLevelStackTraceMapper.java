@@ -92,7 +92,7 @@ public class LanguageLevelStackTraceMapper {
   public StackTraceElement replaceStackTraceElement(StackTraceElement s,
                                                     File d) {
     if(!matches(d,s)) return s;
-    String FileName = d.getName();
+    String FileName = d.getAbsolutePath();
     if(cache.containsKey(FileName)) return replaceStackTraceElement(s,d,cache.get(FileName));
     
     String dn = d.getName();
@@ -170,7 +170,7 @@ public class LanguageLevelStackTraceMapper {
     String dn = d.getRawFile().getName();
     
 // make sure that the document is a LL document
-    if (!((dn.endsWith(".dj0")) || (dn.endsWith(".dj1")) || (dn.endsWith(".dj2")))) return false;
+    if (!isLLFileName(dn)) return false;
     
 // replace suffix with ".java"
     dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
@@ -300,5 +300,25 @@ public class LanguageLevelStackTraceMapper {
     if(line.indexOf("//")!=0) return null;
     line = line.substring(2).trim();
     return line;
+  }
+  
+  /** Return true if the file name ends with .dj0, .dj1 or .dj2. */
+  public static boolean isLLFileName(String s) {
+    return (s.endsWith(".dj0") ||
+            s.endsWith(".dj1") ||
+            s.endsWith(".dj2"));
+  }
+  
+  /** Return true if the file name ends with .dj0, .dj1 or .dj2. */
+  public static boolean isLLFile(File f) {
+    return isLLFileName(f.getName());
+  }
+  
+  /** Change a language level extension into a .java extension. */
+  public static File getJavaFileForLLFile(File llFile) {
+    if (!isLLFile(llFile)) throw new AssertionError("File is not a language level file: "+llFile);
+    String dn = llFile.getPath();
+    dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+    return new File(dn);
   }
 }

@@ -2161,6 +2161,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return docs;
     }
   }
+
+  /** Returns a new collection of all language level documents currently open for editing.
+    * @return a random-access List of the open definitions documents..
+    */
+  public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments() {
+    synchronized(_documentsRepos) {
+      ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
+      for (OpenDefinitionsDocument doc: _documentsRepos.values()) {
+        File f = doc.getRawFile();
+        if (f.getName().endsWith(".dj0") ||
+            f.getName().endsWith(".dj1") ||
+            f.getName().endsWith(".dj2")) docs.add(doc);
+      }
+      return docs;
+    }
+  }
   
   /* Returns a sorted (by time of insertion) collection of all open documents. */
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
