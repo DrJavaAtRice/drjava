@@ -83,7 +83,7 @@ public abstract class InterpretResult implements Serializable {
       if (e instanceof EvaluatorException) {
         // for EvaluatorException, we want to keep the stack trace
         _msg = e.getMessage();
-        _stackTrace = e.getStackTrace();
+        _stackTrace = e.getCause().getStackTrace();
       }
       else {
         // for other InterpreterExceptions, we need to convert to a string here

@@ -174,7 +174,23 @@ public interface GlobalModel extends ILoadDocuments {
    * @return true if all documents were closed
    */
   public boolean closeAllFiles();
-  
+
+  /** This function closes a group of files assuming that the files are contiguous in the enumeration
+    * provided by the document navigator. This assumption is used in selecting which remaining document
+    * (if any) to activate.
+    * <p>
+    * The corner cases in which the file that is being closed had been externally
+    * deleted have been addressed in a few places, namely DefaultGlobalModel.canAbandonFile()
+    * and MainFrame.ModelListener.canAbandonFile().  If the DefinitionsDocument for the
+    * OpenDefinitionsDocument being closed is not in the cache (see model.cache.DocumentCache)
+    * then it is closed without prompting the user to save it.  If it is in the cache, then
+    * we can successfully notify the user that the file is selected for closing and ask whether to
+    * saveAs, close, or cancel.
+    * @param docs the list od OpenDefinitionsDocuments to close
+    * @return whether all files were closed
+    */
+  public boolean closeFiles(List<OpenDefinitionsDocument> docs);
+
   /* Opens all files in specified folder.  If rec is true, open all files in the tree rooted at dir. */
   public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException;
   

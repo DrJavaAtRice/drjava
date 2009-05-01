@@ -535,7 +535,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_RUN =
     new VectorOption<KeyStroke>("key.run", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0)));
   
-  /** The key binding for running the project's main document */
+  /** The key binding for running the project's main class */
   public static final VectorOption<KeyStroke> KEY_RUN_MAIN =
     new VectorOption<KeyStroke>("key.run.main", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0)));
   
@@ -868,8 +868,8 @@ public interface OptionConstants {
     new BooleanOption("debug.step.drjava", Boolean.FALSE);
   
   /** Which packages to exclude when stepping. */
-  public static final StringOption DEBUG_STEP_EXCLUDE =
-    new StringOption("debug.step.exclude", "");
+  public static final VectorOption<String> DEBUG_STEP_EXCLUDE =
+    new VectorOption<String>("debug.step.exclude", new StringOption("",null), new Vector<String>());
   
   /** Whether we want to automatically import packages after breakpoints or steps. */
   public static final BooleanOption DEBUG_AUTO_IMPORT =

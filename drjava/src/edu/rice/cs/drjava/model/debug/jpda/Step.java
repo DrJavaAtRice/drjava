@@ -78,7 +78,6 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     boolean stepJava = DrJava.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
     boolean stepInterpreter = DrJava.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
     boolean stepDrJava = DrJava.getConfig().getSetting(DEBUG_STEP_DRJAVA).booleanValue();
-    String exclude = DrJava.getConfig().getSetting(DEBUG_STEP_EXCLUDE);
 
     StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);
@@ -96,11 +95,9 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
       request.addClassExclusionFilter("edu.rice.cs.util.*");
       request.addClassExclusionFilter("edu.rice.cs.plt.*");
     }
-    StringTokenizer st = new StringTokenizer(exclude, ",");
-    while (st.hasMoreTokens()) {
-      request.addClassExclusionFilter(st.nextToken().trim());
+    for(String s: DrJava.getConfig().getSetting(DEBUG_STEP_EXCLUDE)) {
+      request.addClassExclusionFilter(s.trim());
     }
-
 
     // Add this request (the only one) to the list
     _requests.add(request);

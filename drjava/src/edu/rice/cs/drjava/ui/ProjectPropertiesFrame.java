@@ -375,9 +375,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
     c.gridwidth = 1;
     c.insets = labelInsets;
 
-    JLabel classLabel = new JLabel("Main Document");
-    classLabel.setToolTipText("<html>The project document containing the<br>" + 
-    "<code>main</code> method for the entire project</html>");
+    JLabel classLabel = new JLabel("Main Class");
+    classLabel.setToolTipText("<html>The class containing the <code>main</code><br>"+
+                              "method for the entire project</html>");
     gridbag.setConstraints(classLabel, c);
     panel.add(classLabel);
 
@@ -577,7 +577,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     chooser.setDialogType(JFileChooser.CUSTOM_DIALOG);
 
-    chooser.setDialogTitle("Select Main Document");
+    chooser.setDialogTitle("Select Main Class");
     chooser.setCurrentDirectory(projRoot);
     File   mainFile  = _getMainFile();
     if (mainFile != FileOps.NULL_FILE){

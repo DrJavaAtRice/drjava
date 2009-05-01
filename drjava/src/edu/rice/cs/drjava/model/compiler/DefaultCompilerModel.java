@@ -362,7 +362,7 @@ public class DefaultCompilerModel implements CompilerModel {
      */
     HashSet<File> javaFileSet = new HashSet<File>();
     LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
-    LinkedList<File> filesToBeClosed = new LinkedList<File>(); // Used to record .java files that are open at the same time as their .dj? files.
+    final LinkedList<File> filesToBeClosed = new LinkedList<File>(); // Used to record .java files that are open at the same time as their .dj? files.
     boolean containsLanguageLevels = false;
     for (File f : files) {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
@@ -373,16 +373,16 @@ public class DefaultCompilerModel implements CompilerModel {
         File javaFile = new File(fileName.substring(0, lastIndex) + ".java");
         
         //checks if .dj? file has a matching .java file open in project. Eventually warns user (later on in code)
-        if(files.contains(javaFile)){
-          
+        if(files.contains(javaFile)){          
           filesToBeClosed.add(javaFile);
-          
-        } 
+          // delete file later so closeFiles doesn't complain about missing files
+        }
+        else {
+          // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
+          javaFile.delete();
+        }
         javaFileSet.add(javaFile);
         newFiles.add(javaFile);
-        
-        // Delete the stale .java file (if it exists), a file with this name will subsequently be generated
-        javaFile.delete();
       }   
       else{  
         javaFileSet.add(canonicalFile);
@@ -405,10 +405,52 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     if(!filesToBeClosed.isEmpty()){
-      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null, "Warning: Files need to be closed",
-                                                       "The following files have matching .dj? files open.", 
-                                                       "These .java files need to be closed for proper compiling. \n \n \n" +
-                                                       filesToBeClosed.toString().replace(", ","\n"),true).show();
+      final JButton closeButton = new JButton(new AbstractAction("Close Files") {
+        public void actionPerformed(ActionEvent e) {
+          // no op, i.e. delete everything
+        }
+      });
+      final JButton keepButton = new JButton(new AbstractAction("Keep Open") {
+        public void actionPerformed(ActionEvent e) {
+          // clear the set, i.e. do not delete anything
+          filesToBeClosed.clear();
+        }
+      });
+//      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null, "Warning: Files need to be closed",
+//                                                       "The following files have matching .dj? files open.", 
+//                                                       "These .java files need to be closed for proper compiling. \n \n \n" +
+//                                                       filesToBeClosed.toString().replace(", ","\n"),true).show();
+      ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
+        .setTitle("Java File"+(filesToBeClosed.size()==1?"":"s")+" Need to Be Closed")
+        .setText("The following .java "+(filesToBeClosed.size()==1?
+                                           "file has a matching .dj? file":
+                                           "files have matching .dj? files")+" open.\n"+
+                 (filesToBeClosed.size()==1?
+                    "This .java file needs":
+                    "These .java files need")+" to be closed for proper compiling.")
+        .setItems(filesToBeClosed)
+        .setMessageType(JOptionPane.WARNING_MESSAGE)
+        .setFitToScreen(true)
+        .clearButtons()
+        .addButton(closeButton)
+        .addButton(keepButton)
+        .build();
+      
+      dialog.showDialog();
+      
+      LinkedList<OpenDefinitionsDocument> docsToBeClosed = new LinkedList<OpenDefinitionsDocument>();
+      for(File f: filesToBeClosed) {
+        try {
+          docsToBeClosed.add(_model.getDocumentForFile(f));
+        }
+        catch(IOException ioe) { /* ignore, just don't close this document */ }
+      }
+      _model.closeFiles(docsToBeClosed);
+      // delete the files now because closeFiles has executed and won't complain about missing files anymore
+      for(File f: filesToBeClosed) {        
+        // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
+        f.delete();
+      }
     }
     
     if (containsLanguageLevels) {
@@ -450,7 +492,7 @@ public class DefaultCompilerModel implements CompilerModel {
           ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
             .setTitle("Delete Class Files")
             .setText("We suggest that you delete all class files in the directories with language\n"+
-                     "level files. Do you want to delete the class files in the following directories?")
+                     "level files. Do you want to delete the class files in the following director"+(dirsWithLLFiles.size()==1?"y":"ies")+"?")
             .setItems(new ArrayList<File>(dirsWithLLFiles))
             .setMessageType(JOptionPane.QUESTION_MESSAGE)
             .setFitToScreen(true)

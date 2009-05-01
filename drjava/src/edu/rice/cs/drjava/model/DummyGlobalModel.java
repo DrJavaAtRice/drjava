@@ -170,6 +170,10 @@ public class DummyGlobalModel implements GlobalModel {
   public boolean closeAllFiles() {
     throw new UnsupportedOperationException("Tried to call closeAllFiles on a Dummy");
   }
+
+  public boolean closeFiles(List<OpenDefinitionsDocument> docs) {
+    throw new UnsupportedOperationException("Tried to call closeFiles on a Dummy");
+  }
   
   public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
     throw new UnsupportedOperationException("Tried to call openFolder on a Dummy");

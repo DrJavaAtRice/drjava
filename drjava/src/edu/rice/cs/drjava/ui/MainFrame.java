@@ -420,7 +420,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
-  private volatile AbstractAction _runProjectAction = new AbstractAction("Run Main Document of Project") {
+  private volatile AbstractAction _runProjectAction = new AbstractAction("Run Main Class of Project") {
     public void actionPerformed(ActionEvent ae) { _runProject(); }
   };
   
@@ -6023,7 +6023,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _autoRefreshAction.setEnabled(false);
     _setUpAction(_compileAction, "Compile Current Document", "Compile the current document");
     _setUpAction(_compileAllAction, "Compile", "Compile all open documents");
-    _setUpAction(_printDefDocAction, "Print", "Print the current main document");
+    _setUpAction(_printDefDocAction, "Print", "Print the current document");
     _setUpAction(_printConsoleAction, "Print", "Print the Console pane");
     _setUpAction(_printInteractionsAction, "Print", "Print the Interactions pane");
     _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Change the printer settings");
