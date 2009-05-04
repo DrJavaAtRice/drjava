@@ -516,7 +516,7 @@ File f
 
       <formalpara>
 	<title>Default Imports</title>
-	<para>Under the DrJava's Preferences, the user is allowed to add or remove any classes that the user would like to import for the Interactions Pane, after the pane has been reset. After the Interactions Pane has been reset, the user acquires full access to these imported classes in the Interactions Pane. The user specifies what class to add or remove through the add/remove buttons. </para></formalpara>
+	<para>In DrJava's preferences under "Miscellaneous", the user can add or remove classes and packages that the user would like to automatically import in the Interactions Pane whenver the pane has been reset. After the Interactions Pane has been reset, these classes and packages are immediately available.</para></formalpara>
     </section>
   </chapter>
 
@@ -846,7 +846,7 @@ learning tool.</para>
 
       <formalpara>
  <title>Automatic Trace</title>
- <para>The Automatic Trace command will step into all lines of the code without stopping. In the middle of an automatic trace, the user has the option to disable the automatic trace by pressing the disable automatic trace button accordingly. If automatic trace is not diabled within the progression of the trace, the debugger will automatically end the trace when the program terminates. In addition, the user also has the ability to set the delay interval for stepping into a different line of the code. This option can be located under DrJava's preferences. </para>
+ <para>The Automatic Trace command allows the user to execute periodic "Step Into" commands, by default every 1000 milliseconds. This will cause DrJava to execute the program line by line, entering called methods. After such a periodic step, the user has the option oof disabling the automatic trace by pressing the "Disable Automatic Trace" button. If the automatic trace is not disabled, the program will run its course, and the automatic trace will be turned off at the end of the program. The user can change the delay interval for stepping located in DrJava's preferences.</para>
       </formalpara>
     </section>
 
@@ -1558,7 +1558,7 @@ public class Student {
  <varlistentry>
    <term>Auto-Import after Breakpoint/Step (<varname>debug.auto.import = true</varname>)</term>
 	<listitem>
-		<para>Any default import classes from DrJava Preferences Panel as well as any imported classes used in the Interactions Pane from previous breakpoints will also be available for usage in the Interactions Pane after stepping into another breakpoint. </para>
+		<para>Automatically imports all classes and packages again that had been imported when the program was last suspended, i.e. before the breakpoint was hit or before the last step was taken.</para>
 	</listitem>
  </varlistentry>
 

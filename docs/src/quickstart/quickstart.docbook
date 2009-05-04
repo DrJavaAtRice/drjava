@@ -910,7 +910,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<listitem><formalpara>
 		<title>Auto-Import after Breakpoint/Step:</title>
-		<para>Allows you full usage of any default imported classes within the Interactions pane from DrJava Preferences or any imported classes from the Pane while the program was halted at a previous breakpoint. </para>
+		<para>Automatically imports all classes and packages again that had been imported when the program was last suspended, i.e. before the breakpoint was hit or before the last step was taken.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>	
