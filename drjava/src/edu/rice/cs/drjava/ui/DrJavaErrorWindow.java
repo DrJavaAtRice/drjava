@@ -346,6 +346,8 @@ public class DrJavaErrorWindow extends JDialog {
     b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()));
     b.append("\nTotal memory can expand to: about ");
     b.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
+    b.append("\n\nNumber of processors/cores: ");
+    b.append(Runtime.getRuntime().availableProcessors());
     b.append("\n\n");
     
     // filter out user.dir, user.home and user.name
