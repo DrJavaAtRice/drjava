@@ -530,17 +530,51 @@ public class JPDADebugger implements Debugger {
     _model.getBreakpointManager().addRegion(breakpoint);
   }
   
+  /** Returns the line number of the breakpoint, possibly mapped from LL to Java
+    * if the breakpoint is set in a language level file. */
   public int LLBreakpointLineNum(Breakpoint breakpoint){
-      int line = breakpoint.getLineNumber();
-      File f = breakpoint.getFile();
-      
-      if (LanguageLevelStackTraceMapper.isLLFile(f)) {
-        f = LanguageLevelStackTraceMapper.getJavaFileForLLFile(f);
-        TreeMap<Integer, Integer> tM = getLLSTM().ReadLanguageLevelLineBlockRev(f);
-        line = tM.get(breakpoint.getLineNumber());
-      }
-      return line;
+    int line = breakpoint.getLineNumber();
+    File f = breakpoint.getFile();
+    
+    if (LanguageLevelStackTraceMapper.isLLFile(f)) {
+      f = LanguageLevelStackTraceMapper.getJavaFileForLLFile(f);
+      TreeMap<Integer, Integer> tM = getLLSTM().ReadLanguageLevelLineBlockRev(f);
+      line = tM.get(breakpoint.getLineNumber());
     }
+    return line;
+  }
+  
+  /** Return a stack trace element that matches the given location, but Java line numbers
+    * have been mapped to LL line numbers.
+    * @param l location with Java line numbers
+    * @param files open LL files
+    * @return stack trace element with LL line numbers
+    */
+  public StackTraceElement getLLStackTraceElement(Location l, List<File> files) {
+    // map Java line numbers to LL line numbers
+    int lineNum = l.lineNumber();
+    String sourceName = null;
+    try {
+      sourceName = l.sourceName();
+    }
+    catch(com.sun.jdi.AbsentInformationException aie) { sourceName = null; }
+    StackTraceElement ste = new StackTraceElement(l.declaringType().name(),
+                                                  l.method().name(),
+                                                  sourceName,
+                                                  l.lineNumber());
+    return getLLSTM().replaceStackTraceElement(ste, files);
+  }
+  
+  /** Return a JDI location that matches the given location, but Java line numbers
+    * have been mapped to LL line numbers.
+    * @param l location with Java line numbers
+    * @param files open LL files
+    * @return JDI location with LL line numbers
+    */
+  public Location getLLLocation(Location l, List<File> files) {
+    StackTraceElement ste = getLLStackTraceElement(l, files); 
+    return new DelegatingLocation(ste.getFileName(), ste.getLineNumber(), l);
+  }
   
   /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
     * @param bp The breakpoint to remove.
@@ -624,17 +658,7 @@ public class JPDADebugger implements Debugger {
       for (StackFrame f : thread.frames()) {
         // map Java line numbers to LL line numbers
         String method = JPDAStackData.methodName(f);
-        int lineNum = f.location().lineNumber();
-        String sourceName = null;
-        try {
-          sourceName = f.location().sourceName();
-        }
-        catch(com.sun.jdi.AbsentInformationException aie) { sourceName = null; }
-        StackTraceElement ste = new StackTraceElement(f.location().declaringType().name(),
-                                                      f.location().method().name(),
-                                                      sourceName,
-                                                      f.location().lineNumber());
-        ste = getLLSTM().replaceStackTraceElement(ste, files);
+        StackTraceElement ste = getLLStackTraceElement(f.location(), files);
         frames.add(new JPDAStackData(method, ste.getLineNumber()));
       }
       return frames;
@@ -660,33 +684,72 @@ public class JPDADebugger implements Debugger {
     assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = null;
     
-    // No stored doc, look on the source root set (later, also the sourcepath)
-    ReferenceType rt = location.declaringType();
     String fileName;
-    try { fileName = getPackageDir(rt.name()) + rt.sourceName(); }
-    catch (AbsentInformationException aie) {
-      // Don't know real source name:
-      //   assume source name is same as file name
-      String className = rt.name().replace('.', File.separatorChar);
+    try {
+      final List<File> files = new ArrayList<File>();
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+      Location lll = getLLLocation(location, files);
       
-      // crop off the $ if there is one and anything after it
-      int indexOfDollar = className.indexOf('$');
-      if (indexOfDollar > -1) {
-        className = className.substring(0, indexOfDollar);
+      fileName = lll.sourcePath();
+
+      // Check source root set (open files)
+      File f = _model.getSourceFile(fileName);
+      if (f != null) {
+        // Get a document for this file, forcing it to open
+        try { doc = _model.getDocumentForFile(f); }
+        catch (IOException ioe) {
+          doc = null;
+        }
+      }
+
+    }
+    catch(AbsentInformationException e) {
+      // No stored doc, look on the source root set (later, also the sourcepath)
+      final List<File> files = new ArrayList<File>();
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+
+      ReferenceType rt = location.declaringType();
+      fileName = null;
+      try { fileName = getPackageDir(rt.name()) + rt.sourceName(); }
+      catch (AbsentInformationException aie) {
+        // Don't know real source name:
+        //   assume source name is same as file name
+        fileName = null;
+        String className = rt.name().replace('.', File.separatorChar);
+        
+        // crop off the $ if there is one and anything after it
+        int indexOfDollar = className.indexOf('$');
+        if (indexOfDollar > -1) {
+          className = className.substring(0, indexOfDollar);
+        }
+        
+        for(File f: files) {
+          if (f.getName().equals(className+".java") ||
+              f.getName().equals(className+".dj0") ||
+              f.getName().equals(className+".dj1") ||
+              f.getName().equals(className+".dj2")) {
+            fileName = f.getName();
+            break;
+          }
+        }
+        if (fileName==null) {
+          fileName = className + ".java";
+        }
       }
       
-      fileName = className + ".java";
+      if (fileName!=null) {
+        // Check source root set (open files)
+        File f = _model.getSourceFile(fileName);
+        if (f != null) {
+          // Get a document for this file, forcing it to open
+          try { doc = _model.getDocumentForFile(f); }
+          catch (IOException ioe) {
+            // No doc, so don't notify listener
+          }
+        }
+      }
     }
     
-    // Check source root set (open files)
-    File f = _model.getSourceFile(fileName);
-    if (f != null) {
-      // Get a document for this file, forcing it to open
-      try { doc = _model.getDocumentForFile(f); }
-      catch (IOException ioe) {
-        // No doc, so don't notify listener
-      }
-    }
     return doc;
   }
   
@@ -695,6 +758,7 @@ public class JPDADebugger implements Debugger {
     * @throws DebugException if current thread is not suspended
     */
   public /* synchronized */ void scrollToSource(DebugStackData stackData) throws DebugException {
+    // System.out.println("scrollToSource DebugStackData: "+stackData.getLine());
     assert EventQueue.isDispatchThread();
     _ensureReady();
     if (_runningThread != null) {
@@ -714,15 +778,20 @@ public class JPDADebugger implements Debugger {
     catch (IncompatibleThreadStateException e) {
       throw new DebugException("Unable to find stack frames: " + e);
     }
+
+    final List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
     
+    // map Java to LL line numbers using LanguageLevelStackTraceMapper
     while (i.hasNext()) {
       StackFrame frame = i.next();
+
+      Location lll = getLLLocation(frame.location(), files);
       
-      if (frame.location().lineNumber() == stackData.getLine() &&
+      if (lll.lineNumber() == stackData.getLine() &&
           stackData.getMethod().equals(frame.location().declaringType().name() + "." +
-                                       frame.location().method().name()))
-      {
-        scrollToSource(frame.location(), false);
+                                       frame.location().method().name())) {
+        scrollToSource(lll, false);
       }
     }
   }
@@ -738,6 +807,7 @@ public class JPDADebugger implements Debugger {
     * @param bp the breakpoint
     */
   public /* synchronized */ void scrollToSource(Breakpoint bp, boolean shouldHighlight) {
+    // System.out.println("scrollToSource Breakpoint: "+bp.getLineNumber());
     openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), shouldHighlight);
   }
   
@@ -1146,6 +1216,9 @@ public class JPDADebugger implements Debugger {
   
   /** Scroll to the location specified by location.  Assumes lock on this is already held. */
   private void scrollToSource(Location location, boolean shouldHighlight) {
+    // try {
+    //   System.out.println("scrollToSource Location: "+location.lineNumber()+" "+location.sourceName()+" "+location.sourcePath());
+    // } catch(AbsentInformationException aie) { }
     assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = preloadDocument(location);
     openAndScroll(doc, location, shouldHighlight);
@@ -1157,6 +1230,9 @@ public class JPDADebugger implements Debugger {
     * @param location Location to display
     */
   private void openAndScroll(OpenDefinitionsDocument doc, Location location, boolean shouldHighlight) {
+    // try {
+    //   System.out.println("scrollToSource Location: "+location.lineNumber()+" "+location.sourceName()+" "+location.sourcePath()+" "+doc);
+    // } catch(AbsentInformationException aie) { }
     openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
   }
   
@@ -1166,14 +1242,18 @@ public class JPDADebugger implements Debugger {
     * @param line the line number to display
     * @param className the name of the appropriate class
     */
-  private void openAndScroll(final OpenDefinitionsDocument doc, final int line, String className, 
+  private void openAndScroll(final OpenDefinitionsDocument doc, int line, String className, 
                              final boolean shouldHighlight) {
     assert EventQueue.isDispatchThread();
     // Open and scroll if doc was found
     if (doc != null) { 
       doc.checkIfClassFileInSync();
+      if (LanguageLevelStackTraceMapper.isLLFile(doc.getRawFile())) {
+        // map J
+      }
+      final int llLine = line;
       // change UI if in sync in MainFrame listener
-      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadLocationUpdated(doc, line, shouldHighlight); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadLocationUpdated(doc, llLine, shouldHighlight); } });
     }
     else printMessage("  (Source for " + className + " not found.)");
   }
@@ -1511,9 +1591,13 @@ public class JPDADebugger implements Debugger {
         usedBreakpointLine = true;
       }
     }
-    if (!usedBreakpointLine ) {
+    if (!usedBreakpointLine) {
       try {
-        if (currThread.frameCount() > 0) scrollToSource(currThread.frame(0).location());
+        if (currThread.frameCount() > 0) {
+          final List<File> files = new ArrayList<File>();
+          for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+          scrollToSource(getLLLocation(currThread.frame(0).location(), files));
+        }
       }
       catch (IncompatibleThreadStateException itse) {
         throw new UnexpectedException(itse);
@@ -1802,5 +1886,58 @@ public class JPDADebugger implements Debugger {
   public LanguageLevelStackTraceMapper getLLSTM(){
     // use LLSTM from compiler model.
     return _model.getCompilerModel().getLLSTM();
+  }
+  
+  /** A Location that delegates to another location in all cases except for line number,
+    * source path and source name. */
+  protected static class DelegatingLocation implements Location {
+    protected Location _delegee;
+    protected String _sourceName;
+    protected String _sourcePath;
+    protected int _lineNumber;
+    public DelegatingLocation(String sourceName, int lineNumber, Location delegee) {
+      _sourceName = sourceName;
+      try {
+        _sourcePath = delegee.sourcePath();
+        int pos = _sourcePath.lastIndexOf(File.separator);
+        if (pos>=0) {
+          _sourcePath = _sourcePath.substring(0, pos) + File.separator +_sourceName;
+        }
+        else {
+          _sourcePath = _sourceName;
+        }
+      }
+      catch(AbsentInformationException e) {
+        _sourcePath = null;
+      }
+      _lineNumber = lineNumber;
+      _delegee = delegee;
+    }
+    public long codeIndex() { return _delegee.codeIndex(); }
+    public ReferenceType declaringType() { return _delegee.declaringType(); }
+    public boolean equals(Object obj) {
+      if (!(obj instanceof DelegatingLocation)) return false;
+      DelegatingLocation other = (DelegatingLocation)obj;
+      return _sourceName.equals(other._sourceName)
+        && (_lineNumber==other._lineNumber)
+        && _delegee.equals(other._delegee); 
+    }
+    public int hashCode() { return _delegee.hashCode(); }
+    public int lineNumber() { return _lineNumber; }
+    public int lineNumber(String stratum) { return _lineNumber; /* Is this right? */ }
+    public Method method() { return _delegee.method(); }
+    public String sourceName() { return _sourceName; }
+    public String sourceName(String stratum) { return _sourceName; /* Is this right? */ }
+    public String sourcePath() throws AbsentInformationException {
+      if (_sourcePath!=null) return _sourcePath;
+      else return _delegee.sourcePath();
+    }
+    public String sourcePath(String stratum) throws AbsentInformationException {
+      if (_sourcePath!=null) return _sourcePath;
+      else return _delegee.sourcePath(); /* Is this right? */
+    }
+    public String toString() { return _delegee.toString(); }
+    public VirtualMachine virtualMachine() { return _delegee.virtualMachine(); } 
+    public int compareTo(Location o) { return _delegee.compareTo(o); }
   }
 }
