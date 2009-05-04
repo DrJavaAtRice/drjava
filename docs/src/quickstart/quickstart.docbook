@@ -266,7 +266,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<listitem><formalpara>
 	<title>Search Selection Only:</title>
-	<para>TODO</para>
+	<para>Only used with Find/Replace All. Allows user to find/replace all instances of a word or phrase within a highlighted portion of the document. </para>
 	</formalpara></listitem>
 
 	</itemizedlist>
@@ -910,12 +910,12 @@ read -1, indicating of the end of the stream.</para>
 
 	<listitem><formalpara>
 		<title>Auto-Import after Breakpoint/Step:</title>
-		<para>TODO</para>
+		<para>Allows you full usage of any default imported classes within the Interactions pane from DrJava Preferences or any imported classes from the Pane while the program was halted at a previous breakpoint. </para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>	
 		<title>Auto-Step Rate in ms:</title>
-		<para>TODO</para>
+		<para>The delay interval at which the automatic trace steps into each line of code in the program.</para>
 	</formalpara></listitem>
 	</itemizedlist>
 

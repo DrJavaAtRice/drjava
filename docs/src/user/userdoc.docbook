@@ -220,7 +220,7 @@ Developed by:   Java Programming Languages Team
  <para>There are also four checkboxes to customize each search: "Match Case","Search All Documents", "Whole Word", "No Comments/Strings", and "No Test Cases".  Unchecking the first box will return case-insensitive results, checking the second box will tell DrJava to search through all of the open documents in sequence, checking the third box will ignore partial matches (i.e. it will ignore "hello" if the search text is "lo"), and checking the last box ignores instances found within comments and strings. Checking the "No Test Case" box will cause Java to ignore matches in files with test cases. Currently, this is being determined by examining the file name: If the file name ends with "Test.java", it is considered a test case and will be skilled.</para>
  <para>Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.
 DrJava can also search across more than one line of text (i.e. the search string can include line breaks). For detailed instructions on its usage, see the "Find and Replace" section in the Quickstart documents under the Help menu.</para>
- <para>The last checkbox is "Search Selection Only". TODO</para>
+ <para>The last checkbox is "Search Selection Only". Checking this checkbox, allows the user only to Find/Replace All and disables the Search All Documents as well as No Test Cases checkboxes. The search will be limited to a highlighted portion of the document. The Find Again option after Find All with Search Selection Only has been checked only searches within the selected region likewise.  </para>
 
       <formalpara>
  <title>Go to Line</title>
@@ -243,7 +243,7 @@ DrJava can also search across more than one line of text (i.e. the search string
   <para>With Fast Switching, you can easily switch between recently active documents. Simple hold down <keycode>Control</keycode>, and press the <keycode>Back Quote</keycode> key to navigate through the filenames of recently active documents. Release the <keycode>Control</keycode> key to switch to the document with that filename. </para>
       </formalpara>
 
-      <formalpara>
+     <formalpara>
  <title>Line Numbering</title>
  <para>DrJava displays the cursor's current line number and column number on the right side of the status bar at the bottom of the window.  The line number is shown on the left and starts at 1, and the column number is shown on the right and starts at 0.</para>
       </formalpara>
@@ -516,7 +516,7 @@ File f
 
       <formalpara>
 	<title>Default Imports</title>
-	<para>TODO</para></formalpara>
+	<para>Under the DrJava's Preferences, the user is allowed to add or remove any classes that the user would like to import for the Interactions Pane, after the pane has been reset. After the Interactions Pane has been reset, the user acquires full access to these imported classes in the Interactions Pane. The user specifies what class to add or remove through the add/remove buttons. </para></formalpara>
     </section>
   </chapter>
 
@@ -846,7 +846,7 @@ learning tool.</para>
 
       <formalpara>
  <title>Automatic Trace</title>
- <para>TODO</para>
+ <para>The Automatic Trace command will step into all lines of the code without stopping. In the middle of an automatic trace, the user has the option to disable the automatic trace by pressing the disable automatic trace button accordingly. If automatic trace is not diabled within the progression of the trace, the debugger will automatically end the trace when the program terminates. In addition, the user also has the ability to set the delay interval for stepping into a different line of the code. This option can be located under DrJava's preferences. </para>
       </formalpara>
     </section>
 
@@ -1558,14 +1558,14 @@ public class Student {
  <varlistentry>
    <term>Auto-Import after Breakpoint/Step (<varname>debug.auto.import = true</varname>)</term>
 	<listitem>
-		<para>TODO</para>
+		<para>Any default import classes from DrJava Preferences Panel as well as any imported classes used in the Interactions Pane from previous breakpoints will also be available for usage in the Interactions Pane after stepping into another breakpoint. </para>
 	</listitem>
  </varlistentry>
 
  <varlistentry>
    <term>Auto-Step Rate in ms (<varname>auto.step.rate = 1000</varname>)</term>
 	<listitem>
-		<para>TODO</para>
+		<para>The delay interval at which Automatic Trace steps into every single line of code of the program. </para>
 	</listitem>
  </varlistentry>
 
