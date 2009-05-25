@@ -301,16 +301,22 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/local/java"), roots);
     addIfDir(new File("/usr/local/j2se"), roots);
     addIfDir(new File("/usr/local"), roots);
-    
+
+    /* Entries for Linux java packages */
+    addIfDir(new File("/usr/lib/jvm"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
+
     /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 
      * remember insertion order
      */
     LinkedHashSet<File> jars = new LinkedHashSet<File>();
-    // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (as in OS X)
+    // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
-                                                 IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"));
-    
+                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
+                                                               IOUtil.regexCanonicalCaseFilePredicate("java.*")));
     for (File root : roots) {
       for (File subdir : IOUtil.attemptListFilesAsIterable(root, subdirFilter)) {
         addIfFile(new File(subdir, "lib/tools.jar"), jars);

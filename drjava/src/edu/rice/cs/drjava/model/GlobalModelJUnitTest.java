@@ -53,7 +53,7 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static Log _log = new Log("MasterSlave.txt", false);
+  private static Log _log = new Log("GlobalModelJUnit.txt", false);
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = false;
@@ -187,10 +187,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "   public void testAB() { assertTrue(\"this is true\", true); } " +
     " }";
   
-  /** Creates a test suite for JUnit to run.
-    * @return a test suite based on the methods in this class
-    */
-  public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
+//  /** Creates a test suite for JUnit to run.
+//    * @return a test suite based on the methods in this class
+//    */
+//  public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
   
   /** Tests that a JUnit file with no errors is reported to have no errors. */
   public void testNoJUnitErrors() throws Exception {
