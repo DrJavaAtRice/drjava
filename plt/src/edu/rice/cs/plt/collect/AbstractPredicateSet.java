@@ -53,8 +53,8 @@ public abstract class AbstractPredicateSet<T> extends AbstractSet<T> implements 
    */
   @Override public abstract boolean contains(Object o);
   
-  /** Returns {@code size(1) != 0}. */
-  @Override public boolean isEmpty() { return size(1) != 0; }
+  /** Returns {@code size(1) == 0}. */
+  @Override public boolean isEmpty() { return size(1) == 0; }
   
   /** Returns {@code size(Integer.MAX_VALUE)}. */
   public int size() { return size(Integer.MAX_VALUE); }
