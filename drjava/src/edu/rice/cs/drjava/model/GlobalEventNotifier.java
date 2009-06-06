@@ -608,4 +608,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     try { for (GlobalModelListener l : _listeners) { l.browserChanged(); } }
     finally { _lock.endRead(); } 
   }
+
+  public void updateCurrentLocationInDoc() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.updateCurrentLocationInDoc(); } }
+    finally { _lock.endRead(); } 
+  }
 }

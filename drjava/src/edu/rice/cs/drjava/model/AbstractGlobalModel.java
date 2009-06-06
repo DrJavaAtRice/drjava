@@ -160,7 +160,6 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
   public static final Log _log = new Log("GlobalModel.txt", false);
-  public static final int DIFF_THRESHOLD = 5;
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -2444,35 +2443,39 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File f = new File(root + System.getProperty("file.separator") + fileName);
     return f.exists() ? f : FileOps.NULL_FILE;
   }
-  
+
   /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null. */
   public void addToBrowserHistory() {
+    addToBrowserHistory(false);
+  }
+
+  /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null.
+    * @param before true if the location should be inserted before the current region */
+  public void addToBrowserHistory(boolean before) {
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory()");
+    _notifier.updateCurrentLocationInDoc();
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: after updateCurrentLocationInDoc");
     final OpenDefinitionsDocument doc = getActiveDocument();
 //    assert doc != null && EventQueue.isDispatchThread();
     
     Position startPos = null;
     Position endPos = null;
     try {
-      int pos = doc.getCurrentLocation();
-//      System.err.println("addToBrowserHistory() called for lineNum " + doc.getLineOfOffset(pos) + " in " + doc);
-      BrowserDocumentRegion current = _browserHistoryManager.getCurrentRegion();
-      if (current != null) {
-        OpenDefinitionsDocument currentDoc = current.getDocument();
-        if (doc == currentDoc) {
-          int lineNum = doc.getLineOfOffset(pos);
-          int currentLineNum = currentDoc.getLineOfOffset(current.getStartOffset());
-//          System.err.println("lineNum = " + lineNum + " currentLineNum = " + currentLineNum);
-          if (Math.abs(lineNum - currentLineNum) <= DIFF_THRESHOLD) return;
-        }
-      }
+      int pos = doc.getCaretPosition();
       startPos = doc.createPosition(pos);
       endPos = startPos; // was doc.createPosition(doc._getLineEndPos(pos));
     }
     
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-    
-//        Utilities.show("Adding (" + doc + ", " + startPos + ", " + endPos + ") to browser history");
-    _browserHistoryManager.addBrowserRegion(new BrowserDocumentRegion(doc, startPos, endPos), _notifier);
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: startPos = "+startPos.getOffset());
+    BrowserDocumentRegion r = new BrowserDocumentRegion(doc, startPos, endPos);
+    if (before) {
+      _browserHistoryManager.addBrowserRegionBefore(r, _notifier);
+    }
+    else {
+      _browserHistoryManager.addBrowserRegion(r, _notifier);
+    }
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: "+_browserHistoryManager);
   }
   
   /** throws an UnsupportedOperationException */
@@ -3373,9 +3376,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return offset;
     }
     
+    protected int _caretPosition = 0;
+    
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
     public void setCurrentLocation(int location) { 
-//      _caretPosition = location; 
+//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("setCurrentLocation "+this+": "+location);
+      _caretPosition = location; 
       getDocument().setCurrentLocation(location); 
     }
     
@@ -3384,8 +3390,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    public boolean indentInProgress() { return getDocument().indentInProgress(); }
     
-//    /** @return the caret position as set by the view. */
-//    public int getCaretPosition() { return _caretPosition; }
+    /** @return the caret position as set by the view. */
+    public int getCaretPosition() { return _caretPosition; }
     
     /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.  Only runs in the
       * event thread.

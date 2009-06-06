@@ -288,7 +288,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Listens to any undoable events in the document, and adds them to the undo manager.  Must be done in the view 
     * because the edits are stored along with the caret position at the time of the edit.   Correction: document
-    * cursor position should be used instead of caret position.  Perhaps this listener shoud be attached to the 
+    * cursor position should be used instead of caret position.  Perhaps this listener should be attached to the 
     * document.
     */
   private final UndoableEditListener _undoListener = new UndoableEditListener() {
@@ -390,10 +390,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       // Only indent if in code
 
-      _doc.setCurrentLocation(getCaretPosition());
+      updateCurrentLocationInDoc();
       ReducedModelState state = _doc.getStateAtCurrent();
       if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
     }
+  }
+  
+  /** Updates the current location stored in the document by setting it to the caret position. */
+  public void updateCurrentLocationInDoc() {
+    _doc.setCurrentLocation(getCaretPosition());
   }
 
   /** Special action to take care of case when tab key is pressed. */
@@ -700,7 +705,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       public void actionPerformed( ActionEvent ae) {
         _mainFrame.hourglassOn();
         try{
-          _doc.setCurrentLocation(getCaretPosition());
+          updateCurrentLocationInDoc();
           _commentLines();
         }
         finally{ _mainFrame.hourglassOff(); }
@@ -711,7 +716,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem uncommentLinesItem = new JMenuItem("Uncomment Line(s)");
     uncommentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _doc.setCurrentLocation(getCaretPosition());
+        updateCurrentLocationInDoc();
         _uncommentLines();
       }
     });
@@ -722,7 +727,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem gotoFileUnderCursorItem = new JMenuItem("Go to File Under Cursor");
     gotoFileUnderCursorItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _doc.setCurrentLocation(getCaretPosition());
+        updateCurrentLocationInDoc();
         _mainFrame._gotoFileUnderCursor();
       }
     });
@@ -901,7 +906,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // need to be run.
     try {
       // Sync caret with location before switching
-      getOpenDefDocument().setCurrentLocation(getCaretPosition());
+      updateCurrentLocationInDoc();
       
       // Remove any error highlighting in the old def pane
       removeErrorHighlight();

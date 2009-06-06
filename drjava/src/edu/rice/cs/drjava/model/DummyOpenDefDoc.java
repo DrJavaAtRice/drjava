@@ -442,6 +442,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public int getLineOfOffset(int offset) { throw new UnsupportedOperationException("Dummy method"); }
   public int getOffsetOfLine(int line) { throw new UnsupportedOperationException("Dummy method"); } 
-  
+  /** @return the caret position as set by the view. */
+  public int getCaretPosition() { throw new UnsupportedOperationException("Dummy method"); }
+
   public boolean containsClassOrInterfaceOrEnum() throws BadLocationException { throw new UnsupportedOperationException("Dummy method"); }
 }

@@ -932,9 +932,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void activeDocumentChanged(OpenDefinitionsDocument active) { /* this event is not directly tested */ }
     public void activeDocumentRefreshed(OpenDefinitionsDocument active) { /* this event is not directly tested */ }    
-    public void focusOnDefinitionsPane() {  /* this event is not dircectly tested */ }
-    public void focusOnLastFocusOwner() {  /* this event is not dircectly tested */ }
-    public void browserChanged() { /* this event is not dircectly tested */ }
+    public void focusOnDefinitionsPane() {  /* this event is not directly tested */ }
+    public void focusOnLastFocusOwner() {  /* this event is not directly tested */ }
+    public void browserChanged() { /* this event is not directly tested */ }
+    public void updateCurrentLocationInDoc() { /* this event is not directly tested */ }
   }
   
   public static class InteractionListener extends TestListener {

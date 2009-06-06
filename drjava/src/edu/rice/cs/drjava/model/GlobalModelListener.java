@@ -150,5 +150,8 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   
   /** Called when the a region is added to the browswing history. */
   public void browserChanged();
+  
+  /** Called when the current location in the document needs to be synchronized to the actual location displayed in the view. */
+  public void updateCurrentLocationInDoc();
 }
 

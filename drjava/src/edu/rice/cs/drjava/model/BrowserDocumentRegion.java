@@ -50,8 +50,8 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   private final int _index;                        // unique sequence number for this region
   protected final OpenDefinitionsDocument _doc;    // document for this region
   protected final File _file;                      // file for this region
-  protected final Position _startPosition;         // start position for this region
-  protected final Position _endPosition;           // final position for this region
+  protected Position _startPosition;               // start position for this region
+  protected Position _endPosition;                 // final position for this region
   protected volatile DefaultMutableTreeNode _treeNode;
   
   /** Create a new simple document region.
@@ -99,7 +99,13 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
 //  /** @return the end offset */
 //  public Position getEndPosition() { return _endPosition; }
 
+  public void update(BrowserDocumentRegion other) {
+    if (other.getDocument()!=_doc) throw new IllegalArgumentException("Regions must have the same document.");
+    _startPosition = other._startPosition;
+    _endPosition = other._endPosition;
+  }
+  
   public String toString() {
-    return _doc.toString() + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
+    return _doc.toString() + "[" + getStartOffset() + "]";
   }
 }
