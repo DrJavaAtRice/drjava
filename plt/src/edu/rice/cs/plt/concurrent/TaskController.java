@@ -304,26 +304,10 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     public abstract R get(long timeout, TimeUnit u) throws InterruptedException, ExecutionException, TimeoutException;
   }
   
-  /** Any state that must simply wait to produce a value. */
+  /** Any state in which the task must be started before it can complete. */
   protected abstract class WaitingState extends State {
-    public R get() throws InterruptedException, ExecutionException {
-      _done.ensureSignaled();
-      return state.get().get();
-    }
-    public R get(long timeout, TimeUnit u) throws InterruptedException, ExecutionException, TimeoutException {
-      _done.ensureSignaled(timeout, u);
-      return state.get().get(); // will not block, so can't timeout
-    }
-  }
-  
-  /** Initial state. */
-  protected class FreshState extends State {
-    public final Status status() { return Status.PAUSED; }
-    public final void start() {
-      if (state.compareAndSet(this, new FreshStartingState())) { doStart(); }
-      else { state.get().start(); }
-    }
-    public final boolean cancel(boolean stopRunning) {
+    public Status status() { return Status.PAUSED; }
+    public boolean cancel(boolean stopRunning) {
       if (state.compareAndSet(this, new CanceledState())) {
         _done.signal();
         discard();
@@ -339,8 +323,28 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     }
   }
   
+  /** Any state in which the task has already been asked to compute a result. */
+  protected abstract class ComputingState extends State {
+    public R get() throws InterruptedException, ExecutionException {
+      _done.ensureSignaled();
+      return state.get().get();
+    }
+    public R get(long timeout, TimeUnit u) throws InterruptedException, ExecutionException, TimeoutException {
+      _done.ensureSignaled(timeout, u);
+      return state.get().get(); // will not block, so can't timeout
+    }
+  }
+  
+  /** Initial state. */
+  protected class FreshState extends WaitingState {
+    public void start() {
+      if (state.compareAndSet(this, new FreshStartingState())) { doStart(); }
+      else { state.get().start(); }
+    }
+  }
+  
   /** {@code FreshState.start()} has been invoked, but startup is not yet complete. */ 
-  protected abstract class StartingState extends WaitingState {
+  protected abstract class StartingState extends ComputingState {
     public Status status() { return Status.PAUSED; }
     public void start() {}
     public boolean cancel(boolean stopRunning) {
@@ -354,6 +358,7 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     public abstract void started();
   }
   
+  /** Simple instance of StartingState. */
   protected class FreshStartingState extends StartingState {
     public void started() {}
   }
@@ -365,7 +370,7 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
   }
   
   /** Startup has completed and we're waiting for a result. */
-  protected class RunningState extends WaitingState {
+  protected class RunningState extends ComputingState {
     public Status status() { return Status.RUNNING; }
     public void start() {}
     public boolean cancel(boolean stopRunning) {
@@ -378,7 +383,7 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
   }
   
   /** Canceled while running; waiting for termination to complete. */
-  protected class CancelingState extends WaitingState {
+  protected class CancelingState extends ComputingState {
     public Status status() { return Status.RUNNING; }
     public void start() {}
     public boolean cancel(boolean stopRunning) { return stopRunning; }
@@ -402,7 +407,7 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     public R get(long timeout, TimeUnit u) { return _result; }
   }
   
-  /** Finished with an exception. */
+  /** Finished with an ExecutionException. */
   protected class ExecutionExceptionState extends FinishedState {
     private ExecutionException _e;
     public ExecutionExceptionState(ExecutionException e) { _e = e; }
@@ -410,7 +415,7 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     public R get(long timeout, TimeUnit u) throws ExecutionException { throw _e; }
   }
   
-  /** Finished with an exception. */
+  /** Finished with a RuntimeException. */
   protected class InternalExceptionState extends FinishedState {
     private RuntimeException _e;
     public InternalExceptionState(RuntimeException e) { _e = e; }
@@ -418,6 +423,7 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     public R get(long timeout, TimeUnit u) throws ExecutionException { throw _e; }
   }
   
+  /** Has been successfully canceled. */
   protected class CanceledState extends State {
     public Status status() { return Status.CANCELED; }
     public void start() { throw new CancellationException("Task is canceled"); }

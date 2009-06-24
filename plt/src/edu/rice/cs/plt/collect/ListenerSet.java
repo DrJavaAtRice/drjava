@@ -118,11 +118,6 @@ public class ListenerSet<T> extends DelegatingSet<Runnable1<? super T>> implemen
       return CollectUtil.removeAll(_delegate, removeList);
     }
     
-    /** Remove all but the given listeners from the set. */
-    public boolean retainAll(Iterable<Runnable1<? super T>> retainList) {
-      return CollectUtil.retainAll(_delegate, retainList);
-    }
-    
   }
   
   /** Call the constructor (allows {@code T} to be inferred). */

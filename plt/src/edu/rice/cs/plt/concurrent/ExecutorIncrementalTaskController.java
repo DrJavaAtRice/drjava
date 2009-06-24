@@ -31,40 +31,39 @@ public class ExecutorIncrementalTaskController<I, R> extends IncrementalTaskCont
   
   protected void doStart() {
     _continueMonitor.signal();
-    if (_t == null) { // doStart may be called in the initial state or after a pause
-      _executor.execute(new Runnable() {
-        public void run() {
-          _t = Thread.currentThread();
-          started();
-          try {
-            while (!_task.isResolved()) {
-              authorizeContinue();
-              stepped(_task.step());
-            }
+    _executor.execute(new Runnable() {
+      public void run() {
+        _t = Thread.currentThread();
+        started();
+        try {
+          while (!_task.isResolved()) {
             authorizeContinue();
-            finishedCleanly(_task.value());
+            stepped(_task.step());
           }
-          catch (WrappedException e) {
-            if (e.getCause() instanceof InterruptedException) { stopped(); }
-            else { finishedWithTaskException(e); }
-          }
-          catch (RuntimeException e) { finishedWithTaskException(e); }
-          catch (InterruptedException e) { stopped(); }
-          catch (Throwable t) { finishedWithImplementationException(new WrappedException(t)); }
+          authorizeContinue();
+          finishedCleanly(_task.value());
         }
-        private void authorizeContinue() throws InterruptedException {
-          if (Thread.interrupted()) { throw new InterruptedException(); }
-          if (!_continueMonitor.isSignaled()) {
-            paused();
-            _continueMonitor.ensureSignaled();
-            started();
-          }
+        catch (WrappedException e) {
+          if (e.getCause() instanceof InterruptedException) { stopped(); }
+          else { finishedWithTaskException(e); }
         }
-      });
-    }
+        catch (RuntimeException e) { finishedWithTaskException(e); }
+        catch (InterruptedException e) { stopped(); }
+        catch (Throwable t) { finishedWithImplementationException(new WrappedException(t)); }
+      }
+      private void authorizeContinue() throws InterruptedException {
+        if (Thread.interrupted()) { throw new InterruptedException(); }
+        if (!_continueMonitor.isSignaled()) {
+          paused();
+          _continueMonitor.ensureSignaled();
+          started();
+        }
+      }
+    });
   }
 
   protected void doPause() { _continueMonitor.reset(); }
+  protected void doResume() { _continueMonitor.signal(); }
   protected void doStop() { _t.interrupt(); }
   protected void discard() { _executor = null; _task = null; _continueMonitor = null; _t = null; }
   

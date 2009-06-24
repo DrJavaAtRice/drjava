@@ -130,17 +130,11 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
       else if (s instanceof TaskController.CanceledState) {
         throw new CancellationException("Task is canceled");
       }
-      else { // ignore other fresh, finished, pausing, or canceling states
+      else { // ignore other fresh, paused, finished, pausing, or canceling states
         success = true;
       }
     } while (!success);
   }
-  
-  /**
-   * Begin <em>or resume</em> computation and call {@link #started}.  If starting does not occur immediately
-   * (for example, blocking occurs first), the {@code started()} call may occur in a different thread.
-   */
-  protected abstract void doStart();
   
   /**
    * Pause computation and call {@link #paused}.  If pausing does not occur immediately, the {@code paused()}
@@ -151,10 +145,16 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
    */
   protected abstract void doPause();
   
+  /**
+   * Resume computation (after a pause) and call {@link #started}.  If starting does not occur immediately
+   * (for example, blocking occurs first), the {@code started()} call may occur in a different thread.
+   */
+  protected abstract void doResume();
+  
   protected void paused() {
     boolean kept = false;
     State current = state.get();
-    State next = new FreshState();
+    State next = new PausedState();
     while (current instanceof IncrementalTaskController.PausingState && !kept) {
       // must loop because a transition between PausingStates could occur concurrently
       // can use weakCompareAndSet since we're already in a while loop
@@ -176,7 +176,16 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
     _intermediateListeners.run(intermediateResult);
   }
   
-  protected abstract class PausingState extends WaitingState {
+  /** The tasked has been started and then paused. */
+  protected class PausedState extends WaitingState {
+    public final void start() {
+      if (state.compareAndSet(this, new FreshStartingState())) { doResume(); }
+      else { state.get().start(); }
+    }
+  }
+  
+  /** pause() has been invoked on a RunningState, but the task has not yet paused. */
+  protected abstract class PausingState extends ComputingState {
     public Status status() { return Status.RUNNING; }
     public boolean cancel(boolean stopRunning) {
       if (stopRunning) {
@@ -189,6 +198,7 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
     public abstract void paused();
   }
   
+  /** Simple instance of PausingState. */
   protected class FreshPausingState extends PausingState {
     public void start() {
       if (!state.compareAndSet(this, new StartedPausingState())) { state.get().start(); }
@@ -202,17 +212,20 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
     public void paused() {}
   }
   
+  /** A PausingState that has been canceled while waiting for the pause to complete. */
   protected class CanceledPausingState extends PausingState {
     public void start() {} // we're already committed to canceling
     public boolean cancel(boolean stopRunning) { return stopRunning; }
     public void paused() { state.get().cancel(true); }
   }
   
+  /** A PausingState that has been started while waiting for the pause to complete. */
   protected class StartedPausingState extends PausingState {
     public void start() {}
     public void paused() { state.get().start(); }
   }
   
+  /** A StartingState that has been paused while waiting for startup to complete. */
   protected class PausedStartingState extends StartingState {
     public void start() {
       if (!state.compareAndSet(this, new FreshStartingState())) { state.get().start(); }

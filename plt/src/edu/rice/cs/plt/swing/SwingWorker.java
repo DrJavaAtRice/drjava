@@ -163,10 +163,10 @@ public abstract class SwingWorker<R, I> extends IncrementalTaskController<I, R> 
   
   protected final void doStart() {
     _continueMonitor.signal();
-    if (_workerThread.getState() == Thread.State.NEW) { _workerThread.start(); }
+    _workerThread.start();
   }
   protected final void doPause() { _continueMonitor.reset(); }
+  protected final void doResume() { _continueMonitor.signal(); }
   protected final void doStop() { _workerThread.interrupt(); }
-  
   
 }

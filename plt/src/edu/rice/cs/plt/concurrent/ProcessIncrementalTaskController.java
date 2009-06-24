@@ -120,71 +120,70 @@ public class ProcessIncrementalTaskController<I, R> extends IncrementalTaskContr
     _commandSink = null;
   }
   
+  
   protected void doStart() {
-    if (_t != null) { writeCommand(Command.RUN); }
-    else {
-      _executor.execute(new Runnable() {
-        public void run() {
-          _t = Thread.currentThread();
+    _executor.execute(new Runnable() {
+      public void run() {
+        _t = Thread.currentThread();
+        try {
+          // stop if the task was canceled before starting
+          if (Thread.interrupted()) { throw new InterruptedException(); }
+          Process p = _jvmBuilder.start(Runner.class.getName(), IterUtil.<String>empty());
           try {
-            // stop if the task was canceled before starting
-            if (Thread.interrupted()) { throw new InterruptedException(); }
-            Process p = _jvmBuilder.start(Runner.class.getName(), IterUtil.<String>empty());
+            InputStream in = p.getInputStream();
+            // skip prefix
+            int matching = 0;
+            while (matching < Runner.PREFIX.length) {
+              int read = in.read();
+              if (read == -1) { throw new EOFException("Data prefix not found"); }
+              else if ((byte) read == Runner.PREFIX[matching]) { matching++; } // cast handles negatives
+              else if ((byte) read == Runner.PREFIX[0]) { matching = 1; } // cast handles negatives
+              else { matching = 0; }
+            }
+            // prefix has been matched
+            ObjectInputStream objIn = new ObjectInputStream(in);
             try {
-              InputStream in = p.getInputStream();
-              // skip prefix
-              int matching = 0;
-              while (matching < Runner.PREFIX.length) {
-                int read = in.read();
-                if (read == -1) { throw new EOFException("Data prefix not found"); }
-                else if ((byte) read == Runner.PREFIX[matching]) { matching++; } // cast handles negatives
-                else if ((byte) read == Runner.PREFIX[0]) { matching = 1; } // cast handles negatives
-                else { matching = 0; }
-              }
-              // prefix has been matched
-              ObjectInputStream objIn = new ObjectInputStream(in);
+              ObjectOutputStream objOut = new ObjectOutputStream(p.getOutputStream());
               try {
-                ObjectOutputStream objOut = new ObjectOutputStream(p.getOutputStream());
-                try {
-                  objOut.writeObject(_task);
-                  objOut.writeObject(Command.RUN);
-                  objOut.flush();
-                  _commandSink = objOut;
-                  
-                  Result r;
-                  do {
-                    r = (Result) objIn.readObject();
-                    r.handle(ProcessIncrementalTaskController.this);
-                  } while (!(r instanceof FinishResult));
-                  if (r instanceof CleanFinishResult) {
-                    // let the process run if we finished cleanly
-                    Runnable1<? super Process> onExit = _onExit; // keep local copy so it can be discarded
-                    if (onExit != null) { p.waitFor(); onExit.run(p); }
-                  }
-                  else { p.destroy(); }
+                objOut.writeObject(_task);
+                objOut.writeObject(Command.RUN);
+                objOut.flush();
+                _commandSink = objOut;
+                
+                Result r;
+                do {
+                  r = (Result) objIn.readObject();
+                  r.handle(ProcessIncrementalTaskController.this);
+                } while (!(r instanceof FinishResult));
+                if (r instanceof CleanFinishResult) {
+                  // let the process run if we finished cleanly
+                  Runnable1<? super Process> onExit = _onExit; // keep local copy so it can be discarded
+                  if (onExit != null) { p.waitFor(); onExit.run(p); }
                 }
-                finally { objOut.close(); }
+                else { p.destroy(); }
               }
-              finally { objIn.close(); }
+              finally { objOut.close(); }
             }
-            catch (EOFException e) {
-              p.destroy();
-              throw new IOException("Unable to run process; class path may need to be adjusted");
-            }
-            // destroy the process on an exception, but let it run if we completed cleanly
-            catch (Throwable e) { p.destroy(); throw e; }
+            finally { objIn.close(); }
           }
-          catch (InterruptedException e) { /* ignore -- indicates error occurred in another thread */ }
-          catch (InterruptedIOException e) { /* ignore -- indicates error occurred in another thread */ }
-          catch (RuntimeException e) { finishedWithImplementationException(e); }
-          catch (Throwable t) { finishedWithImplementationException(new WrappedException(t)); }
+          catch (EOFException e) {
+            p.destroy();
+            throw new IOException("Unable to run process; class path may need to be adjusted");
+          }
+          // destroy the process on an exception, but let it run if we completed cleanly
+          catch (Throwable e) { p.destroy(); throw e; }
         }
-      });
-    }
+        catch (InterruptedException e) { /* ignore -- indicates error occurred in another thread */ }
+        catch (InterruptedIOException e) { /* ignore -- indicates error occurred in another thread */ }
+        catch (RuntimeException e) { finishedWithImplementationException(e); }
+        catch (Throwable t) { finishedWithImplementationException(new WrappedException(t)); }
+      }
+    });
   }
   
   protected void doStop() { writeCommand(Command.CANCEL); }
   protected void doPause() { writeCommand(Command.PAUSE); }
+  protected void doResume() { writeCommand(Command.RUN); }
   
   private void writeCommand(Command c) {
     try { _commandSink.writeObject(c); _commandSink.flush(); }
