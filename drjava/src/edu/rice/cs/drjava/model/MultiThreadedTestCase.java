@@ -80,6 +80,15 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     _testFailed = true;
     fail(s);
   }
+
+  /** This method prints the failure message to System.out and kills the JVM.  Just calling fail() doesn't always cause
+    * the test to fail, because the listener is often called from another thread.
+    */
+  protected static void listenerFail(Throwable t) {
+    java.io.StringWriter sw = new java.io.StringWriter();
+    t.printStackTrace(new java.io.PrintWriter(sw));
+    listenerFail(sw.toString());
+  }
   
   /** Join with a thread, i.e. continue only after that thread has terminated.  If the join is interrupted, an 
     * UnexpectedException is thrown.

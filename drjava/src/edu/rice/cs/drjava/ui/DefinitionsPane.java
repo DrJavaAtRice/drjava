@@ -386,7 +386,21 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
      *  happen, then makes a call to indentLine().
      */
     public void actionPerformed(ActionEvent e) {
-      _defaultAction.actionPerformed(e);
+      // this is a hack to get braces {} to work on Icelandic keyboard (bug 2813140)
+      // I don't understand why {} are not entered using the default action
+      if ((e!=null) &&
+          (e.getActionCommand()!=null) &&
+          (e.getActionCommand().equals("{") || e.getActionCommand().equals("}"))) {
+        ActionEvent e2 = new ActionEvent(e.getSource(),
+                                         e.getID(),
+                                         e.getActionCommand(),
+                                         e.getWhen(),
+                                         ActionEvent.SHIFT_MASK);
+        _defaultAction.actionPerformed(e2);
+      }
+      else {
+        _defaultAction.actionPerformed(e);
+      }
       
       // Only indent if in code
 

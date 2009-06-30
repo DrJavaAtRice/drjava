@@ -195,7 +195,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
           defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0, enter, UNDEFINED));
           _frame.validate();
         }
-        catch(Throwable t) { listenerFail(t.getMessage()); }
+        catch(Throwable t) { listenerFail(t); }
         
         _log.log("Completed processing of keyEvents");
         
