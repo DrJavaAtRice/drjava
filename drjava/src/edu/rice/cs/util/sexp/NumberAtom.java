@@ -40,7 +40,7 @@ public class NumberAtom implements Atom {
   private double _num;
   private boolean _hasDecimals;
   public NumberAtom(int num){ 
-    _num = (double)num;
+    _num = num;
     _hasDecimals = false;
   }
   public NumberAtom(double num){

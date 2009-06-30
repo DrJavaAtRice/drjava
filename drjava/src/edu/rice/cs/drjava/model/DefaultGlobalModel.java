@@ -442,7 +442,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * up to date.  Fires an event to signal when execution is about to begin.
       * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
       * event thread execution!
-      * NOTE: the command to run is constructed using {@link MessageFormat}. That means that certain characters,
+      * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
       * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
       * To write curly braces, you need to enclose them in single quotes. Example:
       * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".

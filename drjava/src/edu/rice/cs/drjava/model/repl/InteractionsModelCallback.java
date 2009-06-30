@@ -101,7 +101,7 @@ public interface InteractionsModelCallback {
   public void replThrewException(String message);
   
   /** Signifies that the most recent interpretation was ended due to an exception being thrown.
-    * @param e The exception
+    * @param message The exception's message
     */
   public void replThrewException(String message, StackTraceElement[] stackTrace);
   

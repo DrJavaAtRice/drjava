@@ -559,7 +559,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    }
 //    else {
       @SuppressWarnings("unchecked")
-      Enumeration<DefaultMutableTreeNode> regionNodes = (Enumeration<DefaultMutableTreeNode>) docNode.children();
+      Enumeration<DefaultMutableTreeNode> regionNodes = docNode.children();
       
       // Create a new region node in this document node list, where regions are sorted by start offset.
       int startOffset = r.getStartOffset();

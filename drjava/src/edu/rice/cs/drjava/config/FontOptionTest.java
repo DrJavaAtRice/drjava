@@ -53,7 +53,8 @@ public final class FontOptionTest extends DrJavaTestCase {
     assertEquals(new Font("sansserif", 3, 10), fo.parse("sansserif-BOLDITALIC-10"));
 
     // Any failed parse attempts return some platform-dependent default font
-    assertTrue("defaults to a font", (fo.parse("true") instanceof Font));
+    Font f = fo.parse("true");
+    assertNotNull(f);
   }
 
   public void testFormat() {

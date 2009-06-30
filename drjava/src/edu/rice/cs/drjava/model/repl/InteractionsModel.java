@@ -644,8 +644,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * occurs in a Language Level file.
    * Overriden in DefaultInteractionModel when a GlobalModel is available
    * to make a LanguageLevelStackTraceMapper.
-   * @param t the throwable to replace line number and file name
-   * @return the same throwable.
+   * @param sT the stackTrace to replace line number and file name
+   * @return the same stackTrace.
    */
   public StackTraceElement[] replaceLLException(StackTraceElement[] sT) {
     return sT;
@@ -870,7 +870,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * The arguments get formatted as comma-separated list of strings enclosed in quotes.
     * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
     * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
-    * NOTE: the command to run is constructed using {@link MessageFormat}. That means that certain characters,
+    * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
     * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
     * To write curly braces, you need to enclose them in single quotes. Example:
     * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".

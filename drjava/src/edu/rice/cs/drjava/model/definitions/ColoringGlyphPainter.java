@@ -330,7 +330,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     final ColorOptionListener col = new ColorOptionListener();
     final FontOptionListener fol = new FontOptionListener();
     
-    edu.rice.cs.util.swing.Utilities.clearEventQueue(false);  // In some unit tests the following statement generated NullPointer exceptions.
+    // This can occur in the event thread, and so can't clear the event queue
+    // edu.rice.cs.util.swing.Utilities.clearEventQueue(false);  // In some unit tests the following statement generated NullPointer exceptions.
     
     // delete the old color listeners, because they're hanging onto the wrong coloringview
     // add color listeners to highlight keywords etc

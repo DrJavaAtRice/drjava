@@ -655,29 +655,30 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       MultiThreadedTestCase.listenerFail(message + header);
     }
     
-    public void assertEquals(String s, int expected, int actual) {
-      if (!hasClearedEventQueue) {
-        Utilities.clearEventQueue();
-        hasClearedEventQueue = true;
-      }
-      Assert.assertEquals(s, expected, actual);
-    }
-    
-    public void assertEquals(String s, boolean expected, boolean actual) {
-      if (!hasClearedEventQueue) {
-        Utilities.clearEventQueue();
-        hasClearedEventQueue = true;
-      }
-      Assert.assertEquals(s, expected, actual);
-    }
-
-    public void assertEquals(String s, Object expected, Object actual) {
-      if (!hasClearedEventQueue) {
-        Utilities.clearEventQueue();
-        hasClearedEventQueue = true;
-      }
-      Assert.assertEquals(s, expected, actual);
-    }
+// clearEventQueue must not be called from the event queue, and assertEquals shouldn't have unexpected side effects    
+//    public void assertEquals(String s, int expected, int actual) {
+//      if (!hasClearedEventQueue) {
+//        Utilities.clearEventQueue();
+//        hasClearedEventQueue = true;
+//      }
+//      Assert.assertEquals(s, expected, actual);
+//    }
+//    
+//    public void assertEquals(String s, boolean expected, boolean actual) {
+//      if (!hasClearedEventQueue) {
+//        Utilities.clearEventQueue();
+//        hasClearedEventQueue = true;
+//      }
+//      Assert.assertEquals(s, expected, actual);
+//    }
+//
+//    public void assertEquals(String s, Object expected, Object actual) {
+//      if (!hasClearedEventQueue) {
+//        Utilities.clearEventQueue();
+//        hasClearedEventQueue = true;
+//      }
+//      Assert.assertEquals(s, expected, actual);
+//    }
 
     public void assertFileNotFoundCount(int i) {
       assertEquals("number of times fileNotFound fired", i, fileNotFoundCount);
@@ -1092,7 +1093,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private volatile boolean _compileDone = false;        // records when compilaton is done
     private final Object _compileLock = new Object();     // lock for _compileDone
     
-    public void logCompileStart() {  _compileDone = false; }
+    public void logCompileStart() {
+      synchronized(_compileLock) { _compileDone = false; }
+    }
     
     public void waitCompileDone() throws InterruptedException {
       synchronized(_compileLock) {
@@ -1124,7 +1127,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-//      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertActiveCompilerChangedCount(0);
       assertCompileStartCount(1);

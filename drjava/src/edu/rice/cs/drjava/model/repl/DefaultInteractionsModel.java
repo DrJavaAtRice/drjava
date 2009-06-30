@@ -208,8 +208,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /**
    * overides method in InteractionModel.java and changes stackTrace for a
    * throwable if LL files are present
-   * @param t the throwable to change files name and line number in
-   * @return throwable with replaced file name and line number (if throwable occured in a .dj* file)
+   * @param stackTrace the stack trace to change files name and line number in
+   * @return stack trace with replaced file name and line number (if throwable occured in a .dj* file)
    */
   public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
     // use LLSTM from compiler model.

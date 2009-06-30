@@ -52,8 +52,6 @@ import javax.swing.text.Position;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-import edu.rice.cs.plt.object.ObjectUtil;
-
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest.  See the
   * WARNING below about hashing on this type or its subtypes.
   */

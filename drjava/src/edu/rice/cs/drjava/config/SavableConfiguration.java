@@ -71,12 +71,12 @@ public class SavableConfiguration extends Configuration {
     
     // Write the header
     Date date = new Date();
-    w.write((int)'#');
+    w.write('#');
     w.write(header, 0, header.length());
-    w.write((int)'\n');
-    w.write((int)'#');
+    w.write('\n');
+    w.write('#');
     w.write(date.toString(), 0, date.toString().length());
-    w.write((int)'\n');
+    w.write('\n');
 
     // Write each option
     for (OptionParser<?> key : map.keys()) {
@@ -104,7 +104,7 @@ public class SavableConfiguration extends Configuration {
           tmpString = buff.toString();
         }
         w.write(tmpString, 0, tmpString.length());
-        w.write((int)'\n');
+        w.write('\n');
 
         // p.setProperty(key.getName(),map.getString(key));
       }

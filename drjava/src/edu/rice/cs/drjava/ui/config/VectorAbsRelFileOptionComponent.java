@@ -107,7 +107,7 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
         }
         throw new IllegalArgumentException("Illegal column");
       }
-      public Class getColumnClass(int col) {
+      public Class<?> getColumnClass(int col) {
         switch(col) {
           case 0: return String.class;
           case 1: return Boolean.class;

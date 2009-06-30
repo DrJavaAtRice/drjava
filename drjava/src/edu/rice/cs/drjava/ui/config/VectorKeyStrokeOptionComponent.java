@@ -87,7 +87,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
         }
         throw new IllegalArgumentException("Illegal column");
       }
-      public Class getColumnClass(int col) {
+      public Class<?> getColumnClass(int col) {
         switch(col) {
           case 0: return String.class;
         }

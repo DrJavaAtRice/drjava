@@ -392,7 +392,6 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  @SuppressWarnings("fallthrough")
   public static void sanitizeJavadocCustomParams(JFrame parent,
                                                  String value) {
     boolean containsPrivate = (value.indexOf("-private")>=0);

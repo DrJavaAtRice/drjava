@@ -36,7 +36,6 @@
 
 package edu.rice.cs.util.swing;
 
-import java.awt.EventQueue;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -44,10 +43,9 @@ import java.awt.datatransfer.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
-
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 public class Utilities {
   
@@ -90,9 +88,11 @@ public class Utilities {
     * @param newEvents true if the method should also clear new events that were added by the events just cleared
     */
   public static void clearEventQueue(boolean newEvents) {
-    final EventQueue q = java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue();
+    final EventQueue q = Toolkit.getDefaultToolkit().getSystemEventQueue();
     do {
-      Utilities.invokeAndWait(new Runnable() { public void run() { } });
+      // it is an error to be in the event queue, so Utilties.invokeAndWait shouldn't be used
+      try { EventQueue.invokeAndWait(LambdaUtil.NO_OP); }
+      catch (Exception e) { throw new UnexpectedException(e); }
     } while(newEvents && (null!=q.peekEvent()));
   }
   
@@ -256,7 +256,6 @@ public class Utilities {
     * @return the PropertyChangeListener used to do the observation */
   public static PropertyChangeListener enableDisableWith(Action observable, final Action observer) {
     PropertyChangeListener pcl = new PropertyChangeListener() {
-      @SuppressWarnings("unchecked")
       public void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals("enabled")) { observer.setEnabled((Boolean)e.getNewValue()); }
       }

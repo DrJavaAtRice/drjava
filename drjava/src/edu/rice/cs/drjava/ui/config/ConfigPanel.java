@@ -156,8 +156,8 @@ public class ConfigPanel extends JPanel {
   public void resetToCurrent() {
     for (int i=0; i < _components.size(); i++){
       _components.get(i).resetToCurrent();
-      if (_components.get(i) instanceof VectorOptionComponent)
-        ((VectorOptionComponent)_components.get(i)).resizeTable();
+      if (_components.get(i) instanceof VectorOptionComponent<?>)
+        ((VectorOptionComponent<?>)_components.get(i)).resizeTable();
     }
   }
 
@@ -165,8 +165,8 @@ public class ConfigPanel extends JPanel {
   public void resetToDefault() {
     for (int i = 0; i < _components.size(); i++){
       _components.get(i).resetToDefault();
-      if (_components.get(i) instanceof VectorOptionComponent)
-        ((VectorOptionComponent)_components.get(i)).resizeTable();
+      if (_components.get(i) instanceof VectorOptionComponent<?>)
+        ((VectorOptionComponent<?>)_components.get(i)).resizeTable();
     }
   }
 }

@@ -179,7 +179,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
       public int getRowCount() { return 1; }
       public int getColumnCount() { return buttons.size(); }
       public Object getValueAt(int row, int column) { return buttons.get(column); }
-      public Class getColumnClass(int col) { return JButton.class; }
+      public Class<?> getColumnClass(int col) { return JButton.class; }
       public boolean isCellEditable(int row, int col) { return true; }
       public void setValueAt(Object value, int row, int col) { fireTableCellUpdated(row, col); }
     };
@@ -255,7 +255,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
           return other.getValueAt(row, column);
         }
       }
-      public Class getColumnClass(int col) {
+      public Class<?> getColumnClass(int col) {
         if (col==other.getColumnCount()) {
           return JButton.class;
         }

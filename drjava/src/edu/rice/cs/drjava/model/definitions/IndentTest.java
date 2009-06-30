@@ -65,9 +65,7 @@ public final class IndentTest extends DrJavaTestCase {
   private Integer indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
   
-  /** Standard constructor for IdentTest
-    * @param name {@inheritDoc}
-    */
+  /** Standard constructor for IdentTest */
   public IndentTest(String name) { super(name); }
   
   /** Sets up the member bindings common to all tests. */

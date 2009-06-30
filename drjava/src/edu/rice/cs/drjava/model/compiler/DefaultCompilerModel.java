@@ -62,6 +62,8 @@ import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.util.swing.ScrollableListDialog;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
   * (as opposed to testing DrJava).  TO DO: convert edu.rice.cs.util.Pair to edu.rice.cs.plt.tuple.Pair; requires 
   * making the same conversion in javalanglevels.
@@ -254,9 +256,10 @@ public class DefaultCompilerModel implements CompilerModel {
         }
       }
     }
-    finally { 
-      Utilities.invokeLater(new Runnable() { 
-        public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); } });
+    finally {
+      Utilities.invokeLater(new Runnable() {
+        public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
+      });
     }
   }
   

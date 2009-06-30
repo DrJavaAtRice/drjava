@@ -126,7 +126,7 @@ public class PendingRequestManager {
    * @param dda the DocumentDebugAction whose line needs to be adjusted
    * @return the correct line number for the .java file
    */
-  public int LLDDALineNum(DocumentDebugAction dda){
+  public int LLDDALineNum(DocumentDebugAction<?> dda){
     int line = dda.getLineNumber();
     File f = dda.getFile();
     

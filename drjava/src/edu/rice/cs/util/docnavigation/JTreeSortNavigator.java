@@ -244,9 +244,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     int i;
     for (i = 0; i < numChildren; i++ ) {
       parentsKid = ((DefaultMutableTreeNode) parent.getChildAt(i));
-      if (parentsKid instanceof InnerNode) {
+      if (parentsKid instanceof InnerNode<?,?>) {
         // do nothing, it's a folder
-      } else if(parentsKid instanceof LeafNode) {
+      } else if(parentsKid instanceof LeafNode<?>) {
         oldName = ((LeafNode<?>)parentsKid).getData().getName();
         if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
       } else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
@@ -273,12 +273,12 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     int i;
     for (i = 0; i < numChildren; i++) {
       parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
-      if (parentsKid instanceof InnerNode) {
+      if (parentsKid instanceof InnerNode<?,?>) {
         countFolders++;
         oldName = parentsKid.toString();
         if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
       } 
-      else if (parentsKid instanceof LeafNode) break;
+      else if (parentsKid instanceof LeafNode<?>) break;
       // we're out of folders, and starting into the files, so just break out.
       else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
     }
@@ -323,7 +323,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * the root, it does nothing to it.  Assumes that _model lock is already held.  Only executes in the event thread.
     */
   private void cleanFolderNode(DefaultMutableTreeNode node) {
-    if (node instanceof InnerNode && node.getChildCount() == 0) {
+    if (node instanceof InnerNode<?,?> && node.getChildCount() == 0) {
       DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
       _model.removeNodeFromParent(node);
       @SuppressWarnings("unchecked") InnerNode<?, ItemT> typedNode = (InnerNode<?, ItemT>) node;
@@ -583,7 +583,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     */
   public void valueChanged(TreeSelectionEvent e) {
     Object treeNode = this.getLastSelectedPathComponent();
-    if (treeNode == null || ! (treeNode instanceof NodeData)) return;
+    if (treeNode == null || ! (treeNode instanceof NodeData<?>)) return;
     @SuppressWarnings("unchecked") NodeData<ItemT> newSelection = (NodeData<ItemT>) treeNode;
     if (_current != newSelection) {
       for(INavigationListener<? super ItemT> listener : navListeners) {
@@ -612,9 +612,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       super.getTreeCellRendererComponent(tree, value, sel, isExpanded, leaf, row, false);  
       
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-      if (node instanceof RootNode && _rootIcon != null) setIcon(_rootIcon);
+      if (node instanceof RootNode<?> && _rootIcon != null) setIcon(_rootIcon);
       
-      else if (node instanceof LeafNode) {
+      else if (node instanceof LeafNode<?>) {
         ItemT doc = getNodeUserObject(node);
         if (leaf && _displayManager != null) {
           setIcon(_displayManager.getIcon(doc));
@@ -635,19 +635,19 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (path == null) return false;
     else {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-      if (node instanceof LeafNode) {
+      if (node instanceof LeafNode<?>) {
         this.expandPath(path);
         this.setSelectionPath(path);
         this.scrollPathToVisible(path);
         return true;
       } 
-      else if (node instanceof InnerNode) {
+      else if (node instanceof InnerNode<?,?>) {
         this.expandPath(path);
         this.setSelectionPath(path);
         this.scrollPathToVisible(path);
         return true;
       } 
-      else if (node instanceof RootNode) {
+      else if (node instanceof RootNode<?>) {
         this.expandPath(path);
         this.setSelectionPath(path);
         this.scrollPathToVisible(path);
@@ -686,7 +686,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (ps == null) { return 0; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
-      if (n instanceof InnerNode) { ++count; }
+      if (n instanceof InnerNode<?,?>) { ++count; }
     }
     return count;
   }
@@ -699,7 +699,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (ps == null) { return l; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
-      if (n instanceof FileNode) {
+      if (n instanceof FileNode<?>) {
         l.add(((FileNode<?>)n).getData());
       }
     }
@@ -717,7 +717,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (ps==null) { return 0; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
-      if (n instanceof LeafNode) {
+      if (n instanceof LeafNode<?>) {
         ++count;
       }
     }
@@ -746,7 +746,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (ps==null) { return false; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
-      if (n instanceof GroupNode) { return true; }
+      if (n instanceof GroupNode<?>) { return true; }
     }
     return false;
   }
@@ -855,7 +855,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     
     Object o = event.getPath().getLastPathComponent();
-    if (o instanceof InnerNode) ((InnerNode<?, ?>)o).setCollapsed(true);
+    if (o instanceof InnerNode<?,?>) ((InnerNode<?,?>)o).setCollapsed(true);
   }
   
   /** Called whenever an item in the tree has been expanded.  Only runs in event thread. */
@@ -863,7 +863,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     
     Object o = event.getPath().getLastPathComponent();
-    if (o instanceof InnerNode) ((InnerNode<?, ?>)o).setCollapsed(false);
+    if (o instanceof InnerNode<?,?>) ((InnerNode<?,?>)o).setCollapsed(false);
   }
   
   /** Collapses all the paths in the tree that match one of the path strings included in the given hash set.  Path 
@@ -890,7 +890,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    ArrayList<String> list = new ArrayList<String>();
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
-      if (tn instanceof InnerNode) {
+      if (tn instanceof InnerNode<?,?>) {
         TreePath tp = new TreePath(tn.getPath());
         String s = generatePathString(tp);
         boolean shouldCollapse = paths.contains(s);
@@ -913,7 +913,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     Enumeration<?> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
-      if (tn instanceof InnerNode && ((InnerNode<?, ?>)tn).isCollapsed()) {
+      if (tn instanceof InnerNode<?,?> && ((InnerNode<?,?>)tn).isCollapsed()) {
         TreePath tp = new TreePath(tn.getPath());
         list.add(generatePathString(tp));
       }

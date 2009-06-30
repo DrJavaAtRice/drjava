@@ -936,7 +936,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testMisc() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    @SuppressWarnings("unused") DrJavaProperty p;
 
     // drjava.current.time.millis
     p = pm.getProperty("DrJava","drjava.current.time.millis");

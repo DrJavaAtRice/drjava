@@ -78,7 +78,6 @@ public abstract class InterpretResult implements Serializable {
   private static class ExceptionResult extends InterpretResult {
     private final String _msg;
     private final StackTraceElement[] _stackTrace;
-    @SuppressWarnings("unchecked")
     public ExceptionResult(InterpreterException e) {
       if (e instanceof EvaluatorException) {
         // for EvaluatorException, we want to keep the stack trace

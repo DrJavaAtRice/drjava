@@ -4446,7 +4446,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Sets the left navigator pane to the correct component as dictated by the model. */
   private void _resetNavigatorPane() {
-    if (_model.getDocumentNavigator() instanceof JTreeSortNavigator) {
+    if (_model.getDocumentNavigator() instanceof JTreeSortNavigator<?>) {
       JTreeSortNavigator<?> nav = (JTreeSortNavigator<?>)_model.getDocumentNavigator();
       nav.setDisplayManager(getNavPaneDisplayManager());
       nav.setRootIcon(_djProjectIcon);

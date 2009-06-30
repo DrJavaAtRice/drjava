@@ -1541,7 +1541,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // add collapsed path info
-    if (_documentNavigator instanceof JTreeSortNavigator) {
+    if (_documentNavigator instanceof JTreeSortNavigator<?>) {
       String[] paths = ((JTreeSortNavigator<?>)_documentNavigator).getCollapsedPaths();
       for (String s : paths) { builder.addCollapsedPath(s); }
     }
@@ -1832,7 +1832,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    if (_documentNavigator instanceof JTreeSortNavigator) 
+    if (_documentNavigator instanceof JTreeSortNavigator<?>) 
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths()); 
     
     if (_state.getAutoRefreshStatus()) openNewFilesInProject(); 

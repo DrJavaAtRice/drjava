@@ -95,7 +95,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param title for the panel
     * @param searchString string that was searched for
     * @param searchAll whether all files were searched
-    * @param searchSelected whether the selection within the document was searched
+    * @param searchSelectionOnly whether the selection within the document was searched
     * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */

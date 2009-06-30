@@ -58,7 +58,7 @@ public class OptionMapLoader implements OptionConstants {
         try {
           Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
           //System.out.println("field name: "+field.getName()+"  o: "+o);
-          if (o == null || !(o instanceof Option)) {
+          if (o == null || !(o instanceof Option<?>)) {
             continue; // Development options can be null in the stable version of the code
           }
           
