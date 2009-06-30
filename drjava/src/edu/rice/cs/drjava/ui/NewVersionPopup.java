@@ -161,7 +161,8 @@ public class NewVersionPopup extends JDialog {
     getRootPane().setDefaultButton(_closeButton);
     pack();
     _mainFrame.setPopupLoc(this);
-    Utilities.clearEventQueue(false);  // Why? In principle, its inclusion does not change the semantics of the program
+    // clearEventQueue must not be called from the event thread
+    //Utilities.clearEventQueue(false);  // Why? In principle, its inclusion does not change the semantics of the program
     
     EventQueue.invokeLater(new Runnable() {
       public void run() {
