@@ -3460,6 +3460,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
     
+    config.addOptionListener(DISPLAY_ALL_COMPILER_VERSIONS, new ConfigOptionListeners.DisplayAllCompilerVersionsListener(_configFrame));
     config.addOptionListener(LOOK_AND_FEEL, new ConfigOptionListeners.LookAndFeelListener(_configFrame));
     config.addOptionListener(PLASTIC_THEMES, new ConfigOptionListeners.PlasticThemeListener(_configFrame));
     OptionListener<String> slaveJVMArgsListener = new ConfigOptionListeners.SlaveJVMArgsListener(_configFrame);

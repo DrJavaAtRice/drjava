@@ -97,6 +97,10 @@ public interface OptionConstants {
   
   public static final VectorOption<String> EXTRA_COMPILERS =
     new VectorOption<String>("extra.compilers", new StringOption("",""), new Vector<String>());
+
+  /** Whether to display all versions of the compilers (even if they have the same major version). */
+  public static final BooleanOption DISPLAY_ALL_COMPILER_VERSIONS = new BooleanOption("all.compiler.versions", Boolean.FALSE);
+  
  
   /* ---------- Color Options ---------- */
   

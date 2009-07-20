@@ -432,6 +432,11 @@ public class ConfigFrame extends SwingFrame {
                               _fileOptionChooser);
     javacLoc.setFileFilter(ClassPathFilter.ONLY);
     addOptionComponent(panel, javacLoc);
+
+    BooleanOptionComponent displayAllCompilerVersions =
+      new BooleanOptionComponent(OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS, "Display All Compiler Versions", this,
+                              "Display all compiler versions, even if they have the same major version.");
+    addOptionComponent(panel, displayAllCompilerVersions );
    
     addOptionComponent(panel, new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH,
                                                             "Extra Classpath", this,

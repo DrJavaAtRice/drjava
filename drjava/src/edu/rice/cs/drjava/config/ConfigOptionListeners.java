@@ -44,6 +44,14 @@ import javax.swing.*;
 
 /** @version $Id$ */
 public class ConfigOptionListeners implements OptionConstants {
+  public static class DisplayAllCompilerVersionsListener implements OptionListener<Boolean>, OptionConstants {
+    protected JFrame _parent;
+    public DisplayAllCompilerVersionsListener(JFrame parent) { _parent = parent; }
+    public void optionChanged(OptionEvent<Boolean> oe) {
+      JOptionPane.showMessageDialog(_parent, "You will have to restart DrJava before the change takes effect.");
+    }
+  }
+  
   public static class SlaveJVMArgsListener implements OptionListener<String>, OptionConstants {
     protected JFrame _parent;
     public SlaveJVMArgsListener(JFrame parent) { _parent = parent; }

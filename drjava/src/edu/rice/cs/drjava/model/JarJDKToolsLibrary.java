@@ -43,6 +43,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.io.IOException;
 
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
@@ -205,9 +208,29 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     } while (current != null && result == null);
     
     if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
-      // Couldn't find a good version number, so we'll just guess that it's the currently-running version
-      // Useful where the tools.jar file is in an unusual custom location
-      result = JavaVersion.CURRENT_FULL;
+      JarFile jf = null;
+      try {
+        jf = new JarFile(f);
+        Manifest mf = jf.getManifest();
+        String v = mf.getMainAttributes().getValue("Created-By");
+        if (v!=null) {
+          int space = v.indexOf(' ');
+          if (space>=0) v = v.substring(0,space);
+          result = JavaVersion.parseFullVersion(v);
+        }
+      }
+      catch(IOException ioe) { result = null; }
+      finally {
+        try {
+          if (jf!=null) jf.close();
+        }
+        catch(IOException ioe) { /* ignore, just trying to close the file */ }
+      }
+      if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
+        // Couldn't find a good version number, so we'll just guess that it's the currently-running version
+        // Useful where the tools.jar file is in an unusual custom location      
+        result = JavaVersion.CURRENT_FULL;
+      }
     }
     return result;
   }
@@ -244,7 +267,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 //    catch(Exception rte) { /* ignore, just return null */ }
 //    return null;
 //  }
-  
   
   /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
    * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
@@ -307,6 +329,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
     addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
+
+    addIfDir(new File("/home/mgricken/usr/lib/jvm"), roots);
+    addIfDir(new File("/home/mgricken/usr/lib/jvm/java-6-sun"), roots);
+    addIfDir(new File("/home/mgricken/usr/lib/jvm/java-1.5.0-sun"), roots);
+    addIfDir(new File("/home/mgricken/usr/lib/jvm/java-6-openjdk"), roots);
+    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
 
     /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 
      * remember insertion order

@@ -241,22 +241,24 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // almost always be true, it seems like more trouble than it is worth
     
     // map is sorted by version, lowest-to-highest
-    Map<JavaVersion, JDKToolsLibrary> results = new TreeMap<JavaVersion, JDKToolsLibrary>();
+    Map<JavaVersion.FullVersion, JDKToolsLibrary> results = new TreeMap<JavaVersion.FullVersion, JDKToolsLibrary>();
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this);
-      if (fromConfig.isValid()) { results.put(fromConfig.version().majorVersion(), fromConfig); }
+      if (fromConfig.isValid()) { results.put(fromConfig.version().majorVersion().fullVersion(), fromConfig); }
     }
     
     JDKToolsLibrary fromRuntime = JDKToolsLibrary.makeFromRuntime(this);
     JavaVersion runtimeVersion = fromRuntime.version().majorVersion();
-    if (fromRuntime.isValid() && !results.containsKey(runtimeVersion)) { results.put(runtimeVersion, fromRuntime); }
+    if (fromRuntime.isValid() && !results.containsKey(runtimeVersion)) { results.put(runtimeVersion.fullVersion(), fromRuntime); }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
-      JavaVersion tVersion = t.version().majorVersion();
-      // guaranteed to be valid
+      JavaVersion.FullVersion tVersion = t.version();
+      if (!DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS).booleanValue()) {
+        tVersion = tVersion.majorVersion().fullVersion();
+      }
       if (!results.containsKey(tVersion)) { results.put(tVersion, t); }
     }
     
