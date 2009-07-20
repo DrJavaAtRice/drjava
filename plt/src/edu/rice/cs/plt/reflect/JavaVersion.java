@@ -71,6 +71,11 @@ public enum JavaVersion {
   /** Prepend {@code "Java "} to the version number string */
   public String toString() { return "Java " + versionString(); }
   
+  /** Returns a FullVersion that corresponds to this JavaVersion, e.g. JAVA_6 will return a FullVersion 1.6.0_0. */
+  public FullVersion fullVersion() {
+    return new FullVersion(this, 0, 0, ReleaseType.STABLE, "");
+  }
+  
   /**
    * Produce the {@code JavaVersion} corresponding to the given class version string.  For example,
    * {@code "49.0"} maps to {@code JAVA_5}.  If the text cannot be parsed, {@code UNRECOGNIZED} will be

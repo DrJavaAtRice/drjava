@@ -89,4 +89,14 @@ public class JavaVersionTest extends TestCase {
     assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7)));
   }
   
+  public void testVersionToFullVersion() {
+    assertEquals("Java 1.1.0", JAVA_1_1.fullVersion().toString());
+    assertEquals("Java 1.2.0", JAVA_1_2.fullVersion().toString());
+    assertEquals("Java 1.3.0", JAVA_1_3.fullVersion().toString());
+    assertEquals("Java 1.4.0", JAVA_1_4.fullVersion().toString());
+    assertEquals("Java 5.0", JAVA_5.fullVersion().toString());
+    assertEquals("Java 6.0", JAVA_6.fullVersion().toString());
+    assertEquals("Java 7.0", JAVA_7.fullVersion().toString());
+    assertEquals("Java >7.0", FUTURE.fullVersion().toString());
+  }
 }
