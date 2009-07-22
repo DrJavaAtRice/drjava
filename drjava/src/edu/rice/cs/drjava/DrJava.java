@@ -547,7 +547,7 @@ public class DrJava {
                                                          "System->Preferences->Appearence, display the Visual Effects tab,<br>"+
                                                          "and select 'None'.<br>"+
                                                          "<br>"+
-                                                         "For more information, please go to http://drjava.org/compiz.html<br>"+
+                                                         "For more information, please go to http://drjava.org/compiz<br>"+
                                                          "<br>"+
                                                          "Do you want to start DrJava anyway?</html>",
                                                          "Compiz detected",
