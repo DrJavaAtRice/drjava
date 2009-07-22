@@ -1060,6 +1060,9 @@ public interface OptionConstants {
   
   /** The port where DrJava will listen for remote control requests. */
   public static final IntegerOption REMOTE_CONTROL_PORT = new IntegerOption("remote.control.port", Integer.valueOf(4444));
+
+  /** Whether to warn if Compiz is being used */
+  public static final BooleanOption WARN_IF_COMPIZ = new BooleanOption("warn.if.compiz", Boolean.TRUE);
   
   /* ---------- COMPILER OPTIONS ------------- */
   

@@ -38,8 +38,7 @@ package edu.rice.cs.drjava;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -118,6 +117,8 @@ public class DrJava {
       // Platform-specific UI setup.
       PlatformFactory.ONLY.beforeUISetup();
 
+      warnIfLinuxWithCompiz();
+      
       if (!_forceNewInstance &&
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size() > 0)) {
@@ -506,5 +507,71 @@ public class DrJava {
     _jvmArgs.clear();
     // Do not set _config or _propertiesFile to null because THEY ARE static
   }
-     
+
+  /** Warn if this system is Linux with Compiz. */
+  public static boolean warnIfLinuxWithCompiz() {
+    try {
+      if (!System.getProperty("os.name").equals("Linux")) return false; // not Linux
+      if (!DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.WARN_IF_COMPIZ)) return false; // set to ignore
+      
+      // get /bin/ps
+      File ps = new File("/bin/ps");
+      
+      // execute ps
+      ProcessBuilder pb = new ProcessBuilder(ps.getAbsolutePath(), "-A");
+      Process psProc = pb.start();
+      psProc.waitFor();
+      
+      // read the output of ps
+      BufferedReader br = new BufferedReader(new InputStreamReader(psProc.getInputStream()));
+      boolean compiz = false;
+      String line = null;
+      while((line=br.readLine())!=null) {
+        // find the PID of JUnitTestRunner, i.e. the PID of the current process
+        if ((line.endsWith("compiz")) ||
+            (line.endsWith("compiz.real"))) {
+          compiz = true;
+          break;
+        }
+      }
+      if (!compiz) return false; // no Compiz
+      
+      String[] options = new String[] { "Yes", "Yes, and ignore from now on", "No" };
+      int res = javax.swing.JOptionPane.showOptionDialog(null,
+                                                         "<html>DrJava has detected that you are using Compiz.<br>"+
+                                                         "<br>"+
+                                                         "Compiz and Java Swing are currently incompatible and can cause<br>"+
+                                                         "DrJava or your computer to crash.<br>"+
+                                                         "<br>"+
+                                                         "We recommend that you <b>disable Compiz</b>. On Ubuntu, go to<br>"+
+                                                         "System->Preferences->Appearence, display the Visual Effects tab,<br>"+
+                                                         "and select 'None'.<br>"+
+                                                         "<br>"+
+                                                         "For more information, please go to http://drjava.org/compiz.html<br>"+
+                                                         "<br>"+
+                                                         "Do you want to start DrJava anyway?</html>",
+                                                         "Compiz detected",
+                                                         JOptionPane.DEFAULT_OPTION,
+                                                         javax.swing.JOptionPane.WARNING_MESSAGE,
+                                                         null,
+                                                         options,
+                                                         options[0]);
+      switch(res) {
+        case 1:
+          // set "ignore" option
+          DrJava.getConfig().setSetting(edu.rice.cs.drjava.config.OptionConstants.WARN_IF_COMPIZ, false);
+          break;
+        case 2:
+          System.exit(0);
+          break;
+      }
+      return compiz;
+    }
+    catch(IOException ioe) {
+      return false; // do not warn
+    }
+    catch(InterruptedException ie) {
+      return false; // do not warn
+    }
+  }
 }

@@ -1216,6 +1216,11 @@ public class ConfigFrame extends SwingFrame {
     };
     addOptionComponent(panel, autoImportClasses);
     
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_IF_COMPIZ, 
+                                                         "Warn If Compiz Detected", this,
+                                                         "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
+                                                         "Compiz and Java Swing are incompatible and can lead to crashes.</html>"));
+    
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
 //                                                  "Perform lightweight parsing", this,
