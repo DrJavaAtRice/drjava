@@ -42,7 +42,8 @@ import edu.rice.cs.plt.tuple.Pair;
 import static edu.rice.cs.plt.collect.CollectUtil.makeSet;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-public class IndexedRelationTest extends TestCase {
+/** Tests for mutable relations (IndexedRelation, UnindexedRelation). */
+public class MutableRelationTest extends TestCase {
   
   private static final Set<String> EMPTY = CollectUtil.<String>emptySet();
   
@@ -52,6 +53,10 @@ public class IndexedRelationTest extends TestCase {
   
   public void testSecondNotIndex() {
     prodRelation(new IndexedRelation<String, String>(false));
+  }
+  
+  public void testUnindexed() {
+    prodRelation(new UnindexedRelation<String, String>());
   }
   
   private void prodRelation(Relation<String, String> r) {

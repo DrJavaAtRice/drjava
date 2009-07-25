@@ -34,6 +34,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.tuple;
 
+import java.util.Comparator;
+
 import junit.framework.TestCase;
 
 public class TupleTest extends TestCase {
@@ -118,7 +120,7 @@ public class TupleTest extends TestCase {
     assertSame(i, t1.third());
   }
   
-  public void OptionTest() {
+  public void testOption() {
     Option<String> o1 = Option.none();
     Option<String> o2 = Option.some("foo");
     
@@ -136,6 +138,59 @@ public class TupleTest extends TestCase {
       public Void forNone() { fail("Visitor should go to some case"); return null; }
       public Void forSome(String s) { assertSame("foo", s); return null; }
     });
+  }
+  
+  public void testPairComparator() {
+    Pair<String, Integer> p1 = Pair.make("a", 1);
+    Pair<String, Integer> p2 = Pair.make("a", 1);
+    Pair<String, Integer> p3 = Pair.make("a", 2);
+    Pair<String, Integer> p4 = Pair.make("a", 7);
+    Pair<String, Integer> p5 = Pair.make("b", 1);
+    Pair<String, Integer> p6 = Pair.make("b", 6);
+    
+    Comparator<? super Pair<String, Integer>> c = Pair.<String, Integer>comparator();
+    
+    assertTrue(c.compare(p1, p1) == 0);
+    assertTrue(c.compare(p1, p2) == 0);
+    assertTrue(c.compare(p1, p3) < 0);
+    assertTrue(c.compare(p1, p4) < 0);
+    assertTrue(c.compare(p1, p5) < 0);
+    assertTrue(c.compare(p1, p6) < 0);
+
+    assertTrue(c.compare(p2, p1) == 0);
+    assertTrue(c.compare(p2, p2) == 0);
+    assertTrue(c.compare(p2, p3) < 0);
+    assertTrue(c.compare(p2, p4) < 0);
+    assertTrue(c.compare(p2, p5) < 0);
+    assertTrue(c.compare(p2, p6) < 0);
+
+    assertTrue(c.compare(p3, p1) > 0);
+    assertTrue(c.compare(p3, p2) > 0);
+    assertTrue(c.compare(p3, p3) == 0);
+    assertTrue(c.compare(p3, p4) < 0);
+    assertTrue(c.compare(p3, p5) < 0);
+    assertTrue(c.compare(p3, p6) < 0);
+
+    assertTrue(c.compare(p4, p1) > 0);
+    assertTrue(c.compare(p4, p2) > 0);
+    assertTrue(c.compare(p4, p3) > 0);
+    assertTrue(c.compare(p4, p4) == 0);
+    assertTrue(c.compare(p4, p5) < 0);
+    assertTrue(c.compare(p4, p6) < 0);
+
+    assertTrue(c.compare(p5, p1) > 0);
+    assertTrue(c.compare(p5, p2) > 0);
+    assertTrue(c.compare(p5, p3) > 0);
+    assertTrue(c.compare(p5, p4) > 0);
+    assertTrue(c.compare(p5, p5) == 0);
+    assertTrue(c.compare(p5, p6) < 0);
+
+    assertTrue(c.compare(p6, p1) > 0);
+    assertTrue(c.compare(p6, p2) > 0);
+    assertTrue(c.compare(p6, p3) > 0);
+    assertTrue(c.compare(p6, p4) > 0);
+    assertTrue(c.compare(p6, p5) > 0);
+    assertTrue(c.compare(p6, p6) == 0);
   }
     
   

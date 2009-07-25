@@ -923,6 +923,12 @@ public final class CollectUtil {
     private final Comparator<? super T> _comp;
     public ComparatorTotalOrder(Comparator<? super T> comp) { _comp = comp; }
     public int compare(T arg1, T arg2) { return _comp.compare(arg1, arg2); }
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      else if (!(o instanceof ComparatorTotalOrder<?>)) { return false; }
+      else { return _comp.equals(((ComparatorTotalOrder<?>) o)._comp); }
+    }
+    public int hashCode() { return ObjectUtil.hash(ComparatorTotalOrder.class, _comp); }
   }
   
   /** Create an inverse of the given order. */
@@ -934,6 +940,12 @@ public final class CollectUtil {
     private final Order<? super T> _ord;
     public InverseOrder(Order<? super T> ord) { _ord = ord; }
     public boolean contains(T arg1, T arg2) { return _ord.contains(arg2, arg1); }
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      else if (!(o instanceof InverseOrder<?>)) { return false; }
+      else { return _ord.equals(((InverseOrder<?>) o)._ord); }
+    }
+    public int hashCode() { return ObjectUtil.hash(InverseOrder.class, _ord); }
   }
 
   /** Create an inverse of the given comparator (or TotalOrder). */
@@ -945,6 +957,12 @@ public final class CollectUtil {
     private final Comparator<? super T> _ord;
     public InverseTotalOrder(Comparator<? super T> ord) { _ord = ord; }
     public int compare(T arg1, T arg2) { return _ord.compare(arg2, arg1); }
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      else if (!(o instanceof InverseTotalOrder<?>)) { return false; }
+      else { return _ord.equals(((InverseTotalOrder<?>) o)._ord); }
+    }
+    public int hashCode() { return ObjectUtil.hash(InverseTotalOrder.class, _ord); }
   }
   
   /**
@@ -979,6 +997,5 @@ public final class CollectUtil {
     private StringPrefixOrder() {}
     public boolean contains(String pre, String s) { return s.startsWith(pre); }
   }
-  
 
 }

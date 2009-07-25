@@ -35,8 +35,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.tuple;
 
 import java.io.Serializable;
+import java.util.Comparator;
+
+import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.collect.TotalOrder;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An arbitrary pair of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
@@ -131,6 +136,45 @@ public class Pair<T1, T2> extends Tuple {
     public static final GetSecond<Void> INSTANCE = new GetSecond<Void>();
     private GetSecond() {}
     public T value(Pair<?, ? extends T> arg) { return arg.second(); }
+  }
+  
+  /**
+   * Produce a comparator for pairs, ordered by the natural order of the elements (the leftmost
+   * elements have the highest sort priority).
+   */
+  public static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>>
+      TotalOrder<Pair<? extends T1, ? extends T2>> comparator() {
+    return new PairComparator<T1, T2>(CollectUtil.<T1>naturalOrder(), CollectUtil.<T2>naturalOrder());
+  }
+  
+  /**
+   * Produce a comparator for pairs, ordered by the given comparators (the leftmost
+   * elements have the highest sort priority).
+   */
+  public static <T1, T2> TotalOrder<Pair<? extends T1, ? extends T2>>
+      comparator(Comparator<? super T1> comp1, Comparator<? super T2> comp2) {
+    return new PairComparator<T1, T2>(comp1, comp2);
+  }
+  
+  private static final class PairComparator<T1, T2> extends TotalOrder<Pair<? extends T1, ? extends T2>> {
+    private final Comparator<? super T1> _comp1;
+    private final Comparator<? super T2> _comp2;
+    public PairComparator(Comparator<? super T1> comp1, Comparator<? super T2> comp2) {
+      _comp1 = comp1;
+      _comp2 = comp2;
+    }
+    public int compare(Pair<? extends T1, ? extends T2> p1, Pair<? extends T1, ? extends T2> p2) {
+      return ObjectUtil.compare(_comp1, p1.first(), p2.first(), _comp2, p1.second(), p2.second());
+    }
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      else if (!(o instanceof PairComparator<?,?>)) { return false; }
+      else {
+        PairComparator<?,?> cast = (PairComparator<?,?>) o;
+        return _comp1.equals(cast._comp1) && _comp2.equals(cast._comp2);
+      }
+    }
+    public int hashCode() { return ObjectUtil.hash(PairComparator.class, _comp1, _comp2); }
   }
 
 }

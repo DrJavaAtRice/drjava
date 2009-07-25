@@ -35,6 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.tuple;
 
 import java.io.Serializable;
+
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
@@ -92,6 +93,5 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
     private Factory() {}
     public Wrapper<T> value(T val) { return new Wrapper<T>(val); }
   }
-  
   
 }

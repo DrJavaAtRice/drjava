@@ -36,6 +36,8 @@ package edu.rice.cs.plt.collect;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Set;
+
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -55,6 +57,11 @@ public class LazyRelationIndex<K, V> implements RelationIndex<K, V>, Serializabl
   public LazyRelationIndex(Iterable<? extends Pair<K, V>> pairs) {
     _pairs = pairs;
     _pairSet = new IterableSet<Pair<K, V>>(_pairs);
+  }
+  
+  public LazyRelationIndex(Set<Pair<K, V>> pairs) {
+    _pairs = pairs;
+    _pairSet = CollectUtil.asPredicateSet(pairs);
   }
   
   public boolean isEmpty() { return _pairSet.isEmpty(); }

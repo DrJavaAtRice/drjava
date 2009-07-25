@@ -34,8 +34,11 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.object;
 
+import java.util.Comparator;
+
 import edu.rice.cs.plt.iter.IterUtil;
 
+/** Utility methods that may be useful in implementing an object of any type. */
 public final class ObjectUtil {
   
   private ObjectUtil() {}
@@ -122,6 +125,60 @@ public final class ObjectUtil {
     return result;
   }
   
+  public static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>>
+      int compare(T1 x1, T1 y1, T2 x2, T2 y2) {
+    int result = x1.compareTo(y1);
+    if (result == 0) { result = x2.compareTo(y2); }
+    return result;
+  }
+  
+  public static <T1, T2> int compare(Comparator<? super T1> comp1, T1 x1, T1 y1,
+                                       Comparator<? super T2> comp2, T2 x2, T2 y2) {
+    int result = comp1.compare(x1, y1);
+    if (result == 0) { result = comp2.compare(x2, y2); }
+    return result;
+  }
+  
+  public static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>,
+                   T3 extends Comparable<? super T3>>
+      int compare(T1 x1, T1 y1, T2 x2, T2 y2, T3 x3, T3 y3) {
+    int result = x1.compareTo(y1);
+    if (result == 0) { result = x2.compareTo(y2); }
+    if (result == 0) { result = x3.compareTo(y3); }
+    return result;
+  }
+  
+  public static <T1, T2, T3> int compare(Comparator<? super T1> comp1, T1 x1, T1 y1,
+                                           Comparator<? super T2> comp2, T2 x2, T2 y2,
+                                           Comparator<? super T3> comp3, T3 x3, T3 y3) {
+    int result = comp1.compare(x1, y1);
+    if (result == 0) { result = comp2.compare(x2, y2); }
+    if (result == 0) { result = comp3.compare(x3, y3); }
+    return result;
+  }
+
+  public static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>,
+                   T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>>
+      int compare(T1 x1, T1 y1, T2 x2, T2 y2, T3 x3, T3 y3, T4 x4, T4 y4) {
+    int result = x1.compareTo(y1);
+    if (result == 0) { result = x2.compareTo(y2); }
+    if (result == 0) { result = x3.compareTo(y3); }
+    if (result == 0) { result = x4.compareTo(y4); }
+    return result;
+  }
+  
+  public static <T1, T2, T3, T4> int compare(Comparator<? super T1> comp1, T1 x1, T1 y1,
+                                               Comparator<? super T2> comp2, T2 x2, T2 y2,
+                                               Comparator<? super T3> comp3, T3 x3, T3 y3,
+                                               Comparator<? super T4> comp4, T4 x4, T4 y4) {
+    int result = comp1.compare(x1, y1);
+    if (result == 0) { result = comp2.compare(x2, y2); }
+    if (result == 0) { result = comp3.compare(x3, y3); }
+    if (result == 0) { result = comp4.compare(x4, y4); }
+    return result;
+  }
+
+
   /**
    * Get the height of the object when treated as a composite.  If {@code obj} implements
    * {@code Composite}, invokes {@link Composite#compositeHeight}; otherwise, returns {@code 0}.

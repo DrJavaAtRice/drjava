@@ -35,8 +35,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.tuple;
 
 import java.io.Serializable;
+import java.util.Comparator;
+
+import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.collect.TotalOrder;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda3;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
  * An arbitrary 3-tuple of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
@@ -135,6 +140,53 @@ public class Triple<T1, T2, T3> extends Tuple {
     public static final GetThird<Void> INSTANCE = new GetThird<Void>();
     private GetThird() {}
     public T value(Triple<?, ?, ? extends T> arg) { return arg.third(); }
+  }
+
+  /**
+   * Produce a comparator for triples, ordered by the natural order of the elements (the leftmost
+   * elements have the highest sort priority).
+   */
+  public static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>,
+                   T3 extends Comparable<? super T3>>
+      TotalOrder<Triple<? extends T1, ? extends T2, ? extends T3>> comparator() {
+    return new TripleComparator<T1, T2, T3>(CollectUtil.<T1>naturalOrder(), CollectUtil.<T2>naturalOrder(),
+                                             CollectUtil.<T3>naturalOrder());
+  }
+  
+  /**
+   * Produce a comparator for triples, ordered by the given comparators (the leftmost
+   * elements have the highest sort priority).
+   */
+  public static <T1, T2, T3> TotalOrder<Triple<? extends T1, ? extends T2, ? extends T3>>
+      comparator(Comparator<? super T1> comp1, Comparator<? super T2> comp2, Comparator<? super T3> comp3) {
+    return new TripleComparator<T1, T2, T3>(comp1, comp2, comp3);
+  }
+  
+  private static final class TripleComparator<T1, T2, T3>
+                                 extends TotalOrder<Triple<? extends T1, ? extends T2, ? extends T3>> {
+    private final Comparator<? super T1> _comp1;
+    private final Comparator<? super T2> _comp2;
+    private final Comparator<? super T3> _comp3;
+    public TripleComparator(Comparator<? super T1> comp1, Comparator<? super T2> comp2,
+                             Comparator<? super T3> comp3) {
+      _comp1 = comp1;
+      _comp2 = comp2;
+      _comp3 = comp3;
+    }
+    public int compare(Triple<? extends T1, ? extends T2, ? extends T3> t1,
+                        Triple<? extends T1, ? extends T2, ? extends T3> t2) {
+      return ObjectUtil.compare(_comp1, t1.first(), t2.first(), _comp2, t1.second(), t2.second(),
+                                 _comp3, t1.third(), t2.third());
+    }
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      else if (!(o instanceof TripleComparator<?,?,?>)) { return false; }
+      else {
+        TripleComparator<?,?,?> cast = (TripleComparator<?,?,?>) o;
+        return _comp1.equals(cast._comp1) && _comp2.equals(cast._comp2) && _comp3.equals(cast._comp3);
+      }
+    }
+    public int hashCode() { return ObjectUtil.hash(TripleComparator.class, _comp1, _comp2, _comp3); }
   }
 
 }

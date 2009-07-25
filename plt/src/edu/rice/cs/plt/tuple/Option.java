@@ -34,6 +34,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.tuple;
 
+import java.util.Comparator;
+
+import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.collect.TotalOrder;
+import edu.rice.cs.plt.object.ObjectUtil;
+
 /**
  * A wrapper for optional values.  This provides a strictly-typed alternative to using
  * {@code null} to represent the absence of a value.  Options have two variants: "some"
@@ -91,4 +97,35 @@ public abstract class Option<T> extends Tuple {
     else { return forNone; }
   }
     
+  /**
+   * Produce a comparator for options, ordered by the natural order of the elements with "none" values at
+   * the front.
+   */
+  public static <T extends Comparable<? super T>> TotalOrder<Option<? extends T>> comparator() {
+    return new OptionComparator<T>(CollectUtil.<T>naturalOrder());
+  }
+  
+  /** Produce a comparator for options, ordered by the given comparator with "none" values at the front. */
+  public static <T> TotalOrder<Option<? extends T>> comparator(Comparator<? super T> comp) {
+    return new OptionComparator<T>(comp);
+  }
+  
+  private static final class OptionComparator<T> extends TotalOrder<Option<? extends T>> {
+    private final Comparator<? super T> _comp;
+    public OptionComparator(Comparator<? super T> comp) { _comp = comp; }
+    public int compare(Option<? extends T> o1, Option<? extends T> o2) {
+      if (o1.isSome()) { return o2.isSome() ? _comp.compare(o1.unwrap(), o2.unwrap()) : 1; }
+      else { return o2.isSome() ? -1 : 0; }
+    }
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      else if (!(o instanceof OptionComparator<?>)) { return false; }
+      else {
+        OptionComparator<?> cast = (OptionComparator<?>) o;
+        return _comp.equals(cast._comp);
+      }
+    }
+    public int hashCode() { return ObjectUtil.hash(OptionComparator.class, _comp); }
+  }
+
 }

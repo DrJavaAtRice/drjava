@@ -44,7 +44,7 @@ import edu.rice.cs.plt.object.Composite;
 import edu.rice.cs.plt.object.ObjectUtil;
 
 /**
- * The union of two sets, lazily constructed and updated dynamically.
+ * The union of two relations, lazily constructed and updated dynamically.
  */
 public class UnionRelation<T1, T2> extends AbstractRelation<T1, T2> implements Composite, Serializable {
   private final Relation<T1, T2> _rel1;
