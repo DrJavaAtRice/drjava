@@ -80,6 +80,9 @@ public class DrJava {
     * connecting to an already running instance. */
   static volatile boolean _forceNewInstance = false;
 
+  /** true if the files that were specified on the command line contain project files */
+  static volatile boolean _filesToOpenContainProjectFiles = false;
+  
   /** Time in millisecond before restarting DrJava to change the heap size, etc. is deemed a success. */
   private static final int WAIT_BEFORE_DECLARING_SUCCESS = 5000;
 
@@ -122,14 +125,10 @@ public class DrJava {
       if (!_forceNewInstance &&
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size() > 0)) {
-//        try {
-//          boolean ret = RemoteControlClient.openFile(null);
-        if (! RemoteControlClient.isServerRunning()) {
+        if (!RemoteControlClient.isServerRunning()) {
           // server not running, display splash screen
           new SplashScreen().flash();
         }
-//        }
-//        catch(IOException ioe) { /* ignore */ }
       }
       else {
         // either forcing new instance or no files specified, display splash screen
@@ -300,6 +299,19 @@ public class DrJava {
       else {
         // this is the first file to open, do not consume
         --argIndex;
+        
+        // check if any of the files to open is a project file
+        _filesToOpenContainProjectFiles = false;
+        for (int tempIndex = argIndex; tempIndex < len; ++tempIndex) {
+          String currFileName = args[tempIndex];
+          boolean isProjectFile =
+            currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+            currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
+            currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
+          _filesToOpenContainProjectFiles |= isProjectFile;
+        }
+        // if a project file was specified, force a new instance
+        if (_filesToOpenContainProjectFiles) _forceNewInstance = true;
         break;
       }
     }
@@ -344,73 +356,6 @@ public class DrJava {
     System.out.println("  -X<jvmOption>         specify a JVM configuration option for the master DrJava JVM");      
     System.out.println("  -D<name>[=<value>]    set a Java property for the master DrJava JVM");
   }
-  
-//  /** Prompts the user that the location of tools.jar needs to be specified to be able to use the compiler and/or the
-//    * debugger.  
-//    * @param needCompiler whether DrJava needs tools.jar for a compiler
-//    * @param needDebugger whether DrJava needs tools.jar for the debugger
-//    */
-//  public static void promptForToolsJar(boolean needCompiler, boolean needDebugger) {
-//    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
-//    String selectedVersion = _getToolsJarVersion(selectedFile);
-//    
-//    final String[] text;
-//    if (selectedVersion==null) {
-//      text = new String[] {
-//        "DrJava cannot find a 'tools.jar' file for the version of Java ",
-//        "that is being used to run DrJava (Java version "+System.getProperty("java.version")+").",
-//        "Would you like to specify the location of the requisite 'tools.jar' file?",
-//        "If you say 'No', DrJava might be unable to compile or debug Java programs."
-//      };
-//    }
-//    else {
-//      text = new String[] {
-//        "DrJava cannot find a 'tools.jar' file for the version of Java ",
-//        "that is being used to run DrJava (Java version "+System.getProperty("java.version")+").",
-//        "The file you have selected appears to be for version "+selectedVersion+".",
-//        "Would you like to specify the location of the requisite 'tools.jar' file?",
-//        "If you say 'No', DrJava might be unable to compile or debug Java programs.)"
-//      };
-//    }
-//    
-//    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
-//
-//    if (result == JOptionPane.YES_OPTION) {
-//      JFileChooser chooser = new JFileChooser();
-//      chooser.setFileFilter(new ClassPathFilter() {
-//        public boolean accept(File f) {
-//          if (f.isDirectory()) return true;
-//          String ext = getExtension(f);
-//          return ext != null && ext.equals("jar");
-//        }
-//        public String getDescription() { return "Jar Files"; }
-//      });
-//
-//      // Loop until we find a good tools.jar or the user gives up
-//      do {
-//        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-//          File jar = chooser.getSelectedFile();
-//
-//          if (jar != null) {
-//            // set the tools.jar property
-//            getConfig().setSetting(JAVAC_LOCATION, jar);
-//
-//            // Adjust if we needed a compiler
-//            if (needCompiler && classLoadersCanFind(TEST_COMPILER_CLASS)) needCompiler = false;
-//
-//            // Adjust if we need a debugger
-//            if (needDebugger && classLoadersCanFind(TEST_DEBUGGER_CLASS)) needDebugger = false;
-//          }
-//        }
-////        Utilities.showDebug("need Compiler = " + needCompiler + "; needDebugger = " + needDebugger);
-//      }
-//      while ((needCompiler || needDebugger) && _userWantsToPickAgain());
-//      
-//      // Save config with good tools.jar if available
-//      if ((! needCompiler) && (! needDebugger)) _saveConfig();
-//    }
-//  }
-  
   
   /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
     * accidentally used.

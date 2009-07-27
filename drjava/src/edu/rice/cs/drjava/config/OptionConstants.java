@@ -83,7 +83,10 @@ public interface OptionConstants {
   public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
 
   /** The extension for a DrJava project file */
-  public static final String PROJECT_FILE_EXTENSION = ".xml";
+  public static final String PROJECT_FILE_EXTENSION = ".drjava";
+
+  /** The alternative extension for a DrJava project file */
+  public static final String PROJECT_FILE_EXTENSION2 = ".xml";
 
   /** The extension for stand-alone DrJava external process file. */
   public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";

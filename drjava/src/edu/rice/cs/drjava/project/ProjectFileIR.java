@@ -119,7 +119,7 @@ public interface ProjectFileIR {
   public void setAutoRefreshStatus(boolean b);
   
   /**
-   * The version of dr java that created this project (as determined from its serialization as a .pjt or .xml file)
+   * The version of dr java that created this project (as determined from its serialization as a .pjt or .drjava or .xml file)
    * 
    * @return The version string, if known, or "unknown" otherwise.
    */

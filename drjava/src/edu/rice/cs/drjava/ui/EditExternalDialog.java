@@ -131,7 +131,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava External Process Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
+      return "DrJava External Process Files (*"+EXTPROCESS_FILE_EXTENSION+")";
     }
   };
 

@@ -94,7 +94,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
     
-    //We don't store version information in .pjt files.  Yet another reason to use the .xml format.
+    //We don't store version information in .pjt files.  Yet another reason to use the .drjava or .xml format.
     pfir.setDrJavaVersion("unknown");
 
     try { for (SEList exp : forest) evaluateExpression(exp, pfir, new DocFileListVisitor(_parent)); }

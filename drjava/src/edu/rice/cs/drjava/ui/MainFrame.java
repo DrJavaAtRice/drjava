@@ -284,15 +284,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Filter for regular java files (.java and .j). */
   private final javax.swing.filechooser.FileFilter _javaSourceFilter = new JavaSourceFilter();
   
-  /** Filter for drjava project files (.xml and .pjt) */
+  /** Filter for drjava project files (.drjava and .xml and .pjt) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
       return f.isDirectory() || 
         f.getPath().endsWith(PROJECT_FILE_EXTENSION) ||
+        f.getPath().endsWith(PROJECT_FILE_EXTENSION2) ||
         f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+OLD_PROJECT_FILE_EXTENSION+")";
+      return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+PROJECT_FILE_EXTENSION2+", *"+OLD_PROJECT_FILE_EXTENSION+")";
     }
   };
   
@@ -4968,11 +4969,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       if (projectFile == null || projectFile.getParentFile() == null) { return; }
       String fileName = projectFile.getName();
-      // ensure that saved file has extesion ".xml"
-      if (! fileName.endsWith(".xml")) {
+      // ensure that saved file has extension ".drjava"
+      if (! fileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION)) {
         int lastIndex = fileName.lastIndexOf(".");
-        if (lastIndex == -1) projectFile = new File (projectFile.getAbsolutePath() + ".xml");
-        else projectFile = new File(projectFile.getParentFile(), fileName.substring(0, lastIndex) + ".xml");
+        if (lastIndex == -1) projectFile = new File (projectFile.getAbsolutePath() + OptionConstants.PROJECT_FILE_EXTENSION);
+        else projectFile = new File(projectFile.getParentFile(), fileName.substring(0, lastIndex) + OptionConstants.PROJECT_FILE_EXTENSION);
       }
       if (projectFile == null ||
           projectFile.getParentFile() == null ||
@@ -5021,13 +5022,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   void _saveProjectHelper(File file) {
     try {
-      if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + PROJECT_FILE_EXTENSION);
-      String fileName = file.getCanonicalPath();
+      String fileName = file.getAbsolutePath();
+      if (!fileName.endsWith(PROJECT_FILE_EXTENSION) &&
+          !fileName.endsWith(PROJECT_FILE_EXTENSION2) &&
+          !fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
+        // doesn't end in .drjava or .xml or .pjt
+        String text = "The file name does not end with a DrJava project file "+
+          "extension ("+PROJECT_FILE_EXTENSION+" or "+PROJECT_FILE_EXTENSION2+" or "+OLD_PROJECT_FILE_EXTENSION+"):\n"+
+          file.getName()+"\n"+
+          "Do you want to append "+PROJECT_FILE_EXTENSION+" at the end?";
+        
+        Object[] options = {"Append "+PROJECT_FILE_EXTENSION, "Don't Change File Name"};  
+        int rc = 0;
+        if (!Utilities.TEST_MODE) {
+          rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Append Extension?", JOptionPane.YES_NO_OPTION,
+                                            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        }
+        if (rc==0) {
+          int lastDot = fileName.lastIndexOf('.');
+          if (lastDot == -1) {
+            file = new File(fileName + PROJECT_FILE_EXTENSION);
+          }
+          else {
+            file = new File(fileName.substring(0,lastDot) + PROJECT_FILE_EXTENSION);
+          }
+        }
+      }
+      fileName = file.getCanonicalPath();
       if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
         String text = "The project will be saved in XML format." + 
-          "\nDo you want to change the project file's extension to \""+PROJECT_FILE_EXTENSION+"\"?";
+          "\nDo you want to change the project file's extension to "+PROJECT_FILE_EXTENSION+"?";
         
-        Object[] options = {"Change to \""+PROJECT_FILE_EXTENSION+"\"", "Keep \"" + 
+        Object[] options = {"Change to "+PROJECT_FILE_EXTENSION+"", "Keep \"" + 
           fileName.substring(fileName.lastIndexOf('.'))+"\""};  
         int rc = 1;
         if (!Utilities.TEST_MODE) {

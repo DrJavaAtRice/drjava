@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 public class RemoteControlClient {
   /** true if a DrJava remote control server is running.
    */
-  protected static boolean _serverRunning = false;
+  protected static Boolean _serverRunning = null;
   
   /** Contains the name of the user running the server, or is null if no server is running.
    */
@@ -59,7 +59,15 @@ public class RemoteControlClient {
   /** Return true if a DrJava remote control server is running.
    * @return true if running
    */
-  public static boolean isServerRunning() { return _serverRunning; }
+  public static synchronized boolean isServerRunning() {
+    if (_serverRunning==null) {
+      try {
+        openFile(null);
+      }
+      catch(IOException e) { _serverRunning = false; }
+    }
+    return _serverRunning;
+  }
   
   /** Return the name of the user running the server, or null if no server is running.
    * @return user name or null
@@ -70,7 +78,7 @@ public class RemoteControlClient {
    * @param f file, or null to just test if a server is running.
    * @return true if file could be opened
    */
-  public static boolean openFile(File f) throws IOException {
+  public static synchronized boolean openFile(File f) throws IOException {
     try {
       // get a datagram socket
       DatagramSocket socket = new DatagramSocket();

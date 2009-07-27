@@ -63,13 +63,13 @@ import java.net.*;
 public final class RemoteControlServer {
   /** Prefix of a legitimate query by a client. */
   public static final String QUERY_PREFIX = "DrJava Remote Control?";
-
+  
   /** Prefix of a legitimate response by this server. */
   public static final String RESPONSE_PREFIX = "DrJava Remote Control ";
-
+  
   /** Prefix of a legitimate response by this server, including the user name. */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name")+"!";
-
+  
   /** Create a new remote control server, running in its own daemon thread.
     * @param frame main frame
     */
@@ -104,7 +104,7 @@ public final class RemoteControlServer {
       _frame = frame;
       socket = new DatagramSocket(DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_PORT));
     }
-    
+
     /**
      * Main method of the thread. It loops indefinitely, waiting for queries.
      * Since this is a daemon thread, it will get shut down at the end.
@@ -119,7 +119,7 @@ public final class RemoteControlServer {
           socket.receive(packet);
           
           String request = new String(packet.getData(), 0, packet.getLength());
-
+          
           // check if it was a legitimate query
           if (request.startsWith(QUERY_PREFIX)) {
             // construct response
@@ -144,19 +144,24 @@ public final class RemoteControlServer {
               }
               
               final File f = new File(request);
-              
               if (f.exists()) {
-                  String currFileName = f.getName();
-                  if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-                    MainFrame.openExtProcessFile(f);
-                  }
-                  else {
-                    FileOpenSelector openSelector = new FileOpenSelector() {
-                      public File[] getFiles() throws OperationCanceledException {
-                        return new File[] { f };
-                      }
-                    };
-                    if (_frame != null) { 
+                String currFileName = f.getName();
+                if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+                  MainFrame.openExtProcessFile(f);
+                }
+                else {
+                  FileOpenSelector openSelector = new FileOpenSelector() {
+                    public File[] getFiles() throws OperationCanceledException {
+                      return new File[] { f };
+                    }
+                  };
+                  if (_frame != null) { 
+                    if (currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+                        currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
+                        currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION)) {
+                      _frame.openProject(openSelector);
+                    }
+                    else {
                       _frame.open(openSelector);
                       if (lineNo>=0) {
                         final int l = lineNo;
@@ -166,6 +171,7 @@ public final class RemoteControlServer {
                       }
                     }
                   }
+                }
               }
             }
             else {
@@ -178,7 +184,7 @@ public final class RemoteControlServer {
             InetAddress address = packet.getAddress();
             int port = packet.getPort();
             packet = new DatagramPacket(buf, buf.length, address, port);
-
+            
             socket.send(packet);
           }
         }

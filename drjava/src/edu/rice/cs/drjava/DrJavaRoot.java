@@ -246,7 +246,9 @@ public class DrJavaRoot {
         currFileName = currFileName.substring(0,pathSepIndex);
       }
       
-      boolean isProjectFile = currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+      boolean isProjectFile =
+        currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+        currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
         currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
       final File file = new File(currFileName).getAbsoluteFile();
       FileOpenSelector command = new FileOpenSelector() {
