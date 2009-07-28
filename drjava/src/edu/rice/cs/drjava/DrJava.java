@@ -66,8 +66,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id$
   */
 public class DrJava {
-  
-  private static volatile Log _log = new Log("DrJava.txt", false);
+  public static volatile Log _log = new Log("DrJava.txt", false);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
   
@@ -79,9 +78,6 @@ public class DrJava {
   /** true if a new instance of DrJava should be started instead of
     * connecting to an already running instance. */
   static volatile boolean _forceNewInstance = false;
-
-  /** true if the files that were specified on the command line contain project files */
-  static volatile boolean _filesToOpenContainProjectFiles = false;
   
   /** Time in millisecond before restarting DrJava to change the heap size, etc. is deemed a success. */
   private static final int WAIT_BEFORE_DECLARING_SUCCESS = 5000;
@@ -107,6 +103,16 @@ public class DrJava {
   
   /** @return an array of the files that were passed on the command line. */
   public static String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
+  
+  /** Add a file to the list of files to open. */
+  public static void addFileToOpen(String s) {
+    _filesToOpen.add(s);
+    boolean isProjectFile =
+      s.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+      s.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
+      s.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
+    _forceNewInstance |= isProjectFile;
+  }
   
   /** @return true if the debug console should be enabled */
   public static boolean getShowDebugConsole() { return _showDebugConsole; }
@@ -263,6 +269,8 @@ public class DrJava {
     // Loop through arguments looking for known options
     int argIndex = 0;
     int len = args.length;
+    _log.log("handleCommandLineArgs. _filesToOpen: "+_filesToOpen);
+    _log.log("\t_filesToOpen cleared");
     _filesToOpen.clear();
     
     while(argIndex < len) {
@@ -299,19 +307,6 @@ public class DrJava {
       else {
         // this is the first file to open, do not consume
         --argIndex;
-        
-        // check if any of the files to open is a project file
-        _filesToOpenContainProjectFiles = false;
-        for (int tempIndex = argIndex; tempIndex < len; ++tempIndex) {
-          String currFileName = args[tempIndex];
-          boolean isProjectFile =
-            currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
-            currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
-            currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
-          _filesToOpenContainProjectFiles |= isProjectFile;
-        }
-        // if a project file was specified, force a new instance
-        if (_filesToOpenContainProjectFiles) _forceNewInstance = true;
         break;
       }
     }
@@ -341,7 +336,9 @@ public class DrJava {
     
     // Open the remaining args as filenames
     
-    for (int i = argIndex; i < len; i++) { _filesToOpen.add(args[i]); }
+    for (int i = argIndex; i < len; i++) { addFileToOpen(args[i]); }
+    _log.log("\t _filesToOpen now contains: "+_filesToOpen);
+
     return true;
   }
   
@@ -448,7 +445,9 @@ public class DrJava {
   
   /* Erase all non-final bindings created in this class.  Only used in testing. */
   public static void cleanUp() {
+    _log.log("cleanUp. _filesToOpen: "+_filesToOpen);
     _filesToOpen.clear();
+    _log.log("\t_filesToOpen cleared");
     _jvmArgs.clear();
     // Do not set _config or _propertiesFile to null because THEY ARE static
   }

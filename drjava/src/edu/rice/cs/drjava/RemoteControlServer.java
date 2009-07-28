@@ -145,33 +145,7 @@ public final class RemoteControlServer {
               
               final File f = new File(request);
               if (f.exists()) {
-                String currFileName = f.getName();
-                if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-                  MainFrame.openExtProcessFile(f);
-                }
-                else {
-                  FileOpenSelector openSelector = new FileOpenSelector() {
-                    public File[] getFiles() throws OperationCanceledException {
-                      return new File[] { f };
-                    }
-                  };
-                  if (_frame != null) { 
-                    if (currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
-                        currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
-                        currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION)) {
-                      _frame.openProject(openSelector);
-                    }
-                    else {
-                      _frame.open(openSelector);
-                      if (lineNo>=0) {
-                        final int l = lineNo;
-                        edu.rice.cs.util.swing.Utilities.invokeLater(new Runnable() { 
-                          public void run() { _frame._jumpToLine(l); }
-                        });
-                      }
-                    }
-                  }
-                }
+                DrJavaRoot.handleRemoteOpenFile(f, lineNo);
               }
             }
             else {

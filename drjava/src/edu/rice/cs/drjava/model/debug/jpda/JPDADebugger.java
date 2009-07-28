@@ -1489,8 +1489,8 @@ public class JPDADebugger implements Debugger {
   
   
   /** Create an unboxed primitive corresponding to the given object.
-    * @throw DebugException  If the value is not of a type that can be unboxed, or if an error
-    *                        occurs in the unboxing method invocation.
+    * @throws DebugException  If the value is not of a type that can be unboxed, or if an error
+    *                         occurs in the unboxing method invocation.
     */
   private PrimitiveValue _unbox(ObjectReference val, ThreadReference thread) throws DebugException {
     if (val == null) { throw new DebugException("Value can't be unboxed"); }

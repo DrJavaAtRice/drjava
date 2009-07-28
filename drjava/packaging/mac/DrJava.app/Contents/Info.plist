@@ -36,5 +36,18 @@
                         <string>$APP_PACKAGE/Contents/Resources/DrJava.icns</string>
 		</dict>
 	</dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+    	<dict>
+        	<key>CFBundleTypeExtensions</key>
+        	<array>
+			<string>drjava</string>
+        	</array>
+        	<key>CFBundleTypeName</key>
+        	<string>DrJava Project File</string>
+        	<key>CFBundleTypeRole</key>
+        	<string>Editor</string>
+    </dict>
+</array>
 </dict>
 </plist>

@@ -83,7 +83,7 @@ public class DocumentCache {
   
   private static final int INIT_CACHE_SIZE = 32;
   
-  /** @invariant _residentQueue.size() <= CACHE_SIZE */
+  /** invariant _residentQueue.size() <= CACHE_SIZE */
   private int CACHE_SIZE;
   
   private LinkedHashSet<DocManager> _residentQueue;

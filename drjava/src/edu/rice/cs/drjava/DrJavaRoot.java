@@ -348,5 +348,20 @@ public class DrJavaRoot {
   public static void removeModalWindowAdapter(Window w) {
     _mainFrame.removeModalWindowAdapter(w);
   }
+  
+  /** Handles an "open file" request, either from the remote control server or the operating system.
+    * @param f file to open
+    * @param lineNo line number to jump to, or -1 of not specified */
+  public static void handleRemoteOpenFile(File f, int lineNo) {
+    DrJava._log.log("DrJavaRoot.handleRemoteOpenFile, f="+f);
+    if (_mainFrame != null) { 
+      DrJava._log.log("\tcalling _mainFrame");
+      _mainFrame.handleRemoteOpenFile(f, lineNo);
+    }
+    else {
+      DrJava._log.log("\tadded to _filesToOpen");
+      DrJava.addFileToOpen(f.getAbsolutePath());
+    }
+  }
 }
 

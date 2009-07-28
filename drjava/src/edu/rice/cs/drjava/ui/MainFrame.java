@@ -4562,6 +4562,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return true if the project is closed, false if cancelled
     */
   boolean _closeProject(boolean quitting) {
+    // TODO: in some cases, it is possible to see the documents being removed in the navigation pane
+    //       this can cause errors. fix this.
     _completeClassSet = new HashSet<GoToFileListEntry>(); // reset auto-completion list
     _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
     
@@ -9812,6 +9814,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       catch (IllegalArgumentException e) { /* the URI is not a valid 'file:' URI */ }
     }
     return list;
+  }
+  
+  /** Handles an "open file" request, either from the remote control server or the operating system.
+    * @param f file to open
+    * @param lineNo line number to jump to, or -1 of not specified
+    */
+  public void handleRemoteOpenFile(final File f, final int lineNo) {
+    if (f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+      openExtProcessFile(f);
+    }
+    else {
+      FileOpenSelector openSelector = new FileOpenSelector() {
+        public File[] getFiles() throws OperationCanceledException {
+          return new File[] { f };
+        }
+      };
+      String currFileName = f.getName();
+      if (currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
+          currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
+          currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION)) {
+        openProject(openSelector);
+      }
+      else {
+        open(openSelector);
+        if (lineNo>=0) {
+          final int l = lineNo;
+          Utilities.invokeLater(new Runnable() { 
+            public void run() { _jumpToLine(l); }
+          });
+        }
+      }
+    }
   }
   
   /** Reset the position of the "Open Javadoc" dialog. */
