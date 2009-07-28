@@ -74,12 +74,13 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
   }
   
   /*Give an appropraite error*/
-  public void forStatementDoFirst(Statement that) {
+  public Void forStatementDoFirst(Statement that) {
     _addError("Statements cannot appear outside of method bodies.", that);
+    return null;
   }
   
   /*Make sure that this concrete method def is not declared to be abstract*/
-  public void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
+  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     ModifiersAndVisibility mav = that.getMav();
     String[] modifiers = mav.getModifiers();
     // Concrete methods cannot have any modifiers at the Elementary level since only "abstract" is allowed
@@ -93,42 +94,40 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
     if (that.getThrows().length > 0) { //throws are prohibited at the Elementary level.
       _addAndIgnoreError("Methods cannot throw exceptions at the Elementary level", that);
     }
-    super.forConcreteMethodDefDoFirst(that);
+    return super.forConcreteMethodDefDoFirst(that);
   }
   
   /*Make sure that this abstract method def is declared to be abstract, and that it is not
    * declared to throw any exceptions*/
-  public void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
+  public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
     if (that.getThrows().length > 0) { //throws are prohibited at the Elementary level.
       _addAndIgnoreError("Methods cannot throw exceptions at the Elementary level", that);
     }
     if (!_symbolData.hasModifier("abstract")) {
       _addError("Abstract methods can only be declared in abstract classes.", that);
+      return null;
     }
     else {
-      super.forAbstractMethodDefDoFirst(that);
+      return super.forAbstractMethodDefDoFirst(that);
     }
   }
 
   /*Throw an appropriate error*/
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
+  public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("This open brace must mark the beginning of a method or class body.", that);
+    return null;
   }
   
   /**Cannot initialize variables in a class body at Elementary Level  Must be done in the constructor.*/
-  public void forInitializedVariableDeclaratorDoFirst(InitializedVariableDeclarator that) {
+  public Void forInitializedVariableDeclaratorDoFirst(InitializedVariableDeclarator that) {
     _addError("Cannot initialize a class's fields at the Elementary level.  To set the value of a field, when you instantiate the class, pass the desired value to the class's constructor.", that);
-    forVariableDeclaratorDoFirst(that);
+    return forVariableDeclaratorDoFirst(that);
   }
   
-  
-   /* 
-   * Convert the Variable declartaion to variable datas.  Then, make sure that no 
-   * fields are declared to be abstract.
-   * Finally, add the variable datas to the symbol data, and give an error if
-   * two fields have the same names
-   */
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  /** Convert the Variable declartaion to variable datas.  Then, make sure that no fields are declared to be abstract.
+    * Finally, add the variable datas to the symbol data, and give an error if two fields have the same names
+    */
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _symbolData);
     for (int i = 0; i<vds.length; i++) {
       if (vds[i].hasModifier("abstract")) {
@@ -138,6 +137,7 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
     if(!_symbolData.addFinalVars(vds)) {  //TODO: no need to addFinalVars--made final in _variableDeclaration2VariableData
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses has a field by that name", that);
     }
+    return null;
   }
 
   /*Create a method data corresponding to this method declaration, and then visit the
@@ -145,9 +145,9 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
    * Make sure the method name is different from the class name.
    * Methods are automatically public at the Elementary level.
    */
-  public void forConcreteMethodDef(ConcreteMethodDef that) {
+  public Void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     MethodData md = createMethodData(that, _symbolData);
     md.addPublicMav(); // All methods are automatically public at the Elementary level.
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -159,18 +159,18 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
       _symbolData.addMethod(md);
     }
     that.getBody().visit(new BodyBodyElementaryVisitor(md, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
-    forConcreteMethodDefOnly(that);
+    return forConcreteMethodDefOnly(that);
   }
 
   
-  /*Create a method data corresponding to this method declaration, and then visit the
-   * abstract method def with a new bodybody visitor, passing it the enclosing method data.
-   * Make sure the method name is different from the class name.
-   * Methods are automatically public at the Elementary level.
-   */
-  public void forAbstractMethodDef(AbstractMethodDef that) {
+  /** Create a method data corresponding to this method declaration, and then visit the
+    * abstract method def with a new bodybody visitor, passing it the enclosing method data.
+    * Make sure the method name is different from the class name.
+    * Methods are automatically public at the Elementary level.
+    */
+  public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     MethodData md = createMethodData(that, _symbolData);
     String className = getUnqualifiedClassName(_symbolData.getName());
     if (className.equals(md.getName())) {
@@ -180,14 +180,10 @@ public class ClassBodyElementaryVisitor extends ElementaryVisitor {
     else {
       _symbolData.addMethod(md);
     }
-    forAbstractMethodDefOnly(that);
+    return forAbstractMethodDefOnly(that);
   }
   
- 
-  
-   /**
-    * Test the methods declared in the enclosing (above) class
-    */
+  /** Test the methods declared in the enclosing (above) class. */
   public static class ClassBodyElementaryVisitorTest extends TestCase {
     
     private ClassBodyElementaryVisitor _cbbv;

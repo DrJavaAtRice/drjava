@@ -73,12 +73,13 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
   }
 
   /*Give an appropraite error*/
-  public void forStatementDoFirst(Statement that) {
+  public Void forStatementDoFirst(Statement that) {
     _addError("Statements cannot appear outside of method bodies", that);
+    return null;
   }
   
   /*Make sure that this concrete method def is not declared to be abstract*/
-  public void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
+  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     ModifiersAndVisibility mav = that.getMav();
     String[] modifiers = mav.getModifiers();
     for (int i = 0; i < modifiers.length; i++) {
@@ -87,21 +88,23 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
         break;
       }
     }
+    return null;
   }
   
   /*Make sure that this abstract method def is declared to be abstract*/
-  public void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
+  public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
     if (!_symbolData.hasModifier("abstract")) {
       _addError("Abstract methods can only be declared in abstract classes", that);
     }
     ModifiersAndVisibility mav = that.getMav();
     String[] modifiers = mav.getModifiers();
-    super.forAbstractMethodDefDoFirst(that);
+    return super.forAbstractMethodDefDoFirst(that);
   }
 
   /*Add an appropriate error*/
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
+  public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("This open brace must mark the beginning of a method or class body", that);
+    return null;
   }
    
   
@@ -111,7 +114,7 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
    * Finally, add the variable datas to the symbol data, and give an error if
    * two fields have the same names
    */
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _symbolData);
 
     //make sure that none of the static fields are uninitialized:
@@ -130,6 +133,7 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
     if(!_symbolData.addVars(vdsList.toArray(new VariableData[vdsList.size()]))) {
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", that);
     }
+    return null;
   }
   
   
@@ -137,9 +141,9 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
    * concrete method def with a new bodybody visitor, passing it the enclosing method data.
    * Make sure the method name is different from the class name.
    */
-  public void forConcreteMethodDef(ConcreteMethodDef that) {
+  public Void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     
     MethodData md = createMethodData(that, _symbolData);
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -152,15 +156,16 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
       _symbolData.addMethod(md);
     }
     that.getBody().visit(new BodyBodyAdvancedVisitor(md, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    return null;
   }
 
   /*Create a method data corresponding to this method declaration, and then visit the
    * abstract method def with a new bodybody visitor, passing it the enclosing method data.
    * Make sure the method name is different from the class name.
    */
-  public void forAbstractMethodDef(AbstractMethodDef that) {
+  public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
 
     MethodData md = createMethodData(that, _symbolData);
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -168,31 +173,32 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
       _addAndIgnoreError("Only constructors can have the same name as the class they appear in, and constructors do not have an explicit return type",
                          that);
     }
-    else {
-      _symbolData.addMethod(md);
-    }
+    else _symbolData.addMethod(md);
+    return null;
   }
   
  
   
   
   /**Call the method in AdvancedVisitor since it's common to this and AdvancedBodyAdvancedVisitor. */
-  public void forInnerInterfaceDef(InnerInterfaceDef that) {
+  public Void forInnerInterfaceDef(InnerInterfaceDef that) {
     handleInnerInterfaceDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "$" + that.getName().getText());
+    return null;
   }
   
   /**Call the method in AdvancedVisitor since it's common to this and AdvancedBodyAdvancedVisitor. */
-  public void forInnerClassDef(InnerClassDef that) {
+  public Void forInnerClassDef(InnerClassDef that) {
     handleInnerClassDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "$" + that.getName().getText());
+    return null;
   }
 
   /**
    * Create a constructor corresponding to the specifications in the ConstructorDef, and then
    * visit the constructor body, passing the constructor as the enclosing data.
    */
-  public void forConstructorDef(ConstructorDef that) {
+  public Void forConstructorDef(ConstructorDef that) {
     forConstructorDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     
     that.getMav().visit(this);
     String name = getUnqualifiedClassName(that.getName().getText());
@@ -222,23 +228,24 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
 
     //note that we have seen a constructor.
     _symbolData.incrementConstructorCount();
+    return null;
   }
   
   /** Delegate to method in LanguageLevelVisitor */
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _symbolData);
+    return null;
   }
 
   /**Delegate to method in LanguageLevelVisitor */
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _symbolData);
+    return null;
   }
 
   
   
-   /**
-    * Test the methods that are declared above.
-   */
+  /** Test the methods that are declared above. */
   public static class ClassBodyAdvancedVisitorTest extends TestCase {
     
     private ClassBodyAdvancedVisitor _cbav;

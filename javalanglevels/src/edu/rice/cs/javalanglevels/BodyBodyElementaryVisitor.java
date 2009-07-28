@@ -50,7 +50,7 @@ import junit.framework.TestCase;
  * (not class or interface body) at the Elementary Language Level). 
  */
 public class BodyBodyElementaryVisitor extends ElementaryVisitor {
-
+  
   /**The MethodData of this method. */
   private BodyData _bodyData;
   
@@ -65,14 +65,15 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
    */
   public BodyBodyElementaryVisitor(BodyData bodyData, File file, String packageName, LinkedList<String> importedFiles, 
-                             LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+                                   LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
     super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
     _bodyData = bodyData;
   }
-
+  
   /*Give an appropriate error*/
-  public void forMethodDefDoFirst(MethodDef that) {
+  public Void forMethodDefDoFirst(MethodDef that) {
     _addError("Methods definitions cannot appear within the body of another method or block.", that);
+    return null;
   }
   
   /* There is currently no way to differentiate between a block statement and
@@ -80,27 +81,28 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
    * braced body.  Whenever an instance initialization is visited in a method
    * body, we must assume that it is a block statement.
    */
-  public void forInstanceInitializer(InstanceInitializer that) {
-    forBlock(that.getCode());
+  public Void forInstanceInitializer(InstanceInitializer that) {
+    return forBlock(that.getCode());
   }
-
+  
   /* Visit this BlockData with a new BodyBodyElementary visitor after making sure no errors need to be thrown.*/
-  public void forBlock(Block that) {
+  public Void forBlock(Block that) {
     forBlockDoFirst(that);
-    if (_checkError()) {
-      return;
-    }
+    if (_checkError()) return null;
+    
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     that.getStatements().visit(new BodyBodyElementaryVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    return null;
   }
   
   /*Add the variables that were declared to the body data and make sure that no two
    * variables have the same name.*/
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     if (!_bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
       _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
+    return null;
   }
   
   /**
@@ -116,20 +118,17 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
         String[] modifiers = vds[i].getMav().getModifiers();
         for (int j = 0; j<modifiers.length; j++) { s.append("\"" + modifiers[j] + "\" "); }
         _addAndIgnoreError("You cannot use " + s.toString() + "to declare a local variable at the Elementary level", vd);
-        }
+      }
       vds[i].setFinal();
-
+      
     }
     return vds;
   }
-    
-    
   
-      
-   /**
-    * Test most of the methods declared above right here:
-    */
-   public static class BodyBodyElementaryVisitorTest extends TestCase {
+  /**
+   * Test most of the methods declared above right here:
+   */
+  public static class BodyBodyElementaryVisitorTest extends TestCase {
     
     private BodyBodyElementaryVisitor _bbv;
     
@@ -155,11 +154,11 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");
       _md1 = new MethodData("methodName", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, 
-                                   new VariableData[0], 
-                                   new String[0],
-                                   _sd1,
-                                   null);
-
+                            new VariableData[0], 
+                            new String[0],
+                            _sd1,
+                            null);
+      
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
@@ -194,14 +193,14 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     public void testForVariableDeclarationOnly() {
       // Check one that works
       VariableDeclaration vdecl = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
-                                                       _packageMav,
-                                                       new VariableDeclarator[] {
+                                                          _packageMav,
+                                                          new VariableDeclarator[] {
         new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                               new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                               new Word (JExprParser.NO_SOURCE_INFO, "field1")),
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                               new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                               new Word (JExprParser.NO_SOURCE_INFO, "field2"))});
+                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
+                                            new Word (JExprParser.NO_SOURCE_INFO, "field1")),
+          new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
+                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
+                                              new Word (JExprParser.NO_SOURCE_INFO, "field2"))});
       VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, false, _bbv._bodyData);
       vdecl.visit(_bbv);
@@ -211,14 +210,14 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
       
       // Check one that doesn't work
       VariableDeclaration vdecl2 = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
-                                                        _packageMav,
-                                                        new VariableDeclarator[] {
+                                                           _packageMav,
+                                                           new VariableDeclarator[] {
         new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
                                             new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
                                             new Word (JExprParser.NO_SOURCE_INFO, "field3")),
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field3"))});
+          new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
+                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
+                                              new Word (JExprParser.NO_SOURCE_INFO, "field3"))});
       VariableData vd3 = new VariableData("field3", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       vdecl2.visit(_bbv);
       assertEquals("There should be one error.", 1, errors.size());

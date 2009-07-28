@@ -91,7 +91,7 @@ public class Log {
           log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()));
         }
         catch (IOException ioe) {
-          Utilities.show("Could not create log: " + ioe);
+//          Utilities.show("Could not create log: " + ioe);
           throw new RuntimeException("Could not create log: " + ioe);
         }
       }

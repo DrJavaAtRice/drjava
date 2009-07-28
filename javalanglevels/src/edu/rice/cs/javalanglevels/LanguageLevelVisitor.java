@@ -60,7 +60,7 @@ import junit.framework.TestCase;
   * during the first walk of the AST (checking for general errors and building the symbol table).  This class enforces
   * things that are common to all contexts reachable at any Language Level, as well as top level constraints.
   */
-public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor_void {
+public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor {
   
   /** Errors we have encountered during this pass: string is the text of the error, JExpressionIF is the part of
     * the AST where the error occurs. */
@@ -1555,7 +1555,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /** Check for problems with modifiers that are common to all language levels: duplicate modifiers and illegal
     * combinations of modifiers.
     */
-  public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
+  public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
     Arrays.sort(modifiersAndVisibility);
     if (modifiersAndVisibility.length > 0) {
@@ -1607,14 +1607,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           if (isFinal) _badModifiers("final", "volatile", that);
         }
       }
-      forJExpressionDoFirst(that);  // Does nothing!
+      return forJExpressionDoFirst(that);  // Does nothing!
     }
+    return null;
   }
   
   /** Check for problems with ClassDefs that are common to all Language Levels.  Make sure that the top level class is
     * not private, and that the class name has not already been imported.
     */
-  public void forClassDefDoFirst(ClassDef that) {
+  public Void forClassDefDoFirst(ClassDef that) {
     String name = that.getName().getText();
     Iterator<String> iter = _importedFiles.iterator();
     while (iter.hasNext()) {
@@ -1634,13 +1635,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
     }
     
-    forTypeDefBaseDoFirst(that);
+    return forTypeDefBaseDoFirst(that);
   }
   
   /** Check for problems with InterfaceDefs that are common to all language levels: specifically, top level interfaces 
     * cannot be private or final.
     */
-  public void forInterfaceDefDoFirst(InterfaceDef that) {
+  public Void forInterfaceDefDoFirst(InterfaceDef that) {
     //top level interfaces cannot be private or final.
     String[] mavStrings = that.getMav().getModifiers();
     for (int i = 0; i < mavStrings.length; i++) {
@@ -1652,25 +1653,25 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
     }
     
-    forTypeDefBaseDoFirst(that);
+    return forTypeDefBaseDoFirst(that);
   }
   
   /**
    * Check for problems with InnerInterfaceDefs that are common to all language levels:
    * specifically, they cannot be final.
    */
-  public void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
+  public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
     String[] mavStrings = that.getMav().getModifiers();
     for (int i = 0; i < mavStrings.length; i++) {
       if (mavStrings[i].equals("final")) {
         _addAndIgnoreError("Interfaces cannot be final", that);
       }
     }
-    forTypeDefBaseDoFirst(that);  
+    return forTypeDefBaseDoFirst(that);  
   }
   
   /** This sets the package name field in order to find other classes in the same package. */
-  public void forPackageStatementOnly(PackageStatement that) {
+  public Void forPackageStatementOnly(PackageStatement that) {
     CompoundWord cWord = that.getCWord();
     Word[] words = cWord.getWords();
     String newPackage;
@@ -1693,7 +1694,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     //If file is a .java file and not compiled, won't find it.  This is not consistent with the JLS.
     //if file is a ll file and not compiled, will find it, though this is not consistent with the JLS.
     getSymbolData(_package, that.getSourceInfo(), false, false, false);
-    forJExpressionOnly(that);
+    return forJExpressionOnly(that);
   }
   
   
@@ -1702,7 +1703,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * If there are no errors, add it to the list of imported files, and create a continuation for it.
     * The class will be resolved later.
     */
-  public void forClassImportStatementOnly(ClassImportStatement that) {
+  public Void forClassImportStatementOnly(ClassImportStatement that) {
     CompoundWord cWord = that.getCWord();
     Word[] words = cWord.getWords();
     
@@ -1713,7 +1714,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       if (indexOfLastDot != -1 && 
           (words[words.length-1].getText()).equals(name.substring(indexOfLastDot + 1, name.length()))) {
         _addAndIgnoreError("The class " + words[words.length-1].getText() + " has already been imported.", that);
-        return;
+        return null;
       }
     }
     
@@ -1728,7 +1729,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     if (indexOfLastDot != -1) {
       if (_package.equals(temp.substring(0, indexOfLastDot))) {
         _addAndIgnoreError("You do not need to import " + temp + ".  It is in your package so it is already visible", that);
-        return;
+        return null;
       }
     }
     
@@ -1743,11 +1744,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       continuations.put(temp, new Pair<SourceInfo, LanguageLevelVisitor>(that.getSourceInfo(), this));
       symbolTable.put(temp, sd);
     }
-    forImportStatementOnly(that);
+    return forImportStatementOnly(that);
   }
   
   /**Check to make sure that this package import statement is not trying to import the current pacakge. */
-  public void forPackageImportStatementOnly(PackageImportStatement that) { 
+  public Void forPackageImportStatementOnly(PackageImportStatement that) { 
     CompoundWord cWord = that.getCWord();
     Word[] words = cWord.getWords();
     StringBuffer tempBuff = new StringBuffer(words[0].getText());
@@ -1759,64 +1760,72 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     if (_package.equals(temp)) {
       _addAndIgnoreError("You do not need to import package " + temp + 
                          ". It is your package so all public classes in it are already visible.", that);
-      return;
+      return null;
     }
     
     _importedPackages.addLast(temp);
     
-    forImportStatementOnly(that);
+    return forImportStatementOnly(that);
   }
   
   /**Bitwise operators are not allowed at any language level...*/
-  public void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) {
+  public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) {
     _addAndIgnoreError("Shift assignment operators cannot be used at any language level", that);
+    return null;
   }
-  public void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) {
+  public Void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) {
     _addAndIgnoreError("Bitwise operators cannot be used at any language level", that);
+    return null;
   }
-  public void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) {
+  public Void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) {
     _addAndIgnoreError("Bitwise binary expressions cannot be used at any language level", that);
+    return null;
   }
-  public void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) {
+  public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) {
     _addAndIgnoreError("Bitwise or expressions cannot be used at any language level." + 
                        "  Perhaps you meant to compare two values using regular or (||)", that);
+    return null;
   }
-  public void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) {
+  public Void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) {
     _addAndIgnoreError("Bitwise xor expressions cannot be used at any language level", that);
+    return null;
   }
-  public void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) {
+  public Void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) {
     _addAndIgnoreError("Bitwise and expressions cannot be used at any language level." + 
                        "  Perhaps you meant to compare two values using regular and (&&)", that);
+    return null;
   }
-  public void forBitwiseNotExpressionDoFirst(BitwiseNotExpression that) {
+  public Void forBitwiseNotExpressionDoFirst(BitwiseNotExpression that) {
     _addAndIgnoreError("Bitwise not expressions cannot be used at any language level." + 
                        "  Perhaps you meant to negate this value using regular not (!)", that);
+    return null;
   }
-  public void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) {
+  public Void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) {
     _addAndIgnoreError("Bit shifting operators cannot be used at any language level", that);
+    return null;
   }
-  public void forBitwiseNotExpressionDoFirst(ShiftBinaryExpression that) {
+  public Void forBitwiseNotExpressionDoFirst(ShiftBinaryExpression that) {
     _addAndIgnoreError("Bitwise operators cannot be used at any language level", that);
+    return null;
   }
   
   
   /** The EmptyExpression is a sign of an error. It means that we were missing something
     * we needed when the parser built the AST*/
-  public void forEmptyExpressionDoFirst(EmptyExpression that) {
+  public Void forEmptyExpressionDoFirst(EmptyExpression that) {
     _addAndIgnoreError("You appear to be missing an expression here", that);
+    return null;
   }
   
   /** The NoOp expression signifies a missing binary operator that was encountered when the
     * parser built the AST. */
-  public void forNoOpExpressionDoFirst(NoOpExpression that) {
+  public Void forNoOpExpressionDoFirst(NoOpExpression that) {
     _addAndIgnoreError("You are missing a binary operator here", that);
+    return null;
   }
   
-  /**
-   * If one of the ClassDefs defined in this source file is a 
-   * TestCase class, make sure it is the only thing in the file.
-   */
-  public void forSourceFileDoFirst(SourceFile that) {
+  /** If a ClassDef defined in this source file is a TestCase class, make sure it is the only thing in the file. */
+  public Void forSourceFileDoFirst(SourceFile that) {
     
     for (int i = 0; i< that.getTypes().length; i++) {
       if (that.getTypes()[i] instanceof ClassDef) {
@@ -1829,7 +1838,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         }
       }
     }
-    
+    return null; 
   }
   
   /**
@@ -1839,9 +1848,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * defined in this file.
    * Then, visit them one by one.
    */
-  public void forSourceFile(SourceFile that) {
+  public Void forSourceFile(SourceFile that) {
     forSourceFileDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     
     // The parser enforces that there is either zero or one PackageStatement.
     for (int i = 0; i < that.getPackageStatements().length; i++) that.getPackageStatements()[i].visit(this);
@@ -1871,25 +1880,27 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
     }
     
-    forSourceFileOnly(that);
+    return forSourceFileOnly(that);
   }
   
   /** Call the ResolveNameVisitor to see if this is a reference to a Type name. */
-  public void forSimpleNameReference(SimpleNameReference that) {
+  public Void forSimpleNameReference(SimpleNameReference that) {
     that.visit(new ResolveNameVisitor());
+    return null;
   }
   
   /** Call the ResolveNameVisitor to see if this is a reference to a Type name. */
-  public void forComplexNameReference(ComplexNameReference that) {
+  public Void forComplexNameReference(ComplexNameReference that) {
     that.visit(new ResolveNameVisitor());
+    return null;
   }
   
   /**Do nothing.  This is handled in the forVariableDeclarationOnly case.*/
-  public void forVariableDeclaration(VariableDeclaration that) {
+  public Void forVariableDeclaration(VariableDeclaration that) {
     forVariableDeclarationDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     that.getMav().visit(this);
-    forVariableDeclarationOnly(that);
+    return forVariableDeclarationOnly(that);
   }
   
   /**
@@ -2081,21 +2092,22 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * MemberType recursively.  Just take the whole thing and look for it in
    * forMemberTypeOnly (calls forTypeOnly eventually to get looked up).
    */
-  public void forMemberType(MemberType that) {
+  public Void forMemberType(MemberType that) {
     forMemberTypeDoFirst(that);
-    if (prune(that)) return;
-    forMemberTypeOnly(that);
+    if (prune(that)) return null;
+    return forMemberTypeOnly(that);
   }
   
   /**Return the SymbolData for java.lang.String by default*/
-  public void forStringLiteralOnly(StringLiteral that) {
+  public Void forStringLiteralOnly(StringLiteral that) {
     getSymbolData("String", that.getSourceInfo(), true);
+    return null;
   }
   
   /** Try to resolve the type of the instantiation, and make sure there are no errors*/
-  public void forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) {
+  public Void forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) {
     forSimpleNamedClassInstantiationDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     that.getType().visit(this);
     that.getArguments().visit(this);
     
@@ -2105,7 +2117,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
      */
     getSymbolData(that.getType().getName(), that.getSourceInfo());
     
-    forSimpleNamedClassInstantiationOnly(that);
+    return forSimpleNamedClassInstantiationOnly(that);
   }
   
   
@@ -2134,12 +2146,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    */
   private class ResolveNameVisitor extends JExpressionIFAbstractVisitor<TypeData> {
     
-    public ResolveNameVisitor() {
-    }
+    public ResolveNameVisitor() { }
     
-    /**
-     * Most expressions are not relevant for this check--visit them with outer visitor.
-     */
+    /** Most expressions are not relevant for this check--visit them with outer visitor. */
     public TypeData defaultCase(JExpressionIF that) {
       that.visit(LanguageLevelVisitor.this);
       return null;

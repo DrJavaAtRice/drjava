@@ -71,13 +71,14 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
   }
   
   /*Add an appropriate error*/
-  public void forStatementDoFirst(Statement that) {
+  public Void forStatementDoFirst(Statement that) {
     _addError("Statements cannot appear outside of method bodies", that);
+    return null;
   }
   
   
   /* Make sure that this concrete method def is not declared to be abstract or static. */
-  public void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
+  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     ModifiersAndVisibility mav = that.getMav();
     String[] modifiers = mav.getModifiers();
     // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
@@ -91,11 +92,11 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         break;
       }
     }
-    super.forConcreteMethodDefDoFirst(that);
+    return super.forConcreteMethodDefDoFirst(that);
   }
   
   /*Make sure that this abstract method def is declared to be abstract*/
-  public void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
+  public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
     if (!_classData.hasModifier("abstract")) {
       _addError("Abstract methods can only be declared in abstract classes", that);
     }
@@ -108,19 +109,20 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         break;
       }
     }
-    super.forAbstractMethodDefDoFirst(that);
+    return super.forAbstractMethodDefDoFirst(that);
   }
 
   /**Add an appropriate error*/
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
+  public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("This open brace must mark the beginning of a method or class body", that);
+    return null;
   }
     
   /* Convert the Variable declartaion to variable datas.  Then, make sure that all
    * static fields are initialized and that no fields are declared to be abstract.
    * Finally, add the variable datas to the symbol data, and give an error if
    * two fields have the same names */
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _classData);
     //make sure that none of the static fields are uninitialized:
     LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
@@ -139,15 +141,16 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     if(!_classData.addFinalVars(vdsList.toArray(new VariableData[vdsList.size()]))) {
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", that);
     }
+    return null;
   }
 
   /* Create a method data corresponding to this method declaration, and then visit the concrete method def with a new bodybody 
    * visitor, passing it the enclosing method data. Methods are still public by default, but this can be overridden by the user.
    * Make sure the method name is different from the class name.
    */
-  public void forConcreteMethodDef(ConcreteMethodDef that) {
+  public Void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     MethodData md = createMethodData(that, _classData);
     
     // At Intermediate Level, methods are still public by default.
@@ -163,7 +166,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     else _classData.addMethod(md);
 
     that.getBody().visit(new BodyBodyIntermediateVisitor(md, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
-    forConcreteMethodDefOnly(that);
+    return forConcreteMethodDefOnly(that);
   }
 
   /*Create a method data corresponding to this method declaration, and then visit the
@@ -171,9 +174,9 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
    * Make sure the method name is different from the class name.
    * At the Intermediate Level, methods are public by default, but this can be overridden by the user.
    */
-  public void forAbstractMethodDef(AbstractMethodDef that) {
+  public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     MethodData md = createMethodData(that, _classData);
 
     //At Intermediate Level, methods are still public by default.
@@ -189,15 +192,16 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     else {
       _classData.addMethod(md);
     }
+    return null;
   }
   
  
   
 
   /** Create a constructor corresponding to the specifications in the ConstructorDef.  */
-  public void forConstructorDef(ConstructorDef that) {
+  public Void forConstructorDef(ConstructorDef that) {
     forConstructorDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
 
     that.getMav().visit(this);
     String name = getUnqualifiedClassName(that.getName().getText());
@@ -231,17 +235,19 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     that.getStatements().visit(new BodyBodyIntermediateVisitor(md, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
     //note that we have seen a constructor.
     _classData.incrementConstructorCount();
-    forConstructorDefOnly(that);
+    return forConstructorDefOnly(that);
   }
   
   /** Delegate to method in LLV. */
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _classData);
+    return null;
   }
 
   /** Delegate to method in LLV. */
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _classData);
+    return null;
   }
   
   /** Test the methods in the above (enclosing) class. */

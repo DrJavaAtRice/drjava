@@ -698,12 +698,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     errors.addLast(new Pair<String, JExpressionIF>(message, that));
   }
   
-  /**
-   * Return a TypeData array of the specified size.
-   */
-  protected TypeData[] makeArrayOfRetType(int len) {
-    return new TypeData[len];
-  }
+  /** Return a TypeData array of the specified size. */
+  protected TypeData[] makeArrayOfRetType(int len) { return new TypeData[len]; }
 
   /**
    * This method is called by default from cases that do not 

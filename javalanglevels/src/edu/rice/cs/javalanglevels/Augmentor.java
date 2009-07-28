@@ -45,7 +45,7 @@ import junit.framework.TestCase;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
+public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //  public static final Log _log = new Log("Augmentor.txt", true);
   
   private static final String newLine = System.getProperty("line.separator");
@@ -111,6 +111,12 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     */
   protected Augmentor(Data d) { _enclosingData = d; }
   
+  /** This method is called by default from cases that do not override forCASEOnly. */
+  protected Void defaultCase(JExpressionIF that) { return null; } 
+  
+  /** Return a Void array of the specified size. */
+  protected Void[] makeArrayOfRetType(int len) { return new Void[len]; }
+  
   /** Writes out implicit variableDeclarationModfiers that must be added to augmented file. */
   protected void augmentVariableDeclarationModifiers(VariableDeclaration that) {
     String variableDeclarationModifiers = "";
@@ -133,22 +139,24 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     * VariableDeclaration before beginning augmentation.
     * @param that  The VariableDeclaration we are augmenting.
     */
-  public void forVariableDeclaration(VariableDeclaration that) {
+  public Void forVariableDeclaration(VariableDeclaration that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     augmentVariableDeclarationModifiers(that);
     super.forVariableDeclaration(that);
+    return null;
   }
   
   /** All formal parameters at the Elementary and Intermediate level (parameters to a method or in a catch clause) are augmented to be final.
     * Always read up to the start of the FormalParameter before beginning augmentation.
     * @param that  The FormalParameter we are augmenting.
     */
-  public void forFormalParameter(FormalParameter that) {
+  public Void forFormalParameter(FormalParameter that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     if (_isElementaryFile() || _isIntermediateFile()) {
       _writeToFileOut("final ");
     }
     // We don't bother to visit the declarator, since it does not need to be augmented.
+    return null;
   }
   
   /** Do the augmentation necessary for a ConstructorDef.  Not allowed at the Elementary level, so don't worry
@@ -157,7 +165,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     * Always read up to the start of the ConstructorDef before beginning augmentation.
     * @param that  The ConstructorDef we are augmenting.
     */
-  public void forConstructorDef(ConstructorDef that) {
+  public Void forConstructorDef(ConstructorDef that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     
     if (_isIntermediateFile()) { //if this is an Intermediate level file, want to check and see if the constructor has modifiers.  If not,
@@ -175,6 +183,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     }
     for (FormalParameter fp : that.getParameters()) { fp.visit(this); }
     // We don't bother visiting the rest of the method declaration
+    return null;
   }
   
   /** Do the augmentation necessary for a MethodDef.  At the Elementary level, all methods are automatically
@@ -185,7 +194,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     * Always read up to the start of the MethodDef before beginning augmentation.
     * @param that  The MethodDef being visited.
     */
-  public void forMethodDef(MethodDef that) {
+  public Void forMethodDef(MethodDef that) {
     SourceInfo mdSourceInfo = that.getSourceInfo();
     _readAndWriteThroughIndex(mdSourceInfo.getStartLine(), mdSourceInfo.getStartColumn() - 1);
     
@@ -239,19 +248,20 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     
     for (FormalParameter fp : that.getParams()) { fp.visit(this); }
     // We don't bother visiting the rest of the method declaration
+    return null;
   }
   
   
   /** Delegate the augmentation of this AbstractMethodDef to forMethodDef.
     * @param that  The AbstractMethodDef being augmented.
     */
-  public void forAbstractMethodDef(AbstractMethodDef md) { forMethodDef(md); }
+  public Void forAbstractMethodDef(AbstractMethodDef md) { forMethodDef(md); return null; }
   
   /** Delegate the augmentation of this method def's declaration to forMethodDef.  Then, visit the body with a 
     * MethodBodyAugmentor so that each piece of the body can be correctly augmented.
     * @param that  The ConcreteMethodDef being augmented.
     */
-  public void forConcreteMethodDef(ConcreteMethodDef that) {
+  public Void forConcreteMethodDef(ConcreteMethodDef that) {
     forMethodDef(that);
     MethodData md = 
       _enclosingData.getSymbolData().getMethod(that.getName().getText(), 
@@ -262,6 +272,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
                                  " Please report this bug."); 
     }
     that.getBody().visit(new MethodBodyAugmentor(md));
+    return null;
   }
   
   /** Class Defs can only appear at the top level of a source file.  If this ClassDef appears in an Elementary Level
@@ -270,7 +281,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     * augmented methods.
     * @param cd  The ClassDef we're augmenting.
     */
-  public void forClassDef(ClassDef cd) {
+  public Void forClassDef(ClassDef cd) {
     String className = cd.getName().getText();
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(className));
     if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + " Please report this bug."); }
@@ -314,6 +325,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     
 
     // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
+    return null;
   }
 
   /**
@@ -324,7 +336,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
    * add the Augmentation back in.
    * @param cd  The InnerClassDef we are augmenting.
    */
-  public void forInnerClassDef(InnerClassDef cd) {
+  public Void forInnerClassDef(InnerClassDef cd) {
     String className = cd.getName().getText();
     if (_enclosingData == null) {throw new RuntimeException("Internal Program Error: Enclosing Data is null.  Please report this bug.");}
     SymbolData sd = _enclosingData.getInnerClassOrInterface(className);
@@ -350,6 +362,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
 //    _writeToFileOut(indentString(baseIndent, 0));
 
     // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
+    return null;
 }
 
   
@@ -359,7 +372,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
    * InterfaceDefs can only appear at the top level of a source file.
    * @param cd  The InterfaceDef being augmented.
    */
-  public void forInterfaceDef(InterfaceDef cd) {
+  public Void forInterfaceDef(InterfaceDef cd) {
     String interfaceName = cd.getName().getText();
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(interfaceName));
     if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + ".  Please report this bug."); }
@@ -386,6 +399,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     }
     _writeToFileOut(indentString(baseIndent, 0));
     // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
+    return null;
   }
 
   /**
@@ -395,7 +409,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
    * at the Advanced level, this might need to change.
    * InnerInterfaceDefs can appear inside method or class or interface bodies.
    */
-  public void forInnerInterfaceDef(InnerInterfaceDef cd) {
+  public Void forInnerInterfaceDef(InnerInterfaceDef cd) {
     String interfaceName = cd.getName().getText();
     if (_enclosingData == null) {throw new RuntimeException("Internal Program Error: Enclosing Data is null.  Please report this bug.");}
     SymbolData sd = _enclosingData.getInnerClassOrInterface(interfaceName);
@@ -406,6 +420,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     bb.visit(new Augmentor(sd));
     
     // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
+    return null;
   }
   
   
@@ -413,7 +428,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
    * is from an Elementary or Intermediate Level file, augment with the necessary automatically generated methods.
    * @param e  The AnonymousClassInstantiation we are augmenting.
    */
-  public void forAnonymousClassInstantiation(AnonymousClassInstantiation e) {
+  public Void forAnonymousClassInstantiation(AnonymousClassInstantiation e) {
     SymbolData sd = _enclosingData.getNextAnonymousInnerClass();
 //    _log.log("Augmenting anonymous class " + e + " with SymbolData " + sd);
     if (sd == null) {
@@ -438,17 +453,20 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
       _writeToFileOut(indentString(baseIndent, 0));
 
     }
+    return null;
   }
   
   /**Delegate to for AnonymousClassInstantiation(e).*/
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation e) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation e) {
     forAnonymousClassInstantiation(e);
+    return null;
   }
   
   /**Visit the encosing part of this ComplexAnonymousClass name, and then delegate to forAnonymousClassInstantiation(e)*/
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation e) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation e) {
     e.getEnclosing().visit(this);
     forAnonymousClassInstantiation(e);
+    return null;
   }
 
   /** Sort the Class and Interface defs based on the order they appear in the file.  Then visit each in turn.
@@ -456,7 +474,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     * junit.framework.TestCase, make this the very first line of the augmented file.  This is okay, because at the
     * ElementaryLevel, there are no package statements we might get in trouble with.
     */
-  public void forSourceFile(SourceFile sf) {
+  public Void forSourceFile(SourceFile sf) {
     TypeDefBase[] cds = sf.getTypes();
     
     // We intentionally neglect to visit the package and import statements
@@ -478,6 +496,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     String remainder = _readThroughIndex(sf.getSourceInfo().getEndLine(), sf.getSourceInfo().getEndColumn());
     if (!remainder.endsWith(newLine)) remainder = remainder + newLine; // make sure file ends in a newLine
     _writeToFileOut(remainder, true);
+    return null;
   }
   
   /**

@@ -73,8 +73,9 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
   }
   
   /*Give an appropriate error*/
-  public void forMethodDefDoFirst(MethodDef that) {
+  public Void forMethodDefDoFirst(MethodDef that) {
     _addError("Methods definitions cannot appear within the body of another method or block.", that);
+    return null;
   }
   
   /* There is currently no way to differentiate between a block statement and
@@ -82,58 +83,52 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
    * braced body.  Whenever an instance initialization is visited in a method
    * body, we must assume that it is a block statement.
    */
-  public void forInstanceInitializer(InstanceInitializer that) {
-    forBlock(that.getCode());
+  public Void forInstanceInitializer(InstanceInitializer that) {
+    return forBlock(that.getCode());
   }
 
-  /*
-   * Visit this BlockData with a new BodyBodyAdvanced visitor after making sure no errors need to be thrown.
-   */
-  public void forBlock(Block that) {
+  /* Visit this BlockData with a new BodyBodyAdvanced visitor after making sure no errors need to be thrown. */
+  public Void forBlock(Block that) {
     forBlockDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     that.getStatements().visit(new BodyBodyAdvancedVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
-    forBlockOnly(that);
+    return forBlockOnly(that);
   }
   
-  /** 
-   * Visit the block as in forBlock(), but first add the exception parameter as a variable in 
-   * that block.
-   */
-  public void forCatchBlock(CatchBlock that) {
+  /** Visit the block as in forBlock(), but first add the exception parameter as a variable in that block. */
+  public Void forCatchBlock(CatchBlock that) {
     forCatchBlockDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     
     Block b = that.getBlock();
     forBlockDoFirst(b);
-    if (prune(b)) return;
+    if (prune(b)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     
     VariableData exceptionVar = formalParameters2VariableData(new FormalParameter[]{ that.getException() }, bd)[0];
-    if (prune(that.getException())) return;
+    if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
     b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
     forBlockOnly(b);
-    forCatchBlockOnly(that);
+    return forCatchBlockOnly(that);
   }
   
-  /*Add the variables that were declared to the body data and make sure that no two
-   * variables have the same name.*/
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  /** Add the variables that were declared to the body data and make sure that no two variables have the same name.*/
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     if (!_bodyData.addVars(_variableDeclaration2VariableData(that, _bodyData))) {
       _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
+    return null;
   }
   
-  /**
-   * Call the super method to convert these to a VariableData array.
-   * Do some special handling of the modifier "final" in the error message, since final can be used to declare a local variable.
-   * @param enclosingData  The Data which contains the variables
-   */
+  /** Call the super method to convert these to a VariableData array.
+    * Do some special handling of the modifier "final" in the error message, since final can be used to declare a local variable.
+    * @param enclosingData  The Data which contains the variables
+    */
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
     VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
     for (int i = 0; i < vds.length; i++) {
@@ -152,29 +147,34 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
   
   
   /**Override method in AdvancedVisitor that throws an error here.*/
-  public void forTryCatchStatementDoFirst(TryCatchStatement that) {
-    //do nothing!  No errors to throw here.
-  }
+  public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /* No errors to throw here. */ }
 
   /* Make sure that no modifiers appear before the InnerClassDef, and then delegate. */
-  public void forInnerClassDef(InnerClassDef that) {
-    if (that.getMav().getModifiers().length > 0) {_addAndIgnoreError("No modifiers may appear before a class declaration here", that.getMav());}
-    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "$" + _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+  public Void forInnerClassDef(InnerClassDef that) {
+    if (that.getMav().getModifiers().length > 0) { 
+      _addAndIgnoreError("No modifiers may appear before a class declaration here", that.getMav());
+    }
+    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "$" + 
+                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    return null;
   }
   
   /** Give an error, since InnerInterfaces cannot appear here. */
-  public void forInnerInterfaceDef(InnerInterfaceDef that) {
+  public Void forInnerInterfaceDef(InnerInterfaceDef that) {
     _addError("Inner interface declarations cannot appear here", that);
+    return null;
   }
   
   /** Delegate to method in LLV. */
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _bodyData);
+    return null;
   }
 
   /** Delegate to method in LLV. */
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _bodyData);
+    return null;
   }
 
     

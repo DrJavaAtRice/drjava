@@ -96,7 +96,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   }
   
   /**Only abstract, public, private, protected, and static are allowed at this level.*/
-  public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
+  public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
     StringBuffer sb = new StringBuffer();
     String temp;
@@ -113,116 +113,136 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     if (sb.length() > 0) {
       if (count > 1)  temp = temp + "s";
       _addAndIgnoreError(temp + sb.toString() + " cannot be used at the Intermediate level", that);
-      return;
+      return null;
     }
-    super.forModifiersAndVisibilityDoFirst(that);
+    return super.forModifiersAndVisibilityDoFirst(that);
   }
 
   
   /** Do not allow explicit Package Statements at the Intermediate Level. */
-  public void forPackageStatementDoFirst(PackageStatement that) {
-    _addError("Package statements cannot be used at the Intermediate level.  All Intermediate level classes and interfaces are assumed to be in the default package", that);
+  public Void forPackageStatementDoFirst(PackageStatement that) {
+    _addError("Package statements cannot be used at the Intermediate level.  " +
+              "All Intermediate level classes and interfaces are assumed to be in the default package", that);
+    return null;
   }
   
   /**Do not allow inner classes at the Intermediate Level.*/
-  public void forInnerClassDefDoFirst(InnerClassDef that) {
+  public Void forInnerClassDefDoFirst(InnerClassDef that) {
     _addError("Inner classes cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow inner interfaces at the Intermediate Level.*/
-    public void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
+    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
     _addError("Nested interfaces cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow static intiializers at the Intermediate Level.*/
-  public void forStaticInitializerDoFirst(StaticInitializer that) {
+  public Void forStaticInitializerDoFirst(StaticInitializer that) {
     _addError("Static initializers cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow labeled statements at the Intermediate Level.*/
-  public void forLabeledStatementDoFirst(LabeledStatement that) {
+  public Void forLabeledStatementDoFirst(LabeledStatement that) {
     _addError("Labeled statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow switch statements at the Intermediate Level.*/
-  public void forSwitchStatementDoFirst(SwitchStatement that) {
+  public Void forSwitchStatementDoFirst(SwitchStatement that) {
     _addError("Switch statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow while statements at the Intermediate Level.*/
-  public void forWhileStatementDoFirst(WhileStatement that) {
+  public Void forWhileStatementDoFirst(WhileStatement that) {
     _addError("While statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow do statements at the Intermediate Level.*/
-  public void forDoStatementDoFirst(DoStatement that) {
+  public Void forDoStatementDoFirst(DoStatement that) {
     _addError("Do statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow for statements at the Intermediate Level.*/
-  public void forForStatementDoFirst(ForStatement that) {
+  public Void forForStatementDoFirst(ForStatement that) {
     _addError("For statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow break statements at the Intermediate Level.*/
-  public void forBreakStatementDoFirst(BreakStatement that) {
+  public Void forBreakStatementDoFirst(BreakStatement that) {
     _addError("Break statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow continue statements at the Intermediate Level.*/
-  public void forContinueStatementDoFirst(ContinueStatement that) {
+  public Void forContinueStatementDoFirst(ContinueStatement that) {
     _addError("Continue statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow synchronized statements at the Intermediate Level.*/
-  public void forSynchronizedStatementDoFirst(SynchronizedStatement that) {
+  public Void forSynchronizedStatementDoFirst(SynchronizedStatement that) {
     _addError("Synchronized statements cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow try-catch statements at the Intermediate Level.*/
-  public void forTryCatchStatementDoFirst(TryCatchStatement that) {
+  public Void forTryCatchStatementDoFirst(TryCatchStatement that) {
     _addAndIgnoreError("A try-catch statement cannot appear here", that);
+    return null;
   }
 
   /**Make sure that the formal parameter is not final*/
-  public void forFormalParameterDoFirst(FormalParameter that) {
+  public Void forFormalParameterDoFirst(FormalParameter that) {
     if (that.isIsFinal()) {
       _addError("The keyword \"final\" cannot be used at the Intermediate level", that);
+    return null;
     }
     else {
-      forJExpressionDoFirst(that);
+      return forJExpressionDoFirst(that);
     }
   }
 
   /**Do not allow type parameters (generics) at the Intermediate level*/
-  public void forTypeParameterDoFirst(TypeParameter that) {
+  public Void forTypeParameterDoFirst(TypeParameter that) {
     _addError("Type Parameters cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Only allow the 4 basic primitives: int, double, boolean, and char*/
-  public void forPrimitiveTypeDoFirst(PrimitiveType that) {
+  public Void forPrimitiveTypeDoFirst(PrimitiveType that) {
     String name = that.getName();
     if (!(name.equals("int") || name.equals("double") || name.equals("boolean") || name.equals("char"))) {
       _addError("Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used at the Intermediate level", that);
+    return null;
     }
     else {
-      forTypeDoFirst(that);
+      return forTypeDoFirst(that);
     }
   }
 
   /**Do not allow arrays at the Intermediate Level*/
-  public void forArrayTypeDoFirst(ArrayType that) {
+  public Void forArrayTypeDoFirst(ArrayType that) {
     _addError("Arrays cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow conditional expressions at the Intermediate Level*/
-  public void forConditionalExpressionDoFirst(ConditionalExpression that) {
+  public Void forConditionalExpressionDoFirst(ConditionalExpression that) {
     _addError("Conditional expressions cannot be used at the Intermediate level", that);
+    return null;
   }
 
   /**Do not allow instanceof expressions at the Intermediate Level*/
-  public void forInstanceofExpressionDoFirst(InstanceofExpression that) {
+  public Void forInstanceofExpressionDoFirst(InstanceofExpression that) {
     _addError("Instanceof expressions cannot be used at the Intermediate level", that);
+    return null;
   }
   
   
@@ -246,9 +266,9 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
    * methods.  The constructor will be autogenerated right before the TypeChecking pass starts.
    * Once the class def has been handled, remove it from classesToBeParsed.
    */
-  public void forClassDef(ClassDef that) {    
+  public Void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
 
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = addSymbolData(that, className);
@@ -266,8 +286,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       createEquals(sd);
     }
     forClassDefOnly(that);
-
     _classesToBeParsed.remove(className);
+    return null;
   }
 
    /**
@@ -276,9 +296,9 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     * Then visit the body to handle anything defined inside the interface.
     * Once the interface has been resolved, remove it from _classesToBeParsed.
     */
-  public void forInterfaceDef(InterfaceDef that) {
+  public Void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     String className = that.getName().getText();
     that.getMav().visit(this);
     that.getName().visit(this);
@@ -291,6 +311,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
     forInterfaceDefOnly(that);
     _classesToBeParsed.remove(getQualifiedClassName(className));
+    return null;
   }  
   
   

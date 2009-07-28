@@ -69,42 +69,48 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
   }
   
   /*Throw an appropriate error*/
-  public void forStatementDoFirst(Statement that) {
+  public Void forStatementDoFirst(Statement that) {
     _addError("Statements cannot appear outside of method bodies", that);
+    return null;
   }
   
   /*Throw an appropriate error*/
-  public void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
+  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     _addError("You cannot have concrete methods definitions in interfaces", that);
+    return null;
   }
 
   /**Throw an appropriate error*/
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
+  public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("This open brace must mark the beginning of an interface body", that);
+    return null;
   }
   
   /**No fields in interfaces at Intermediate Level.  Give an appropriate error.*/
-  public void forVariableDeclarationDoFirst(VariableDeclaration that) {
+  public Void forVariableDeclarationDoFirst(VariableDeclaration that) {
     _addError("You cannot have fields in interfaces at the Intermediate level", that);
+    return null;
   }
   
   /** No super references for interfaces--give an appropriate error.*/
-  public void forSuperReferenceDoFirst(SuperReference that) {
+  public Void forSuperReferenceDoFirst(SuperReference that) {
     _addAndIgnoreError("The field 'super' does not exist in interfaces.  Only classes have a 'super' field", that);
+    return null;
   }
   
   /**No This literal in interfaces--give an appropriate error*/
-  public void forThisReferenceDoFirst(ThisReference that) {
+  public Void forThisReferenceDoFirst(ThisReference that) {
     _addAndIgnoreError("The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", that);
+    return null;
   }
 
   /* Make sure that the method is not declared to be private or protected.  Make it public and abstract
    * if it is not already declared to be so (since this is the default in the absence of modifiers). 
    * Make sure the method name is not the same as the interface name.
    */
-  public void forAbstractMethodDef(AbstractMethodDef that) {
+  public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (_checkError()) return;
+    if (_checkError()) return null;
     
     MethodData md = createMethodData(that, _symbolData);
     
@@ -125,11 +131,13 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                          "and constructors cannot appear in interfaces.", that);
     }
     else _symbolData.addMethod(md);
+    return null;
   }
   
   /** Throw an error: Interfaces cannot have constructors */
-  public void forConstructorDefDoFirst(ConstructorDef that) {
-      _addAndIgnoreError("Constructor definitions cannot appear in interfaces", that);
+  public Void forConstructorDefDoFirst(ConstructorDef that) {
+    _addAndIgnoreError("Constructor definitions cannot appear in interfaces", that);
+    return null;
   }
   
   /** Call the super method to convert these to a VariableData array, then make sure that
@@ -145,18 +153,18 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
   }
   
   /** Delegate to method in LLV */
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _symbolData);
+    return null;
   }
 
   /** Delegate to method in LLV */
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _symbolData);
+    return null;
   }
   
-   /**
-    * Test the methods declared in the above class.
-    */
+  /** Test the methods declared in the above class. */
   public static class InterfaceBodyIntermediateVisitorTest extends TestCase {
     
     private InterfaceBodyIntermediateVisitor _ibiv;

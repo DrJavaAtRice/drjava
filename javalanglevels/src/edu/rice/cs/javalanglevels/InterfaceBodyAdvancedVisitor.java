@@ -71,18 +71,21 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
   }
   
   /*Add an appropriate error*/
-  public void forStatementDoFirst(Statement that) {
+  public Void forStatementDoFirst(Statement that) {
     _addError("Statements cannot appear outside of method bodies", that);
+    return null;
   }
   
   /**Add an appropriate error, since concrete methods cannot be in interfaces*/
-  public void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
+  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     _addError("You cannot have concrete methods definitions in interfaces", that);
+    return null;
   }
 
   /*Add an appropriate error*/
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
+  public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("This open brace must mark the beginning of an interface body", that);
+    return null;
   }
   
   /* 
@@ -91,7 +94,7 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
    * Finally, add the variable datas to the symbol data, and give an error if
    * two fields have the same names
    */
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _symbolData);
     //make sure that all of the fields are initialized:
     LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
@@ -106,29 +109,30 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
     if (!_symbolData.addVars(vdsList.toArray(new VariableData[vdsList.size()]))) {
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", that);
     }
+    return null;
   }
   
 
   
-  /**
-   * No This literal in interfaces!
-   */
-  public void forThisReferenceDoFirst(ThisReference that) {
+  /** No This literal in interfaces! */
+  public Void forThisReferenceDoFirst(ThisReference that) {
     _addAndIgnoreError("The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", that);
+    return null;
   }
 
   /** No super references for interfaces.*/
-  public void forSuperReferenceDoFirst(SuperReference that) {
+  public Void forSuperReferenceDoFirst(SuperReference that) {
     _addAndIgnoreError("The field 'super' does not exist in interfaces.  Only classes have a 'super' field", that);
+    return null;
   }
 
   /* Make sure that the method is not declared to be private or protected.  Make it public and abstract
    * if it is not already declared to be so (since this is the default in the absence of modifiers). 
    * Make sure the method name is not the same as the interface name.
    */
-  public void forAbstractMethodDef(AbstractMethodDef that) {
+  public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     
     MethodData md = createMethodData(that, _symbolData);
     
@@ -150,35 +154,40 @@ public class InterfaceBodyAdvancedVisitor extends AdvancedVisitor {
     }
     else _symbolData.addMethod(md);
 //    forAbstractMethodDefOnly(that);
+    return null;
   }
   
 
   
   /** Call the method in AdvancedVisitor since it's common to this and ClassBodyIntermediateVisitor. */
-  public void forInnerInterfaceDef(InnerInterfaceDef that) {
+  public Void forInnerInterfaceDef(InnerInterfaceDef that) {
     handleInnerInterfaceDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "$" + that.getName().getText());
+    return null;
   }
   
   /**Call the method in AdvancedVisitor since it's common to this and ClassBodyIntermediateVisitor.*/
-  public void forInnerClassDef(InnerClassDef that) {
+  public Void forInnerClassDef(InnerClassDef that) {
     handleInnerClassDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "$" + that.getName().getText());
+    return null;
   }
   
   /** Throw an error: Interfaces cannot have constructors */
-  public void forConstructorDefDoFirst(ConstructorDef that) {
-      _addAndIgnoreError("Constructor definitions cannot appear in interfaces", that);
+  public Void forConstructorDefDoFirst(ConstructorDef that) {
+    _addAndIgnoreError("Constructor definitions cannot appear in interfaces", that);
+    return null;
   }
 
   /**Delegate to method in LLV */
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _symbolData);
+    return null;
   }
 
   /** Delegate to method in LLV*/
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     System.out.println("Calling simpleAnonymousClassInstantiation Helper from InterfaceBody " + that.getSourceInfo());
-
     simpleAnonymousClassInstantiationHelper(that, _symbolData);
+    return null;
   }
 
   

@@ -130,7 +130,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
   /** Check the modifiers and visibility specifiers that the user has given.  Make sure they are appropriate.
     * Only abstract, public, private, protected, and static and final are allowed at this level.
     */
-  public void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
+  public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
     StringBuffer sb = new StringBuffer();
     String temp;
@@ -150,22 +150,22 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
         temp = temp + "s";
       }
       _addAndIgnoreError(temp + sb.toString() + " cannot be used at the Advanced level", that);
-      return;
+      return null;
     }
-    super.forModifiersAndVisibilityDoFirst(that);
+    return super.forModifiersAndVisibilityDoFirst(that);
   }
 
   /**
    * The default case in a switch statement at the Advanced Level can only appear as the last case.
    */
-  public void forSwitchStatementDoFirst(SwitchStatement that) {
+  public Void forSwitchStatementDoFirst(SwitchStatement that) {
     for (int i = 0; i<that.getCases().length-1; i++) {
       SwitchCase sc = that.getCases()[i];
       if (sc instanceof DefaultCase) {
         _addAndIgnoreError("Default case must be the last case of a switch statement at the Advanced level", sc);
       }
     }
-    super.forSwitchStatementDoFirst(that);
+    return super.forSwitchStatementDoFirst(that);
   }
   
   
@@ -173,71 +173,81 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    * Here are several constructs that cannot be used at the Advanced Level
    */
   /*Give error because InstanceInitializers cannot be used at the Advanced Level.*/
-  public void forInstanceInitializerDoFirst(InstanceInitializer that) {
+  public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("Instance initializers cannot be used at the Advanced level", that);
+    return null;
   }
   
   /*Give error because StaticInitializers cannot be used at the Advanced Level.*/
-  public void forStaticInitializerDoFirst(StaticInitializer that) {
+  public Void forStaticInitializerDoFirst(StaticInitializer that) {
     _addError("Static initializers cannot be used at the Advanced level", that);
+    return null;
   }
   
   /*Give error because LabeledStatements cannot be used at the Advanced Level.*/
-  public void forLabeledStatementDoFirst(LabeledStatement that) {
+  public Void forLabeledStatementDoFirst(LabeledStatement that) {
     _addError("Labeled statements cannot be used at the Advanced level", that);
+    return null;
   }
 
   /*Give error because LabeledBreakStatements cannot be used at the Advanced Level.*/
-  public void forLabeledBreakStatementDoFirst(LabeledBreakStatement that) {
+  public Void forLabeledBreakStatementDoFirst(LabeledBreakStatement that) {
     _addError("Labeled statements cannot be used at the Advanced level, so you cannot break to a label", that);
+    return null;
   }
  
   /*Give error because LabeledContinueStatements cannot be used at the Advanced Level.*/
-  public void forLabeledContinueStatementDoFirst(LabeledContinueStatement that) {
+  public Void forLabeledContinueStatementDoFirst(LabeledContinueStatement that) {
     _addError("Labeled statements cannot be used at the Advanced level, so you cannot use a labeled continue statement", that);
+    return null;
 
   }
 
   /*Give error because SynchronizedStatements cannot be used at the Advanced Level.*/
-  public void forSynchronizedStatementDoFirst(SynchronizedStatement that) {
+  public Void forSynchronizedStatementDoFirst(SynchronizedStatement that) {
     _addError("Synchronized statements cannot be used at the Advanced level", that);
+    return null;
   }
 
   /*Give error because TypeParameters cannot be used at the Advanced Level.*/
-  public void forTypeParameterDoFirst(TypeParameter that) {
+  public Void forTypeParameterDoFirst(TypeParameter that) {
     _addError("Type Parameters cannot be used at the Advanced level", that);
+    return null;
   }
 
   /*Give error because ConditionalExpressions cannot be used at the Advanced Level.*/
-  public void forConditionalExpressionDoFirst(ConditionalExpression that) {
+  public Void forConditionalExpressionDoFirst(ConditionalExpression that) {
     _addError("Conditional expressions cannot be used at the Advanced level", that);
+    return null;
   }
 
     /* For now, Give error because Instanceof Expressions cannot be used at the Advanced Level.
      * TODO: Perhaps we should allow this at the advanced level--if we can find a good example of where students would need it.
      */
-  public void forInstanceofExpressionDoFirst(InstanceofExpression that) {
+  public Void forInstanceofExpressionDoFirst(InstanceofExpression that) {
     _addError("Instanceof expressions cannot be used at the Advanced level", that);
+    return null;
   }
 
 
   /**Only int, double, boolean, and char can be used at any language level.*/
-  public void forPrimitiveTypeDoFirst(PrimitiveType that) {
+  public Void forPrimitiveTypeDoFirst(PrimitiveType that) {
     String name = that.getName();
     if (!(name.equals("int") || name.equals("double") || name.equals("boolean") || name.equals("char"))) {
       _addError("Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used at the Advanced level", that);
+      return null;
     }
     else {
-      super.forPrimitiveTypeDoFirst(that);
+      return super.forPrimitiveTypeDoFirst(that);
     }
   }
 
   /* TryCatchStatements cannot appear at the top level of a file, so give an error
    * if one appears here.
    */
-  public void forTryCatchStatementDoFirst(TryCatchStatement that) {
+  public Void forTryCatchStatementDoFirst(TryCatchStatement that) {
     _addAndIgnoreError("A try-catch statement cannot appear here", that);
-    super.forTryCatchStatementDoFirst(that);
+    return super.forTryCatchStatementDoFirst(that);
   }
   
   /**
@@ -316,9 +326,9 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    * Once the ClassDef has been handled, remove the class from _classesToBeParsed so we know it's been taken care of.
    * @param that  The ClassDef being handled.
    */
-  public void forClassDef(ClassDef that) {    
+  public Void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
 
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = addSymbolData(that, className); //does the class initalization
@@ -345,41 +355,28 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     forClassDefOnly(that);
 
     _classesToBeParsed.remove(className);
+    return null;
   }
   
   
   
-  /***
-   * This is a noop, because we do not do code augmentation at the Advanced Level.
-   */
-  protected void createToString(SymbolData sd) {
-    return; //noop
-  }
+  /** This is a noop, because we do not do code augmentation at the Advanced Level. */
+  protected void createToString(SymbolData sd) { return; }
 
-  /***
-   * This is a noop, because we do not do code augmentation at the Advanced Level.
-   */
-    protected void createHashCode(SymbolData sd) {    
-      return; //noop
-    }
+  /** This is a noop, because we do not do code augmentation at the Advanced Level. */
+  protected void createHashCode(SymbolData sd) { return; }
     
-  /***
-   * This is a noop, because we do not do code augmentation at the Advanced Level.
-   */
-    protected void createEquals(SymbolData sd) {    
-      return; //noop
-    }    
-
-    
+  /** This is a noop, because we do not do code augmentation at the Advanced Level. */
+  protected void createEquals(SymbolData sd) { return; }    
    
   /**
    * Create a SymbolData corresponding to this interface and add it appropriately.
    * Then visit the body to handle anything defined inside the interface.
    * Once the interface has been resolved, remove it from _classesToBeParsed.
    */
-  public void forInterfaceDef(InterfaceDef that) {
+  public Void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
 
     String className = that.getName().getText();
     that.getMav().visit(this);
@@ -393,6 +390,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
       
     forInterfaceDefOnly(that);
     _classesToBeParsed.remove(getQualifiedClassName(className));
+    return null;
   }
   
   
@@ -537,10 +535,11 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
   
   
   /*Resolve the ArrayType by looking it up.*/  
-  public void forArrayType(ArrayType that) {
+  public Void forArrayType(ArrayType that) {
     forArrayTypeDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     getSymbolData(that.getName(), that.getSourceInfo());
+    return null;
   }
 
   

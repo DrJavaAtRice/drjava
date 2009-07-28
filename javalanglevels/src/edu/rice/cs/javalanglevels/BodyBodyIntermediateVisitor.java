@@ -72,8 +72,9 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   }
   
   /*Give an appropriate error*/
-  public void forMethodDefDoFirst(MethodDef that) {
+  public Void forMethodDefDoFirst(MethodDef that) {
     _addError("Methods definitions cannot appear within the body of another method or block.", that);
+    return null;
   }
   
   /* There is currently no way to differentiate between a block statement and
@@ -81,60 +82,54 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
    * braced body.  Whenever an instance initialization is visited in a method
    * body, we must assume that it is a block statement.
    */
-  public void forInstanceInitializer(InstanceInitializer that) {
-    forBlock(that.getCode());
+  public Void forInstanceInitializer(InstanceInitializer that) {
+    return forBlock(that.getCode());
   }
 
  /* Visit this BlockData with a new BodyBodyIntermediate visitor after making sure no errors need to be thrown.*/
-  public void forBlock(Block that) {
+  public Void forBlock(Block that) {
     forBlockDoFirst(that);
-    if (prune(that)) {  return; }
+    if (prune(that)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     that.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
-    forBlockOnly(that);
+    return forBlockOnly(that);
   }
   
-  /** 
-   * Visit the block as in forBlock(), but first add the exception parameter as a variable in 
-   * that block.
-   */
-  public void forCatchBlock(CatchBlock that) {
+  /** Visit the block as in forBlock(), but first add the exception parameter as a variable in that block. */
+  public Void forCatchBlock(CatchBlock that) {
     forCatchBlockDoFirst(that);
-    if (prune(that)) return;
+    if (prune(that)) return null;
     
     Block b = that.getBlock();
     forBlockDoFirst(b);
-    if (prune(b)) return;
+    if (prune(b)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     
     VariableData exceptionVar = formalParameters2VariableData(new FormalParameter[]{ that.getException() }, bd)[0];
-    if (prune(that.getException())) return;
+    if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
     b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
     forBlockOnly(b);
-    forCatchBlockOnly(that);
+    return forCatchBlockOnly(that);
   }
   
   /*Add the variables that were declared to the body data and make sure that no two
    * variables have the same name.*/
-  public void forVariableDeclarationOnly(VariableDeclaration that) {
+  public Void forVariableDeclarationOnly(VariableDeclaration that) {
     if (!_bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
       _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
+    return null;
   }
   
   /**Override method in IntermediateVisitor that throws an error here.*/
-  public void forTryCatchStatementDoFirst(TryCatchStatement that) {
-    //do nothing!  No errors to throw here.
-  }
+  public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /*  No errors to throw here. */ }
     
   
-  /*
-   * Make sure that no modifiers appear before the InnerClassDef, and then delegate.
-   */
+  /* Make sure that no modifiers appear before the InnerClassDef, and then delegate.*/
 //  public void forInnerClassDef(InnerClassDef that) {
 //    if (_bodyData.hasModifier("static")) {
 //      _addError("Static classes can not be declared inside of methods", that);
@@ -145,23 +140,26 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
 //  }
 
   /** Delegate to method in LLV. */
-  public void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
     complexAnonymousClassInstantiationHelper(that, _bodyData);
+    return null;
   }
 
   /** Delegate to method in LLV. */
-  public void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _bodyData);
+    return null;
   }
   
   /** If this is the body of a constructor, referencing 'this' is illegal. So, check to see if this is a constructor,
     * and if so, throw an error. This should catch both the ComplexThisReference and the SimpleThisReference case.
    */
   //TODO: Long term, it might be nice to create a ConstructorBodyIntermediateVisitor, so this check is not necessary here.
-  public void forThisReferenceDoFirst(ThisReference that) {
+  public Void forThisReferenceDoFirst(ThisReference that) {
     if (isConstructor(_bodyData)) {
       _addAndIgnoreError("You cannot reference the field 'this' inside a constructor at the Intermediate Level", that);
     }
+    return null;
   }
 
   /**
@@ -184,9 +182,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return vds;
   }
   
-  /**
-   * Test most of the methods declared above right here:
-   */
+  /** Test most of the methods declared above right here: */
   public static class BodyBodyIntermediateVisitorTest extends TestCase {
     
     private BodyBodyIntermediateVisitor _bbv;
@@ -201,13 +197,9 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
     
     
-    public BodyBodyIntermediateVisitorTest() {
-      this("");
-    }
+    public BodyBodyIntermediateVisitorTest() { this(""); }
     
-    public BodyBodyIntermediateVisitorTest(String name) {
-      super(name);
-    }
+    public BodyBodyIntermediateVisitorTest(String name) { super(name); }
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");

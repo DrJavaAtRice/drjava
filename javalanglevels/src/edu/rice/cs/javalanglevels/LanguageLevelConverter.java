@@ -78,9 +78,7 @@ public class LanguageLevelConverter {
   }
   
   /**Add the visitor error to the list of errors*/
-  private void _addVisitorError(Pair<String, JExpressionIF> ve) {
-    _visitorErrors.addLast(ve);
-  }
+  private void _addVisitorError(Pair<String, JExpressionIF> ve) { _visitorErrors.addLast(ve); }
   
   /**Parse, Visit, Type Check, and Convert any language level files in the array of files*/
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
@@ -89,13 +87,15 @@ public class LanguageLevelConverter {
     return convert(files, options, sourceToTopLevelClassMap);
   }
   
-  /**Parse, Visit, Type Check, and Convert any language level files in the array of files
-    * @param sourceToTopLevelClassMap a map from source files to names of top-level classes created from that source file;
-    *        an empty map should be passed in; it will be filled out by this method */
+  /** Parse, visit, type check, and convert any language level files (and unconverted LL files they reference) in files/
+    * @param files  The array of files to process.
+    * @param sourceToTopLevelClassMap  A map from source files to names of top-level classes created from that source file;
+    *        it is initially empty and subsequently filled out by this method */
   // "Visit" is an extremely vague notion; I presume it means construct a symbol table for the file.
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
     convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
     OPT = options;
+    //  WHAT IS THE FOLLOWING STATIC FIELD REFERNCE DOING HERE?  THIS IS ABOMINABLE CODE!
     LanguageLevelVisitor._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
     LinkedList<Pair<String, JExpressionIF>> languageLevelVisitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
@@ -103,7 +103,7 @@ public class LanguageLevelConverter {
     //keep track of the continuations to resolve  // What precisely is a continuation?
     Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
     
-    //and the newSDs we've created
+    //and the new SDs (symbol table entries) we've created
     Hashtable<SymbolData, LanguageLevelVisitor> languageLevelNewSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
     
     // Similarly, we need a Hashtable for a shared symbolTable.
@@ -112,31 +112,31 @@ public class LanguageLevelConverter {
     // And a linked list to share visited files.
     LinkedList<Pair<LanguageLevelVisitor, SourceFile>> languageLevelVisitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
     
-    // We are doing two passes on the files, and the second pass needs the first's corresponding
-    // SourceFile and ElementaryVisitor so we'll keep them around in a Hashtable.
+    /* We are doing two passes on the files, and the second pass needs the first's corresponding
+       SourceFile and LanguageLevelVisitor so we'll keep them around in a Hashtable. */
     Hashtable<Integer, Pair<SourceFile, LanguageLevelVisitor>> mediator = new Hashtable<Integer, Pair<SourceFile, LanguageLevelVisitor>>();
     
-    // The visitedFiles returned by any pass may include another file which is already scheduled for compilation.
-    // In this case, we don't want to reparse, or perform either the first pass or the type check since it has
-    // already been done.  (An error is thrown if we do since it thinks the class has already been defined).
+    /* The visitedFiles returned by any pass may include another file which is already scheduled for compilation.
+       In this case, we don't want to reparse, or perform either the first pass or the type check since it has
+       already been done.  (An error is thrown if we do since it thinks the class has already been defined). */
+    // WHAT visitedFiles are RETURNED?  HOW?  The return type is a Pair containing NO files!  I SMELL GLOBAL VARIABLES!
     LinkedList<File> filesNotToCheck = new LinkedList<File>();
     
-    // The number of files to compile may change if one file references another one.
-    // We don't want to visit these newly referenced files because they've already
-    // been visited.
+    /* The number of files to compile may change if one file references another one.
+       We don't want to visit these newly referenced files because they've already
+       been visited. */
+    // WHAT DOES VISIT MEAN?
     int originalNumOfFiles = files.length;
     
-    // Find the ones (of what?) that are LL files.
-    // Do the passes first for ALL files before proceeding to code augmentation.
-    // Otherwise if one class' superclass get augmented first, then it sees a lot
-    // of illegal constructs (e.g. public and constructors).
+    /* Find the ones (of what?) that are LL files.
+       Do the passes first for ALL files before proceeding to code augmentation.
+       Otherwise if one class' superclass get augmented first, then it sees a lot
+       of illegal constructs (e.g. public and constructors). */
     
-    //will maintain the files we visit along with their visitors (for type checking step).
+    /* will maintain the files we visit along with their visitors (for type checking step). */
     LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visited = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
     
-    
-    for (int ind = 0; ind < originalNumOfFiles; ind++) {
-      File f = files[ind];
+    for (File f : files) {
       
       try {
         BufferedReader tempBr = new BufferedReader(new FileReader(f));
@@ -164,8 +164,9 @@ public class LanguageLevelConverter {
             sf = jep.SourceFile();
             final Set<String> topLevelClasses = new HashSet<String>();
             for (TypeDefBase t: sf.getTypes()) {
-              t.visit(new JExpressionIFAbstractVisitor_void() {
-                public void forClassDef(ClassDef that) { topLevelClasses.add(that.getName().getText()); }
+              t.visit(new JExpressionIFAbstractVisitor<Void>() {
+                public Void forClassDef(ClassDef that) { topLevelClasses.add(that.getName().getText()); return null; }
+                public Void defaultCase(JExpressionIF that) { return null; }
               });
             }
             sourceToTopLevelClassMap.put(f, topLevelClasses);
@@ -217,7 +218,7 @@ public class LanguageLevelConverter {
     }
     
 //    Utilities.show("Visited " + visited + " in first pass");
-    //Resolve continuations and create constructors.  Also accumulate errors.
+    // Resolve continuations and create constructors.  Also accumulate errors.
     LanguageLevelVisitor.errors = new LinkedList<Pair<String, JExpressionIF>>(); //clear out error list
     
     
