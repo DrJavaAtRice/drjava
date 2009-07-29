@@ -139,26 +139,16 @@ public class LanguageLevelConverter {
     for (File f : files) {
       
       try {
+        if (filesNotToCheck.contains(f)) continue;  // Detects equal files; earlier code versions claimed it failed
+        // Check for a null file
         BufferedReader tempBr = new BufferedReader(new FileReader(f));
         String firstLine = tempBr.readLine();
-        if (firstLine == null) continue;
         tempBr.close();
+        if (firstLine == null) continue;
         
-        /* If the file has the correct suffix, then parse it. Ignore files in filesNotToCheck.  contains on 
-         * filesNotToCheck failed to return desired result. So it is done manually, matching AbsolutePath. */
-//        boolean foundFile = false;
-        
-        for (File fntc: files) {
-          if (fntc.getAbsolutePath().equals(f.getAbsolutePath())) {
-//            foundFile = true;
-            break;
-          }
-        }
-        
-        if (_isLanguageLevelFile(f) /* && ! foundFile*/) {
+        if (_isLanguageLevelFile(f)) {
           System.out.flush();
           SourceFile sf;
-//          File f = files[ind];
           JExprParser jep = new JExprParser(f);
           try { 
             sf = jep.SourceFile();
@@ -177,7 +167,7 @@ public class LanguageLevelConverter {
             continue;
           }
           
-          //Now create a LanguageLevelVisitor to do the first pass over the file.
+          // Now create a LanguageLevelVisitor to do the first pass over the file.
           LanguageLevelVisitor llv = null;
           if (isElementaryFile(f)) {
             llv = 
