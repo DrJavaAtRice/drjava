@@ -29,7 +29,9 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   public static final ExtendedTypeSystem INSTANCE = new ExtendedTypeSystem();
   
   /** Determine if the type is well-formed. */
-  public boolean isWellFormed(Type t) { return WELL_FORMED.contains(t); }
+  public boolean isWellFormed(Type t) {
+    return WELL_FORMED.contains(t);
+  }
   
   private final Predicate<Type> WELL_FORMED = LambdaUtil.asPredicate(new TypeAbstractVisitor<Boolean>() {
     @Override public Boolean defaultCase(Type t) { return true; }

@@ -10,32 +10,38 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;
 import koala.dynamicjava.tree.CompilationUnit;
+import koala.dynamicjava.tree.SourceInfo;
+import koala.dynamicjava.tree.TypeDeclaration;
 import edu.rice.cs.dynamicjava.Options;
-import edu.rice.cs.dynamicjava.interpreter.CheckerException;
-import edu.rice.cs.dynamicjava.interpreter.CompositeException;
-import edu.rice.cs.dynamicjava.interpreter.LibraryContext;
-import edu.rice.cs.dynamicjava.interpreter.ParserException;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
-import edu.rice.cs.dynamicjava.interpreter.TopLevelContext;
-import edu.rice.cs.dynamicjava.interpreter.TypeContext;
+import edu.rice.cs.dynamicjava.interpreter.*;
 import edu.rice.cs.dynamicjava.symbol.JLSTypeSystem;
 import edu.rice.cs.dynamicjava.symbol.Library;
 import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
 import edu.rice.cs.dynamicjava.symbol.TreeLibrary;
+import edu.rice.cs.plt.collect.UnindexedRelation;
+import edu.rice.cs.plt.collect.Relation;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 import edu.rice.cs.plt.text.ArgumentParser;
+import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.tuple.Pair;
 
 public class SourceChecker {
 
   private final Options _opt;
+  private final boolean _quiet;
+  private int _statusCount;
   
-  public SourceChecker(Options opt) {
+  public SourceChecker(Options opt, boolean quiet) {
     _opt = opt;
+    _quiet = quiet;
+    _statusCount = 0;
   }
   
   public void check(File... sources) throws InterpreterException {
@@ -46,58 +52,131 @@ public class SourceChecker {
     check(sources, IterUtil.<File>empty());
   }
   
-  public void check(Iterable<? extends File> sources, Iterable<? extends File> classPath) throws InterpreterException {
+  public void check(Iterable<? extends File> sources, Iterable<? extends File> classPath)
+                      throws InterpreterException {
     Iterable<CompilationUnit> tree = parse(sources);
-    typeCheck(tree, classPath);
+    TypeContext context = makeContext(tree, classPath);
+    Relation<TypeDeclaration, ClassChecker> decls = extractDeclarations(tree, context);
+    initializeClassSignatures(decls);
+    checkSignatures(decls);
+    checkBodies(decls);
   }
   
   private Iterable<CompilationUnit> parse(Iterable<? extends File> sources) throws InterpreterException {
-    List<CompilationUnit> result = new ArrayList<CompilationUnit>();
-    List<InterpreterException> errors = new ArrayList<InterpreterException>();
-    FileFilter filter = IOUtil.extensionFilePredicate("java");
-    for (File f : sources) {
-      for (File source : IOUtil.listFilesRecursively(f, filter)) {
+    final List<CompilationUnit> result = new ArrayList<CompilationUnit>();
+    Iterable<File> files = IterUtil.collapse(IterUtil.map(sources, new Lambda<File, Iterable<File>>() {
+      private final FileFilter _filter = IOUtil.extensionFilePredicate("java");
+      public Iterable<File> value(File f) { return IOUtil.listFilesRecursively(f, _filter); }
+    }));
+    new Phase<File>("Parsing") {
+      protected void step(File source) throws InterpreterException {
         try {
-          result.add(new JavaCCParser(new FileReader(source), source).parseCompilationUnit());
+          JavaCCParser parser = new JavaCCParser(new FileReader(source), source);
+          result.add(parser.parseCompilationUnit());
         }
-        catch (ParseError e) {
-          errors.add(new ParserException(e));
-        }
-        catch (FileNotFoundException e) {
-          errors.add(new SourceException(e));
-        }
-        debug.log("Parsed file " + source);
+        catch (ParseError e) { throw new ParserException(e); }
+        catch (FileNotFoundException e) { throw new SourceException(e); }
       }
-    }
-    if (errors.isEmpty()) { return result; }
-    else { throw new CompositeException(errors); }
+      protected SourceInfo location(File f) { return SourceInfo.point(f, 0, 0); }
+    }.run(files);
+    return result;
   }
   
-  private void typeCheck(Iterable<CompilationUnit> sources, Iterable<? extends File> cp) throws InterpreterException {
-    ClassLoader loader = new PathClassLoader(null, cp);
-    Library classLib = SymbolUtil.classLibrary(loader);
+  private TypeContext makeContext(Iterable<CompilationUnit> sources, Iterable<? extends File> cp) {
+    Library classLib = SymbolUtil.classLibrary(new PathClassLoader(null, cp));
     debug.logStart("creating TreeLibrary");
-    Library sourceLib = new TreeLibrary(sources, loader, _opt);
+    Library sourceLib = new TreeLibrary(sources, classLib.classLoader(), _opt);
     debug.logEnd("creating TreeLibrary");
-    TypeContext context = new TopLevelContext(new LibraryContext(new LibraryContext(classLib), sourceLib), loader);
-    CompilationUnitChecker checker = new CompilationUnitChecker(context, _opt);
-    List<InterpreterException> errors = new ArrayList<InterpreterException>();
-    Iterable<CompilationUnitChecker.BodyChecker> bodyCheckers = IterUtil.empty();
-    for (CompilationUnit u : sources) {
-      debug.logValue("Checking source", "location", u.getSourceInfo());
-      try { bodyCheckers = IterUtil.compose(bodyCheckers, checker.check(u)); }
-      catch (CheckerException e) { errors.add(e); }
-    }
-    if (!errors.isEmpty()) {
-      for (CompilationUnitChecker.BodyChecker c : bodyCheckers) {
-        try { c.check(); }
-        catch (CheckerException e) { errors.add(e); }
+    return new TopLevelContext(new LibraryContext(new LibraryContext(classLib), sourceLib));
+  }
+  
+  private Relation<TypeDeclaration, ClassChecker> extractDeclarations(Iterable<CompilationUnit> sources,
+                                                                       TypeContext context)
+                                                                       throws InterpreterException {
+    final CompilationUnitChecker unitChecker = new CompilationUnitChecker(context, _opt);
+    final Relation<TypeDeclaration, ClassChecker> checkers = UnindexedRelation.makeLinkedHashBased();
+    new Phase<CompilationUnit>("Resolving imports") {
+      protected void step(CompilationUnit u) throws InterpreterException {
+        checkers.addAll(unitChecker.extractDeclarations(u));
       }
-    }
-    if (!errors.isEmpty()) { throw new CompositeException(errors); }
+      protected SourceInfo location(CompilationUnit arg) { return arg.getSourceInfo(); }
+    }.run(sources);
+    return checkers;
+  }
+
+  private void initializeClassSignatures(Relation<TypeDeclaration, ClassChecker> decls) throws InterpreterException {
+    new ClassCheckerPhase("Checking class signatures") {
+      protected void step(TypeDeclaration ast, ClassChecker checker) { checker.initializeClassSignatures(ast); } 
+    }.run(decls);
+  }
+  
+  private void checkSignatures(Relation<TypeDeclaration, ClassChecker> decls) throws InterpreterException {
+    new ClassCheckerPhase("Checking class member signatures") {
+      protected void step(TypeDeclaration ast, ClassChecker checker) { checker.checkSignatures(ast); } 
+    }.run(decls);
+  }
+  
+  private void checkBodies(Relation<TypeDeclaration, ClassChecker> decls) throws InterpreterException {
+    new ClassCheckerPhase("Checking class member bodies") {
+      protected void step(TypeDeclaration ast, ClassChecker checker) { checker.checkBodies(ast); } 
+    }.run(decls);
   }
   
   
+  private void startStatus(String description) {
+    _statusCount = 0;
+    if (!_quiet) {
+      String fullDesc = TextUtil.padRight(description + "...", ' ', 30);
+      System.out.print(fullDesc);
+      System.out.flush();
+    }
+  }
+  
+  private void incrementStatus() {
+    _statusCount++;
+    // arbitrarily chose 10 as the interval for status printouts
+    if (!_quiet && (_statusCount % 10 == 0)) { System.out.print('*'); System.out.flush(); }
+  }
+  
+  private void endStatus() {
+    if (!_quiet) { System.out.println(); }
+  }
+  
+  
+  private abstract class Phase<T> {
+    private final String _description;
+    protected Phase(String description) { _description = description; }
+    
+    protected abstract void step(T arg) throws InterpreterException;
+    protected abstract SourceInfo location(T arg);
+    
+    public void run(Iterable<? extends T> args) throws InterpreterException {
+      List<InterpreterException> errors = new ArrayList<InterpreterException>();
+      startStatus(_description);
+      for (T arg : args) {
+        try { step(arg); }
+        catch (InterpreterException e) { errors.add(e); }
+        catch (RuntimeException e) { errors.add(new InternalException(e, location(arg))); }
+        incrementStatus();
+      }
+      endStatus();
+      if (!errors.isEmpty()) { throw CompositeException.make(errors); }
+    }
+  }
+  
+  private abstract class ClassCheckerPhase extends Phase<Pair<TypeDeclaration, ClassChecker>> {
+    protected ClassCheckerPhase(String description) { super(description); }
+    protected final void step(Pair<TypeDeclaration, ClassChecker> arg) throws InterpreterException {
+      try { step(arg.first(), arg.second()); }
+      catch (ExecutionError e) { throw new CheckerException(e); }
+    }
+    protected final SourceInfo location(Pair<TypeDeclaration, ClassChecker> arg) {
+      return arg.first().getSourceInfo();
+    }
+    protected abstract void step(TypeDeclaration ast, ClassChecker checker);
+  }
+    
+    
   public static void main(String... args) {
     ArgumentParser argParser = new ArgumentParser();
     argParser.supportOption("classpath", "");
@@ -111,7 +190,7 @@ public class SourceChecker {
     Iterable<File> sources = IterUtil.map(parsedArgs.params(), IOUtil.FILE_FACTORY);
     
     try {
-      new SourceChecker(opt).check(sources, cp);
+      new SourceChecker(opt, false).check(sources, cp);
       System.out.println("Completed checking successfully.");
     }
     catch (InterpreterException e) {

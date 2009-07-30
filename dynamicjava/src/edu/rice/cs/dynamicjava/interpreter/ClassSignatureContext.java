@@ -4,7 +4,6 @@ import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
-// TODO: support references to this class within the signature or body
 /**
  * The context of a class declaration's signature, which includes its type variables and own name
  * but excludes its members.

@@ -863,12 +863,13 @@ public class ExpressionChecker {
         }
       }
       
-      TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node,
-                                  new TreeClassLoader(context.getClassLoader(), opt), opt);
+      TreeClassLoader loader = new TreeClassLoader(context.getClassLoader(), opt);
+      TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node, loader, opt);
       setDJClass(node, c);
-      ClassMemberChecker checker = new ClassMemberChecker(new ClassContext(context, c), opt);
-      checker.checkClassSignatures(node.getMembers());
-      checker.checkBodies(node.getMembers());
+      ClassChecker checker = new ClassChecker(c, loader, context, opt);
+      checker.initializeClassSignatures(node);
+      checker.checkSignatures(node);
+      checker.checkBodies(node);
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
@@ -976,13 +977,14 @@ public class ExpressionChecker {
         throw new ExecutionError("no.such.inner.class", node);
       }
       
-      TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node,
-                                  new TreeClassLoader(context.getClassLoader(), opt), opt);
+      TreeClassLoader loader = new TreeClassLoader(context.getClassLoader(), opt);
+      TreeClass c = new TreeClass(context.makeAnonymousClassName(), null, node, loader, opt);
       setDJClass(node, c);
-      ClassMemberChecker checker = new ClassMemberChecker(new ClassContext(context, c), opt);
-      checker.checkClassSignatures(node.getMembers());
-      checker.checkBodies(node.getMembers());
-      
+      ClassChecker checker = new ClassChecker(c, loader, context, opt);
+      checker.initializeClassSignatures(node);
+      checker.checkSignatures(node);
+      checker.checkBodies(node);
+
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
     }

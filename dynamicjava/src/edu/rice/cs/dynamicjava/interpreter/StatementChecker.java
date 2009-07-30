@@ -308,36 +308,10 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     TreeClassLoader loader = new TreeClassLoader(context.getClassLoader(), opt);
     DJClass c = new TreeClass(context.makeClassName(node.getName()), null, node, loader, opt);
     setDJClass(node, c);
-    
-    TypeContext sigContext = new ClassSignatureContext(context, c, loader);
-    TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
-
-    final TypeParameter[] tparams;
-    if (node instanceof GenericClassDeclaration) {
-      tparams = ((GenericClassDeclaration) node).getTypeParameters();
-    }
-    else if (node instanceof GenericInterfaceDeclaration) {
-      tparams = ((GenericInterfaceDeclaration) node).getTypeParameters();
-    }
-    else { tparams = new TypeParameter[0]; }
-    sigChecker.checkTypeParameters(tparams);
-
-    if (node instanceof ClassDeclaration) {
-      sigChecker.check(((ClassDeclaration) node).getSuperclass());
-    }
-    if (node.getInterfaces() != null) {
-      for (TypeName tn : node.getInterfaces()) { sigChecker.check(tn); }
-    }
-
-    ClassMemberChecker classChecker = new ClassMemberChecker(new ClassContext(sigContext, c), opt); 
-    if (node instanceof InterfaceDeclaration) {
-      classChecker.checkInterfaceSignatures(node.getMembers());
-    }
-    else {
-      classChecker.checkClassSignatures(node.getMembers());
-    }
-    classChecker.checkBodies(node.getMembers());
-    
+    ClassChecker classChecker = new ClassChecker(c, loader, context, opt);
+    classChecker.initializeClassSignatures(node);
+    classChecker.checkSignatures(node);
+    classChecker.checkBodies(node);
     return new LocalContext(context, loader, c);
   }
 

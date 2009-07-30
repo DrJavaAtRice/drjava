@@ -17,6 +17,7 @@ import edu.rice.cs.plt.lambda.Lambda;
 public class TreeLibrary implements Library {
   
   private final TotalMap<String, InjectiveRelation<String, DJClass>> _packages;
+  private final TreeClassLoader _loader;
 
   /**
    * Create a library based on the given parsed compilation units.  Every top-level class or interface
@@ -32,7 +33,7 @@ public class TreeLibrary implements Library {
             return new IndexedInjectiveRelation<String, DJClass>();
           }
         }, true);
-    TreeClassLoader loader = new TreeClassLoader(parentLoader, opt); 
+    _loader = new TreeClassLoader(parentLoader, opt); 
     for (CompilationUnit cu : cus) {
       PackageDeclaration pd = cu.getPackage();
       String pkg = (pd == null) ? "" : pd.getName();
@@ -41,7 +42,7 @@ public class TreeLibrary implements Library {
         if (ast instanceof TypeDeclaration) {
           String declaredName = ((TypeDeclaration) ast).getName();
           String fullName = pkg.equals("") ? declaredName : pkg + "." + declaredName;
-          DJClass c = new TreeClass(fullName, null, ast, loader, opt);
+          DJClass c = new TreeClass(fullName, null, ast, _loader, opt);
           NodeProperties.setDJClass(ast, c);
           classes.add(declaredName, c);
         }
@@ -60,4 +61,5 @@ public class TreeLibrary implements Library {
     else { return IterUtil.empty(); }
   }
 
+  public ClassLoader classLoader() { return _loader; }
 }

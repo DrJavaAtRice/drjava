@@ -8,6 +8,8 @@ import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /**
  * The context of a class body, including all members of the class (both declared and inherited).
  */

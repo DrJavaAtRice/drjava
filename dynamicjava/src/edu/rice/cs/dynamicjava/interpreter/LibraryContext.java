@@ -46,4 +46,5 @@ public class LibraryContext extends DelegatingContext {
     }
   }
   
+  public ClassLoader getClassLoader() { return _library.classLoader(); }
 }

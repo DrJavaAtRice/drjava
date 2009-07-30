@@ -12,5 +12,8 @@ public interface Library {
    * classes have the given name, returns all of them.
    */
   public Iterable<DJClass> declaredClasses(String fullName);
+  
+  /** Get a class loader for loading the classes in the library. */
+  public ClassLoader classLoader();
 
 }

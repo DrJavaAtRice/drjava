@@ -31,9 +31,10 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * processing the supertypes and type parameters, etc., of those declarations.  Here we handle
  * much of this process by recursively creating all members of the given class at the time of
  * creation, and tagging the declarations with these new objects.  The members of the resulting DJClass 
- * are immediately available; type-related operations (accessing the type parameters or supertypes, 
- * for example), on the other hand, must not occur until after the corresponding syntax has been 
- * tagged with the appropriate types.
+ * are immediately available; type parameters and supertypes are initialized with stub Object types
+ * until the actual types can be resolved (note that, until actual types are resolved, the results
+ * of a member lookup on a TreeClass will be incorrect; but, as complex dependencies sometimes exist
+ * between name and supertype resolution, this stub information is sometimes useful).
  */
 public class TreeClass implements DJClass {
   
@@ -83,7 +84,36 @@ public class TreeClass implements DJClass {
     _classes = new LinkedList<TreeClass>();
     _opt = opt;
     loader.registerTree(this);
+    tagSignature();
     extractMembers(loader);
+  }
+  
+  /** Set the TYPE and TYPE_VARIABLE properties of of non-anonymous classes/interfaces to stub Object types. */
+  private void tagSignature() {
+    if (_ast instanceof TypeDeclaration) {
+      TypeDeclaration td = (TypeDeclaration) _ast;
+
+      TypeParameter[] tparams;
+      if (td instanceof GenericClassDeclaration) {
+        tparams = ((GenericClassDeclaration) td).getTypeParameters();
+      }
+      else if (td instanceof GenericInterfaceDeclaration) {
+        tparams = ((GenericInterfaceDeclaration) td).getTypeParameters();
+      }
+      else { tparams = new TypeParameter[0]; }
+      for (TypeParameter p : tparams) {
+        BoundedSymbol tempBounds = new BoundedSymbol(new Object(), p.getRepresentation(),
+                                                     TypeSystem.OBJECT, TypeSystem.NULL);
+        NodeProperties.setTypeVariable(p, new VariableType(tempBounds));
+      }
+
+      if (td instanceof ClassDeclaration) {
+        NodeProperties.setType(((ClassDeclaration) td).getSuperclass(), TypeSystem.OBJECT);
+      }
+      if (td.getInterfaces() != null) {
+        for (ReferenceTypeName tn : td.getInterfaces()) { NodeProperties.setType(tn, TypeSystem.OBJECT); }
+      }
+    }
   }
   
   private void extractMembers(final TreeClassLoader loader) {
@@ -107,6 +137,7 @@ public class TreeClass implements DJClass {
         @Override public Void visit(InterfaceDeclaration d) {
           TreeClass c = new TreeClass(_fullName + "$" + d.getName(), TreeClass.this, d, loader, _opt);
           NodeProperties.setDJClass(d, c);
+          _classes.add(c);
           return null;
         }
         @Override public Void visit(ConstructorDeclaration d) {
@@ -238,6 +269,8 @@ public class TreeClass implements DJClass {
    * repeated invocations should produce the same object).
    */
   public Class<?> load() { return _loaded.value(); }
+  
+  public String toString() { return "TreeClass(" + _fullName + ")"; }
   
   public boolean equals(Object o) {
     if (this == o) { return true; }

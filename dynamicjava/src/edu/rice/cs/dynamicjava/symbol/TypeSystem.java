@@ -229,7 +229,8 @@ public abstract class TypeSystem {
    * @param c  The class to be instantiated
    * @param args  The type arguments for {@code c}
    * @throws InvalidTypeArgumentException  If the arguments do not correspond to the formal parameters of 
-   *                                       {@code c}, or if the arguments are not within their bounds.
+   *                                        {@code c} (bounds are not checked, so the result may not be
+   *                                        well-formed).
    */
   public abstract ClassType makeClassType(DJClass c, Iterable<? extends Type> args) 
     throws InvalidTypeArgumentException;
@@ -411,8 +412,9 @@ public abstract class TypeSystem {
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
    * @throws InvalidTargetException  If {@code object} cannot be used to access a class.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid, do not correspond to the 
-   *                                       class's formal parameters, or are not within their bounds.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
+   *                                        class's formal parameters (bounds are not checked, so the result
+   *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
   public abstract ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
@@ -425,8 +427,9 @@ public abstract class TypeSystem {
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
    * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid, do not correspond to the 
-   *                                       class's formal parameters, or are not within their bounds.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
+   *                                        class's formal parameters (bounds are not checked, so the
+   *                                        result may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
   public abstract ClassType lookupClass(Type t, String name, Iterable<? extends Type> typeArgs)
@@ -439,8 +442,9 @@ public abstract class TypeSystem {
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
    * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid, do not correspond to the 
-   *                                       class's formal parameters, or are not within their bounds.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
+   *                                        class's formal parameters (bounds are not checked, so the result
+   *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */
   public abstract ClassType lookupStaticClass(Type t, String name, Iterable<? extends Type> typeArgs)

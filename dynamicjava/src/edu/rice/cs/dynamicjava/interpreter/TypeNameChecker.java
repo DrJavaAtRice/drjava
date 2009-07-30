@@ -126,6 +126,16 @@ public class TypeNameChecker {
     return t.acceptVisitor(visitor);
   }
   
+  /**
+   * Verify that a TypeName that has already been checked is well-formed (according to
+   * {@link TypeSystem#isWellFormed}).
+   */
+  public void ensureWellFormed(TypeName t) {
+    if (!ts.isWellFormed(getType(t))) {
+      throw new ExecutionError("malformed.type", t);
+    }
+  }
+  
   /** Invoke {@link #check} on each element of a list. */
   public Iterable<Type> checkList(Iterable<? extends TypeName> l) {
     Iterable<Type> result = IterUtil.mapSnapshot(l, visitor);
@@ -139,34 +149,47 @@ public class TypeNameChecker {
     return result;
   }
   
-  /**
-   * Verify that a TypeName that has already been checked is well-formed (according to
-   * {@link TypeSystem#isWellFormed}).
-   */
-  public void ensureWellFormed(TypeName t) {
-    if (!ts.isWellFormed(getType(t))) {
-      throw new ExecutionError("malformed.type", t);
-    }
-  }
-  
   /** Invoke {@link #ensureWellFormed} on each element of a list. */
   public void ensureWellFormedList(Iterable<? extends TypeName> l) {
     for (TypeName t : l) { ensureWellFormed(t); }
   }
   
   
-  /** Tag the given type parameters with a new VariableType, and set the bounds appropriately. */
+  /**
+   * Tag the given type parameters with a new VariableType, and set the bounds appropriately;
+   * verify that the results are well-formed.
+   */
   public void checkTypeParameters(TypeParameter[] tparams) {
+    checkStructureForTypeParameters(tparams);
+    ensureWellFormedTypeParameters(tparams);
+  }
+
+  /** Tag the given type parameters with a new VariableType, and set the bounds appropriately. */
+  public void checkStructureForTypeParameters(TypeParameter[] tparams) {
     for (TypeParameter tparam : tparams) {
       setTypeVariable(tparam, new VariableType(new BoundedSymbol(tparam, tparam.getRepresentation())));
     }
     for (TypeParameter param : tparams) {
-      Iterable<ReferenceTypeName> bounds = IterUtil.compose(param.getBound(), param.getInterfaceBounds());
-      // meet is guaranteed to be nonempty, and thus not TOP
-      Type upperBound = ts.meet(checkList(bounds));
+      Type upperBound = checkStructure(param.getBound());
+      if (!param.getInterfaceBounds().isEmpty()) {
+        // can't use meet because it may involving subtyping on uninitialized variables
+        upperBound = new IntersectionType(IterUtil.compose(upperBound, checkList(param.getInterfaceBounds())));
+      }
       BoundedSymbol b = getTypeVariable(param).symbol();
       b.initializeUpperBound(upperBound);
       b.initializeLowerBound(TypeSystem.NULL);
+    }
+  }
+  
+  /**
+   * Verify that the given type parameters (for which {@link #checkStructureForTypeParameters} has
+   * already been invoked) are well-formed.
+   */
+  public void ensureWellFormedTypeParameters(TypeParameter[] tparams) {
+    for (TypeParameter tparam : tparams) {
+      if (!ts.isWellFormed(getTypeVariable(tparam))) {
+        throw new ExecutionError("malformed.type", tparam);
+      }
     }
   }
   
@@ -296,7 +319,7 @@ public class TypeNameChecker {
         first = false;
         name += ids.next().image();
         List<? extends TypeName> targsNames = allTargs.next();
-        Iterable<Type> targs = checkList(targsNames);
+        Iterable<Type> targs = checkStructureForList(targsNames);
         
         try {
           DJClass c = context.getTopLevelClass(name, ts);
@@ -324,7 +347,7 @@ public class TypeNameChecker {
       
       while (ids.hasNext()) {
         try {
-          Iterable<Type> targs = checkList(allTargs.next());
+          Iterable<Type> targs = checkStructureForList(allTargs.next());
           t = ts.lookupClass(t, ids.next().image(), targs);
         }
         catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
@@ -349,7 +372,7 @@ public class TypeNameChecker {
     @Override public Type visit(HookTypeName node) {
       Type upper = TypeSystem.OBJECT;
       if (node.getUpperBound().isSome()) {
-        upper = check(node.getUpperBound().unwrap());
+        upper = checkStructure(node.getUpperBound().unwrap());
         if (!ts.isReference(upper)) {
           setErrorStrings(node, ts.userRepresentation(upper));
           throw new ExecutionError("wildcard.bound", node);
@@ -358,7 +381,7 @@ public class TypeNameChecker {
       
       Type lower = TypeSystem.NULL;
       if (node.getLowerBound().isSome()) {
-        lower = check(node.getLowerBound().unwrap());
+        lower = checkStructure(node.getLowerBound().unwrap());
         if (!ts.isReference(lower)) {
           setErrorStrings(node, ts.userRepresentation(lower));
           throw new ExecutionError("wildcard.bound", node);
@@ -378,7 +401,7 @@ public class TypeNameChecker {
      * @return  The type of the TypeName
      */
     @Override public Type visit(ArrayTypeName node) {
-      Type elementType = check(node.getElementType());
+      Type elementType = checkStructure(node.getElementType());
       Type arrayT = node.isVararg() ? new VarargArrayType(elementType) :
         new SimpleArrayType(elementType);
       return setType(node, arrayT);

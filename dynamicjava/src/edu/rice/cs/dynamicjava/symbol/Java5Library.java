@@ -16,4 +16,5 @@ public class Java5Library implements Library {
     catch (LinkageError e) { return IterUtil.empty(); }
   }
 
+  public ClassLoader classLoader() { return _loader; }
 }

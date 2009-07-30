@@ -12,6 +12,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.TypeUtil;
 import koala.dynamicjava.interpreter.NodeProperties;
+import edu.rice.cs.dynamicjava.symbol.TypeSystem.InvalidTypeArgumentException;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -794,7 +795,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * @param c  The class to be instantiated
    * @param args  The type arguments for {@code c}
    * @throws InvalidTypeArgumentException  If the arguments do not correspond to the formal parameters of 
-   *                                       {@code c}, or if the arguments are not within their bounds.
+   *                                        {@code c} (bounds are not checked, so the result may not be
+   *                                        well-formed).
    */
   public ClassType makeClassType(DJClass c, Iterable<? extends Type> args) throws InvalidTypeArgumentException {
     if (IterUtil.isEmpty(args)) { return makeClassType(c); }
@@ -2434,8 +2436,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
    * @throws InvalidTargetException  If {@code object} cannot be used to access a class.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid, do not correspond to the 
-   *                                       class's formal parameters, or are not within their bounds.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
+   *                                        class's formal parameters (bounds are not checked, so the result
+   *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
   public ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
@@ -2450,8 +2453,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
    * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid, do not correspond to the 
-   *                                       class's formal parameters, or are not within their bounds.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
+   *                                        class's formal parameters (bounds are not checked, so the result
+   *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
   public ClassType lookupClass(Type t, final String name, Iterable<? extends Type> typeArgs)
@@ -2482,8 +2486,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
    * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid, do not correspond to the 
-   *                                       class's formal parameters, or are not within their bounds.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
+   *                                        class's formal parameters (bounds are not checked, so the result
+   *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */
   public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs)

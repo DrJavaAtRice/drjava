@@ -20,7 +20,6 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class TopLevelContext extends DelegatingContext {
 
   private final TypeContext _next; // need to save here for making copies
-  private final ClassLoader _loader;
   private final String _currentPackage;
   private final Iterator<Integer> _anonymousCounter;
     
@@ -47,17 +46,16 @@ public class TopLevelContext extends DelegatingContext {
    * The context is initialized with an on-demand import of "java.lang".
    */
   public TopLevelContext(ClassLoader loader) {
-    this(new LibraryContext(SymbolUtil.classLibrary(loader)), loader);
+    this(new LibraryContext(SymbolUtil.classLibrary(loader)));
   }
   
   /**
    * Make a top-level context that delegates to the given context.
    * The context is initialized with an on-demand import of "java.lang".
    */
-  public TopLevelContext(TypeContext next, ClassLoader loader) {
+  public TopLevelContext(TypeContext next) {
     super(next);
     _next = next;
-    _loader = loader;
     _currentPackage = "";
     _anonymousCounter = new SequenceIterator<Integer>(1, LambdaUtil.INCREMENT_INT);
     _onDemandPackages = new HashSet<String>();
@@ -72,14 +70,13 @@ public class TopLevelContext extends DelegatingContext {
   }
   
   private TopLevelContext(TopLevelContext copy) {
-    this(copy._next, copy._loader, copy._currentPackage, copy);
+    this(copy._next, copy._currentPackage, copy);
   }
   
   @SuppressWarnings("unchecked")
-  private TopLevelContext(TypeContext next, ClassLoader loader, String currentPackage, TopLevelContext bindings) {
+  private TopLevelContext(TypeContext next, String currentPackage, TopLevelContext bindings) {
     super(next);
     _next = next;
-    _loader = loader;
     _currentPackage = currentPackage;
     _anonymousCounter = bindings._anonymousCounter;
     _onDemandPackages = (HashSet<String>) bindings._onDemandPackages.clone();
@@ -92,14 +89,14 @@ public class TopLevelContext extends DelegatingContext {
   }
   
   protected TypeContext duplicate(TypeContext next) {
-    return new TopLevelContext(next, _loader, _currentPackage, this);
+    return new TopLevelContext(next, _currentPackage, this);
   }
 
   
   /* PACKAGE AND IMPORT MANAGEMENT */
   
   /** Set the current package to the given package name */
-  public TypeContext setPackage(String name) { return new TopLevelContext(_next, _loader, name, this); }
+  public TypeContext setPackage(String name) { return new TopLevelContext(_next, name, this); }
   
   /** Import on demand all top-level classes in the given package */
   public TypeContext importTopLevelClasses(String pkg) {
@@ -344,7 +341,5 @@ public class TopLevelContext extends DelegatingContext {
     // the top level "catches" anything that is thrown.
     return IterUtil.<Type>singleton(TypeSystem.THROWABLE);
   }
-  
-  public ClassLoader getClassLoader() { return _loader; }
   
 }
