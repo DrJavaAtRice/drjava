@@ -91,4 +91,65 @@ class WindowsPlatform extends DefaultPlatform {
     // Otherwise, trust that it worked.
     return true;
   }
+  
+  /** @return true if file extensions can be registered and unregistered. */
+  public boolean canRegisterFileExtensions() { return true; }
+
+  /** Register .drjava file extension.
+    * @return true if registering succeeded */
+  public boolean registerProjectFileExtension() {
+    // TODO
+//    try {
+//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, ".drjava", "", "DrJavaProject");
+//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaProject", "", "DrJava project file");
+//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaProject\\shell\\open\\command", "",
+//                             "drjava.exe \"%1\" %*");
+//      return true;
+//    }
+//    catch(WindowsRegistry.RegistryException re) {
+      return false;
+//    }
+  }
+
+  /** Unregister .drjava file extension.
+    * @return true if unregistering succeeded */
+  public boolean unregisterProjectFileExtension() {
+    // TODO
+    return false;
+  }
+  
+  /** @return true if .drjava file extension is registered. */
+  public boolean isProjectFileExtensionRegistered() {
+    // TODO
+    return false;
+  }
+  
+  /** Register .java file extension.
+    * @return true if registering succeeded */
+  public boolean registerJavaFileExtension() {
+    // TODO
+//    try {
+//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, ".java", "", "DrJavaSource");
+//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaSource", "", "Java source file");
+//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaSource\\shell\\open\\command", "",
+//                             "drjava.exe \"%1\" %*");
+//      return true;
+//    }
+//    catch(WindowsRegistry.RegistryException re) {
+      return false;
+//    }
+  }
+  
+  /** Unregister .java file extension.
+    * @return true if unregistering succeeded */
+  public boolean unregisterJavaFileExtension() {
+    // TODO
+    return false;
+  }
+  
+  /** @return true if .java file extension is registered. */
+  public boolean isJavaFileExtensionRegistered() {
+    // TODO
+    return false;
+  }
 }

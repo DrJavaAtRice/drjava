@@ -94,6 +94,19 @@ class MacPlatform extends DefaultPlatform {
    */
   public void beforeUISetup() {
     System.setProperty("apple.laf.useScreenMenuBar","true");
+    
+    // needs to be done here, otherwise the event gets lost
+    ApplicationListener appListener = new ApplicationAdapter() {
+      public void handleOpenFile(ApplicationEvent event) {
+        if (event.getFilename()!=null) {
+          edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(event.getFilename()), -1);
+        }
+      }
+    };
+    
+    // Register the ApplicationListener.
+    Application appl = new Application();
+    appl.addApplicationListener(appListener);
   }
    
   /**
@@ -103,20 +116,15 @@ class MacPlatform extends DefaultPlatform {
    * @param prefs the Action associated with openning the Preferences dialog
    * @param quit the Action associated with quitting the DrJava application
    */
-  public void afterUISetup(Action about, Action prefs, Action quit) {
-    
-    final Action aboutAction = about;
-    final Action prefsAction = prefs;
-    final Action quitAction = quit;
-    
+  public void afterUISetup(final Action about, final Action prefs, final Action quit) {    
     ApplicationListener appListener = new ApplicationAdapter() {
       public void handleAbout(ApplicationEvent e) {
-        aboutAction.actionPerformed(new ActionEvent(this, 0, "About DrJava"));
+        about.actionPerformed(new ActionEvent(this, 0, "About DrJava"));
         e.setHandled(true);
       }
 
       public void handlePreferences(ApplicationEvent e) {
-        prefsAction.actionPerformed(new ActionEvent(this, 0, "Preferences..."));
+        prefs.actionPerformed(new ActionEvent(this, 0, "Preferences..."));
         e.setHandled(true);
       }
 
@@ -126,7 +134,7 @@ class MacPlatform extends DefaultPlatform {
         final ApplicationEvent ae = e;
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            quitAction.actionPerformed(new ActionEvent(this, 0, "Quit DrJava"));
+            quit.actionPerformed(new ActionEvent(this, 0, "Quit DrJava"));
             ae.setHandled(true);
           }
         });

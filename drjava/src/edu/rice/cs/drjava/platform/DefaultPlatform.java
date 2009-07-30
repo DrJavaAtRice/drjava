@@ -233,4 +233,29 @@ class DefaultPlatform implements PlatformSupport {
     // by default just set the object's mnemonic
     obj.setMnemonicAt(tabIndex, mnemonic);
   }
+  
+  /** @return true if file extensions can be registered and unregistered. */
+  public boolean canRegisterFileExtensions() { return false; }
+  
+  /** Register .drjava file extension.
+    * @return true if registering succeeded */
+  public boolean registerProjectFileExtension() { return false; }
+
+  /** Unregister .drjava file extension.
+    * @return true if unregistering succeeded */
+  public boolean unregisterProjectFileExtension() { return false; }
+  
+  /** @return true if .drjava file extension is registered. */
+  public boolean isProjectFileExtensionRegistered() { return false; }
+  
+  /** Register .java file extension.
+    * @return true if registering succeeded */
+  public boolean registerJavaFileExtension() { return false; }
+  
+  /** Unregister .java file extension.
+    * @return true if unregistering succeeded */
+  public boolean unregisterJavaFileExtension() { return false; }
+  
+  /** @return true if .java file extension is registered. */
+  public boolean isJavaFileExtensionRegistered() { return false; }
 }

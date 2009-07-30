@@ -1403,7 +1403,7 @@ public interface OptionConstants {
   /** The request URL that the user generated the last time the DrJava survey was taken. */
   public static final StringOption LAST_DRJAVA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
   
-  /** . */
+  /** Delete class files for language-level classes. */
   public static final ArrayList<String> DELETE_LL_CLASS_FILES_CHOICES =
     DeleteLLClassFileChoices.evaluate();
   static class DeleteLLClassFileChoices {
@@ -1419,4 +1419,27 @@ public interface OptionConstants {
   /** Whether to delete language level class files. */
   public static final ForcedChoiceOption DELETE_LL_CLASS_FILES =
     new ForcedChoiceOption("delete.ll.class.files", DELETE_LL_CLASS_FILES_CHOICES.get(2), DELETE_LL_CLASS_FILES_CHOICES);
+  
+  /** File extension registration choices. */
+  public static final ArrayList<String> FILE_EXT_REGISTRATION_CHOICES =
+    FileExtRegistrationChoices.evaluate();
+  static class FileExtRegistrationChoices{
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add("never");
+      aList.add("ask me at startup");
+      aList.add("always");
+      return aList;
+    }
+  }
+  
+  /** File extension registration for .java files. */
+  public static final ForcedChoiceOption JAVA_FILE_EXT_REGISTRATION =
+    new ForcedChoiceOption("file.ext.registration.java", FILE_EXT_REGISTRATION_CHOICES .get(1),
+                           FILE_EXT_REGISTRATION_CHOICES);
+  
+  /** File extension registration for .drjava files. */
+  public static final ForcedChoiceOption PROJECT_FILE_EXT_REGISTRATION =
+    new ForcedChoiceOption("file.ext.registration.project", FILE_EXT_REGISTRATION_CHOICES .get(1),
+                           FILE_EXT_REGISTRATION_CHOICES);
 }

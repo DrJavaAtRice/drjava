@@ -119,4 +119,29 @@ public interface PlatformSupport {
     * @see javax.swing.JTabbedPane#setMnemonicAt(int,int)
     * @see java.awt.event.KeyEvent */
   public void setMnemonicAt(javax.swing.JTabbedPane obj, int tabIndex, int mnemonic);
+  
+  /** @return true if file extensions can be registered and unregistered. */
+  public boolean canRegisterFileExtensions();
+  
+  /** Register .drjava file extension.
+    * @return true if registering succeeded */
+  public boolean registerProjectFileExtension();
+
+  /** Unregister .drjava file extension.
+    * @return true if unregistering succeeded */
+  public boolean unregisterProjectFileExtension();
+  
+  /** @return true if .drjava file extension is registered. */
+  public boolean isProjectFileExtensionRegistered();
+  
+  /** Register .java file extension.
+    * @return true if registering succeeded */
+  public boolean registerJavaFileExtension();
+  
+  /** Unregister .java file extension.
+    * @return true if unregistering succeeded */
+  public boolean unregisterJavaFileExtension();
+  
+  /** @return true if .java file extension is registered. */
+  public boolean isJavaFileExtensionRegistered();
 }
