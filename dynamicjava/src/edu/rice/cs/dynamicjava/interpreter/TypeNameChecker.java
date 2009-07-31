@@ -388,11 +388,6 @@ public class TypeNameChecker {
         }
       }
 
-      if (!ts.isSubtype(lower, upper)) {
-        setErrorStrings(node, ts.userRepresentation(upper), ts.userRepresentation(lower));
-        throw new ExecutionError("wildcard.bounds", node);
-      }
-      
       return setType(node, new Wildcard(new BoundedSymbol(node, upper, lower)));
     }
     

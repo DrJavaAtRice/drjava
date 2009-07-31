@@ -126,7 +126,7 @@ public class SourceChecker {
   private void startStatus(String description) {
     _statusCount = 0;
     if (!_quiet) {
-      String fullDesc = TextUtil.padRight(description + "...", ' ', 30);
+      String fullDesc = TextUtil.padRight(description + "...", ' ', 35);
       System.out.print(fullDesc);
       System.out.flush();
     }

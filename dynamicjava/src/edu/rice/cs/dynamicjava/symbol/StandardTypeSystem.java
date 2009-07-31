@@ -691,25 +691,28 @@ public abstract class StandardTypeSystem extends TypeSystem {
       }
       
       public void forParameterizedClassType(ParameterizedClassType t) {
+        Iterator<DJClass> classes = SymbolUtil.outerClassChain(t.ofClass()).iterator();
         Iterator<? extends Type> targs = t.typeArguments().iterator();
-        boolean first = true;
-        for (DJClass c : SymbolUtil.outerClassChain(t.ofClass())) {
-          if (first) {
-            result.append(SymbolUtil.shortName(c));
-            first = false;
-          }
-          else { result.append("."); result.append(c.declaredName()); }
-          Iterable<VariableType> params = c.declaredTypeParameters();
-          if (!IterUtil.isEmpty(params)) {
-            result.append("<");
-            boolean firstParam = true;
-            for (VariableType param : params) { // param is ignored -- it's just a counter
-              if (!firstParam) { result.append(", "); }
-              firstParam = false;
-              run(targs.next());
+        DJClass c = classes.next();
+        result.append(SymbolUtil.shortName(c));
+        DJClass inner;
+        while (c != null) {
+          inner = classes.hasNext() ? classes.next() : null; // next in the chain, or null if c is last
+          if (inner == null || !inner.isStatic()) {
+            Iterable<VariableType> params = c.declaredTypeParameters();
+            if (!IterUtil.isEmpty(params)) {
+              result.append("<");
+              boolean firstParam = true;
+              for (VariableType param : params) { // param is ignored -- it's just a counter
+                if (!firstParam) { result.append(", "); }
+                firstParam = false;
+                run(targs.next());
+              }
+              result.append(">");
             }
-            result.append(">");
           }
+          if (inner != null) { result.append("."); result.append(c.declaredName()); }
+          c = inner;
         }
       }
       

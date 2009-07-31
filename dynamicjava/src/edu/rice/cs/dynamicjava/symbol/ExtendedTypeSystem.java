@@ -30,10 +30,17 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   
   /** Determine if the type is well-formed. */
   public boolean isWellFormed(Type t) {
-    return WELL_FORMED.contains(t);
+    return new WellFormedChecker().contains(t);
   }
   
-  private final Predicate<Type> WELL_FORMED = LambdaUtil.asPredicate(new TypeAbstractVisitor<Boolean>() {
+  /**
+   * Tests well-formedness for normalized types.  Due to its use of internal state, unrelated (and possibly parallel)
+   * invocations should use distinct instances.
+   */
+  private class WellFormedChecker extends TypeAbstractVisitor<Boolean> implements Predicate<Type> {
+    RecursionStack<Type> _stack = new RecursionStack<Type>();
+    public boolean contains(Type t) { return t.apply(this); }
+    
     @Override public Boolean defaultCase(Type t) { return true; }
     @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
     @Override public Boolean forSimpleClassType(SimpleClassType t) {
@@ -44,7 +51,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     }
     @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
       Iterable<? extends Type> args = t.typeArguments();
-      if (IterUtil.and(args, WELL_FORMED)) {
+      if (IterUtil.and(args, this)) {
         Iterable<VariableType> params = SymbolUtil.allTypeParameters(t.ofClass());
         if (IterUtil.sizeOf(params) == IterUtil.sizeOf(args)) {
           Iterable<Type> captArgs = captureTypeArgs(args, params);
@@ -57,10 +64,13 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       return false;
     }
     @Override public Boolean forBoundType(BoundType t) {
-      return IterUtil.and(t.ofTypes(), WELL_FORMED);
+      return IterUtil.and(t.ofTypes(), this);
     }
-    @Override public Boolean forVariableType(VariableType t) {
-      return checkBoundedSymbol(t.symbol());
+    @Override public Boolean forVariableType(final VariableType t) {
+      Thunk<Boolean> checkVar = new Thunk<Boolean>() {
+        public Boolean value() { return checkBoundedSymbol(t.symbol()); }
+      };
+      return _stack.apply(checkVar, true, t);
     }
     @Override public Boolean forWildcard(Wildcard w) {
       return checkBoundedSymbol(w.symbol());
@@ -70,7 +80,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       Type upper = s.upperBound();
       return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper);
     }
-  });
+  }
   
   /** Determine if the given types may be treated as equal.  This is recursive, transitive, and symmetric. */
   public boolean isEqual(Type t1, Type t2) {
@@ -331,7 +341,9 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
    */
   private final TypeUpdateVisitor NORMALIZE = new TypeUpdateVisitor() {
     @Override public Type forIntersectionTypeOnly(IntersectionType t, Iterable<? extends Type> normTypes) {
+      debug.logStart(new String[]{"t","normTypes"}, wrap(t), wrap(normTypes));
       Type result = MEET_NORM.value(normTypes);
+      debug.logEnd("result", wrap(result));
       return t.equals(result) ? t : result;
     }
     @Override public Type forUnionTypeOnly(UnionType t, Iterable<? extends Type> normTypes) {
@@ -689,7 +701,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
         constraintWs.add(new Wildcard(sym));
       }
       Iterable<Type> result = captureTypeArgs(constraintWs, tparams);
-      if (IterUtil.and(result, WELL_FORMED)) { return result; }
+      if (IterUtil.and(result, new WellFormedChecker())) { return result; }
     }
     
     // give up
