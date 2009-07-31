@@ -12,7 +12,6 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.TypeUtil;
 import koala.dynamicjava.interpreter.NodeProperties;
-import edu.rice.cs.dynamicjava.symbol.TypeSystem.InvalidTypeArgumentException;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -1429,7 +1428,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     
     public boolean matchesWithVarargs() {
       if (_matchesAllButLast && _paramForVarargs instanceof VarargArrayType) {
-        ArrayType arrayT = (ArrayType) substitute((ArrayType) _paramForVarargs, _tparams, _targs);
+        ArrayType arrayT = (ArrayType) substitute(_paramForVarargs, _tparams, _targs);
         Type elementT = arrayT.ofType();
         _argForVarargs = boxingConvert(_argForVarargs, elementT);
         // TODO: Allow unchecked conversion of raw types?
@@ -1557,7 +1556,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         boxArgs();
         if (super.matches()) {
           _params = IterUtil.compose(_params, _varargParam);
-          ArrayType arrayT = (ArrayType) substitute((ArrayType) _varargParam, _tparams, _targs);
+          ArrayType arrayT = (ArrayType) substitute(_varargParam, _tparams, _targs);
           _args = IterUtil.compose(_args, makeArray(arrayT, EMPTY_EXPRESSION_ITERABLE));
           return true;
         }
@@ -1590,7 +1589,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         boxArgs();
         if (super.matches()) {
           _params = IterUtil.compose(_params, _varargParam);
-          ArrayType arrayT = (ArrayType) substitute((ArrayType) _varargParam, _tparams, _targs);
+          ArrayType arrayT = (ArrayType) substitute(_varargParam, _tparams, _targs);
           _args = IterUtil.compose(_args, makeArray(arrayT, EMPTY_EXPRESSION_ITERABLE));
           return true;
         }
@@ -1625,7 +1624,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       if (_varargParam instanceof VarargArrayType) {
         boxArgs();
         if (super.matches()) {
-          ArrayType arrayT = (ArrayType) substitute((ArrayType) _varargParam, _tparams, _targs);
+          ArrayType arrayT = (ArrayType) substitute(_varargParam, _tparams, _targs);
           Type elementT = arrayT.ofType();
           Iterable<Expression> boxedVarargArgs = EMPTY_EXPRESSION_ITERABLE;
           for (Expression arg : _varargArgs) {
@@ -2534,7 +2533,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
           }
           
           @Override public ClassType forRawClassType(RawClassType t) {
-            return t; // TODO: Handle parameterized raw members (such as Foo.Bar<T> vs. Foo<X>.Bar<T>)
+            return t;
           }
           
           @Override public ClassType forParameterizedClassType(ParameterizedClassType t) {
@@ -2560,7 +2559,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /**
    * Produces a list of all inner classes matching the given predicate in type {@code t}.  No
    * errors are thrown.  The given type arguments are applied to the result, but no checks are
-   * made for their correctness.
+   * made for their correctness (a ParameterizedClassType result may have the wrong number of
+   * arguments, including the case of missing arguments from a raw outer type; a SimpleClassType
+   * result may be missing arguments).
    */
   private Iterable<? extends ClassType> 
     lookupClasses(Type t, Lambda<? super Boolean, ? extends Predicate<? super DJClass>> makePred,
@@ -2576,33 +2577,23 @@ public abstract class StandardTypeSystem extends TypeSystem {
       
       public Iterable<ClassType> defaultCase(Type t) { return IterUtil.empty(); }
       
-      @Override public Iterable<ClassType> forSimpleClassType(SimpleClassType t) {
-        Lambda<DJClass, ClassType> makeType;
-        if (IterUtil.isEmpty(typeArgs)) {
-          makeType = new Lambda<DJClass, ClassType>() {
-            public ClassType value(DJClass c) { return new SimpleClassType(c); }
-          };
-        }
-        else {
-          makeType = new Lambda<DJClass, ClassType>() {
-            public ClassType value(DJClass c) { return new ParameterizedClassType(c, typeArgs); }
-          };
-        }
-        return IterUtil.mapSnapshot(IterUtil.filter(t.ofClass().declaredClasses(), _matchInner), makeType);
-      }
-      
-      @Override public Iterable<ClassType> forRawClassType(RawClassType t) {
-        // TODO: Handle raw member access warnings
-        Lambda<DJClass, ClassType> makeType = new Lambda<DJClass, ClassType>() {
-          public ClassType value(DJClass c) { return new RawClassType(c); }
-        };
-        return IterUtil.mapSnapshot(IterUtil.filter(t.ofClass().declaredClasses(), _matchInner), makeType);
-      }
-      
-      @Override public Iterable<ClassType> forParameterizedClassType(final ParameterizedClassType t) {
+      @Override public Iterable<ClassType> forClassType(final ClassType t) {
         Lambda<DJClass, ClassType> makeType = new Lambda<DJClass, ClassType>() {
           public ClassType value(DJClass c) {
-            return new ParameterizedClassType(c, IterUtil.compose(t.typeArguments(), typeArgs));
+            ClassType dynamicOuter; // may be null
+            if (c.isStatic()) { dynamicOuter = SymbolUtil.dynamicOuterClassType(t); }
+            else { dynamicOuter = t; }
+            if (dynamicOuter instanceof ParameterizedClassType) {
+              Iterable<? extends Type> outerTypeArgs = ((ParameterizedClassType) dynamicOuter).typeArguments();
+              return new ParameterizedClassType(c, IterUtil.compose(outerTypeArgs, typeArgs));
+            }
+            else if (dynamicOuter instanceof RawClassType) {
+              // malformed if type args is nonempty -- that should be caught by the caller
+              return IterUtil.isEmpty(typeArgs) ? new RawClassType(c) : new ParameterizedClassType(c, typeArgs);
+            }
+            else {
+              return IterUtil.isEmpty(typeArgs) ? new SimpleClassType(c) : new ParameterizedClassType(c, typeArgs);
+            }
           }
         };
         return IterUtil.mapSnapshot(IterUtil.filter(t.ofClass().declaredClasses(), _matchInner), makeType);

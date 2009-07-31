@@ -3505,7 +3505,7 @@ PARSER_END(Parser)
   TypeParameter typeParameter() :
   {
     List<IdentifierToken> name;
-    TypeName bound = new ReferenceTypeName("Object");
+    TypeName bound = new ReferenceTypeName("java.lang.Object");
     List<ReferenceTypeName> interfaceBoundsList = new LinkedList<ReferenceTypeName>();
     ReferenceTypeName interf;
   }
