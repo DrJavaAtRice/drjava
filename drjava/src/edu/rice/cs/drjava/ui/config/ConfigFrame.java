@@ -1201,42 +1201,45 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the file types panel of the preferences window. */
   private void _setupFileTypesPanel(ConfigPanel panel) {
     if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
-      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files with the<br>"+
-                                                   "extension .drjava to DrJava. When double-clicking<br>"+
-                                                   "on a .drjava file, DrJava will open it.</html>", this, true));
+      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>"+
+                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>"+
+                                                   "When double-clicking on a .drjava file, DrJava will open it.</html>", this, true));
       
-      addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (!PlatformFactory.ONLY.registerProjectFileExtension()) {
+          if (PlatformFactory.ONLY.registerDrJavaFileExtensions()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not set .drjava file association.",
+                                          "Successfully set .drjava and .djapp file associations.",
+                                          "Success",
+                                          JOptionPane.INFORMATION_MESSAGE); 
+          }
+          else {
+            JOptionPane.showMessageDialog(ConfigFrame.this,
+                                          "Could not set .drjava and .djapp file associations.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Associate .drjava Files with DrJava", this, "This associates .drjava project files with DrJava."));
+      }, "Associate .drjava and .djapp Files with DrJava", this, "This associates .drjava and .djapp files with DrJava."));
 
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
-      addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (!PlatformFactory.ONLY.unregisterProjectFileExtension()) {
+          if (PlatformFactory.ONLY.unregisterDrJavaFileExtensions()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not remove .drjava file association.",
+                                          "Successfully removed .drjava and .djapp file associations.",
+                                          "Success",
+                                          JOptionPane.INFORMATION_MESSAGE); 
+          }
+          else {
+            JOptionPane.showMessageDialog(ConfigFrame.this,
+                                          "Could not remove .drjava and .djapp file associations.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Remove .drjava File Associates", this, "This removes the association of .drjava project files with DrJava."));
-      
-      addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-      
-      addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.PROJECT_FILE_EXT_REGISTRATION,
-                                                                "<html>Automatically assign .drjava Project Files to DrJava</html>", this,
-                                                                "<html>Selecting 'always' will re-establish the file association every time DrJava<br>"+
-                                                                "started, without asking. Selecting 'ask me' will ask the user at start up<br>"+
-                                                                "if the association has been changed. Selecting 'never' will not assign<br>"+
-                                                                ".drjava files to DrJava."));
+      }, "Remove .drjava and .djapp File Associations", this, "This removes the association of .drjava and .djapp files with DrJava."));
       
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
@@ -1244,9 +1247,15 @@ public class ConfigFrame extends SwingFrame {
                                                    "extension .java to DrJava. When double-clicking<br>"+
                                                    "on a .java file, DrJava will open it.</html>", this, true));
 
-      addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (!PlatformFactory.ONLY.registerJavaFileExtension()) {
+          if (PlatformFactory.ONLY.registerJavaFileExtension()) {
+            JOptionPane.showMessageDialog(ConfigFrame.this,
+                                          "Successfully set .java file association.",
+                                          "Success",
+                                          JOptionPane.INFORMATION_MESSAGE); 
+          }
+          else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
                                           "Could not set .java file association.",
                                           "File Types Error",
@@ -1257,25 +1266,34 @@ public class ConfigFrame extends SwingFrame {
 
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
 
-      addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (!PlatformFactory.ONLY.unregisterJavaFileExtension()) {
+          if (PlatformFactory.ONLY.unregisterJavaFileExtension()) {
+            JOptionPane.showMessageDialog(ConfigFrame.this,
+                                          "Successfully removed .java file association.",
+                                          "Success",
+                                          JOptionPane.INFORMATION_MESSAGE); 
+          }
+          else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
                                           "Could not remove .java file association.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Remove .java File Association", this, "This removes the association of .drjava project files with DrJava."));
+      }, "Remove .java File Association", this, "This removes the association of .java project files with DrJava."));
 
-      addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.JAVA_FILE_EXT_REGISTRATION,
-                                                                "<html>Automatically assign .java Source Files to DrJava</html>", this,
-                                                                "<html>Assign Java source files with the extension .java to DrJava.<br>"+
-                                                                "When double-clicking on a .java file, DrJava will open it.<br><br>"+
+      addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+      addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+      
+      addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.FILE_EXT_REGISTRATION,
+                                                                "<html>Automatically assign .java, .drjava and .djapp Files to DrJava</html>", this,
+                                                                "<html>Assign files with the extensions .java, .drjava and .djapp to DrJava.<br>"+
+                                                                "When double-clicking those files, they will be opened in DrJava.<br><br>"+
                                                                 "Selecting 'always' will re-establish this association every time DrJava<br>"+
                                                                 "started, without asking. Selecting 'ask me' will ask the user at start up<br>"+
                                                                 "if the association has been changed. Selecting 'never' will not assign<br>"+
-                                                                ".drjava files to DrJava."));
+                                                                ".java, .drjava and .djapp files to DrJava."));
     }
     else {
       addOptionComponent(panel, 

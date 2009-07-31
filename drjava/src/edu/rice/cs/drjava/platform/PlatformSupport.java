@@ -123,16 +123,16 @@ public interface PlatformSupport {
   /** @return true if file extensions can be registered and unregistered. */
   public boolean canRegisterFileExtensions();
   
-  /** Register .drjava file extension.
+  /** Register .drjava and .djapp file extensions.
     * @return true if registering succeeded */
-  public boolean registerProjectFileExtension();
+  public boolean registerDrJavaFileExtensions();
 
-  /** Unregister .drjava file extension.
+  /** Unregister .drjava and .djapp file extensions.
     * @return true if unregistering succeeded */
-  public boolean unregisterProjectFileExtension();
+  public boolean unregisterDrJavaFileExtensions();
   
-  /** @return true if .drjava file extension is registered. */
-  public boolean isProjectFileExtensionRegistered();
+  /** @return true if .drjava and .djapp file extensions are registered. */
+  public boolean areDrJavaFileExtensionsRegistered();
   
   /** Register .java file extension.
     * @return true if registering succeeded */

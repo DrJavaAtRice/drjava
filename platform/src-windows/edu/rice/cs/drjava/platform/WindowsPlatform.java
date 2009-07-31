@@ -35,7 +35,13 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.platform;
+
 import java.net.URL;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * Platform-specific code unique to the Windows platform.
@@ -94,62 +100,209 @@ class WindowsPlatform extends DefaultPlatform {
   
   /** @return true if file extensions can be registered and unregistered. */
   public boolean canRegisterFileExtensions() { return true; }
-
-  /** Register .drjava file extension.
+  
+  private static final String DRJAVA_PROJECT_PROGID = "DrJava.Project";
+  private static final String DRJAVA_EXTPROCESS_PROGID = "DrJava.ExtProcess";
+  private static final String DRJAVA_JAVA_PROGID = "DrJava.Java";
+  
+  /** Register .drjava and .djapp file extensions.
     * @return true if registering succeeded */
-  public boolean registerProjectFileExtension() {
-    // TODO
-//    try {
-//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, ".drjava", "", "DrJavaProject");
-//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaProject", "", "DrJava project file");
-//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaProject\\shell\\open\\command", "",
-//                             "drjava.exe \"%1\" %*");
-//      return true;
-//    }
-//    catch(WindowsRegistry.RegistryException re) {
-      return false;
-//    }
+  public boolean registerDrJavaFileExtensions() {
+    boolean retval = registerFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID, "text", "text/plain");
+    retval &= registerFileExtension(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID, "program", "multipart/mixed");
+    return retval;
   }
 
-  /** Unregister .drjava file extension.
+  /** Unregister .drjava and .djapp file extensions.
     * @return true if unregistering succeeded */
-  public boolean unregisterProjectFileExtension() {
-    // TODO
-    return false;
+  public boolean unregisterDrJavaFileExtensions() {
+    boolean retval = unregisterFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID);
+    retval &= unregisterFileExtension(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID);
+    return retval;
   }
   
-  /** @return true if .drjava file extension is registered. */
-  public boolean isProjectFileExtensionRegistered() {
-    // TODO
-    return false;
+  /** @return true if .drjava and .djapp file extensions are registered. */
+  public boolean areDrJavaFileExtensionsRegistered() {
+    return
+      isFileExtensionRegistered(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID) && 
+      isFileExtensionRegistered(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID);
   }
   
   /** Register .java file extension.
     * @return true if registering succeeded */
   public boolean registerJavaFileExtension() {
-    // TODO
-//    try {
-//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, ".java", "", "DrJavaSource");
-//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaSource", "", "Java source file");
-//      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, "DrJavaSource\\shell\\open\\command", "",
-//                             "drjava.exe \"%1\" %*");
-//      return true;
-//    }
-//    catch(WindowsRegistry.RegistryException re) {
-      return false;
-//    }
+    return registerFileExtension(".java", DRJAVA_JAVA_PROGID, "text", "text/plain");
   }
   
   /** Unregister .java file extension.
     * @return true if unregistering succeeded */
   public boolean unregisterJavaFileExtension() {
-    // TODO
-    return false;
+    return unregisterFileExtension(".java", DRJAVA_JAVA_PROGID);
   }
   
   /** @return true if .java file extension is registered. */
   public boolean isJavaFileExtensionRegistered() {
-    // TODO
-    return false;
+    return isFileExtensionRegistered(".java", DRJAVA_JAVA_PROGID);
+  }
+     
+  /** Return true if a file extension is registered.
+    * @param extension extension, like ".drjava"
+    * @param progid program ID, like "DrJava.Project"
+    * @return true if a file extension is registered */
+  private boolean isFileExtensionRegistered(String extension, String progid) {
+    try {
+      String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "");
+      return (oldDefault!=null) && (progid.equals(oldDefault));
+    }
+    catch(WindowsRegistry.RegistryException re) {
+      return false;
+    }
+  }
+  
+  /** Register a file extension.
+    * @param extension extension, like ".drjava"
+    * @param progid program ID, like "DrJava.Project"
+    * @return true if registering succeeded */
+  private boolean registerFileExtension(String extension, String progid, String perceived, String mime) {
+    try {
+      String cmdLine = getCommandLine();
+//      The general form of a file extension key is:
+//
+//    * HKEY_CLASSES_ROOT
+//          o .ext
+//
+//            (Default) = ProgID.ext.1 (REG_SZ)
+//            PerceivedType = PerceivedType (REG_SZ)
+//            Content Type = mime content type (REG_SZ)
+//                + OpenWithProgids
+//                      # ProgID2.ext.1
+//                      # ProgID3.ext.1
+//                + OpenWithList
+//                      # AlternateProgram1.exe
+//                      # AlternateProgram2.exe
+//                + ProgID.ext.1
+//                      # shellnew      
+      try {
+        String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "");
+        if ((oldDefault!=null) && (!progid.equals(oldDefault))) {
+          // add the old default to the OpenWithProgids and OpenWithList
+          WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids", oldDefault, "");
+          WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithList", oldDefault, "");
+        }
+      }
+      catch(WindowsRegistry.RegistryException re) { /* if the lookup fails, then there was nothing to do anyway */ }
+      
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "", progid);
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "PerceivedType", perceived);
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "Content Type", mime);
+      
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids", progid, "");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithList", progid, "");
+      
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+progid, "", "DrJava project file");
+      
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+progid+"\\shell\\open\\command", "",
+                             cmdLine+" \"%1\" %*");
+      return true;
+    }
+    catch(WindowsRegistry.RegistryException re) {
+      return false;
+    }
+    catch(IOException ioe) {
+      return false;
+    }
+  }
+
+  /** Unregister a file extension.
+    * @param extension extension, like ".drjava"
+    * @param progid program ID, like "DrJava.Project"
+    * @return true if unregistering succeeded */
+  public boolean unregisterFileExtension(String extension, String progid) {
+    boolean otherProgidsLeft = false; // true if other programs are still registered and the file type shouldn't be deleted
+    try {
+      int handle;
+      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids",
+                                       WindowsRegistry.KEY_ALL_ACCESS);
+      try {
+        WindowsRegistry.deleteValue(handle, progid);
+      }
+      catch(WindowsRegistry.RegistryException re) { /* if it couldn't be deleted, there was nothing to do anyway */ }
+      WindowsRegistry.QueryInfoResult qir = WindowsRegistry.queryInfoKey(handle);
+      otherProgidsLeft |= (qir.valueCount>0);
+      otherProgidsLeft |= (qir.subkeyCount>0);
+      WindowsRegistry.flushKey(handle);
+      WindowsRegistry.closeKey(handle);
+
+      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithList",
+                                       WindowsRegistry.KEY_ALL_ACCESS);
+      try {
+        WindowsRegistry.deleteValue(handle, progid);
+      }
+      catch(WindowsRegistry.RegistryException re) { /* if it couldn't be deleted, there was nothing to do anyway */ }
+      qir = WindowsRegistry.queryInfoKey(handle);
+      otherProgidsLeft |= (qir.valueCount>0);
+      otherProgidsLeft |= (qir.subkeyCount>0);
+      WindowsRegistry.flushKey(handle);
+      WindowsRegistry.closeKey(handle);
+
+      if (!otherProgidsLeft) {
+        WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids");
+        WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension);
+      }
+      WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+progid);
+      return true;
+    }
+    catch(WindowsRegistry.RegistryException re) {
+      return false;
+    }
+  }
+  
+  private String getCommandLine() throws WindowsRegistry.RegistryException, IOException {
+    // detect current DrJava file (.jar or .exe)
+    String[] cps = System.getProperty("java.class.path").split("\\;", -1);
+    File found = null;
+    for(String cp: cps) {
+      try {
+        File f = new File(cp);
+        if (!f.exists()) { continue; }
+        if (f.isDirectory()) {
+          // this is a directory, maybe DrJava is contained here as individual files
+          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar)+".class");
+          if (cf.exists() && cf.isFile()) {
+            found = f;
+            break;
+          }
+        }
+        else if (f.isFile()) {
+          // this is a file, it should be a jar file
+          java.util.jar.JarFile jf = new java.util.jar.JarFile(f);
+          // if it's not a jar file, an exception will already have been thrown
+          // so we know it is a jar file
+          // now let's check if it contains DrJava
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class")!=null) {
+            found = f;
+            break;
+          }
+        }
+      }
+      catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }
+    }
+    if (found==null) throw new IOException("DrJava file not found");
+    final File drjavaFile = found;
+    
+    String cmdLine = drjavaFile.getAbsolutePath();
+    if (!drjavaFile.getAbsolutePath().endsWith(".exe")) {
+      // jar file, we need to start it with Java
+      // look up .jar
+      String jarProgid = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, ".jar", "");
+      String jarLine = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, jarProgid+"\\shell\\open\\command", "");
+      BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(jarLine));
+      tok.wordRange(0,255);
+      tok.whitespaceRange(' ',' ');
+      tok.addQuotes("\"","\"");
+      String jarCommand = tok.getNextToken();
+      cmdLine = jarCommand + " -jar "+drjavaFile.getAbsolutePath();
+    }
+    return cmdLine;
   }
 }

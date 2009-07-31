@@ -585,12 +585,13 @@ public class WindowsRegistry {
     String s;
     for(int i=0; i<qi.valueCount; ++i) {
       s = enumValue(handle, i, qi.maxValueLength+1);
-      deleteValue(handle, s);
+      if (s!=null) deleteValue(handle, s);
     }
     for(int i=0; i<qi.subkeyCount; ++i) {
       s = enumKey(handle, i, qi.maxSubkeyLength+1);
-      delKey(handle, s);
+      if (s!=null) delKey(handle, s);
     }
+    flushKey(handle);
     closeKey(handle);
     deleteKey(hKey, subKey);
   }

@@ -3544,32 +3544,80 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     DrJavaErrorHandler.setButton(_errorsButton);
     
-    // check for new version if desired by user
-    boolean askedForNewVersion = false;
-    if (! DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
-          .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
-        !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
-      int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
-      java.util.Date nextCheck = 
-        new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
-                             + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
-      if (new java.util.Date().after(nextCheck)) {
-        askedForNewVersion = true;
+    // check file associations if desired by user
+    boolean alreadyShowedDialog = false;
+    if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
+      // only try to register file extensions if this platform supports it
+      if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
+            .equals(OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2))) { // Always
+        // always set file associations
+        PlatformFactory.ONLY.registerDrJavaFileExtensions();
+        PlatformFactory.ONLY.registerJavaFileExtension();
+      }
+      else if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
+                 .equals(OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(1)) && // Ask me
+               !edu.rice.cs.util.swing.Utilities.TEST_MODE &&
+               ((!PlatformFactory.ONLY.areDrJavaFileExtensionsRegistered()) ||
+                (!PlatformFactory.ONLY.isJavaFileExtensionRegistered()))) {
+        alreadyShowedDialog = true;
         EventQueue.invokeLater(new Runnable() {
           public void run() {
-            NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
-            if (popup.checkNewVersion()) { popup.setVisible(true); }
+            int rc;
+            Object[] options = {"Yes", "No", "Always", "Never"};
+            String text = "Do you want to associate .java, .drjava and .djapp files with DrJava?\n" + 
+              "Double-clicking on those files will open them in DrJava.\n\n" +
+              "Select 'Always' to let DrJava do this automatically.\n"+
+              "Select 'Never' if you don't want to be asked again.\n\n"+
+              "You can change this setting in the Preferences dialog under\n"+
+              "Miscellaneous/File Types.";
+            
+            rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Set File Associations?", JOptionPane.YES_NO_OPTION,
+                                              JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            if ((rc==0) || (rc==2)) { // Yes or Always
+              PlatformFactory.ONLY.registerDrJavaFileExtensions();
+              PlatformFactory.ONLY.registerJavaFileExtension();
+            }
+            if (rc==2) { // Always
+              DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION, OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2));
+            }
+            if (rc==3) { // Never
+              DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION, OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(0));
+            }
           }
         });
       }
     }
-    if (!askedForNewVersion) {
+    
+    if (!alreadyShowedDialog) {
       // check for new version if desired by user
+      // but only if we haven't just asked if the user wants to download a new version
+      // two dialogs on program start is too much clutter    
+      if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
+            .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
+          !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
+        int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
+        java.util.Date nextCheck = 
+          new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
+                               + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
+        if (new java.util.Date().after(nextCheck)) {
+          alreadyShowedDialog = true;
+          EventQueue.invokeLater(new Runnable() {
+            public void run() {
+              NewVersionPopup popup = new NewVersionPopup(MainFrame.this);
+              if (popup.checkNewVersion()) { popup.setVisible(true); }
+            }
+          });
+        }
+      }
+    }
+    if (!alreadyShowedDialog) {
+      // ask if the user wants to submit the survey
       // but only if we haven't just asked if the user wants to download a new version
       // two dialogs on program start is too much clutter
       if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
         if (DrJavaSurveyPopup.maySubmitSurvey()) {
           // either enough days have passed, or the configuration has changed
+          alreadyShowedDialog = true;
           EventQueue.invokeLater(new Runnable() {
             public void run() {
               DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);

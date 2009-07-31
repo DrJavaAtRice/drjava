@@ -237,16 +237,16 @@ class DefaultPlatform implements PlatformSupport {
   /** @return true if file extensions can be registered and unregistered. */
   public boolean canRegisterFileExtensions() { return false; }
   
-  /** Register .drjava file extension.
+  /** Register .drjava and .djapp file extensions.
     * @return true if registering succeeded */
-  public boolean registerProjectFileExtension() { return false; }
+  public boolean registerDrJavaFileExtensions() { return false; }
 
-  /** Unregister .drjava file extension.
+  /** Unregister .drjava and .djapp file extensions.
     * @return true if unregistering succeeded */
-  public boolean unregisterProjectFileExtension() { return false; }
+  public boolean unregisterDrJavaFileExtensions() { return false; }
   
-  /** @return true if .drjava file extension is registered. */
-  public boolean isProjectFileExtensionRegistered() { return false; }
+  /** @return true if .drjava and .djapp file extensions are registered. */
+  public boolean areDrJavaFileExtensionsRegistered() { return false; }
   
   /** Register .java file extension.
     * @return true if registering succeeded */

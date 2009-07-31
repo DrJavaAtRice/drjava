@@ -1433,13 +1433,8 @@ public interface OptionConstants {
     }
   }
   
-  /** File extension registration for .java files. */
-  public static final ForcedChoiceOption JAVA_FILE_EXT_REGISTRATION =
-    new ForcedChoiceOption("file.ext.registration.java", FILE_EXT_REGISTRATION_CHOICES .get(1),
-                           FILE_EXT_REGISTRATION_CHOICES);
-  
-  /** File extension registration for .drjava files. */
-  public static final ForcedChoiceOption PROJECT_FILE_EXT_REGISTRATION =
-    new ForcedChoiceOption("file.ext.registration.project", FILE_EXT_REGISTRATION_CHOICES .get(1),
+  /** File extension registration. */
+  public static final ForcedChoiceOption FILE_EXT_REGISTRATION =
+    new ForcedChoiceOption("file.ext.registration", FILE_EXT_REGISTRATION_CHOICES .get(1),
                            FILE_EXT_REGISTRATION_CHOICES);
 }
