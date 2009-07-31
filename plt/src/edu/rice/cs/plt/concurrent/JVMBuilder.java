@@ -285,7 +285,8 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
       env = IterUtil.toArray(envL, String.class);
     }
     
-    debug.logValues("Starting JVM", new String[]{"command", "env", "dir"}, command, env, _dir);
+    // IMPORTANT: Do not leave this logging message uncommented, or setting debug to an RMILogSink won't work
+    //debug.logValues("Starting JVM", new String[]{"command", "env", "dir"}, command, env, _dir);
     return Runtime.getRuntime().exec(command, env, _dir);
   }
   
