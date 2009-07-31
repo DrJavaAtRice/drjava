@@ -34,7 +34,7 @@ import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
  * <pre>
  * class CompiledClass extends SuperClass {
  *   private static final TreeCompiler.EvaluationAdapter $adapter;
- *   private final TreeCompiler.BindingsFactory $bindingsFactory;
+ *   final TreeCompiler.BindingsFactory $bindingsFactory;
  * 
  *   static String STATIC_FIELD;
  *   Number instanceField;
@@ -239,6 +239,12 @@ public class TreeCompiler {
     
     _classWriter.visit(_java5 ? V1_5 : V1_4, accessFlags, _name, classSig,
                        className(extractClass(extendsT)), extractClassNames(implementsTs));
+    DJClass declaring = _treeClass.declaringClass();
+    if (declaring != null) {
+      // visitOuter corresponds to Class.getEnclosingClass(), visitInner to Class.getDeclaringClass()
+      _classWriter.visitOuterClass(className(declaring), null, null); 
+      _classWriter.visitInnerClass(_name, className(declaring), _treeClass.declaredName(), accessFlags);
+    }
     
     if (isInterface) {
       // interface fields must be public (adapter is necessary to interpret declared field initializers)
@@ -248,7 +254,8 @@ public class TreeCompiler {
     else {
       _classWriter.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL | ACC_SYNTHETIC, ADAPTER_FIELD,
                               EVALUATION_ADAPTER_DESCRIPTOR, null, null).visitEnd();
-      _classWriter.visitField(ACC_PRIVATE | ACC_FINAL | ACC_SYNTHETIC, BINDINGS_FACTORY_FIELD,
+      // to be accessible to inner classes, must not be private
+      _classWriter.visitField(ACC_FINAL | ACC_SYNTHETIC, BINDINGS_FACTORY_FIELD,
                               BINDINGS_FACTORY_DESCRIPTOR, null, null).visitEnd();
     }
     
@@ -259,6 +266,12 @@ public class TreeCompiler {
           // Ignore any declarations we can't handle (if this declaration is malformed,
           // that should have already been caught)
           return null;
+        }
+        @Override public Void visit(ClassDeclaration member) {
+          recordInnerClass(member, isInterface); return null;
+        }
+        @Override public Void visit(InterfaceDeclaration member) {
+          recordInnerClass(member, isInterface); return null;
         }
         @Override public Void visit(ConstructorDeclaration member) {
           // constructor compilation must be deferred until all initialization code has been found
@@ -296,6 +309,10 @@ public class TreeCompiler {
     _classWriter.visitEnd();
   }
   
+  private void recordInnerClass(TypeDeclaration ast, boolean isInterface) {
+    int access = isInterface ? ast.getModifiers().getBitVector(STATIC, FINAL) : ast.getModifiers().getBitVector();
+    _classWriter.visitInnerClass(className(NodeProperties.getDJClass(ast)), _name, ast.getName(), access);
+  }
   
   private void compileDefaultConstructor(Type extendsT) {
     DJClass outerC = SymbolUtil.dynamicOuterClass(_treeClass);

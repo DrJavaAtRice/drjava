@@ -321,9 +321,10 @@ public class TreeClass implements DJClass {
     public TreeConstructor() {
       _loaded = LazyThunk.make(new Thunk<DJConstructor>() {
         public DJConstructor value() {
-          Type firstT = (_outerClass == null) ? RUNTIME_BINDINGS_TYPE : SymbolUtil.thisType(_outerClass);
-          Iterable<LocalVariable> params = IterUtil.compose(new LocalVariable("", firstT, false),
-                                                            TreeConstructor.this.declaredParameters());
+          Iterable<LocalVariable> params = TreeConstructor.this.declaredParameters();
+          if (_outerClass == null) {
+            params = IterUtil.compose(new LocalVariable("", RUNTIME_BINDINGS_TYPE, false), params);
+          }
           DJClass c = SymbolUtil.wrapClass(TreeClass.this.load());
           for (DJConstructor candidate : c.declaredConstructors()) {
             if (paramsMatch(params, candidate.declaredParameters())) {

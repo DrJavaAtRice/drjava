@@ -62,7 +62,8 @@ public class TreeClassLoader extends ClassLoader {
       TreeCompiler compiler = new TreeCompiler(treeClass, _opt);
       byte[] bytes = compiler.bytecode();
       _adapters.put(name, compiler.evaluationAdapter());
-      return defineClass(name, bytes, 0, bytes.length);
+      Class<?> result = defineClass(name, bytes, 0, bytes.length);
+      return result;
     }
   }
   
