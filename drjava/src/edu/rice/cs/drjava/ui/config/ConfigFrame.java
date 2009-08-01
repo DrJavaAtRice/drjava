@@ -1300,7 +1300,10 @@ public class ConfigFrame extends SwingFrame {
                          new LabelComponent("<html><br><br>"+
                                             (PlatformFactory.ONLY.isMacPlatform()?
                                                "File associations are managed automatically by Mac OS.":
-                                               "Managing file associations is not supported yet on this operating system.")+
+                                               (PlatformFactory.ONLY.isWindowsPlatform()?
+                                                  "To set file associations, please use the .exe file version of DrJava.<br>"+
+                                                "Configuring file associations is not supported for the .jar file version.":
+                                                  "Managing file associations is not supported yet on this operating system."))+
                                             "</html>",
                                             this, true));
     }

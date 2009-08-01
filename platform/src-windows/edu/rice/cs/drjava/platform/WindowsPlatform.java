@@ -99,7 +99,13 @@ class WindowsPlatform extends DefaultPlatform {
   }
   
   /** @return true if file extensions can be registered and unregistered. */
-  public boolean canRegisterFileExtensions() { return true; }
+  public boolean canRegisterFileExtensions() {
+    // only works in .exe version for now
+    try {
+      return getDrJavaFile().getName().endsWith(".exe");
+    }
+    catch(IOException ioe) { return false; }
+  }
   
   private static final String DRJAVA_PROJECT_PROGID = "DrJava.Project";
   private static final String DRJAVA_EXTPROCESS_PROGID = "DrJava.ExtProcess";
@@ -151,10 +157,19 @@ class WindowsPlatform extends DefaultPlatform {
     * @return true if a file extension is registered */
   private boolean isFileExtensionRegistered(String extension, String progid) {
     try {
-      String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "");
-      return (oldDefault!=null) && (progid.equals(oldDefault));
+      // check the file extension
+      String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension, "");
+      if ((oldDefault==null) || (!progid.equals(oldDefault))) return false; // not set
+      
+      // now check the command
+      String cmdLine = getCommandLine()+" \"%1\" %*";
+      String oldCmdLine = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open\\command", "");
+      return ((oldCmdLine!=null) && (cmdLine.equals(oldCmdLine)));
     }
     catch(WindowsRegistry.RegistryException re) {
+      return false;
+    }
+    catch(IOException ioe) {
       return false;
     }
   }
@@ -183,25 +198,26 @@ class WindowsPlatform extends DefaultPlatform {
 //                + ProgID.ext.1
 //                      # shellnew      
       try {
-        String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "");
+        String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension, "");
         if ((oldDefault!=null) && (!progid.equals(oldDefault))) {
           // add the old default to the OpenWithProgids and OpenWithList
-          WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids", oldDefault, "");
-          WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithList", oldDefault, "");
+          WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids", oldDefault, "");
+          WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithList", oldDefault, "");
         }
       }
       catch(WindowsRegistry.RegistryException re) { /* if the lookup fails, then there was nothing to do anyway */ }
       
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "", progid);
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "PerceivedType", perceived);
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension, "Content Type", mime);
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension, "", progid);
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension, "PerceivedType", perceived);
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension, "Content Type", mime);
       
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids", progid, "");
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithList", progid, "");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids", progid, "");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithList", progid, "");
       
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+progid, "", "DrJava project file");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid, "", "DrJava project file");
       
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+progid+"\\shell\\open\\command", "",
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open", "FriendlyAppName", "DrJava");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open\\command", "",
                              cmdLine+" \"%1\" %*");
       return true;
     }
@@ -221,7 +237,7 @@ class WindowsPlatform extends DefaultPlatform {
     boolean otherProgidsLeft = false; // true if other programs are still registered and the file type shouldn't be deleted
     try {
       int handle;
-      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids",
+      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids",
                                        WindowsRegistry.KEY_ALL_ACCESS);
       try {
         WindowsRegistry.deleteValue(handle, progid);
@@ -233,7 +249,7 @@ class WindowsPlatform extends DefaultPlatform {
       WindowsRegistry.flushKey(handle);
       WindowsRegistry.closeKey(handle);
 
-      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithList",
+      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithList",
                                        WindowsRegistry.KEY_ALL_ACCESS);
       try {
         WindowsRegistry.deleteValue(handle, progid);
@@ -246,18 +262,19 @@ class WindowsPlatform extends DefaultPlatform {
       WindowsRegistry.closeKey(handle);
 
       if (!otherProgidsLeft) {
-        WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension+"\\OpenWithProgids");
-        WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+extension);
+        WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids");
+        WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension);
       }
-      WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Classes\\"+progid);
+      WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open");
+      WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid);
       return true;
     }
     catch(WindowsRegistry.RegistryException re) {
       return false;
     }
   }
-  
-  private String getCommandLine() throws WindowsRegistry.RegistryException, IOException {
+
+  private File getDrJavaFile() throws IOException {
     // detect current DrJava file (.jar or .exe)
     String[] cps = System.getProperty("java.class.path").split("\\;", -1);
     File found = null;
@@ -288,7 +305,11 @@ class WindowsPlatform extends DefaultPlatform {
       catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }
     }
     if (found==null) throw new IOException("DrJava file not found");
-    final File drjavaFile = found;
+    return found;
+  }
+  
+  private String getCommandLine() throws WindowsRegistry.RegistryException, IOException {
+    final File drjavaFile = getDrJavaFile();
     
     String cmdLine = drjavaFile.getAbsolutePath();
     if (!drjavaFile.getAbsolutePath().endsWith(".exe")) {
