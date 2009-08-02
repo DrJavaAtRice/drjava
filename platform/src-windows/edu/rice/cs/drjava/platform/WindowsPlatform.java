@@ -174,6 +174,8 @@ class WindowsPlatform extends DefaultPlatform {
     }
   }
   
+  //public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("platform.txt",true);
+  
   /** Register a file extension.
     * @param extension extension, like ".drjava"
     * @param progid program ID, like "DrJava.Project"
@@ -181,22 +183,22 @@ class WindowsPlatform extends DefaultPlatform {
   private boolean registerFileExtension(String extension, String progid, String perceived, String mime) {
     try {
       String cmdLine = getCommandLine();
-//      The general form of a file extension key is:
-//
-//    * HKEY_CLASSES_ROOT
-//          o .ext
-//
-//            (Default) = ProgID.ext.1 (REG_SZ)
-//            PerceivedType = PerceivedType (REG_SZ)
-//            Content Type = mime content type (REG_SZ)
-//                + OpenWithProgids
-//                      # ProgID2.ext.1
-//                      # ProgID3.ext.1
-//                + OpenWithList
-//                      # AlternateProgram1.exe
-//                      # AlternateProgram2.exe
-//                + ProgID.ext.1
-//                      # shellnew      
+      //      The general form of a file extension key is:
+      //
+      //    * HKEY_CLASSES_ROOT
+      //          o .ext
+      //
+      //            (Default) = ProgID.ext.1 (REG_SZ)
+      //            PerceivedType = PerceivedType (REG_SZ)
+      //            Content Type = mime content type (REG_SZ)
+      //                + OpenWithProgids
+      //                      # ProgID2.ext.1
+      //                      # ProgID3.ext.1
+      //                + OpenWithList
+      //                      # AlternateProgram1.exe
+      //                      # AlternateProgram2.exe
+      //                + ProgID.ext.1
+      //                      # shellnew      
       try {
         String oldDefault = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension, "");
         if ((oldDefault!=null) && (!progid.equals(oldDefault))) {
@@ -237,39 +239,260 @@ class WindowsPlatform extends DefaultPlatform {
     boolean otherProgidsLeft = false; // true if other programs are still registered and the file type shouldn't be deleted
     try {
       int handle;
-      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids",
-                                       WindowsRegistry.KEY_ALL_ACCESS);
+      WindowsRegistry.QueryInfoResult qir;
       try {
-        WindowsRegistry.deleteValue(handle, progid);
+        handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids",
+                                         WindowsRegistry.KEY_ALL_ACCESS);
+        try {
+          WindowsRegistry.deleteValue(handle, progid);
+        }
+        catch(WindowsRegistry.RegistryException re) { /* if it couldn't be deleted, there was nothing to do anyway */ }
+        qir = WindowsRegistry.queryInfoKey(handle);
+        otherProgidsLeft |= (qir.valueCount>0);
+        otherProgidsLeft |= (qir.subkeyCount>0);
+        WindowsRegistry.flushKey(handle);
+        WindowsRegistry.closeKey(handle);
+        
+        handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithList",
+                                         WindowsRegistry.KEY_ALL_ACCESS);
+        try {
+          WindowsRegistry.deleteValue(handle, progid);
+        }
+        catch(WindowsRegistry.RegistryException re) { /* if it couldn't be deleted, there was nothing to do anyway */ }
+        qir = WindowsRegistry.queryInfoKey(handle);
+        otherProgidsLeft |= (qir.valueCount>0);
+        otherProgidsLeft |= (qir.subkeyCount>0);
+        WindowsRegistry.flushKey(handle);
+        WindowsRegistry.closeKey(handle);
+        
+        if (!otherProgidsLeft) {
+          WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids");
+          WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension);
+        }
+        WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open");
+        WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid);
       }
-      catch(WindowsRegistry.RegistryException re) { /* if it couldn't be deleted, there was nothing to do anyway */ }
-      WindowsRegistry.QueryInfoResult qir = WindowsRegistry.queryInfoKey(handle);
-      otherProgidsLeft |= (qir.valueCount>0);
-      otherProgidsLeft |= (qir.subkeyCount>0);
-      WindowsRegistry.flushKey(handle);
-      WindowsRegistry.closeKey(handle);
-
-      handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithList",
-                                       WindowsRegistry.KEY_ALL_ACCESS);
+      catch(WindowsRegistry.RegistryException re) {
+        /* if it couldn't be deleted, there was nothing to do anyway */
+      }
+      
+      // also need to delete from
+      // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.ext\Application
+      File drjavaFile = null;
+      String ourCmdLine = null;
       try {
-        WindowsRegistry.deleteValue(handle, progid);
+        drjavaFile = getDrJavaFile();
+        ourCmdLine = getCommandLine()+" \"%1\" %*";
       }
-      catch(WindowsRegistry.RegistryException re) { /* if it couldn't be deleted, there was nothing to do anyway */ }
-      qir = WindowsRegistry.queryInfoKey(handle);
-      otherProgidsLeft |= (qir.valueCount>0);
-      otherProgidsLeft |= (qir.subkeyCount>0);
-      WindowsRegistry.flushKey(handle);
-      WindowsRegistry.closeKey(handle);
+      catch(IOException ioe) { return false; }
 
-      if (!otherProgidsLeft) {
-        WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids");
-        WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension);
+      try {
+        // LOG.log("[1]");
+        handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\"+extension,
+                                         WindowsRegistry.KEY_ALL_ACCESS);
+        // LOG.log("[2]");
+        try {
+          String s = WindowsRegistry.queryValue(handle, "Application");
+          // LOG.log("Application = "+s);
+          if ((s!=null) && (s.equals(drjavaFile.getName()))) {
+            // LOG.log("[3]");
+            WindowsRegistry.deleteValue(handle, progid);
+            // LOG.log("[4]");
+          }
+        }
+        catch(WindowsRegistry.RegistryException re) {
+          // LOG.log("[A] "+re.toString());
+          /* if it couldn't be deleted, there was nothing to do anyway */
+        }
+        
+        // LOG.log("[5]");
+        WindowsRegistry.flushKey(handle);
+        // LOG.log("[6]");
+        WindowsRegistry.closeKey(handle);
+        // LOG.log("[7]");
       }
-      WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open");
-      WindowsRegistry.delKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid);
+      catch(WindowsRegistry.RegistryException re) {
+        // LOG.log("[B] "+re.toString());
+        /* if it couldn't be deleted, there was nothing to do anyway */
+      }
+
+      // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.ext\OpenWithProgids\progid
+      otherProgidsLeft = false;
+      try {
+        // LOG.log("[8]");
+        handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\"+extension+"\\OpenWithProgids",
+                                         WindowsRegistry.KEY_ALL_ACCESS);
+        // LOG.log("[9]");
+        try {
+          // LOG.log("[10] delete progid: "+progid);
+          WindowsRegistry.deleteValue(handle, progid);
+          // LOG.log("[11]");
+        }
+        catch(WindowsRegistry.RegistryException re) {
+          // LOG.log("[B] "+re.toString());
+          /* if it couldn't be deleted, there was nothing to do anyway */
+        }
+        // LOG.log("[12]");
+        qir = WindowsRegistry.queryInfoKey(handle);
+        // LOG.log("[13]");
+        otherProgidsLeft |= (qir.valueCount>0);
+        otherProgidsLeft |= (qir.subkeyCount>0);
+        // LOG.log("[15]");
+        WindowsRegistry.flushKey(handle);
+        // LOG.log("[16]");
+        WindowsRegistry.closeKey(handle);
+        // LOG.log("[17], left="+otherProgidsLeft);
+
+        if (!otherProgidsLeft) {
+          // LOG.log("[18]");
+          WindowsRegistry.delKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                 "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\"+extension+"\\OpenWithProgids");
+          // LOG.log("[19]");
+        }
+      }
+      catch(WindowsRegistry.RegistryException re) {
+        // LOG.log("[C] "+re.toString());
+        /* if it couldn't be deleted, there was nothing to do anyway */
+      }
+
+      String mruList = "";
+      // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.ext\OpenWithList\MRUList
+      // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.ext\OpenWithList\a      
+      try {
+        // LOG.log("[20]");
+        handle = WindowsRegistry.openKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\"+extension+"\\OpenWithList",
+                                         WindowsRegistry.KEY_ALL_ACCESS);
+        // LOG.log("[21]");
+        try {
+          String s = WindowsRegistry.queryValue(handle, "MRUList");
+          // LOG.log("[22] s="+s);
+          if (s!=null) mruList = s;
+        }
+        catch(WindowsRegistry.RegistryException re) {
+          // LOG.log("[D] "+re.toString());
+          /* if it couldn't be read, there was nothing to do anyway */
+        }
+        // LOG.log("[23] MRUlist="+mruList);
+        String newMRUList = "";
+        for(int i=0; i<mruList.length(); ++i) {
+          String letter = mruList.substring(i,i+1); 
+          // LOG.log("[24] i="+i+" letter="+letter);
+          boolean keep = true;
+          try {
+            // LOG.log("[24]");
+            String value = WindowsRegistry.queryValue(handle, letter);
+            // LOG.log("[25] value="+value);
+            if (value!=null) {
+              // value is something like "drjava.exe"
+              // check if this is our command line
+              // HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Applications\<value>\shell\open\command
+              // LOG.log("[26]");
+              try {
+                String cmdLine =
+                  WindowsRegistry.getKey(WindowsRegistry.HKEY_LOCAL_MACHINE,
+                                         "SOFTWARE\\Classes\\Applications\\"+value+"\\shell\\open\\command","");
+                // LOG.log("[27] cmdLine="+cmdLine);
+                // LOG.log("ourCmdLine="+ourCmdLine);
+                if ((cmdLine!=null) && (cmdLine.equals(ourCmdLine))) {
+                  // LOG.log("[28]");
+                  // this is ours, delete it
+                  keep = false;
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE,
+                                         "SOFTWARE\\Classes\\Applications\\"+value+"\\shell\\open\\command");
+                  // LOG.log("[29]");
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE,
+                                         "SOFTWARE\\Classes\\Applications\\"+value+"\\shell\\open");
+                  // LOG.log("[30]");
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE,
+                                         "SOFTWARE\\Classes\\Applications\\"+value+"\\shell");
+                  // LOG.log("[31]");
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_LOCAL_MACHINE,
+                                         "SOFTWARE\\Classes\\Applications\\"+value);
+                  // LOG.log("[32]");
+                }
+              }
+              catch(WindowsRegistry.RegistryException re) {
+                // LOG.log("[E] "+re.toString());
+                /* if it couldn't be read, there was nothing to do anyway */
+              }
+              
+              // HKEY_CURRENT_USER\Software\Classes\Applications\<value>\shell\open\command
+              // LOG.log("[33]");
+              try {
+                String cmdLine =
+                  WindowsRegistry.getKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Classes\\Applications\\"+value+"\\shell\\open\\command","");
+                // LOG.log("[34] cmdLine"+cmdLine);
+                // LOG.log("ourCmdLine="+ourCmdLine);
+                if ((cmdLine!=null) && (cmdLine.equals(ourCmdLine))) {
+                  // LOG.log("[35]");
+                  // this is ours, delete it
+                  keep = false;
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Classes\\Applications\\"+value+"\\shell\\open\\command");
+                  // LOG.log("[36]");
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Classes\\Applications\\"+value+"\\shell\\open");
+                  // LOG.log("[37]");
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Classes\\Applications\\"+value+"\\shell");
+                  // LOG.log("[38]");
+                  WindowsRegistry.delKey(WindowsRegistry.HKEY_CURRENT_USER,
+                                         "Software\\Classes\\Applications\\"+value);
+                  // LOG.log("[39]");
+                }
+              }
+              catch(WindowsRegistry.RegistryException re) {
+                // LOG.log("[F] "+re.toString());
+                /* if it couldn't be read, there was nothing to do anyway */
+              }
+              // LOG.log("[40] keep="+keep);
+              if (!keep) {
+                try {
+                  // LOG.log("[41]");
+                  WindowsRegistry.deleteValue(handle, letter);
+                  // LOG.log("[42]");
+                }
+                catch(WindowsRegistry.RegistryException re) {
+                  // LOG.log("[G] "+re.toString());
+                  /* if it couldn't be read, ignore it, we can still fix it with MRUList */
+                }
+              }
+            }
+          }
+          catch(WindowsRegistry.RegistryException re) {
+            // LOG.log("[H] "+re.toString());
+            /* if it couldn't be read, there was nothing to do anyway */
+          }
+          // LOG.log("[43]");
+          if (keep) newMRUList = newMRUList + letter;
+          // LOG.log("[44] newMRUList="+newMRUList);
+        }
+        // LOG.log("[45] final newMRUList="+newMRUList);
+        // LOG.log("mruList="+mruList);
+        if (!mruList.equals(newMRUList)) {
+          // LOG.log("[46]");
+          // update MRUList
+          WindowsRegistry.setValue(handle, "MRUList", newMRUList);
+          // LOG.log("[47]");
+        }
+        // LOG.log("[48]");
+        WindowsRegistry.flushKey(handle);
+        // LOG.log("[49]");
+        WindowsRegistry.closeKey(handle);
+        // LOG.log("[50]");
+      }
+      catch(WindowsRegistry.RegistryException re) {
+        // LOG.log("[I] "+re.toString());
+        /* if it couldn't be read, there was nothing to do anyway */
+      }      
       return true;
     }
     catch(WindowsRegistry.RegistryException re) {
+      // LOG.log("[Z] "+re);
       return false;
     }
   }
