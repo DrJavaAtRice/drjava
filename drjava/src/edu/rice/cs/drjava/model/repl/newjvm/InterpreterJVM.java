@@ -353,7 +353,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     protected TypeContext duplicate(TypeContext next) { return new DebugMethodContext(next, _isStatic); }
     @Override public DJClass getThis() { return _isStatic ? null : super.getThis(); }
     @Override public DJClass getThis(String className) { return _isStatic ? null : super.getThis(className); }
-    @Override public Type getSuperType(TypeSystem ts) { return _isStatic ? null : super.getSuperType(ts); }
     @Override public Type getReturnType() { return null; }
     @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
   }

@@ -816,7 +816,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     // assert EventQueue.isDispatchThread();
     Reader r;
     r = new StringReader(getText()); // getText() is cheap if document is not resident
-    try { return new Parser(r).packageDeclaration().getName(); }
+    try { return new Parser(r).packageDeclaration(Parser.DeclType.TOP).getName(); }
     catch (ParseException e) { return ""; }
     // addresses bug [ 1815387 ] Editor should discard parse errors for now
     // we should upgrade our parser to handle @
