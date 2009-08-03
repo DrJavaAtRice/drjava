@@ -48,6 +48,26 @@
         	<key>CFBundleTypeRole</key>
         	<string>Editor</string>
     </dict>
+    	<dict>
+        	<key>CFBundleTypeExtensions</key>
+        	<array>
+			<string>java</string>
+        	</array>
+        	<key>CFBundleTypeName</key>
+        	<string>Java Source File</string>
+        	<key>CFBundleTypeRole</key>
+        	<string>Editor</string>
+    </dict>
+    	<dict>
+        	<key>CFBundleTypeExtensions</key>
+        	<array>
+			<string>djapp</string>
+        	</array>
+        	<key>CFBundleTypeName</key>
+        	<string>DrJava Add-On File</string>
+        	<key>CFBundleTypeRole</key>
+        	<string>Editor</string>
+    </dict>
 </array>
 </dict>
 </plist>

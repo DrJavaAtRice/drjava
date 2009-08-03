@@ -6164,7 +6164,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
     _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
-    _setUpAction(_gotoLineAction, "Go to line", "Play", "Go to a line number in the document");
+    _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
     _setUpAction(_gotoFileAction, "Go to File", "Go to a file specified by its name");
     _setUpAction(gotoFileUnderCursorAction, "Go to File Under Cursor",
                  "Go to the file specified by the word the cursor is located on");
@@ -6385,30 +6385,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
     _addMenuItem(editMenu, completeWordUnderCursorAction, KEY_COMPLETE_FILE);
     
-    // Find/replace, goto
+    // Find/replace
     editMenu.addSeparator();
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
     _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT);
     _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV);
-    _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
-    _addMenuItem(editMenu, _gotoFileAction, KEY_GOTO_FILE);
-    _addMenuItem(editMenu, gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
     
     // Next, prev doc
     editMenu.addSeparator();
     _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT);
     _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
     _addMenuItem(editMenu, _browseBackAction, KEY_BROWSE_BACK);
-    _addMenuItem(editMenu, _browseForwardAction, KEY_BROWSE_FORWARD);    
-    _addMenuItem(editMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE);
-    _addMenuItem(editMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE);
+    _addMenuItem(editMenu, _browseForwardAction, KEY_BROWSE_FORWARD);
     editMenu.addSeparator();
-    _addMenuItem(editMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
-    _addMenuItem(editMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
+    
+    // Go to
+    final JMenu goToMenu = new JMenu("Go To");
+    _addMenuItem(goToMenu, _gotoLineAction, KEY_GOTO_LINE);
+    _addMenuItem(goToMenu, _gotoFileAction, KEY_GOTO_FILE);
+    _addMenuItem(goToMenu, gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
+    _addMenuItem(goToMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE);
+    _addMenuItem(goToMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE);
+    editMenu.add(goToMenu);
+
+    // Panes
+    final JMenu panesMenu = new JMenu("Tabbed Panes");
+    _addMenuItem(panesMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
+    _addMenuItem(panesMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
     _detachTabbedPanesMenuItem = _newCheckBoxMenuItem(_detachTabbedPanesAction);
     _detachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
     _setMenuShortcut(_detachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES);
-    editMenu.add(_detachTabbedPanesMenuItem);
+    panesMenu.add(_detachTabbedPanesMenuItem);
+    editMenu.add(panesMenu);
     
     // access to configurations GUI
     editMenu.addSeparator();

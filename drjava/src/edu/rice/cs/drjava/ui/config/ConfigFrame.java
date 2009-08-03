@@ -1059,6 +1059,15 @@ public class ConfigFrame extends SwingFrame {
                                                   "If this is disabled, only the \"DrJava Error\" button will appear.</html>", 
                                                   false)
                          .setEntireColumn(true));
+    addOptionComponent(panel,
+                       new BooleanOptionComponent(OptionConstants.WARN_IF_COMPIZ, 
+                                                  "Warn If Compiz Detected",
+                                                  this,
+                                                  "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
+                                                  "Compiz and Java Swing are incompatible and can lead to crashes.</html>",
+                                                  false)
+                         .setEntireColumn(true));
+    
     
     addOptionComponent(panel, 
                        new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
@@ -1070,11 +1079,11 @@ public class ConfigFrame extends SwingFrame {
                                                        "Delete language level class files?", this,
                                                        "Whether DrJava should delete class files in directories with language level files."));
 
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_IF_COMPIZ, 
-                                                         "Warn If Compiz Detected", this,
-                                                         "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
-                                                         "Compiz and Java Swing are incompatible and can lead to crashes.</html>"));
-    
+    addOptionComponent(panel, 
+                       new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + 
+                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", this, true));
+
     addOptionComponent(panel, 
                        new ForcedChoiceOptionComponent(OptionConstants.NEW_VERSION_NOTIFICATION,
                                                        "Check for new versions?", this,
@@ -1095,6 +1104,10 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
+                                                         "Maximum Size of Browser History", 
+                                                         this,
+                                                         "Determines how many entries are kept in the browser history."));
     
     /* Check box options */
     addOptionComponent(panel, 
@@ -1189,12 +1202,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        new StringOptionComponent(OptionConstants.SLAVE_JVM_ARGS, "JVM Args for Interactions JVM", 
                                                  this,
-                                                 "The command-line arguments to pass to the Interactions JVM."));
-    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
-                                                         "Maximum Size of Browser History", 
-                                                         this,
-                                                         "Determines how many entries are kept in the browser history."));
-    
+                                                 "The command-line arguments to pass to the Interactions JVM."));    
     panel.displayComponents();
   }
 
