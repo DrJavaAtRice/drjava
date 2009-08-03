@@ -154,9 +154,9 @@
   
   <target name="generate-html" depends="assert-docbook-xsl-exists">
     <mkdir dir="docs/${docbook-dir}" />
-    <exec executable="xsltproc" failonerror="yes">
+    <exec executable="xsltproc" failonerror="yes" dir="src/${docbook-dir}">
       <arg value="-o" />
-      <arg value="docs/${docbook-dir}/" />
+      <arg value="../../docs/${docbook-dir}/" />
       <arg file="${docbook-xsl-home}/html/chunk.xsl" />
       <arg file="src/${docbook-dir}/${docbook-srcfile}.docbook" />
     </exec>
@@ -178,9 +178,9 @@
     </taskdef>
     <mkdir dir="fo" />
     <mkdir dir="docs" />
-    <exec executable="xsltproc" failonerror="yes">
+    <exec executable="xsltproc" failonerror="yes" dir="src/${docbook-dir}">
       <arg value="-o" />
-      <arg value="fo/${docbook-srcfile}.fo" />
+      <arg value="../../fo/${docbook-srcfile}.fo" />
       <arg file="${docbook-xsl-home}/fo/docbook.xsl" />
       <arg file="src/${docbook-dir}/${docbook-srcfile}.docbook" />
     </exec>
