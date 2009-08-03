@@ -110,7 +110,7 @@ public class Parser {
     return this.<T>_throwParseException(message);
   }
   
-  private static enum DeclType { TOP, CLASS_MEMBER, INTERFACE_MEMBER, LOCAL, REPL };
+  public static enum DeclType { TOP, CLASS_MEMBER, INTERFACE_MEMBER, LOCAL, REPL };
   
   /**
    * Creates a field declaration
