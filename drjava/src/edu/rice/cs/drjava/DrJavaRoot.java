@@ -167,9 +167,6 @@ public class DrJavaRoot {
       DrJavaErrorWindow.setFrame(_mainFrame);
       Thread.setDefaultUncaughtExceptionHandler(DrJavaErrorHandler.INSTANCE);
       
-      // false means "do not jump to the line number that may be specified, just open the file"
-      _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, false);
-      
       /* We use EventQueue.invokeLater rather than Utilities.invokeLater to ensure all files have been loaded and
        * added to the file view before the MainFrame is set visible.  When this was not done, we occasionally encountered
        * a NullPointerException on start up when specifying a file (ex: java -jar drjava.jar somefile.java)
@@ -177,9 +174,11 @@ public class DrJavaRoot {
       EventQueue.invokeLater(new Runnable(){ 
         public void run(){ 
           _mainFrame.start();
-          if (anyLineNumbersSpecified) { // this time, we do want to jump to the line number
-            _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
-          }
+          
+          // now open the files specified on the command line. must be done here
+          // after _mainFrame.start() to address bug
+          // [ drjava-Bugs-2831253 ] Starting DrJava with Project as Parameter
+          _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
         } 
       });
       
