@@ -9,7 +9,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2008-7-17</date>
+    <date>2009-08-03</date>
     <title>DrJava User Documentation</title>
   </bookinfo>
   <toc></toc>
@@ -51,41 +51,48 @@
       <title>Running DrJava</title>
       <para>On many platforms, DrJava can be started by simply double-clicking on the <filename>.jar</filename> file you downloaded.  DrJava can also be started from a command prompt, where you can optionally give it a list of source files to open at startup:</para>
       <cmdsynopsis>
- <command>java -jar drjava-DATE-TIME.jar</command>
+ <command>java -jar drjava-RELEASE-DATE-rREVISION.jar</command>
  <arg choice='opt'>-config [CONFIG_FILE]</arg>
  <arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
-      <para>Replace DATE-TIME with the appropriate value for your version of DrJava, e.g. <command>java -jar drjava-20060420-1406.jar</command>.  The "config" argument is optional and allows you to specify a custom configuration file, rather than the <filename>.drjava</filename> file stored in your home directory.</para>
+      <para>Replace RELEASE-DATE-rREVISION with the appropriate value for your version of DrJava, e.g. <command>java -jar drjava-stable-20080904-r4668.jar</command>.  The "config" argument is optional and allows you to specify a custom configuration file, rather than the <filename>.drjava</filename> file stored in your home directory.</para>
 
       <formalpara>
         <title>Running DrJava on Mac OS X</title>
-        <para>If you are using Mac OS X, you can download DrJava as an Application from our website.  Download the <filename>drjava-DATE-TIME-osx.tar.gz</filename> file and decompress it.  You can then copy the DrJava icon into your Applications folder or keep it on your Dock.</para>
+        <para>If you are using Mac OS X, you can download DrJava as an Application from our website.  Download the <filename>drjava-RELEASE-DATE-rREVISION-osx.tar.gz</filename> file and decompress it.  You can then copy the DrJava icon into your Applications folder or keep it on your Dock.</para>
       </formalpara>
 
       <formalpara>
         <title>Running DrJava on Windows</title>
-        <para>If you are using Windows, you can download DrJava as an executable file from our website.  Download the <filename>drjava-DATE-TIME.exe</filename> file.  You can then run it like a normal Windows program.</para>
+        <para>If you are using Windows, you can download DrJava as an executable file from our website.  Download the <filename>drjava-RELEASE-DATE-rREVISION.exe</filename> file.  You can then run it like a normal Windows program.</para>
       </formalpara>
     </section>
 
     <section id="gs-requirements">
       <title>System Requirements</title>
-      <para>DrJava requires Java 2, version 1.4 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
-      <para>We recommend downloading and using Sun's JDK 1.5.0, currently in beta releases, (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
+      <para>DrJava requires Java version 5 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
+      <para>We recommend downloading and using Sun's JDK 6 (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
       <para>DrJava uses two Java Virtual Machines (one for the main program, and one for the Interactions Pane) that use Java's Remote Method Invocation (RMI) to communicate with each other. RMI uses TCP/IP as the default transport mechanism, so you must have those drivers installed. Without TCP/IP, DrJava will not start properly.</para>
+      <para>Note that there is an incompatibility between Java's Swing
+GUI library and the Compiz window manager on Linux. We, the developers
+of DrJava, cannot do anything to fix this problem. We hope that future
+versions of Java and Compiz will address the incompatibility. In the
+meantime, we recommend that you disable Compiz if you experience
+problems. We also suggest that you use the latest versions of Compiz
+and Java, so you can benefit from possible bug fixes made by Sun and
+the Compiz developers. For more information, see <ulink url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
     </section>
 
     <section id="gs-license">
       <title>License</title>
 <para>
-Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
+Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
 All rights reserved.
 </para>
 
-<para>
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-</para>
+<para> Redistribution and use in source and binary forms, with or
+withoutmodification, are permitted provided that the following
+conditions are met: </para>
 
 <itemizedlist mark="opencircle">
 <listitem>
@@ -539,7 +546,10 @@ File f
 
     <section id="compiling-selecting">
       <title>Selecting a Compiler</title>
-      <para>DrJava supports the use of different Java compilers, such as the traditional "Javac" compiler supplied with the JDK or Sun's JSR-14 experimental compiler (which supports generic types when only running under the 1.4 JDK).  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.  You may notice that the same compiler may appear multiple times in the menu.  This happens because DrJava looks for compilers in three different places: on the user classpath, the user specified location in Preferences, and in the usual locations that the compiler can be found (the default installation directory, where java is located, etc.).</para>
+      <para>DrJava supports the use of different Java compilers, such as different versions of the "Javac" compiler supplied with the JDK.  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.
+<!-- You may notice that the same compiler may appear multiple times in the menu.  This happens because DrJava looks for compilers in three different places: on the user classpath, the user specified location in Preferences, and in the usual locations that the compiler can be found (the default installation directory, where java is located, etc.). -->
+</para>
+      <para>DrJava will only display one compiler for each major version even though you have more than one update the JDK installed (Example: you have JDK 6 Updates 10 and 14 installed; DrJava will only display JDK 6 Update 14). If you want to display all compiler versions that were found, enable "Show all compiler versions" in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).</para>
     </section>
   </chapter>
 
@@ -1056,6 +1066,55 @@ public class Student {
       <para>Thank you for helping us make DrJava better!</para>
     </section>
 
+    <section id="other-dialogs-filetypes">
+      <title>Set File Associations</title>
+      <para>DrJava can detect if .java, .drjava and .djapp files
+	have not been associated with DrJava. If this is the case,
+	DrJava may display the "Set File Associations?" dialog at
+	startup. This dialog has four buttons.</para>
+      <formalpara><title>Yes</title>
+	<para>Set file associations so .java, .drjava and .djapp
+	files open in DrJava when double-clicked.</para></formalpara>
+      <formalpara><title>No</title>
+	<para>Do not set file associations.</para></formalpara>
+      <formalpara><title>Always</title>
+	<para>Set file associations, and do this automatically
+	from now on without asking me again.</para></formalpara>
+      <formalpara><title>Never</title>
+	<para>Do not set file associations, and never ask me about it
+again.</para></formalpara>
+      <para>These settings can also be changed within DrJava by
+	opening the Preferences window and selecting the "File Types"
+pane (see <link linkend="configuration">Configuring DrJava</link>).</para>
+    </section>
+
+    <section id="other-dialogs-compiz">
+      <title>Compiz Detected</title>
+      <para>DrJava suffers from an incompatibility between the Linux
+window manager Compiz and Sun's Swing Java GUI library. We, the
+developers of DrJava, cannot do anything to fix this problem. We hope
+that future versions of Java and Compiz will address the
+incompatibility. In the meantime, we recommend that you disable Compiz
+if you experience problems. We also suggest that you use the latest
+versions of Compiz and Java, so you can benefit from possible bug
+fixes made by Sun and the Compiz developers. For more information, see
+<ulink
+url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
+      <para>When DrJava detects that you are using Compiz, it will
+display the "Compiz Detected" dialog at startup and ask if you want to
+start DrJava nonetheless. The dialog has three buttons.</para>
+      <formalpara><title>Yes</title>
+	<para>Start DrJava, even though Compiz is being used.</para></formalpara>
+      <formalpara><title>Yes, and ignore from now on</title>
+	<para>Start DrJava, and never complain about Compiz again.</para></formalpara>
+      <formalpara><title>No</title>
+	<para>Do not start DrJava.</para></formalpara>
+      <para>Whether DrJava should display this warning can be changed by
+	opening the Preferences window and selecting the
+"Notifications" pane (see <link linkend="configuration">Configuring
+DrJava</link>).</para>
+    </section>
+
   </chapter>
 
 
@@ -1078,18 +1137,17 @@ public class Student {
 
       <para>Note: All parameters are parsed as standard Java strings, so escape characters must be considered.  Notably, to include a Windows-style path in a parameter value, all backslashes must be escaped.  For example:</para>
 
-      <programlisting>javac.location=c:\\jdk1.4\\lib\\tools.jar</programlisting>
+      <programlisting>javac.location=c:\\jdk6\\lib\\tools.jar</programlisting>
     </section>
-
 
     <section id="config-options">
       <title>Available Options</title>
-      <para>All available configuration options are displayed here.  The option keys and default values are also provided for users who wish to edit their configuration file.</para>
+      <para>All available configuration options are displayed in the following sections.  The option keys and default values are also provided for users who wish to edit their configuration file.</para>
       
       <!-- Resource Location -->
-      <formalpara>
- <title>Resource Locations</title>
- <para>These options specify where to find Java resources on your computer, such as compilers or classpath directories.
+    <section id="config-options-resource">
+      <title>Resource Locations</title>
+      <para>These options specify where to find Java resources on your computer, such as compilers or classpath directories.</para>
 
         <variablelist>
 
@@ -1165,10 +1223,9 @@ public class Student {
      </varlistentry>
      
      <varlistentry>
-       <term>JSR14 Location (<varname>jsr14.location = ""</varname>)</term>
-       <term>JSR14 Collections Path (<varname>jsr14.collectionspath = ""</varname>)</term>
+       <term>Display All Compiler Versions (<varname>all.compiler.versions = false</varname>)</term>
        <listitem>
-  <para>Specifies the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is an experimental compiler provided by Sun which supports generic types.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (We currently support JSR-14 versions 1.0, 1.2, 1.3, 2.0, and 2.2.  Note that for versions 2.0 and later, <filename>javac.jar</filename> has been renamed <filename>gjc-rt.jar</filename>.)</para>
+  <para>By default, DrJava only displays one compiler per major version, even if multiple updates are found (Example: You have JDK 6 Updates 10 and 14 installed; DrJava will only display JDK 6 Update 14). To display all compiler versions, mark this checkbox. Note: You have to restart DrJava when you change this setting.</para>
        </listitem>
      </varlistentry>
      
@@ -1180,21 +1237,26 @@ public class Student {
      </varlistentry>
      
    </variablelist>
-      </para>
-      </formalpara>
-
+ </section>
 
       <!-- Display -->
-      <formalpara>
- <title>Display Options</title>
- <para>These configurable options affect how DrJava's user interface is displayed.</para>
-      </formalpara>
+    <section id="config-options-display">
+      <title>Display Options</title>
+      <para>These configurable options affect how DrJava's user interface is displayed.</para>
+
       <variablelist>
 
         <varlistentry>
    <term>Look and Feel (<varname>look.and.feel = ""</varname>)</term>
    <listitem>
      <para>Name of the Swing LookAndFeel class which determines the general appearance of DrJava.  If this option is changed while DrJava is running, the changes will not apply until you restart.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Plastic Theme (<varname>plastic.theme = "DesertBlue"</varname>)</term>
+   <listitem>
+     <para>If Plastic is selected as Look and Feel, then this setting changes the theme that is used to display DrJava. If Plastic is not selected, changing this setting has no effect. If this option is changed while DrJava is running, the changes will not apply until you restart.</para>
    </listitem>
  </varlistentry>
  
@@ -1211,25 +1273,18 @@ public class Student {
      <para>Whether to display all line numbers along the left margin of the Definitions Pane.</para>
    </listitem>
  </varlistentry>
- 
- <varlistentry>
-   <term>Save Main Window Postion (<varname>window.store.position = true</varname>)</term>
+
+   <varlistentry>
+   <term>Show sample of source code when fast switching (<varname>show.source.for.fast.switch = true</varname>)</term>
    <listitem>
-     <para>Whether to save the position and size of the DrJava window between sessions.</para>
+     <para>Whether a sample of the source code around the current caret position should be shown in the Fast Switch window.</para>
    </listitem>
- </varlistentry>
-  
- <varlistentry>
-   <term>Save "xxx" Dialog Postion (several choices for "xxx": <varname>dialog.clipboardhistory.store.position = true</varname>, <varname>dialog.gotofile.store.position = true</varname>, <varname>dialog.openjavadoc.store.position = true</varname>, <varname>dialog.completeword.store.position = true</varname>, <varname>dialog.jaroptions.store.position = true</varname>)</term>
+ </varlistentry>   
+
+  <varlistentry>
+   <term>Show Code Preview Popups (<varname>show.code.preview.popups = false</varname>)</term>
    <listitem>
-     <para>Whether to save the position and size of the indicated dialog between DrJava sessions.</para>
-   </listitem>
- </varlistentry>
-  
- <varlistentry>
-   <term>Reset "xxx" Dialog Postion and Size (several choices for "xxx")</term>
-   <listitem>
-     <para>By pressing this button, you can reset the position and size of the indicated dialog to its default value. This is useful if the dialog somehow appeared outside the screen and is not accessible, e.g. when switching from a dual-screen computer to a single-screen computer.</para>
+     <para>Whether a sample of the source code around the document location should be shown in the Breakpoints, Bookmarks and Find Results panes.</para>
    </listitem>
  </varlistentry>
 
@@ -1238,8 +1293,14 @@ public class Student {
    <listitem>
      <para>How many entries are saved in the clipboard history.</para>
    </listitem>
- </varlistentry>
+ </varlistentry>   
 
+  <varlistentry>
+   <term>Display Fully-Qualified Class Names in "Go to File" Dialog (<varname>dialog.gotofile.fully.qualified = false</varname>)</term>
+   <listitem>
+     <para>Whether the "Go to File" dialog should also include the fully-qualified class names. Example: There is a file myPackage/MyClass.java (in the myPackage package). With this setting enabled, the "Go to File" dialog will contain both MyClass.java and myPackage.MyClass.java; with the setting disabled, it will only contain MyClass.java.</para>
+   </listitem>
+ </varlistentry>
 
  <varlistentry>
    <term>Scan Class Files For Auto-Completion After Each Compile (<varname>dialog.completeword.scan.class.files = false</varname>)</term>
@@ -1248,14 +1309,20 @@ public class Student {
    </listitem>
  </varlistentry>
 
+ <varlistentry>
+   <term>Consider Java API Classes for Auto Completion (<varname>dialog.completeword.javaapi = false</varname>)</term>
+   <listitem>
+     <para>When this option is enabled, DrJava will include the names of the standard Java API classes in the list of names used for auto-completion.</para>
+   </listitem>
+ </varlistentry>
       </variablelist>
 
+ </section>
 
       <!-- Fonts -->
-      <formalpara>
- <title>Font Options</title>
- <para>Each font option is specified as a string containing the font name, style, and size, separated by dashes.  The style should be in upper-case (ie. PLAIN, BOLD, ITALIC, or BOLDITALIC), while the font name must be a valid font on the system.  (In most cases, using the font chooser in the Preferences window is the simplest approach.)</para>
-      </formalpara>
+    <section id="config-options-fonts">
+      <title>Font Options</title>
+      <para>Each font option is specified as a string containing the font name, style, and size, separated by dashes.  The style should be in upper-case (ie. PLAIN, BOLD, ITALIC, or BOLDITALIC), while the font name must be a valid font on the system.  (In most cases, using the font chooser in the Preferences window is the simplest approach.)</para>
       <variablelist>
  
  <varlistentry>
@@ -1288,12 +1355,12 @@ public class Student {
  
       </variablelist>
 
-      
-      <!-- Colors -->
-      <formalpara>
- <title>Color Options</title>
- <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, and the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
-      </formalpara>
+ </section>
+
+      <!-- Fonts -->
+    <section id="config-options-color">
+      <title>Color Options</title>
+      <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, and the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
       
       <!-- Definitions Colors -->
       <variablelist>
@@ -1453,19 +1520,64 @@ public class Student {
 
       </variablelist>
 
+ </section>
+
+      <!-- Window Positions -->
+    <section id="config-options-windowpos">
+      <title>Window Positions</title>
+      <para>DrJava can save the last position of the main window and its dialogs and restore them the next time DrJava is started.</para>
+
+      <variablelist>
+ <varlistentry>
+   <term>Save Main Window Postion (<varname>window.store.position = true</varname>)</term>
+   <listitem>
+     <para>Whether to save the position and size of the DrJava window between sessions.</para>
+   </listitem>
+ </varlistentry>
+  
+ <varlistentry>
+   <term>Save "xxx" Dialog Postion (several choices for "xxx": <varname>dialog.clipboardhistory.store.position = true</varname>, <varname>dialog.gotofile.store.position = true</varname>, <varname>dialog.openjavadoc.store.position = true</varname>, <varname>dialog.completeword.store.position = true</varname>, <varname>dialog.jaroptions.store.position = true</varname>)</term>
+   <listitem>
+     <para>Whether to save the position and size of the indicated dialog between DrJava sessions.</para>
+   </listitem>
+ </varlistentry>
+  
+ <varlistentry>
+   <term>Reset "xxx" Dialog Postion and Size (several choices for "xxx")</term>
+   <listitem>
+     <para>By pressing this button, you can reset the position and size of the indicated dialog to its default value. This is useful if the dialog somehow appeared outside the screen and is not accessible, e.g. when switching from a dual-screen computer to a single-screen computer.</para>
+   </listitem>
+ </varlistentry>
+ 
+<varlistentry>
+   <term>Detach Tabbed Panes (<varname>tabbedpanes.detach = false</varname>)</term>
+   <listitem>
+     <para>By default, the tabbed panes are attached to the bottom of DrJava's main window. By selecting this option, DrJava displays the tabbed panes in their own separate window.</para>
+   </listitem>
+ </varlistentry>
+
+<varlistentry>
+   <term>Detach Debugger (<varname>debugger.detach = false</varname>)</term>
+   <listitem>
+     <para>By default, the debugger pane is displayed in DrJava's main window. By selecting this option, DrJava displays the debugger in its own separate window.</para>
+   </listitem>
+ </varlistentry>
+
+      </variablelist>
+ </section>
 
       <!-- Key Bindings -->
-      <formalpara>
- <title>Key Bindings</title>
- <para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  Users may bind multiple keys to a single action as long as there are no conflicts and may add or remove key bindings as desired.  (We recommend editing these options in the Preferences window.)</para>
+    <section id="config-options-key">
+      <title>Key Bindings</title>
+      <para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  Users may bind multiple keys to a single action as long as there are no conflicts and may add or remove key bindings as desired.  (We recommend editing these options in the Preferences window.)</para>
 
-      </formalpara>
-      
-     <!-- Compiler Options -->
-     <formalpara>
-<title>Compiler Options</title>
-<para>Configurable options relating to compiling source code in DrJava. Note that Compiler Warnings are not shown when compiling any Java Language Level files. Also note that the Compiler Warnings options are all passed using the "-Xlint:" flag, which is a non-standard option and may not work with all implementations of the JDK.</para>
-     </formalpara>
+ </section>
+
+      <!-- Compiler Options -->
+    <section id="config-options-compiler">
+      <title>Compiler Options</title>
+      <para>Configurable options relating to compiling source code in DrJava. Note that Compiler Warnings are not shown when compiling any Java Language Level files. Also note that the Compiler Warnings options are all passed using the "-Xlint:" flag, which is a non-standard option and may not work with all implementations of the JDK.</para>
+
      <variablelist>
 
 <varlistentry>
@@ -1511,13 +1623,51 @@ public class Student {
 </varlistentry>
 
      </variablelist>
+ </section>
 
+      <!-- Interactions Pane -->
+    <section id="config-options-interactions">
+      <title>Interactions Pane</title>
+      <para>Configurable options relating to interpreting code in the Interactions Pane.</para>
+
+     <variablelist>
+
+ <varlistentry>
+   <term>Size of Interactions History (<varname>history.max.size = 500</varname>)</term>
+   <listitem>
+     <para>Specifies how many commands will be remembered in the history of the Interactions window.  Previous commands can be recalled using the up and down arrow keys.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Enable the "Auto Import" Dialog (<varname>dialog.autoimport.enabled = true</varname>)</term>
+   <listitem>
+     <para>When this option is enabled, DrJava will display a dialog to automatically import classes when a class name is interpreted but not known. After the class has been selected, DrJava will execute the appropriate "import" statement and re-execute the line that caused the dialog to appear.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Classes to Auto-Import (<varname>interactions.auto.import.classes = []</varname>)</term>
+   <listitem>
+     <para>This option allows you to select classes and packages that should be imported automatically whenever the Interactions Pane is reset. List fully-qualified class names (e.g. java.util.ArrayList, or packages ending with a *, e.g. java.util.*).</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Restore last working directory of the Interactions Pane on start up (<varname>sticky.interactions.dir = true</varname>)</term>
+   <listitem>
+     <para>If this option is enabled, DrJava will restore the directory that was last used in the Interactions Pane. If it is disabled, DrJava will always use the value of the "iuser.home" property.</para>
+   </listitem>
+ </varlistentry>
+
+     </variablelist>
+ </section>
 
       <!-- Debugger -->
-      <formalpara>
- <title>Debugger</title>
- <para>All configurable options relating to the debugger.</para>
-      </formalpara>
+    <section id="config-options-debugger">
+      <title>Debugger</title>
+      <para>All configurable options relating to the debugger.</para>
+ 
       <variablelist>
 
  <varlistentry>
@@ -1571,12 +1721,13 @@ public class Student {
 
       </variablelist>
 
+ </section>
 
       <!-- Javadoc -->
-      <formalpara>
- <title>Javadoc</title>
- <para>All configurable options relating to generating Javadoc.</para>
-      </formalpara>
+    <section id="config-options-javadoc">
+      <title>Javadoc</title>
+      <para>All configurable options relating to generating Javadoc.</para>
+ 
       <variablelist>
 
  <varlistentry>
@@ -1658,13 +1809,13 @@ public class Student {
  </varlistentry>
 
       </variablelist>
-
+ </section>
 
       <!-- Notifications -->
-      <formalpara>
- <title>Notifications</title>
- <para>Configures how often DrJava notifies you for certain events.  The notifications in this section can all be suppressed by clicking on a "Do not show this message again" checkbox (or similar) on the notification itself.</para>
-      </formalpara>
+    <section id="config-options-notifications">
+      <title>Notifications</title>
+      <para>Configures how often DrJava notifies you for certain events.  The notifications in this section can all be suppressed by clicking on a "Do not show this message again" checkbox (or similar) on the notification itself.</para>
+
       <variablelist>
 
  <varlistentry>
@@ -1757,14 +1908,53 @@ public class Student {
      <para>Whether to show a popup dialog when the first internal DrJava error occurs. If this option is not selected, DrJava will try to continue quietly and only display the "DrJava Errors" button (See <link linkend="drjava-errors">DrJava Errors</link>).</para>
    </listitem>
  </varlistentry>
-      </variablelist>
 
-      
+        <varlistentry>
+   <term>Warn if Compiz Detected (<varname>warn.if.compiz = true</varname>)</term>
+   <listitem>
+     <para>Whether DrJava should warn the user if Compiz is
+detected (see <link linkend="other-dialogs-compiz">Compiz Detected</link> dialog). DrJava suffers from an incompatibility between the Linux
+window manager Compiz and Sun's Swing Java GUI library. We, the
+developers of DrJava, cannot do anything to fix this problem. We hope
+that future versions of Java and Compiz will address the
+incompatibility. In the meantime, we recommend that you disable Compiz
+if you experience problems. We also suggest that you use the latest
+versions of Compiz and Java, so you can benefit from possible bug
+fixes made by Sun and the Compiz developers. For more information, see
+<ulink
+url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Delete language level class files (<varname>delete.ll.class.files = always</varname>)</term>
+   <listitem>
+     <para>Whether Drjava should delete class files generated from Language Level source files (.dj0, .dj1, and .dj2) before compilation. This may be necessary to avoid problems with the Language Level facility. Selecting "always" will do this automatically without involving the user. Selecting "ask me" will display a notification window and let the user decide. Selecting "never" will not delete class files nor ask the user to do so.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Check for new versions (<varname>new.version.notification = stable and beta versions only</varname>)</term>
+   <listitem>
+     <para>Whether Drjava should check if a newer version of DrJava exists. Setting this to "none (disabled)" will not check for newer versions. The other setting select what kind of versions will be considered, ranging from "stable versions only" to "weekly experimental builds".</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Days between new version check (<varname>new.version.notification.days = 7</varname>)</term>
+   <listitem>
+     <para>How many days have to pass before DrJava will look for a new version again. By default, DrJava will check every seven days..</para>
+   </listitem>
+ </varlistentry>
+
+      </variablelist>
+ </section>
+
       <!-- Miscellaneous -->
-      <formalpara>
- <title>Miscellaneous</title>
- <para>These are the remaining configurable options in DrJava.</para>
-      </formalpara>
+    <section id="config-options-misc">
+      <title>Miscellaneous</title>
+      <para>These are the remaining configurable options in DrJava.</para>
+
       <variablelist>
  
  <varlistentry>
@@ -1775,16 +1965,16 @@ public class Student {
  </varlistentry>
  
  <varlistentry>
-   <term>Size of Interactions History (<varname>history.max.size = 500</varname>)</term>
+   <term>Recent Files List Size (<varname>recent.files.max.size = 5</varname>)</term>
    <listitem>
-     <para>Specifies how many commands will be remembered in the history of the Interactions window.  Previous commands can be recalled using the up and down arrow keys.</para>
+     <para>Specifies how many recently used files to display in the File menu.</para>
    </listitem>
  </varlistentry>
 
  <varlistentry>
-   <term>Recent Files List Size (<varname>recent.files.max.size = 5</varname>)</term>
+   <term>Size of Browser History (<varname>browser.history.max.size = 50</varname>)</term>
    <listitem>
-     <para>Specifies how many recently used files to display in the File menu.</para>
+     <para>Specifies how many source code locations are stored in the browser history.</para>
    </listitem>
  </varlistentry>
 
@@ -1816,7 +2006,8 @@ public class Student {
      <para>Whether DrJava should clear the contents of the Console Tab each time the Interactions Pane is reset.</para>
    </listitem>
  </varlistentry>
-   
+
+<!--    
   <varlistentry>
    <term>Allow Access of Private Members in the Interactions Pane (<varname>allow.private.access = false</varname>)</term>
    <listitem>
@@ -1824,13 +2015,8 @@ public class Student {
    </listitem>
  </varlistentry>
    
-  <varlistentry>
-   <term>Show sample of source code when fast switching (<varname>show.source.for.fast.switch = true</varname>)</term>
-   <listitem>
-     <para>Whether a sample of the source code around the current caret position should be shown in the Fast Switch window.</para>
-   </listitem>
- </varlistentry>
-   
+-->
+
   <varlistentry>
    <term>Require test classes in projects to end in "Test" (<varname>force.test.suffix = false</varname>)</term>
    <listitem>
@@ -1839,29 +2025,143 @@ public class Student {
  </varlistentry>
 
   <varlistentry>
-   <term>JVM Args (<varname>jvm.args = ""</varname>)</term>
-   <listitem>
-     <para>Command line arguments used when creating the InterpreterJVM.  This is an advanced option because if you use invalid arguments, the InterpreterJVM may not start up successfully.  If this happens, remove the value stored in Preferences.</para>
-   </listitem>
-  </varlistentry>
-
-  <varlistentry>
    <term>Put the focus in the definitions pane after find/replace (<varname>find.replace.focus.in.defpane = false</varname>)</term>
    <listitem>
      <para>Whether to put the focus in the Definitions pane after using find/replace. If this option is not enabled, the focus will remain in the Find/Replace pane.</para>
    </listitem>
  </varlistentry>
 
+  <varlistentry>
+   <term>Forcefully Quit DrJava (<varname>drjava.use.force.quit = false</varname>)</term>
+   <listitem>
+     <para>On some systems (namely tablet PCs), DrJava does not shut down properly when quit. Select this option to remedy this problem.</para>
+   </listitem>
+ </varlistentry>
+
+  <varlistentry>
+   <term>Enable Remote Control (<varname>remote.control.enabled = true</varname>)</term>
+   <listitem>
+     <para>Java's "remote control" allows other applications to control certain aspects of DrJava, for example what file is displayed. This feature is also necessary if you want to double-click on a .java file to open the file in an existing instance of DrJava.</para>
+   </listitem>
+ </varlistentry>
+
+  <varlistentry>
+   <term>Remote Control Port (<varname>remote.control.port = 4444</varname>)</term>
+   <listitem>
+     <para>Selects the port that Drjava uses for its remote control.</para>
+   </listitem>
+ </varlistentry>
+
+  <varlistentry>
+   <term>Follow File Delay (<varname>follow.file.delay = 300</varname>)</term>
+   <listitem>
+     <para>Specifies the number of milliseconds that have to pass before DrJava will update a "Follow File" window again.</para>
+   </listitem>
+ </varlistentry>
+
+  <varlistentry>
+   <term>Maximum Lines in "Follow File" Window (<varname>follow.file.lines = 1000</varname>)</term>
+   <listitem>
+     <para>Specifies the number of of lines that a "Follow File" window may contain. If a file has more than this many lines, only the end of the file will be displayed.</para>
+   </listitem>
+ </varlistentry>
+
       </variablelist>
-      
+ </section>
+
+      <!-- File Types -->
+    <section id="config-options-filetypes">
+      <title>File Types</title>
+      <para>Configurable options for file types. Note that the options here are only available on Windows, and only if the .exe file is used.</para>
+      <para>.drjava files are DrJava project files. .djapp files are DrJava add-ons. .java files are Java source files.</para>
+
+     <variablelist>
+
+ <varlistentry>
+   <term>Associate .drjava and .djapp Files with DrJava</term>
+   <listitem>
+     <para>Set the file type associations so that double-clicking on .drjava and .djapp files in the Windows Explorer will open them in DrJava.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Remove .drjava and .djapp File Associations</term>
+   <listitem>
+     <para>Remove the association of .drjava and .djapp files with DrJava.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Associate .java Files with DrJava</term>
+   <listitem>
+     <para>Set the file type associations so that double-clicking on .java files in the Windows Explorer will open them in DrJava.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Remove .java File Associations</term>
+   <listitem>
+     <para>Remove the association of .java files with DrJava.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Automatically assign .java, .drjava and .djapp Files to DrJava (<varname>file.ext.registration = ask me at startup</varname>)</term>
+   <listitem>
+     <para>Specifies whether Drjava should automatically associate .java, .drjava and .djapp files with DrJava so those files are opened with DrJava when double-clicked. When set to the default, "ask me at startup", DrJava will check at startup if those associations exist, and if not, present a dialog allowing the user to set the file associations (see <link linkend="other-dialogs-filetypes">Set File Associations</link> dialog). Setting this option to "always" will set the file associations automatically at startup without user interaction. Setting it to "never" will not change file associations nor ask the user.</para>
+   </listitem>
+ </varlistentry>
+     </variablelist>
+     
     </section>      
-    
+
+      <!-- JVMs -->
+    <section id="config-options-jvms">
+      <title>JVMs</title>
+      <para>Configurable options for the two Java Virtual Machines (JVMs) that DrJava uses.</para>
+
+     <variablelist>
+
+ <varlistentry>
+   <term>Maximum Heap Size for Main JVM in MB (<varname>master.jvm.xmx = default</varname>)</term>
+   <listitem>
+     <para>Specifies how many megabytes of memory Java should use for the Main JVM (the main part of DrJava including the editor and compiler). The "default" setting leaves this up to Java. If you experience "Out of memory" errors, set this to a value that is larger than 64 MB (default in Java 5) but smaller than the amount of physical memory you have. If it is still too small, choose the next bigger setting. Note: You have to restart DrJava for changes to become effective.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>JVM Args for Main JVM (<varname>master.jvm.args = ""</varname>)</term>
+   <listitem>
+     <para>Specifies the JVM arguments that should be used for DrJava's Main JVM, other than the maximum heap size (-Xmx), which is controlled using the option above. Note: You have to restart DrJava for changes to become effective.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Maximum Heap Size for Interactions JVM in MB (<varname>slave.jvm.xmx = default</varname>)</term>
+   <listitem>
+     <para>Specifies how many megabytes of memory Java should use for the Interactions JVM (used to interpret code in the Interactions Pane and to run programs developed in DrJava). The "default" setting leaves this up to Java. If you experience "Out of memory" errors, set this to a value that is larger than 64 MB (default in Java 5) but smaller than the amount of physical memory you have. If it is still too small, choose the next bigger setting. Note: You have to reset the Interactions Pane for changes to become effective.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>JVM Args for Interactions JVM (<varname>slave.jvm.args = ""</varname>)</term>
+   <listitem>
+     <para>Specifies the JVM arguments that should be used for DrJava's Interactions JVM, other than the maximum heap size (-Xmx), which is controlled using the option above. Note: You have to reset the Interactions Pane for changes to become effective.</para>
+   </listitem>
+ </varlistentry>
+     </variablelist>
+     
+    </section>      
+
+</section>
+
   </appendix>
 
   <!-- **** Appendix: Setting up DrJava **** -->
+<!--
   <appendix id="platform-setup">
     <title>Setting up DrJava on your Platform</title>
-    <para>DrJava can be set up to handle files similarly to other applications on your platform.  For example, Windows <!--and Mac OS X--> allows you to associate types of files with particular applications.  <!-- In addition, some platforms even allow you to drop files onto an application's icon to open them.--></para>
+    <para>DrJava can be set up to handle files similarly to other applications on your platform.  For example, Windows and Mac OS X allow you to associate types of files with particular applications. In addition, some platforms even allow you to drop files onto an application's icon to open them.</para>
 
     <section id="setup-win32-associations">
       <title>Associating Java files to DrJava, on Windows</title>
@@ -1946,7 +2246,7 @@ public class Student {
       </orderedlist>
     </section>
   </appendix>
-
+-->
 
   <!-- **** Appendix: DrJava Errors **** -->
   <appendix id="drjava-errors">
