@@ -1656,7 +1656,7 @@ DrJava</link>).</para>
  <varlistentry>
    <term>Restore last working directory of the Interactions Pane on start up (<varname>sticky.interactions.dir = true</varname>)</term>
    <listitem>
-     <para>If this option is enabled, DrJava will restore the directory that was last used in the Interactions Pane. If it is disabled, DrJava will always use the value of the "iuser.home" property.</para>
+     <para>If this option is enabled, DrJava will restore the directory that was last used in the Interactions Pane. If it is disabled, DrJava will always use the value of the "user.home" property.</para>
    </listitem>
  </varlistentry>
 

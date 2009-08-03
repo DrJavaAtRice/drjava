@@ -9,7 +9,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2006-8-18</date>
+    <date>2009-08-03</date>
     <title>A Quick Start Guide to DrJava</title>
   </bookinfo>
   <toc></toc>
@@ -45,7 +45,7 @@ introduce you to some of its key features.</para>
 	Do a search for "Download Java JDK"
 	</para> </listitem>
 	<listitem> <para>
-	Select the most recent build of Java from the list of options you see.  We recommend Java 5.0 (formerly called Java 1.5) assuming that you are using the current beta release of DrJava.  Recent releases of DrJava are not compatible with versions of the JDK prior to 1.4.  Older versions of DrJava are compatible with Java 1.3 and Java 1.4 but not Java 5.0.
+	Select the most recent build of Java from the list of options you see.  We recommend Java 6, assuming that you are using a current release of DrJava.  Recent releases of DrJava are not compatible with versions of the JDK prior to Java 5 (previously called Java 1.5.0).  Older versions of DrJava are compatible with Java 1.3 and Java 1.4.
 	</para> </listitem>
 	<listitem> <para>
 	Click on the link to download the JDK.
@@ -70,7 +70,7 @@ introduce you to some of its key features.</para>
 	Go to <ulink url="http://www.drjava.org">http://www.drjava.org.</ulink>
 	</para></listitem>
 	<listitem><para>
-	Select which build of DrJava is right for you, and click on the appropriate button.  We using the most recent beta release since it supports all of the Java 5.0 language extensions, which make Java programming simpler.  We also recommend that Windows users download the <filename>.exe</filename> file, that Mac OS X users use the <filename>osx.tar.gz</filename> version, and that other users download the <filename>.jar</filename> version.  If you have problems with the beta release of DrJava, you can roll back to the stable version but it does not support Java 1.5 langauge.  Experienced users may want to experiment with other versions of DrJava including the most recent 
+	Select which build of DrJava is right for you, and click on the appropriate button.  We recommend using the most recent stable or beta releases since they support all of the Java 5 language extensions and Java 6 APIs, which make Java programming simpler.  We also recommend that Windows users download the <filename>.exe</filename> file, that Mac OS X users use the <filename>osx.tar.gz</filename> version, and that other users download the <filename>.jar</filename> version.  If you have problems with a beta release of DrJava, you can roll back to the most recent stable version.  Experienced users may want to experiment with other versions of DrJava including the most recent 
 Development Build jar instead. To do so, click on the "more download options" link.
 	<mediaobject>
        		<imageobject>
@@ -727,6 +727,11 @@ read -1, indicating of the end of the stream.</para>
 	<title>Tools.jar Location:</title> 
 		<para>The directory of your tools.jar file which has the compiler and debugger. This file is usually created during the installation of the Java JDK.</para>
 	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Display All Compiler Versions:</title> 
+		<para>By default, DrJava only displays one compiler per major version, even if multiple updates are found (Example: You have JDK 6 Updates 10 and 14 installed; DrJava will only display JDK 6 Update 14). To display all compiler versions, mark this checkbox. Note: You have to restart DrJava when you change this setting.</para>
+	</formalpara></listitem>
 	
 	<listitem><formalpara>
 	<title>Extra Classpath:</title>
@@ -761,6 +766,11 @@ read -1, indicating of the end of the stream.</para>
 		<title>Look and Feel:</title>
 		<para> Specify what theme DrJava uses</para>
 	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Plastic Theme:</title>
+		<para> If Plastic is selected as Look and Feel, then the specific theme can be selected here</para>
+	</formalpara></listitem>
 	
 	<listitem><formalpara>
 		<title>Toolbar Buttons:</title> 
@@ -773,18 +783,13 @@ read -1, indicating of the end of the stream.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Save Window Size and Position:</title>
-		<para>Check this if you want the size and position of the main DrJava window to be saved on exit.</para>
+		<title>Show sample of source code when fast switching:</title>
+		<para>Choose whether a sample of the source code around the current caret position should be shown in the Fast Switch window.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Save "xxx"Dialog Position:</title>
-		<para>Check this if you want the size and position of the "xxx" dialog to be saved on exit (different choices for "xxx").</para>
-	</formalpara></listitem>
-
-	<listitem><formalpara>
-		<title>Reset "xxx" Dialog Position and Size:</title>
-		<para>Press this button to reset the size and position of the "xxx" dialog (different choices for "xxx"). This can be useful if the dialog was displayed outside the screen for some reason and is not accessible.</para>
+		<title>Show Code Preview Popups:</title>
+		<para>Whether a sample of the source code around the document location should be shown in the Breakpoints, Bookmarks and Find Results panes.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
@@ -800,6 +805,11 @@ read -1, indicating of the end of the stream.</para>
 	<listitem><formalpara>
 		<title>Scan Class Files For Auto-Completion After Each Compile:</title>
 		<para>DrJava can auto-complete the names of user classes. If this option is checked, DrJava will scan all class files that were created after each compile to obtain the names, even of inner classes. IF this option is not checked, DrJava can only auto-complete the names of the documents that are open. Selecting this option slows down compiles.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Consider Java API Classes for Auto Completion:</title>
+		<para>When this option is enabled, DrJava will include the names of the standard Java API classes in the list of names used for auto-completion.</para>
 	</formalpara></listitem>
 
 	</itemizedlist>
@@ -862,6 +872,40 @@ read -1, indicating of the end of the stream.</para>
 
 	</section>
 
+ 	<section id="windowpos">
+	<title>Window Positions</title>
+	<para>The Window Positions category allows you to control if DrJava saves the positions of its windows. </para>
+
+	<itemizedlist>
+	<listitem><formalpara>
+		<title>Save Window Size and Position:</title>
+		<para>Check this if you want the size and position of the main DrJava window to be saved on exit.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Save "xxx"Dialog Position:</title>
+		<para>Check this if you want the size and position of the "xxx" dialog to be saved on exit (different choices for "xxx").</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Reset "xxx" Dialog Position and Size:</title>
+		<para>Press this button to reset the size and position of the "xxx" dialog (different choices for "xxx"). This can be useful if the dialog was displayed outside the screen for some reason and is not accessible.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Detach Tabbed Panes:</title>
+		<para>By default, the tabbed panes are attached to the bottom of DrJava's main window. By selecting this option, DrJava displays the tabbed panes in their own separate window.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Detach Debugger:</title>
+		<para>By default, the debugger pane is displayed in DrJava's main window. By selecting this option, DrJava displays the debugger in its own separate window.</para>
+	</formalpara></listitem>
+
+	</itemizedlist>
+
+        </section>
+
 	<section id="keybindings">
 	<title>Key Bindings</title>
 
@@ -885,6 +929,35 @@ read -1, indicating of the end of the stream.</para>
        		<imagedata fileref="CompilerOptions.jpg" format="jpg" width="80%" />
        		</imageobject>
      	</mediaobject>
+
+	</section>
+
+	<section id="interactionsoptions">
+	<title>Interactions Pane</title>
+
+	<para> The Interactions Pane category allows you to set options for the Interactions Pane.</para>
+	<itemizedlist>
+	<listitem><formalpara>
+		<title>Size of Interactions History:</title> 
+		<para>Specifies how many interactions will be stored in the history for you to scroll through using the up arrow.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Enable the "Auto Import" Dialog:</title> 
+		<para>When this option is enabled, DrJava will display a dialog to automatically import classes when a class name is interpreted but not known. After the class has been selected, DrJava will execute the appropriate "import" statement and re-execute the line that caused the dialog to appear.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Classes to Auto-Import:</title> 
+		<para>This option allows you to select classes and packages that should be imported automatically whenever the Interactions Pane is reset. List fully-qualified class names (e.g. java.util.ArrayList, or packages ending with a *, e.g. java.util.*).</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Restore last working directory of the Interactions Pane on start up:</title> 
+		<para>If this option is enabled, DrJava will restore the directory that was last used in the Interactions Pane. If it is disabled, DrJava will always use the value of the "user.home" property.</para>
+	</formalpara></listitem>
+
+	</itemizedlist>
 
 	</section>
 
@@ -979,8 +1052,8 @@ read -1, indicating of the end of the stream.</para>
 	</section>	
 
 	<section id="notificationpreferences">
-		<title>Notifications Menu</title>
-	<para>The Notifications menu lets you say whether or not you want notifications on certain actions.  This is the place to come if you accidentally turn off a warning and want to turn it back on.</para>
+		<title>Notifications Options</title>
+	<para>The Notifications category lets you say whether or not you want notifications on certain actions.  This is the place to come if you accidentally turn off a warning and want to turn it back on.</para>
 
 		<mediaobject>
        		<imageobject>
@@ -991,9 +1064,9 @@ read -1, indicating of the end of the stream.</para>
 	</section>
 
 	<section id="miscellaneouspreferences">
-		<title>Miscellaneous Menu</title>
+		<title>Miscellaneous Options</title>
 
-	<para> The Miscellaneous menu contains all of the options that did not fit neatly into one of the above categories.</para>
+	<para> The Miscellaneous category contains all of the options that did not fit neatly into one of the above categories.</para>
 
 	<itemizedlist mark="opencircle">
 	<listitem><formalpara>
@@ -1002,13 +1075,13 @@ read -1, indicating of the end of the stream.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Size of Interactions History:</title> 
-		<para>Specifies how many interactions will be stored in the history for you to scroll through using the up arrow.</para>
+		<title>Recent Files List Size:</title> 
+		<para>Specifies how many of your most recently open files are displayed when you open the "File" menu on the toolbar.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Recent Files List Size:</title> 
-		<para>Specifies how many of your most recently open files are displayed when you open the "File" menu on the toolbar.</para>
+		<title>Maximum Size of Browser History:</title> 
+		<para>Specifies how many source code locations are stored in the browser history. This history can be used to go back and forth, like in a web browser.</para>
 	</formalpara></listitem>
 
 	<listitem>
@@ -1038,27 +1111,48 @@ read -1, indicating of the end of the stream.</para>
 		</formalpara></listitem>
 
 		<listitem><formalpara>
-		<title>Allow Access of Private Members in Interactions Pane:</title> 
-		<para>A great option for testing, because it gives you more flexibility than normal.  However, it can also lead to confusion for beginning students since private fields cannot normally be accessed outside of their classes.</para>
+			<title>Require test classes in projects to end in "Test":</title>
+			<para>Whether to require that JUnit test classes in projects end in "Test". If this is enabled, classes that do not end in "Test" will not be considered JUnit tests when in project mode.</para>
 		</formalpara></listitem>
 
+<!--		<listitem><formalpara>
+		<title>Allow Access of Private Members in Interactions Pane:</title> 
+		<para>A great option for testing, because it gives you more flexibility than normal.  However, it can also lead to confusion for beginning students since private fields cannot normally be accessed outside of their classes.</para>
+		</formalpara></listitem> -->
+	
 		<listitem><formalpara>
-			<title>Show Sample of Source Code when Fast Switching:</title> 
-			<para>Shows part of the source code when you use ctrl-tilde to quickly switch between documents.</para>
+			<title>Put the focus in the definitions pane after find/replace:</title> 
+			<para>If this option is checked, the focus will be put in the definitions pane after using "Find". If this is not checked, then the focus will remain in the Find/Replace tab.</para>
 		</formalpara></listitem>
 	
 		<listitem><formalpara>
-			<title>Put the focus in the definitions pane after find/replace.</title> 
-			<para>If this option is checked, the focus will be put in the definitions pane after using "Find". If this is not checked, then the focus will remain in the Find/Replace tab.</para>
+			<title>Forcefully Quit DrJava:</title> 
+			<para>On some systems (namely tablet PCs), DrJava does not shut down properly when quit. Select this option to remedy this problem.</para>
 		</formalpara></listitem>
+	
+		<listitem><formalpara>
+			<title>Enable Remote Control:</title> 
+			<para>Java's "remote control" allows other applications to control certain aspects of DrJava, for example what file is displayed. This feature is also necessary if you want to double-click on a .java file to open the file in an existing instance of DrJava.</para>
+		</formalpara></listitem>
+	
+		<listitem><formalpara>
+			<title>Remote Control Port:</title> 
+			<para>Selects the port that Drjava uses for its remote control.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Follow File Delay:</title> 
+			<para>Specifies the number of milliseconds that have to pass before DrJava will update a "Follow File" window again.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Maximum Lines in "Follow File" Window:</title> 
+			<para>Specifies the number of of lines that a "Follow File" window may contain. If a file has more than this many lines, only the end of the file will be displayed.</para>
+		</formalpara></listitem>
+
 		</itemizedlist>
 	</listitem>
 
-	
-		<listitem><formalpara>
-			<title>JVM Args for Interactions</title> 
-			<para>Allows you to pass arguments to the JVM that controls the Interactions Pane.</para>
-		</formalpara></listitem>
 	</itemizedlist>
 
 		<mediaobject>
@@ -1068,7 +1162,74 @@ read -1, indicating of the end of the stream.</para>
      	</mediaobject>	
 
 	</section>	
-    
+
+	<section id="filetypesoptions">
+		<title>File Types</title>
+
+	<para>Configurable options for file types. Note that the options here are only available on Windows, and only if the .exe file is used.</para>
+	<para>.drjava files are DrJava project files. .djapp files are DrJava add-ons. .java files are Java source files.</para>
+
+	<itemizedlist mark="opencircle">
+		<listitem><formalpara>
+			<title>Associate .drjava and .djapp Files with DrJava</title> 
+			<para>Set the file type associations so that double-clicking on .drjava and .djapp files in the Windows Explorer will open them in DrJava.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Remove .drjava and .djapp File Associations</title> 
+			<para>Remove the association of .drjava and .djapp files with DrJava.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Associate .java Files with DrJava</title> 
+			<para>Set the file type associations so that double-clicking on .java files in the Windows Explorer will open them in DrJava.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Remove .java File Associations</title> 
+			<para>Remove the association of .java files with DrJava.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Automatically assign .java, .drjava and .djapp Files to DrJava</title> 
+			<para>Specifies whether Drjava should automatically associate .java, .drjava and .djapp files with DrJava so those files are opened with DrJava when double-clicked. When set to the default, "ask me at startup", DrJava will check at startup if those associations exist, and if not, present a dialog allowing the user to set the file associations. Setting this option to "always" will set the file associations automatically at startup without user interaction. Setting it to "never" will not change file associations nor ask the user.</para>
+		</formalpara></listitem>
+
+	</itemizedlist>
+
+	</section>	
+ 
+
+	<section id="jvmsoptions">
+		<title>JVM Options</title>
+
+	<para>The JVM category contains options for the two Java Virtual Machines (JVMs) that DrJava uses.</para>
+
+	<itemizedlist mark="opencircle">
+		<listitem><formalpara>
+			<title>Maximum Heap Size for Main JVM in MB</title> 
+			<para>Specifies how many megabytes of memory Java should use for the Main JVM (the main part of DrJava including the editor and compiler). The "default" setting leaves this up to Java. If you experience "Out of memory" errors, set this to a value that is larger than 64 MB (default in Java 5) but smaller than the amount of physical memory you have. If it is still too small, choose the next bigger setting. Note: You have to restart DrJava for changes to become effective.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>JVM Args for Main JVM</title> 
+			<para>Specifies the JVM arguments that should be used for DrJava's Main JVM, other than the maximum heap size (-Xmx), which is controlled using the option above. Note: You have to restart DrJava for changes to become effective.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Maximum Heap Size for Interactions JVM in MB</title> 
+			<para>Specifies how many megabytes of memory Java should use for the Interactions JVM (used to interpret code in the Interactions Pane and to run programs developed in DrJava). The "default" setting leaves this up to Java. If you experience "Out of memory" errors, set this to a value that is larger than 64 MB (default in Java 5) but smaller than the amount of physical memory you have. If it is still too small, choose the next bigger setting. Note: You have to reset the Interactions Pane for changes to become effective.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>JVM Args for Interactions JVM</title> 
+			<para>Specifies the JVM arguments that should be used for DrJava's Interactions JVM, other than the maximum heap size (-Xmx), which is controlled using the option above. Note: You have to reset the Interactions Pane for changes to become effective.</para>
+		</formalpara></listitem>
+
+	</itemizedlist>
+
+	</section>	
+   
   </chapter>
 
 
