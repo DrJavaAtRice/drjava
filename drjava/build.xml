@@ -962,9 +962,17 @@
     <echo message="Creating ${version-tag}-osx.tar.gz" />
     <property name="mac-app-dir" value="${version-tag}/osx" />
     <mkdir dir="${mac-app-dir}" />
-    <filter token="VERSION" value="${version-tag}" />
-    <copy todir="${mac-app-dir}/${readable-project-name}.app" filtering="yes" >
+    <copy todir="${mac-app-dir}/${readable-project-name}.app" >
       <fileset dir="packaging/mac/${readable-project-name}.app" excludes="**/*jar-goes-here" />
+    </copy>
+    <copy todir="${mac-app-dir}/${readable-project-name}.app" overwrite="yes" >
+      <fileset dir="packaging/mac/${readable-project-name}.app">
+        <include name="**/*.plist" />
+        <include name="**/*.xml" />
+      </fileset>
+      <filterset>
+        <filter token="VERSION" value="${version-tag}" />
+      </filterset>
     </copy>
     <copy file="${ant.project.name}.jar" 
           todir="${mac-app-dir}/${readable-project-name}.app/Contents/Resources/Java" />
@@ -988,9 +996,17 @@
     </taskdef>
     <property name="windows-app-dir" value="${version-tag}/windows" />
     <mkdir dir="${windows-app-dir}" />
-    <filter token="VERSION" value="${version-tag}" />
-    <copy todir="${windows-app-dir}" filtering="yes" >
+    <copy todir="${windows-app-dir}" >
       <fileset dir="packaging/windows" />
+    </copy>
+    <copy todir="${windows-app-dir}" overwrite="yes" >
+      <fileset dir="packaging/windows">
+        <include name="**/*.plist" />
+        <include name="**/*.xml" />
+      </fileset>
+      <filterset>
+        <filter token="VERSION" value="${version-tag}" />
+      </filterset>
     </copy>
     <copy file="${ant.project.name}.jar" todir="${windows-app-dir}" />
     <launch4j configfile="${windows-app-dir}/launch4j-config.xml" />
