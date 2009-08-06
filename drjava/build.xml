@@ -395,7 +395,7 @@
   <target name="do-test" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}'" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
-           fork="yes" forkmode="perTest" maxmemory="512M" jvm="${test-jvm}" dir="${basedir}">
+           fork="yes" forkmode="perTest" maxmemory="800M" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="${test-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
