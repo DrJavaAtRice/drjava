@@ -104,14 +104,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
   
   /** Asserts that the given string typed by the user of the form "java classname" is transformed to the given
-    * expected main method invocation.
+    * expected main method invocation.  An arbitrary prefix may precede the expected string.
     * @param typed the "java classname args ..." typed by the user
     * @param expected the expected main class call
     */
-  protected void _assertJavaTransformation(final String typed, final String expected) {
-    assertEquals("main transformation should match expected",
-                 expected,
-                 TestInteractionsModel._transformJavaCommand(typed));
+  protected void _assertJavaTransformationTail(final String typed, final String expected) {
+    assertTrue("main transformation should match expected",
+               TestInteractionsModel._transformJavaCommand(typed).endsWith(expected));
   }
 
   /** Asserts that the given string typed by the user of the form "applet classname" is transformed to the given
@@ -223,23 +222,23 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretJavaArguments started");
     // java Foo a b c
     // Foo.main(new String[]{"a", "b", "c"});
-    _assertJavaTransformation("java Foo a b c", "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
+    _assertJavaTransformationTail("java Foo a b c", "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
     // java Foo "a b c"
     // Foo.main(new String[]{"a b c"});
-    _assertJavaTransformation("java Foo \"a b c\"", "Foo.main(new String[]{\"a b c\"});");
+    _assertJavaTransformationTail("java Foo \"a b c\"", "Foo.main(new String[]{\"a b c\"});");
     // java Foo "a b"c d
     // Foo.main(new String[]{"a bc", "d"});
     //  This is different behavior than Unix or DOS, but it's more
     //  intuitive to the user (and easier to implement).
-    _assertJavaTransformation("java Foo \"a b\"c d", "Foo.main(new String[]{\"a bc\",\"d\"});");
+    _assertJavaTransformationTail("java Foo \"a b\"c d", "Foo.main(new String[]{\"a bc\",\"d\"});");
     
     // java Foo c:\\file.txt
     // Foo.main("c:\\file.txt");
-    _assertJavaTransformation("java Foo c:\\\\file.txt", "Foo.main(new String[]{\"c:\\\\file.txt\"});");
+    _assertJavaTransformationTail("java Foo c:\\\\file.txt", "Foo.main(new String[]{\"c:\\\\file.txt\"});");
     
     // java Foo /home/user/file
     // Foo.main("/home/user/file");
-    _assertJavaTransformation("java Foo /home/user/file", "Foo.main(new String[]{\"/home/user/file\"});");
+    _assertJavaTransformationTail("java Foo /home/user/file", "Foo.main(new String[]{\"/home/user/file\"});");
     _log.log("testInterpretJavaArguments ended");
   }
   
@@ -252,16 +251,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretJavaEscapedArgs started");
     // java Foo \j
     // Foo.main(new String[]{"j"});
-    _assertJavaTransformation("java Foo \\j", "Foo.main(new String[]{\"j\"});");
+    _assertJavaTransformationTail("java Foo \\j", "Foo.main(new String[]{\"j\"});");
     // java Foo \"
     // Foo.main(new String[]{"\""});
-    _assertJavaTransformation("java Foo \\\"", "Foo.main(new String[]{\"\\\"\"});");
+    _assertJavaTransformationTail("java Foo \\\"", "Foo.main(new String[]{\"\\\"\"});");
     // java Foo \\
     // Foo.main(new String[]{"\\"});
-    _assertJavaTransformation("java Foo \\\\", "Foo.main(new String[]{\"\\\\\"});");
+    _assertJavaTransformationTail("java Foo \\\\", "Foo.main(new String[]{\"\\\\\"});");
     // java Foo a\ b
     // Foo.main(new String[]{"a b"});
-    _assertJavaTransformation("java Foo a\\ b", "Foo.main(new String[]{\"a b\"});");
+    _assertJavaTransformationTail("java Foo a\\ b", "Foo.main(new String[]{\"a b\"});");
     _log.log("testInterpretJavaEscapedArgs ended");
   }
   
@@ -272,16 +271,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretJavaQuotedEscapedArgs started");
     // java Foo "a \" b"
     // Foo.main(new String[]{"a \" b"});
-    _assertJavaTransformation("java Foo \"a \\\" b\"", "Foo.main(new String[]{\"a \\\" b\"});");
+    _assertJavaTransformationTail("java Foo \"a \\\" b\"", "Foo.main(new String[]{\"a \\\" b\"});");
     // java Foo "\'"
     // Foo.main(new String[]{"\\'"});
-    _assertJavaTransformation("java Foo \"\\'\"", "Foo.main(new String[]{\"\\\\'\"});");
+    _assertJavaTransformationTail("java Foo \"\\'\"", "Foo.main(new String[]{\"\\\\'\"});");
     // java Foo "\\"
     // Foo.main(new String[]{"\\"});
-    _assertJavaTransformation("java Foo \"\\\\\"", "Foo.main(new String[]{\"\\\\\"});");
+    _assertJavaTransformationTail("java Foo \"\\\\\"", "Foo.main(new String[]{\"\\\\\"});");
     // java Foo "\" \d"
     // Foo.main(new String[]{"\" \\d"});
-    _assertJavaTransformation("java Foo \"\\\" \\d\"", "Foo.main(new String[]{\"\\\" \\\\d\"});");
+    _assertJavaTransformationTail("java Foo \"\\\" \\d\"", "Foo.main(new String[]{\"\\\" \\\\d\"});");
     // java Foo "\n"
     // Foo.main(new String[]{"\n"});
     /*    _assertJavaTransformation("java Foo \"\\n\"", "Foo.main(new String[]{\"\\n\"});");
@@ -304,13 +303,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   public void testInterpretJavaSingleQuotedArgs() {
     _log.log("testInterpretJavaSingleQuotedArgs started");
     // java Foo 'asdf'
-    _assertJavaTransformation("java Foo 'asdf'", "Foo.main(new String[]{\"asdf\"});");
+    _assertJavaTransformationTail("java Foo 'asdf'", "Foo.main(new String[]{\"asdf\"});");
     
     // java Foo 'a b c'
-    _assertJavaTransformation("java Foo 'a b c'", "Foo.main(new String[]{\"a b c\"});");
+    _assertJavaTransformationTail("java Foo 'a b c'", "Foo.main(new String[]{\"a b c\"});");
     
     // java Foo 'a b'c
-    _assertJavaTransformation("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
+    _assertJavaTransformationTail("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
      _log.log("testInterpretJavaSingleQuotedArgs ended");
   }
   

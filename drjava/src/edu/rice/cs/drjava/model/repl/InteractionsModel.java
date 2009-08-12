@@ -859,14 +859,23 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public abstract void _notifyInterpreterReady(File wd);
 
   protected static String _transformJavaCommand(String s) {
-    return _transformCommand(s,"{0}.main(new String[]'{'{1}'}');");
+    // check the return type and public access before executing, per bug #1585210
+    String command = "try '{'\n" +
+                     "  java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
+                     "  if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
+                     "'}'\n" +
+                     "catch (java.lang.NoSuchMethodException e) '{'\n" +
+                     "  throw new java.lang.NoSuchMethodError(\"main\");\n" +
+                     "'}'\n" +
+                     "{0}.main(new String[]'{'{1}'}');";
+    return _transformCommand(s, command);
   }
   
   protected static String _transformAppletCommand(String s) {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
   
-  /** Assumes a trimmed String. Returns a string of the call that the interpretor can use.
+  /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
     * The arguments get formatted as comma-separated list of strings enclosed in quotes.
     * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
     * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
