@@ -205,7 +205,7 @@ public class TreeLogSink extends TextLogSink {
           if (e.descendents() == 0) { descendents.setVisible(false); }
           else {
             descendents.setVisible(true);
-            descendents.setText("(" + e.descendents() + ")");
+            descendents.setText("[" + e.descendents() + "]");
           }
           time.setText(e.time());
           location.setText(e.location());
