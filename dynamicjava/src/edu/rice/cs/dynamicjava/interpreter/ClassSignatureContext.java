@@ -4,6 +4,8 @@ import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /**
  * The context of a class declaration's signature, which includes its type variables and own name
  * but excludes its members.
@@ -79,6 +81,8 @@ public class ClassSignatureContext extends DelegatingContext {
    * if there is no such type.
    */
   public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    debug.logStart(new String[]{"class","name"}, _c, name); try {
+      
     if (matchesMemberClass(name)) {
       return SymbolUtil.thisType(_c.declaringClass());
     }
@@ -86,6 +90,8 @@ public class ClassSignatureContext extends DelegatingContext {
       return super.typeContainingMemberClass(name, ts);
     }
     else { return null; }
+    
+    } finally { debug.logEnd(); }
   }
   
   /** Test whether {@code name} is an in-scope type variable. */

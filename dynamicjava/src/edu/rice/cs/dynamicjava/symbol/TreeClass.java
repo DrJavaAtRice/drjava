@@ -88,7 +88,7 @@ public class TreeClass implements DJClass {
     extractMembers(loader);
   }
   
-  /** Set the TYPE and TYPE_VARIABLE properties of of non-anonymous classes/interfaces to stub Object types. */
+  /** Set the TYPE and TYPE_VARIABLE properties of of non-anonymous classes' signatures to stub Object types. */
   private void tagSignature() {
     if (_ast instanceof TypeDeclaration) {
       TypeDeclaration td = (TypeDeclaration) _ast;

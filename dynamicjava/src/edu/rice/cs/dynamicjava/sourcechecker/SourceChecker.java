@@ -126,7 +126,7 @@ public class SourceChecker {
   private void startStatus(String description) {
     _statusCount = 0;
     if (!_quiet) {
-      String fullDesc = TextUtil.padRight(description + "...", ' ', 35);
+      String fullDesc = TextUtil.padRight(description + "...", ' ', 36);
       System.out.print(fullDesc);
       System.out.flush();
     }
@@ -152,14 +152,18 @@ public class SourceChecker {
     
     public void run(Iterable<? extends T> args) throws InterpreterException {
       List<InterpreterException> errors = new ArrayList<InterpreterException>();
+      debug.logStart(_description);
       startStatus(_description);
       for (T arg : args) {
+        debug.logStart("location", location(arg));
         try { step(arg); }
         catch (InterpreterException e) { errors.add(e); }
         catch (RuntimeException e) { errors.add(new InternalException(e, location(arg))); }
         incrementStatus();
+        debug.logEnd();
       }
       endStatus();
+      debug.logEnd(_description);
       if (!errors.isEmpty()) { throw CompositeException.make(errors); }
     }
   }
@@ -175,7 +179,6 @@ public class SourceChecker {
     }
     protected abstract void step(TypeDeclaration ast, ClassChecker checker);
   }
-    
     
   public static void main(String... args) {
     ArgumentParser argParser = new ArgumentParser();

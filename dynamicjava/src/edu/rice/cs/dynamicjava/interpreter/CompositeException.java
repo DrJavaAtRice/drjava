@@ -36,17 +36,14 @@ public class CompositeException extends InterpreterException {
   public SizedIterable<InterpreterException> exceptions() { return _exceptions; }
   
   public static InterpreterException make(Iterable<? extends InterpreterException> errors) {
-    if (IterUtil.sizeOf(errors, 2) == 1) { return IterUtil.first(errors); }
-    else {
-      List<InterpreterException> normalized = new ArrayList<InterpreterException>();
-      for (InterpreterException e : errors) {
-        if (e instanceof CompositeException) {
-          CollectUtil.addAll(normalized, ((CompositeException) e).exceptions());
-        }
-        else { normalized.add(e); }
+    List<InterpreterException> normalized = new ArrayList<InterpreterException>();
+    for (InterpreterException e : errors) {
+      if (e instanceof CompositeException) {
+        CollectUtil.addAll(normalized, ((CompositeException) e).exceptions());
       }
-      return new CompositeException(normalized);
+      else { normalized.add(e); }
     }
+    return new CompositeException(normalized);
   }
 
 }

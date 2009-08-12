@@ -543,17 +543,18 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       }
       
       else {
-        if (!hasValue(bk) || getValue(bk) == null) {
-          throw new ExecutionError("invalid.constant", bk);
+        Expression exp = bk.getExpression();
+        if (!hasValue(exp) || getValue(exp) == null) {
+          throw new ExecutionError("invalid.constant", exp);
         }
-        if (!ts.isAssignable(t, getType(bk), getValue(bk))) {
-          setErrorStrings(node, ts.userRepresentation(getType(bk)));
-          throw new ExecutionError("switch.label.type", bk);
+        if (!ts.isAssignable(t, getType(exp), getValue(exp))) {
+          setErrorStrings(node, ts.userRepresentation(getType(exp)));
+          throw new ExecutionError("switch.label.type", exp);
         }
-        if (values.contains(getValue(bk))) { 
+        if (values.contains(getValue(exp))) { 
           throw new ExecutionError("duplicate.switch.case", node);
         }
-        values.add(getValue(bk));
+        values.add(getValue(exp));
       }
     }
     
@@ -662,7 +663,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     
     return context;
   }
-
+  
     /**
    * Visits an AssertStatement.  JLS 14.10.
    */
@@ -710,6 +711,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     return context;
   }
   
+  @Override public TypeContext visit(BreakStatement node) {
+    return context; // TODO: check control-flow context, labels
+  }
+
+  @Override public TypeContext visit(ContinueStatement node) {
+    return context; // TODO: check control-flow context, labels
+  }
+
   @Override public TypeContext visit(ExpressionStatement node) {
     if (node.getExpression() instanceof SimpleAssignExpression) {
       SimpleAssignExpression assign = (SimpleAssignExpression) node.getExpression();

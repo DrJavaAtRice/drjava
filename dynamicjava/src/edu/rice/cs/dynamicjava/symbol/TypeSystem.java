@@ -58,18 +58,19 @@ public abstract class TypeSystem {
   protected static final Iterable<Expression> EMPTY_EXPRESSION_ITERABLE = IterUtil.empty();
   protected static final Option<Type> NONE_TYPE_OPTION = Option.none();
   
-  public TypeWrapper wrap(Type t) { return new TypeWrapper(t); }
+  public TypeWrapper wrap(Type t) { return (t == null) ? null : new TypeWrapper(t); }
   
   public Iterable<TypeWrapper> wrap(Iterable<? extends Type> ts) {
-    return IterUtil.map(ts, WRAP_TYPE);
+    return (ts == null) ? null : IterUtil.map(ts, WRAP_TYPE);
   }
   
   private final Lambda<Type, TypeWrapper> WRAP_TYPE = new Lambda<Type, TypeWrapper>() {
-    public TypeWrapper value(Type t) { return new TypeWrapper(t); }
+    public TypeWrapper value(Type t) { return (t == null) ? null : new TypeWrapper(t); }
   };
 
   public Option<TypeWrapper> wrap(Option<Type> t) {
-    return t.isSome() ? Option.some(new TypeWrapper(t.unwrap())) : Option.<TypeWrapper>none();
+    if (t == null) return null;
+    else return t.isSome() ? Option.some(new TypeWrapper(t.unwrap())) : Option.<TypeWrapper>none();
   }
   
   /**

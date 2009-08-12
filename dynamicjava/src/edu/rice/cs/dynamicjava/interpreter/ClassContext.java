@@ -52,8 +52,12 @@ public class ClassContext extends DelegatingContext {
    * if there is no such type.
    */
   @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    debug.logStart(new String[]{"class","name"}, _c, name); try {
+      
     if (hasMemberClass(name, ts)) { return _thisType; }
     else { return super.typeContainingMemberClass(name, ts); }
+    
+    } finally { debug.logEnd(); }
   }
   
   private boolean hasMemberClass(String name, TypeSystem ts) {

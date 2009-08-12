@@ -1329,14 +1329,16 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   protected Type immediateSupertype(SimpleClassType t) {
     if (t.equals(OBJECT)) { return null; }
-    else { return meet(IterUtil.compose(OBJECT, t.ofClass().declaredSupertypes())); }
+    // can't use meet here because there may be a circular dependency with subtyping
+    else { return new IntersectionType(IterUtil.compose(OBJECT, t.ofClass().declaredSupertypes())); }
   }
   
   protected Type immediateSupertype(RawClassType t) {
     Iterable<Type> erasedSups = IterUtil.map(t.ofClass().declaredSupertypes(), new Lambda<Type, Type>() {
       public Type value(Type t) { return t.apply(ERASE); }
     });
-    return meet(IterUtil.compose(OBJECT, erasedSups));
+    // can't use meet here because there may be a circular dependency with subtyping
+    return new IntersectionType(IterUtil.compose(OBJECT, erasedSups));
   }
   
   protected Type immediateSupertype(ParameterizedClassType t) {
@@ -1344,7 +1346,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     DJClass c = tCap.ofClass();
     Iterable<? extends Type> sups =
       substitute(c.declaredSupertypes(), SymbolUtil.allTypeParameters(c), tCap.typeArguments());
-    return meet(IterUtil.compose(OBJECT, sups));
+    // can't use meet here because there may be a circular dependency with subtyping
+    return new IntersectionType(IterUtil.compose(OBJECT, sups));
   }
   
   
@@ -1831,10 +1834,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                                  final Iterable<? extends Expression> args,
                                                  final Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logValues("Looking up constructor",
-                    new String[]{"t", "typeArgs", "arg types", "expected"},
-                    wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)),
-                    expected);
+    debug.logStart(new String[]{"t","typeArgs","arg types","expected"},
+                   wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
+                     
     Iterable<ConstructorInvocation> results = 
       t.apply(new TypeAbstractVisitor<Iterable<ConstructorInvocation>>() {
       
@@ -1845,7 +1847,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         Lambda<DJConstructor, SignatureChecker> makeChecker = 
           new Lambda<DJConstructor, SignatureChecker>() {
           public SignatureChecker value(DJConstructor k) {
-            debug.logValues(new String[]{"k", "declaredParameterTypes"}, k, SymbolUtil.declaredParameterTypes(k));
+            //debug.logValues(new String[]{"k", "declaredParameterTypes"}, k, SymbolUtil.declaredParameterTypes(k));
             return makeChecker(k.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(k),
                                args, t, expected);
           }
@@ -1919,6 +1921,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     int matches = IterUtil.sizeOf(results);
     if (matches != 1) { throw new UnmatchedLookupException(matches); }
     else { return IterUtil.first(results); }
+    
+    } finally { debug.logEnd(); }
   }
   
   public boolean containsMethod(Type t, String name) {
@@ -1930,7 +1934,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   private boolean containsMethod(Type t, final String name, final boolean requireStatic) {
-//    System.out.println("Testing if method " + name + " exists in type " + userRepresentation(t));
+    debug.logStart(new String[]{"t","name","requireStatic"}, wrap(t), name, requireStatic); try {
+    
     class LookupMethod extends TypeAbstractVisitor<Iterable<Object>> {
       
       private boolean _includePrivate;
@@ -1948,6 +1953,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       public Iterable<Object> defaultCase(Type t) { return IterUtil.empty(); }
       
       @Override public Iterable<Object> forClassType(ClassType t) {
+        debug.logValues(new String[]{"t","methods"}, wrap(t), t.ofClass().declaredMethods());
         for (DJMethod m : t.ofClass().declaredMethods()) {
           if (m.declaredName().equals(name) && validMethod(m)) {
             return IterUtil.singleton(null);
@@ -1958,6 +1964,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
     Iterable<? extends Object> results = lookupMember(t, new LookupMethod(true), new LookupMethod(false));
     return !IterUtil.isEmpty(results);
+    
+    } finally { debug.logEnd(); }
   }
   
   /**
@@ -1978,9 +1986,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                              final Iterable<? extends Expression> args,
                                              final Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-//    System.out.println("\nLooking up method " + name + " in type " + userRepresentation(NodeProperties.getType(object)) +
-//                       " with typeArgs (" + userRepresentation(typeArgs) + ") and args (" +
-//                       userRepresentation(IterUtil.map(args, NodeProperties.NODE_TYPE)) + ")");
+    debug.logStart(new String[]{"t","name", "typeArgs","arg types","expected"},
+                   wrap(NodeProperties.getType(object)), name, wrap(typeArgs),
+                   wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
+
     class LookupMethod extends TypeAbstractVisitor<Iterable<ObjectMethodInvocation>> {
       
       private Predicate<? super DJMethod> _matchMethod;
@@ -2082,6 +2091,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     int matches = IterUtil.sizeOf(results);
     if (matches != 1) { throw new UnmatchedLookupException(matches); }
     else { return IterUtil.first(results); }
+    
+    } finally { debug.logEnd(); }
   }
   
   /**
@@ -2102,8 +2113,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                                    final Iterable<? extends Expression> args,
                                                    final Option<Type> expected)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    //debug.logValues("Looking up method", new String[]{ "t", "name", "typeArgs", "args", "expected" },
-    //                wrap(t), name, wrap(typeArgs), args, wrap(expected));
+    debug.logStart(new String[]{"t","name","typeArgs","arg types","expected"},
+                   wrap(t), name, wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)),
+                   wrap(expected)); try {
+                     
     class LookupMethod extends TypeAbstractVisitor<Iterable<StaticMethodInvocation>> {
       
       private Predicate<? super DJMethod> _matchMethod;
@@ -2206,6 +2219,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     int matches = IterUtil.sizeOf(results);
     if (matches != 1) { throw new UnmatchedLookupException(matches); }
     else { return IterUtil.first(results); }
+    
+    } finally { debug.logEnd(); }
   }
   
   
@@ -2218,7 +2233,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   private boolean containsField(Type t, final String name, final boolean requireStatic) {
-//    System.out.println("Testing if field " + name + " exists in type " + userRepresentation(t));
+    debug.logStart(new String[]{"t", "name", "requireStatic"}, wrap(t), name, requireStatic); try {
+    
     class LookupField extends TypeAbstractVisitor<Iterable<Object>> {
       
       private boolean _includePrivate;
@@ -2251,6 +2267,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
     Iterable<? extends Object> results = lookupMember(t, new LookupField(true), new LookupField(false));
     return !IterUtil.isEmpty(results);
+    
+    } finally { debug.logEnd(); }
   }
 
   /**
@@ -2263,8 +2281,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public ObjectFieldReference lookupField(final Expression object, final String name)
     throws InvalidTargetException, UnmatchedLookupException {
-//    System.out.println("\nLooking up field " + name + " in type " + 
-//                       userRepresentation(NodeProperties.getType(object)));
+    debug.logStart(new String[]{"t", "name"}, wrap(NodeProperties.getType(object)), name); try {
+
     class LookupField extends TypeAbstractVisitor<Iterable<ObjectFieldReference>> {
       
       private boolean _includePrivate;
@@ -2324,6 +2342,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     int matches = IterUtil.sizeOf(results);
     if (matches != 1) { throw new UnmatchedLookupException(matches); }
     else { return IterUtil.first(results); }
+    
+    } finally { debug.logEnd(); }
   }
   
   
@@ -2337,7 +2357,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public StaticFieldReference lookupStaticField(Type t, final String name)
     throws InvalidTargetException, UnmatchedLookupException {
-//    System.out.println("\nLooking up static field " + name + " in type " + userRepresentation(t));
+    debug.logStart(new String[]{"t", "name"}, wrap(t), name); try {
+    
     class LookupField extends TypeAbstractVisitor<Iterable<StaticFieldReference>> {
       
       private boolean _includePrivate;
@@ -2390,11 +2411,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
     int matches = IterUtil.sizeOf(results);
     if (matches != 1) { throw new UnmatchedLookupException(matches); }
     else { return IterUtil.first(results); }
+    
+    } finally { debug.logEnd(); }
   }
   
   
   public boolean containsClass(Type t, final String name) {
-//    System.out.println("Testing if class " + name + " exists in type " + userRepresentation(t));
+    debug.logStart(new String[]{"t","name"}, wrap(t), name); try {
     
     // TODO: We allow nonstatic classes and ambiguous references here.  Is that correct?
     Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
@@ -2411,9 +2434,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
     };
     Iterable<? extends ClassType> classes = lookupClasses(t, makePred, EMPTY_TYPE_ITERABLE);
     return !IterUtil.isEmpty(classes);
+    
+    } finally { debug.logEnd(); }
   }
   
   public boolean containsStaticClass(Type t, final String name) {
+    debug.logStart(new String[]{"t","name"}, wrap(t), name); try {
+    
     Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
       public Predicate<DJClass> value(final Boolean includePrivate) {
         return new Predicate<DJClass>() {
@@ -2429,6 +2456,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     };
     Iterable<? extends ClassType> classes = lookupClasses(t, makePred, EMPTY_TYPE_ITERABLE);
     return !IterUtil.isEmpty(classes);
+    
+    } finally { debug.logEnd(); }
   }
   
   /**
@@ -2462,23 +2491,23 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */  
   public ClassType lookupClass(Type t, final String name, Iterable<? extends Type> typeArgs)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs);
-    try {
-      Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-        public Predicate<DJClass> value(final Boolean includePrivate) {
-          return new Predicate<DJClass>() {
-            public boolean contains(DJClass c) {
-              if (c.declaredName().equals(name)) {
-                return includePrivate || !c.accessibility().equals(Access.PRIVATE);
-              }
-              else { return false; }
+    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs); try {
+      
+    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
+      public Predicate<DJClass> value(final Boolean includePrivate) {
+        return new Predicate<DJClass>() {
+          public boolean contains(DJClass c) {
+            if (c.declaredName().equals(name)) {
+              return includePrivate || !c.accessibility().equals(Access.PRIVATE);
             }
-          };
-        }
-      };
-      return lookupClass(t, makePred, typeArgs, name);
-    }
-    finally { debug.logEnd(); }
+            else { return false; }
+          }
+        };
+      }
+    };
+    return lookupClass(t, makePred, typeArgs, name);
+    
+    } finally { debug.logEnd(); }
   }
   
   /**
@@ -2495,24 +2524,24 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs);
-    try {
-      Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-        public Predicate<DJClass> value(final Boolean includePrivate) {
-          return new Predicate<DJClass>() {
-            public boolean contains(DJClass c) {
-              if (c.declaredName().equals(name)) {
-                if (includePrivate) { return c.isStatic(); }
-                else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
-              }
-              else { return false; }
+    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs); try {
+      
+    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
+      public Predicate<DJClass> value(final Boolean includePrivate) {
+        return new Predicate<DJClass>() {
+          public boolean contains(DJClass c) {
+            if (c.declaredName().equals(name)) {
+              if (includePrivate) { return c.isStatic(); }
+              else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
             }
-          };
-        }
-      };
-      return lookupClass(t, makePred, typeArgs, name);
-    }
-    finally { debug.logEnd(); }
+            else { return false; }
+          }
+        };
+      }
+    };
+    return lookupClass(t, makePred, typeArgs, name);
+    
+    } finally { debug.logEnd(); }
   }
   
   /** Look up an inner class based on the given predicate. */
@@ -2581,6 +2610,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
       public Iterable<ClassType> defaultCase(Type t) { return IterUtil.empty(); }
       
       @Override public Iterable<ClassType> forClassType(final ClassType t) {
+        debug.logStart("t", wrap(t)); try {
+          
         Lambda<DJClass, ClassType> makeType = new Lambda<DJClass, ClassType>() {
           public ClassType value(DJClass c) {
             ClassType dynamicOuter; // may be null
@@ -2599,7 +2630,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
             }
           }
         };
+        debug.logValue("declaredClasses", t.ofClass().declaredClasses());
         return IterUtil.mapSnapshot(IterUtil.filter(t.ofClass().declaredClasses(), _matchInner), makeType);
+        
+        } finally { debug.logEnd(); }
       }
       
     }
@@ -2634,7 +2668,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   private <T> Iterable<? extends T> 
     lookupMember(Type t, TypeVisitor<? extends Iterable<? extends T>> baseCase, 
                  TypeVisitor<? extends Iterable<? extends T>> recursiveBaseCase) {
-    return lookupMember(t, new LinkedList<Type>(), baseCase, recursiveBaseCase);
+    return lookupMember(t, new HashSet<Type>(), baseCase, recursiveBaseCase);
   }
   
   /**
@@ -2642,13 +2676,12 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * and returning an empty iterable in that case
    */
   private <T> Iterable<? extends T>
-    lookupMember(Type t, final List<Type> alreadyChecked,
+    lookupMember(Type t, final Set<Type> alreadyChecked,
                  TypeVisitor<? extends Iterable<? extends T>> baseCase, 
                  final TypeVisitor<? extends Iterable<? extends T>> recursiveBaseCase) {
-    for (Type checkedT : alreadyChecked) {
-      // TODO: Improve the performance here (use a hash code consistent with isEqual)
-      if (isEqual(t, checkedT)) { return IterUtil.empty(); }
-    }
+    debug.logStart("t", wrap(t)); try {
+      
+    if (alreadyChecked.contains(t)) { return IterUtil.empty(); }
     
     final Iterable<? extends T> baseResult = t.apply(baseCase);
     alreadyChecked.add(t);
@@ -2696,6 +2729,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
         
       });
     }
+    
+    } finally { debug.logEnd(); }
   }
   
 }

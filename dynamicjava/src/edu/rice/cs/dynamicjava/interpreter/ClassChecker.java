@@ -40,13 +40,19 @@ public class ClassChecker {
   public void initializeClassSignatures(TypeDeclaration ast) {
     TypeContext sigContext = new ClassSignatureContext(_context, _c, _loader);
     TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
-    sigChecker.checkStructureForTypeParameters(typeParameters(ast));
-    if (ast instanceof ClassDeclaration) {
-      sigChecker.checkStructure(((ClassDeclaration) ast).getSuperclass());
+    debug.logStart("Initializing type parameters", "class", ast.getName());
+    try { sigChecker.checkStructureForTypeParameters(typeParameters(ast)); }
+    finally { debug.logEnd(); }
+    debug.logStart("Initializing supertypes", "class", ast.getName());
+    try {
+      if (ast instanceof ClassDeclaration) {
+        sigChecker.checkStructure(((ClassDeclaration) ast).getSuperclass());
+      }
+      if (ast.getInterfaces() != null) {
+        for (TypeName tn : ast.getInterfaces()) { sigChecker.checkStructure(tn); }
+      }
     }
-    if (ast.getInterfaces() != null) {
-      for (TypeName tn : ast.getInterfaces()) { sigChecker.checkStructure(tn); }
-    }
+    finally { debug.logEnd(); }
     initializeNestedClassSignatures(ast.getMembers(), sigContext);
   }
   
@@ -85,13 +91,19 @@ public class ClassChecker {
   public void checkSignatures(TypeDeclaration ast) {
     TypeContext sigContext = new ClassSignatureContext(_context, _c, _loader);
     TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
-    sigChecker.ensureWellFormedTypeParameters(typeParameters(ast));
-    if (ast instanceof ClassDeclaration) {
-      sigChecker.ensureWellFormed(((ClassDeclaration) ast).getSuperclass());
+    debug.logStart("Check type parameters");
+    try { sigChecker.ensureWellFormedTypeParameters(typeParameters(ast)); }
+    finally { debug.logEnd(); }
+    debug.logStart("Check supertypes");
+    try {
+      if (ast instanceof ClassDeclaration) {
+        sigChecker.ensureWellFormed(((ClassDeclaration) ast).getSuperclass());
+      }
+      if (ast.getInterfaces() != null) {
+        for (TypeName tn : ast.getInterfaces()) { sigChecker.ensureWellFormed(tn); }
+      }
     }
-    if (ast.getInterfaces() != null) {
-      for (TypeName tn : ast.getInterfaces()) { sigChecker.ensureWellFormed(tn); }
-    }
+    finally { debug.logEnd(); }
     
     if (ast instanceof InterfaceDeclaration) { checkInterfaceMemberSignatures(ast.getMembers(), sigContext); }
     else { checkClassMemberSignatures(ast.getMembers(), sigContext); }
@@ -116,13 +128,21 @@ public class ClassChecker {
   private void checkClassMemberSignatures(Iterable<? extends Node> members, TypeContext sigContext) {
     TypeContext bodyContext = new ClassContext(sigContext, _c); 
     Visitor<Void> v = new ClassMemberSignatureVisitor(bodyContext);
-    for (Node n : members) { n.acceptVisitor(v); }
+    for (Node n : members) {
+      debug.logStart();
+      try { n.acceptVisitor(v); }
+      finally { debug.logEnd(); }
+    }
   }
 
   private void checkInterfaceMemberSignatures(Iterable<? extends Node> members, TypeContext sigContext) {
     TypeContext bodyContext = new ClassContext(sigContext, _c); 
     Visitor<Void> v = new InterfaceMemberSignatureVisitor(bodyContext);
-    for (Node n : members) { n.acceptVisitor(v); }
+    for (Node n : members) {
+      debug.logStart();
+      try { n.acceptVisitor(v); }
+      finally { debug.logEnd(); }
+    }
   }
   
   /**
@@ -153,7 +173,11 @@ public class ClassChecker {
     TypeContext sigContext = new ClassSignatureContext(_context, _c, _loader);
     TypeContext bodyContext = new ClassContext(sigContext, _c); 
     MemberBodyVisitor bod = new MemberBodyVisitor(bodyContext);
-    for (Node n : members) { n.acceptVisitor(bod); }
+    for (Node n : members) {
+      debug.logStart();
+      try { n.acceptVisitor(bod); }
+      finally { debug.logEnd(); }
+    }
   }
   
   private static TypeParameter[] typeParameters(TypeDeclaration ast) {

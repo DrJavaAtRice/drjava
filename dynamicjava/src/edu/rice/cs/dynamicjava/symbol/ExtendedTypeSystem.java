@@ -84,13 +84,18 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   
   /** Determine if the given types may be treated as equal.  This is recursive, transitive, and symmetric. */
   public boolean isEqual(Type t1, Type t2) {
+    //debug.logStart(new String[]{"t1","t2"}, wrap(t1), wrap(t2)); try {
+      
     if (t1.equals(t2)) { return true; }
     else {
       NormSubtyper sub = new NormSubtyper();
-      Type t1Norm = NORMALIZE.value(t1);
-      Type t2Norm = NORMALIZE.value(t2);
+      Normalizer norm = new Normalizer(sub);
+      Type t1Norm = norm.value(t1);
+      Type t2Norm = norm.value(t2);
       return sub.contains(t1Norm, t2Norm) && sub.contains(t2Norm, t1Norm);
     }
+    
+    //} finally { debug.logEnd(); }
   }
   
   /**
@@ -98,7 +103,9 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
    * (in terms of {@link #isEqual}), transitive relation.
    */
   public boolean isSubtype(Type subT, Type superT) {
-    return new NormSubtyper().contains(NORMALIZE.value(subT), NORMALIZE.value(superT));
+    NormSubtyper sub = new NormSubtyper();
+    Normalizer norm = new Normalizer(sub);
+    return sub.contains(norm.value(subT), norm.value(superT));
   }
   
   /**
@@ -115,7 +122,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     public Predicate<Type> subtypes(Type sup) { return bindSecond((Order<Type>) this, sup); }
     
     public boolean contains(final Type subT, final Type superT) {
-      //debug.logStart(new String[]{"subT", "superT"}, subT, superT); try {
+      //debug.logStart(new String[]{"subT", "superT"}, wrap(subT), wrap(superT)); try {
               
       if (subT.equals(superT)) { return true; } // what follows assumes the types are not syntactically equal
       
@@ -128,7 +135,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             public Boolean defaultCase(final Type subT) {
               Thunk<Boolean> checkLowerBound = new Thunk<Boolean>() {
                 public Boolean value() {
-                  Type bound = NORMALIZE.value(superT.symbol().lowerBound());
+                  Type bound = new Normalizer(NormSubtyper.this).value(superT.symbol().lowerBound());
                   return NormSubtyper.this.contains(subT, bound);
                 }
               };
@@ -248,11 +255,18 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
         public Boolean forClassType(final ClassType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
-            @Override public Boolean forClassType(ClassType superT) {
-              Type newSub = immediateSupertype(subT);
+            @Override public Boolean forClassType(final ClassType superT) {
+              final Type newSub = immediateSupertype(subT);
               if (newSub == null) { return false; }
-              // immediateSupertype() always returns a normalized type
-              else { return NormSubtyper.this.contains(newSub, superT); }
+              else {
+                Thunk<Boolean> recurOnParent = new Thunk<Boolean>() {
+                  public Boolean value() {
+                    Type newSubNorm = new Normalizer(NormSubtyper.this).value(newSub);
+                    return NormSubtyper.this.contains(newSubNorm, superT);
+                  }
+                };
+                return _stack.apply(recurOnParent, false, subT, superT);
+              }
             }
           });
         }
@@ -308,7 +322,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
         public Boolean forVariableType(final VariableType subT) {
           Thunk<Boolean> checkUpperBound = new Thunk<Boolean>() {
             public Boolean value() {
-              Type bound = NORMALIZE.value(subT.symbol().upperBound());
+              Type bound = new Normalizer(NormSubtyper.this).value(subT.symbol().upperBound());
               return NormSubtyper.this.contains(bound, superT);
             }
           };
@@ -339,15 +353,24 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
    * <li>All component types are normalized.  (Wildcard bounds are "component types"; variable bounds and
    * class supertypes are not.)</li>
    */
-  private final TypeUpdateVisitor NORMALIZE = new TypeUpdateVisitor() {
+  private final class Normalizer extends TypeUpdateVisitor {
+    
+    /**
+     * Subtyper to preserve stack during circular dependencies between normalization and subtyping.
+     * Note that the results from this subtyper may be different than the results from a fresh
+     * subtyper, and any use should be an optimization, not something essential to correctness.
+     */
+    private final NormSubtyper _subtyper;
+    public Normalizer(NormSubtyper subtyper) { _subtyper = subtyper; }
+    
     @Override public Type forIntersectionTypeOnly(IntersectionType t, Iterable<? extends Type> normTypes) {
-      debug.logStart(new String[]{"t","normTypes"}, wrap(t), wrap(normTypes));
-      Type result = MEET_NORM.value(normTypes);
-      debug.logEnd("result", wrap(result));
+      //debug.logStart(new String[]{"t","normTypes"}, wrap(t), wrap(normTypes)); try {
+      Type result = new NormMeeter(_subtyper).value(normTypes);
       return t.equals(result) ? t : result;
+      //} finally { debug.logEnd(); }
     }
     @Override public Type forUnionTypeOnly(UnionType t, Iterable<? extends Type> normTypes) {
-      Type result = JOIN_NORM.value(normTypes);
+      Type result = new NormJoiner(_subtyper).value(normTypes);
       return t.equals(result) ? t : result;
     }
     @Override public Type forWildcardOnly(Wildcard w) {
@@ -361,13 +384,21 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   };
   
   public Type join(Iterable<? extends Type> ts) {
-    return JOIN_NORM.value(map(ts, NORMALIZE));
+    NormSubtyper sub = new NormSubtyper();
+    return new NormJoiner(sub).value(map(ts, new Normalizer(sub)));
   }
   
   /** Produce the normalized union of normalized types (may return a union or some other form). */
-  private final Lambda<Iterable<? extends Type>, Type> JOIN_NORM = new Lambda<Iterable<? extends Type>, Type>() {
+  private class NormJoiner implements Lambda<Iterable<? extends Type>, Type> {
+    /**
+     * Subtyper to preserve stack during circular dependencies between normalization and subtyping.
+     * Note that the results from this subtyper may be different than the results from a fresh
+     * subtyper, and so any use should be an optimization, not something essential to correctness.
+     */
+    private final NormSubtyper _subtyper;
+    public NormJoiner(NormSubtyper subtyper) { _subtyper = subtyper; }
     public Type value(Iterable<? extends Type> elements) {
-      List<Type> disjuncts = maxList(collapse(map(elements, DISJUNCTS)), new NormSubtyper());
+      List<Type> disjuncts = maxList(collapse(map(elements, DISJUNCTS)), _subtyper);
       switch (disjuncts.size()) {
         case 0: return BOTTOM;
         case 1: return disjuncts.get(0);
@@ -377,20 +408,30 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   };
   
   public Type meet(Iterable<? extends Type> ts) {
-    return MEET_NORM.value(map(ts, NORMALIZE));
+    NormSubtyper sub = new NormSubtyper();
+    return new NormMeeter(sub).value(map(ts, new Normalizer(sub)));
   }
   
   /** Produce the normalized intersection of normalized types (may return a union, intersection, or some other form). */
-  private final Lambda<Iterable<? extends Type>, Type> MEET_NORM = new Lambda<Iterable<? extends Type>, Type>() {
+  private class NormMeeter implements Lambda<Iterable<? extends Type>, Type> {
+    /**
+     * Subtyper to preserve stack during circular dependencies between normalization and subtyping.
+     * Note that the results from this subtyper may be different than the results from a fresh
+     * subtyper, and so any use should be an optimization, not something essential to correctness.
+     */
+    private final NormSubtyper _subtyper;
+    public NormMeeter(NormSubtyper subtyper) { _subtyper = subtyper; }
+    
     public Type value(Iterable<? extends Type> elements) {
       if (IterUtil.or(elements, bindSecond(LambdaUtil.INSTANCE_OF, UnionType.class))) {
+        final NormJoiner joiner = new NormJoiner(_subtyper);
         // elements contain at least one union
         Iterable<Iterable<Type>> posElements = map(elements, new Lambda<Type, Iterable<Type>>() {
           public Iterable<Type> value(Type element) {
             // convert sum-of-products (normalized) form to product-of-sums
             // javac 1.5/1.6 requires explicit type args
             return IterUtil.<Type, Type, Type, Type, Iterable<Type>>
-              distribute(element, DISJUNCTS, CONJUNCTS, JOIN_NORM, LambdaUtil.<Iterable<Type>>identity());
+              distribute(element, DISJUNCTS, CONJUNCTS, joiner, LambdaUtil.<Iterable<Type>>identity());
           }
         });
        // each element of conjuncts is atomic or a union of atomics
@@ -398,23 +439,24 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
         // convert back to sum-of-products
         // javac 1.5/1.6 requires explicit type args
         return IterUtil.<Iterable<Type>, Type, Type, Type, Type>
-          distribute(conjuncts, LambdaUtil.<Iterable<Type>>identity(), DISJUNCTS, MEET_ATOMIC, JOIN_NORM);
+          distribute(conjuncts, LambdaUtil.<Iterable<Type>>identity(), DISJUNCTS, _meetAtomic, joiner);
       }
-      else { return MEET_ATOMIC.value(collapse(map(elements, CONJUNCTS))); }
+      else { return _meetAtomic.value(collapse(map(elements, CONJUNCTS))); }
     }
-  };
-  
-  /** Produce the normalized intersection of atomic (not union or intersection) types. */ 
-  private final Lambda<Iterable<? extends Type>, Type> MEET_ATOMIC = new Lambda<Iterable<? extends Type>, Type>() {
-    public Type value(Iterable<? extends Type> atoms) {
-      List<Type> conjuncts = minList(atoms, new NormSubtyper());
-      switch (conjuncts.size()) {
-        case 0: return TOP;
-        case 1: return conjuncts.get(0);
-        default: return new IntersectionType(conjuncts);
+    
+    /** Produce the normalized intersection of atomic (not union or intersection) types. */ 
+    private final Lambda<Iterable<? extends Type>, Type> _meetAtomic =
+        new Lambda<Iterable<? extends Type>, Type>() {
+      public Type value(Iterable<? extends Type> atoms) {
+        List<Type> conjuncts = minList(atoms, _subtyper);
+        switch (conjuncts.size()) {
+          case 0: return TOP;
+          case 1: return conjuncts.get(0);
+          default: return new IntersectionType(conjuncts);
+        }
       }
-    }
-  };
+    };
+  }
   
   private final TypeVisitorLambda<Iterable<? extends Type>> DISJUNCTS =
       new TypeAbstractVisitor<Iterable<? extends Type>>() {
@@ -446,14 +488,17 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       Type arg = triple.second();
       if (arg instanceof Wildcard) {
         Wildcard argW = (Wildcard) arg;
+        Type argU = argW.symbol().upperBound();
+        Type argL = argW.symbol().lowerBound();
         VariableType param = triple.third();
         Type paramU = substitute(param.symbol().upperBound(), sigma);
         Type paramL = substitute(param.symbol().lowerBound(), sigma);
-        triple.first().initializeUpperBound(new IntersectionType(IterUtil.make(argW.symbol().upperBound(),
-                                                                               paramU)));
-        triple.first().initializeLowerBound(new UnionType(IterUtil.make(argW.symbol().lowerBound(), paramL)));
+        Type captureU = argU.equals(paramU) ? argU : new IntersectionType(IterUtil.make(argU, paramU));
+        Type captureL = argL.equals(paramL) ? argL : new UnionType(IterUtil.make(argL, paramL));
         // These bounds aren't normalized because we can't perform subtype checks on uninstantiated variables.
         // That's okay, though, because we don't assume anywhere that variable bounds are normalized.
+        triple.first().initializeUpperBound(captureU);
+        triple.first().initializeLowerBound(captureL);
       }
     }
     return newArgs;
@@ -534,11 +579,14 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     public Option<ConstraintScenario> and(ConstraintScenario that) {
       ConstraintScenario result = new ConstraintScenario();
+      NormSubtyper sub = new NormSubtyper();
+      NormJoiner join = new NormJoiner(sub);
+      NormMeeter meet = new NormMeeter(sub);
       for (VariableType var : union(_lowerBounds.keySet(), that._lowerBounds.keySet())) {
-        result._lowerBounds.put(var, JOIN_NORM.value(IterUtil.make(lowerBound(var), that.lowerBound(var))));
+        result._lowerBounds.put(var, join.value(IterUtil.make(lowerBound(var), that.lowerBound(var))));
       }
       for (VariableType var : union(_upperBounds.keySet(), that._upperBounds.keySet())) {
-        result._upperBounds.put(var, MEET_NORM.value(IterUtil.make(upperBound(var), that.upperBound(var))));
+        result._upperBounds.put(var, meet.value(IterUtil.make(upperBound(var), that.upperBound(var))));
       }
       return result.isWellFormed() ? Option.some(result) : Option.<ConstraintScenario>none(); 
     }
@@ -659,12 +707,14 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     // perform inference for args and returned
     ConstraintFormula constraints = TRUE;
-    for (Pair<Type, Type> pair : IterUtil.zip(IterUtil.map(args, NORMALIZE), IterUtil.map(params, NORMALIZE))) {
+    NormSubtyper sub = new NormSubtyper();
+    Normalizer norm = new Normalizer(sub);
+    for (Pair<Type, Type> pair : IterUtil.zip(IterUtil.map(args, norm), IterUtil.map(params, norm))) {
       constraints = constraints.and(inf.subtypeNorm(pair.first(), pair.second()));
       if (!constraints.isSatisfiable()) { break; }
     }
     if (expected.isSome() && constraints.isSatisfiable()) {
-      constraints = constraints.and(inf.supertypeNorm(NORMALIZE.value(expected.unwrap()), NORMALIZE.value(returned)));
+      constraints = constraints.and(inf.supertypeNorm(norm.value(expected.unwrap()), norm.value(returned)));
     }
     
     // transitivity constraints: inferred bounds must be sub/super-types of declared bounds
@@ -673,9 +723,9 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     for (ConstraintScenario s : constraints.scenarios()) {
       ConstraintFormula cf = s;
       for (VariableType param : tparams) {
-        cf = cf.and(inf.subtypeNorm(s.lowerBound(param), NORMALIZE.value(param.symbol().upperBound())));
+        cf = cf.and(inf.subtypeNorm(s.lowerBound(param), norm.value(param.symbol().upperBound())));
         if (!cf.isSatisfiable()) { break; }
-        cf = cf.and(inf.supertypeNorm(s.upperBound(param), NORMALIZE.value(param.symbol().lowerBound())));
+        cf = cf.and(inf.supertypeNorm(s.upperBound(param), norm.value(param.symbol().lowerBound())));
         if (!cf.isSatisfiable()) { break; }
       }
       transConstraints = transConstraints.or(cf);
@@ -712,16 +762,18 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     private final Set<? extends VariableType> _vars;
     private final RecursionStack2<Type, Type> _subStack;
     private final RecursionStack2<Type, Type> _supStack;
+    private final NormSubtyper _subtyper;
     
     public Inferencer(Set<? extends VariableType> vars) {
       _vars = vars;
       _subStack = new RecursionStack2<Type, Type>();
       _supStack = new RecursionStack2<Type, Type>();
+      _subtyper = new NormSubtyper();
     }
     
     public ConstraintFormula subtypeNorm(final Type arg, final Type param) {
       //debug.logValues(new String[]{ "arg", "param" }, wrap(arg), wrap(param));
-      if (!param.apply(_containsVar)) { return new NormSubtyper().contains(arg, param) ? TRUE : FALSE; }
+      if (!param.apply(_containsVar)) { return _subtyper.contains(arg, param) ? TRUE : FALSE; }
       else {
         return param.apply(new TypeAbstractVisitor<ConstraintFormula>() {
           
@@ -733,7 +785,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             @Override public ConstraintFormula forVariableType(final VariableType arg) {
               Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
                 public ConstraintFormula value() {
-                  return subtypeNorm(NORMALIZE.value(arg.symbol().upperBound()), param);
+                  return subtypeNorm(new Normalizer(_subtyper).value(arg.symbol().upperBound()), param);
                 }
               };
               Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
@@ -829,7 +881,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
                 @Override public ConstraintFormula defaultCase(final Type arg) {
                   Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
                     public ConstraintFormula value() {
-                      return subtypeNorm(arg, NORMALIZE.value(param.symbol().lowerBound()));
+                      return subtypeNorm(arg, new Normalizer(_subtyper).value(param.symbol().lowerBound()));
                     }
                   };
                   Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
@@ -905,7 +957,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             @Override public ConstraintFormula forVariableType(final VariableType arg) {
               Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
                 public ConstraintFormula value() {
-                  return supertypeNorm(NORMALIZE.value(arg.symbol().lowerBound()), param);
+                  return supertypeNorm(new Normalizer(_subtyper).value(arg.symbol().lowerBound()), param);
                 }
               };
               Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {
@@ -1001,7 +1053,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
                 @Override public ConstraintFormula defaultCase(final Type arg) {
                   Thunk<ConstraintFormula> recurOnBound = new Thunk<ConstraintFormula>() {
                     public ConstraintFormula value() {
-                      return supertypeNorm(arg, NORMALIZE.value(param.symbol().upperBound()));
+                      return supertypeNorm(arg, new Normalizer(_subtyper).value(param.symbol().upperBound()));
                     }
                   };
                   Thunk<ConstraintFormula> infiniteCase = new Thunk<ConstraintFormula>() {

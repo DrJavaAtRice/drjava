@@ -285,7 +285,6 @@ public class TypeNameChecker {
           else { throw new ExecutionError("ambiguous.name", node); }
         }
       }
-      
       while (ids.hasNext()) {
         try { t = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty()); }
         catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
