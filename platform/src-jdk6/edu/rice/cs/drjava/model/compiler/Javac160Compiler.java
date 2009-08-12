@@ -119,7 +119,8 @@ public class Javac160Compiler extends JavacCompiler {
       Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
         public void run() {
           try {
-            File temp = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);;
+            File temp = File.createTempFile(PREFIX, SUFFIX);
+            IOUtil.attemptDelete(temp);
             File[] toDelete = temp.getParentFile().listFiles(new FilenameFilter() {
               public boolean accept(File dir, String name) {
                 if ((!name.startsWith(PREFIX)) || (!name.endsWith(SUFFIX))) return false;
