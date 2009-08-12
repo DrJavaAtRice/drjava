@@ -262,8 +262,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       _lvtc = new LValueWithValueTypeChecker(new Bob(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>()));
       _ta = _lvtc._testAssignableInstance;
       _lvtc._bob.errors = new LinkedList<Pair<String, JExpressionIF>>();
-      _lvtc._bob.symbolTable = new Symboltable();
-      LanguageLevelVisitor.symbolTable = _lvtc._bob.symbolTable;
+      LanguageLevelConverter.symbolTable = _lvtc._bob.symbolTable = new Symboltable();
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _lvtc._bob._importedPackages.addFirst("java.lang");
     }

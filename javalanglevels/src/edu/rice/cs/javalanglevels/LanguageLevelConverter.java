@@ -52,7 +52,11 @@ import edu.rice.cs.plt.iter.IterUtil;
   */
 public class LanguageLevelConverter {
   
-  // public static final Log _log = new Log("LLConverter.txt", false);
+  public static final Log _log = new Log("LLConverter.txt", false);
+  
+  /** Hashtable for a shared symbolTable.  Since this field is static, only one instance of
+    * LanguageLevelConverter should exist at a time. */
+  static Symboltable symbolTable = new Symboltable();
   
   public static Options OPT = Options.DEFAULT;
   
@@ -95,7 +99,8 @@ public class LanguageLevelConverter {
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
     convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
     OPT = options;
-    //  WHAT IS THE FOLLOWING STATIC FIELD REFERNCE DOING HERE?  THIS IS ABOMINABLE CODE!
+    
+    LanguageLevelVisitor.symbolTable = symbolTable = new Symboltable();  // redundant?
     LanguageLevelVisitor._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
     LinkedList<Pair<String, JExpressionIF>> languageLevelVisitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
@@ -105,9 +110,6 @@ public class LanguageLevelConverter {
     
     //and the new SDs (symbol table entries) we've created
     Hashtable<SymbolData, LanguageLevelVisitor> languageLevelNewSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
-    
-    // Similarly, we need a Hashtable for a shared symbolTable.
-    Symboltable languageLevelVisitorSymbolTable = new Symboltable();
     
     // And a linked list to share visited files.
     LinkedList<Pair<LanguageLevelVisitor, SourceFile>> languageLevelVisitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
@@ -151,7 +153,9 @@ public class LanguageLevelConverter {
           SourceFile sf;
           JExprParser jep = new JExprParser(f);
           try { 
+//            System.err.println("Parsing " + f);
             sf = jep.SourceFile();
+//            System.err.println("Completed parsing " + f);
             final Set<String> topLevelClasses = new HashSet<String>();
             for (TypeDefBase t: sf.getTypes()) {
               t.visit(new JExpressionIFAbstractVisitor<Void>() {
@@ -164,6 +168,7 @@ public class LanguageLevelConverter {
           catch (ParseException pe) {
             // If there is a ParseException, go to next file.
             _addParseException(pe);
+            _log.log("GENERATED ParseException for file " + f);
             continue;
           }
           
@@ -171,19 +176,19 @@ public class LanguageLevelConverter {
           LanguageLevelVisitor llv = null;
           if (isElementaryFile(f)) {
             llv = 
-              new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, 
+              new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), symbolTable, 
                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
                                     languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else if (isIntermediateFile(f)) {
             llv = 
-              new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable,
+              new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), symbolTable,
                                       new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
                                       languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else if (isAdvancedFile(f)) {
             llv = 
-              new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, 
+              new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), symbolTable, 
                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
                                   languageLevelVisitedFiles, languageLevelNewSDs);
           }
@@ -191,9 +196,9 @@ public class LanguageLevelConverter {
             throw new RuntimeException("Internal Bug: Invalid file format not caught initially.  Please report this bug.");
           }
           
-          
           // First pass
           sf.visit(llv);
+          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
           visited.add(new Pair<LanguageLevelVisitor, SourceFile>(llv, sf));
           //add the continuations to the hash table.
           continuations.putAll(llv.continuations);
@@ -204,17 +209,17 @@ public class LanguageLevelConverter {
         // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
         _addVisitorError(new Pair<String, JExpressionIF>(ioe.getMessage(), new NullLiteral(JExprParser.NO_SOURCE_INFO)));
       }
-      
     }
     
 //    Utilities.show("Visited " + visited + " in first pass");
     // Resolve continuations and create constructors.  Also accumulate errors.
     LanguageLevelVisitor.errors = new LinkedList<Pair<String, JExpressionIF>>(); //clear out error list
     
-    
     //Resolve continuations
     //Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = llv.continuations;
-    
+ 
+    _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");
+    _log.log("Resolving continuations: " + continuations + "\n");
     while (! continuations.isEmpty()) {
       Enumeration<String> en = continuations.keys();
       
@@ -222,12 +227,16 @@ public class LanguageLevelConverter {
         String className = en.nextElement();
         Pair<SourceInfo, LanguageLevelVisitor> pair = continuations.remove(className);
         SymbolData returnedSd = pair.getSecond().getSymbolData(className, pair.getFirst(), true);
+        _log.log("Attempting to resolve " + className + "\n  Result = " + returnedSd);
         if (returnedSd == null) {
-          LanguageLevelVisitor.errors.add(new Pair<String, JExpressionIF>("Could not resolve " + className, new NullLiteral(pair.getFirst())));
+          LanguageLevelVisitor.errors.add(new Pair<String, JExpressionIF>("Could not resolve " + className, 
+                                                                          new NullLiteral(pair.getFirst())));
         }
       }
     }
-    
+     
+    _log.log("\nDUMPING SYMBOLTABLE AFTER PASS 1\n\n" + symbolTable + "\n");
+
     // Create any constructors.
     Hashtable<SymbolData, LanguageLevelVisitor> newSDs = LanguageLevelVisitor._newSDs;
     Enumeration<SymbolData> keys = newSDs.keys();
@@ -270,7 +279,7 @@ public class LanguageLevelConverter {
         
         
         // Type check.
-        TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, llv.symbolTable, llv._importedFiles, llv._importedPackages);
+        TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, symbolTable, llv._importedFiles, llv._importedPackages);
         sf.visit(btc);
         if (btc.errors.size() > 0) _visitorErrors.addAll(btc.errors);
       }

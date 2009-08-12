@@ -1191,7 +1191,5 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
     }
     /** This method is called by default from cases that do not override forCASEOnly. */
     protected Void defaultCase(JExpressionIF that) { return null; } 
-    protected boolean prune(JExpressionIF that) { return true;
-    }
-    
+    protected boolean prune(JExpressionIF that) { return true; }
 }

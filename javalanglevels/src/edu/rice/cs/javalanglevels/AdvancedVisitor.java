@@ -46,36 +46,33 @@ import edu.rice.cs.plt.iter.IterUtil;
 import junit.framework.TestCase;
 
 
-/*
- * Top-level Language Level Visitor that represents the Advanced Language Level.  Enforces constraints during the
- * first walk of the AST (checking for langauge specific errors and building the symbol table).
- * This class enforces things that are common to all contexts reachable at the Advanced Language Level (i.e., inside class bodies,
- * method bodies, interface bodies, top level, inner inner classes, etc), but also enforces specific top level constraints (i.e. you cannot have try 
- * catch statements at the top level, etc.)
- */
+/** Top-level Language Level Visitor that represents the Advanced Language Level.  Enforces constraints during the
+  * first walk of the AST (checking for langauge specific errors and building the symbol table).
+  * This class enforces things that are common to all contexts reachable at the Advanced Language Level (i.e., inside
+  * class bodies, method bodies, interface bodies, top level, inner inner classes, etc), but also enforces specific top
+  * level constraints (i.e. you cannot have try catch statements at the top level, etc.)
+  */
 
 public class AdvancedVisitor extends LanguageLevelVisitor {
   
-  /**
-   * This constructor is called from the subclasses of Advanced Visitor when creating a new instance of AdvancedVisitor.  
-   * The default value for className is the empty string.
-   */
+  /** This constructor is called from the subclasses of Advanced Visitor when creating a new instance of AdvancedVisitor.  
+    * The default value for className is the empty string.
+    */
   public AdvancedVisitor(File file, String packageName, LinkedList<String> importedFiles, 
                          LinkedList<String> importedPackages,LinkedList<String> classNamesInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
     super(file, packageName, importedFiles, importedPackages, classNamesInThisFile, continuations);
   }
   
 
-  /**
-   * This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
-   * AdvancedVisitor to visit a new file with.  Package is set to "" by default.
-   * @param file  The File corresponding to the source file we are visiting
-   * @param errors  The list of errors that have been encountered so far.
-   * @param symbolTable  The table of classes (types) that we have encountered
-   * @param continuations  The table of classes we have encountered but still need to resolve
-   * @param visitedFiles  The list of files we have visited
-   * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after this pass is finished)
-   */
+  /** This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
+    * AdvancedVisitor to visit a new file with.  Package is set to "" by default.
+    * @param file  The File corresponding to the source file we are visiting
+    * @param errors  The list of errors that have been encountered so far.
+    * @param symbolTable  The table of classes (types) that we have encountered
+    * @param continuations  The table of classes we have encountered but still need to resolve
+    * @param visitedFiles  The list of files we have visited
+    * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after this pass is finished)
+    */
   public AdvancedVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable,
                          Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
                          LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles,
@@ -89,14 +86,12 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
   }
 
-    /**
-     * At the Advanced Level, no code augmentation is done.
-     * However, if we are working with a class that has no constructor,
-     * we need to pretend that it has a 0-ary default constructor.
-     * This doesn't actually need to be written in the file, it
-     * just needs to be in our internal representation of the class.
-     * @param sd  The SymbolData we are checking
-   */
+  /** At the Advanced Level, no code augmentation is done. However, if we are working with a class that has no 
+    * constructor, we need to pretend that it has a 0-ary default constructor.
+    * This doesn't actually need to be written in the file, it
+    * just needs to be in our internal representation of the class.
+    * @param sd  The SymbolData we are checking
+    */
   public void createConstructor(SymbolData sd) {
     SymbolData superSd = sd.getSuperClass();
     
@@ -108,8 +103,8 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     //if sd already has a constructor, just return.
     boolean hasOtherConstructor = sd.hasMethod(name);
     if (hasOtherConstructor) {
-          _newSDs.remove(sd); //this won't do anything if sd is not in _newSDs.
-          return;
+      _newSDs.remove(sd); //this won't do anything if sd is not in _newSDs.
+      return;
     }
     
     //otherwise, it doesn't have a constructor, so let's add it!
@@ -155,9 +150,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     return super.forModifiersAndVisibilityDoFirst(that);
   }
 
-  /**
-   * The default case in a switch statement at the Advanced Level can only appear as the last case.
-   */
+  /** The default case in a switch statement at the Advanced Level can only appear as the last case. */
   public Void forSwitchStatementDoFirst(SwitchStatement that) {
     for (int i = 0; i<that.getCases().length-1; i++) {
       SwitchCase sc = that.getCases()[i];
@@ -169,9 +162,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
   }
   
   
-  /**
-   * Here are several constructs that cannot be used at the Advanced Level
-   */
+  /** Here are several constructs that cannot be used at the Advanced Level */
   /*Give error because InstanceInitializers cannot be used at the Advanced Level.*/
   public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("Instance initializers cannot be used at the Advanced level", that);
@@ -250,10 +241,9 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     return super.forTryCatchStatementDoFirst(that);
   }
   
-  /**
-   * Check to see if the specified className is a class defined in the current file.
-   * If it is, it will be stored in _classNamesInThisFile.
-   */
+  /** Check to see if the specified className is a class defined in the current file.
+    * If it is, it will be stored in _classNamesInThisFile.
+    */
   private boolean _isClassInCurrentFile(String className) {
     Iterator<String> iter = _classNamesInThisFile.iterator();
     while (iter.hasNext()) {
@@ -266,17 +256,16 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
   }
   
   
-  /**
-   * Convert the specified array of FormalParameters into an array of VariableDatas which is then returned.
-   * For each parameter, try to resolve its type.  A type can be
-   * a regular top level type, an inner class type, or something we haven't seen yet (i.e.,
-   * a continuation).
-   * All formal parameters are automatically made final.
-   * All static method parameters are automatically made static-final (see note below).
-   * @param fps  The formal parameters we are trying to resolve.
-   * @param d  The data these formal parameters belong to.
-   * @return  An array of VariableData corresponding to the formal parameters.
-   */
+  /** Convert the specified array of FormalParameters into an array of VariableDatas which is then returned.
+    * For each parameter, try to resolve its type.  A type can be
+    * a regular top level type, an inner class type, or something we haven't seen yet (i.e.,
+    * a continuation).
+    * All formal parameters are automatically made final.
+    * All static method parameters are automatically made static-final (see note below).
+    * @param fps  The formal parameters we are trying to resolve.
+    * @param d  The data these formal parameters belong to.
+    * @return  An array of VariableData corresponding to the formal parameters.
+    */
   protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, Data d) {
     VariableData[] varData = new VariableData[fps.length];
     VariableDeclarator vd;
@@ -295,7 +284,8 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     for (int i = 0; i < varData.length; i++) {
       vd = fps[i].getDeclarator();
       String name = vd.getName().getText();
-      SymbolData type = getSymbolData(vd.getType().getName(), vd.getType().getSourceInfo());
+      SourceInfo si = vd.getType().getSourceInfo();
+      SymbolData type = getSymbolData(vd.getType().getName(), si);
       
       if (type == null) {
         //see if this is a partially qualified field reference
@@ -307,7 +297,6 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
         type = new SymbolData(d.getSymbolData().getName() + "$" + vd.getType().getName());
         d.getSymbolData().addInnerClass(type);
         type.setOuterData(d.getSymbolData());
-        continuations.put(type.getName(), new Pair<SourceInfo, LanguageLevelVisitor>(vd.getType().getSourceInfo(), this));
       }
       
       varData[i] = new VariableData(name, 
@@ -319,25 +308,24 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     return varData;
   }
   
-  
-  /**
-   * Handle a ClassDef at the Advanced Level.  To do this, get its name and call addSymbolData to do the appropriate lookups.
-   * Then visit everything in the class def.
-   * Once the ClassDef has been handled, remove the class from _classesToBeParsed so we know it's been taken care of.
-   * @param that  The ClassDef being handled.
-   */
+  /** Handle a ClassDef at the Advanced Level.  To do this, get its name and call addSymbolData to do the appropriate lookups.
+    * Then visit everything in the class def.
+    * Once the ClassDef has been handled, remove the class from _classesToBeParsed so we know it's been taken care of.
+    * @param that  The ClassDef being handled.
+    */
   public Void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
     if (prune(that)) return null;
 
     String className = getQualifiedClassName(that.getName().getText());
+    _log.log("Adding SymbolData for " + className);
     SymbolData sd = addSymbolData(that, className); //does the class initalization
    
     that.getMav().visit(this);
     
     that.getName().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-//    that.getSuperclass().visit(this);
+    that.getSuperclass().visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     if (sd != null) { //we were able to resolve the type, so visit the body.
@@ -357,9 +345,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     _classesToBeParsed.remove(className);
     return null;
   }
-  
-  
-  
+
   /** This is a noop, because we do not do code augmentation at the Advanced Level. */
   protected void createToString(SymbolData sd) { return; }
 
@@ -414,7 +400,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     that.getMav().visit(this);
     that.getName().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-    that.getSuperclass().visit(this);
+//    that.getSuperclass().visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     SymbolData sd = addInnerSymbolData(that, name, that.getName().getText(), data, true);
@@ -429,7 +415,6 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
       createToString(sd);
       createHashCode(sd);
       createEquals(sd);
-
     }
    
     // Inner classes should never be put into _classesToBeParsed since they are parsed whenever their outer classes are parsed.
@@ -578,7 +563,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
     public void setUp() {
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();

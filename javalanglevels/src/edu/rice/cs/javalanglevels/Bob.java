@@ -252,17 +252,20 @@ public class Bob extends TypeChecker {
    *                       unless there is an error in the student's code.
    */
   public TypeData forThrowStatementOnly(ThrowStatement that, TypeData thrown_result) {
-    if (thrown_result == null || !assertFound(thrown_result, that.getThrown())) {return null;}
+    if (thrown_result == null || !assertFound(thrown_result, that.getThrown())) return null;
   
     // add the SymbolData even if we're throwing a SymbolData, not an InstanceData
     _thrown.addLast(new Pair<SymbolData, JExpression>(thrown_result.getSymbolData(), that));
       
     //make sure they instantiated what is being thrown.
     if (!thrown_result.isInstanceType()) {
-      _addError("You cannot throw a class or interface name.  Perhaps you mean to instantiate the exception " + thrown_result.getSymbolData().getName() + " that you are throwing", that);
+      _addError("You cannot throw a class or interface name.  Perhaps you mean to instantiate the exception class " + 
+                thrown_result.getSymbolData().getName() + " that you are throwing", that);
       thrown_result = thrown_result.getInstanceData();
     }
     
+//    System.err.println("getSymbolData(\"java.lang.Throwable\", that, false, true) = " + 
+//                       getSymbolData("java.lang.Throwable", that, false, true));
     //make sure what is being thrown extends java.lang.Throwable.
     if (!_isAssignableFrom(getSymbolData("java.lang.Throwable", that, false, true), thrown_result.getSymbolData())) {
       _addError("You are attempting to throw " + thrown_result.getSymbolData().getName() + ", which does not implement the Throwable interface", that);
@@ -409,11 +412,10 @@ public class Bob extends TypeChecker {
     return null;
   }
   
-  /*
-   * Look for the inner interface inside of the enclosing data.
-   * Then, visit everything that needs to be visited.
-   * @param that  The InnerInterfaceDef that is being visited.
-   */
+  /** Look for the inner interface inside of the enclosing data.
+    * Then, visit everything that needs to be visited.
+    * @param that  The InnerInterfaceDef that is being visited.
+    */
   public TypeData forInnerInterfaceDef(InnerInterfaceDef that) {
     String className = that.getName().getText();
     SymbolData sd = _data.getInnerClassOrInterface(className); // This works because className will never be a qualified name
@@ -586,7 +588,7 @@ public class Bob extends TypeChecker {
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       _b = new Bob(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
         _b._importedPackages.addFirst("java.lang");
@@ -603,7 +605,7 @@ public class Bob extends TypeChecker {
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
                                                           _b._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      llv.symbolTable = _b.symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
       
       SourceInfo si = JExprParser.NO_SOURCE_INFO;
       Expression e1 = new IntegerLiteral(si, 1);
@@ -656,22 +658,29 @@ public class Bob extends TypeChecker {
       
         
     public void testForThrowStatementOnly() {
-      SymbolData exception = new SymbolData("java.lang.Throwable");
+      ThrowStatement s = new ThrowStatement(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      SymbolData exception = _b.getSymbolData("java.lang.Throwable", s, false, true); // new SymbolData("java.lang.Throwable");
       InstanceData exceptionInstance = exception.getInstanceData();
-      symbolTable.put("java.lang.Throwable", exception);
+//      symbolTable.put("java.lang.Throwable", exception);
       
       SymbolData notAnException = new SymbolData("bob");
       InstanceData naeInstance = notAnException.getInstanceData();
 
-      ThrowStatement s = new ThrowStatement(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
       
-      assertEquals("When a SymbolData is the thrown type, return its InstanceData", exceptionInstance, _b.forThrowStatementOnly(s, exception));
+      assertEquals("When a SymbolData is the thrown type, return its InstanceData", exceptionInstance, 
+                   _b.forThrowStatementOnly(s, exception));
       assertEquals("There should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "You cannot throw a class or interface name.  Perhaps you mean to instantiate the exception java.lang.Throwable that you are throwing", errors.getLast().getFirst());
+      
+      assertEquals("Error message should be correct", 
+                   "You cannot throw a class or interface name.  " + 
+                   "Perhaps you mean to instantiate the exception class java.lang.Throwable that you are throwing", 
+                   errors.get(0).getFirst());
 
-      assertEquals("When a thrown type does not implement Throwable, return the type anyway", naeInstance, _b.forThrowStatementOnly(s, naeInstance));
+      assertEquals("When a thrown type does not implement Throwable, return the type anyway", naeInstance, 
+                   _b.forThrowStatementOnly(s, naeInstance));
       assertEquals("There should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "You are attempting to throw bob, which does not implement the Throwable interface", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You are attempting to throw bob, which does not implement the Throwable interface", errors.getLast().getFirst());
     }
       
   
@@ -679,7 +688,7 @@ public class Bob extends TypeChecker {
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
                                                           _b._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      llv.symbolTable = _b.symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
       
       SourceInfo si = JExprParser.NO_SOURCE_INFO;
       

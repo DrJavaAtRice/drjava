@@ -562,7 +562,7 @@ public class BodyTypeChecker extends Bob {
   /**
    * Here, we follow the following rules for determining what to return:
    * If there is not a default block, the statement does not return.
-   * If the result from any of the blocks is KEEP_GOING, the statement does not return.  (KEEP_GOING signifies that a break statement was seen)
+   * If the result from any of the blocks is NOT_FOUND, the statement does not return.  (NOT_FOUND signifies that a break statement was seen)
    * If the last block does not return, then the statement does not return.
    */
    public TypeData forSwitchStatementOnly(SwitchStatement that, TypeData test_result, TypeData[] cases_result, boolean sawDefault) {
@@ -570,9 +570,9 @@ public class BodyTypeChecker extends Bob {
      /**If we did not see a default block, this statement cannot be guaranteed to return*/
      if (!sawDefault) {return null;}
      
-     /**If any of the blocks are KEEP_GOING, then the statement does not return.*/
+     /**If any of the blocks are NOT_FOUND, then the statement does not return.*/
      for (int i = 0; i<cases_result.length; i++) {
-       if (cases_result[i] != null && cases_result[i].getSymbolData() == SymbolData.KEEP_GOING) {return null;}
+       if (cases_result[i] != null && cases_result[i].getSymbolData() == SymbolData.NOT_FOUND) {return null;}
      }
      
      /**If the last block does not return, then the statement also does not return. */
@@ -685,11 +685,11 @@ public class BodyTypeChecker extends Bob {
       return null;
     }
     
-    if (s1 == SymbolData.KEEP_GOING && s2 != null) {return SymbolData.KEEP_GOING;}
-    if (s2 == SymbolData.KEEP_GOING && s1 != null) {return SymbolData.KEEP_GOING;}
+    if (s1 == SymbolData.NOT_FOUND && s2 != null) {return SymbolData.NOT_FOUND;}
+    if (s2 == SymbolData.NOT_FOUND && s1 != null) {return SymbolData.NOT_FOUND;}
     
-    if (s1 == null && s1 != SymbolData.KEEP_GOING) { return s2; }
-    if (s2 == null && s1 != SymbolData.KEEP_GOING) {return s1;}
+    if (s1 == null && s1 != SymbolData.NOT_FOUND) { return s2; }
+    if (s2 == null && s1 != SymbolData.NOT_FOUND) {return s1;}
     if (s1==null || s2==null) {return null;}
     if (s1 == SymbolData.EXCEPTION) { return s2; }
     if (s2 == SymbolData.EXCEPTION) { return s1; }
@@ -734,11 +734,11 @@ public class BodyTypeChecker extends Bob {
    * try-catch statement doesn't necessarily return a value.
    */
   protected InstanceData tryCatchLeastRestrictiveType(InstanceData tryBlock_result, InstanceData[] catchBlocks_result, InstanceData finallyBlock_result) {// Return the common superclass or null if there exists a block that doesn't return no nothing (except the finally block) 
-    if (tryBlock_result == null || tryBlock_result == SymbolData.KEEP_GOING.getInstanceData()) {return finallyBlock_result;}
+    if (tryBlock_result == null || tryBlock_result == SymbolData.NOT_FOUND.getInstanceData()) {return finallyBlock_result;}
     TypeData leastRestrictiveType = tryBlock_result;
     for (int i = 0; i < catchBlocks_result.length; i++) {
       if (catchBlocks_result[i] == null) {return finallyBlock_result;}
-      if (catchBlocks_result[i] != SymbolData.KEEP_GOING.getInstanceData() && _isAssignableFrom(catchBlocks_result[i].getSymbolData(), leastRestrictiveType.getSymbolData())) {
+      if (catchBlocks_result[i] != SymbolData.NOT_FOUND.getInstanceData() && _isAssignableFrom(catchBlocks_result[i].getSymbolData(), leastRestrictiveType.getSymbolData())) {
         leastRestrictiveType = catchBlocks_result[i];
       }
     }
@@ -772,17 +772,17 @@ public class BodyTypeChecker extends Bob {
     return false;
   }
 
-  /**
-   * Make sure that every exception that is caught could have been thrown in the try statement
-   */
+  /** Make sure that every exception that is caught could have been thrown in the try statement */
   protected void makeSureCaughtStuffWasThrown(TryCatchStatement that, SymbolData[] caught_array, LinkedList<Pair<SymbolData, JExpression>> thrown) {
     // Make sure every Exception that is caught could actually be thrown
     for (int i = 0; i < caught_array.length; i++) {
       SymbolData currCaughtSD = caught_array[i];
+//      System.err.println("currCaughtSD = " +  currCaughtSD + " isChecked = " + isCheckedException(currCaughtSD, that));
       boolean foundThrownException = false;
       if (isCheckedException(currCaughtSD, that) && 
           ! currCaughtSD.getName().equals("java.lang.Exception") &&
           ! currCaughtSD.getName().equals("java.lang.Throwable")) {
+//        System.err.println("Checking thrown");
         for (Pair<SymbolData, JExpression> p : thrown) {
           SymbolData sd = p.getFirst();
           if (sd.isSubClassOf(currCaughtSD)) {
@@ -790,7 +790,9 @@ public class BodyTypeChecker extends Bob {
           }
         }
         if (!foundThrownException) {
-          _addError("The exception " + currCaughtSD.getName() + " is never thrown in the body of the corresponding try block", that.getCatchBlocks()[i]);
+//          System.err.println("Calling _addError for " +  currCaughtSD);
+          _addError("The exception " + currCaughtSD.getName() + " is never thrown in the body of the corresponding try block", 
+                    that.getCatchBlocks()[i]);
         }
       } 
     }
@@ -893,7 +895,7 @@ public class BodyTypeChecker extends Bob {
       _thrown = new LinkedList<Pair<SymbolData, JExpression>>();
     }
     
-    if (finallyBlock_result == SymbolData.KEEP_GOING.getInstanceData()) {
+    if (finallyBlock_result == SymbolData.NOT_FOUND.getInstanceData()) {
       finallyBlock_result = null;
     }
     
@@ -1073,7 +1075,7 @@ public class BodyTypeChecker extends Bob {
        ((MethodData)_bd2).getParams()[0].setEnclosingData(_bd2);
                             
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       _bd1.addEnclosingData(_sd1);
       _bd1.addVars(((MethodData)_bd1).getParams());
       _bd2.addVars(((MethodData)_bd2).getParams());
@@ -1760,7 +1762,7 @@ public class BodyTypeChecker extends Bob {
       assertEquals("There should now be two errors", 2, errors.size());
       assertEquals("The error message should be correct", "You cannot use an assignment expression in the conditional expression of an if-then-else statement at any language level", errors.get(1).getFirst());
       
-      //test that if one branch returns a value but the other is a break or continue that SymbolData.KEEP_GOING is returned.
+      //test that if one branch returns a value but the other is a break or continue that SymbolData.NOT_FOUND is returned.
       te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
         new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
       returnStatement = new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
@@ -1793,7 +1795,7 @@ public class BodyTypeChecker extends Bob {
       _bbtc._data = md1;
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
 
-      assertEquals("Should return SymbolData.KEEP_GOING", SymbolData.KEEP_GOING.getInstanceData(), ift.visit(_bbtc));
+      assertEquals("Should return SymbolData.NOT_FOUND", SymbolData.NOT_FOUND.getInstanceData(), ift.visit(_bbtc));
       
       assertEquals("There should still be two errors", 2, errors.size());      
     }
@@ -2270,15 +2272,15 @@ public class BodyTypeChecker extends Bob {
                                                                                              new TypeData[] {SymbolData.INT_TYPE}, 
                                                                                              false));
      
-     //if any of the blocks are KEEP_GOING, should return null
-     assertEquals("Should return null--has a keep going block", null, _bbtc.forSwitchStatementOnly(ss, 
+     //if any of the blocks are NOT FOUND, should return null
+     assertEquals("Should return null--has a not-found block", null, _bbtc.forSwitchStatementOnly(ss, 
                                                                                              SymbolData.CHAR_TYPE.getInstanceData(), 
-                                                                                             new TypeData[] {SymbolData.KEEP_GOING, SymbolData.INT_TYPE}, 
+                                                                                             new TypeData[] {SymbolData.NOT_FOUND, SymbolData.INT_TYPE}, 
                                                                                              true));
      
-     assertEquals("Should return null--has a keep going block", null, _bbtc.forSwitchStatementOnly(ss, 
+     assertEquals("Should return null--has a not-found block", null, _bbtc.forSwitchStatementOnly(ss, 
                                                                                              SymbolData.CHAR_TYPE.getInstanceData(), 
-                                                                                             new TypeData[] {SymbolData.INT_TYPE, SymbolData.KEEP_GOING}, 
+                                                                                             new TypeData[] {SymbolData.INT_TYPE, SymbolData.NOT_FOUND}, 
                                                                                              true));
                   
      
@@ -2464,7 +2466,7 @@ public class BodyTypeChecker extends Bob {
        
       //a body with a break
       dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
-      assertEquals("Should return KEEP_GOING", SymbolData.KEEP_GOING, dc.visit(_bbtc));
+      assertEquals("Should return NOT_FOUND", SymbolData.NOT_FOUND, dc.visit(_bbtc));
       assertEquals("There should be no errors", 0, errors.size());
     }
     
@@ -2486,7 +2488,7 @@ public class BodyTypeChecker extends Bob {
        
       //break body
       dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
-      assertEquals("Should return KEEP_GOING", SymbolData.KEEP_GOING, _bbtc.forSwitchCase(dc));
+      assertEquals("Should return NOT_FOUND", SymbolData.NOT_FOUND, _bbtc.forSwitchCase(dc));
       assertEquals("There should be no errors", 0, errors.size());
       
       //non-empty body that does not return: fall-through
@@ -2528,7 +2530,7 @@ public class BodyTypeChecker extends Bob {
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2626,7 +2628,7 @@ public class BodyTypeChecker extends Bob {
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2657,7 +2659,7 @@ public class BodyTypeChecker extends Bob {
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2687,8 +2689,11 @@ public class BodyTypeChecker extends Bob {
       UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
       FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
-      SymbolData javaLangThrowable = new SymbolData("java.lang.Throwable");
+      NormalTryCatchStatement ntcs =
+        new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b,
+                                    new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
+      SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
+                                     // new SymbolData("java.lang.Throwable");
       _bbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
       SymbolData exception = new SymbolData("my.crazy.exception");
       exception.setSuperClass(javaLangThrowable);
@@ -2709,7 +2714,9 @@ public class BodyTypeChecker extends Bob {
       
       thrown.remove(p);
       
-      _bbtc.makeSureCaughtStuffWasThrown(ntcs, new SymbolData[] { exception2}, thrown);
+      _bbtc.makeSureCaughtStuffWasThrown(ntcs, new SymbolData[] {exception2}, thrown);
+//      System.err.println("thrown = " + thrown);
+//      System.err.println("errors = " + errors);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "The exception A&M.beat.Rice.in.BaseballException is never thrown in the body of the corresponding try block", errors.get(0).getFirst());
     }
@@ -2815,7 +2822,7 @@ public class BodyTypeChecker extends Bob {
 
       NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
 
-      SymbolData javaLangThrowable = new SymbolData("java.lang.Throwable");
+      SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
       _bbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
       SymbolData exception = new SymbolData("my.crazy.exception");
       exception.setSuperClass(javaLangThrowable);
@@ -2843,7 +2850,7 @@ public class BodyTypeChecker extends Bob {
                                       new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2851,7 +2858,7 @@ public class BodyTypeChecker extends Bob {
 
       SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
       SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
-      symbolTable = llv.symbolTable;
+      LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
 
       
       //Make sure it is okay to have something else other than an uncaught exception in a braced body.
@@ -2955,7 +2962,7 @@ public class BodyTypeChecker extends Bob {
                                       new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -3139,7 +3146,7 @@ public class BodyTypeChecker extends Bob {
                                                           new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();

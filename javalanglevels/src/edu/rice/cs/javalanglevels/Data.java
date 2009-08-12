@@ -44,7 +44,8 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 /** Abstract type, representing the data for a given braced body-class, interface, method, or just a body. */
 public abstract class Data {
   
-  /**The name of this data.*/
+  /**The name of this data. */
+  // This data design is truly atrocious.  The documentation is worse.  In a SymbolData, _name includes the package prefix. */
   protected String _name;
   
   /**The vars defined in the lexical scope of this data.*/

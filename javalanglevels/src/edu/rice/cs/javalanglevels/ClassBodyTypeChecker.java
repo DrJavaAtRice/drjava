@@ -392,7 +392,7 @@ public class ClassBodyTypeChecker extends Bob {
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       _cbbtc = new ClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _cbbtc._importedPackages.addFirst("java.lang");

@@ -50,50 +50,41 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  * other is a complete SymbolData containing all of the member data.
  */
 public class SymbolData extends TypeData {
+  
   /***************Singleton primitive SymbolDatas********************/
   
   /**This represents the boolean primitive*/
   public static final SymbolData BOOLEAN_TYPE = new PrimitiveData("boolean") {
     
-    /**
-     * You can only cast a boolean primitive to a boolean primitive or a Boolean object (in 1.5).
-     */
+    /** You can only cast a boolean primitive to a boolean primitive or a Boolean object (in 1.5). */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
       return isAssignableTo(castTo, version);
     }
     
-    /**
-     * Returns true if the specified SymbolData is a boolean type
-     */
+    /** Returns true if the specified SymbolData is a boolean type. */
     public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) {
       if (toCheck == null) {return false;}
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !toCheck.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Boolean");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Boolean");
         return (autoBoxMe != null && autoBoxMe.isAssignableTo(toCheck, version));
       }
       return toCheck==BOOLEAN_TYPE;
     }
-    
   };
-  
   
   /**This represents the char primitive*/
   public static final SymbolData CHAR_TYPE = new PrimitiveData("char") {
     
-    /**
-     * You can cast a char primitive to a char, int, long, float, double or short or byte or Character object (in 1.5)
-     */
+    /** You can cast a char primitive to a char, int, long, float, double or short or byte or Character object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
       return isAssignableTo(castTo, version) || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /**
-     * You can assign a char primitive to a char, int, long, float, double or Character object (in 1.5)
-     */
+    /** You can assign a char primitive to a char, int, long, float, double or Character object (in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
       if (assignTo == null) {return false;}
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Character");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Character");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
 
@@ -108,93 +99,73 @@ public class SymbolData extends TypeData {
   /**This represents the byte primitive*/
   public static final SymbolData BYTE_TYPE = new PrimitiveData("byte"){
     
-    /**
-     * You can cast a byte primitive to a char, int, long, float, double or short or byte or Byte object (in 1.5)
-     */
+    /** You can cast a byte primitive to a char, int, long, float, double or short or byte or Byte object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
       return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE;
     }
 
-    /**
-     * You can assign a byte primitive to a byte, short, int, long, float, double, or Byte object(in 1.5)
-     */
+    /** You can assign a byte primitive to a byte, short, int, long, float, double, or Byte object(in 1.5). */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) {return false;}
+      if (assignTo == null) return false;
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Byte");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Byte");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
 
-      return assignTo==SymbolData.BYTE_TYPE || 
-        assignTo==SymbolData.SHORT_TYPE || 
+      return assignTo == SymbolData.BYTE_TYPE || 
+        assignTo == SymbolData.SHORT_TYPE || 
         assignTo == SymbolData.INT_TYPE || 
         assignTo == SymbolData.LONG_TYPE || 
         assignTo == SymbolData.FLOAT_TYPE || 
         assignTo == SymbolData.DOUBLE_TYPE;
-        
     }
   };
-  
-  
-  
+
   /**This represents the short primitive*/
   public static final SymbolData SHORT_TYPE = new PrimitiveData("short"){
     
-    /**
-     * You can cast a short primitive to a char, int, long, float, double or short or byte or Short object (in 1.5)
-     */
+    /** You can cast a short primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
       return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /**
-     * You can assign a short primitive to a short, int, long, float, double, or Short object(in 1.5)
-     */
+    /** You can assign a short primitive to a short, int, long, float, double, or Short object(in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
       if (assignTo == null) {return false;}
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Short");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Short");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
-
       
       return assignTo==SymbolData.SHORT_TYPE || 
         assignTo == SymbolData.INT_TYPE || 
         assignTo == SymbolData.LONG_TYPE || 
         assignTo == SymbolData.FLOAT_TYPE || 
         assignTo == SymbolData.DOUBLE_TYPE; 
-        
     }
   };
   
   /**This represents the int primitive*/
   public static final SymbolData INT_TYPE = new PrimitiveData("int"){
     
-    /**
-     * You can cast a int primitive to a char, int, long, float, double or short or byte or Short object (in 1.5)
-     */
+    /** You can cast a int primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
       return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /**
-     * You can assign a int primitive to a int, long, float, double, or Integer object(in 1.5)
-     */
+    /** You can assign a int primitive to a int, long, float, double, or Integer object(in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
       if (assignTo == null) {return false;}
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Integer");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Integer");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
 
-      return assignTo == SymbolData.INT_TYPE || 
-        assignTo == SymbolData.LONG_TYPE || 
-        assignTo == SymbolData.FLOAT_TYPE || 
-        assignTo == SymbolData.DOUBLE_TYPE;
-        
+      return assignTo == SymbolData.INT_TYPE || assignTo == SymbolData.LONG_TYPE || 
+        assignTo == SymbolData.FLOAT_TYPE ||  assignTo == SymbolData.DOUBLE_TYPE;
     }
   };
   
@@ -202,11 +173,10 @@ public class SymbolData extends TypeData {
   /**This represents the long primitive*/
   public static final SymbolData LONG_TYPE = new PrimitiveData("long"){
     
-    /**
-     * You can cast a long primitive to a char, int, long, float, double or short or byte or Short object (in 1.5)
-     */
+    /** You can cast a long primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
+      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE || 
+        castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
     /**
@@ -216,7 +186,7 @@ public class SymbolData extends TypeData {
       if (assignTo == null) {return false;}
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Long");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Long");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
 
@@ -244,7 +214,7 @@ public class SymbolData extends TypeData {
       if (assignTo == null) {return false;}
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Float");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Float");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
 
@@ -269,12 +239,10 @@ public class SymbolData extends TypeData {
       if (assignTo == null) {return false;}
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
-        SymbolData autoBoxMe = LanguageLevelVisitor.symbolTable.get("java.lang.Double");
+        SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Double");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
-
       return assignTo == SymbolData.DOUBLE_TYPE; 
-
     }
   };
   
@@ -282,49 +250,32 @@ public class SymbolData extends TypeData {
   public static final SymbolData VOID_TYPE = new PrimitiveData("void") {
   
     /** A void value cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return false;
-    }
+    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
     
     /** A void value can be assigned to itself */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) {
-      return this==toCheck;
-    }
-  
+    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return this == toCheck; }
   };
   
   /**Used for an exception*/
   public static final SymbolData EXCEPTION = new SymbolData("exception") {
-    /**
-     * You cannot cast an exception to anything.
-     */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return false;
-    }
+    /** You cannot cast an exception to anything. */
+    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
     
-    /**
-     * Returns true, because an exception takes the place of a return.
-     * This SymbolData is only used when the user has thrown an Exception.
-     */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) {
-      return true;
-    }
+    /** Returns true, because an exception takes the place of a return.
+      * This SymbolData is only used when the user has thrown an Exception.
+      */
+    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return true; }
     
   };
 
-  /**Used when there was an error, but we want to keep going*/
-  public static final SymbolData KEEP_GOING = new SymbolData("keep going") {
+  /**Used to signal a symbol table search that failed*/
+  public static final SymbolData NOT_FOUND = new SymbolData("not found") {
   
-    /** A keep going value cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return false;
-    }
+    /** A not-found value cannot be cast to anything */
+    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
     
-    /** A keep going value cannot be assigned to anything */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) {
-      return false;
-    }
-  
+    /** A not-found value cannot be assigned to anything */
+    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
   };
   
  /**Used for null*/
@@ -395,8 +346,8 @@ public class SymbolData extends TypeData {
     ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
     VOID_TYPE.setIsContinuation(false);    
     VOID_TYPE.setMav(_publicMav);
-    KEEP_GOING.setIsContinuation(false);
-    KEEP_GOING.setMav(_publicMav);
+    NOT_FOUND.setIsContinuation(false);
+    NOT_FOUND.setMav(_publicMav);
     EXCEPTION.setMav(_publicMav);
     EXCEPTION.setIsContinuation(false);
   }
@@ -440,16 +391,14 @@ public class SymbolData extends TypeData {
   /* The number of anonymous inner classes, used in naming them. */
   private int _anonymousInnerClassNum;  
   
-
-  /**
-   * Constructor for SymbolData
-   * @param name  The name of this class or interface
-   * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
-   * @param typeParameters  Generic type info, not used
-   * @param superClass  The super class of this class
-   * @param interfaces  The super interfaces
-   * @param outerData  The enclosing data of this class, or null
-   */
+  /** Constructor for SymbolData
+    * @param name  The name of this class or interface
+    * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
+    * @param typeParameters  Generic type info, not used
+    * @param superClass  The super class of this class
+    * @param interfaces  The super interfaces
+    * @param outerData  The enclosing data of this class, or null
+    */
   public SymbolData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters, 
                     SymbolData superClass, LinkedList<SymbolData> interfaces, Data outerData) {
     super(outerData);
@@ -459,9 +408,7 @@ public class SymbolData extends TypeData {
     _methods = new LinkedList<MethodData>();
     _superClass = superClass;
     _interfaces = interfaces;
-    for (int i = 0; i < interfaces.size(); i++) {
-      addEnclosingData(_interfaces.get(i));
-    }
+    for (int i = 0; i < interfaces.size(); i++) { addEnclosingData(_interfaces.get(i)); }
     /* Add first because we want to look at the super class first */
     _enclosingData.addFirst(_superClass);
     _innerClasses = new LinkedList<SymbolData>();
@@ -475,37 +422,35 @@ public class SymbolData extends TypeData {
     _instanceData = new InstanceData(this);
   }
 
-  /**
-   * Constructor for SymbolData
-   * @param name  The name of this class or interface
-   * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
-   * @param typeParameters  Generic type info, not used
-   * @param superClass  The super class of this class
-   * @param interfaces  The super interfaces
-   * @param outerData  The enclosing data of this class, or null
-   */
+  /** Constructor for SymbolData
+    * @param name  The name of this class or interface
+    * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
+    * @param typeParameters  Generic type info, not used
+    * @param superClass  The super class of this class
+    * @param interfaces  The super interfaces
+    * @param outerData  The enclosing data of this class, or null
+    */
   public SymbolData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters,
-                    SymbolData superClass, LinkedList<SymbolData> interfaces, Data outerData, String pakage) {
+                    SymbolData superClass, LinkedList<SymbolData> interfaces, Data outerData, String pkg) {
     this(name, modifiersAndVisibility, typeParameters, superClass, interfaces, outerData);
-    _package = pakage;
+    _package = pkg;
   }
   
-  /**
-   * This constructor is only called by Interfaces.  Thus, there is never a super class, and _isInterface
-   * is set to true.
-   * @param name  The name of this class or interface
-   * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
-   * @param typeParameters  Generic type info, not used
-   * @param interfaces  The super interfaces
-   * @param outerData  The enclosing data of this class, or null
-   */
+  /** This constructor is only called by Interfaces.  Thus, there is never a super class, and _isInterface
+    * is set to true.
+    * @param name  The name of this class or interface
+    * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
+    * @param typeParameters  Generic type info, not used
+    * @param interfaces  The super interfaces
+    * @param outerData  The enclosing data of this class, or null
+    */
   public SymbolData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters,
                     LinkedList<SymbolData> interfaces, Data outerData) {
     this(name, modifiersAndVisibility, typeParameters, null, interfaces, outerData);
     _isInterface = true;
   }
 
-  /**Called to create a continuation when all you know is the name*/
+  /** Called to create a continuation when all you know is the name */
   public SymbolData(String name) {
     super(null);
     _name = name;
@@ -520,19 +465,16 @@ public class SymbolData extends TypeData {
     _isInterface = false;
     _package = "";
     _instanceData = new InstanceData(this);
+  }
+  
+  /** No reference type is a Primitive type. */
+  public boolean isPrimitiveType() { return false; }
+  
+  public String toString() {
+    if (_isContinuation) return "? " + _name;
+    return "!" + _name;
+  }
 
-    
-  }
-  
-  
-  /**
-   * No reference type is a Primitive type.
-   */
-  public boolean isPrimitiveType() {
-    return false;
-  }
-  
-  
   /**
    * See if this can be assigned to assignTo.
    * An assignment is legal:
@@ -578,10 +520,6 @@ public class SymbolData extends TypeData {
      if (name.equals("java.lang.Boolean")) {return SymbolData.BOOLEAN_TYPE;}
      return null;
    }
-         
-     
-        
-       
 
   /**
    * See if this can be cast as a castTo.
@@ -645,16 +583,12 @@ public class SymbolData extends TypeData {
      return false;
    }
 
-  
-    /**
-   * Depth-first traversal of the tree of enclosing data 
-   * checking to see if sd is above this SymbolData 
-   * in the class hierarchy.
-   */
-  public boolean isSubClassOf(SymbolData superClass) {
-    if (this == superClass) {
-      return true;
-    }
+   /** Depth-first traversal of the tree of enclosing data checking to see if sd is above this SymbolData 
+     * in the class hierarchy.
+     */
+   public boolean isSubClassOf(SymbolData superClass) {
+    if (superClass == null) return false;
+    if (this == superClass) return true;
     if (superClass.isInterface()) {
       Iterator<SymbolData> iter = _interfaces.iterator();
       while (iter.hasNext()) {
@@ -695,36 +629,22 @@ public class SymbolData extends TypeData {
   }
   
   /**@return false, since this is a SymbolData and not an InstanceData*/
-  public boolean isInstanceType() {
-    return false;
-  }
- 
- 
+  public boolean isInstanceType() { return false; }
+
  /**@return this SymbolData.*/
-  public SymbolData getSymbolData() {
-    return this;
-  }
+  public SymbolData getSymbolData() { return this; }
   
   /**@return the InstanceData corresponding to this class.*/
-  public InstanceData getInstanceData() { 
-    return _instanceData;
-  }
+  public InstanceData getInstanceData() { return _instanceData; }
 
   /**set the InstanceData for this class to the specified value*/
-  public void setInstanceData(InstanceData id) {
-    _instanceData = id;
-  }
-  
+  public void setInstanceData(InstanceData id) { _instanceData = id; }
   
   /**@return the package*/
-  public String getPackage() {
-    return _package;
-  }
+  public String getPackage() { return _package; }
   
   /**Set the package to the specified value*/
-  public void setPackage(String pakage) {
-    _package = pakage;
-  }
+  public void setPackage(String pkg) { _package = pkg;  }
   
   /**@return the generic type parameters*/
   public TypeParameter[] getTypeParameters() {
@@ -750,15 +670,12 @@ public class SymbolData extends TypeData {
     return _innerInterfaces;
   }
   
-  
-  
-  /**
-   * Takes in a name and tries to match it with one of this Data's inner classes or
-   * inner interfaces.  The input string is a name relative to this SymbolData
-   * (such as B.C to request the class A.B.C from class A) and may be delimited by '.' or '$'.
-   * Checks the super class and interfaces of this SymbolData to see if the inner class or interface can be found there.
-   * If no matching visibile inner classes or interfaces are found, but one or more that are not visible are found, one of the non-visibile ones will be returned.
-   * @return  The SymbolData for the matching inner class or interface or null if there isn't one or SymbolData.AMBIGUOUS_REFERENCE if the reference is ambiguous.
+  /** Takes in a name and tries to match it with one of this Data's inner classes or
+    * inner interfaces.  The input string is a name relative to this SymbolData
+    * (such as B.C to request the class A.B.C from class A) and may be delimited by '.' or '$'.
+    * Checks the super class and interfaces of this SymbolData to see if the inner class or interface can be found there.
+    * If no matching visibile inner classes or interfaces are found, but one or more that are not visible are found, one of the non-visibile ones will be returned.
+    * @return  The SymbolData for the matching inner class or interface or null if there isn't one or SymbolData.AMBIGUOUS_REFERENCE if the reference is ambiguous.
    */
   protected SymbolData getInnerClassOrInterfaceHelper(String nameToMatch, int firstIndexOfDot) {
     Iterator<SymbolData> iter = innerClassesAndInterfacesIterator();
@@ -889,20 +806,19 @@ public class SymbolData extends TypeData {
     return success;
  }
 
-    /**
-   * Add the array of variable datas to the list of variables defined in this scope, unless
-   * a name has already been used.  Return true if all variables were added successfully, 
-   * false otherwise.  Set each of the variable datas in the array to be final before
-   * adding them.
-   * 
-   * Since this method is used to add fields at the Elementary and Intermediate levels,
-   * and at these levels, we do not want the user to be able to shadow fields defined
-   * in the superclass hierarchy, instead of using the normal repeatedName method,
-   * check the repeated name throughout the hierarchy.
-   * 
-   * @param vars  The VariableData[] that we want to add.
-   * @return  true if all VariableDatas were added successfully, false otherwise.
-   */
+  /** Add the array of variable datas to the list of variables defined in this scope, unless
+    * a name has already been used.  Return true if all variables were added successfully, 
+    * false otherwise.  Set each of the variable datas in the array to be final before
+    * adding them.
+    * 
+    * Since this method is used to add fields at the Elementary and Intermediate levels,
+    * and at these levels, we do not want the user to be able to shadow fields defined
+    * in the superclass hierarchy, instead of using the normal repeatedName method,
+    * check the repeated name throughout the hierarchy.
+    * 
+    * @param vars  The VariableData[] that we want to add.
+    * @return  true if all VariableDatas were added successfully, false otherwise.
+    */
   public boolean addFinalVars(VariableData[] vars) {
     boolean success = true;
     for (int i = 0; i<vars.length; i++) {
@@ -1241,12 +1157,11 @@ public class SymbolData extends TypeData {
     }
   }
   
-  /**
-   * This version of addMethod is called whenever the method corresponds to one that is auto-generated
-   * (toString, equals, hashCode, etc.) and is necessary because we need to check if the user defined
-   * a method with the same signature and, if so, highlight the user method instead of trying to highlight
-   * the auto-generated method (which doesn't appear in the raw version of the source anyway).
-   */
+  /** This version of addMethod is called whenever the method corresponds to one that is auto-generated
+    * (toString, equals, hashCode, etc.) and is necessary because we need to check if the user defined
+    * a method with the same signature and, if so, highlight the user method instead of trying to highlight
+    * the auto-generated method (which doesn't appear in the raw version of the source anyway).
+    */
   public void addMethod(MethodData method, boolean isAugmentedCode) {
     // Detect if a method was user-defined that matches the signature of an auto-generated method.
     MethodData md = repeatedSignature(_methods, method);
@@ -2202,8 +2117,7 @@ public class SymbolData extends TypeData {
       yourData.setIsContinuation(false);
       assertTrue("Should be assignable", myData.isSubClassOf(yourData));
     }
-    
-    
+
     public void testIsInnerClassOf() {
       _sd = new SymbolData("innerClass");
       SymbolData outer1 = new SymbolData("outer1");
@@ -2228,12 +2142,7 @@ public class SymbolData extends TypeData {
       assertFalse("_sd is not an outer class of outer1", outer1.isInnerClassOf(_sd, true));
       assertFalse("outer3 cannot be seen from _sd if the static flag is true, because outer2 is static", _sd.isInnerClassOf(outer3, true));
       assertTrue("But, outer3 is an outer class of _sd", _sd.isInnerClassOf(outer3, false));
-      
-      
     }
-    
-      
-      
     
     public void testCreateUniqueMethodName() {
       SymbolData george = new SymbolData("George");
@@ -2278,12 +2187,5 @@ public class SymbolData extends TypeData {
                    "sayHello4", george.createUniqueMethodName("sayHello"));
       
     }
-    
-    
-    
-    
   }
-      
-
-
 }

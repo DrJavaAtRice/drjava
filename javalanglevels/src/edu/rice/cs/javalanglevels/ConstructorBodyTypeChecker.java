@@ -384,7 +384,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       ((MethodData) _bd1).getParams()[1].setEnclosingData(_bd1);                      
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       _bd1.addEnclosingData(_sd1);
       _bd1.addVars(((MethodData)_bd1).getParams());
       _cbtc = new ConstructorBodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
@@ -429,7 +429,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
                                                           new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -437,7 +437,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
 
       SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
       SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
-      symbolTable = llv.symbolTable;
+      LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
 
       
       _sd3.setIsContinuation(false);

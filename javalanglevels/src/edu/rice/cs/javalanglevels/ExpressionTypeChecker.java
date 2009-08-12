@@ -1692,7 +1692,7 @@ public class ExpressionTypeChecker extends Bob {
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       _etc = new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _etc._importedPackages.addFirst("java.lang");
@@ -1812,7 +1812,7 @@ public class ExpressionTypeChecker extends Bob {
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
                                                           _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      llv.symbolTable = _etc.symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
       
       SourceInfo si = JExprParser.NO_SOURCE_INFO;
       
@@ -1897,7 +1897,7 @@ public class ExpressionTypeChecker extends Bob {
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
                                                           _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      llv.symbolTable = _etc.symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
       
       SourceInfo si = JExprParser.NO_SOURCE_INFO;
       
@@ -3609,7 +3609,7 @@ public class ExpressionTypeChecker extends Bob {
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
                                                           _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      llv.symbolTable = _etc.symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
       ArrayData boolArray = new ArrayData(SymbolData.BOOLEAN_TYPE, llv, JExprParser.NO_SOURCE_INFO);
       boolArray.setIsContinuation(false);
       symbolTable.remove("boolean[]");

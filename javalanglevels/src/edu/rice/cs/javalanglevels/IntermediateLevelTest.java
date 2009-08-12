@@ -62,13 +62,14 @@ public class IntermediateLevelTest extends TestCase {
     
   }
 
-  /*Test that files that are correct can be processed with no errors and result in the expected augmented file.
-   * Yay.dj1 is designed to be handled as a 1.4 file, so ignore it here.
-   */
+  /** Test that files that are correct can be processed with no errors and result in the expected augmented file.
+    * Yay.dj1 is designed to be handled as a 1.4 file, so ignore it here.
+    */
   public void testSuccessful() {
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
-        return pathName.getAbsolutePath().endsWith(".dj1") && !pathName.getAbsolutePath().endsWith("Yay.dj1");  //we will check Yay.dj1 for 1.4 augmentation
+        return pathName.getAbsolutePath().endsWith(".dj1") && ! pathName.getAbsolutePath().endsWith("Yay.dj1");  
+        // we will check Yay.dj1 for 1.4 augmentation
       }
     });
 
@@ -110,22 +111,26 @@ public class IntermediateLevelTest extends TestCase {
     
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
-        return pathName.getAbsolutePath().endsWith(".dj1");
+//        return pathName.getAbsolutePath().endsWith(".dj1");
+        return pathName.getAbsolutePath().endsWith("BadClass.dj1");
       }});
-      
+//    System.err.println("In testShouldBeErrors, testFiles = " + Arrays.toString(testFiles));
     LanguageLevelConverter llc;
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     for (int i = 0; i<testFiles.length; i++) {
-      llc = new LanguageLevelConverter();
-      result = llc.convert(new File[] {testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-      assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(), !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
+//      System.err.println("TESTING " + testFiles[i]);
+      LanguageLevelConverter llc1 = new LanguageLevelConverter();
+      result = llc1.convert(new File[] {testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+      assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(), 
+                 ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
     }
     
     /* Take care of the "references" directory */
-    llc = new LanguageLevelConverter();
+    LanguageLevelConverter llc2 = new LanguageLevelConverter();
     File f = new File(new File(directory, "references"), "ReferencingClass.dj1");
-    result = llc.convert(new File[] { f }, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-    assertTrue("should be parse exceptions or visitor exceptions in file " + f.getName(), !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
+    result = llc2.convert(new File[] { f }, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    assertTrue("should be parse exceptions or visitor exceptions in file " + f.getName(), 
+               ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
   }
   
   
@@ -156,5 +161,4 @@ public class IntermediateLevelTest extends TestCase {
         // let JUnit throw the exception
       }
   }
-    
 }

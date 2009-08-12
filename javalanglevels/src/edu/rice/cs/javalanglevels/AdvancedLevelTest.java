@@ -37,6 +37,7 @@
 package edu.rice.cs.javalanglevels;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
+import edu.rice.cs.javalanglevels.util.Log;
 import junit.framework.TestCase;
 import java.util.*;
 import java.io.*;
@@ -44,41 +45,65 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
-/**
- * This is a high-level test to make sure that taking an Advanced Level file from
- * source file to augmented file has the correct behavior, does not throw errors when
- * it should not, throws errors when it should, and results in the correct augmented code.
- * Files that should be successfully tested are placed in the testFiles/forAdvancedLevelTest folder 
- * as .dj2 files, and the expected augmented files asre also placed in the testFiles/forAdvancedLevelTest
- * folder with the same name, but a .expected extension.  Files that are expected to generate errors are
- * placed in the testFiles/forAdvancedLevelTest/shouldBreak folder, as .dj2 files.
- * Other subdirectories are used for other tests.
- */public class AdvancedLevelTest extends TestCase {
-  File directory;
+/** This is a high-level test to make sure that taking an Advanced Level file from
+  * source file to augmented file has the correct behavior, does not throw errors when
+  * it should not, throws errors when it should, and results in the correct augmented code.
+  * Files that should be successfully tested are placed in the testFiles/forAdvancedLevelTest folder 
+  * as .dj2 files, and the expected augmented files asre also placed in the testFiles/forAdvancedLevelTest
+  * folder with the same name, but a .expected extension.  Files that are expected to generate errors are
+  * placed in the testFiles/forAdvancedLevelTest/shouldBreak folder, as .dj2 files.
+  * Other subdirectories are used for other tests.
+  */
+import java.util.*;
   
-  //Iterable _iterable;
-  //Appendable _appendable;
-  //EnumConstantNotPresentException _ecnp;
-  //ProcessBuilder _pb;
+public class AdvancedLevelTest extends TestCase {
+    
+  public static final Log _log = new Log("LLConverter.txt", false);
   
-  public void setUp() {
-    directory = new File("testFiles/forAdvancedLevelTest");
+  File dir1, dir2, dir3;
+  FileFilter dj2Filter, dj2JavaFilter;
+  
+  public void setUp() { 
+    dir1 = new File("testFiles/forAdvancedLevelTest"); 
+    dir2 = new File("testFiles/forAdvancedLevelTest/importedFiles"); 
+    dir3 = new File("testFiles/forAdvancedLevelTest/importedFiles2"); 
+    
+    dj2Filter = new FileFilter() {
+      public boolean accept(File pathName) {
+        String name = pathName.getAbsolutePath();
+        return (name.endsWith(".dj2"));
+      }
+    };
+    dj2JavaFilter = new FileFilter() {
+      public boolean accept(File pathName) {
+        String name = pathName.getAbsolutePath();
+        return (name.endsWith(".dj2") || name.endsWith(".java"));
+      }
+    };
   }
   
-  /**
-   * Try some example files and make sure they can be converted without errors and that the resulting conversions are correct.
-   */
+  /** Try some example files and make sure they can be converted without errors and that the resulting conversions are correct. */
   public void testSuccessful() {
-    File[] testFiles = directory.listFiles(new FileFilter() {
-      public boolean accept(File pathName) {
-        return pathName.getAbsolutePath().endsWith(".dj2");
-      }
-    });
-    
-    
+
+    _log.log("Running testSuccessful");
+    File[] files1 = dir1.listFiles(dj2Filter);
+    File[] files2 = dir2.listFiles(dj2Filter);
+    File[] files3 = dir3.listFiles(dj2Filter);
+
     LanguageLevelConverter llc = new LanguageLevelConverter();
+    // testFiles = files1 || files2 || files3; this computation is ugly in Java because Java has no functional lists
+    int len1 = files1.length;
+    int len2 = files2.length;
+    int len3 = files3.length;
+    File[] testFiles = new File[len1 + len2 + len3];
+    for (int i = 0; i < len1; i++) { testFiles[i] = files1[i]; }
+    for (int i = 0; i < len2; i++) { testFiles[len1 + i] = files2[i]; }
+    for (int i = 0; i < len3; i++) { testFiles[len1 + len2 + i] = files3[i]; }
+        
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    
+    System.err.println("testFiles = " + Arrays.toString(testFiles));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
@@ -105,13 +130,12 @@ import edu.rice.cs.plt.io.IOUtil;
     }
     
     //test the subdirectory files as well.
-    File newDirectory = new File(directory.getAbsolutePath() + System.getProperty("file.separator") + "importedFiles");
-    testFiles = newDirectory.listFiles(new FileFilter() {
+    File dir2 = new File(dir1.getAbsolutePath() + System.getProperty("file.separator") + "importedFiles");
+    testFiles = dir2.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
         String name = pathName.getAbsolutePath();
         return name.endsWith("IsItPackageAndImport.dj1") || name.endsWith("ToReference.dj1");
       }});
-      
       
       /**Now make sure that the resulting java files are correct.*/
       for(int i = 0; i < testFiles.length; i++) {
@@ -134,18 +158,17 @@ import edu.rice.cs.plt.io.IOUtil;
         }
       }
       
-      //And make sure that no java file was generated for ToReference2.dj1
-      //(This is testing that we correctly handled what could have been an ambiguous name reference, but wasn't)
-      File f = new File(newDirectory, "ToReference2.java");
-      assertFalse("ToReference2.java should not exist", f.exists());
+//      //And make sure that no java file was generated for ToReference2.dj1
+//      //(This is testing that we correctly handled what could have been an ambiguous name reference, but wasn't)
+//      File f = new File(dir2, "ToReference2.java");
+//      assertFalse("ToReference2.java should not exist", f.exists());
       
-      newDirectory = new File(directory.getAbsolutePath() + System.getProperty("file.separator") + "importedFiles2");
-      testFiles = newDirectory.listFiles(new FileFilter() {
+      File f;
+      dir2 = new File(dir1.getAbsolutePath() + System.getProperty("file.separator") + "importedFiles2");
+      testFiles = dir2.listFiles(new FileFilter() {
         public boolean accept(File pathName) {
           return pathName.getAbsolutePath().endsWith("AlsoReferenced.dj1");
         }});
-        
-        
         
         /**Now make sure that the resulting java files are correct.*/
         for(int i = 0; i < testFiles.length; i++) {
@@ -168,91 +191,96 @@ import edu.rice.cs.plt.io.IOUtil;
           }
         }
         
-        //And make sure that no java file was generated for ToReference.dj1
-        f = new File(newDirectory, "ToReference.java");
-        assertFalse("ToReference.java should not exist", f.exists());
+//        //And make sure that no java file was generated for ToReference.dj1
+//        f = new File(dir2, "ToReference.java");
+//        assertFalse("ToReference.java should not exist", f.exists());
+//        fail("Ensure that System.err is dumped");
         
   }
 
-  /**
-   * Test that if a package and a class have the same name, an error is given.
-   */
+  /** Test that if a package and a class have the same name, an error is given. */
   public void testPackageError() {
-    directory = new File(directory.getAbsolutePath() + "/shouldBreak/noBreak");
-    File[] testFiles = directory.listFiles(new FileFilter() {
-      public boolean accept(File pathName) {
-        return pathName.getAbsolutePath().endsWith(".dj2");
-      }});
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      for (int i = 0; i<testFiles.length; i++) {
-        result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-        assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
-      }
+    _log.log("Running testPackageError");
+    String base = dir1.getAbsolutePath();
+    dir1 = new File(base + "/shouldBreak/noBreak");
+    dir2 = new File(base + "/shouldBreak");
+        
+    File[] files1 = dir1.listFiles(dj2Filter);
+    File[] files2 = dir2.listFiles(dj2Filter);
     
-      
+    int len1 = files1.length;
+    int len2 = files2.length;
+    File[] testFiles = new File[len1 + len2];
+    for (int i = 0; i < len1; i++) { testFiles[i] = files1[i]; }
+    for (int i = 0; i < len2; i++) { testFiles[len1 + i] = files2[i]; }
+
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
   }
 
-  /**
-   * Test a set of files that have various Advanced Level errors.  See the files themselves for a description of the errors.
-   */
+  /** Test a set of files that have various Advanced Level errors.  See the files themselves for a description of the errors. */
   public void testShouldBeErrors() { 
-    directory = new File(directory.getAbsolutePath() + "/shouldBreak");
-    File[] testFiles = directory.listFiles(new FileFilter() {
+    _log.log("Running testShouldBeErrors");
+    dir1 = new File(dir1.getAbsolutePath() + "/shouldBreak");
+    File[] testFiles = dir1.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
         return pathName.getAbsolutePath().endsWith(".dj2");
       }});
-
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      for (int i = 0; i<testFiles.length; i++) {
-        LanguageLevelVisitor._errorAdded = false;
-        result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-        assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
-      }
+    
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
+    for (int i = 0; i<testFiles.length; i++) {
+      LanguageLevelVisitor._errorAdded = false;
+      result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+      assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
+    }
   }
   
   
-  /**
-   * This file used to have a NullPointer Exception in it because of a bug in the code.  Leave the test in so that the bug
-   * never gets reintroduced.
-   */
+  /** This file used to have a NullPointer Exception in it because of a bug in the code.  Leave the test in so that the bug
+    * never gets reintroduced.
+    */
   public void testNoNullPointer() { 
-    directory = new File(directory.getAbsolutePath() + "/shouldBreak");
-    File[] testFiles = directory.listFiles(new FileFilter() {
+    _log.log("Running testNoNullPointer");
+    dir1 = new File(dir1.getAbsolutePath() + "/shouldBreak");
+    File[] testFiles = dir1.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
         return pathName.getAbsolutePath().endsWith("SwitchDoesntAssign.dj2");
       }});
-
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      for (int i = 0; i<testFiles.length; i++) {
-        result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-        assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
+    _log.log("testFiles = " + testFiles);
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
+    for (int i = 0; i<testFiles.length; i++) {
+      result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+      assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
       }
   }  
-  
     
-  /**make sure that the order packaged files are compiled in does not matter.
-   * This is to make sure that a bug that was fixed stays fixed.
-   */
+  /** Make sure that the order packaged files are compiled in does not matter.
+    * This is to make sure that a bug that was fixed stays fixed.
+    */
   public void testPackagedOrderMatters() {
-     File newDirectory = new File(directory.getAbsolutePath() + System.getProperty("file.separator") + "lists-dj2" + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "listFW");
-     File[] testFiles = new File[]{new File(newDirectory, "NEList.dj2"),
-                                   new File(newDirectory, "MTList.dj2"),
-                                   new File(newDirectory, "IList.dj2")};
+    _log.log("Running testPackagedOrderMatters");
+    dir2 = new File(dir1.getAbsolutePath() + System.getProperty("file.separator") + "lists-dj2" + 
+                    System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "listFW");
+    File[] testFiles = 
+      new File[]{ new File(dir2, "NEList.dj2"), new File(dir2, "MTList.dj2"), new File(dir2, "IList.dj2")};
+    
+    System.err.println("testfiles = " + Arrays.toString(testFiles));
 
-          System.out.flush();
-
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-      
-      assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
-      
-      assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
-
-      //don't worry about checking the .java files for correctness...just make sure there weren't any exceptions
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    System.err.println("ParseExceptions: " + result.getFirst());
+    System.err.println("VisitorExceptions: " + result.getSecond());
+    
+    assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
+    
+    assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
+    
+    //don't worry about checking the .java files for correctness...just make sure there weren't any exceptions
   }
   
 }

@@ -37,19 +37,17 @@
 package edu.rice.cs.javalanglevels;
 import java.util.*;
 
-/**
- * This class extends Hashtable so that we can have extra functionality in the put function.
- * A Symboltable is specifically a Hashtable of Strings to SymbolData.  The put function
- * checks to see if the specified SymbolData is already in the table.  If so, it simply updates its
- * fields.
- */
+/** This class extends Hashtable so that we can have extra functionality in the put function.
+  * A Symboltable is specifically a Hashtable of Strings to SymbolData.  The put function
+  * checks to see if the specified SymbolData is already in the table.  If so, it simply updates its
+  * fields.
+  */
 
 public class Symboltable extends Hashtable<String, SymbolData> {
   
-  /**
-   * Overrides put function of hash table.  If the specified SymbolData is already in
-   * the table, simply update its fields.  Otherwise, do a normal put operation.
-   * */
+  /** Overrides put function of hash table.  If the specified SymbolData is already in
+    * the table, simply update its fields.  Otherwise, do a normal put operation.
+    */
   public SymbolData put (String name, SymbolData sd) {
     SymbolData inTable = this.get(sd.getName());
     if (inTable != null) {

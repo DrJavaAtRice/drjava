@@ -275,6 +275,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
    
     that.getMav().visit(this);
     that.getName().visit(this);
+    that.getSuperclass().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
@@ -450,7 +451,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     public void setUp() {
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();

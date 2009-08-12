@@ -42,25 +42,20 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
-/**
- * Represents the data for a given class or instance of a class.  
- * When talking about TypeData, we are either talking about a specific instantiation of
- * a class (represented by a InstanceData) or a class type itself (represented by a SymbolData).
- */
+/** Represents the data for a given class or instance of a class.  
+  * When talking about TypeData, we are either talking about a specific instantiation of
+  * a class (represented by a InstanceData) or a class type itself (represented by a SymbolData).
+  */
 public abstract class TypeData extends Data {
   
-  public TypeData(Data d) {
-    super(d);
-  }
+  public TypeData(Data d) { super(d); }
   
   /**@return true if this is an InstanceData, and false if this is a SymbolData.*/
- public abstract boolean isInstanceType();
- 
- 
- /**@return the class SymbolData corresponding to this TypeData.*/
- public abstract  SymbolData getSymbolData();
- 
- /**@return the InstanceData corresponding to this TypeData.*/
-  public abstract InstanceData getInstanceData();
-       
+  public abstract boolean isInstanceType();
+  
+  /**@return the class SymbolData corresponding to this TypeData.*/
+  public abstract SymbolData getSymbolData();
+  
+  /**@return the InstanceData corresponding to this TypeData.*/
+  public abstract InstanceData getInstanceData();    
 }

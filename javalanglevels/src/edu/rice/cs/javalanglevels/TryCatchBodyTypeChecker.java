@@ -157,7 +157,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       ((MethodData) _bd1).getParams()[1].setEnclosingData(_bd1);
                             
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       _bd1.addEnclosingData(_sd1);
       _bd1.addFinalVars(((MethodData)_bd1).getParams());
       _tcbtc = new TryCatchBodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
@@ -187,7 +187,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
                                       new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      llv.symbolTable = symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -209,7 +209,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
 
       NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
 
-      SymbolData javaLangThrowable = new SymbolData("java.lang.Throwable");
+      SymbolData javaLangThrowable = _tcbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
       _tcbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
       SymbolData exception = new SymbolData("my.crazy.exception");
       exception.setSuperClass(javaLangThrowable);

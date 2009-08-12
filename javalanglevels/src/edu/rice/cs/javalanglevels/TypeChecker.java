@@ -38,6 +38,7 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
+import edu.rice.cs.javalanglevels.util.Log;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
@@ -48,6 +49,8 @@ import junit.framework.TestCase;
 /** Does Type Checking that is not dependent on the enclosing body.  Also does top level type checking.  Common
  * to all langauge levels.*/
 public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implements JExpressionIFVisitor<TypeData> {
+  
+  protected static final Log _log = new Log("LLConverter.txt", false);
 
   /**Holds any errors that are encountered during TypeChecking*/
   static LinkedList<Pair<String, JExpressionIF>> errors;
@@ -84,7 +87,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     _file = file;
     _package = packageName;
     this.errors = errors;
-    this.symbolTable = symbolTable;
+    LanguageLevelConverter.symbolTable = this.symbolTable = symbolTable;
     this._importedFiles = importedFiles;
     this._importedPackages = importedPackages;
   }
@@ -167,17 +170,16 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
   }
 
-  /**
-   * Returns the SymbolData corresponding to the name className, assuming that className
-   * does not refer to an unqualified or partially-qualified inner class.
-   **/
+  /** Returns the SymbolData corresponding to the name className, assuming that className
+    * does not refer to an unqualified or partially-qualified inner class.
+    **/
   public SymbolData getSymbolData(String className, JExpression jexpr, boolean giveException, boolean runnableNotOkay) {
     // Check qualified class name (which is no different at elementary level)
     SourceInfo si = jexpr.getSourceInfo();
     LanguageLevelVisitor llv = new LanguageLevelVisitor(_file, _package, _importedFiles, 
                                                         _importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-    llv.symbolTable = this.symbolTable;
+    LanguageLevelConverter.symbolTable = llv.symbolTable = this.symbolTable;
     SymbolData sd = llv.getSymbolData(className, si, false, false, false, true); // TODO: Is this right?
     if (sd == null || sd.isContinuation()) {
       if (giveException) {
@@ -227,21 +229,18 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return nv;
   }
   
-   /**
-   * The Qualified Class Name is the package, followed by a dot, followed by the rest of the class name.
-   * If the provided className is already qualified, just return it.  If the package is not empty,
-   * and the className does not start with the package, append the package name onto the className, and return it.
-   * @param className  The className to qualify.
-   */
+  /** The Qualified Class Name is the package, followed by a dot, followed by the rest of the class name.
+    * If the provided className is already qualified, just return it.  If the package is not empty,
+    * and the className does not start with the package, append the package name onto the className, and return it.
+    * @param className  The className to qualify.
+    */
   protected String getQualifiedClassName(String className) {
-    if (!_package.equals("") && !className.startsWith(_package)) {return _package + "." + className;}
-    else { return className;}
+    if (!_package.equals("") && ! className.startsWith(_package)) { return _package + "." + className;}
+    else return className;
   }
 
   
-  /**
-   * Check to see if the two symbol datas are in the same package.
-   */
+  /** Check to see if the two symbol datas are in the same package.*/
   private static boolean _areInSamePackage(SymbolData enclosingSD, SymbolData thisSD) {
     String enclosingSDName = enclosingSD.getName();
     int lastIndexOfDot = enclosingSDName.lastIndexOf(".");
@@ -751,12 +750,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   
   public TypeData forBreakStatementOnly(BreakStatement that) {
     // returns a sentinel value that tells us that this is a break or continue statement.
-    return SymbolData.KEEP_GOING;
+    return SymbolData.NOT_FOUND;
   }
 
   public TypeData forContinueStatementOnly(ContinueStatement that) {
     // returns a sentinel value that tells us that this is a break or continue statement.
-    return SymbolData.KEEP_GOING;
+    return SymbolData.NOT_FOUND;
   }
 
   public TypeData forReturnStatementOnly(ReturnStatement that) {
@@ -786,13 +785,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   
    
   
-  /**
-   * Return whether the value on the right can be assigned to the value on the left. 
-   * Uses autoboxing if the user has java 1.5.
-   */
+  /** Return whether the value on the right can be assigned to the value on the left. 
+    * Uses autoboxing if the user has java 1.5.
+    */
   protected boolean _isAssignableFrom(SymbolData sdLeft, SymbolData sdRight) {
     
-    if (sdRight == null) {return false;}
+    if (sdRight == null) return false;
     return sdRight.isAssignableTo(sdLeft, LanguageLevelConverter.OPT.javaVersion());
 
   }
@@ -969,12 +967,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return doReturn;
   }
   
-
   /**Do what is necessary to handle a class def*/
   public TypeData forClassDef(ClassDef that) {
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = getSymbolData(className, that, true, false);
-
+//    if (sd == null) {
+//      System.err.println("****DISASTER****  sd is null for ClassDef " + that);
+//      _log.log("****DISASTER****  sd is null for ClassDef " + that);
+//    }
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
       return null;
@@ -1278,8 +1278,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      symbolTable = new Symboltable();
-      LanguageLevelVisitor.symbolTable = symbolTable;
+      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
@@ -1751,7 +1750,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_btc._file, _btc._package, _btc._importedFiles, 
                                                         _btc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      llv.symbolTable = _btc.symbolTable;
+      LanguageLevelConverter.symbolTable = llv.symbolTable = _btc.symbolTable;
       
       SourceInfo si = JExprParser.NO_SOURCE_INFO;
       

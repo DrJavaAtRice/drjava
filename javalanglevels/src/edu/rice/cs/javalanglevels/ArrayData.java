@@ -266,7 +266,7 @@ public class ArrayData extends SymbolData {
                                                           new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
-      llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       si = JExprParser.NO_SOURCE_INFO;
       SymbolData e = new SymbolData("elementType");
       e.setIsContinuation(false);
