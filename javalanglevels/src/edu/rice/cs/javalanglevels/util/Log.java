@@ -47,7 +47,7 @@ import java.util.TimeZone;
   * @version $Id: Log.java 4691 2008-12-02 23:33:27Z dlsmith $
   */
 public class Log {
-  public static final boolean ENABLE_ALL = true;
+  public static final boolean ENABLE_ALL = false;
   
   /** Whether this particular log is enabled in development mode. */
   protected volatile boolean _isEnabled;
