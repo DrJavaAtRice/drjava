@@ -398,7 +398,7 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
 
   /**
    * Evaluates a left-hand side of an assignment.  In the undefined cases, this returns null.  
-   * (The type checker insures that such cases will never be called.)
+   * (The type checker ensures that such cases will never be called.)
    */
   private class LValueVisitor extends AbstractVisitor<Box<Object>> {
     
@@ -449,6 +449,11 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
           try { Array.set(array, index, val); }
           catch (NullPointerException e) {
             throw new WrappedException(new EvaluatorException(e, "java.lang.reflect.Array.set"));
+          }
+          catch (IllegalArgumentException e) {
+            Exception newE = new ArrayStoreException();
+            newE.setStackTrace(e.getStackTrace());
+            throw new WrappedException(new EvaluatorException(newE, "java.lang.reflect.Array.set"));
           }
           catch (ArrayIndexOutOfBoundsException e) {
             throw new WrappedException(new EvaluatorException(e, "java.lang.reflect.Array.set"));
