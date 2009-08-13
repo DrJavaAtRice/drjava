@@ -21,17 +21,17 @@ public class FunctionSignatureContext extends DelegatingContext {
   }
   
   /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
-  public boolean typeExists(String name, TypeSystem ts) {
+  @Override public boolean typeExists(String name, TypeSystem ts) {
     return declaredTypeVariable(name) != null || super.typeExists(name, ts);
   }
   
   /** Test whether {@code name} is an in-scope type variable. */
-  public boolean typeVariableExists(String name, TypeSystem ts) {
+  @Override public boolean typeVariableExists(String name, TypeSystem ts) {
     return declaredTypeVariable(name) != null || super.typeVariableExists(name, ts);
   }
   
   /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public VariableType getTypeVariable(String name, TypeSystem ts) {
+  @Override public VariableType getTypeVariable(String name, TypeSystem ts) {
     VariableType result = declaredTypeVariable(name);
     return (result == null) ? super.getTypeVariable(name, ts) : result;
   }

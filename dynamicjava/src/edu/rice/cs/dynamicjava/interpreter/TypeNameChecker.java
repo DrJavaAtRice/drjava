@@ -286,7 +286,11 @@ public class TypeNameChecker {
         }
       }
       while (ids.hasNext()) {
-        try { t = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty()); }
+        try {
+          ClassType memberType = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty());
+          new ExpressionChecker(context, opt).checkAccessibility(memberType.ofClass(), node);
+          t = memberType;
+        }
         catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
@@ -347,7 +351,9 @@ public class TypeNameChecker {
       while (ids.hasNext()) {
         try {
           Iterable<Type> targs = checkStructureForList(allTargs.next());
-          t = ts.lookupClass(t, ids.next().image(), targs);
+          ClassType memberType = ts.lookupClass(t, ids.next().image(), targs);
+          new ExpressionChecker(context, opt).checkAccessibility(memberType.ofClass(), node);
+          t = memberType;
         }
         catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }

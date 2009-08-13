@@ -23,60 +23,50 @@ public class FunctionWrapperClass implements DJClass {
   private static final Iterator<Integer> ID_COUNTER =
     new SequenceIterator<Integer>(1, LambdaUtil.INCREMENT_INT);
   
-  private final String _packageName;
+  private final Access.Module _accessModule;
   private final Iterable<DJMethod> _methods;
   private final String _name;
   
-  public FunctionWrapperClass(String packageName, Iterable<? extends LocalFunction> functions) {
-    _packageName = packageName;
+  public FunctionWrapperClass(Access.Module accessModule, Iterable<? extends LocalFunction> functions) {
+    _accessModule = accessModule;
     _methods = IterUtil.mapSnapshot(functions, FUNCTION_AS_METHOD);
     _name = "Overload" + ID_COUNTER.next();
   }
   
-  private static final Lambda<LocalFunction, DJMethod> FUNCTION_AS_METHOD =
+  /** Non-static because FunctionWrapperMethod is non-static. */
+  private final Lambda<LocalFunction, DJMethod> FUNCTION_AS_METHOD =
     new Lambda<LocalFunction, DJMethod>() {
     public DJMethod value(LocalFunction f) { return new FunctionWrapperMethod(f); }
   };
   
-  public String packageName() { return _packageName; }
+  public String packageName() { return _accessModule.packageName(); }
   
   /** Produces the binary name for the given class (as in {@link Class#getName}) */
   public String fullName() {
-    // TODO: use the context to get this name instaed
-    return _packageName + ".$" + _name;
+    // TODO: use the context to get this name instead
+    String pkg = packageName();
+    if (pkg.length() > 0) pkg += ".";
+    return pkg + "$" + _name;
   }
   
   public boolean isAnonymous() { return false; }
-  
   public String declaredName() { return _name; }
-  
   public boolean isInterface() { return false; }
-  
   public boolean isStatic() { return false; }
-  
   public boolean isAbstract() { return false; }
-  
   public boolean isFinal() { return true; }
-  
   public Access accessibility() { return Access.PUBLIC; }
-  
+  public Access.Module accessModule() { return _accessModule; }
   public boolean hasRuntimeBindingsParams() { return false; }
-  
   /** The class that declares this class, or {@code null} if this is declared at a top-level or local scope */
   public DJClass declaringClass() { return null; }
-  
   /** List all type variables declared by this class */
   public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
-  
   /** List the declared supertypes of this class */
   public Iterable<Type> declaredSupertypes() { return IterUtil.empty(); }
-  
   public Iterable<DJField> declaredFields() { return IterUtil.empty(); }
-  
   public Iterable<DJConstructor> declaredConstructors() { return IterUtil.empty(); }
-  
   public Iterable<DJMethod> declaredMethods() { return _methods; }
-  
   public Iterable<DJClass> declaredClasses() { return IterUtil.empty(); }
 
   /**
@@ -97,7 +87,7 @@ public class FunctionWrapperClass implements DJClass {
   public int hashCode() { return System.identityHashCode(this); }
   
   
-  private static class FunctionWrapperMethod implements DJMethod {
+  private class FunctionWrapperMethod implements DJMethod {
     private final LocalFunction _f;
     public FunctionWrapperMethod(LocalFunction f) { _f = f; }
     public Iterable<VariableType> declaredTypeParameters() { return _f.declaredTypeParameters(); }
@@ -109,12 +99,11 @@ public class FunctionWrapperClass implements DJClass {
     public boolean isAbstract() { return false; }
     public boolean isFinal() { return false; }
     public Access accessibility() { return Access.PUBLIC; }
-    public boolean hasRuntimeBindingsParams() { return false; }
+    public Access.Module accessModule() { return _accessModule; }
     public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {
       return _f.evaluate(args, bindings, options);
     }
-    
   }
 
 } 

@@ -110,7 +110,7 @@ public class ClassContext extends DelegatingContext {
     return ts.containsMethod(_thisType, name);
   }
   
-  
+
   /** Return a full name for a class with the given name declared here. */
   @Override public String makeClassName(String n) {
     return _c.fullName() + "$" + n;

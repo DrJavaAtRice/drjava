@@ -28,7 +28,7 @@ public class Interpreter {
     _bindings = bindings;
     // Force potentially expensive objects/classes to initialize now:
     _opt.typeSystem();
-    new JavaCCParser(new StringReader("")).parseStream();
+    new JavaCCParser(new StringReader(""), _opt).parseStream();
   }
   
   public Interpreter(Options opt) {
@@ -60,7 +60,7 @@ public class Interpreter {
   
   private Iterable<Node> parse(String code) throws InterpreterException {
     try {
-      return new JavaCCParser(new StringReader(code)).parseStream();
+      return new JavaCCParser(new StringReader(code), _opt).parseStream();
     }
     catch (ParseError e) {
       throw new ParserException(e);

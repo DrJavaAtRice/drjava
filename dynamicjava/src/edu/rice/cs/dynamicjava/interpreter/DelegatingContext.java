@@ -178,8 +178,8 @@ public abstract class DelegatingContext implements TypeContext {
   
   /* MISC CONTEXTUAL INFORMATION */
   
-  public String getPackage() {
-    return _next.getPackage();
+  public Access.Module accessModule() {
+    return _next.accessModule();
   }
   
   /** Return a full name for a class with the given name declared here. */

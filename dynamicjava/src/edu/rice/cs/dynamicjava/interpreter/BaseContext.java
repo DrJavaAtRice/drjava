@@ -23,7 +23,7 @@ public class BaseContext implements TypeContext {
     return partial;
   }
   public LocalVariable getLocalVariable(String name, TypeSystem ts) { return null; }
-  public String getPackage() { return ""; }
+  public Access.Module accessModule() { return new TopLevelAccessModule(""); }
   public Type getReturnType() { return null; }
   public DJClass getThis() { return null; }
   public DJClass getThis(String className) { return null; }

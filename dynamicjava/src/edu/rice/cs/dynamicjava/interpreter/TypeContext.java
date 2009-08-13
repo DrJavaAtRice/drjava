@@ -115,7 +115,7 @@ public interface TypeContext {
   /* MISC CONTEXTUAL INFORMATION */
   
   /** Get the current package. */
-  public String getPackage();
+  public Access.Module accessModule();
   
   /** Return a full name for a class with the given name declared here. */
   public String makeClassName(String declaredName);

@@ -17,6 +17,7 @@ public class ArrayLengthField implements DJField {
   public boolean isFinal() { return true; }
   public boolean isStatic() { return false; }
   public Access accessibility() { return Access.PUBLIC; }
+  public Access.Module accessModule() { return new TopLevelAccessModule("java.lang"); }
 
   public Box<Object> boxForReceiver(final Object receiver) {
     return new Box<Object>() {

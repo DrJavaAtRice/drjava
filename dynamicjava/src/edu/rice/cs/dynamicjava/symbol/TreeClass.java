@@ -43,6 +43,7 @@ public class TreeClass implements DJClass {
   
   private final String _fullName;
   private final DJClass _declaring; // may be null
+  private final Access.Module _accessModule;
   private final Node _ast;
   private final ModifierSet _mods;
   private final Thunk<Class<?>> _loaded;
@@ -58,15 +59,17 @@ public class TreeClass implements DJClass {
    * @param fullName  The fully-qualified name of the class, as in {@link Class#getName}.
    * @param declaring  The declaring class of this class, or null if it appears at a top level or local
    *                   scope.
+   * @param accessModule  The access module for this class, or null if it is its own access module
    * @param ast  The parsed declaration of this class.  Must be a TypeDeclaration, AnonymousAllocation,
    *             or AnonymousInnerAllocation.
    * @param loader  A class loader for compiling and loading this class.  Note that the loader must
    *                be defined to allow transitive loading of all referenced classes.
    */
-  public TreeClass(String fullName, DJClass declaring, Node ast, final TreeClassLoader loader,
-                   Options opt) {
+  public TreeClass(String fullName, DJClass declaring, Access.Module accessModule, Node ast,
+                   final TreeClassLoader loader, Options opt) {
     _fullName = fullName;
     _declaring = declaring;
+    _accessModule = (accessModule == null) ? this : accessModule;
     _ast = ast;
     if (_ast instanceof TypeDeclaration) { _mods = ((TypeDeclaration) _ast).getModifiers(); }
     else { _mods = ModifierSet.make(); }
@@ -129,13 +132,13 @@ public class TreeClass implements DJClass {
       n.acceptVisitor(new AbstractVisitor<Void>() {
         @Override public Void defaultCase(Node n) { return null; /* ignore other declarations */ }
         @Override public Void visit(ClassDeclaration d) {
-          TreeClass c = new TreeClass(_fullName + "$" + d.getName(), TreeClass.this, d, loader, _opt);
+          TreeClass c = new TreeClass(_fullName + "$" + d.getName(), TreeClass.this, _accessModule, d, loader, _opt);
           NodeProperties.setDJClass(d, c);
           _classes.add(c);
           return null;
         }
         @Override public Void visit(InterfaceDeclaration d) {
-          TreeClass c = new TreeClass(_fullName + "$" + d.getName(), TreeClass.this, d, loader, _opt);
+          TreeClass c = new TreeClass(_fullName + "$" + d.getName(), TreeClass.this, _accessModule, d, loader, _opt);
           NodeProperties.setDJClass(d, c);
           _classes.add(c);
           return null;
@@ -168,6 +171,7 @@ public class TreeClass implements DJClass {
   public Node declaration() { return _ast; }
   
   public String packageName() {
+    // can't delegate to _accessModule, because it may be this
     int dot = _fullName.lastIndexOf('.');
     if (dot == -1) { return ""; }
     else { return _fullName.substring(0, dot); }
@@ -191,6 +195,7 @@ public class TreeClass implements DJClass {
   public boolean isAbstract() { return _mods.isAbstract(); }
   public boolean isFinal() { return _mods.isFinal(); }
   public Access accessibility() { return extractAccessibility(_mods); }
+  public Access.Module accessModule() { return _accessModule; }
   public boolean hasRuntimeBindingsParams() { return true; }
   
   /** The class that declares this class, or {@code null} if this is declared at a top-level or local scope */
@@ -308,6 +313,7 @@ public class TreeClass implements DJClass {
     public Access accessibility() {
       return isInterface() ? Access.PUBLIC : extractAccessibility(_f.getModifiers());
     }
+    public Access.Module accessModule() { return _accessModule; }
     public Box<Object> boxForReceiver(Object receiver) {
       return _loaded.value().boxForReceiver(receiver);
     }
@@ -338,6 +344,9 @@ public class TreeClass implements DJClass {
       });
       _outerClass = SymbolUtil.dynamicOuterClass(TreeClass.this);
     }
+    
+    public String declaredName() { return TreeClass.this.declaredName(); }
+    public Access.Module accessModule() { return _accessModule; }
     
     public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {
@@ -411,6 +420,7 @@ public class TreeClass implements DJClass {
     public Access accessibility() {
       return isInterface() ? Access.PUBLIC : extractAccessibility(_m.getModifiers());
     }
+    public Access.Module accessModule() { return _accessModule; }
     
     public Type returnType() { return NodeProperties.getType(_m.getReturnType()); }
       

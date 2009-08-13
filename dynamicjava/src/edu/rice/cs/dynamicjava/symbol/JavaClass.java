@@ -57,6 +57,14 @@ public class JavaClass implements DJClass {
   public Access accessibility() { return extractAccessibility(_c.getModifiers()); }  
   public boolean hasRuntimeBindingsParams() { return false; }
   
+  public Access.Module accessModule() {
+    // Reflection API (1.4) doesn't tell us enclosing classes, so we're limited to declaring classes
+    Class<?> result = _c;
+    Class<?> outer = result.getDeclaringClass();
+    while (outer != null) { result = outer; outer = result.getDeclaringClass(); }
+    return new JavaClass(result);
+  }
+
   public DJClass declaringClass() {
     Class<?> outer = _c.getDeclaringClass();
     return (outer == null) ? null : new JavaClass(outer);
@@ -131,22 +139,24 @@ public class JavaClass implements DJClass {
     public DJClass value(Class c) { return new JavaClass(c); }
   };
   
-  private static final Lambda<Field, DJField> CONVERT_FIELD = new Lambda<Field, DJField>() {
+  /** Non-static because JavaField is non-static. */
+  private final Lambda<Field, DJField> CONVERT_FIELD = new Lambda<Field, DJField>() {
     public DJField value(Field f) { return new JavaField(f); }
   };
   
-  /** Non-static because the JavaConstructor class is non-static. */
+  /** Non-static because JavaConstructor is non-static. */
   @SuppressWarnings("unchecked") // java.lang.Class methods return (raw) type Constructor[] in Java 5 (fixed in Java 6)
   private final Lambda<Constructor, DJConstructor> CONVERT_CONSTRUCTOR =
     new Lambda<Constructor, DJConstructor>() {
     public DJConstructor value(Constructor k) { return new JavaConstructor(k); }
   };
   
-  private static final Lambda<Method, DJMethod> CONVERT_METHOD = new Lambda<Method, DJMethod>() {
+  /** Non-static because JavaMethod is non-static. */
+  private final Lambda<Method, DJMethod> CONVERT_METHOD = new Lambda<Method, DJMethod>() {
     public DJMethod value(Method m) { return new JavaMethod(m); }
   };
 
-  protected static class JavaField implements DJField {
+  protected class JavaField implements DJField {
     protected final Field _f;
     public JavaField(Field f) { _f = f; }
     public String declaredName() { return _f.getName(); }
@@ -154,6 +164,7 @@ public class JavaClass implements DJClass {
     public boolean isFinal() { return Modifier.isFinal(_f.getModifiers()); }
     public boolean isStatic() { return Modifier.isStatic(_f.getModifiers()); }
     public Access accessibility() { return extractAccessibility(_f.getModifiers()); }
+    public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     
     public Box<Object> boxForReceiver(final Object receiver) {
       return new Box<Object>() {
@@ -227,7 +238,9 @@ public class JavaClass implements DJClass {
       _params = makeParamThunk(); /* allows overriding */
     }
     
+    public String declaredName() { return JavaClass.this.declaredName(); }
     public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
+    public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() { return paramFactory(_k.getParameterTypes()); }
     public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
     
@@ -282,7 +295,7 @@ public class JavaClass implements DJClass {
                   "sun.reflect.NativeConstructorAccessorImpl.newInstance0" };
   
   
-  protected static class JavaMethod implements DJMethod {
+  protected class JavaMethod implements DJMethod {
     protected final Method _m;
     private final Thunk<Iterable<LocalVariable>> _params;
     public JavaMethod(Method m) { _m = m; _params = makeParamThunk(); /* allows overriding */ }
@@ -292,6 +305,7 @@ public class JavaClass implements DJClass {
     public boolean isAbstract() { return Modifier.isAbstract(_m.getModifiers()); }
     public boolean isFinal() { return Modifier.isFinal(_m.getModifiers()); }
     public Access accessibility() { return extractAccessibility(_m.getModifiers()); }
+    public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     public Type returnType() { return classAsType(_m.getReturnType()); }
     public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
     public Iterable<LocalVariable> declaredParameters() { return _params.value(); }

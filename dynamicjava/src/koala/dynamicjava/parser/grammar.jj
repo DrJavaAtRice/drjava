@@ -24,6 +24,7 @@ import koala.dynamicjava.tree.ModifierSet.Modifier;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 import koala.dynamicjava.tree.tiger.*;
+import edu.rice.cs.dynamicjava.Options;
 
 /**
  * This class represents a (interpreted) Java 1.1 language parser
@@ -31,10 +32,11 @@ import koala.dynamicjava.tree.tiger.*;
  */
 
 public class Parser {
-  /**
-   * The name of the file currently interpreted; null by default
-   */
+  /** The name of the file currently interpreted; null by default */
   private File file = null;
+  
+  /** DynamicJava options */
+  private Options opt = Options.DEFAULT;
   
   /**
    * A flag to use in semantic lookaheads.  Declared here as a workaround because 
@@ -53,6 +55,8 @@ public class Parser {
   
   /** Sets the current file */
   public void setFile(File f) { file = f; }
+  
+  public void setOptions(Options o) { opt = o; }
   
   private SourceInfo _range(Token first, Token last) {
     return SourceInfo.range(file, first.beginLine, first.beginColumn, last.endLine, last.endColumn);
@@ -1339,7 +1343,7 @@ PARSER_END(Parser)
   { ReferenceTypeName name = null; }
   {
     try {
-      "package" [ name=referenceTypeName() ] (";" | <EOF>)
+      "package" [ name=referenceTypeName() ] optionalSemicolon()
       {
         if(name instanceof GenericReferenceTypeName){
           _throwParseException("Package names cannot be parameterized.");
@@ -1366,7 +1370,7 @@ PARSER_END(Parser)
   }
   {
     try {
-      t1="import" [sttic="static"] [name=referenceTypeName()] ["." star="*"] (t2=";" | t2=<EOF>)
+      t1="import" [sttic="static"] [name=referenceTypeName()] ["." star="*"] t2=optionalSemicolon()
       {
         if(name instanceof GenericReferenceTypeName){
           _throwParseException("Import names cannot be parameterized.");
@@ -1678,8 +1682,9 @@ PARSER_END(Parser)
         |
           {
             Token lookahead = getToken(1);
-            if (!(level.equals(DeclType.REPL) &&
-                  (lookahead.kind == ParserConstants.EOF || lookahead.image.equals("}")))) {
+            boolean canSkip = !opt.requireSemicolon() && level.equals(DeclType.REPL) &&
+                              (lookahead.kind == ParserConstants.EOF || lookahead.image.equals("}"));
+            if (!canSkip) {
               _throwParseException("Invalid variable declaration");
             }
           }
@@ -2316,7 +2321,7 @@ PARSER_END(Parser)
   }
   {
     try { 
-      t="assert" exp=expression() [":" falseString=expression()] (t2=";" | t2=<EOF>)
+      t="assert" exp=expression() [":" falseString=expression()] t2=optionalSemicolon()
       {   
         return new AssertStatement(exp, falseString, _range(t, t2));
       }
@@ -2366,7 +2371,7 @@ PARSER_END(Parser)
     try {
       t1="do" stat=statement(true) "while"
         ( "(" | _errorChar('('))
-        exp=expression() ")" t2=";"
+        exp=expression() ")" t2=optionalSemicolon()
       {
         return new DoStatement(exp, stat, _range(t1, t2));
       }
@@ -2566,7 +2571,7 @@ PARSER_END(Parser)
   }
   {
     try {
-      b="return" [ exp=expression() ] e=";"
+      b="return" [ exp=expression() ] e=optionalSemicolon()
       {
         return new ReturnStatement(exp, _range(b, e));
       }
@@ -2587,7 +2592,7 @@ PARSER_END(Parser)
   }
   {
     try {
-      b="throw" exp=expression() e=";"
+      b="throw" exp=expression() e=optionalSemicolon()
       {
         return new ThrowStatement(exp, _range(b, e));
       }
@@ -2663,13 +2668,21 @@ PARSER_END(Parser)
   ExpressionStatement expressionStatement(boolean strictExpression) :
   { Expression exp; Token t = null; }
   {
-    { lookaheadFlag = strictExpression; } // makes strictExpression visible to lookahead
+    { lookaheadFlag = strictExpression; } // lookaheadFlag is visible in lookaheads
     (
         LOOKAHEAD({ lookaheadFlag }) exp = statementExpression() t = ";"
       | exp = expression() ( LOOKAHEAD(<EOF> | "}") {} | t = ";")
     )
     { return new ExpressionStatement(exp, t != null, _range(exp, token)); }
   }
+  
+  Token optionalSemicolon() :
+  { Token t; }
+  {
+    (t=";" | LOOKAHEAD({ !opt.requireSemicolon() }) t=<EOF>)
+    { return t; }
+  }
+  
   
   // Productions for Expressions /////////////////////////////////////////////////////////
   

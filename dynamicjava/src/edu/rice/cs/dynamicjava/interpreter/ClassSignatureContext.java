@@ -54,13 +54,13 @@ public class ClassSignatureContext extends DelegatingContext {
   }
   
   /** Test whether {@code name} is an in-scope top-level class */
-  public boolean topLevelClassExists(String name, TypeSystem ts) {
+  @Override public boolean topLevelClassExists(String name, TypeSystem ts) {
     return matchesTopLevelClass(name) ||
           (!matchesMemberClass(name) && !matchesTypeVariable(name) && super.topLevelClassExists(name, ts));
   }
   
   /** Return the top-level class with the given name, or {@code null} if it does not exist. */
-  public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
     if (matchesTopLevelClass(name)) {
       return _c;
     }
@@ -71,7 +71,7 @@ public class ClassSignatureContext extends DelegatingContext {
   }
   
   /** Test whether {@code name} is an in-scope member class */
-  public boolean memberClassExists(String name, TypeSystem ts) {
+  @Override public boolean memberClassExists(String name, TypeSystem ts) {
     return matchesMemberClass(name) ||
           (!matchesTopLevelClass(name) && !matchesTypeVariable(name) && super.memberClassExists(name, ts));
   }
@@ -80,7 +80,7 @@ public class ClassSignatureContext extends DelegatingContext {
    * Return the most inner type containing a class with the given name, or {@code null}
    * if there is no such type.
    */
-  public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
     debug.logStart(new String[]{"class","name"}, _c, name); try {
       
     if (matchesMemberClass(name)) {
@@ -95,19 +95,21 @@ public class ClassSignatureContext extends DelegatingContext {
   }
   
   /** Test whether {@code name} is an in-scope type variable. */
-  public boolean typeVariableExists(String name, TypeSystem ts) {
+  @Override public boolean typeVariableExists(String name, TypeSystem ts) {
     return matchesTypeVariable(name) ||
           (!matchesClass(name) && super.typeVariableExists(name, ts));
   }
   
   /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public VariableType getTypeVariable(String name, TypeSystem ts) {
+  @Override public VariableType getTypeVariable(String name, TypeSystem ts) {
     VariableType result = declaredTypeVariable(name);
     if (result != null) { return result; }
     else if (!matchesClass(name)) { return super.getTypeVariable(name, ts); }
     else { return null; }
   }
   
-  public ClassLoader getClassLoader() { return _loader; }
+  @Override public ClassLoader getClassLoader() { return _loader; }
+  
+  @Override public Access.Module accessModule() { return _c.accessModule(); }
   
 }

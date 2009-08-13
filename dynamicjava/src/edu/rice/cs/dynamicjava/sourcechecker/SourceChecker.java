@@ -18,10 +18,12 @@ import koala.dynamicjava.tree.SourceInfo;
 import koala.dynamicjava.tree.TypeDeclaration;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
+import edu.rice.cs.dynamicjava.symbol.ExtendedTypeSystem;
 import edu.rice.cs.dynamicjava.symbol.JLSTypeSystem;
 import edu.rice.cs.dynamicjava.symbol.Library;
 import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
 import edu.rice.cs.dynamicjava.symbol.TreeLibrary;
+import edu.rice.cs.dynamicjava.symbol.TypeSystem;
 import edu.rice.cs.plt.collect.UnindexedRelation;
 import edu.rice.cs.plt.collect.Relation;
 import edu.rice.cs.plt.io.IOUtil;
@@ -71,7 +73,7 @@ public class SourceChecker {
     new Phase<File>("Parsing") {
       protected void step(File source) throws InterpreterException {
         try {
-          JavaCCParser parser = new JavaCCParser(new FileReader(source), source);
+          JavaCCParser parser = new JavaCCParser(new FileReader(source), source, _opt);
           result.add(parser.parseCompilationUnit());
         }
         catch (ParseError e) { throw new ParserException(e); }
@@ -188,7 +190,11 @@ public class SourceChecker {
     argParser.requireParams(1);
     ArgumentParser.Result parsedArgs = argParser.parse(args);
     
-    Options opt = parsedArgs.hasOption("jls") ? new Options(JLSTypeSystem.INSTANCE) : Options.DEFAULT;
+    final TypeSystem ts = parsedArgs.hasOption("jls") ? JLSTypeSystem.INSTANCE : ExtendedTypeSystem.INSTANCE;
+    Options opt = new Options() {
+      public TypeSystem typeSystem() { return ts; }
+      public boolean enforceAllAccess() { return true; }
+    };
     Iterable<File> cp = IOUtil.parsePath(parsedArgs.getUnaryOption("classpath"));
     Iterable<File> sources = IterUtil.map(parsedArgs.params(), IOUtil.FILE_FACTORY);
     

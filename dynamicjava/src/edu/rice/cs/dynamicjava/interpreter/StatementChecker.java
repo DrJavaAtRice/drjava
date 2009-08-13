@@ -306,7 +306,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   
   private TypeContext handleTypeDeclaration(TypeDeclaration node) {
     TreeClassLoader loader = new TreeClassLoader(context.getClassLoader(), opt);
-    DJClass c = new TreeClass(context.makeClassName(node.getName()), null, node, loader, opt);
+    DJClass c = new TreeClass(context.makeClassName(node.getName()), null, context.accessModule(), node, loader, opt);
     setDJClass(node, c);
     ClassChecker classChecker = new ClassChecker(c, loader, context, opt);
     classChecker.initializeClassSignatures(node);
@@ -720,7 +720,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   }
 
   @Override public TypeContext visit(ExpressionStatement node) {
-    if (node.getExpression() instanceof SimpleAssignExpression) {
+    if (node.getExpression() instanceof SimpleAssignExpression &&
+        !opt.requireVariableType() && (node.getHasSemicolon() || !opt.requireSemicolon())) {
       SimpleAssignExpression assign = (SimpleAssignExpression) node.getExpression();
       if (assign.getLeftExpression() instanceof AmbiguousName) {
         AmbiguousName ambigName = (AmbiguousName) assign.getLeftExpression();

@@ -6,8 +6,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 /** Represents a method declaration. */
-public interface DJMethod extends Function {
-  public String declaredName();
+public interface DJMethod extends Function, Access.Limited {
   public boolean isStatic();
   public boolean isAbstract();
   public boolean isFinal();

@@ -24,19 +24,19 @@ public class LibraryContext extends DelegatingContext {
   }
 
   /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
-  public boolean typeExists(String name, TypeSystem ts) {
+  @Override public boolean typeExists(String name, TypeSystem ts) {
     return !(IterUtil.isEmpty(_library.declaredClasses(name))) ||
            super.typeExists(name, ts);
   }
   
   /** Test whether {@code name} is an in-scope top-level class */
-  public boolean topLevelClassExists(String name, TypeSystem ts) {
+  @Override public boolean topLevelClassExists(String name, TypeSystem ts) {
     return !(IterUtil.isEmpty(_library.declaredClasses(name))) ||
            super.topLevelClassExists(name, ts);
   }
   
   /** Return the top-level class with the given name, or {@code null} if it does not exist. */
-  public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
     Iterable<DJClass> matches = _library.declaredClasses(name);
     int size = IterUtil.sizeOf(matches, 2);
     switch (size) {
@@ -46,5 +46,5 @@ public class LibraryContext extends DelegatingContext {
     }
   }
   
-  public ClassLoader getClassLoader() { return _library.classLoader(); }
+  @Override public ClassLoader getClassLoader() { return _library.classLoader(); }
 }

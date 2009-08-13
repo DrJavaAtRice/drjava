@@ -42,7 +42,7 @@ public class TreeLibrary implements Library {
         if (ast instanceof TypeDeclaration) {
           String declaredName = ((TypeDeclaration) ast).getName();
           String fullName = pkg.equals("") ? declaredName : pkg + "." + declaredName;
-          DJClass c = new TreeClass(fullName, null, ast, _loader, opt);
+          DJClass c = new TreeClass(fullName, null, null, ast, _loader, opt);
           NodeProperties.setDJClass(ast, c);
           classes.add(declaredName, c);
         }
