@@ -7,7 +7,7 @@ VERSIONS:
 
 asm-3.1.jar:              ASM 3.1 (http://asm.objectweb.org)
 docs.jar:                 docs-20060901-2010
-dynamicjava-base.jar:     dynamicjava-20090812-r4982
+dynamicjava-base.jar:     dynamicjava-20090813-r4987
 forms-1.0.7.jar:          JGoodies Forms
 javalanglevels-base.jar:  javalanglevels-20090223-r4766
 junit.jar:                JUnit 4.4
