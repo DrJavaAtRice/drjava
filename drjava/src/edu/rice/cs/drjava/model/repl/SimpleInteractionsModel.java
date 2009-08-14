@@ -67,6 +67,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   
   protected ClassPathManager _classPathManager;
   protected Interpreter _interpreter;
+  protected final InteractionsPaneOptions _interpreterOptions;
   
   /** Creates a new InteractionsModel using a InteractionsDJDocument. */
   public SimpleInteractionsModel() { this(new InteractionsDJDocument()); }
@@ -77,7 +78,8 @@ public class SimpleInteractionsModel extends InteractionsModel {
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, new File(System.getProperty("user.dir")), 1000, AbstractGlobalModel.WRITE_DELAY);
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
+    _interpreterOptions = new InteractionsPaneOptions();
+    _interpreter = new Interpreter(_interpreterOptions, _classPathManager.makeClassLoader(null));
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
   
@@ -149,12 +151,17 @@ public class SimpleInteractionsModel extends InteractionsModel {
     */
   public void addExtraClassPath(File path) { _classPathManager.addExtraCP(path); }
   
+  /** Sets whether or not the interpreter should enforce access to all members. */
+  public void setEnforceAllAccess(boolean enforce) { _interpreterOptions.setEnforceAllAccess(enforce); }
   
-  /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
-  public void setInterpreterPrivateAccessible(boolean accessible) {
-    // TODO: implement this with the Options object
-    //_interpreter.setPrivateAccessible(accessible);
-  }
+  /** Sets whether or not the interpreter should enforce access to private members. */
+  public void setEnforcePrivateAccess(boolean enforce) { _interpreterOptions.setEnforcePrivateAccess(enforce); }
+
+  /** Require a semicolon at the end of statements. */
+  public void setRequireSemicolon(boolean require) { _interpreterOptions.setRequireSemicolon(require); }
+  
+  /** Require variable declarations to include an explicit type. */
+  public void setRequireVariableType(boolean require) { _interpreterOptions.setRequireVariableType(require); }
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
     * @param t The Throwable thrown by System.exit

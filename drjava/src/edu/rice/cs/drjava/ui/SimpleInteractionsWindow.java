@@ -113,11 +113,6 @@ public class SimpleInteractionsWindow extends SwingFrame {
   /** Accessor for the controller. */
   public InteractionsController getController() { return _controller; }
   
-  /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
-  public void setInterpreterPrivateAccessible(boolean accessible) {
-    _model.setInterpreterPrivateAccessible(accessible);
-  }
-  
   /** Main method to create a SimpleInteractionsWindow from the console. Doesn't take any command line arguments. */
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();
@@ -125,7 +120,6 @@ public class SimpleInteractionsWindow extends SwingFrame {
       // TODO: define apropriate context
 //      w.defineVariable("FRAME", w);
 //      w.defineVariable("CONTROLLER", w.getController());
-      w.setInterpreterPrivateAccessible(true);
     }
     w.setVisible(true);
   }

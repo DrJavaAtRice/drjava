@@ -182,9 +182,18 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     *        an interactionEnded event will be fired)
     */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
+
+  /** Sets whether or not the interpreter should enforce access to all members. */
+  public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }
   
-  /** Sets whether or not the interpreter should allow access to private members. */
-  public void setPrivateAccessible(boolean allow) { _jvm.setPrivateAccessible(allow); }
+  /** Sets whether or not the interpreter should enforce access to private members. */
+  public void setEnforcePrivateAccess(boolean enforce) { _jvm.setEnforcePrivateAccess(enforce); }
+
+  /** Require a semicolon at the end of statements. */
+  public void setRequireSemicolon(boolean require) { _jvm.setRequireSemicolon(require); }
+  
+  /** Require variable declarations to include an explicit type. */
+  public void setRequireVariableType(boolean require) { _jvm.setRequireVariableType(require); }
   
   /** Gets the interpreter class path from the interpreter jvm.
     * @return a list of class path elements

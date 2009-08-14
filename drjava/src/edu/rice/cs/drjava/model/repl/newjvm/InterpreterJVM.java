@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
@@ -90,7 +91,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   // As RMI can lead to parallel threads, all fields must be thread-safe.  Collections are wrapped
   // in synchronized versions.
   
-  private final Options _interpreterOptions;
+  private final InteractionsPaneOptions _interpreterOptions;
   private volatile Pair<String, Interpreter> _activeInterpreter;
   private final Interpreter _defaultInterpreter;
   private final Map<String, Interpreter> _interpreters;
@@ -114,7 +115,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _interpreterLoader = _classPathManager.makeClassLoader(null);
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
     
-    _interpreterOptions = Options.DEFAULT;
+    // _interpreterOptions = Options.DEFAULT;
+    _interpreterOptions = new InteractionsPaneOptions();
     _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
     _interpreters = new HashMap<String,Interpreter>();
     _busyInterpreters = new HashSet<Interpreter>();
@@ -386,9 +388,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     return Pair.make(changed, _busyInterpreters.contains(_defaultInterpreter));
   }
   
-  /** Sets the interpreter to allow access to private members. */
-  public synchronized void setPrivateAccessible(boolean allow) {
-    // TODO: implement with Options values
+  /** Check that all access of class members is permitted by accessibility controls. */
+  public synchronized void setEnforceAllAccess(boolean enforce) {
+    _interpreterOptions.setEnforceAllAccess(enforce);
+  }
+  
+  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
+  public synchronized void setEnforcePrivateAccess(boolean enforce) {
+    _interpreterOptions.setEnforcePrivateAccess(enforce);
+  }
+
+  /** Require a semicolon at the end of statements. */
+  public synchronized void setRequireSemicolon(boolean require) {
+    _interpreterOptions.setRequireSemicolon(require);
+  }
+  
+  /** Require variable declarations to include an explicit type. */
+  public synchronized void setRequireVariableType(boolean require) {
+    _interpreterOptions.setRequireVariableType(require);
   }
   
   // ---------- JUnit methods ----------

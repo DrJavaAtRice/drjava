@@ -3371,12 +3371,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
     config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
-    config.addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
-      }
-    });
-    
     config.addOptionListener(FORCE_TEST_SUFFIX, new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _model.getJUnitModel().setForceTestSuffix(oce.value.booleanValue());

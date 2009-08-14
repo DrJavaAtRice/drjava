@@ -532,17 +532,46 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try { return Option.some(remote.setToDefaultInterpreter()); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
-  
-  /** Sets the interpreter to allow access to private members.  The result is {@code false} if
+
+  /** Sets the interpreter to enforce access to all members.  The result is {@code false} if
    * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
    */
-  public boolean setPrivateAccessible(boolean allow) {
+  public boolean setEnforceAllAccess(boolean enforce) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
-    try { remote.setPrivateAccessible(allow); return true; }
+    try { remote.setEnforceAllAccess(enforce); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
-   
+  
+  /** Sets the interpreter to enforce access to private members.  The result is {@code false} if
+   * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
+   */
+  public boolean setEnforcePrivateAccess(boolean enforce) {
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
+    if (remote == null) { return false; }
+    try { remote.setEnforcePrivateAccess(enforce); return true; }
+    catch (RemoteException e) { _handleRemoteException(e); return false; }
+  }
+  
+  /** Require a semicolon at the end of statements. The result is {@code false} if
+   * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
+   */
+  public boolean setRequireSemicolon(boolean require) {
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
+    if (remote == null) { return false; }
+    try { remote.setRequireSemicolon(require); return true; }
+    catch (RemoteException e) { _handleRemoteException(e); return false; }
+  }
+  
+  /** Require variable declarations to include an explicit type. The result is {@code false} if
+   * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
+   */
+  public boolean setRequireVariableType(boolean require) {
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
+    if (remote == null) { return false; }
+    try { remote.setRequireVariableType(require); return true; }
+    catch (RemoteException e) { _handleRemoteException(e); return false; }
+  }
   
   /*
    * === Helper methods ===
@@ -673,9 +702,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     @Override public void started(InterpreterJVMRemoteI i) {
       if (_state.compareAndSet(this, new FreshRunningState(i))) {
-        Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
-        try { i.setPrivateAccessible(allowAccess); }
+        boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
+          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(2)); // "all"
+        try { i.setEnforceAllAccess(enforceAllAccess); }
         catch (RemoteException re) { _handleRemoteException(re); }
+        
+        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
+          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0)); // not "none"
+        try { i.setEnforcePrivateAccess(enforcePrivateAccess); }
+        catch (RemoteException re) { _handleRemoteException(re); }
+        
+        Boolean requireSemicolon = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_REQUIRE_SEMICOLON);
+        try { i.setRequireSemicolon(requireSemicolon); }
+        catch (RemoteException re) { _handleRemoteException(re); }
+        
+        Boolean requireVariableType = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_REQUIRE_VARIABLE_TYPE);
+        try { i.setRequireVariableType(requireVariableType); }
+        catch (RemoteException re) { _handleRemoteException(re); }
+        
         // Note that _workingDir isn't guaranteed to be the dir at the time startup began.  Is that a problem?
         // (Is the user ever going to see a working dir message that doesn't match the actual setting?)
         _interactionsModel.interpreterReady(_workingDir);

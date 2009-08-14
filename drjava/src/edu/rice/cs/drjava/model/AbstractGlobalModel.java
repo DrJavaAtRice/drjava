@@ -2283,11 +2283,29 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
 //    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue ());
     
-//    DrJava.getConfig().addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
-//      public void optionChanged(OptionEvent<Boolean> oce) {
-//        getInteractionsModel().setPrivateAccessible( oce.value.booleanValue());
-//      }
-//    });
+    DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
+          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(2)); // "all"
+        getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
+        
+        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
+          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0)); // not "none"
+        getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
+      }
+    });
+
+    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_SEMICOLON, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        getInteractionsModel().setRequireSemicolon(oce.value);
+      }
+    });
+
+    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        getInteractionsModel().setRequireVariableType(oce.value);
+      }
+    });
   }
   
   /** Appends a string to the given document using a particular attribute set.

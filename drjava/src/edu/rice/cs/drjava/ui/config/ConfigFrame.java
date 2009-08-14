@@ -1132,12 +1132,6 @@ public class ConfigFrame extends SwingFrame {
                        new BooleanOptionComponent(OptionConstants.RESET_CLEAR_CONSOLE, "Clear Console After Interactions Reset", 
                                                   this,
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
-    // Disabled until this is implemented:
-//    addOptionComponent(panel, 
-//                       new BooleanOptionComponent(OptionConstants.ALLOW_PRIVATE_ACCESS, 
-//                                                  "Allow Access of Private Members in Interactions Pane", 
-//                                                  this,
-//                                                  "Whether to allow users to access private (and protected) fields and methods."));
 
     addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
@@ -1404,6 +1398,23 @@ public class ConfigFrame extends SwingFrame {
                                                   "or to always use the value of the \"user.home\" Java property<br>"+
                                                   "(currently "+System.getProperty("user.home")+")."));
 
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+      
+    addOptionComponent(panel, 
+                       new ForcedChoiceOptionComponent(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL,
+                                                       "Enforce access control", 
+                                                       this,
+                                                       "What kind of access control should DrJava enforce in the Interactions Pane?"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_SEMICOLON, 
+                                                         "Require Semicolon", this,
+                                                         "<html>Whether DrJava should require a semicolon at the<br>"+
+                                                         "end of a statement in the Interactions Pane.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, 
+                                                         "Require Variable Type", this,
+                                                         "<html>Whether DrJava should require a variable type for<br>"+
+                                                         "variable declarations in the Interactions Pane.</html>"));
+    
     panel.displayComponents();
   }
 

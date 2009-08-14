@@ -1052,8 +1052,9 @@ public interface OptionConstants {
   /** Whether to make emacs-style backup files. */
   public static final BooleanOption BACKUP_FILES = new BooleanOption("files.backup", Boolean.TRUE);
   
-  /** Whether to allow users to access to all members in the Interactions Pane. */
-  public static final BooleanOption ALLOW_PRIVATE_ACCESS = new BooleanOption("allow.private.access", Boolean.FALSE);
+  /** Whether to allow users to access to all members in the Interactions Pane.
+    * This should not be used anymore. Instead, use DYNAMICJAVA_ACCESS_CONTROL. */
+  @Deprecated public static final BooleanOption ALLOW_PRIVATE_ACCESS = new BooleanOption("allow.private.access", Boolean.FALSE);
   
   /** Whether to force test classes in projects to end in "Test". */
   public static final BooleanOption FORCE_TEST_SUFFIX = new BooleanOption("force.test.suffix", Boolean.FALSE);
@@ -1159,6 +1160,32 @@ public interface OptionConstants {
   public static final BooleanOption STICKY_INTERACTIONS_DIRECTORY =
     new BooleanOption("sticky.interactions.dir", Boolean.TRUE);
   
+  /** Whether to require a semicolon at the end of statements in the Interactions Pane. */
+  public static final BooleanOption DYNAMICJAVA_REQUIRE_SEMICOLON =
+    new BooleanOption("dynamicjava.require.semicolon", Boolean.FALSE);
+  
+  /** Whether to require a variable type for variable declarations in the Interactions Pane. */
+  public static final BooleanOption DYNAMICJAVA_REQUIRE_VARIABLE_TYPE =
+    new BooleanOption("dynamicjava.require.variable.type", Boolean.TRUE);
+  
+  /** Dynamic Java access control. */
+  public static final ArrayList<String> DYNAMICJAVA_ACCESS_CONTROL_CHOICES =
+    DynamicJavaAccessControlChoices.evaluate();
+  static class DynamicJavaAccessControlChoices {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add("disabled");
+      aList.add("private only");
+      aList.add("all");
+      return aList;
+    }
+  }
+  
+  /** File extension registration. */
+  public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
+    new ForcedChoiceOption("dynamicjava.access.control", DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0),
+                           DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
+
   /** The command-line arguments to be passed to the Master JVM. */
   public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");
   

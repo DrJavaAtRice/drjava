@@ -53,8 +53,17 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   public boolean runTestSuite() throws RemoteException;
   
-  /** Sets whether to allow private access. */
-  public void setPrivateAccessible(boolean allow) throws RemoteException;
+  /** Check that all access of class members is permitted by accessibility controls. */
+  public void setEnforceAllAccess(boolean enforce) throws RemoteException;
+  
+  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
+  public void setEnforcePrivateAccess(boolean enforce) throws RemoteException;
+
+  /** Require a semicolon at the end of statements. */
+  public void setRequireSemicolon(boolean require) throws RemoteException;
+  
+  /** Require variable declarations to include an explicit type. */
+  public void setRequireVariableType(boolean require) throws RemoteException;
   
   /** Adds a named Interpreter to the list.
    * @param name the unique name for the interpreter
