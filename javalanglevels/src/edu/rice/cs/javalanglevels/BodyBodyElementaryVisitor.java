@@ -64,10 +64,16 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
    * @param classDefsInThisFile  A list of the classes that are defined in the source file
    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
    */
-  public BodyBodyElementaryVisitor(BodyData bodyData, File file, String packageName, LinkedList<String> importedFiles, 
-                                   LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+  public BodyBodyElementaryVisitor(BodyData bodyData, 
+                                   File file, String packageName, 
+                                   LinkedList<String> importedFiles, 
+                                   LinkedList<String> importedPackages, 
+                                   LinkedList<String> classDefsInThisFile, 
+                                   Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
+                                 LinkedList<String> innerClassesToBeParsed) {
     super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
     _bodyData = bodyData;
+    _innerClassesToBeParsed = innerClassesToBeParsed;
   }
   
   /*Give an appropriate error*/
@@ -92,7 +98,8 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
-    that.getStatements().visit(new BodyBodyElementaryVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    that.getStatements().visit(new BodyBodyElementaryVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
+                                                             _classNamesInThisFile, continuations, _innerClassesToBeParsed));
     return null;
   }
   
@@ -163,8 +170,10 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
       LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _bbv = new BodyBodyElementaryVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      _bbv = new BodyBodyElementaryVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                                           new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                           new LinkedList<String>());
+      _bbv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bbv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _bbv._resetNonStaticFields();
       _bbv._importedPackages.addFirst("java.lang");

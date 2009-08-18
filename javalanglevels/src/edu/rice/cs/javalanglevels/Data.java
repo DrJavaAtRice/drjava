@@ -317,16 +317,14 @@ public abstract class Data {
     _blocks.clear();
   }
   
-  /**
-   * Takes in a name and tries to match it with one of this Data's inner classes or
-   * inner interfaces.  The input string is a name relative to this SymbolData
-   * (such as B.C to request the class A.B.C from class A) and may be delimited by '.' or '$'.
-   * If the name is not found in this Data, checks the outer data (if there is one).  
-   * If no matching visibile inner classes or interfaces are found, but one or more that are not visible are found, one of the non-visibile ones will be returned.
-   * This means that checkAccessibility should be called after this method.
-   * @param name  The name of the inner class or interface to find.
-   * @return  The SymbolData for the matching inner class or interface or null if there isn't one.
-   */
+  /** Takes in a name and tries to match it with one of this Data's inner classes or inner interfaces.  The input string
+    * is a name relative to this SymbolData (such as B.C to request the class A.B.C from class A) and may be delimited 
+    * by '.' or '$'.  If the name is not found in this Data, checks the outer data (if there is one).  If no matching 
+    * visibile inner classes or interfaces are found, but one or more that are not visible are found, one of the
+    * non-visibile ones will be returned. This means that checkAccessibility should be called after this method.
+    * @param name  The name of the inner class or interface to find.
+    * @return  The SymbolData for the matching inner class or interface or null if there isn't one.
+    */
   public SymbolData getInnerClassOrInterface(String name) {
     int firstIndexOfDot = name.indexOf(".");
     int firstIndexOfDollar = name.indexOf("$");
@@ -349,7 +347,6 @@ public abstract class Data {
       else { outerPiece = result; }
       if (TypeChecker.checkAccessibility(outerPiece.getMav(), outerPiece, this.getSymbolData())) {return result;}
       else {privateResult = result; result = null;}
-    
     }
     
     
@@ -407,10 +404,9 @@ public abstract class Data {
    */
   public void setInnerClasses(LinkedList<SymbolData> innerClasses) { _innerClasses = innerClasses; }  
   
-  /**
-   * Add the specified SymbolData to the end of the list of inner classes.
-   * @param innerClass  The SymbolData to add.
-   */
+  /** Add the specified SymbolData to the end of the list of inner classes.
+    * @param innerClass  The SymbolData to add.
+    */
   public void addInnerClass(SymbolData innerClass) {
     _innerClasses.addLast(innerClass);
   }

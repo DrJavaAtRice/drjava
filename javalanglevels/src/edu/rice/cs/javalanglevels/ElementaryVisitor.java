@@ -86,16 +86,14 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
     this.symbolTable = symbolTable;
     this.visitedFiles= visitedFiles;//new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
     this._newSDs = newSDs;
-    _hierarchy = new Hashtable<String, TypeDefBase>();//hierarchy;
-    _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();    
+    _hierarchy = new Hashtable<String, TypeDefBase>();//hierarchy;  
   }
 
   /*Try to look up the className*/
   protected SymbolData getSymbolData (String className, SourceInfo si, boolean resolve, boolean fromClassFile) {
-    /** 
-     * At the elementary level, class names that contain a dot must begin with java.lang because there are
-     * no import statements and no inner classes.
-     */
+    /**  At the elementary level, class names that contain a dot must begin with java.lang because there are
+      * no import statements and no inner classes.
+      */
     
     if (className.indexOf(".") != -1 && !fromClassFile) {
       _addAndIgnoreError("Class names should not contain \".\" at the Elementary level", new NullLiteral(si));
@@ -432,12 +430,12 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
       LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bv = new ElementaryVisitor(new File(""), errors, symbolTable, 
                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
+      _bv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _bv._resetNonStaticFields();
       _bv._importedPackages.addFirst("java.lang");

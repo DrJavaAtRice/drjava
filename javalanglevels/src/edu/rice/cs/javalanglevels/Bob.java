@@ -526,9 +526,7 @@ public class Bob extends TypeChecker {
     return isCheckedException(sd, that);
   }
   
-  /*
-   * Visit each of the items in the body and make sure that none throw uncaught exceptions
-   */
+  /** Visit each of the items in the body and make sure that none throw uncaught exceptions */
   public TypeData forBody(Body that) {
     final TypeData[] items_result = makeArrayOfRetType(that.getStatements().length);
     for (int i = 0; i < that.getStatements().length; i++) {

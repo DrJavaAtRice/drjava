@@ -314,9 +314,7 @@ public class ExpressionTypeChecker extends Bob {
     return SymbolData.BOOLEAN_TYPE.getInstanceData();
   }
 
-  /**
-   * Not currently supported.
-   */
+  /** Not currently supported. */
   public TypeData forBitwiseBinaryExpressionOnly(BitwiseBinaryExpression that, TypeData left_result, 
                                                  TypeData right_result) {
     throw new RuntimeException ("Internal Program Error: Bitwise operators are not supported.  " + 
@@ -799,15 +797,20 @@ public class ExpressionTypeChecker extends Bob {
                                  "  Please report this bug.");
     }
     if (sd.getSuperClass() == null) {
-      if (superC.isInterface()) {sd.setSuperClass(symbolTable.get("java.lang.Object")); sd.addInterface(superC);}
+      if (superC == null) {
+        throw new RuntimeException("Internal Program Error:  Superclass data for " + sd + " is null." + 
+                                   "  Please report this bug.");
+      }
+      if (superC.isInterface()) {
+        sd.setSuperClass(symbolTable.get("java.lang.Object")); 
+        sd.addInterface(superC);
+      }
       else { sd.setSuperClass(superC);}
     }
     LanguageLevelVisitor.createAccessors(sd, _file);
 
     return sd;
   }
-  
-  
  
   /**
    * Resolve the type of this anonymous class.  Look it up in the enclosing data, check that
@@ -1297,11 +1300,8 @@ public class ExpressionTypeChecker extends Bob {
     MethodData md = _lookupMethod(that.getName().getText(), context.getSymbolData(), newArgs, that, 
                            "No method found in class " + context.getName() + " with signature: ", 
                            false, _getData().getSymbolData());
-        
-        
-    if (md == null) {
-      return null;
-    }
+           
+    if (md == null)  return null;
 
     if (!context.isInstanceType() && !md.hasModifier("static")) {
       _addError("Cannot access the non-static method " + md.getName() + " from a static context", that);
@@ -1836,8 +1836,11 @@ public class ExpressionTypeChecker extends Bob {
       Expression badIndexL = new LongLiteral(si, 4l);
 
       //Test one that works
-      SimpleUninitializedArrayInstantiation sa1 = new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", new ArrayType(si, "int[][]", new ArrayType(si, "int[]", new PrimitiveType(si, "int")))), 
-                                                                                            new DimensionExpressionList(si, new Expression[] {i1, i2, i3}));
+      SimpleUninitializedArrayInstantiation sa1 = 
+        new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", 
+                                                                    new ArrayType(si, "int[][]", 
+                                                                                  new ArrayType(si, "int[]", new PrimitiveType(si, "int")))), 
+                                                  new DimensionExpressionList(si, new Expression[] {i1, i2, i3}));
       assertEquals("Should return instance of int[][][]", intArray3.getInstanceData(), sa1.visit(_etc));
       assertEquals("There should be no errors", 0, errors.size());
       
@@ -1845,6 +1848,10 @@ public class ExpressionTypeChecker extends Bob {
       SimpleUninitializedArrayInstantiation sa2 = new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", new ArrayType(si, "int[][]", new ArrayType(si, "int[]", new PrimitiveType(si, "int")))), 
                                                                                             new DimensionExpressionList(si, new Expression[] {i1, i2, badIndexD}));
       assertEquals("Should return instance of int[][][]", intArray3.getInstanceData(), sa2.visit(_etc));
+      /* The preceding test only confirms structural equality not identity  of the result.  The TypeData equals method
+       * has been overridden to confirm that its argument belongs to the same class as this and then perform an equals 
+       * comparison of the only field of the argument and this. */
+      
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "The dimensions of an array instantiation must all be ints.  You have specified something of type double", errors.getLast().getFirst());
       

@@ -345,17 +345,16 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
       
   
-  /**
-   * Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
-   * @param methodName  The name of the method.
-   * @param enclosingSD  The SymbolData we're currently searching for the method.
-   * @param arguments  The types of the arguments to the method.
-   * @param jexpr  The JExpression for the method invocation used in the error message.
-   * @param isConstructor  Tells us if this method is a constructor. If so, we know it must be in the initial SymbolData.
-   *                       We assume that the correct SymbolData was passed in.
-   * @param thisSD  The SymbolData whence the method is invoked.
-   * @return  The SymbolData where we find the method of null if it was not found.  An error is added if it is not found.
-   */  
+  /** Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
+    * @param methodName  The name of the method.
+    * @param enclosingSD  The SymbolData we're currently searching for the method.
+    * @param arguments  The types of the arguments to the method.
+    * @param jexpr  The JExpression for the method invocation used in the error message.
+    * @param isConstructor  Tells us if this method is a constructor. If so, we know it must be in the initial SymbolData.
+    *                       We assume that the correct SymbolData was passed in.
+    * @param thisSD  The SymbolData whence the method is invoked.
+    * @return  The SymbolData where we find the method of null if it was not found.  An error is added if it is not found.
+    */  
   protected MethodData _lookupMethodHelper(String methodName, SymbolData enclosingSD, InstanceData[] arguments, JExpression jexpr, boolean isConstructor, SymbolData thisSD, LinkedList<MethodData> matchingMethods) {
     Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = _getMatchingMethods(methodName, enclosingSD, arguments, jexpr, isConstructor, thisSD);
     LinkedList<MethodData> matching = p.getFirst();
@@ -372,7 +371,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       matchingWithAutoBoxing = p.getSecond();
     }
     
-
     if (matching.size() == 1) {return matching.getFirst();}
     if (matching.size() > 1) {return _selectTheMostSpecificMethod(matching, arguments, jexpr);}
     if (matchingWithAutoBoxing.size() == 1) {return matchingWithAutoBoxing.getFirst();}
@@ -967,7 +965,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return doReturn;
   }
   
-  /**Do what is necessary to handle a class def*/
+  /**Do what is necessary to handle a class def */
   public TypeData forClassDef(ClassDef that) {
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = getSymbolData(className, that, true, false);
@@ -989,13 +987,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     //Reset sd's anonymous inner class count so we can count again during this second pass.
     sd.setAnonymousInnerClassNum(0);
 
-   
     //Make sure this class does not implement the Runnable interface
     if (sd.hasInterface(getSymbolData("java.lang.Runnable", that, false, false))) {
       _addError(sd.getName() + " implements the Runnable interface, which is not allowed at any language level", that);
     }
 
-    
     SymbolData superClass = sd.getSuperClass();
     //make sure this class can see its super class
     if (superClass != null) {
@@ -1021,14 +1017,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     final TypeData superclass_result = that.getSuperclass().visit(this);
     final SymbolData[] interfaces_result = new SymbolData[that.getInterfaces().length];
     for (int i = 0; i < that.getInterfaces().length; i++) {
-      interfaces_result[i]=getSymbolData(that.getInterfaces()[i].getName(), that.getInterfaces()[i], true, true);
+      interfaces_result[i] = getSymbolData(that.getInterfaces()[i].getName(), that.getInterfaces()[i], true, true);
       if (interfaces_result[i] != null) {
         //make sure this class can see the interfaces it implements
         checkAccessibility(that.getInterfaces()[i], interfaces_result[i].getMav(), interfaces_result[i].getName(), interfaces_result[i], sd, "interface");
         //Make sure that all of these are actually interfaces.
         if (!interfaces_result[i].isInterface()) {
           _addError(interfaces_result[i].getName() + " is not an interface and thus cannot appear after the keyword 'implements' here.  Perhaps you meant to say 'extends'?", that);
-      }
+        }
         
       }
       else {
@@ -1039,11 +1035,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     //See if sd is a test class.  If so, it must be public.
     SymbolData testSd = getSymbolData("junit.framework.TestCase", new NullLiteral(JExprParser.NO_SOURCE_INFO), false, true);
     if (testSd != null && sd.isSubClassOf(testSd)) { 
-      if (!sd.hasModifier("public")) {
+      if (! sd.hasModifier("public")) {
         _addError(sd.getName() + " extends TestCase and thus must be explicitly declared public", that);
       }
       boolean foundOne = false;
-      for (int i = 0; i<sd.getMethods().size(); i++) {
+      for (int i = 0; i < sd.getMethods().size(); i++) {
         MethodData myMd = sd.getMethods().get(i);
         if (myMd.getName().startsWith("test") && (myMd.getReturnType() == SymbolData.VOID_TYPE) && myMd.hasModifier("public")) {
           foundOne = true;
@@ -1053,8 +1049,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       if (!foundOne) {
         _addError("Class " + sd.getName() + " does not have any valid test methods.  Test methods must be declared public, must return void, and must start with the word \"test\"", that); 
       }
-        
-
     }
     
     //This is bad because it means that in this instance, the type checker is not language independent.
@@ -1096,7 +1090,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     unassignVariableDatas(cbtc.thingsThatHaveBeenAssigned);
     
-
     return forClassDefOnly(that, mav_result, name_result, typeParameters_result, superclass_result, interfaces_result, body_result);
   }
   

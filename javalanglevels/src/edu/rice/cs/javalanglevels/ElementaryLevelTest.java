@@ -68,7 +68,7 @@ public class ElementaryLevelTest extends TestCase {
         return pathName.getAbsolutePath().endsWith(".dj0");
       }
     });
-    System.err.println("testFiles for testSuccessful = " + Arrays.toString(testFiles));
+//    System.err.println("testFiles for testSuccessful = " + Arrays.toString(testFiles));
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5,
@@ -107,8 +107,7 @@ public class ElementaryLevelTest extends TestCase {
         return pathName.getAbsolutePath().endsWith(".dj0");
       }});
     
-    System.err.println("testFiles for testShouldBeErrors = " + Arrays.toString(testFiles));
-//    LanguageLevelConverter llc = new LanguageLevelConverter();
+//    System.err.println("testFiles for testShouldBeErrors = " + Arrays.toString(testFiles));
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     for (int i = 0; i < testFiles.length; i++) {
       LanguageLevelConverter llc = new LanguageLevelConverter();

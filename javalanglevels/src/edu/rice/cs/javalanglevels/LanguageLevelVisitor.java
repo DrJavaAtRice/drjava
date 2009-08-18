@@ -87,11 +87,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /**True once we have encountered an error we cannot recover from.*/
   static boolean _errorAdded;
   
+  /** A list of qualified class names of the subclasses of this class that have been traversed and 
+    * continuations pending the resolution of their superclasses.
+    */
+  static Hashtable<String, TypeDefBase> _hierarchy;
+  
   /**The source file that is being compiled */
   File _file;
   
   /** The package of the current file */
   String _package;
+  
+  /** The name of the class currently being parsed.  This is null for a top-level visitor but is set in ...ClassBodyVisitor. 
+    * The package name prefix is excluded.  */
+  String _enclosingClassName;
   
   /** A list of file names (classes) imported by the current file. */
   LinkedList<String> _importedFiles;
@@ -102,16 +111,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /** A list of ClassDefs and InterfaceDefs in the current file. */
   LinkedList<String> _classNamesInThisFile;
   
-  /** A list of qualified class names of the subclasses of this class that have been traversed and 
-    * continuations pending the resolution of their superclasses.
-    */
-  static Hashtable<String, TypeDefBase> _hierarchy;
-  
   /** A Hashtable containing a list of qualified class names of classes waiting to be parsed 
     * within SourceFiles we're in the process of compiling mapped to a pair containing their
     * ClassDefs and LanguageLevelVisitors.
     */
-  static Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>> _classesToBeParsed;
+  Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>> _classesToBeParsed;
+  LinkedList<String> _innerClassesToBeParsed;
+  
   protected static final Log _log = new Log("LLConverter.txt", false);
   
   /** This constructor is called from the subclasses of LanguageLevelVisitor.
@@ -126,10 +132,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                               LinkedList<String> importedPackages, LinkedList<String> classNamesInThisFile, 
                               Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
     _file = file;
+    _enclosingClassName = null;
     _package = packageName;
     _importedFiles = importedFiles;
     _importedPackages = importedPackages;
     _classNamesInThisFile = classNamesInThisFile;
+    _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+    _innerClassesToBeParsed = new LinkedList<String>();
     this.continuations = continuations;
   }
   
@@ -150,6 +159,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /* Reset the nonStatic fields of this visitor.  Used during testing. */
   protected void _resetNonStaticFields() {
     _file = new File("");
+    _enclosingClassName = null;
     _package = "";
     _importedFiles = new LinkedList<String>();
     _importedPackages = new LinkedList<String>();
@@ -363,9 +373,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // Return a continuation, since it shouldn't be in the symbolTable yet based on where we call this method from.
       // The visitor we pair here doesn't matter because it should always get removed from the continuations list before
       // it is visited.
-      continuations.put(qualifiedClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
-      SymbolData sd = new SymbolData(qualifiedClassName);
-      symbolTable.put(qualifiedClassName, sd);
+//      System.err.println("Creating continuation for class to be parsed: " + qualifiedClassName);
+      SymbolData sd = addSymbolData(si, qualifiedClassName);
       return sd;
     }
   }
@@ -454,12 +463,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return null;
   }
   
-  /** Assume the class name is qualified already, and try to look it up.
-    * If it's a continuation and resolve is true, this resolves the class 
-    * by reading its class file if it's a java library file or looking it
-    * up in the file system otherwise.
-    * If it's not qualified with either the package name or java.lang, throw an
-    * error somehow.
+  /** Assume the class name is qualified, and try to look it up.
+    * If it's a continuation and resolve is true, resolve the class 
+    * by reading its class file.
     * @param className  The name to look up.  Presumed to be qualified.
     * @param si  The source info of where this was called from.
     * @param resolve  true if we want to resolve the SymbolData.
@@ -547,7 +553,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     else return sd;
   }
   
-  /** Check the file system for the class name, returning the corresponding SymbolData if there is a match.  If no match
+    /** Check the file system for the class name, returning the corresponding SymbolData if there is a match.  If no match
     * is found an resolve is false, a continuation for the symbol is created and entered in the symbol table and continuatoin
     * table.  This method is a leaf in the 'getSymbol' calling hierarchy.
     * @param qualifiedClassName  The name of the class we're looking up.
@@ -557,10 +563,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     */
   private SymbolData _getSymbolData_FromFileSystem(final String qualifiedClassName, SourceInfo si, boolean resolve,
                                                    boolean addError) {
-    // Is qualifiedClassName in _classesToBeParsed, saving the time it would take to parse
-    // all the java files in this package.
-    Pair<TypeDefBase, LanguageLevelVisitor> pair = _classesToBeParsed.get(qualifiedClassName);
+    // If qualifiedClassName is already defined (and not a continuation to resolve), return
+    SymbolData sd = symbolTable.get(qualifiedClassName);
+    if (sd != null && (! resolve || ! sd.isContinuation())) { return sd; }
     
+    // Is qualifiedClassName in _classesToBeParsed, look it up directly in the parsed ASTs
+    Pair<TypeDefBase, LanguageLevelVisitor> pair = _classesToBeParsed.get(qualifiedClassName);
     if (pair != null) return _lookupFromClassesToBeParsed(qualifiedClassName, si, resolve);
     
     /* If qualifiedClassName is not in the symbol table or list of classes to be parsed, check if the class is defined
@@ -601,9 +609,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       else dirPath = "";
     }
     
-    // First look for the .class file
-    File classFile = new File(path + ".class");
-    // Then look for the most recently modified .java, .djx file.    
+    // Find class file and matching source file for qualifiedClassName -- if they exist
+    
+    File classFile = new File(path + ".class");  // create File object for class file
+    
+    // Then look for the most recently modified matching source (.djx or .java) file.    
     File[] sourceFiles = new File(dirPath).listFiles(new FileFilter() {
       public boolean accept(File f) {
         try {
@@ -627,25 +637,26 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         }
       }
     }
+
+    // Claim: sourceFile is not the current file.  Otherwise, className would have been in _classNamesInThisFile.
     
-    // Check if sourceFile is the current file.  If so, there's an error because if the class to look for
-    // is in the current file, it would've been in _classNamesInThisFile.
-    //TODO: it is possible this should be an error.  But I am no longer positive.
-    
-    // Then check the corresponding class file to see if it's up to date.
-    SymbolData sd = symbolTable.get(qualifiedClassName);
-    if (sd != null && ! sd.isContinuation()) { return sd; }
+    // If sourceFile exists, we have identified the class corresponding to qualifiedClassName.  If resolve is false, 
+    // simply create and return the appropriate continuation, deferring the loading of class information until reolution
+    // time.  If there is no corresponding class file or the class file is not 
+    // up-to-date, signal an error.  Otherwise load the symbol table information from the class file
+
     if (sourceFile != null) {
       // First see if we even need to resolve this class. If not, create a continuation and return it.
-      if (! resolve) {
-        if (sd != null) { return sd; }
-        else {
-          sd = new SymbolData(qualifiedClassName);
-          continuations.put(qualifiedClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
-          symbolTable.put(qualifiedClassName, sd);
-          return sd;
+      if (! resolve) { 
+        assert sd == null;
+        sd = addSymbolData(si, qualifiedClassName); // defer loading class file information
+        return sd;
+//        else {
+//          sd = new SymbolData(qualifiedClassName);
+//          continuations.put(qualifiedClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
+//          symbolTable.put(qualifiedClassName, sd);
+//          return sd;
         }
-      }
       // Get last modified time of corresponding class file
       long classModTime = classFile.lastModified();
       if (classModTime == 0L) return null;  // if classFile does not exist, return
@@ -674,8 +685,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     return SymbolData.NOT_FOUND;
   }
-  
-  
+ 
   /** Calls getSymbolData with default values By default, resolve is false.  By default, fromClassFile is false, since 
     * this is only true when we are trying to resolve types from the context of a class file. By default addError is
     * true, since we want to display errors.  By default checkImportedStuff is true, since we want to consider 
@@ -698,11 +708,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     */  
   public SymbolData getSymbolData(String className, SourceInfo si, boolean resolve) {
     SymbolData sd = getSymbolData(className, si, resolve, false, true, true);
-    if (resolve && sd != null) {
-      if (sd.isContinuation()) { throw new RuntimeException("Internal Program Error: " + sd.getName() + 
-                                                            " should not be a continuation.  Please report this bug.");}
-      continuations.remove(sd.getName());
-    }
+//    if (resolve && sd != null) {
+//      if (sd.isContinuation()) { throw new RuntimeException("Internal Program Error: " + sd.getName() + 
+//                                                            " should not be a continuation.  Please report this bug.");}
+//      continuations.remove(sd.getName());
+//    }
     return sd;
   }
   
@@ -745,64 +755,63 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     */
   protected SymbolData getSymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
                                      boolean addError, boolean checkImportedStuff) {
-    
-//    if (className.equals("Constant")) throw new RuntimeException("getSymbol called on Constant");
-    
-//    if (className.equals("Object")) 
-//      System.err.println("getSymbolData(" + className + ", " + si + ", " + resolve + ", " + fromClassFile + ", " + addError +
-//             ", " + checkImportedStuff);
-    
-    int indexOfNextDot = className.indexOf(".");
-    /* we don't think this is necessay, but as a safety percausion, check the $ that denotes anonymous inner classes 
-     * and inner classes. */
-    int indexOfNextDollar = className.indexOf("$");  
-    if (indexOfNextDot == -1 && indexOfNextDollar == -1) {
-      return getSymbolDataHelper(className, si, resolve, fromClassFile, addError, checkImportedStuff);
+ 
+    if (className.endsWith("[]")) { // className refers to an array type
+      SymbolData sd = 
+        getSymbolData(className.substring(0, className.length() - 2), si, resolve, fromClassFile, addError, 
+                      checkImportedStuff);
+      if (sd == null) return null; // Should not happen
+      ArrayData ad = new ArrayData(sd, this, si);
+      symbolTable.put(ad.getName(), ad);
+      return ad;
     }
-    else { indexOfNextDot = 0; }  // ABOMINABLE CODING
-    SymbolData whatever;
+    
+    // First, handle classNames that clearly do NOT refer to inner classes
+    int indexOfNextDot = className.indexOf(".");
+    int indexOfNextDollar = className.indexOf("$");   // '$' is assumed not to appear in source program type names
+    if (indexOfNextDot == -1 && indexOfNextDollar == -1)
+      return getSymbolDataHelper(className, si, resolve, fromClassFile, addError, checkImportedStuff);
+    
+    // Try to decompose className into an inner class reference, but name may simply be fully qualified
+    indexOfNextDot = 0;   
+    SymbolData sd;
     int length = className.length();
     while (indexOfNextDot != length) {
       indexOfNextDot = className.indexOf(".", indexOfNextDot + 1);
       if (indexOfNextDot == -1) { indexOfNextDot = length; }
-      String s = className.substring(0, indexOfNextDot);
+      String prefix = className.substring(0, indexOfNextDot);
       /* We want to resolve after every piece until the last one because we need to know
        * when we actually have a class so that we can tell that the rest of the pieces
        * are inner classes.  We use the resolve parameter's value for the last piece
        * since that means there are no inner classes
        */
-      boolean newResolve = resolve || (indexOfNextDot != length);
-      whatever = getSymbolDataHelper(s, si, newResolve, fromClassFile, false, checkImportedStuff);
-//      if (s.equals("fully.qualified.Woah")) throw new RuntimeException(s + " passed to helper and newResolve = " + resolve );
-      if (whatever != null) {
+//      boolean newResolve = resolve || (indexOfNextDot != length);
+      sd = getSymbolDataHelper(prefix, si, resolve, fromClassFile, false, checkImportedStuff);
+//      if (prefix.equals("fully.qualified.Woah")) throw new RuntimeException(prefix + " passed to helper and newResolve = " + resolve );
+      if (sd != null) { // prefix matches an extant symbol
+        String outerClassName = prefix;
         String innerClassName = "";
-        SymbolData outerClass = whatever;
-        if (whatever != null && indexOfNextDot != length) {
-          outerClass = whatever;
+        if (indexOfNextDot != length) {
+          SymbolData outerClassSD = sd;
           innerClassName = className.substring(indexOfNextDot + 1);
-          whatever = outerClass.getInnerClassOrInterface(innerClassName);
+//          System.err.println("Outer class prefix found: " + prefix + " inner class extension: " + innerClassName);
+          sd = outerClassSD.getInnerClassOrInterface(innerClassName);
+//          System.err.println("Corresponding symbol = " + sd);
+          if (sd == null) { // create continuation for inner class; we are forbidding some ambiguities Java may permit
+            sd = addInnerSymbolData(si, outerClassName + "." + innerClassName, outerClassSD);
+          }
+          return sd;
         }
-        if (whatever == SymbolData.AMBIGUOUS_REFERENCE) {
+        else if (sd == SymbolData.AMBIGUOUS_REFERENCE) {
           _addAndIgnoreError("Ambiguous reference to class or interface " + className, new NullLiteral(si));
           return null;
         }
-        if (whatever != null && whatever != SymbolData.NOT_FOUND) { return whatever; }
-        else { 
-          //perhaps this was an array type--try to resolve it without the [], and then put it in the symbol table
-          if (className.endsWith("[]")) { 
-            SymbolData sd = 
-              getSymbolData(className.substring(0, className.length() - 2), si, resolve, fromClassFile, addError, 
-                            checkImportedStuff);
-            if (sd != null) {
-              ArrayData ad = new ArrayData(sd, this, si);
-              symbolTable.put(ad.getName(), ad);
-              return ad;
-            }
-            return sd;
-          }
-        }
+        else if (sd != null && sd != SymbolData.NOT_FOUND) { return sd; }
       }
+      // sd may be null or an error element of SymbolData
     }
+    
+    // No match was found
     if (! fromClassFile && addError) {
       // _log.log("Returning an Invalid class name for " + className);
       String newName = className;
@@ -810,6 +819,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       newName = newName.substring(lastDollar + 1, newName.length());
 //      Utilities.show("Invalid class name " + newName + " and " + className);
       _addAndIgnoreError("Invalid class name " + newName, new NullLiteral(si));
+//      throw new RuntimeException("Invalid class name " + newName + " encountered in file " + _file);
     }
     return null;
   }
@@ -844,14 +854,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
   }
   
-  /** This method takes in a class name (it may or may not be qualified) and tries to get it from the symbol table
-    * as is.  If this fails, it will see if the class name corresponds to one of the imported files.
-    * Then it will prepend the current package and try again.  It will then try to prepend the imported
-    * packages to the class name.  Finally, it will try prepending java.lang and see if it is in the symbol table.
-    * After each check, this method also checks if such a class file (.class or .java) exists and if so, will
-    * build up a SymbolData for the class by compiling the class if the class is out of date or does not exist,
-    * and then reading the class file for the needed information.  The newly created SymbolData will be put 
-    * into the symbol table.  Returns null if the className is not found.
+  /** This method takes in a class name (it may or may not be qualified) and tries to find it in the symbol 
+    * table.  If the class name is not qualified and this search fails, it tries to match the class name with classes
+    * defined in the current file.  Then it tries to match it with one of the imported files.  If this fails
+    * it tries to prepend the imported packages to the class name.   If this fails, either report an error (if resolve
+    * is true) or return null.
     * @param className  The name of the class to lookup.
     * @param si  The SourceInfo of the reference to className used in case of an error.
     * @param resolve  Whether to return a continuation or fully parse the class.
@@ -870,7 +877,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       return _getArraySymbolData(className, si, resolve, fromClassFile, addError, checkImportedStuff);
     }
     
-    // Check for qualified types.
+    // Check for qualified types. (FAILS for inner classes).  This invoication be the result of a recursive call.
     if (className.indexOf(".") != -1) return _getQualifiedSymbolData(className, si, resolve, fromClassFile, addError);
     
     String name = null; // name of the SymbolData to be returned
@@ -977,13 +984,28 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     else return className;
   }
   
+  // Creates a continuation for an inner class or interface
+  protected SymbolData addInnerSymbolData(SourceInfo si, String qualifiedTypeName, Data enclosing) {
+    SymbolData sd = new SymbolData(qualifiedTypeName); // create continuation
+    SymbolData enclosingSD = enclosing.getSymbolData();
+    symbolTable.put(qualifiedTypeName, sd);  // if qualifiedTypeName refers to an external inner class, this will likely fail
+    enclosing.getSymbolData().addInnerClass(sd);
+    sd.setOuterData(enclosingSD);
+    continuations.put(qualifiedTypeName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
+//    System.err.println("Creating continuation for inner type " + qualifiedTypeName);
+    return sd;
+  }
+  
   /** Does what is necessary to process this TypeDefBase from the context of enclosing.
     * This method is very similar to addSymbolData, except that it uses an enclosing data for reference.
     */
-  protected SymbolData addInnerSymbolData(TypeDefBase typeDefBase, String qualifiedClassName, String partialName, 
-                                          Data enclosing, boolean isClass) {
+  protected SymbolData addInnerSymbolData(TypeDefBase typeDefBase, 
+                                          String qualifiedTypeName, 
+                                          String partialName, 
+                                          Data enclosing, 
+                                          boolean isClass) {
     //try to look up in symbol table, in case it has already been defined
-    SymbolData sd = symbolTable.get(qualifiedClassName);
+    SymbolData sd = symbolTable.get(qualifiedTypeName);
     
     //try to look up in enclosing's list of inner classes
     if (sd == null) { sd = enclosing.getInnerClassOrInterface(partialName); }
@@ -997,15 +1019,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     if (sd != null) {
       //make sure it is a direct inner class or interface of this data.
-      if (sd.getOuterData() != enclosing) {sd = null;}
+      if (sd.getOuterData() != enclosing) { sd = null; }
     }
     
     // create a new symbolData for it--this is the first time we've seen it
     if (sd == null) { 
-      sd = new SymbolData(qualifiedClassName);
+      sd = new SymbolData(qualifiedTypeName);
       sd.setOuterData(enclosing);
-      if (isClass) {enclosing.getSymbolData().addInnerClass(sd);}
-      else {(enclosing.getSymbolData()).addInnerInterface(sd);}
+      if (isClass) { enclosing.getSymbolData().addInnerClass(sd); }
+      else { enclosing.getSymbolData().addInnerInterface(sd); }
     }
     
     // create the LinkedList for the SymbolDatas of the interfaces
@@ -1013,22 +1035,25 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     SymbolData tempSd;
     ReferenceType[] rts = typeDefBase.getInterfaces();
     for (int i = 0; i < rts.length; i++) {
-      tempSd = getSymbolData(rts[i].getName(), rts[i].getSourceInfo(), false, false, false);
+      SourceInfo si = rts[i].getSourceInfo();
+      String tempName = rts[i].getName();
+      tempSd = getSymbolData(tempName, si, false, false, false);
       
-      if (tempSd != null) {
-        interfaces.addLast(tempSd);  
-      }
+      if (tempSd != null) { interfaces.addLast(tempSd); }
       
       else if (enclosing instanceof SymbolData) {
-        //check to see if this is an inner class referencing an inner interface
-        tempSd = enclosing.getInnerClassOrInterface(rts[i].getName());
+        // Check to see if this is an inner class referencing an inner interface
+        tempSd = enclosing.getInnerClassOrInterface(tempName);
         if (tempSd == null) {
-          String qualifyingPart = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf("$"));
-          tempSd = new SymbolData(qualifyingPart + "$" + rts[i].getName());
+          String qualifyingPart = qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."));
+          String qualifiedTempName = qualifyingPart + "." + tempName;
+          // Should we introduce addInnerInterfaceSymbol ?
+          tempSd = new SymbolData(qualifiedTempName);
           tempSd.setInterface(true);
           enclosing.getSymbolData().addInnerInterface(tempSd); //interfaces can only be defined in symbol datas
           tempSd.setOuterData(enclosing);
-          continuations.put(rts[i].getName(), new Pair<SourceInfo, LanguageLevelVisitor>(rts[i].getSourceInfo(), this));          
+//          System.err.println("Creating inner interface continuation for " + qualifiedTempName + " at LLV: 1042");
+          continuations.put(qualifiedTempName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));          
         }
         interfaces.addLast(tempSd);
       }
@@ -1059,10 +1084,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       if (superClass == null) {
         superClass = enclosing.getInnerClassOrInterface(superClassName);
         if (superClass == null) {
-          String qualifyingPart = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf("$"));
-          superClass = new SymbolData(qualifyingPart + "$" + superClassName);
+          String qualifyingPart = qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."));
+          superClass = new SymbolData(qualifyingPart + "." + superClassName);
           enclosing.addInnerClass(superClass);
           superClass.setOuterData(enclosing);
+//          System.err.println("Creating continuation for " + superClassName + " at LLV:1079");
           continuations.put(superClassName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this)); 
         }
       }
@@ -1086,9 +1112,21 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return sd;
   }
   
+  /** This method creates the specified continuation in the symbol table.  Should never happen for an inner class.
+    * @param si  The SourceInfo corresponding to this occurrence of the class symbol
+    * @param qualifiedClassName  The name for the class.
+    */
+  protected SymbolData addSymbolData(SourceInfo si, String qualifiedClassName) {
+    SymbolData sd = new SymbolData(qualifiedClassName);  // create a continuation
+    continuations.put(qualifiedClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
+    symbolTable.put(qualifiedClassName, sd);
+//    System.err.println("Creating continuation for " + qualifiedClassName + " at LLV:1124");
+    return sd;
+  }
+  
   /** This method takes in a TypeDefBase (which is either a ClassDef or an InterfaceDef), generates a SymbolData, and 
     * adds the name and SymbolData pair to the symbol table.  It checks that this class is not already in the symbol 
-    * table.
+    * table. Should never happen for an inner class or interface.
     * @param typeDefBase  The AST node for the class def, interface def, inner class def, or inner interface def.
     * @param qualifiedClassName  The name for the class.
     */
@@ -1104,26 +1142,30 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
     SymbolData tempSd;
     ReferenceType[] rts = typeDefBase.getInterfaces();
-    for (int i = 0; i < rts.length; i++) {
-      tempSd = getSymbolData(rts[i].getName(), rts[i].getSourceInfo(), false, false, false);
+    for (ReferenceType rt: rts) {
+      tempSd = getSymbolData(rt.getName(), rt.getSourceInfo(), false, false, false);
       
       if (tempSd != null) interfaces.addLast(tempSd);  
-      else if (qualifiedClassName.indexOf("$") != -1) { // class is inner
-        // check to see if this is an inner class referencing an inner interface
-        String qualifyingPart = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf("$"));
-        tempSd = getSymbolData(qualifyingPart + "$" + rts[i].getName(), rts[i].getSourceInfo(), false, false, false);
+      else if (qualifiedClassName.indexOf(".") != -1) { // class is inner
+        // Check to see if this is an inner class referencing an inner interface
+        String qualifyingPart = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf("."));
+        tempSd = getSymbolData(qualifyingPart + "." + rt.getName(), rt.getSourceInfo(), false, false, false);
         if (tempSd == null) {
-          tempSd = new SymbolData(qualifyingPart + "$" + rts[i].getName());
+          String tempName = qualifyingPart + "." + rt.getName();
+          tempSd = new SymbolData(tempName);
           tempSd.setInterface(true);
-          continuations.put(rts[i].getName(), new Pair<SourceInfo, LanguageLevelVisitor>(rts[i].getSourceInfo(), this));          
+//          System.err.println("Creating continuation for " + tempName  + " at LLV: 1144");
+          continuations.put(tempName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this));          
         }
         interfaces.addLast(tempSd);
       }
       else if (tempSd == null) {  // class is not inner; ith superinterface not yet defined
-//        _addAndIgnoreError("Could not resolve " + rts[i].getName(), rts[i]);
-//        // Couldn't resolve the interface.
-        _log.log("CREATING continuation " + rts[i].getName() + " with SourceInfo " + rts[i].getSourceInfo());
-        continuations.put(rts[i].getName(), new Pair<SourceInfo, LanguageLevelVisitor>(rts[i].getSourceInfo(), this));    
+        String tempName = rt.getName();
+        _log.log("CREATING continuation " + tempName + " with SourceInfo " + rt.getSourceInfo());
+//        System.err.println("CREATING continuation for " + tempName + " at LLV: 1154");
+        tempSd = new SymbolData(tempName);
+        tempSd.setInterface(true);
+        continuations.put(tempName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this));    
       }
     }
     
@@ -1155,9 +1197,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       if (superClass == null) {
         // Couldn't resolve the super class: make it Object by default
-        superClass = new SymbolData(superClassName);
-        symbolTable.put(superClassName, sd);
-        continuations.put(superClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
+        superClass = addSymbolData(si, superClassName);
       }
       sd.setInterface(false);
     }
@@ -1186,6 +1226,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * TODO: At the advanced level, this may need to be overwritten?
     */
   protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, Data enclosing) {
+//    Utilities.show("formalParameters2VariableData called on " + fps);
     //Should conssolidate with same method in AdvancedVisitor; almost identical
     VariableData[] varData = new VariableData[fps.length];
     VariableDeclarator vd;
@@ -1193,20 +1234,25 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         
     for (int i = 0; i < varData.length; i++) {
       vd = fps[i].getDeclarator();
-      String name = vd.getName().getText();
+      String name = vd.getName().getText();  // getName returns a Word
+      String typeName = vd.getType().getName();
       SourceInfo si = vd.getType().getSourceInfo();
-      SymbolData type = getSymbolData(vd.getType().getName(), si);
-      
-      if (type == null) {  // should add && ! elementary level here ?  What about library types?
-        //see if this is a partially qualified field reference
-        type = enclosing.getInnerClassOrInterface(vd.getType().getName());
-      }
+      SymbolData type = getSymbolData(typeName, si);
       
       if (type == null) {
-        //if we still couldn't resolve sd, create a continuation for it.
-        type = new SymbolData(enclosing.getSymbolData().getName() + "$" + vd.getType().getName());
-        enclosing.getSymbolData().addInnerClass(type);
-        type.setOuterData(enclosing.getSymbolData());
+        // See if this is a partially qualified field reference in the symbol table
+        type = enclosing.getInnerClassOrInterface(typeName);
+//        System.err.println("For inner class/interface " + typeName + " found type " + type);
+      }
+      
+      if (type == null) { // create a continuation for it
+        String qualifiedTypeName = enclosing.getSymbolData().getName() + "." + typeName;
+        if (_innerClassesToBeParsed.contains(qualifiedTypeName)) {  // reference to an inner class. Exclude .dj1 and .dj0 files?
+          type = addInnerSymbolData(si, qualifiedTypeName, enclosing);
+        }
+        else { // reference to a top level class or an external class
+          type = addSymbolData(si, typeName);
+        }
       }
       
       varData[i] = new VariableData(name, 
@@ -1220,6 +1266,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   /* Create a MethodData corresponding to the MethodDef within the context of the SymbolData sd. */
   protected MethodData createMethodData(MethodDef that, SymbolData sd) {
+//    Utilities.show("createMethodData called on " + that);
 //    _log.log("createMethodData(" + that + ", " + sd + ") called.");
     that.getMav().visit(this);
     that.getName().visit(this);
@@ -1261,45 +1308,55 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     LinkedList<VariableData> vds = new LinkedList<VariableData>();
     ModifiersAndVisibility mav = vd.getMav();
     VariableDeclarator[] declarators = vd.getDeclarators();
-    Type type;
-    String name;
-    for (int i = 0; i < declarators.length; i++) {
-      declarators[i].visit(this);
-      type = declarators[i].getType();
-      name = declarators[i].getName().getText();
-      SymbolData sd = getSymbolData(type.getName(), type.getSourceInfo());
-      
-      if (sd == null) {
-        //see if this is a partially qualified field reference
-        sd = enclosing.getInnerClassOrInterface(type.getName());
-      }
-      
-      if (sd == null) {
-        //if we still couldn't resolve sd, create a continuation for it.
-        sd = new SymbolData(enclosing.getSymbolData().getName() + "$" + type.getName());
-        enclosing.getSymbolData().addInnerClass(sd);
-        sd.setOuterData(enclosing.getSymbolData());
-        continuations.put(sd.getName(), new Pair<SourceInfo, LanguageLevelVisitor>(type.getSourceInfo(), this));
-      }
-      
+    for (VariableDeclarator declarator: declarators) {
+      declarator.visit(this); // Does NOTHING!
+      Type type = declarator.getType();
+      String name = declarator.getName().getText();
+      SymbolData sd = handleDeclarator(type, name, enclosing);
+   
       if (sd != null) {
-        boolean initialized = declarators[i] instanceof InitializedVariableDeclarator;
+        boolean initialized = declarator instanceof InitializedVariableDeclarator;
         // want hasBeenAssigned to be true if this variable declaration is initialized, and false otherwise.
         VariableData vdata = new VariableData(name, mav, sd, initialized, enclosing); 
         vdata.setHasInitializer(initialized);
         vds.addLast(vdata); 
       }
       
-      else _addAndIgnoreError("Class or Interface " + type.getName() + " not found", declarators[i].getType());
+      else _addAndIgnoreError("Class or Interface " + name + " not found", type);
     }
     return vds.toArray(new VariableData[vds.size()]);
   }
   
+  // What happens with array types?
+  SymbolData handleDeclarator(Type type, String name, Data enclosing) {
+
+    String typeName = type.getName();
+    SourceInfo si = type.getSourceInfo();
+    SymbolData sd = getSymbolData(typeName, si);
+    
+    if (sd == null) {
+      // See if this is a partially qualified field reference
+      sd = enclosing.getInnerClassOrInterface(typeName);
+    }
+    
+    if (sd == null) { // create a continuation for it
+      String qualifiedTypeName = enclosing.getSymbolData().getName() + "." + typeName;
+      if (_innerClassesToBeParsed.contains(qualifiedTypeName)) {  // reference to an inner class. Exclude .dj1 and .dj0 files?
+        sd = addInnerSymbolData(si, qualifiedTypeName, enclosing);
+      }
+      else { // reference to a top level class or an external class
+        sd = addSymbolData(si, typeName);
+      }
+    }
+    return sd;
+  }
+                               
   /** This method is called when an error should be added to the static LinkedList of errors.
     * This version is called from the DoFirst methods in the LanguageLevelVisitors to halt
     * parsing of the construct.
     */
   protected static void _addError(String message, JExpressionIF that) {
+//    Utilities.show("_addError(" + message + ", " + that + ") called");
     _errorAdded = true;
     errors.addLast(new Pair<String, JExpressionIF>(message, that));
   }
@@ -1309,6 +1366,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * flag is not checked anyway, so this version should be called.
     */
   protected static void _addAndIgnoreError(String message, JExpressionIF that) {
+//    Utilities.show("_addAndIgnoreError(" + message + ", " + that + ") called");
     if (_errorAdded) {
       throw new RuntimeException("Internal Program Error: _addAndIgnoreError called while _errorAdded was true." + 
                                  "  Please report this bug.");
@@ -1439,10 +1497,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return forTypeDefBaseDoFirst(that);
   }
   
-  /**
-   * Check for problems with InnerInterfaceDefs that are common to all language levels:
-   * specifically, they cannot be final.
-   */
+  /** Check for problems with InnerInterfaceDefs that are common to all language levels: specifically, they cannot be 
+    * final.
+    */
   public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
     String[] mavStrings = that.getMav().getModifiers();
     for (int i = 0; i < mavStrings.length; i++) {
@@ -1523,9 +1580,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     if (sd == null) {
       // Create a continuation for the imported class and put it into the symbol table so
       // that on lookup, we can check imported classes before classes in the same package.
-      sd = new SymbolData(temp);
-      continuations.put(temp, new Pair<SourceInfo, LanguageLevelVisitor>(that.getSourceInfo(), this));
-      symbolTable.put(temp, sd);
+//      System.err.println("Creating continuation for imported class " + temp);
+      sd = addSymbolData(that.getSourceInfo(), temp);
     }
     return forImportStatementOnly(that);
   }
@@ -1632,6 +1688,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * Then, visit them one by one.
     */
   public Void forSourceFile(SourceFile that) {
+//    System.err.println("Processing source file " + that.getSourceInfo().getFile());
     forSourceFileDoFirst(that);
     if (prune(that)) return null;
     
@@ -1648,6 +1705,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       String qualifiedClassName = getQualifiedClassName(types[i].getName().getText());
       _classNamesInThisFile.addFirst(qualifiedClassName);
+//      System.err.println("Adding " + qualifiedClassName + " to _classesToBeParsed");
       _log.log("Adding " + qualifiedClassName + " to _classesToBeParsed");
       _classesToBeParsed.put(qualifiedClassName, new Pair<TypeDefBase, LanguageLevelVisitor>(types[i], this));
     }
@@ -1677,7 +1735,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return null;
   }
   
-  /**Do nothing.  This is handled in the forVariableDeclarationOnly case.*/
+  /** Do nothing.  This is handled in the forVariableDeclarationOnly case.*/
   public Void forVariableDeclaration(VariableDeclaration that) {
     forVariableDeclarationDoFirst(that);
     if (prune(that)) return null;
@@ -1685,10 +1743,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return forVariableDeclarationOnly(that);
   }
   
-  /**
-   * If the method being generated already exists in the SymbolData,
-   * throw an error, because generated methods cannot be overwritten.
-   */
+  /** If the method being generated already exists in the SymbolData,
+    * throw an error, because generated methods cannot be overwritten.
+    */
   protected static void addGeneratedMethod(SymbolData sd, MethodData md) {
     MethodData rmd = SymbolData.repeatedSignature(sd.getMethods(), md);
     if (rmd == null) {
@@ -2015,7 +2072,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       _llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+      _llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _llv._resetNonStaticFields();
       _llv._importedPackages.add("java.lang");
       _llv._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
@@ -2144,7 +2201,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      _hierarchy.remove("Lisa");
       //Re-add Lisa because the first call with resolve set to true removed it and
       // test that Lisa is actually visited and added to the symbolTable.
-      _classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
+      _llv._classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
       assertFalse("Should return a non-continuation", 
                   _llv._lookupFromClassesToBeParsed("Lisa", 
                                                     JExprParser.NO_SOURCE_INFO,
@@ -2304,7 +2361,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
       ElementaryVisitor bv = new ElementaryVisitor(new File(""));
       
-      _classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
+      _llv. _classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
       assertFalse("Should return a non-continuation", 
                   _llv._getSymbolData_FromCurrFile("Lisa", JExprParser.NO_SOURCE_INFO, true).isContinuation());
     }
@@ -2451,7 +2508,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // Inner inner class
       SymbolData sd3 = new SymbolData("fully.qualified.Woah.Wow.James");
       sd1.addInnerClass(sd3);
+//      System.err.println("SYMBOL TABLE ENTRY FOR \"fully.qualified.Woah.Wow.James\" = " + 
+//                         _llv.symbolTable.get("fully.qualified.Woah.Wow.James"));
       sd3.setOuterData(sd1);
+//      System.err.println("INNER CLASS LOOKUP YIELDS: " + sd1.getInnerClassOrInterface("James"));
       result = _llv.getSymbolData("fully.qualified.Woah.Wow.James", JExprParser.NO_SOURCE_INFO, true, false);
       assertEquals("Should return sd3", sd3, result);
     }
@@ -2497,7 +2557,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                  new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Object", new Type[0]),
                                  new ReferenceType[0], 
                                  new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
-      _llv._classesToBeParsed.put("fully.qualified.Qwerty", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
+      bv._classesToBeParsed.put("fully.qualified.Qwerty", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
       assertEquals("should return sd the continuation", sd, 
                    bv.getSymbolDataHelper("Qwerty", JExprParser.NO_SOURCE_INFO, false, true, true, true));
       assertTrue("should be a continuation", sd.isContinuation());

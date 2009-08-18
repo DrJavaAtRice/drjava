@@ -200,6 +200,9 @@ public class LanguageLevelConverter {
           sf.visit(llv);
           _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
           visited.add(new Pair<LanguageLevelVisitor, SourceFile>(llv, sf));
+          _log.log("\nCONTINUATIONS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.continuations + "\n");
+          _log.log("\nERRORS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.errors + "\n");
+//          if (! llv.errors.isEmpty()) Utilities.show("errors after " + f + "\n" + llv.errors);
           //add the continuations to the hash table.
           continuations.putAll(llv.continuations);
           languageLevelVisitorErrors.addAll(llv.errors);
@@ -219,6 +222,7 @@ public class LanguageLevelConverter {
     //Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = llv.continuations;
  
     _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");
+//    System.err.println("Resolving continuations " + continuations);
     _log.log("Resolving continuations: " + continuations + "\n");
     while (! continuations.isEmpty()) {
       Enumeration<String> en = continuations.keys();
@@ -228,8 +232,9 @@ public class LanguageLevelConverter {
         Pair<SourceInfo, LanguageLevelVisitor> pair = continuations.remove(className);
         SymbolData returnedSd = pair.getSecond().getSymbolData(className, pair.getFirst(), true);
         _log.log("Attempting to resolve " + className + "\n  Result = " + returnedSd);
+//        System.err.println("Attempting to resolve " + className + "\n  Result = " + returnedSd);
         if (returnedSd == null) {
-          LanguageLevelVisitor.errors.add(new Pair<String, JExpressionIF>("Could not resolve " + className, 
+          LanguageLevelVisitor.errors.add(new Pair<String, JExpressionIF>("Converter could not resolve " + className, 
                                                                           new NullLiteral(pair.getFirst())));
         }
       }

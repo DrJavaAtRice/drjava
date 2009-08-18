@@ -43,14 +43,11 @@ import java.io.*;
 
 import junit.framework.TestCase;
 
-
-
-/*
- * Language Level Visitor that represents the Advanced Language Level.  Enforces constraints during the
- * first walk of the AST (checking for langauge specific errors and building the symbol table).
- * This class enforces things that are common to all contexts reachable within a method body or other body 
- * (not class or interface body)the Advanced Language Level). 
- */
+/** Language Level Visitor that represents the Advanced Language Level.  Enforces constraints during the
+  * first walk of the AST (checking for langauge specific errors and building the symbol table).
+  * This class enforces things that are common to all contexts reachable within a method body or other body 
+  * (not class or interface body)the Advanced Language Level). 
+  */
 public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
 
   /**The MethodData of this method.*/
@@ -66,10 +63,17 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
    * @param classDefsInThisFile  A list of the classes that are defined in the source file
    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
    */
-  public BodyBodyAdvancedVisitor(BodyData bodyData, File file, String packageName, LinkedList<String> importedFiles, 
-                             LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+  public BodyBodyAdvancedVisitor(BodyData bodyData,
+                                 File file,
+                                 String packageName,
+                                 LinkedList<String> importedFiles, 
+                                 LinkedList<String> importedPackages, 
+                                 LinkedList<String> classDefsInThisFile, 
+                                 Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
+                                 LinkedList<String> innerClassesToBeParsed) {
     super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
     _bodyData = bodyData;
+    _innerClassesToBeParsed = innerClassesToBeParsed;
   }
   
   /*Give an appropriate error*/
@@ -93,7 +97,8 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
     if (prune(that)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
-    that.getStatements().visit(new BodyBodyAdvancedVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    that.getStatements().visit(new BodyBodyAdvancedVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
+                                                           _classNamesInThisFile, continuations, _innerClassesToBeParsed));
     return forBlockOnly(that);
   }
   
@@ -112,7 +117,8 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
     if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
-    b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
+                                                            _classNamesInThisFile, continuations, _innerClassesToBeParsed));
     forBlockOnly(b);
     return forCatchBlockOnly(that);
   }
@@ -150,12 +156,12 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
   public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /* No errors to throw here. */ }
 
   /* Make sure that no modifiers appear before the InnerClassDef, and then delegate. */
-  public Void forInnerClassDef(InnerClassDef that) {
+  public Void forInnerClassDef(InnerClassDef that) { 
     if (that.getMav().getModifiers().length > 0) { 
       _addAndIgnoreError("No modifiers may appear before a class declaration here", that.getMav());
     }
-    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "$" + 
-                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + 
+                        /* _bodyData.getSymbolData().preincrementLocalClassNum() + */ that.getName().getText());
     return null;
   }
   
@@ -214,9 +220,10 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
       LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _bav = new BodyBodyAdvancedVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      
+      _bav = new BodyBodyAdvancedVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(),
+                                         new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                         new LinkedList<String>());
+      _bav._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bav.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _bav._resetNonStaticFields();
       _bav._importedPackages.addFirst("java.lang");

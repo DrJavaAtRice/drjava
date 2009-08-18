@@ -171,7 +171,5 @@ public class VoidMethodsNotAllowedClassBodyTypeChecker extends ClassBodyTypeChec
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "The keyword \"void\" is not allowed outside of a TestCase class at the Intermediate level", errors.get(0).getFirst());
     }
-      
   }
-  
 }

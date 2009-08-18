@@ -50,10 +50,9 @@ public abstract class BodyData extends Data{
     super(outerData);
   }
   
-  /**
-   * Return the enclosing SymbolData, corresponding to the enclosing class.
-   * Note-this may be several layers up the tree.
-   */
+  /** Return the enclosing SymbolData, corresponding to the enclosing class.
+    * Note-this may be several layers up the tree.
+    */
   public SymbolData getSymbolData() {
     return _outerData.getSymbolData();//_enclosingData.get(0).getSymbolData();
   }

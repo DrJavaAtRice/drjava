@@ -43,32 +43,36 @@ import java.io.*;
 
 import junit.framework.TestCase;
 
-
-
-/*
- * Language Level Visitor that represents the Advanced Language Level.  Enforces constraints during the
- * first walk of the AST (checking for langauge specific errors and building the symbol table).
- * This class enforces things that are common to all contexts reachable within a class body at 
- * the Advanced Language Level. 
- */
+/** Language Level Visitor that represents the Advanced Language Level.  Enforces constraints during the
+  * first walk of the AST (checking for langauge specific errors and building the symbol table).
+  * This class enforces things that are common to all contexts reachable within a class body at 
+  * the Advanced Language Level. 
+  */
 public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
   
-  /**The SymbolData corresponding to this class.*/
+  /** The SymbolData corresponding to this class. */
   private SymbolData _symbolData;
   
-  /*
-   * Constructor for ClassBodyAdvancedVisitor.
-   * @param sd  The SymbolData that encloses the context we are visiting.
-   * @param file  The source file this came from.
-   * @param packageName  The package the source file is in
-   * @importedFiles  A list of classes that were specifically imported
-   * @param importedPackages  A list of package names that were specifically imported
-   * @param classDefsInThisFile  A list of the classes that are defined in the source file
-   * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
-   */
-  public ClassBodyAdvancedVisitor(SymbolData sd, File file, String packageName, LinkedList<String> importedFiles, 
-                                  LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);    
+  /** Constructor for ClassBodyAdvancedVisitor.
+    * @param sd  The SymbolData that encloses the context we are visiting.
+    * @param className The name of the enclosing class
+    * @param file  The source file this came from.
+    * @param packageName  The package the source file is in
+    * @importedFiles  A list of classes that were specifically imported
+    * @param importedPackages  A list of package names that were specifically imported
+    * @param classDefsInThisFile  A list of the classes that are defined in the source file
+    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
+    */
+  public ClassBodyAdvancedVisitor(SymbolData sd, 
+                                  String className, 
+                                  File file, 
+                                  String packageName, 
+                                  LinkedList<String> importedFiles, 
+                                  LinkedList<String> importedPackages, 
+                                  LinkedList<String> classDefsInThisFile, 
+                                  Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);  
+    _enclosingClassName = className;
     _symbolData = sd;
   }
 
@@ -107,13 +111,11 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
     return null;
   }
    
-  
-  /* 
-   * Convert the Variable declartaion to variable datas.  Then, make sure that all
-   * static fields are initialized and that no fields are declared to be abstract.
-   * Finally, add the variable datas to the symbol data, and give an error if
-   * two fields have the same names
-   */
+  /** Convert the Variable declartaion to variable datas.  Then, make sure that all
+    * static fields are initialized and that no fields are declared to be abstract.
+    * Finally, add the variable datas to the symbol data, and give an error if
+    * two fields have the same names
+    */
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _symbolData);
 
@@ -155,7 +157,8 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
     else {
       _symbolData.addMethod(md);
     }
-    that.getBody().visit(new BodyBodyAdvancedVisitor(md, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    that.getBody().visit(new BodyBodyAdvancedVisitor(md, _file, _package, _importedFiles, _importedPackages, 
+                                                     _classNamesInThisFile, continuations, _innerClassesToBeParsed));
     return null;
   }
 
@@ -182,13 +185,13 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
   
   /**Call the method in AdvancedVisitor since it's common to this and AdvancedBodyAdvancedVisitor. */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-    handleInnerInterfaceDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "$" + that.getName().getText());
+    handleInnerInterfaceDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "." + that.getName().getText());
     return null;
   }
   
   /**Call the method in AdvancedVisitor since it's common to this and AdvancedBodyAdvancedVisitor. */
   public Void forInnerClassDef(InnerClassDef that) {
-    handleInnerClassDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "$" + that.getName().getText());
+    handleInnerClassDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "." + that.getName().getText());
     return null;
   }
 
@@ -224,7 +227,8 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
     }
     
     _symbolData.addMethod(md);
-    that.getStatements().visit(new BodyBodyAdvancedVisitor(md, _file, _package, _importedFiles, _importedPackages, _classNamesInThisFile, continuations));
+    that.getStatements().visit(new BodyBodyAdvancedVisitor(md, _file, _package, _importedFiles, _importedPackages, 
+                                                           _classNamesInThisFile, continuations, _innerClassesToBeParsed));
 
     //note that we have seen a constructor.
     _symbolData.incrementConstructorCount();
@@ -276,8 +280,8 @@ public class ClassBodyAdvancedVisitor extends AdvancedVisitor {
       LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _cbav = new ClassBodyAdvancedVisitor(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      _cbav = new ClassBodyAdvancedVisitor(_sd1, "", new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      _cbav._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _cbav.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _cbav._resetNonStaticFields();
       _cbav._importedPackages.addFirst("java.lang");

@@ -43,27 +43,29 @@ import java.io.*;
 
 import junit.framework.TestCase;
 
-/* Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the first walk of 
- * the AST (checking for langauge specific errors and building the symbol table). This class enforces things that are 
- * common to all contexts reachable within an interface body at the Intermediate Language Level. 
- */
+/** Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the first walk of 
+  * the AST (checking for langauge specific errors and building the symbol table). This class enforces things that are 
+  * common to all contexts reachable within an interface body at the Intermediate Language Level. 
+  */
 public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
   
   /**The SymbolData corresponding to this interface.*/
   private SymbolData _symbolData;
   
-  /*
-   * Constructor for InterfaceBodyIntermediateVisitor.
-   * @param sd  The SymbolData that encloses the context we are visiting.
-   * @param file  The source file this came from.
-   * @param packageName  The package the source file is in
-   * @importedFiles  A list of classes that were specifically imported
-   * @param importedPackages  A list of package names that were specifically imported
-   * @param classDefsInThisFile  A list of the classes that are defined in the source file
-   * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
-   */
-  public InterfaceBodyIntermediateVisitor(SymbolData sd, File file, String packageName, LinkedList<String> importedFiles, 
-                                  LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile,Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+  /** Constructor for InterfaceBodyIntermediateVisitor.
+    * @param sd  The SymbolData that encloses the context we are visiting.
+    * @param file  The source file this came from.
+    * @param packageName  The package the source file is in
+    * @importedFiles  A list of classes that were specifically imported
+    * @param importedPackages  A list of package names that were specifically imported
+    * @param classDefsInThisFile  A list of the classes that are defined in the source file
+    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
+    */
+  public InterfaceBodyIntermediateVisitor(SymbolData sd, File file, String packageName, 
+                                          LinkedList<String> importedFiles, 
+                                          LinkedList<String> importedPackages, 
+                                          LinkedList<String> classDefsInThisFile, 
+                                          Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
     super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
     _symbolData = sd;
   }
@@ -192,8 +194,8 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _ibiv = new InterfaceBodyIntermediateVisitor(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      _ibiv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _ibiv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _ibiv._resetNonStaticFields();
       _ibiv._importedPackages.addFirst("java.lang");
@@ -365,7 +367,5 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       assertEquals("The error message should be correct", "Constructor definitions cannot appear in interfaces", errors.get(0).getFirst());
       
     }
-    
-    
   }
 }
