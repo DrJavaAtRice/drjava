@@ -1660,6 +1660,27 @@ DrJava</link>).</para>
    </listitem>
  </varlistentry>
 
+ <varlistentry>
+   <term>Enforce access control (<varname>dynamicjava.access.control = disabled</varname>)</term>
+   <listitem>
+     <para>This option controls the access control DrJava performs when class members are accessed. If the option is set to 'private and package only', then access control is used for all class members that are private or package private. If it is set to 'private only', then access control is used only for private members, and the other access levels can always be accessed. If it is set to 'disabled', all class members can be accessed, regardless of their access level. (Note: Currently, access control in DrJava's Interactions Pane has not been fully implemented; at most, access is checked for private and package private members; protected members can always be accessed.)</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Require semicolon (<varname>dynamicjava.require.semicolon = false</varname>)</term>
+   <listitem>
+     <para>If this option is enabled, then DrJava will require a semicolon at the end of statements in the Interactions Pane.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Require variable type (<varname>dynamicjava.require.variable.type = true</varname>)</term>
+   <listitem>
+		<para>If this option is enabled, then DrJava will a variable type for variable declarations in the Interactions Pane (e.g. <filename>int i = 5</filename>). If it is disabled, DrJava will attempt to assign a variable type automatically (e.g. <filename>i = 5</filename> to declare an <filename>int i</filename>).</para>
+   </listitem>
+ </varlistentry>
+
      </variablelist>
  </section>
 

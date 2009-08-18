@@ -1176,7 +1176,10 @@ public interface OptionConstants {
       ArrayList<String> aList = new ArrayList<String>(4);
       aList.add("disabled");
       aList.add("private only");
-      aList.add("all");
+
+      // NOTE: this sets the enforceAllAccess option in InteractionsPaneOptions, but since that is not fully
+      // implemented, this description is better.
+      aList.add("private and package only"); 
       return aList;
     }
   }
