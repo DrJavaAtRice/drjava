@@ -476,6 +476,7 @@ public class ConfigFrame extends SwingFrame {
         return null;
       }
     });
+    plasticComponent.getComponent().setEnabled(lookAndFeelComponent.getCurrentComboBoxValue().startsWith("com.jgoodies.looks.plastic."));
     addOptionComponent(panel, plasticComponent);
 
     //ToolbarOptionComponent is a degenerate option component
