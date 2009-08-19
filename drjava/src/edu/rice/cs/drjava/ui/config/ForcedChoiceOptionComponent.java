@@ -119,6 +119,11 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 
     return true;
   }
+  
+  /** @return the value currently displayed in the combo box. */
+  public String getCurrentComboBoxValue() {
+    return _comboBox.getSelectedItem().toString();
+  }
 
   /** Displays the given value. */
   public void setValue(String value) { resetToCurrent(value); }

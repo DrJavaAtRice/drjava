@@ -462,11 +462,21 @@ public class ConfigFrame extends SwingFrame {
   /** Add all of the components for the Display Options panel of the preferences window. */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
-    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL, "Look and Feel", this,
-                                                              "Changes the general appearance of DrJava."));
+    final ForcedChoiceOptionComponent lookAndFeelComponent =
+      new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL, "Look and Feel", this,
+                                      "Changes the general appearance of DrJava.");
+    addOptionComponent(panel, lookAndFeelComponent);
 
-    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.PLASTIC_THEMES, "Plastic Theme", this,
-                                                              "Pick the theme to be used by the Plastic family of Look and Feels"));
+    final ForcedChoiceOptionComponent plasticComponent =
+      new ForcedChoiceOptionComponent(OptionConstants.PLASTIC_THEMES, "Plastic Theme", this,
+                                      "Pick the theme to be used by the Plastic family of Look and Feels");
+    lookAndFeelComponent.addChangeListener(new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        plasticComponent.getComponent().setEnabled(lookAndFeelComponent.getCurrentComboBoxValue().startsWith("com.jgoodies.looks.plastic."));
+        return null;
+      }
+    });
+    addOptionComponent(panel, plasticComponent);
 
     //ToolbarOptionComponent is a degenerate option component
     addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons", this,
